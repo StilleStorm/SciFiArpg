@@ -31,8 +31,8 @@
     "stamp": "Zweryfikowano"
   },
   "note": {
-    "start": "Zgłoszenie zostało przyjęte. Planu rozpatrzenia nie załączono.",
-    "firstKill": "Urządzenie nr {n} zostało skreślone. Uzasadnienia nie sporządzono.",
+    "start": "Zgłoszenie przyjęto. Planu rozpatrzenia nie załączono.",
+    "firstKill": "Urządzenie nr {n} skreślono jako pierwsze. Kolejność skreśleń nie ma znaczenia.",
     "pickup": "Przedmiot nr {n} dodano do załączników."
   },
   "notes": {
