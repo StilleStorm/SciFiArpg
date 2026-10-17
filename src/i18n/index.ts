@@ -1,3 +1,5 @@
+import { bindOrphans } from './typography';
+
 /**
  * t('domain.key', params). Files in pl/*.json are merged under their file name:
  * pl/ui.json -> keys "ui.<path>". A leaf is a string or a plural object {one, few, many}.
@@ -74,11 +76,13 @@ export function t(key: string, params?: Params): string {
     const count = params?.['count'];
     text = entry[pluralCategory(typeof count === 'number' ? count : Number(count ?? 0))];
   }
-  if (!params) return text;
-  return text.replace(/\{(\w+)\}/g, (m, name: string) => {
-    const v = params[name];
-    return v === undefined ? m : String(v);
-  });
+  if (!params) return bindOrphans(text);
+  return bindOrphans(
+    text.replace(/\{(\w+)\}/g, (m, name: string) => {
+      const v = params[name];
+      return v === undefined ? m : String(v);
+    }),
+  );
 }
 
 /** Pick the form of a generated word that agrees with the noun's grammatical gender. */

@@ -57,7 +57,7 @@ describe('createNarrator', () => {
     expect(said).toHaveLength(2);
     nar.tick(CORRECTION_DELAY_S[1] - CORRECTION_DELAY_S[0] + 0.6);
     expect(said).toHaveLength(3);
-    expect(said[2]?.text).toContain('Przepraszam za nieścisłość w przypisie 2.');
+    expect(said[2]?.text).toContain('Przepraszam za nieścisłość w\u00a0przypisie 2.');
     expect(said[2]?.text).toContain('4471');
     expect(said[2]?.n).toBe(3);
     expect(nar.pending).toBe(0);
@@ -70,7 +70,7 @@ describe('createNarrator', () => {
     expect(said[0]).toMatch(/nr \d+\./);
     expect(said[0]).not.toContain('nr 12.');
     nar.tick(25);
-    expect(said[1]).toContain('Przepraszam za nieścisłość w przypisie 1');
+    expect(said[1]).toContain('Przepraszam za nieścisłość w\u00a0przypisie 1');
     expect(said[1]).toContain('12');
   });
 

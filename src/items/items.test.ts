@@ -129,7 +129,7 @@ describe('rollItem', () => {
       rare++;
       if (r.freeVersion) {
         free++;
-        expect(r.name.endsWith('w wersji darmowej')).toBe(true);
+        expect(r.name.endsWith('w\u00a0wersji darmowej')).toBe(true);
       }
     }
     expect(free / rare).toBeGreaterThan(0.06);

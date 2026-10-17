@@ -28,13 +28,13 @@ describe('nameItem: adjective after the noun, agreement by gender', () => {
     expect(nameItem(base('ladowarka'), [])).toBe('ładowarka');
   });
   it('several affixes: first after a space, the rest after commas, phrases last', () => {
-    expect(nameItem(base('kask'), affixesOf(['darmowy', 'gwarancyjny', 'domniemany']))).toBe('kask kurierski gwarancyjny, domniemany, w wersji darmowej');
+    expect(nameItem(base('kask'), affixesOf(['darmowy', 'gwarancyjny', 'domniemany']))).toBe('kask kurierski gwarancyjny, domniemany, w\u00a0wersji darmowej');
     expect(nameItem(base('pieczatka'), affixesOf(['fabrycznienowy', 'gwarancyjny']))).toBe('pieczątka serwisowa fabrycznie nowa, gwarancyjna');
-    expect(nameItem(base('zaswiadczenie'), affixesOf(['zgodny', 'uzywany']))).toBe('zaświadczenie zgodne z regulaminem, używane');
+    expect(nameItem(base('zaswiadczenie'), affixesOf(['zgodny', 'uzywany']))).toBe('zaświadczenie zgodne z\u00a0regulaminem, używane');
   });
   it('phrases with a preposition do not change with gender', () => {
     for (const g of ['czytnik', 'ladowarka', 'urzadzenie', 'rekawiczki']) {
-      expect(nameItem(base(g), affixesOf(['asystent'])).endsWith('z asystentem głosowym')).toBe(true);
+      expect(nameItem(base(g), affixesOf(['asystent'])).endsWith('z\u00a0asystentem głosowym')).toBe(true);
     }
   });
   it('capitalizes for captions', () => {
