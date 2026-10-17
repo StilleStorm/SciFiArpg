@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#f3ecd8" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Zgłoszenie</title>
+    <link rel="icon" type="image/png" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="preload" href="/fonts/Michroma-Regular.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="/fonts/SpaceMono-Regular.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="/fonts/EBGaramond-Regular.ttf" as="font" type="font/ttf" crossorigin />
+  </head>
+  <body>
+    <svg
+      id="stage"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 390 844"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+    >
+      <defs>
+        <!-- Pen wobble: applied to #world only. Region and seed are driven by the loop (render/stage.ts). -->
+        <filter id="wobble" filterUnits="userSpaceOnUse" x="0" y="0" width="390" height="844" color-interpolation-filters="sRGB">
+          <feTurbulence id="wobble-noise" type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="1" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+
+        <!-- Same pen wobble for HTML-hosted drawings (cover), sized to the element. -->
+        <filter id="wobble-cover" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="2" seed="5" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.55" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+
+        <!-- Hatching: the only fill allowed for shapes. -->
+        <pattern id="hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="4" stroke-width="1" />
+        </pattern>
+        <pattern id="hatch-wide" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
+          <line x1="0" y1="0" x2="0" y2="7" stroke-width="1" />
+        </pattern>
+
+        <!-- Uneven stamp ink: grain thresholded into a mask (white = ink, black = bare paper). -->
+        <filter id="stamp-grain" filterUnits="userSpaceOnUse" x="-220" y="-110" width="440" height="220" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="0.55 0.7" numOctaves="3" seed="4" />
+          <feColorMatrix type="matrix" values="9 0 0 0 -2.3  9 0 0 0 -2.3  9 0 0 0 -2.3  0 0 0 0 1" />
+        </filter>
+        <mask id="stamp-mask" maskUnits="userSpaceOnUse" x="-220" y="-110" width="440" height="220">
+          <rect x="-220" y="-110" width="440" height="220" fill="#fff" filter="url(#stamp-grain)" />
+        </mask>
+
+        <!-- Paper grain tile, filled from render/paper.ts. -->
+        <pattern id="paper" width="256" height="256" patternUnits="userSpaceOnUse">
+          <image id="paper-tile" width="256" height="256" />
+        </pattern>
+      </defs>
+      <g id="page"></g>
+      <g id="world" filter="url(#wobble)"></g>
+      <g id="fx"></g>
+    </svg>
+    <div id="ui"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

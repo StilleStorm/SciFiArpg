@@ -1,0 +1,467 @@
+@font-face {
+  font-family: 'Michroma';
+  src: url('/fonts/Michroma-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Space Mono';
+  src: url('/fonts/SpaceMono-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Space Mono';
+  src: url('/fonts/SpaceMono-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Space Mono';
+  src: url('/fonts/SpaceMono-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'EB Garamond';
+  src: url('/fonts/EBGaramond-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'EB Garamond';
+  src: url('/fonts/EBGaramond-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'EB Garamond';
+  src: url('/fonts/EBGaramond-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Day edition. Night edition swaps the same variables; the toggle sets data-theme on <html>. */
+:root {
+  --paper: #f3ecd8;
+  --paper-edge: #e0d5b6;
+  --ink: #1b1711;
+  --ink-wet: #6b604f;
+  --accent: #b3261e;
+  --accent-dry: #9a2c24;
+  --title: 'Michroma', monospace;
+  --mono: 'Space Mono', 'Courier New', monospace;
+  --serif: 'EB Garamond', Georgia, serif;
+  --band-top: 62px;
+  --band-bottom: 98px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='day']) {
+    --paper: #2a2420;
+    --paper-edge: #1e1915;
+    --ink: #e6dcc4;
+    --ink-wet: #9a8f78;
+    --accent: #c9493f;
+    --accent-dry: #b4463d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='night'] {
+  --paper: #2a2420;
+  --paper-edge: #1e1915;
+  --ink: #e6dcc4;
+  --ink-wet: #9a8f78;
+  --accent: #c9493f;
+  --accent-dry: #b4463d;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  position: fixed;
+  inset: 0;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+}
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+#page,
+#world,
+#fx {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+.hidden {
+  display: none !important;
+}
+.paper {
+  background-color: var(--paper);
+  background-image: var(--paper-noise, none);
+}
+
+/* ---------- HUD: the filled-in form ---------- */
+.hud {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  padding: calc(env(safe-area-inset-top) + 8px) 16px 7px;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1;
+}
+.hud-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+.hud-row + .hud-row {
+  margin-top: 7px;
+}
+.field {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+.field > label {
+  font-size: 10px;
+  white-space: nowrap;
+}
+.blank {
+  flex: 1;
+  min-width: 0;
+  min-height: 17px;
+  padding: 0 2px 1px;
+  text-align: right;
+  font-size: 13px;
+  line-height: 17px;
+  border-bottom: 1px solid var(--ink);
+  white-space: nowrap;
+}
+.racja .blank {
+  position: relative;
+  border-bottom: 0;
+  min-height: 22px;
+  padding: 0;
+}
+.racja .val {
+  position: absolute;
+  right: 2px;
+  top: 0;
+  color: var(--accent);
+  font-size: 14px;
+}
+.racja svg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 10px;
+  overflow: visible;
+  fill: none;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+}
+.racja .whole {
+  stroke: var(--ink);
+  stroke-width: 0.8;
+}
+.racja .left {
+  stroke: var(--accent);
+  stroke-width: 2.2;
+}
+.racja .lost {
+  stroke: var(--ink);
+  stroke-width: 0.9;
+}
+
+/* ---------- Footnotes: the bottom of the page ---------- */
+.foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--band-bottom) + env(safe-area-inset-bottom));
+  padding: 8px 16px calc(env(safe-area-inset-bottom) + 6px);
+  border-top: 1px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  font-size: 12.5px;
+  line-height: 15px;
+}
+.foot::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 16px;
+  width: 64px;
+  border-top: 1px solid var(--ink);
+}
+.fn {
+  margin: 0 0 2px;
+  max-height: 30px;
+  overflow: hidden;
+}
+.fn sup {
+  font-size: 9px;
+  line-height: 0;
+  margin-right: 3px;
+}
+
+/* ---------- Pads: circled margin notes ---------- */
+.pad {
+  position: absolute;
+  width: 84px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+}
+.pad svg {
+  width: 52px;
+  height: 52px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.pad .word {
+  margin-top: 1px;
+  font-style: italic;
+  font-size: 12px;
+  line-height: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.pad:active svg {
+  stroke-width: 2.4;
+}
+.pad.s1 { right: 4px; bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom) + 10px); }
+.pad.s2 { right: 88px; bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom) + 6px); }
+.pad.s3 { right: 4px; bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom) + 82px); }
+.pad.inv { left: 4px; bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom) + 10px); }
+[data-hand='left'] .pad.s1 { right: auto; left: 4px; }
+[data-hand='left'] .pad.s2 { right: auto; left: 88px; }
+[data-hand='left'] .pad.s3 { right: auto; left: 4px; }
+[data-hand='left'] .pad.inv { left: auto; right: 4px; }
+
+/* ---------- Full-page screens: cover and death form ---------- */
+.screen {
+  position: absolute;
+  inset: 0;
+  padding: calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 14px);
+  pointer-events: auto;
+}
+.frame {
+  position: relative;
+  height: 100%;
+  border: 1.5px solid var(--ink);
+  outline: 1px solid var(--ink);
+  outline-offset: -7px;
+  padding: 28px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.agency {
+  font-family: var(--title);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.department {
+  margin-top: 6px;
+  font-style: italic;
+  font-size: 15px;
+}
+.rule {
+  width: 100%;
+  margin: 22px 0 18px;
+  border: 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  height: 4px;
+}
+.cover-title {
+  font-family: var(--title);
+  font-size: 27px;
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.cover-sub {
+  font-family: var(--title);
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 8px 0 0;
+}
+.cover-subject {
+  margin: 14px 0 0;
+  font-style: italic;
+  font-size: 16px;
+}
+.cover-art {
+  width: 300px;
+  height: 248px;
+  margin: 22px 0 0;
+  overflow: visible;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 0.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cover-stamp {
+  position: absolute;
+  left: 50%;
+  top: 61%;
+  width: 320px;
+  height: 90px;
+  margin-left: -160px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.4;
+  pointer-events: none;
+}
+.start {
+  margin-top: auto;
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  padding: 10px 6px 3px;
+  border-bottom: 1.5px solid var(--ink);
+  letter-spacing: 0.06em;
+}
+.start:active {
+  border-bottom-width: 3px;
+}
+.cover-footer {
+  margin-top: 22px;
+  font-style: italic;
+  font-size: 13px;
+}
+
+.form-title {
+  font-family: var(--title);
+  font-size: 22px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 52px 0 0;
+}
+.form-body {
+  font-size: 17px;
+  line-height: 1.4;
+  margin: 8px 0 0;
+}
+.form-line {
+  font-family: var(--mono);
+  font-size: 15px;
+  margin: 18px 0 0;
+}
+.form-btn {
+  margin-top: auto;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 18px;
+  padding: 8px 30px 6px;
+  border: 1.5px solid var(--ink);
+  outline: 1px solid var(--ink);
+  outline-offset: 3px;
+}
+.form-btn:active {
+  border-width: 3px;
+}
+
+/* ---------- Text inside the SVG layers ---------- */
+.t-note {
+  fill: var(--ink);
+  stroke: none;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 11px;
+}
+.t-struck {
+  fill: var(--accent);
+  stroke: none;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+}
+.t-stamp {
+  fill: var(--accent);
+  stroke: none;
+  font-family: var(--title);
+  text-anchor: middle;
+}
+.t-plate {
+  fill: var(--ink);
+  stroke: none;
+  font-family: var(--mono);
+  font-size: 9px;
+  text-anchor: middle;
+}
+pattern line {
+  stroke: var(--ink);
+}
