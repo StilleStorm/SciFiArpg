@@ -13,9 +13,9 @@ export const CALM_SECONDS = 1.5;
 
 export const bossAlive = (s: RunState): boolean => s.enemies.some((e) => e.boss === true);
 
-/** Nothing else holds the screen and the fight is not a boss fight: the form may open if something asks for it. */
+/** Nothing else holds the screen, the fight is not a boss fight and the run is not already won: the form may open if something asks for it. */
 export function canOpenUpdate(s: RunState, formOpen: boolean): boolean {
-  return s.hero.pendingLevels > 0 && !formOpen && s.status === 'running' && !s.modal && !s.turning && !bossAlive(s);
+  return s.hero.pendingLevels > 0 && !formOpen && s.status === 'running' && !s.modal && !s.turning && !bossAlive(s) && s.victoryAt === null;
 }
 
 /** The player (HUD tap) or the page turn asks for the form. Returns false if there is nothing queued. */

@@ -4,3 +4,4 @@ shots
 *.tsbuildinfo
 dist-*/
 shots-*/
+shots-smoke/

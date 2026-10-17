@@ -83,6 +83,9 @@ describe('update queue', () => {
     s.modal = null;
     s.turning = true;
     expect(canOpenUpdate(s, false)).toBe(false);
+    s.turning = false;
+    s.victoryAt = 12; // the boss fell: the ticket is closing, no form now
+    expect(canOpenUpdate(s, false)).toBe(false);
   });
 
   it('several level ups queue: each opening spends one and the next is ready right after', () => {
