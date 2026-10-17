@@ -447,3 +447,61 @@ and is funny precisely because the Asystent reads it out flatly.
 - More clauses, uniques, parts. English and other languages.
 - Sound: keyboard clicks, notification ping drawn as a pen scratch, stamp thud. No music yet.
 - Leaderboard as "Ranking użytkowników (nieoficjalny)".
+
+---
+
+## 14. Sound (phase after the first playable; design is final, build later)
+
+Same method as the look: one real anchor, a ban list, verified against it.
+
+### 14.1 Anchor
+Two things. First, the **document's own foley**: the sounds of producing the printout, not of
+the fictional world. Second, **hold music made the way the Studio Eksperymentalne Polskiego
+Radia (1958–) made tape music**: loops, splices, wow and flutter, hiss, filtered noise, early
+electronics, Rudnik and Kotoński rather than any film score. Framed as the ticket system's
+hold line: "Muzyka na czekanie, utwór nr 7."
+
+### 14.2 Ban list
+Sawtooth or supersaw pads, big reverbs, chiptune square-wave bleeps, "sci-fi" whooshes and
+risers, major/minor pop scales, four-on-the-floor loops, orchestral hits, sidechain pumping,
+any sample pack sound. No oscillator tone may be heard raw.
+
+### 14.3 SFX (all synthesized in Web Audio from noise, clicks and short plucks; no samples)
+- hit: pen scratch (short filtered-noise burst with a pitch drop); crit: longer scratch + a
+  blot "plop" (low filtered click).
+- kill: two fast strokes (scratches) + a pencil scribble (crackly noise, 250 ms) as the
+  figure is rubbed out.
+- stamp: rubber stamp thud (low click + damped noise) with a tiny paper slap.
+- footnote: one typewriter key per footnote; a carriage-return "ding + zip" for corrections.
+- loot: paper slide (soft noise sweep); card sketch: three quick scratches.
+- level up / aktualizacja: stapler clack; confirm: stamp thud.
+- page turn: a sheet being lifted and laid down (two noise sweeps, 400 ms).
+- walking: nothing (paper does not make steps); page edge: a dull paper bump.
+- notifications family: a dry "ping" made from a damped pluck, never a chat-app ping.
+- bot hours: a hold-line beep (one sine, telephone-band filtered, is the single allowed tone).
+
+### 14.4 Music: the page as a punched roll, played as hold music
+- **Material.** Each page's obstacle layout is read as a piano roll: x = time, y = pitch
+  class. So every page has its own motif, deterministic from the seed. Each planet picks a
+  fixed, strange scale (never major/minor): Bohlen–Pierce subsets, a 7-note mode with two
+  microtonally detuned degrees, or a pentatonic with one wrong note. Tempo is slow.
+- **Instrument.** Music box / barrel organ: Karplus–Strong plucks and 2-operator FM bells with
+  slight detune per note, like a worn mechanism. No pads.
+- **Treatment.** Then the Experimental Studio: tape loop with wow (0.3–0.8 Hz) and flutter,
+  hiss bed, splices (hard cuts), a bandpass that narrows toward telephone bandwidth
+  (300–3400 Hz) as the hold line "degrades", an occasional hold-line beep.
+- **Adaptation** (state → layers, crossfaded over 2–4 s):
+  - calm: the roll alone, sparse.
+  - enemies near (count > 2): a second voice enters, a fifth below, slightly late.
+  - elite present: the splices start; a reversed fragment every 8 bars.
+  - boss: loop speed ×1.25 and the hiss rises; on each boss phase a hard cut to a new splice.
+  - bot hours (Godziny konsultanta): telephone band only + hold beep every 4 s.
+  - Czas wsteczny: the whole loop plays backwards.
+  - suspended (Zawieszenie): the music continues but ducked to −12 dB, as if behind a door.
+  - death: the roll stops with a ritardando of the mechanism, not a sting.
+- **Implementation notes.** One `AudioContext` unlocked on the first tap ("Akceptuję
+  regulamin" is the natural unlock). A `music/` module exposes `setState(flags)` and renders
+  everything from a seed with the run rng fork 'music'. An offline render script
+  (`npm run render-audio`) writes a 20 s WAV per state for inspection: peak level, spectrum
+  within band, no clipping. Taste is judged by the player on the phone. Settings: music and SFX
+  volume, both persisted; defaults on.
