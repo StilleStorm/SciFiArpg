@@ -29,13 +29,36 @@ Language of code, comments and docs: English. Language of the game: Polish, thro
 
 ## 2. Platform and controls
 
-- Mobile browser, portrait, installable PWA, works offline after first load.
-- Tap on the page = walk there. Hold = keep walking toward the finger.
-- Auto-attack the nearest enemy in range when standing still or when an enemy is adjacent.
-- Three skill buttons at the bottom right, reachable by the right thumb. A fourth button
-  bottom left opens the inventory ("Załączniki"). Left-handed mirror in settings.
-- Walking over loot picks it up. Tapping an item on the ground shows its card first.
-- No virtual joystick. No pinch. No double-tap. No long menus mid-run.
+- Mobile browser, installable PWA, works offline after first load.
+- **Orientation: landscape by default**, portrait as an option. The manifest locks landscape;
+  the setting "Orientacja: pozioma / pionowa" switches the lock through the Screen Orientation
+  API where the platform allows it (installed app on Android). iOS ignores orientation locks,
+  so there the setting only picks the layout and the game follows how the phone is held; the
+  settings line says so.
+- **Steering: joystick or tap**, setting "Sterowanie: joystick / dotyk". Joystick is the
+  default in landscape, tap is the default in portrait; either works in either orientation.
+  - *Joystick*: floating. It appears where the thumb lands on the steering half of the screen
+    (left half; mirrored for left-handed), drawn as two ink circles (base and knob) with a
+    hatched dead zone. Direction steers, distance scales speed (dead zone 12%). Releasing
+    stops. Auto-attack keeps working while moving.
+  - *Tap*: tap on the page = walk there. Hold = keep walking toward the finger. An ink "x"
+    marks the tap.
+- **Auto-attack** the nearest enemy in range, always, standing or moving. The player never
+  taps enemies.
+- **Pads.** Three skill pads under the right thumb, drawn as circled margin notes with a word
+  label. The Załączniki (inventory) pad sits bottom-left in tap mode and moves to the top
+  right under the HUD in joystick mode, so the steering half stays clear. Left-handed mirror
+  swaps halves and pads.
+- **Landscape layout.** HUD form top-left (compact, two lines), page header (clause) top
+  centre, Załączniki/update line top-right, joystick or tap area on the left half, skill pads
+  bottom-right, footnotes bottom-centre on at most two lines (older ones scroll off sooner),
+  the inventory and form sheets as two-column pages. **Portrait layout** stays as built: HUD
+  top, pads bottom-right, Załączniki bottom-left, footnotes bottom.
+- The camera shows the same world height in both orientations (about 700 units) and more
+  width in landscape, so landscape is the better ARPG view; enemy entry waves are placed in
+  the actual view rect.
+- No pinch. No double-tap. No long menus mid-run. Walking over loot picks it up. Tapping an
+  item on the ground shows its card first (not built yet).
 - Must run at 60 fps on a mid-range phone with ~60 moving SVG elements. Entities are `<g>` with
   a `transform`, never rebuilt per frame. Filters on a few group nodes, never per element.
 
