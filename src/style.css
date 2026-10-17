@@ -60,7 +60,7 @@
   --mono: 'Space Mono', 'Courier New', monospace;
   --serif: 'EB Garamond', Georgia, serif;
   --band-top: 62px;
-  --band-bottom: 98px;
+  --band-bottom: 106px;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -263,8 +263,8 @@ button {
   flex-direction: column;
   justify-content: flex-end;
   overflow: hidden;
-  font-size: 12.5px;
-  line-height: 15px;
+  font-size: 15px;
+  line-height: 19px;
 }
 .foot::before {
   content: '';
@@ -276,11 +276,13 @@ button {
 }
 .fn {
   margin: 0 0 2px;
-  max-height: 30px;
+  /* two lines; a note keeps its height, so the older ones are pushed out of the top, never squeezed */
+  flex: none;
+  max-height: 38px;
   overflow: hidden;
 }
 .fn sup {
-  font-size: 9px;
+  font-size: 10px;
   line-height: 0;
   margin-right: 3px;
 }

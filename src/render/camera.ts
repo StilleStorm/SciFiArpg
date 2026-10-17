@@ -21,6 +21,18 @@ export function viewSizeFor(vw: number, vh: number): { w: number; h: number } {
 }
 
 let viewSize = { w: MIN_VIEW_W, h: MIN_VIEW_H };
+/** css px per world unit right now (1 in portrait on a 390 px phone, 0.75 in landscape on the same phone). */
+let zoom = 1;
+
+/** How many css px one world unit covers at the moment (set by `camera.resize()`). */
+export function viewZoom(): number {
+  return zoom;
+}
+
+/** Set what `viewZoom()` reports (tests). */
+export function setViewZoom(z: number): void {
+  zoom = z > 0 ? z : 1;
+}
 
 /** The world size the camera shows right now (set by `camera.resize()`); used to place the entry wave. */
 export function currentViewSize(): { w: number; h: number } {
@@ -67,6 +79,7 @@ export function createCamera(
     h: MIN_VIEW_H,
     resize() {
       setViewSize(viewSizeFor(window.innerWidth, window.innerHeight));
+      setViewZoom(Math.max(1, window.innerWidth) / viewSize.w);
       cam.w = viewSize.w;
       cam.h = viewSize.h;
     },

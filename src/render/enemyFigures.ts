@@ -14,6 +14,7 @@ import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsB
 import { rtOf } from '../enemies/runtime';
 import { t } from '../i18n';
 import { bubbleShown } from './bubbleFocus';
+import { viewZoom } from './camera';
 import { drawIn, marginNote, stamp } from './ink';
 import { syncStatusMarkers } from './statusMarkers';
 import { el, n2, wobblyCircle } from './svg';
@@ -42,6 +43,8 @@ interface FigState {
   claimSig: string;
   /** The bubble is on the paper (class bubble-off hides it with opacity 0). */
   bubbleOn: boolean;
+  /** The zoom transform the bubble carries (see bubbleTransform). */
+  bubbleTf: string;
   phase: number;
   flip: number;
   spinning: boolean;
@@ -99,10 +102,22 @@ export function wrapClaim(text: string, max = 15): string[] {
   return lines;
 }
 
-const CHAR_W = 5.2;
+/** Bubble type: 16 units of italic Garamond, 17 units per line; readable at 1 unit = 1 css px (portrait on a phone). */
+const BUBBLE_FONT = 16;
+const BUBBLE_LINE = 17;
+const CHAR_W = 7;
 
 function bubbleBox(lines: string[]): { w: number; h: number } {
-  return { w: Math.max(...lines.map((l) => l.length), 4) * CHAR_W + 14, h: lines.length * 13 + 8 };
+  return { w: Math.max(...lines.map((l) => l.length), 4) * CHAR_W + 16, h: lines.length * BUBBLE_LINE + 9 };
+}
+
+/**
+ * The bubble is an annotation, so it keeps its css px size when the camera zooms out (landscape shows 520 units
+ * tall, which would shrink 16 units to 12 px): it is scaled up about its tail by 1 / zoom, never below 1.
+ */
+function bubbleTransform(top: number): string {
+  const k = Math.min(1.6, Math.max(1, 1 / viewZoom()));
+  return k === 1 ? '' : `translate(0 ${n2(top)}) scale(${n2(k)}) translate(0 ${n2(-top)})`;
 }
 
 function buildBubble(e: Enemy, top: number): SVGGElement {
@@ -124,22 +139,25 @@ function buildBubble(e: Enemy, top: number): SVGGElement {
     `L${n2(x1 + j())} ${n2(yb - r)}Q${n2(x1)} ${n2(yb)} ${n2(x1 - r)} ${n2(yb + j() * 0.5)}` +
     `L${tr} ${n2(yb)}L${n2(1.5 + j())} ${n2(yb + 8)}L${tl} ${n2(yb)}` +
     `L${n2(x0 + r)} ${n2(yb + j() * 0.5)}Q${n2(x0)} ${n2(yb)} ${n2(x0)} ${n2(yb - r)}L${n2(x0 + j())} ${n2(yt + r)}Q${n2(x0)} ${n2(yt)} ${n2(x0 + r)} ${n2(yt)}Z`;
-  g.append(el('path', { d, 'stroke-width': 1.3 }));
+  // the bubble is a patch of clean paper: another figure's strokes never cross the words
+  g.append(el('path', { d, 'stroke-width': 1.3, fill: 'var(--paper)' }));
   lines.forEach((line, i) => {
     const text = el(
       'text',
       {
         x: 0,
-        y: n2(yt + 13.5 + i * 13),
+        y: n2(yt + BUBBLE_LINE - 0.5 + i * BUBBLE_LINE),
         'text-anchor': 'middle',
-        'font-size': 12,
-        style: 'font-family: var(--serif); font-style: italic; fill: var(--ink); stroke: var(--paper); stroke-width: 2.6; stroke-linejoin: round; paint-order: stroke',
+        'font-size': BUBBLE_FONT,
+        style: 'font-family: var(--serif); font-style: italic; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke',
       },
       [line],
     );
     g.append(text);
   });
   g.dataset['box'] = `${n2(x0)} ${n2(yt)} ${n2(w)} ${n2(h)}`;
+  const tf = bubbleTransform(top);
+  if (tf) g.setAttribute('transform', tf);
   return g;
 }
 
@@ -158,6 +176,22 @@ function strikeBubble(bubble: SVGGElement, animate: boolean): void {
   line.style.strokeDasharray = String(len);
   line.style.strokeDashoffset = String(len);
   tween(160, (p) => (line.style.strokeDashoffset = String(len * (1 - p))), { ease: easeOut });
+}
+
+/**
+ * Keep the speaking figures above the silent ones in the layer: a bubble is crossed only by the strokes of
+ * another figure that speaks too (a few at a time, see bubbleFocus). Nodes move only when a bubble turns on
+ * or off; the view sync never reorders.
+ */
+function restack(g: SVGGElement, speaking: boolean): void {
+  const layer = g.parentElement;
+  if (!layer) return;
+  if (speaking) {
+    if (layer.lastElementChild !== g) layer.append(g);
+    return;
+  }
+  const firstSpeaking = layer.querySelector(':scope > [data-kind="enemy"] > [data-part="over"] > .bubble:not(.bubble-off)')?.closest('[data-kind="enemy"]');
+  if (firstSpeaking && firstSpeaking !== g) layer.insertBefore(g, firstSpeaking);
 }
 
 // ---------- the figure ----------
@@ -196,12 +230,12 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   over.append(bubble, markers);
   if (boss) {
     over.append(
-      el('text', { x: 0, y: n2(boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16), 'text-anchor': 'middle', 'font-size': 7.5, 'letter-spacing': 1.6, style: `${FONT.title}; fill: var(--ink); stroke: none` }, [t(`enemies.boss.${boss}.name`).toLocaleUpperCase('pl')]),
+      el('text', { x: 0, y: n2(boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16), 'text-anchor': 'middle', 'font-size': 9, 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: none` }, [t(`enemies.boss.${boss}.name`).toLocaleUpperCase('pl')]),
     );
   } else if (e.elite) {
     over.append(
       el('path', { d: `M${n2(-hw)} ${n2(feet + 3)}Q0 ${n2(feet + 6)} ${n2(hw)} ${n2(feet + 2.5)}M${n2(-hw + 5)} ${n2(feet + 6)}Q0 ${n2(feet + 8.5)} ${n2(hw - 4)} ${n2(feet + 5.5)}`, 'stroke-width': 1.1 }),
-      el('text', { x: 0, y: n2(feet + 18), 'text-anchor': 'middle', 'font-size': 10, style: `${FONT.serif}; fill: var(--ink); stroke: none` }, [eliteWord(e.elite.affix, asm.body)]),
+      el('text', { x: 0, y: n2(feet + 19), 'text-anchor': 'middle', 'font-size': 12, style: `${FONT.serif}; fill: var(--ink); stroke: none` }, [eliteWord(e.elite.affix, asm.body)]),
     );
   }
   g.append(under, fig, over);
@@ -222,6 +256,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
     legPaths,
     claimSig: claimSig(e),
     bubbleOn: true,
+    bubbleTf: bubbleTransform(bubbleTop),
     phase: 0,
     flip: 1,
     spinning: false,
@@ -390,10 +425,18 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
     }
   }
 
+  const tf = bubbleTransform(st.bubbleTop);
+  if (tf !== st.bubbleTf) {
+    st.bubbleTf = tf;
+    if (tf) st.bubble.setAttribute('transform', tf);
+    else st.bubble.removeAttribute('transform');
+  }
+
   const on = bubbleShown(e);
   if (on !== st.bubbleOn) {
     st.bubbleOn = on;
     st.bubble.classList.toggle('bubble-off', !on);
+    restack(g, on);
   }
 
   syncStatusMarkers(st.markers, e.statuses, { hw: st.hw, top: st.top, feet: st.feet });

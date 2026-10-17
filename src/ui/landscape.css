@@ -127,8 +127,8 @@
   /* centred between the skill pads (about 180 px from either edge with the mirror): long notes fit in two lines */
   width: min(440px, calc(100vw - 400px));
   min-width: 260px;
-  /* exactly two lines of 15 px, so an older note is clipped at a line and never shows half of itself */
-  height: calc(37px + env(safe-area-inset-bottom));
+  /* exactly two lines of 19 px, so an older note is clipped at a line and never shows half of itself */
+  height: calc(45px + env(safe-area-inset-bottom));
   padding: 0 12px calc(env(safe-area-inset-bottom) + 6px);
   border-left: 1px solid var(--ink);
   border-right: 1px solid var(--ink);
@@ -139,10 +139,8 @@
   left: 12px;
   border-top-width: 2px;
 }
-/* each note keeps its own height, so the older ones are pushed out of the top, never squeezed */
 :root[data-orient='landscape'] .foot .fn {
   margin: 0;
-  flex: none;
 }
 
 /* ============ landscape: pages and forms laid out in two columns where there is room (390 px of height) ============ */
