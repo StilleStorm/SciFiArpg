@@ -18,6 +18,7 @@ import { createHeroLayer, type HeroLayer } from './heroes/layer';
 import { heroBuilders, wrapEnemyBuilder } from './render/heroFigures';
 import { bindHeroFx, zoneBuilder } from './render/heroFx';
 import { createExitReveal } from './render/exitReveal';
+import { updateBubbleFocus } from './render/bubbleFocus';
 
 export interface Game {
   readonly state: RunState | null;
@@ -98,6 +99,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
       for (const z of s.zones) ents.push(z);
       hero.frame(s);
       exits.frame(s);
+      updateBubbleFocus(s.enemies, s.player);
       views.sync(ents, s.time * 1000);
       camera.follow(s.player.x, s.player.y, dtSec);
       camera.apply();

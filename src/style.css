@@ -839,3 +839,11 @@ s.struck-out.fresh::after {
 .pop-wrap:has(.pop.cookie) {
   align-items: flex-end;
 }
+
+/* Claim bubbles: only the few that matter are shown (render/bubbleFocus.ts); the rest stay in the DOM. */
+.bubble {
+  transition: opacity 0.18s linear;
+}
+.bubble.bubble-off {
+  opacity: 0;
+}

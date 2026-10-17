@@ -13,6 +13,7 @@ import { BOSS_OF, ELITE_SCALE, eliteWord } from '../enemies/families';
 import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsBase';
 import { rtOf } from '../enemies/runtime';
 import { t } from '../i18n';
+import { bubbleShown } from './bubbleFocus';
 import { drawIn, marginNote, stamp } from './ink';
 import { syncStatusMarkers } from './statusMarkers';
 import { el, n2, wobblyCircle } from './svg';
@@ -39,6 +40,8 @@ interface FigState {
   markers: SVGGElement;
   legPaths: SVGPathElement[];
   claimSig: string;
+  /** The bubble is on the paper (class bubble-off hides it with opacity 0). */
+  bubbleOn: boolean;
   phase: number;
   flip: number;
   spinning: boolean;
@@ -218,6 +221,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
     markers,
     legPaths,
     claimSig: claimSig(e),
+    bubbleOn: true,
     phase: 0,
     flip: 1,
     spinning: false,
@@ -378,11 +382,18 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
       const nb = buildBubble(e, st.bubbleTop);
       st.bubble.replaceWith(nb);
       st.bubble = nb;
+      nb.classList.toggle('bubble-off', !st.bubbleOn);
       drawIn(nb, 220);
       if (e.claim?.struck) strikeBubble(nb, false);
     } else if (e.claim?.struck) {
       strikeBubble(st.bubble, true);
     }
+  }
+
+  const on = bubbleShown(e);
+  if (on !== st.bubbleOn) {
+    st.bubbleOn = on;
+    st.bubble.classList.toggle('bubble-off', !on);
   }
 
   syncStatusMarkers(st.markers, e.statuses, { hw: st.hw, top: st.top, feet: st.feet });
