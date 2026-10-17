@@ -30,7 +30,8 @@ export interface Game {
   stop(): void;
   update(dt: number): void;
   render(dtSec: number): void;
-  onTap(clientX: number, clientY: number): void;
+  /** A tap on the page. `walk` false (joystick mode): do not walk there, only the kiosk and the bot hear it. */
+  onTap(clientX: number, clientY: number, walk?: boolean): void;
 }
 
 /** Ties run state to the stage: simulation step, view sync, camera. Owns no rules. */
@@ -84,6 +85,9 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
       if (!s || s.status !== 'running') return;
       const held = input.held();
       if (held) s.player.target = camera.screenToWorld(held.x, held.y);
+      const steer = input.steer();
+      if (steer) s.player.steer = steer;
+      else delete s.player.steer;
       sim.step(s, dt);
       if (s.status !== 'running') input.setEnabled(false);
     },
@@ -104,10 +108,15 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
       camera.follow(s.player.x, s.player.y, dtSec);
       camera.apply();
     },
-    onTap(clientX, clientY) {
+    onTap(clientX, clientY, walk = true) {
       const s = state;
       if (!s || s.status !== 'running' || s.modal || s.turning) return;
       const w = camera.screenToWorld(clientX, clientY);
+      if (!walk) {
+        // Joystick mode: a quick tap only matters on the kiosk (the player steers there himself).
+        if (tapKiosk(s, w.x, w.y)) bus.emit('player:tap', { x: w.x, y: w.y });
+        return;
+      }
       s.player.target = w;
       tapMark(w.x, w.y);
       tapKiosk(s, w.x, w.y);

@@ -41,6 +41,9 @@ const SKILL_DRAWINGS: Record<HeroId, readonly (readonly string[])[]> = {
   ],
 };
 
+/** A click this soon after a pointerdown on the same pad is the tail of that press, not a second cast. */
+const CLICK_AFTER_PRESS_MS = 700;
+
 const INVENTORY_DRAWING = 'M-5 11V-8A5 5 0 0 1 5-8V8A3 3 0 0 1-1 8V-4'; // paper clip
 
 const PADS: PadId[] = ['skill1', 'skill2', 'skill3', 'inventory'];
@@ -124,7 +127,23 @@ export function createPads(root: HTMLElement, bus: Bus): HTMLElement {
     svg.append(base, glyph, ring);
     btn.append(svg, word);
     if (id === 'inventory') btn.setAttribute('aria-label', t('ui.pads.inventory'));
-    btn.addEventListener('click', () => bus.emit(EVENT[id]));
+    if (id === 'inventory') {
+      btn.addEventListener('click', () => bus.emit(EVENT[id]));
+    } else {
+      // A skill answers the finger going down: with another thumb already on the joystick the browser sends
+      // no `click` for a second touch. A click that follows the press is swallowed; one that comes alone
+      // (keyboard, assistive tech, a script) still casts.
+      let pressedAt = -Infinity;
+      btn.addEventListener('pointerdown', (ev) => {
+        if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+        pressedAt = performance.now();
+        bus.emit(EVENT[id]);
+      });
+      btn.addEventListener('click', () => {
+        if (performance.now() - pressedAt < CLICK_AFTER_PRESS_MS) return;
+        bus.emit(EVENT[id]);
+      });
+    }
     wrap.append(btn);
     nodes.push({ btn, glyph, word, ring, last: -2 });
   });

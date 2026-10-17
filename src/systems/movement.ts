@@ -18,6 +18,25 @@ export function movePlayer(s: RunState, bus: Bus, dt: number): void {
     resolveMove(s.page, p, p.r);
     return;
   }
+  const steer = p.steer;
+  if (steer && steer.mag > 0) {
+    // Joystick: velocity from the stick, the walk target is forgotten. Walls and obstacles slide as for a walk.
+    p.target = null;
+    const step = speed * steer.mag * dt;
+    const bx = p.x;
+    const by = p.y;
+    p.x += steer.dx * step;
+    p.y += steer.dy * step;
+    if (Math.abs(steer.dx) > 0.2) p.facing = steer.dx > 0 ? 1 : -1;
+    const side = resolveMove(s.page, p, p.r);
+    if (side && s.edgeCooldown <= 0) {
+      s.edgeCooldown = EDGE_NOTE_COOLDOWN;
+      bus.emit('page:edge', { x: p.x, y: p.y, side });
+    }
+    p.moving = Math.hypot(p.x - bx, p.y - by) > step * 0.25;
+    p.stuck = 0;
+    return;
+  }
   if (p.target) {
     const dx = p.target.x - p.x;
     const dy = p.target.y - p.y;

@@ -31,6 +31,12 @@ export interface Settings {
   musicVolume: number;
   /** SFX volume 0..100 (default 100). */
   sfxVolume: number;
+  /** Layout and lock the player asked for; absent = landscape (DESIGN 2). */
+  orientation?: 'landscape' | 'portrait';
+  /** Joystick or tap; only honoured once `steeringTouched`, until then the orientation decides (ui/layout.ts). */
+  steering?: 'joystick' | 'tap';
+  /** The player picked a steering mode himself, so it no longer follows the orientation. */
+  steeringTouched?: boolean;
 }
 
 export const DEFAULT_MUSIC_VOLUME = 80;
@@ -118,6 +124,8 @@ export function migrate(raw: unknown): MetaState {
   const rawSettings = isRecord(raw['settings']) ? raw['settings'] : {};
   const theme = rawSettings['theme'];
   const history = Array.isArray(raw['history']) ? raw['history'].map(toEntry).filter((e): e is TicketEntry => e !== null) : [];
+  const orientation = rawSettings['orientation'];
+  const steering = rawSettings['steering'];
   const out: MetaState = {
     ...raw,
     version: SAVE_VERSION,
@@ -130,6 +138,9 @@ export function migrate(raw: unknown): MetaState {
       leftHanded: rawSettings['leftHanded'] === true,
       musicVolume: toVolume(rawSettings['musicVolume'], DEFAULT_MUSIC_VOLUME),
       sfxVolume: toVolume(rawSettings['sfxVolume'], DEFAULT_SFX_VOLUME),
+      ...(orientation === 'landscape' || orientation === 'portrait' ? { orientation } : {}),
+      ...(steering === 'joystick' || steering === 'tap' ? { steering } : {}),
+      ...(rawSettings['steeringTouched'] === true ? { steeringTouched: true } : {}),
     },
   };
   delete out.heroId;

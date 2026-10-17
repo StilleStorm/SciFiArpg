@@ -2,6 +2,7 @@ import { t } from '../i18n';
 import { el } from '../render/svg';
 import type { Settings } from '../save/save';
 import { h } from './dom';
+import { currentOrient, effectiveSteering, orientationSetting } from './layout';
 
 export interface SettingsScreen {
   el: HTMLElement;
@@ -48,7 +49,14 @@ function volumeLine(label: string, value: number, onInput: (v: number) => void, 
   return line;
 }
 
-/** Wydanie (day / night / by device), the left-handed mirror and the two volumes. All are saved by the caller. */
+/** A group of options with its heading; the groups are laid out in one column (portrait) or two (landscape). */
+function group(title: string, ...children: HTMLElement[]): HTMLElement {
+  const g = h('section', 'set-group');
+  g.append(h('h3', 'group', title), ...children);
+  return g;
+}
+
+/** Wydanie (day / night / by device), the left-handed mirror, orientation, steering and the two volumes. All are saved by the caller. */
 export function createSettings(
   root: HTMLElement,
   onChange: (next: Settings) => void,
@@ -63,6 +71,7 @@ export function createSettings(
   let current: Settings = { theme: 'auto', leftHanded: false, musicVolume: 80, sfxVolume: 100 };
 
   function render(): void {
+    const scrolled = frame.querySelector('.set-scroll')?.scrollTop ?? 0; // picking an option redraws the form: keep the place
     frame.replaceChildren();
     const set = (patch: Partial<Settings>): void => {
       current = { ...current, ...patch };
@@ -85,6 +94,18 @@ export function createSettings(
       current = { ...current, ...patch };
       onChange(current);
     };
+    const orient = h('div', 'opts row');
+    const chosenOrient = orientationSetting(current);
+    orient.append(
+      option(t('screens.settings.landscape'), chosenOrient === 'landscape', () => set({ orientation: 'landscape' })),
+      option(t('screens.settings.portrait'), chosenOrient === 'portrait', () => set({ orientation: 'portrait' })),
+    );
+    const steer = h('div', 'opts row');
+    const chosenSteer = effectiveSteering(current, currentOrient());
+    steer.append(
+      option(t('screens.settings.joystick'), chosenSteer === 'joystick', () => set({ steering: 'joystick', steeringTouched: true })),
+      option(t('screens.settings.tap'), chosenSteer === 'tap', () => set({ steering: 'tap', steeringTouched: true })),
+    );
     const sound = h('div', 'vols');
     sound.append(
       volumeLine(t('screens.settings.music'), current.musicVolume, (v) => live({ musicVolume: v }), () => onVolumeSet('music')),
@@ -93,20 +114,24 @@ export function createSettings(
     const back = h('button', 'form-btn', t('screens.settings.back'));
     back.type = 'button';
     back.addEventListener('click', onBack);
+    const body = h('div', 'set-scroll');
+    const grid = h('div', 'set-grid');
+    grid.append(
+      group(t('screens.settings.theme'), theme),
+      group(t('screens.settings.hand'), hand),
+      group(t('screens.settings.orientation'), orient, h('p', 'eta', t('screens.settings.orientationNote'))),
+      group(t('screens.settings.steering'), steer, h('p', 'eta', t('screens.settings.steeringNote'))),
+      group(t('screens.settings.sound'), sound, h('p', 'eta', t('screens.settings.soundNote'))),
+    );
+    body.append(grid, h('p', 'eta', t('screens.settings.note')));
     frame.append(
       h('div', 'agency', t('ui.title.agency')),
       h('h2', 'form-title tight', t('screens.settings.title')),
       h('hr', 'rule'),
-      h('h3', 'group', t('screens.settings.theme')),
-      theme,
-      h('h3', 'group', t('screens.settings.hand')),
-      hand,
-      h('h3', 'group', t('screens.settings.sound')),
-      sound,
-      h('p', 'eta', t('screens.settings.soundNote')),
-      h('p', 'eta', t('screens.settings.note')),
+      body,
       back,
     );
+    body.scrollTop = scrolled;
   }
 
   return {

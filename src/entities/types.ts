@@ -48,6 +48,11 @@ export interface Player extends Fighter {
   target: Vec | null;
   /** Seconds spent pushing against something without getting anywhere. */
   stuck: number;
+  /**
+   * Joystick steering (ui/joystick.ts): unit direction and strength 0..1. Set every frame by game.ts while a thumb
+   * is on the stick, absent otherwise; it overrides `target` (systems/movement.ts).
+   */
+  steer?: { dx: number; dy: number; mag: number };
   level: number;
   gwiazdki: number;
   /** Worn items by slot (items/inventory.ts equips; items/stats.ts recomputes stats from them). */

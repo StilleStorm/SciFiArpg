@@ -6,7 +6,10 @@ import { addFootnote } from './ui/footnotes';
 import type { Enemy } from './entities';
 import type { Bus } from './core/events';
 import { applyDamage } from './systems/combat';
-import type { MetaState } from './save/save';
+import type { Input } from './input';
+import type { MetaState, Settings } from './save/save';
+import { steerVector } from './ui/joystick';
+import { currentOrient, effectiveSteering, type Orient, type Steering } from './ui/layout';
 import type { RunOptions, RunState } from './world/run';
 import { openKiosk } from './economy/kiosk';
 import { fillDemoInventory, giveRandomItem } from './items/demo';
@@ -56,6 +59,19 @@ export interface GameHook {
   enemies: EnemyHook;
   /** Offline audio renders and the live context state (audio/hook.ts). */
   audio: AudioHook;
+  /**
+   * Save the orientation setting and ask for the lock where there is one. The layout itself follows the window:
+   * in a browser test change the viewport (`page.setViewportSize`) to flip `data-orient`.
+   */
+  setOrientation(orient: Orient): void;
+  /** Choose joystick or tap as the player would in the settings (it is remembered as his choice). */
+  setSteering(steering: Steering): void;
+  /** The left-handed mirror, as the settings screen sets it. */
+  setLeftHanded(on: boolean): void;
+  /** What steers now: the layout orientation and the steering in force. */
+  controls(): { orient: Orient; steering: Steering };
+  /** Hold the stick at a finger offset of (dx, dy) css px from its centre (null lets go). Needs joystick mode. */
+  joystick(dx: number, dy: number): void;
   /** Plain-data snapshot for assertions. */
   snapshot(): { screen: Screen; time: number; hp: number; enemies: number; pickups: number; kills: number; x: number; y: number } | null;
 }
@@ -73,6 +89,9 @@ export interface HookDeps {
   getMeta(): MetaState;
   setMeta(meta: MetaState): void;
   bus: Bus;
+  input: Input;
+  /** Merge into the saved settings and apply them (main.ts). */
+  changeSettings(patch: Partial<Settings>): void;
 }
 
 const NEAR = 90;
@@ -167,6 +186,13 @@ export function installTestHook(deps: HookDeps): void {
       skHandle = mountSklep(root, deps.getMeta(), player);
     },
     openKiosk: () => openKiosk(),
+    setOrientation: (orient) => deps.changeSettings({ orientation: orient }),
+    setLeftHanded: (on) => deps.changeSettings({ leftHanded: on }),
+    setSteering: (steering) => deps.changeSettings({ steering, steeringTouched: true }),
+    controls: () => ({ orient: currentOrient(), steering: effectiveSteering(deps.getMeta().settings, currentOrient()) }),
+    joystick(dx, dy) {
+      deps.input.inject(dx === 0 && dy === 0 ? null : steerVector(dx, dy));
+    },
     snapshot() {
       const s = game.state;
       if (!s) return null;

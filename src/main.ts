@@ -19,6 +19,8 @@ import { installTestHook } from './testHook';
 import { createBaza } from './ui/baza';
 import { createFootnotes } from './ui/footnotes';
 import { createHud } from './ui/hud';
+import { createJoystick } from './ui/joystick';
+import { applySteering, currentOrient, effectiveSteering, initLayout, lockOrientation, orientationSetting } from './ui/layout';
 import { bindLawSheets } from './ui/lawSheets';
 import { createPads } from './ui/pads';
 import { mountProfile } from './ui/profile';
@@ -43,13 +45,22 @@ const wobble = createWobble(stage);
 let meta = loadMeta();
 let screen: Screen = 'title';
 
-/** Day / night / by device, and the left-handed mirror of the pads. */
+/** Day / night / by device, the left-handed mirror, steering and the orientation lock. */
+let lockedFor: string | null = null;
 function applySettings(s: Settings): void {
   setTheme(s.theme);
   stage.ui.classList.toggle('lefty', s.leftHanded);
   setVolumes(s.musicVolume, s.sfxVolume);
+  const steering = effectiveSteering(s, currentOrient());
+  applySteering(steering);
+  input.setMode(steering);
+  input.setLeftHanded(s.leftHanded);
+  const wanted = orientationSetting(s);
+  if (wanted !== lockedFor) {
+    lockedFor = wanted;
+    void lockOrientation(wanted); // a no-op where the platform has no lock (iOS, a desktop tab)
+  }
 }
-applySettings(meta.settings);
 
 const save = (next: typeof meta): void => {
   meta = next;
@@ -57,7 +68,9 @@ const save = (next: typeof meta): void => {
 };
 
 // Router: title -> profile -> baza <-> settings / Sklep, baza -> ticket -> run -> baza
-const input = createInput(stage.svg, (x, y) => game.onTap(x, y));
+const input = createInput(stage.svg, (x, y, walk) => game.onTap(x, y, walk), createJoystick(stage.ui));
+initLayout(() => applySettings(meta.settings)); // data-orient on <html> follows the window; steering follows it until the player chooses
+applySettings(meta.settings);
 const game = createGame(stage, bus, camera, input);
 const hud = createHud(stage.ui, () => game.hero.requestUpdate());
 const footnotes = createFootnotes(stage.ui);
@@ -211,6 +224,19 @@ window.addEventListener('resize', () => {
   hud.invalidate();
 });
 
-installTestHook({ game, bus, getScreen: () => screen, go, getMeta: () => meta, setMeta: (m) => (meta = m) });
+installTestHook({
+  game,
+  bus,
+  input,
+  getScreen: () => screen,
+  go,
+  getMeta: () => meta,
+  setMeta: (m) => (meta = m),
+  changeSettings: (patch) => {
+    const next = { ...meta.settings, ...patch };
+    save({ ...meta, settings: next });
+    applySettings(next);
+  },
+});
 go('title');
 loop.start();
