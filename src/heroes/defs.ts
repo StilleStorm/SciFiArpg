@@ -64,7 +64,7 @@ export const HEROES: readonly HeroDef[] = [
     racja: 120,
     racjaPerLevel: 12,
     speed: 112,
-    r: 14,
+    r: 16,
     baseStats: { pewnoscSiebie: 100, upor: 70, dmgMin: 6, dmgMax: 11, critChance: 0.08, resist: { mechaniczny: 10 } },
     auto: { type: 'mechaniczny', range: 56, cooldown: 0.95, projectile: false },
     skills: [
@@ -77,7 +77,7 @@ export const HEROES: readonly HeroDef[] = [
     racja: 76,
     racjaPerLevel: 8,
     speed: 128,
-    r: 11,
+    r: 13,
     baseStats: { pewnoscSiebie: 95, upor: 38, dmgMin: 4, dmgMax: 8, critChance: 0.1, resist: { regulaminowy: 10 } },
     auto: { type: 'regulaminowy', range: 190, cooldown: 0.75, projectile: true },
     skills: [
@@ -90,7 +90,7 @@ export const HEROES: readonly HeroDef[] = [
     racja: 80,
     racjaPerLevel: 8,
     speed: 124,
-    r: 11,
+    r: 13,
     baseStats: { pewnoscSiebie: 95, upor: 45, dmgMin: 5, dmgMax: 9, critChance: 0.1, resist: { egzystencjalny: 15 } },
     auto: { type: 'egzystencjalny', range: 130, cooldown: 0.8, projectile: true },
     skills: [
@@ -103,7 +103,7 @@ export const HEROES: readonly HeroDef[] = [
     racja: 68,
     racjaPerLevel: 7,
     speed: 134,
-    r: 11,
+    r: 13,
     baseStats: { pewnoscSiebie: 110, upor: 32, dmgMin: 5, dmgMax: 10, critChance: 0.12, resist: {} },
     auto: { type: 'mechaniczny', range: 260, cooldown: 1.05, projectile: true, pierceOnCrit: true },
     skills: [

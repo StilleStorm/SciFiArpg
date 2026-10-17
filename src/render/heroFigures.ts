@@ -13,6 +13,8 @@ import type { Builder } from './view';
 import '../ui/forms.css';
 
 const LEG_PERIOD_MS = 150;
+/** Heroes, summons and hero copies are drawn this much larger on the page (the profile card keeps 1). */
+export const HERO_SCALE = 1.15;
 
 interface FigureDef {
   scale: number;
@@ -192,13 +194,16 @@ export interface FigureOpts {
   foam?: boolean;
   /** Caption written under the figure (kept upright when the figure faces left). */
   caption?: string;
+  /** Extra size factor (HERO_SCALE on the page). */
+  size?: number;
 }
 
 /** One hero figure as a `<g>`. Its legs are `data-leg` paths; `patchFigure` swaps them. */
 export function buildHeroFigure(heroId: HeroId, opts: FigureOpts = {}): SVGGElement {
   const def = FIGURES[heroId];
   const g = el('g', { class: `hero hero-${heroId}${opts.dotted ? ' fig-dotted' : ''}` });
-  const inner = el('g', { class: 'fig', transform: `scale(${def.scale})` });
+  const sc = def.scale * (opts.size ?? 1);
+  const inner = el('g', { class: 'fig', transform: `scale(${n2(sc)})` });
   g.append(inner);
   for (const [cx, cy, r] of def.echo ?? []) {
     const echo = el('path', { d: circlePath(cx, cy, r), 'stroke-dasharray': '1.5 2.5' });
@@ -214,10 +219,10 @@ export function buildHeroFigure(heroId: HeroId, opts: FigureOpts = {}): SVGGElem
   if (foam) inner.append(foam);
   let caption: SVGTextElement | null = null;
   if (opts.caption) {
-    caption = el('text', { class: 't-caption', x: 0, y: 36 }, [opts.caption]);
+    caption = el('text', { class: 't-caption', x: 0, y: Math.round(36 * (opts.size ?? 1)) }, [opts.caption]);
     g.append(caption);
   }
-  parts.set(g, { inner, legs, foam, caption, heroId, scale: def.scale });
+  parts.set(g, { inner, legs, foam, caption, heroId, scale: sc });
   return g;
 }
 
@@ -260,14 +265,14 @@ export function patchFigure(e: Walker, g: SVGGElement, timeMs: number): void {
 // ---------- builders ----------
 
 export const playerBuilder: Builder<Player> = {
-  create: (e) => buildHeroFigure(e.heroId, { foam: e.heroId === 'pralka' }),
+  create: (e) => buildHeroFigure(e.heroId, { foam: e.heroId === 'pralka', size: HERO_SCALE }),
   patch: patchFigure,
   drawInMs: 0,
 };
 
 export const summonBuilder: Builder<Summon> = {
   create: (e) => {
-    const opts: FigureOpts = { dotted: true };
+    const opts: FigureOpts = { dotted: true, size: HERO_SCALE };
     if (e.variant === 'decoy') opts.caption = t('heroes.kartograf.decoy');
     return buildHeroFigure(e.heroId, opts);
   },
@@ -310,7 +315,7 @@ export function wrapEnemyBuilder(base: Builder<Enemy>): Builder<Enemy> {
   const wrapped: Builder<Enemy> = {
     create(e) {
       if (!e.copyOf) return base.create(e);
-      const g = buildHeroFigure(e.copyOf.heroId, { caption: t('heroes.copy.caption') });
+      const g = buildHeroFigure(e.copyOf.heroId, { caption: t('heroes.copy.caption'), size: HERO_SCALE });
       g.dataset['copy'] = '1';
       return g;
     },

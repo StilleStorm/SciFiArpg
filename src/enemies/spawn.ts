@@ -21,6 +21,8 @@ export interface SpawnOpts {
   /** Ring around `around` the enemies are placed on. */
   minRadius?: number;
   maxRadius?: number;
+  /** Nobody is placed closer than this to the player (default 160). */
+  minPlayer?: number;
 }
 
 /** Put one enemy at (x, y) if the spot is free (not inside an obstacle). */
@@ -56,7 +58,7 @@ export function spawnWave(s: RunState, family: FamilyId, count: number, around: 
       const x = around.x + Math.cos(a) * d;
       const y = around.y + Math.sin(a) * d;
       if (x < 60 || y < 60 || x > s.page.w - 60 || y > s.page.h - 60) continue;
-      if (Math.hypot(x - s.player.x, y - s.player.y) < 160) continue;
+      if (Math.hypot(x - s.player.x, y - s.player.y) < (opts.minPlayer ?? 160)) continue;
       const elite = opts.elite ?? (wantElite || r.chance(ELITE_CHANCE) ? r.pick(ELITE_IDS) : undefined);
       const tier = opts.tier ?? (fam === 'powiadomienia' ? 1 : pageTier(s));
       const e = placeEnemy(s, fam, x, y, { tier, elite });
@@ -68,6 +70,55 @@ export function spawnWave(s: RunState, family: FamilyId, count: number, around: 
     }
   }
   return out;
+}
+
+export interface Rect {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+/** Nobody of the entry wave stands closer than this to the player. */
+export const ENTRY_MIN = 180;
+/** At least this many enemies are inside the camera view when a page is entered. */
+export const ENTRY_VISIBLE = 3;
+
+const inRect = (e: { x: number; y: number }, v: Rect): boolean => e.x >= v.x0 && e.x <= v.x1 && e.y >= v.y0 && e.y <= v.y1;
+
+/**
+ * The first wave of a page: placed inside `view` (what the camera shows on entry) at least ENTRY_MIN from the
+ * player, so the first screenshot is not empty paper. Tops up with single enemies of the family if obstacles
+ * or walls took some. Returns the enemies it placed.
+ */
+export function spawnEntryWave(s: RunState, family: FamilyId, count: number, view: Rect): Enemy[] {
+  const r = s.rngs.spawn;
+  const p = s.player;
+  const margin = 70;
+  const inner: Rect = { x0: view.x0 + margin, y0: view.y0 + margin, x1: view.x1 - margin, y1: view.y1 - margin };
+  const out: Enemy[] = [];
+  // an anchor inside the view, 220..340 from the player, where the group gathers
+  for (let tries = 0; tries < 60 && out.length === 0; tries++) {
+    const ax = r.range(Math.max(inner.x0, 80), Math.min(inner.x1, s.page.w - 80));
+    const ay = r.range(Math.max(inner.y0, 80), Math.min(inner.y1, s.page.h - 80));
+    const d = Math.hypot(ax - p.x, ay - p.y);
+    if (d < ENTRY_MIN + 40 || d > 340) continue;
+    out.push(...spawnWave(s, family, count, { x: ax, y: ay }, { minRadius: 20, maxRadius: 80, minPlayer: ENTRY_MIN }));
+  }
+  // top up: single enemies anywhere in the view
+  for (let tries = 0; tries < 200 && s.enemies.filter((e) => inRect(e, view) && Math.hypot(e.x - p.x, e.y - p.y) >= ENTRY_MIN).length < ENTRY_VISIBLE; tries++) {
+    const x = r.range(Math.max(view.x0, 70), Math.min(view.x1, s.page.w - 70));
+    const y = r.range(Math.max(view.y0, 70), Math.min(view.y1, s.page.h - 70));
+    if (Math.hypot(x - p.x, y - p.y) < ENTRY_MIN + 10) continue;
+    const e = placeEnemy(s, family, x, y, { tier: family === 'powiadomienia' ? 1 : pageTier(s) });
+    if (e) out.push(e);
+  }
+  return out;
+}
+
+/** Enemies inside `view` and at least `minDist` from the player. */
+export function countInView(s: RunState, view: Rect, minDist = 0): number {
+  return s.enemies.filter((e) => inRect(e, view) && Math.hypot(e.x - s.player.x, e.y - s.player.y) >= minDist).length;
 }
 
 /** One elite of a family near a point (default: somewhere on the page, away from the player). */

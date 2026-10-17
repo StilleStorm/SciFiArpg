@@ -11,7 +11,7 @@ export function createPlayer(id: number, x: number, y: number): Player {
     id,
     x,
     y,
-    r: 11,
+    r: 13,
     hp: 60,
     hpMax: 60,
     speed: 130,

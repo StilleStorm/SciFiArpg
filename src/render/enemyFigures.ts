@@ -7,7 +7,7 @@
 import { createRng } from '../core/rng';
 import type { Bus } from '../core/events';
 import type { Enemy } from '../entities/types';
-import { assemble, assembleBoss, layoutAssembly, type Assembly, type Layout } from '../enemies/assemble';
+import { ENEMY_SCALE, assemble, assembleBoss, layoutAssembly, type Assembly, type Layout } from '../enemies/assemble';
 import { CONFIRM_R, GRID_CELL, GRID_NEED_S, CONFIRM_NEED_S, gridCellCenter } from '../enemies/bosses';
 import { BOSS_OF, ELITE_SCALE, eliteWord } from '../enemies/families';
 import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsBase';
@@ -166,7 +166,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   g.replaceChildren();
   const asm = assemblyOf(e);
   const layout = layoutAssembly(asm);
-  const sc = asm.scale * (e.elite ? ELITE_SCALE : 1);
+  const sc = asm.scale * ENEMY_SCALE * (e.elite ? ELITE_SCALE : 1);
   const H = asm.height * sc;
   const feet = Math.round(H * 0.48);
   const top = feet - H;

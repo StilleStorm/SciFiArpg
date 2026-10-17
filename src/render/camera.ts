@@ -80,6 +80,13 @@ export function createCamera(
   return cam;
 }
 
+/** The rectangle the camera shows when it is centred on (cx, cy), clamped like `apply()` does. */
+export function viewRect(cx: number, cy: number, w: number, h: number, bounds: { w: number; h: number }): { x0: number; y0: number; x1: number; y1: number } {
+  const x0 = axis(cx, w, bounds.w);
+  const y0 = axis(cy, h, bounds.h);
+  return { x0, y0, x1: x0 + w, y1: y0 + h };
+}
+
 /** Top-left of the view along one axis, keeping the view inside page +- overscan. */
 function axis(center: number, size: number, extent: number): number {
   const lo = -OVERSCAN;

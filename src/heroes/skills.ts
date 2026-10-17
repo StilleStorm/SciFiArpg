@@ -15,7 +15,7 @@ export type SkillFn = (s: RunState, bus: Bus, hero: HeroDef) => void | false;
 const DISAGREE_LINES = 6;
 const MAX_COPIES = 2;
 const MAX_ZONES = 2;
-export const FOAM_RADIUS = 38;
+export const FOAM_RADIUS = 44;
 
 function fx(bus: Bus, kind: 'swirl' | 'foam' | 'cone' | 'ring' | 'line' | 'blink' | 'dash', x: number, y: number, r: number, x2 = x, y2 = y): void {
   bus.emit('skill:fx', { kind, x, y, x2, y2, r });

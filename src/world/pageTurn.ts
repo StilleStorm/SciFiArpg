@@ -11,8 +11,8 @@ import { FAMILY_IDS, type FamilyId } from '../enemies/ids';
 import { t } from '../i18n';
 import { openKiosk } from '../economy/kiosk';
 import { spawnBoss } from '../enemies/bosses';
-import { spawnWave } from '../enemies/spawn';
-import type { Camera } from '../render/camera';
+import { spawnEntryWave, spawnWave } from '../enemies/spawn';
+import { MIN_VIEW_H, MIN_VIEW_W, viewRect, type Camera } from '../render/camera';
 import { drawIn, stamp } from '../render/ink';
 import { drawPage, type PageHeader } from '../render/obstacles';
 import type { Stage } from '../render/stage';
@@ -60,11 +60,20 @@ export function planWaves(s: RunState): Wave[] {
   return waves;
 }
 
+/** What the camera shows on entering the page: at least 390 x 700 units around the player, clamped to the paper. */
+export function entryView(s: RunState): { x0: number; y0: number; x1: number; y1: number } {
+  return viewRect(s.player.x, s.player.y, MIN_VIEW_W, MIN_VIEW_H, { w: s.page.w, h: s.page.h });
+}
+
 /** Fill the current page (and, on the last page, put the boss on it). Clears `s.populate`. */
 export function populatePage(s: RunState, bus: Bus): void {
   s.populate = false;
   const r = s.rngs.spawn;
-  for (const w of planWaves(s)) {
+  const waves = planWaves(s);
+  // The first wave stands in view of the entry (at least 3 enemies, none closer than 180 units).
+  const first = waves.shift();
+  if (first) spawnEntryWave(s, first.family, first.count, entryView(s));
+  for (const w of waves) {
     // Spread each wave over the page, away from where the player stands.
     for (let tries = 0; tries < 20; tries++) {
       const around = { x: r.range(160, s.page.w - 160), y: r.range(160, s.page.h - 160) };

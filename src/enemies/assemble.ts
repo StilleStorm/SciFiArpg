@@ -24,6 +24,8 @@ import {
 /** Figure height limits for common enemies, in world units (the player is ~64). */
 export const HEIGHT_MIN = 56;
 export const HEIGHT_MAX = 80;
+/** Every enemy figure is drawn this much larger on screen (and collides with the same factor), for the phone. */
+export const ENEMY_SCALE = 1.2;
 
 export interface Assembly {
   family: FamilyId;
@@ -143,7 +145,7 @@ export function assemble(seed: number, family: FamilyId, tier = 1): Assembly {
     dotted: body.dotted ?? 0,
     serial: serialOf(seed),
     height,
-    radius: clamp(Math.round(body.w * (family === 'powiadomienia' ? 0.34 : 0.36) * scale), 12, 22),
+    radius: clamp(Math.round(body.w * (family === 'powiadomienia' ? 0.34 : 0.36) * scale * ENEMY_SCALE), 14, 26),
     width,
   };
   if (body.ranged) a.ranged = body.ranged;
@@ -178,7 +180,7 @@ export function assembleBoss(boss: BossId, seed = 1): Assembly {
         boss,
         ranged: body.ranged,
         height: 60 + 14 + 24,
-        radius: 26,
+        radius: Math.round(26 * ENEMY_SCALE),
         width: 90,
       };
     }
@@ -197,7 +199,7 @@ export function assembleBoss(boss: BossId, seed = 1): Assembly {
         serial,
         boss,
         height: 54 + 24,
-        radius: 30,
+        radius: Math.round(30 * ENEMY_SCALE),
         width: 50,
       };
     case 'hipoteza':
@@ -215,7 +217,7 @@ export function assembleBoss(boss: BossId, seed = 1): Assembly {
         serial,
         boss,
         height: 54 + 17,
-        radius: 32,
+        radius: Math.round(32 * ENEMY_SCALE),
         width: 64,
       };
   }

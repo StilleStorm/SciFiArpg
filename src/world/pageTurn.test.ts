@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { createBus, type Bus, type GameEvents } from '../core/events';
 import { createSim } from '../systems/step';
-import { enterPage, kioskOf, kioskReached, planWaves, populatePage, tapKiosk, tickPageTurn } from './pageTurn';
+import { countInView } from '../enemies/spawn';
+import { enterPage, entryView, kioskOf, kioskReached, planWaves, populatePage, tapKiosk, tickPageTurn } from './pageTurn';
 import { createRun, type RunState } from './run';
 
 function events(bus: Bus, names: (keyof GameEvents)[]): { name: string; payload: unknown }[] {
@@ -153,5 +154,25 @@ describe('the kiosk', () => {
     s.player.y = k.y + 100;
     expect(kioskReached(s)).toBe(true);
     expect(kioskReached(s)).toBe(false);
+  });
+});
+
+describe('the entry wave', () => {
+  it('puts at least 3 enemies in the 390 x 700 view on every page, none closer than 180 units', () => {
+    for (let seed = 1; seed <= 30; seed++) {
+      for (const law of ['grawitacja', 'parzystosc'] as const) {
+        const s = run(seed, law);
+        const bus = createBus();
+        for (let page = 0; page < 5; page++) {
+          if (page > 0) enterPage(s, bus, page);
+          populatePage(s, bus);
+          const view = entryView(s);
+          expect(countInView(s, view, 180), `seed ${seed} ${law} page ${page}`).toBeGreaterThanOrEqual(3);
+          for (const e of s.enemies) {
+            expect(Math.hypot(e.x - s.player.x, e.y - s.player.y), `seed ${seed} page ${page}`).toBeGreaterThanOrEqual(150);
+          }
+        }
+      }
+    }
   });
 });
