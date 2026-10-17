@@ -8,7 +8,7 @@ import type { Bus } from '../core/events';
 import { createPickup } from '../entities/factory';
 import type { Input } from '../input';
 import { t } from '../i18n';
-import { entryView, gainXp, confirmUpdate, openOffer, reroll, xpForKill } from '../progression';
+import { bossAlive, canOpenUpdate, entryView, gainXp, confirmUpdate, openOffer, requestUpdate, reroll, xpForKill } from '../progression';
 import { eraseOut } from '../render/ink';
 import type { Views } from '../render/view';
 import { createDeathForms, type DeathForms } from '../ui/deathForms';
@@ -35,8 +35,10 @@ export interface HeroLayer {
   readonly death: DeathForms;
   /** Test hook: make the next death this outcome. */
   forceOutcome(o: DeathOutcome | null): void;
-  /** Open the update form for the player's current level (test hook, normally opened by a level up). */
+  /** Open the update form for the player's current level (test hook, normally opened by the update queue). */
   openUpdate(): boolean;
+  /** The HUD line was tapped: open the queued update if the screen is free (not during a boss fight). */
+  requestUpdate(): boolean;
 }
 
 export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
@@ -48,22 +50,22 @@ export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
   const resume = (s: RunState): void => {
     s.status = 'running';
     input.setEnabled(true);
-    flush(s);
   };
 
-  /** Open the form if a level was gained and nothing else holds the screen. */
-  function flush(s: RunState): void {
-    if (s.hero.pendingLevels <= 0 || s.status !== 'running' || update.isOpen) return;
-    openUpdate(s);
+  /** Open the queued update if the screen is free: no sheet, no turning page, no live boss. */
+  function flush(s: RunState): boolean {
+    return canOpenUpdate(s, update.isOpen) && openUpdate(s);
   }
 
   function openUpdate(s: RunState): boolean {
     if (s.status !== 'running') return false;
     s.status = 'paused';
+    s.hero.updateRequested = false;
+    s.hero.calm = 0;
     input.setEnabled(false);
     const offer = openOffer(s);
     update.open({
-      version: s.player.level,
+      version: s.player.level - Math.max(1, s.hero.pendingLevels) + 1, // the oldest queued level first
       entries: offer.entries.map((e) => entryView(s, e)),
       rerollUsed: s.hero.rerollUsed,
       onReport() {
@@ -78,6 +80,7 @@ export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
         s.hero.pendingLevels = Math.max(0, s.hero.pendingLevels - 1);
         update.close();
         resume(s);
+        flush(s); // several queued updates open one after another
       },
     });
     return true;
@@ -116,11 +119,20 @@ export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
     gainXp(s, bus, xpForKill(tier)); // each level gained emits player:levelup, handled below
   });
 
+  // A level up only queues the update (progression/queue.ts): a margin note and the HUD line announce it.
   bus.on('player:levelup', () => {
     const s = state();
     if (!s) return;
     s.hero.pendingLevels++;
-    flush(s);
+    bus.emit('margin:note', { text: t('forms.update.available'), x: s.player.x, y: s.player.y - s.player.r - 46, ttl: 2200 });
+  });
+  bus.on('update:ready', () => {
+    const s = state();
+    if (s) flush(s);
+  });
+  bus.on('page:entered', () => {
+    const s = state();
+    if (s) requestUpdate(s); // a turning page is a good time to sign
   });
 
   // Kartograf: the whole page map at once. The cheap honest version is a footnote naming the exit corner
@@ -191,6 +203,16 @@ export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
     openUpdate() {
       const s = state();
       return s ? openUpdate(s) : false;
+    },
+    requestUpdate() {
+      const s = state();
+      if (!s || s.hero.pendingLevels <= 0) return false;
+      if (bossAlive(s)) {
+        bus.emit('footnote', { text: t('forms.update.duringBoss') });
+        return false;
+      }
+      requestUpdate(s);
+      return flush(s);
     },
   };
 }

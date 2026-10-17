@@ -5,6 +5,7 @@ import type { Bus } from '../core/events';
 import type { Enemy, Projectile, Summon } from '../entities/types';
 import { recomputeStats } from '../items/stats';
 import { attack, applyDamage } from '../systems/combat';
+import { canOpenUpdate, tickUpdateQueue } from '../progression/queue';
 import { PAGE_H, PAGE_W, resolveMove } from '../world/pages';
 import type { RunState } from '../world/run';
 import { durationOf, enemiesWithin, nearestEnemy, power, setExistence, skillDamage, touchStatus } from './helpers';
@@ -39,6 +40,7 @@ export function heroStep(s: RunState, bus: Bus, dt: number): void {
   stepSummons(s, bus, dt);
   stepZones(s, dt);
   stepProjectiles(s, bus, dt);
+  if (tickUpdateQueue(s, dt) && canOpenUpdate(s, false)) bus.emit('update:ready');
 }
 
 function stepDash(s: RunState, bus: Bus, dt: number): void {

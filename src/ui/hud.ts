@@ -47,7 +47,8 @@ export function reputacjaText(s: RunState): string {
   return `${p.level} \u00b7 ${progress}`;
 }
 
-export function createHud(root: HTMLElement): Hud {
+/** `onUpdateTap` is called when the player taps the "aktualizacja dostepna" line under Reputacja. */
+export function createHud(root: HTMLElement, onUpdateTap: () => void = () => undefined): Hud {
   const el = h('div', 'hud paper');
   const racja = field('ui.hud.racja', 'racja');
   const reputacja = field('ui.hud.reputacja');
@@ -58,7 +59,11 @@ export function createHud(root: HTMLElement): Hud {
   reputacja.root.classList.add('rep');
   row1.append(racja.root);
   row2.append(reputacja.root, gwiazdki.root, strona.root);
-  el.append(row1, row2);
+  // A queued update: a typed line hanging under the form, tappable (44 px tall), shown only while one waits.
+  const upd = h('button', 'upd hidden', t('forms.update.availableLine'));
+  upd.type = 'button';
+  upd.addEventListener('click', onUpdateTap);
+  el.append(row1, row2, upd);
   root.append(el);
 
   const svg = svgEl('svg', { 'aria-hidden': 'true' });
@@ -68,7 +73,7 @@ export function createHud(root: HTMLElement): Hud {
   svg.append(whole, left, lost);
   racja.blank.append(svg);
 
-  const cache = { racja: '', ratio: -1, width: 0, reputacja: '', gwiazdki: '', strona: '' };
+  const cache = { racja: '', ratio: -1, width: 0, reputacja: '', gwiazdki: '', strona: '', upd: false };
   const setText = (node: HTMLElement, key: 'racja' | 'reputacja' | 'gwiazdki' | 'strona', text: string): void => {
     if (cache[key] === text) return;
     cache[key] = text;
@@ -86,6 +91,11 @@ export function createHud(root: HTMLElement): Hud {
       setText(reputacja.value, 'reputacja', reputacjaText(s));
       setText(gwiazdki.value, 'gwiazdki', String(p.gwiazdki));
       setText(strona.value, 'strona', t('ui.hud.pages', { page: s.pageIndex + 1, total: s.pageCount }));
+      const waiting = s.hero.pendingLevels > 0;
+      if (waiting !== cache.upd) {
+        cache.upd = waiting;
+        upd.classList.toggle('hidden', !waiting);
+      }
       const ratio = Math.max(0, p.hp) / p.hpMax;
       const width = racja.blank.clientWidth;
       if (width > 0 && (ratio !== cache.ratio || width !== cache.width)) {

@@ -10,3 +10,4 @@ export function emptyProgress(): Progress {
 
 export * from './xp';
 export * from './update';
+export * from './queue';

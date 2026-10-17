@@ -138,6 +138,10 @@ export interface HeroRun {
   rerollUsed: boolean;
   offer: UpdateOffer | null;
   pendingLevels: number;
+  /** Seconds with no enemy near; the queued update opens at progression/queue.ts CALM_SECONDS. */
+  calm: number;
+  /** The player tapped the HUD or the page turned: open the queued update as soon as it may. */
+  updateRequested: boolean;
   /** Death state. */
   deaths: number;
   /** Friendly copies that become hostile when their time is up (Petlowiec quirk). */
@@ -174,6 +178,8 @@ export function createHeroRun(heroId: HeroId): HeroRun {
     rerollUsed: false,
     offer: null,
     pendingLevels: 0,
+    calm: 0,
+    updateRequested: false,
     deaths: 0,
     ghosts: [],
     copyDrops: [],

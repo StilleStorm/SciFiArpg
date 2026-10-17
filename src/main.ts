@@ -57,7 +57,7 @@ const save = (next: typeof meta): void => {
 // Router: title -> profile -> baza <-> settings / Sklep, baza -> ticket -> run -> baza
 const input = createInput(stage.svg, (x, y) => game.onTap(x, y));
 const game = createGame(stage, bus, camera, input);
-const hud = createHud(stage.ui);
+const hud = createHud(stage.ui, () => game.hero.requestUpdate());
 const footnotes = createFootnotes(stage.ui);
 const pads = createPads(stage.ui, bus);
 const title = createTitle(stage.ui, () => go(meta.heroId ? 'baza' : 'profile'));

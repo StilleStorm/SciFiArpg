@@ -22,6 +22,8 @@ export interface GameEvents {
   'margin:note': { text: string; x: number; y: number; ttl?: number };
   'run:ended': { outcome: 'zgloszenie' | 'petla' | 'zawieszenie' | 'ukonczono' };
   'player:levelup': { level: number };
+  /** A queued update may open now (calm page, page turn or HUD tap); heroes/layer.ts opens the form. */
+  'update:ready': undefined;
   /** The player is on page `index` (0-based) of `count`; emitted at run start and after every page turn. */
   'page:entered': { index: number; count: number };
   /** The player reached the exit; the sweep starts (render/pageturn). */

@@ -162,6 +162,24 @@ button {
   font-size: 13px;
   line-height: 1;
 }
+.upd {
+  position: absolute;
+  left: 12px;
+  top: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  pointer-events: auto;
+  background-color: var(--paper);
+  background-image: var(--paper-noise, none);
+  border: 1px solid var(--ink);
+  border-top: 0;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
 .hud-row {
   display: flex;
   align-items: flex-end;
