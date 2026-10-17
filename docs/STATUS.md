@@ -47,6 +47,9 @@ joystick/tap steering (§2), editorial rules (§12.1).
    shown somewhere; sounds for enemy:miss / offTopic / gwiazdki pickup; stereo panning.
 5. Heavy-metal music profile (own anchor and ban list to be written first).
 6. More fidget animation, more laws/uniques/parts, quests as ticket correspondence, English.
+7. When the game is fuller: move hosting to the player's Cloudflare (custom domain), then Google
+   Play via Trusted Web Activity (PWABuilder/Bubblewrap; needs /.well-known/assetlinks.json at
+   the origin root, a privacy policy URL, the 12-tester closed test; developer account exists).
 
 ## Known limits
 - iOS ignores orientation locks; the setting only picks the layout there.
