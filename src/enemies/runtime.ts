@@ -1,5 +1,6 @@
 import type { Vec } from '../core/vec';
 import type { RangedSpec } from './partsBase';
+import type { DefectId } from './ids';
 
 /**
  * Per-enemy mutable state that only the enemy modules read (AI timers, defect and boss phases).
@@ -102,3 +103,19 @@ export function rtOf(e: { rt?: EnemyRt }): EnemyRt {
   if (!e.rt) e.rt = newRt();
   return e.rt;
 }
+
+// ---------- which defects the player has learned (per run) ----------
+
+const learned = new WeakMap<object, Set<DefectId>>();
+
+/** The player hit an enemy with this defect: its footnote may now be shown (for heroes who do not see defects at once). */
+export function learnDefect(run: object, defect: DefectId): void {
+  let set = learned.get(run);
+  if (!set) {
+    set = new Set();
+    learned.set(run, set);
+  }
+  set.add(defect);
+}
+
+export const defectLearned = (run: object, defect: DefectId): boolean => learned.get(run)?.has(defect) ?? false;

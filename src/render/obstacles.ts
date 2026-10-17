@@ -218,7 +218,9 @@ function drawExit(page: Page, exit: PageExit, seed: number): SVGGElement {
   const cx = exit.x + fx * (a + pad - 14);
   const cy = exit.y + fy * (a + pad + 22);
   const word = el('text', { class: 't-note', x: n2(cx), y: n2(cy), 'text-anchor': 'middle', 'font-size': 13 }, [t('ui.exit.next')]);
-  const wrap = el('g', {}, [g, word]);
+  // Not on the paper until the player is close (or is the Kartograf): render/exitReveal.ts draws it in.
+  const wrap = el('g', { 'data-exit': '1' }, [g, word]);
+  wrap.style.opacity = '0';
   return wrap;
 }
 

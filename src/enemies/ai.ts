@@ -30,7 +30,7 @@ import {
 } from './families';
 import { applyTierStats } from './make';
 import { fireShot, updateEnemyProjectiles } from './projectiles';
-import { rtOf } from './runtime';
+import { defectLearned, rtOf } from './runtime';
 import type { RangedSpec } from './partsBase';
 
 const WANDER_RADIUS = 120;
@@ -204,9 +204,10 @@ function meet(s: RunState, e: Enemy, bus: Bus): void {
     note(fk, t(`enemies.family.${e.family}.meet`));
     return;
   }
+  // The Konsultant reads the defect at first sight; everyone else only after the first hit on that kind.
   if (e.defect) {
     const dk = `defect:${e.defect}`;
-    if (!m.keys.has(dk)) {
+    if (!m.keys.has(dk) && (s.player.seesDefects || defectLearned(s, e.defect))) {
       const def = DEFECTS[e.defect];
       note(dk, t('enemies.defect.footnote', { serial: serialOf(e.seed), cause: t(def.causeKey), effect: t(def.effectKey), vuln: t(`combat.type.${def.vuln}`) }));
       return;

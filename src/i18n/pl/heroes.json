@@ -109,6 +109,8 @@
     }
   },
   "kartograf": {
+    "exit": "Kartograf zaznacza wyjście: w {corner} rogu strony. Terenu nie sprawdzano.",
+    "corner": { "tl": "lewym górnym", "tr": "prawym górnym", "bl": "lewym dolnym", "br": "prawym dolnym" },
     "name": "Kartograf Planet Nieistniejących",
     "desc1": "Sporządza mapy planet, których istnienie potwierdza wyłącznie nawigacja.",
     "desc2": "Mapy są dokładne. Terenu nie sprawdzano.",

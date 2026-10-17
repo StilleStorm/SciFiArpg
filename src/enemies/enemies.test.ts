@@ -627,3 +627,36 @@ describe('bosses', () => {
     expect(got).toEqual(['boss', 'urzadzenia']);
   });
 });
+
+describe('defect footnotes', () => {
+  const defectNotes = (seesDefects: boolean, hit: boolean): number => {
+    const s = run();
+    const bus = createBus();
+    const grid = createGrid<Enemy>(64);
+    s.player.x = 600;
+    s.player.y = 800;
+    s.player.seesDefects = seesDefects;
+    const e = put(s, 'urzadzenia', 600, 600);
+    e.defect = 'loud';
+    e.hp = e.hpMax = 9999;
+    const notes: string[] = [];
+    bus.on('footnote', (n) => notes.push(n.text));
+    if (hit) applyDamage(s, bus, e, 1, false);
+    for (let i = 0; i < 60 * 8; i++) {
+      grid.clear();
+      grid.insert(e);
+      s.time += 1 / 60;
+      updateEnemyAi(s, grid, bus, 1 / 60);
+      e.x = 600;
+      e.y = 600; // stay where it is, the note is about being seen
+    }
+    return notes.filter((n) => n.includes('Wada fabryczna')).length;
+  };
+  it('the Konsultant reads the defect at first sight', () => {
+    expect(defectNotes(true, false)).toBe(1);
+  });
+  it('other heroes read it only after the first hit on that kind', () => {
+    expect(defectNotes(false, false)).toBe(0);
+    expect(defectNotes(false, true)).toBe(1);
+  });
+});

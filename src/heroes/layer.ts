@@ -123,6 +123,15 @@ export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
     flush(s);
   });
 
+  // Kartograf: the whole page map at once. The cheap honest version is a footnote naming the exit corner
+  // (render/exitReveal.ts draws the dog-ear in straight away for this hero).
+  bus.on('page:entered', () => {
+    const s = state();
+    const exit = s?.page.exit;
+    if (!s || !exit || !s.player.revealsPage) return;
+    bus.emit('footnote', { text: t('heroes.kartograf.exit', { corner: t(`heroes.kartograf.corner.${exit.corner}`) }) });
+  });
+
   bus.on('summon:expired', ({ id }) => {
     const g = views.detach(id);
     if (g) eraseOut(g, 380, 0, () => g.remove());

@@ -269,6 +269,15 @@ export function generateRunPages(rng: Rng, count: number): Page[] {
   return pages;
 }
 
+/** Within this distance of the corner the dog-ear is drawn in for everyone; the Kartograf sees it from the start. */
+export const EXIT_SIGHT = 400;
+
+/** Whether the exit dog-ear is on the paper yet: always for the Kartograf, else once the player is near. */
+export function exitVisible(page: Page, pos: Vec, revealsPage: boolean): boolean {
+  if (!page.exit) return false;
+  return revealsPage || dist(pos, page.exit) <= EXIT_SIGHT;
+}
+
 /** True when `pos` stands in the exit's folded corner. */
 export function atExit(page: Page, pos: Vec): boolean {
   return page.exit !== null && dist(pos, page.exit) < EXIT_RADIUS;

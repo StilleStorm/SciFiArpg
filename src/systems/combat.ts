@@ -1,4 +1,5 @@
 import { rollDamage, type DamageType } from '../combat/damage';
+import { learnDefect } from '../enemies/runtime';
 import { canMelee, enemyOutgoing, modifyDamage, onEnemyHurt } from '../enemies/hooks';
 import type { Bus } from '../core/events';
 import type { Grid } from '../entities';
@@ -42,6 +43,7 @@ export function attack(s: RunState, bus: Bus, attacker: Fighter, defender: Fight
 /** Subtract racja, emit the hit event, and handle death. Returns true if the defender died. */
 export function applyDamage(s: RunState, bus: Bus, defender: Fighter, amount: number, crit: boolean, type?: DamageType): boolean {
   ({ amount, crit } = modifyDamage(bus, defender, amount, crit, type)); // claims, existence, zgloszony
+  if (defender.kind === 'enemy' && defender.defect) learnDefect(s, defender.defect);
   if (defender.kind === 'player') amount = absorbShield(defender, amount);
   if (amount <= 0) return false;
   defender.hp -= amount;

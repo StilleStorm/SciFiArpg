@@ -17,6 +17,7 @@ import { createRun, type RunOptions, type RunState } from './world/run';
 import { createHeroLayer, type HeroLayer } from './heroes/layer';
 import { heroBuilders, wrapEnemyBuilder } from './render/heroFigures';
 import { bindHeroFx, zoneBuilder } from './render/heroFx';
+import { createExitReveal } from './render/exitReveal';
 
 export interface Game {
   readonly state: RunState | null;
@@ -42,6 +43,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
   const hero = createHeroLayer({ root: stage.ui, bus, views, input, getState: () => state });
   bindHeroFx(bus, stage.fx);
   bindEnemyFx(bus);
+  const exits = createExitReveal(stage.page);
   const sim = createSim(bus);
   installItems(stage.ui, bus, () => state);
   const ents: Entity[] = [];
@@ -95,6 +97,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
       for (const m of s.summons) ents.push(m);
       for (const z of s.zones) ents.push(z);
       hero.frame(s);
+      exits.frame(s);
       views.sync(ents, s.time * 1000);
       camera.follow(s.player.x, s.player.y, dtSec);
       camera.apply();
