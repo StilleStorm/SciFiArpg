@@ -124,7 +124,10 @@ try {
   // ---- update form ----
   await page.evaluate(() => window.__game.start(21, { heroId: 'konsultant' }));
   await wait(1200);
-  await page.evaluate(() => window.__game.hero.levelUp());
+  await page.evaluate(() => {
+    window.__game.hero.levelUp();
+    window.__game.hero.requestUpdate(); // the level up only queues the update
+  });
   await wait(1200);
   await shot('update-form');
   await page.evaluate(() => window.__game.hero.givePermission('powiadomienia'));

@@ -20,6 +20,8 @@ export interface HeroHook {
   levelUp(): void;
   /** Open the update form for the current level without leveling. */
   openUpdate(): boolean;
+  /** Same as tapping the HUD line: open the queued update now (false if none is queued or a boss is alive). */
+  requestUpdate(): boolean;
   /** Press the entry at `index` (0..2) and then "Zainstaluj". False if the form is not open or the entry is locked. */
   pickUpdate(index: number): boolean;
   /** Press "Zglos problem z aktualizacja". */
@@ -67,6 +69,7 @@ export function createHeroHook(game: Game, bus: Bus): HeroHook {
       if (s) gainXp(s, bus, xpToNext(s.player.level) / s.hero.mods.xp + 1);
     },
     openUpdate: () => game.hero.openUpdate(),
+    requestUpdate: () => game.hero.requestUpdate(),
     pickUpdate(index) {
       const rows = document.querySelectorAll<HTMLButtonElement>('.sheet .entry');
       const row = rows[index];

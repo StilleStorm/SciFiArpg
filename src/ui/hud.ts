@@ -91,7 +91,7 @@ export function createHud(root: HTMLElement, onUpdateTap: () => void = () => und
       setText(reputacja.value, 'reputacja', reputacjaText(s));
       setText(gwiazdki.value, 'gwiazdki', String(p.gwiazdki));
       setText(strona.value, 'strona', t('ui.hud.pages', { page: s.pageIndex + 1, total: s.pageCount }));
-      const waiting = s.hero.pendingLevels > 0;
+      const waiting = s.hero.pendingLevels > 0 && s.victoryAt === null; // after the boss no form opens any more
       if (waiting !== cache.upd) {
         cache.upd = waiting;
         upd.classList.toggle('hidden', !waiting);

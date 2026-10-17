@@ -96,7 +96,7 @@ string or `{ one, few, many }` with `{count}`. No UI strings in `.ts` files, no 
 ## Test hook, scripts, commands
 `window.__game`: `start(seed, opts)`, `go(screen)`, `state()`, `advance(s)`, `turnTo(page)`, `hitEnemy()`,
 `killEnemy()`, `hurtPlayer(n)`, `placePlayer`, `snapshot()`, `giveItem`, `demoInventory`, `openInventory`, `openSklep`,
-`hero.{cast, levelUp, grantXp, openUpdate, pickUpdate, die, givePermission}`, `enemies.{spawnFamily, spawnBoss, hit, clear, list}`.
+`hero.{cast, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`, `enemies.{spawnFamily, spawnBoss, hit, clear, list}`.
 `npm run dev | build | typecheck | test`. `npm run shot` builds, serves with `vite preview`, drives the bundled
 Chromium at 390x844 @2x and writes `shots/*.png` (exits non-zero on page errors). `npm run smoke` builds and plays
 a whole ticket in the same browser: real buttons into a run, kills, the queued update opened from the HUD line,
