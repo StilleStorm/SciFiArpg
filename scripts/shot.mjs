@@ -220,6 +220,176 @@ try {
   if (snap !== 'baza') problems.push(`expected the base screen after death, got ${snap}`);
   await wait(500);
   await shot('baza-after-death');
+
+  // ---------- portrait with the joystick: the Załączniki pad moves under the HUD, top right ----------
+  await page.evaluate(() => {
+    window.__game.setLeftHanded(false);
+    window.__game.setSteering('joystick');
+    window.__game.start(5);
+  });
+  await wait(1300);
+  await shot('run-joystick');
+  await page.evaluate(() => window.__game.setSteering('tap'));
+
+  // ---------- landscape (DESIGN 2): 844 x 390, joystick by default ----------
+  const lctx = await browser.newContext({
+    viewport: { width: 844, height: 390 },
+    deviceScaleFactor: 2,
+    isMobile: true,
+    hasTouch: true,
+    userAgent: UA,
+    colorScheme: 'light',
+    serviceWorkers: 'block',
+  });
+  const lp = await lctx.newPage();
+  lp.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
+  lp.on('console', (m) => {
+    if (m.text().includes('Service Worker registration blocked')) return;
+    if (m.type() === 'error' || m.type() === 'warning') problems.push(`console.${m.type()}: ${m.text()}`);
+  });
+  await lp.goto(BASE, { waitUntil: 'load' });
+  await lp.waitForFunction(() => window.__game !== undefined);
+  await lp.evaluate(() => document.fonts.ready);
+  const lshot = (name) => lp.screenshot({ path: `${SHOTS}/land-${name}.png` });
+  const lwait = (ms) => lp.waitForTimeout(ms);
+  const lcdp = await lctx.newCDPSession(lp);
+  const touch = (type, id, x, y) => lcdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id }] });
+
+  await lwait(2200);
+  await lshot('title');
+  const orient = await lp.evaluate(() => document.documentElement.dataset.orient);
+  if (orient !== 'landscape') problems.push(`expected data-orient landscape at 844x390, got ${orient}`);
+  const ctl = await lp.evaluate(() => window.__game.controls());
+  if (ctl.steering !== 'joystick') problems.push(`expected the joystick by default in landscape, got ${ctl.steering}`);
+
+  await lp.evaluate(() => window.__game.go('ticket'));
+  await lwait(700);
+  await lshot('ticket');
+
+  await lp.evaluate(() => window.__game.start(7, { lawId: 'parzystosc', pageCount: 5 }));
+  await lwait(1500);
+  await lp.evaluate(() => {
+    window.__game.footnote('Urządzenie nr 4471-B zostało skreślone zgodnie z procedurą.');
+    window.__game.footnote('Procedury nie odnaleziono. Przepraszamy za utrudnienia w tym zakresie, które nie wynikają z naszej winy.');
+  });
+  await lwait(400);
+  await lshot('run');
+
+  // joystick mid-drag: thumb down on the left half, dragged right and up; the figure walks, the stick is drawn
+  const before = await lp.evaluate(() => ({ x: window.__game.state().player.x, y: window.__game.state().player.y }));
+  await touch('touchStart', 1, 150, 260);
+  await lwait(120);
+  for (let i = 1; i <= 8; i++) {
+    await touch('touchMove', 1, 150 + i * 7, 260 - i * 5);
+    await lwait(60);
+  }
+  await lwait(600);
+  await lshot('joystick');
+  await touch('touchEnd', 1, 0, 0);
+  await lwait(200);
+  const after = await lp.evaluate(() => ({ x: window.__game.state().player.x, y: window.__game.state().player.y }));
+  if (Math.hypot(after.x - before.x, after.y - before.y) < 20) problems.push('the joystick did not move the player');
+
+  // the page header at the top of the page is not covered by the HUD
+  await lp.evaluate(() => {
+    window.__game.state().enemies.length = 0;
+    window.__game.placePlayer(600, 160);
+  });
+  await lwait(1500);
+  await lshot('header');
+
+  // the queued update: the typed line top right, then the form
+  await lp.evaluate(() => window.__game.hero.levelUp());
+  await lwait(500);
+  await lshot('update-line');
+  await lp.locator('.hud .upd').click();
+  await lwait(800);
+  await lshot('update-form');
+  await lp.evaluate(() => window.__game.hero.pickUpdate(0));
+  await lwait(1500);
+
+  // the inventory as a two-column sheet
+  await lp.evaluate(() => {
+    window.__game.demoInventory();
+    window.__game.openInventory();
+  });
+  await lwait(700);
+  await lshot('inventory');
+  await lp.locator('.ps-close').click();
+  await lwait(300);
+
+  // the Sklep sheet
+  await lp.evaluate(() => window.__game.openSklep());
+  await lwait(700);
+  await lshot('sklep');
+  await lp.locator('.ps-close').click();
+  await lwait(300);
+
+  // a pop-up form (cookie banner) and the footnote history
+  await lp.evaluate(() => window.__game.start(12, { lawId: 'ciasteczka', pageCount: 4 }));
+  await lwait(1500);
+  await lshot('cookies');
+  await lp.evaluate(() => document.querySelector('.pop-buttons .form-btn').click());
+  await lp.evaluate(() => window.__game.footnote('Przypis kontrolny.'));
+  await lwait(300);
+  await lp.locator('.foot').click();
+  await lwait(400);
+  await lshot('footnote-history');
+  await lp.locator('.pop-wrap').click();
+
+  // left-handed: halves and pads swap, the stick answers on the right half
+  await lp.evaluate(() => {
+    window.__game.setLeftHanded(true);
+    window.__game.start(5);
+  });
+  await lwait(1300);
+  await touch('touchStart', 1, 700, 250);
+  await lwait(100);
+  for (let i = 1; i <= 6; i++) {
+    await touch('touchMove', 1, 700 - i * 8, 250 - i * 4);
+    await lwait(60);
+  }
+  await lwait(300);
+  await lshot('run-lefty');
+  await touch('touchEnd', 1, 0, 0);
+  await lp.evaluate(() => window.__game.setLeftHanded(false));
+
+  // base, settings, profile
+  await lp.evaluate(() => {
+    const m = window.__game.meta();
+    window.__game.setMeta({ ...m, heroId: 'konsultant', gwiazdki: 37, runsCompleted: 3 });
+    window.__game.go('baza');
+  });
+  await lwait(900);
+  await lshot('baza');
+  await lp.getByText('Ustawienia', { exact: true }).click();
+  await lwait(500);
+  await lshot('settings');
+  await lp.getByText('Wróć', { exact: true }).click();
+  await lwait(300);
+  await lp.evaluate(() => window.__game.go('profile'));
+  await lwait(900);
+  await lshot('profile');
+  await lp.locator('.profile .choose').click();
+  await lwait(500);
+
+  // night edition, and a death form
+  await lp.evaluate(() => {
+    window.__game.start(5);
+    window.__game.setTheme('night');
+  });
+  await lwait(1300);
+  await lshot('run-night');
+  await lp.evaluate(() => window.__game.setTheme('day'));
+  await lp.evaluate(() => window.__game.hero.die('zgloszenie'));
+  await lwait(2500);
+  await lshot('death');
+  await lwait(7500);
+  await lp.evaluate(() => window.__game.start(9, { pageCount: 4 }));
+  await lwait(1200);
+  await lp.evaluate(() => window.__game.hero.die('petla'));
+  await lwait(2200);
+  await lshot('death-slip');
 } finally {
   await browser?.close();
   stop();

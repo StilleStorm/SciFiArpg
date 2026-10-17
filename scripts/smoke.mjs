@@ -248,6 +248,129 @@ try {
   await shot('13-after-death');
   log('after the death form:', await screen(), JSON.stringify(await runState()));
 
+  // ---------- 6b. landscape with the joystick (DESIGN 2) ----------
+  // A second context at 844 x 390: the layout flips by itself, the joystick is the default steering, a thumb on the
+  // left half steers while another finger taps a pad, and the figure fights while it walks.
+  const lctx = await browser.newContext({
+    viewport: { width: 844, height: 390 },
+    deviceScaleFactor: 2,
+    isMobile: true,
+    hasTouch: true,
+    userAgent: UA,
+    colorScheme: 'light',
+    serviceWorkers: 'block',
+  });
+  await lctx.addInitScript(() => {
+    Math.random = () => 0.4242;
+    Date.now = () => 1.75e12;
+  });
+  const lp = await lctx.newPage();
+  lp.on('pageerror', (e) => problems.push(`pageerror (landscape): ${e.message}`));
+  lp.on('console', (m) => {
+    if (m.text().includes('Service Worker registration blocked')) return;
+    if (m.type() === 'error' || m.type() === 'warning') problems.push(`console.${m.type()} (landscape): ${m.text()}`);
+  });
+  await lp.goto(BASE, { waitUntil: 'load' });
+  await lp.waitForFunction(() => window.__game !== undefined);
+  await lp.evaluate(() => document.fonts.ready);
+  const lcdp = await lctx.newCDPSession(lp);
+  const touch = (type, points) => lcdp.send('Input.dispatchTouchEvent', { type, touchPoints: points });
+  const lstate = () => lp.evaluate(() => {
+    const s = window.__game.state();
+    return s && { x: s.player.x, y: s.player.y, enemies: s.enemies.map((e) => ({ hp: e.hp, hpMax: e.hpMax })) };
+  });
+
+  await lp.evaluate(() => window.__game.start(31, { pageCount: 3, lawId: 'grawitacja' }));
+  await sleep(1500);
+  const ctl = await lp.evaluate(() => ({ ...window.__game.controls(), attr: document.documentElement.dataset.orient, steer: document.documentElement.dataset.steer }));
+  check('landscape layout and the joystick by default at 844 x 390', ctl.orient === 'landscape' && ctl.attr === 'landscape' && ctl.steering === 'joystick' && ctl.steer === 'joystick', JSON.stringify(ctl));
+  // one target dummy straight above the player, with a lot of racja
+  await lp.evaluate(() => {
+    const g = window.__game;
+    const s = g.state();
+    g.enemies.clear();
+    s.player.hp = s.player.hpMax = 1e9;
+    s.hero.pendingLevels = 0;
+    g.placePlayer(600, 900);
+    const [id] = g.enemies.spawnFamily('urzadzenia', 1);
+    const e = s.enemies.find((x) => x.id === id);
+    e.hp = e.hpMax = 1e6;
+    e.x = e.home.x = 600;
+    e.y = e.home.y = 830;
+  });
+  await sleep(600); // drawn in
+  // Sample every frame: an auto-attack while moving shows as attackTimer jumping up while player.moving is true.
+  // The position at the very pointerup is kept, to see that the player stops within one step of the release.
+  await lp.evaluate(() => {
+    const w = window;
+    w.__smokeLand = { autoWhileMoving: 0, releasedAt: null };
+    let prev = 0;
+    const tick = () => {
+      const s = w.__game.state();
+      if (!s) return;
+      const p = s.player;
+      if (p.moving && p.attackTimer > prev + 1e-6) w.__smokeLand.autoWhileMoving++;
+      prev = p.attackTimer;
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    document.getElementById('stage').addEventListener(
+      'pointerup',
+      () => {
+        const s = w.__game.state();
+        if (s && w.__smokeLand.releasedAt === null) w.__smokeLand.releasedAt = { x: s.player.x, y: s.player.y, speed: s.player.speed * s.law.speedMul };
+      },
+      { capture: true },
+    );
+  });
+  const p0 = await lstate();
+  // thumb down on the left half and pushed up; a second finger taps the first skill pad meanwhile.
+  // (CDP: touchStart/touchMove list every active point, touchEnd lists the points that are lifted.)
+  await touch('touchStart', [{ x: 160, y: 270, id: 1 }]);
+  await sleep(100);
+  for (let i = 1; i <= 3; i++) {
+    await touch('touchMove', [{ x: 160, y: 270 - i * 8, id: 1 }]);
+    await sleep(60);
+  }
+  const padBox = await lp.locator('.pad.s1').boundingBox();
+  const padPoint = { x: padBox.x + padBox.width / 2, y: padBox.y + 26, id: 2 };
+  const held = { x: 160, y: 246, id: 1 };
+  await touch('touchStart', [held, padPoint]);
+  await sleep(60);
+  await touch('touchEnd', [padPoint]);
+  await sleep(120);
+  const joyShown = await lp.evaluate(() => !document.querySelector('.joy').classList.contains('hidden'));
+  const padCooling = await lp.locator('.pad.s1.cooling').count();
+  await lp.screenshot({ path: `${SHOTS}/15-landscape-joystick.png` });
+  let last = held;
+  for (let i = 1; i <= 12; i++) {
+    last = { x: held.x, y: Math.max(200, held.y - i * 6), id: 1 };
+    await touch('touchMove', [last]);
+    await sleep(90);
+  }
+  const p1 = await lstate();
+  await touch('touchEnd', [last]);
+  await sleep(150);
+  const joyHidden = await lp.evaluate(() => document.querySelector('.joy').classList.contains('hidden'));
+  const p2 = await lstate();
+  await sleep(400);
+  const p3 = await lstate();
+  const moved = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+  check('the joystick is drawn under the thumb and hidden on release', joyShown && joyHidden, `shown ${joyShown}, hidden ${joyHidden}`);
+  check('the player moved with the joystick', moved > 40, `${moved.toFixed(0)} units`);
+  check('a pad tap works while the thumb steers (two touches)', padCooling > 0, `cooling pads ${padCooling}`);
+  const land = await lp.evaluate(() => window.__smokeLand);
+  const rel = land.releasedAt;
+  const afterRelease = rel ? Math.hypot(p3.x - rel.x, p3.y - rel.y) : Infinity;
+  const oneStep = rel ? rel.speed / 60 + 0.5 : 0;
+  check('the player stops within one step of the release', afterRelease <= oneStep, `${afterRelease.toFixed(2)} units after pointerup (one step ${oneStep.toFixed(2)})`);
+  check('the player stays stopped', Math.hypot(p3.x - p2.x, p3.y - p2.y) < 0.5, `${Math.hypot(p3.x - p2.x, p3.y - p2.y).toFixed(2)} units`);
+  check('auto-attack fires while steering', land.autoWhileMoving > 0, `${land.autoWhileMoving} attacks while moving`);
+  const fought = (p3.enemies[0]?.hp ?? 1) < (p3.enemies[0]?.hpMax ?? 1);
+  check('an attack landed on the dummy', fought, `hp ${p3.enemies[0]?.hp}/${p3.enemies[0]?.hpMax}`);
+  await lp.screenshot({ path: `${SHOTS}/16-landscape-after.png` });
+  await lctx.close();
+
   // ---------- 7. frame time with 40 enemies ----------
   // a fresh run: the death slip of the step above may still hold the old one
   await page.evaluate(() => window.__game.start(11, { pageCount: 5, lawId: 'grawitacja' }));
