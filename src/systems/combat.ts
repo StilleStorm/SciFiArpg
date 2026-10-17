@@ -30,7 +30,8 @@ export function attack(s: RunState, bus: Bus, attacker: Fighter, defender: Fight
   const res = rollDamage(attacker.stats, defender.stats, attacker.damageType, s.rngs.combat);
   attacker.attackTimer = attacker.attackCooldown;
   const dir = defender.x - attacker.x;
-  if (Math.abs(dir) > 1) attacker.facing = dir > 0 ? 1 : -1;
+  // a walking player keeps facing where he walks (movement sets it every step); a turn here would flicker one frame
+  if (Math.abs(dir) > 1 && !(attacker.kind === 'player' && attacker.moving)) attacker.facing = dir > 0 ? 1 : -1;
   if (!res.hit) {
     if (defender.kind === 'enemy') bus.emit('enemy:miss', { id: defender.id });
     return false;
@@ -78,23 +79,24 @@ function killPlayer(s: RunState, bus: Bus, p: Player): void {
   bus.emit('player:died', { x: p.x, y: p.y });
 }
 
-/** Auto-attack the nearest enemy in range when standing still or when one is adjacent. */
+/**
+ * Auto-attack the nearest enemy in range, standing or moving (DESIGN 2): a ranged hero shoots while steering or
+ * walking to a tap, a melee hero swings at whatever is within reach. Nothing in range, nothing happens.
+ */
 export function playerAttacks(s: RunState, grid: Grid<Enemy>, bus: Bus, dt: number): void {
   const p = s.player;
   p.attackTimer = Math.max(0, p.attackTimer - dt);
   if (p.attackTimer > 0 || isStunned(p)) return;
   let nearest: Enemy | null = null;
   let best = Infinity;
-  let adjacent = false;
   for (const e of grid.query(p.x, p.y, p.attackRange)) {
     const d = Math.hypot(e.x - p.x, e.y - p.y);
     if (d < best) {
       best = d;
       nearest = e;
     }
-    if (d <= p.r + e.r + 8) adjacent = true;
   }
-  if (nearest && (!p.moving || adjacent) && !fireAuto(s, p, nearest)) attack(s, bus, p, nearest);
+  if (nearest && !fireAuto(s, p, nearest)) attack(s, bus, p, nearest);
 }
 
 export function enemiesAttack(s: RunState, bus: Bus, dt: number): void {

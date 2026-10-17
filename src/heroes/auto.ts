@@ -29,6 +29,6 @@ export function fireAuto(s: RunState, p: Player, target: Enemy): boolean {
     passed: [],
   });
   p.attackTimer = p.attackCooldown;
-  if (Math.abs(target.x - p.x) > 1) p.facing = target.x > p.x ? 1 : -1;
+  if (!p.moving && Math.abs(target.x - p.x) > 1) p.facing = target.x > p.x ? 1 : -1;
   return true;
 }
