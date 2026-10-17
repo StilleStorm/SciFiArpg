@@ -16,10 +16,11 @@ Keep this file current: it replaces chat memory.
   Levels calibrated numerically, not by ear (see Open feedback).
 - Polish text had one voice pass (Opus). ui.json and screens.json still need a pass after the
   controls build adds strings.
-- In progress at the time of writing: **controls build** (Sonnet builder): landscape default,
-  orientation setting, floating joystick with a steering setting, landscape layout, the
-  one-letter-word typography rule (DESIGN §2 and §12.1). After it: integrator pass, voice pass
-  on ui.json/screens.json, push.
+- Controls are live: landscape default (520 world units high, portrait 700), orientation
+  setting with lock, floating joystick (default in landscape) or tap, auto-attack while moving,
+  manifest fullscreen (Android hides the bars), one-letter-word typography rule in t().
+- Voice passes done on every i18n file. Unused keys to wire or drop: ui.note.firstKill/start/pickup.
+- Nothing in progress. Next session starts with the player's feedback from the phone.
 
 ## Gates and commands
 `npm run check` (typecheck, tests, lint:rules, build) · `npm run shot` · `npm run smoke`
@@ -39,10 +40,11 @@ joystick/tap steering (§2), editorial rules (§12.1).
 - Whether bubbles/figures are readable at phone size.
 
 ## Backlog, in order
-1. Integrate controls build; voice pass on ui.json/screens.json; push.
+1. Act on phone feedback (feel of joystick, scale, sound levels, frame rate).
 2. Spór for bosses (DESIGN §5.4).
 3. Przesyłka / paczkomat deliveries (§7), tap an item on the ground to see its card first (§2).
-4. Odwirowanie knockback distance; appeal-form pickup drawing; Ciasteczka empty paper behind the
+4. Joystick mode: the tappable footnote slip sits in the steering half (move the tap target or
+   ignore steering-half taps on it); landscape 40-enemy perf measurement; Odwirowanie knockback distance; appeal-form pickup drawing; Ciasteczka empty paper behind the
    banner; Wygenerowane drawings are the busiest (simplify); "Muzyka na czekanie, utwór nr N"
    shown somewhere; sounds for enemy:miss / offTopic / gwiazdki pickup; stereo panning.
 5. Heavy-metal music profile (own anchor and ban list to be written first).
