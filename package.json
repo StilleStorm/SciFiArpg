@@ -8,10 +8,13 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "lint:rules": "node scripts/lint-rules.mjs",
+    "check": "npm run typecheck && npm test && npm run lint:rules && npm run build",
     "test": "vitest run",
     "icons": "node scripts/icons.mjs",
     "shot": "vite build --outDir ${SHOT_OUT:-dist} && node scripts/shot.mjs",
-    "smoke": "vite build && node scripts/smoke.mjs"
+    "smoke": "vite build && node scripts/smoke.mjs",
+    "render-audio": "vite build --outDir ${AUDIO_OUT:-dist} && node scripts/render-audio.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.64.1",

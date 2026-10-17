@@ -79,8 +79,10 @@ Kartograf, who also gets a footnote naming the corner (`render/exitReveal.ts`, `
 Input: `skill:1|2|3`, `inventory`, `player:tap`. Run: `run:started`, `run:ended {outcome}`, `screen:changed`,
 `page:entered`, `page:turn`, `page:edge`. Combat: `player:hit`, `enemy:hit|miss|died {tier, family}`, `boss:died`,
 `enemy:rebutted|offTopic|escalated`. Heroes: `skill:cast`, `skill:fx`, `summon:expired`, `player:levelup`,
-`update:ready`, `player:died`, `player:unsuspended`. Presentation: `footnote {text}`, `stamp`, `margin:note
-{text, x, y, ttl?}`, `law:trigger`, `law:ask`, `pickup:taken`. Adding one to `GameEvents` makes the compiler check all uses.
+`update:ready`, `player:died`, `player:unsuspended`. Presentation: `footnote {text}`, `footnote:added {n, text,
+correction}` (printed by `main.ts` for every footnote, the Asystent's too), `stamp`, `margin:note
+{text, x, y, ttl?}`, `law:trigger`, `law:ask`, `pickup:taken`, `boss:phase {id, family, x, y}` (Prototyp at half racja,
+Weryfikacja's grid solved, Hipoteza confirmed). Adding one to `GameEvents` makes the compiler check all uses.
 
 ## Render
 `views.sync` creates one `<g data-id>` per entity, then patches only `transform` and a few attributes
@@ -89,6 +91,47 @@ Input: `skill:1|2|3`, `inventory`, `player:tap`. Run: `run:started`, `run:ended 
 HTML sheets share `ui/sheet.ts`; long ones scroll in their own area (`overscroll-behavior: contain`,
 `touch-action: pan-y`) with the action row sticky or below the scroll, and every `#ui button` is at least 44 x 44 px.
 
+## Audio (`audio/`, DESIGN 14)
+Web Audio only, synthesized from noise, clicks and short plucks; no samples, no dependencies. State in, sound out: game
+systems only emit events, `audio/bindings.ts` is the one place where events meet sounds, `audio.frame()` runs once per
+rendered frame from `main.ts`. Nothing exists before the first gesture (`getContext()` is null, every call no-ops, no
+autoplay warning); any `Error` inside a handler is swallowed (one `console.warn`, silent after 20), so audio can never
+break the game. Hit-stop is `loop.freeze(40)` (rest period 90 ms), called by the bindings on crits and kills.
+```
+context.ts   one AudioContext, created on the first pointerdown/pointerup/touchend/click/keydown (and by "Akceptuję
+             regulamin"), resumed on visibilitychange and after an iOS 'interrupted'; onAudioReady, setVolumes
+mix.ts       sfx -> master; music -> duck -> master; master -> compressor (limiter) -> soft ceiling (-1.4 dBFS) -> out.
+             music sits -12 dB under sfx at equal sliders; duck(6 dB, 300 ms) on kills and boss phases
+dsp.ts       pure generators: Karplus-Strong (allpass-tuned, in buffers: DelayNode feedback is floored to 128 frames),
+             2-op FM bell with detune, resonated-noise swell, motor hum, curves.  buffers.ts caches them per context
+recipes.ts   every sound as data {layers: [{kind noise|click|pluck|thump|sine, freq, bandpass?, q?, attack, decay, gain,
+             pitchDrop?, delay?, repeat?+spread? (grain trains), role transient|body|sub|tail}]}, validateRecipe,
+             HERO_SKILL_SOUNDS (3 per hero), FAMILY_FLAVOUR.  levels.ts: per-recipe trims from the offline render
+sfx.ts       playRecipe(sink, ...) builds nodes per call and disconnects them on `onended`; play(name, opts); startHum()
+bindings.ts  bus -> sounds; reads hero and enemy family from the state; beast body scales with existence
+hook.ts      window.__game.audio: renderProfile, renderSfx (OfflineAudioContext), music(), contextState()
+music/       scale.ts (Bohlen-Pierce subsets, 7-note mode with two detuned degrees, pentatonic with one wrong note; all
+             rejected until containsTriad finds no major/minor triad), profiles.ts (B hold line, C punched roll, B+C;
+             tempo, scale, loop 8-16 bars, band, splice rate rolled from rng.fork('music')), roll.ts (page obstacles ->
+             pins: x = step, y = degree, size = velocity and length), holdline.ts (tape chain: wow, flutter, hiss, gate
+             splices, band, beep; the hold line's own loop material), adapt.ts (flags -> targets), scheduler.ts
+             (100 ms look-ahead, 25 ms tick, no timers), engine.ts (one profile on any context with an injected clock),
+             index.ts (startMusic, stopMusic, tickMusic, setMusicState, deriveFlags)
+```
+Music flags are derived from the run state each frame (`deriveFlags`): enemies within 380 units, an elite within 700, a
+boss alive, `law.botTime`, `law.reversed`, `player.suspended`, dead, `turning`. Targets (`adaptTargets`) ease over about
+3 s: calm sparse (the strongest pin of every bar), more than 2 near = second voice a fifth below, a little late; elite =
+splices and a reversed fragment every 8 bars; boss = tempo x1.25, hiss up, hard cut per `boss:phase`; bot hours =
+300-3400 Hz and a beep every 4 s; reversed = the loop runs backwards; suspended = -12 dB behind a lowpass; death =
+tempo to 0, no sting; page turn = a splice and the new page's roll. Music exists only during a run (`run:started` to
+`run:ended`). The engine stays under 40 nodes alive (17 persistent, at most 8 voices of 2 nodes, a beep and a tick);
+`engine.test.ts` runs it on a recording fake context for 5 minutes of changing states. The roll is a pure function of the
+page and the scale, so each page plays its own motif.
+`npm run render-audio` builds, then renders through the real mix in the bundled Chromium: 20 s per profile and state,
+a calm-to-boss crossfade and a death per profile, 1 s per sound and the composites the bindings play together, into
+`audio-renders/` (gitignored); prints peak, RMS, the 60-140 Hz body share and clipping, and exits 1 on a clip, a peak
+above -1 dBFS or a combat sound without body. After changing a recipe, re-measure and update `levels.ts`.
+
 ## i18n
 `t('domain.key')`; `src/i18n/pl/<domain>.json` are picked up automatically (file name = key prefix). A leaf is a
 string or `{ one, few, many }` with `{count}`. No UI strings in `.ts` files, no `any`, no `!` outside tests.
@@ -96,10 +139,11 @@ string or `{ one, few, many }` with `{count}`. No UI strings in `.ts` files, no 
 ## Test hook, scripts, commands
 `window.__game`: `start(seed, opts)`, `go(screen)`, `state()`, `advance(s)`, `turnTo(page)`, `hitEnemy()`,
 `killEnemy()`, `hurtPlayer(n)`, `placePlayer`, `snapshot()`, `giveItem`, `demoInventory`, `openInventory`, `openSklep`,
-`hero.{cast, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`, `enemies.{spawnFamily, spawnBoss, hit, clear, list}`.
-`npm run dev | build | typecheck | test`. `npm run shot` builds, serves with `vite preview`, drives the bundled
+`hero.{cast, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`, `enemies.{spawnFamily, spawnBoss, hit, clear, list}`,
+`audio.{renderProfile, renderSfx, music, contextState, running, sfxNames}`.
+`npm run dev | build | typecheck | test | lint:rules | check | render-audio`. `npm run shot` builds, serves with `vite preview`, drives the bundled
 Chromium at 390x844 @2x and writes `shots/*.png` (exits non-zero on page errors). `npm run smoke` builds and plays
 a whole ticket in the same browser: real buttons into a run, kills, the queued update opened from the HUD line,
 inventory, boss on the last page, `baza` after it, a death form, then 5 s of `requestAnimationFrame` deltas with 40
 enemies; pictures in `shots-smoke/`, exit code 1 on a page error or a failed check (`SMOKE_UNCAPPED=1` lifts the 60 Hz
-limit, `PERF_MAX_MS` fails above a bound). Everything must pass `npm run typecheck && npm test && npm run build`.
+limit, `PERF_MAX_MS` fails above a bound); it also checks that the real clicks unlock the audio context and that music plays. Everything must pass `npm run check`.

@@ -137,6 +137,12 @@ try {
   await sleep(1800);
   check('reached the run through the real buttons', (await screen()) === 'run');
   await shot('04-run-start');
+  // sound: the real button clicks unlocked the context, the music started with the run (menus had none)
+  const ctxState = await page.evaluate(() => window.__game.audio.contextState());
+  check('the audio context was unlocked by the real clicks', ctxState === 'running', ctxState);
+  await sleep(2500);
+  const music = await page.evaluate(() => window.__game.audio.music());
+  check('music is playing during the run', music !== null && music.bars >= 1, music ? `${music.id} ${music.bpm} bpm ${music.scale}, bars ${music.bars}` : 'none');
   await settle();
 
   // ---------- 2. walk, fight, kill ----------
@@ -151,6 +157,8 @@ try {
   }
   const afterFight = await runState();
   check('at least one kill', (afterFight?.kills ?? 0) > k0, `kills ${afterFight?.kills}`);
+  const music2 = await page.evaluate(() => window.__game.audio.music());
+  check('the music kept going through the fight', music2 !== null && music2.bars > (music?.bars ?? 0), music2 ? `bars ${music2.bars}` : 'none');
   await shot('05-fight');
 
   // ---------- 3. the deferred update: HUD line, tap, form, install ----------
