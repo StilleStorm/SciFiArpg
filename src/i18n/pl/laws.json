@@ -1,8 +1,8 @@
 {
   "parzystosc": {
     "name": "Parzystość",
-    "text": "Na tej planecie wszystko występuje parami, włącznie z nieszczęściem.",
-    "header": "Na {planet} wszystko występuje parami, włącznie z nieszczęściem. Korzystając z planety, akceptujesz ten stan rzeczy.",
+    "text": "Na tej planecie wszystko występuje parami, włącznie z\u00a0nieszczęściem.",
+    "header": "Na {planet} wszystko występuje parami, włącznie z\u00a0nieszczęściem. Korzystając z\u00a0planety, akceptujesz ten stan rzeczy.",
     "short": "Wrogowie i łupy występują parami."
   },
   "grawitacja": {
@@ -26,38 +26,38 @@
   "wymagana-aktualizacja": {
     "name": "Wymagana aktualizacja",
     "text": "Twoja broń wymaga aktualizacji.",
-    "header": "Twoja broń wymaga aktualizacji. Do czasu jej zainstalowania działa w trybie ograniczonym.",
-    "short": "Broń −50% do aktualizacji z pierwszego elitarnego."
+    "header": "Twoja broń wymaga aktualizacji. Do czasu jej zainstalowania działa w\u00a0trybie ograniczonym.",
+    "short": "Broń −50% do aktualizacji, którą upuszcza pierwszy elitarny wróg."
   },
   "nie-przeszkadzac": {
     "name": "Nie przeszkadzać",
-    "text": "Na planecie obowiązuje tryb nie przeszkadzać.",
-    "header": "Na {planet} obowiązuje tryb nie przeszkadzać. Umiejętności generują hałas. Zwykłe uderzenia są traktowane jako cisza.",
+    "text": "Na planecie obowiązuje tryb „nie przeszkadzać”.",
+    "header": "Na {planet} obowiązuje tryb „nie przeszkadzać”. Umiejętności generują hałas. Zwykłe uderzenia są traktowane jako cisza.",
     "short": "Umiejętności podwajają zasięg alarmu."
   },
   "oplata-serwisowa": {
     "name": "Opłata serwisowa",
     "text": "Każde zwycięstwo podlega opłacie serwisowej.",
-    "header": "Każde zwycięstwo podlega opłacie serwisowej w wysokości jednej gwiazdki. Jakość łupów podniesiono w ramach rekompensaty.",
-    "short": "Każde zabicie kosztuje 1 gwiazdkę, łupy o klasę lepsze."
+    "header": "Każde zwycięstwo podlega opłacie serwisowej w\u00a0wysokości jednej gwiazdki. Jakość łupów podniesiono w\u00a0ramach rekompensaty.",
+    "short": "Każde skreślenie kosztuje 1 gwiazdkę, łupy o klasę lepsze."
   },
   "ciasteczka": {
     "name": "Ciasteczka",
     "text": "Ta strona używa ciasteczek.",
     "header": "Ta strona używa ciasteczek. Kontynuując przeglądanie strony, wyrażasz zgodę na personalizację wrogów.",
-    "short": "Na każdej stronie baner: więcej wrogów albo mniej łupów."
+    "short": "Na każdej stronie baner: więcej wrogów i łupów albo mniej jednych i drugich."
   },
   "weryfikacja-dwuetapowa": {
     "name": "Weryfikacja dwuetapowa",
     "text": "Wyjście wymaga weryfikacji dwuetapowej.",
-    "header": "Wyjście ze strony wymaga weryfikacji dwuetapowej. Kod zostanie wysłany po zażądaniu go. Czas dostarczenia nie jest gwarantowany.",
-    "short": "Wyjście otwiera kod z SMS, który przychodzi po 6–12 s."
+    "header": "Wyjście ze strony wymaga weryfikacji dwuetapowej. Kod wysyła się na żądanie. Czasu dostarczenia nie gwarantuje się.",
+    "short": "Wyjście otwiera kod z SMS-a. SMS przychodzi po 6–12 s."
   },
   "bot": {
     "0": "Rozumiem. Czy chodzi o: a) fakturę, b) dostawę, c) inne?",
     "1": "Dziękuję za wiadomość. Twoja sprawa jest dla nas ważna.",
     "2": "Nie jestem pewien, czy dobrze zrozumiałem. Czy możesz sformułować to inaczej?",
-    "3": "Przekazuję zgłoszenie do konsultanta. Konsultant jest poza godzinami.",
+    "3": "Przekazuję zgłoszenie do konsultanta. Konsultant jest poza godzinami pracy.",
     "4": "Czy to odpowiada na Twoje pytanie? Tak / Nie / Nie wiem.",
     "5": "Zanotowałem. Proszę o cierpliwość. Szacowany czas: nieustalony.",
     "6": "Widzę, że próbujesz się ruszyć. Czy chodzi o zmianę adresu?",
@@ -80,7 +80,7 @@
     "body": "Używamy ciasteczek, aby dopasować wrogów do Twoich preferencji. Możesz zaakceptować wszystkie albo tylko niezbędne.",
     "all": "Akceptuję wszystkie",
     "minimal": "Tylko niezbędne",
-    "allDone": "Wrogowie zostali spersonalizowani. Dodano jednego elitarnego.",
+    "allDone": "Wrogów spersonalizowano. Dodano jednego elitarnego.",
     "minimalDone": "Zastosowano wyłącznie niezbędnych wrogów. Łupy ograniczono do niezbędnych.",
     "again": "Przez 30 sekund nie wykryto aktywności. Baner wyświetlono ponownie."
   },
@@ -91,7 +91,7 @@
     "body": "Wpisz kod z SMS-a, aby opuścić stronę.",
     "enter": "Wpisz kod",
     "accepted": "Kod przyjęty. Wyjście odblokowane.",
-    "locked": "Wyjście wymaga weryfikacji dwuetapowej. Prosimy o oczekiwanie na kod."
+    "locked": "Wyjście wymaga weryfikacji dwuetapowej. Prosimy czekać na kod."
   },
   "kiosk": {
     "label": "PACZKOMAT"

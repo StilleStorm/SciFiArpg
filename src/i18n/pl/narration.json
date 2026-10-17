@@ -56,7 +56,7 @@
       "Skreślono dwa egzemplarze."
     ],
     "fix": [
-      "Przepraszam za nieścisłość w przypisie {ref}. Egzemplarz był jeden, nr {n}. Drugi został domniemany."
+      "Przepraszam za nieścisłość w przypisie {ref}. Egzemplarz był jeden, nr {n}. Drugi był domniemany."
     ]
   },
   "pickup": {
@@ -107,7 +107,7 @@
   "levelup": {
     "ok": [
       "Reputacja zgłaszającego wzrosła do poziomu {level}. Zmiany nie są widoczne.",
-      "Poziom {level} został przyznany. Uzasadnienie wkrótce."
+      "Przyznano poziom {level}. Uzasadnienie zostanie dosłane."
     ],
     "bad": [
       "Reputacja zgłaszającego wzrosła do poziomu {wrong}."
@@ -119,7 +119,7 @@
   "death": {
     "ok": [
       "Zgłaszający utracił rację w sprawie, której dotyczyło zgłoszenie.",
-      "Zgłoszenie uznano za zasadne. Zgłaszającego mniej."
+      "Zgłoszenie uznano za zasadne. Zgłaszającego ubyło."
     ]
   },
   "law_hours_bot": {
@@ -151,8 +151,8 @@
   },
   "law_noise": {
     "ok": [
-      "Użycie umiejętności wygenerowało hałas. Hałas został odnotowany przez otoczenie.",
-      "Tryb nie przeszkadzać nie obejmuje umiejętności."
+      "Użycie umiejętności wygenerowało hałas. Otoczenie hałas odnotowało.",
+      "Tryb „nie przeszkadzać” nie obejmuje umiejętności."
     ]
   }
 }

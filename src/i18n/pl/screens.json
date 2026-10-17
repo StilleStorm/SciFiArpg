@@ -65,16 +65,16 @@
     "theme": "Wydanie",
     "day": "Dzienne",
     "night": "Nocne",
-    "auto": "Wg urządzenia",
+    "auto": "Według urządzenia",
     "hand": "Układ przycisków",
-    "right": "Praworęczny",
-    "left": "Leworęczny",
+    "right": "Dla praworęcznych",
+    "left": "Dla leworęcznych",
     "sound": "Dźwięk",
     "music": "Muzyka na czekanie",
     "sfx": "Odgłosy kancelaryjne",
     "soundNote": "Muzyka towarzyszy wyłącznie rozpatrywaniu zgłoszenia. Poza nim obowiązuje cisza biurowa.",
     "back": "Wróć",
-    "note": "Zmiany zapisano. Nie zapytano, czy chcesz."
+    "note": "Zmiany zapisano. Zgody nie wymagano."
   },
   "profile": {
     "title": "Profil użytkownika",

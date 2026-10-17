@@ -552,3 +552,15 @@ rng fork 'music'. An offline render script (`npm run render-audio`) writes a 20 
 profile and state for inspection: peak and RMS levels, spectrum within band, no clipping,
 every combat sound shows a body layer. Taste is judged by the player on the phone. Settings:
 music and SFX volume, both persisted; defaults on.
+
+### 12.1 Editorial rules added after the first voice pass
+- Enemies are *przeciwnicy* in system text; *wrogowie* only when a form or clause is quoting
+  the planet's own regulamin (the regulamin is allowed to be cruder than the Asystent).
+- The death form counts every kill as *urządzenie* on purpose: the clerk generalizes.
+- A form that DESIGN says lies must keep lying (e.g. *Czas wsteczny*: "reputacja ujemna").
+- One-letter words (w, z, i, a, o, u) never end a line. This is a typography rule for the
+  renderer (bind them to the next word in `wrapText`/`wrapClaim` and in `t()`), not for the
+  JSON, so tests that pin exact text keep passing.
+- Skill names are nouns or noun phrases without end punctuation, so they compose into
+  "{skill}, ulepszenie {rank}". The Konsultant's question is therefore printed without "?"
+  on purpose; the Asystent notes it once as a clerical omission (backlog).

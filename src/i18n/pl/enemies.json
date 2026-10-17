@@ -10,7 +10,7 @@
     },
     "wygenerowane": {
       "name": "Wygenerowane",
-      "meet": "Napotkano istoty wygenerowane. Istnieją w stopniu zależnym od liczby polubień. Wątpliwość im służy, uderzenie czyni je na chwilę prawdziwymi."
+      "meet": "Napotkano istoty wygenerowane. Istnieją w stopniu zależnym od liczby polubień. Wątpliwość im służy. Uderzenie czyni je na chwilę prawdziwymi, co źle znoszą."
     }
   },
   "body": {
@@ -73,7 +73,7 @@
     },
     "limp": {
       "cause": "jedna noga nie została dokręcona",
-      "effect": "po utracie połowy racji odpada, a urządzenie zwalnia"
+      "effect": "po utracie połowy racji noga odpada, a urządzenie zwalnia"
     },
     "thinks": {
       "cause": "moduł rozumowania nie przewiduje wątpliwości",
@@ -84,7 +84,7 @@
       "effect": "przyspiesza ataki, po czym musi ostygnąć"
     },
     "firmware": {
-      "cause": "wgrano oprogramowanie od innego urządzenia",
+      "cause": "wgrano oprogramowanie innego urządzenia",
       "effect": "co piąty ruch wykonuje w losowym kierunku"
     },
     "loud": {
@@ -135,9 +135,9 @@
     },
     "weryfikacja": {
       "name": "Weryfikacja",
-      "meet": "Napotkano Weryfikację. Pyta, czy użytkownik jest robotem. Odpowiedź „tak” nie została przewidziana.",
+      "meet": "Napotkano Weryfikację. Pyta, czy użytkownik jest robotem. Odpowiedzi „tak” nie przewidziano.",
       "hint": "Zaznacz wszystkie kratki z hydrantami.",
-      "solved": "Wszystkie hydranty zaznaczono. Weryfikacja zostaje wstrzymana."
+      "solved": "Wszystkie hydranty zaznaczono. Weryfikację wstrzymano."
     },
     "hipoteza": {
       "name": "Hipoteza",

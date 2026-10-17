@@ -36,7 +36,7 @@
     "desc2": "Złożyła wniosek o uznanie osobowości. Wniosek oczekuje na rozpatrzenie.",
     "desc3": "Do tego czasu walczy wręcz i nie odsłania bębna bez potrzeby.",
     "quirk": "Co dziesiąte trafienie w nią powoduje błąd programu. Losowa umiejętność uruchamia się bez odnowienia.",
-    "quirkNote": "Błąd programu. Umiejętność uruchomiono bez opłaty.",
+    "quirkNote": "Błąd programu. Uruchomiono umiejętność, o którą nikt nie prosił.",
     "auto": "Uderzenie obudową. Mechaniczne, krótkie, wolne.",
     "skill1": {
       "name": "Wirowanie",
@@ -51,13 +51,13 @@
     "skill3": {
       "name": "Odwirowanie",
       "pad": "Odwirowanie",
-      "desc": "Przejazd z jednym przeciwnikiem. Zostaje on zablokowany."
+      "desc": "Przejazd z jednym przeciwnikiem. Na końcu przeciwnik jest zablokowany."
     }
   },
   "konsultant": {
     "name": "Konsultant Infolinii",
     "desc1": "Konsultant, który opuścił kolejkę w trakcie rozmowy.",
-    "desc2": "Rozmowa jest nadal nagrywana w celach jakości.",
+    "desc2": "Rozmowa jest nadal nagrywana w celu poprawy jakości obsługi.",
     "desc3": "Sprawy załatwia na odległość i zgodnie z regulaminem.",
     "quirk": "Przedmioty weryfikuje dwa razy szybciej. Wady urządzeń widzi od razu.",
     "auto": "Rzucone zgłoszenie. Regulaminowe, średni zasięg.",
@@ -74,7 +74,7 @@
     "skill3": {
       "name": "Czy mogę jeszcze w czymś pomóc",
       "pad": "Pomoc",
-      "desc": "Częstsze trafienia krytyczne. Każde skreślenie przynosi gwiazdkę."
+      "desc": "Częstsze argumenty nie do odparcia. Każde skreślenie przynosi gwiazdkę."
     }
   },
   "petlowiec": {
@@ -97,7 +97,7 @@
     "skill3": {
       "name": "Pętla",
       "pad": "Pętla",
-      "desc": "Powrót tam, gdzie byłeś 3 sekundy temu, z ówczesną racją."
+      "desc": "Powrót do miejsca i stanu racji sprzed 3 sekund."
     },
     "disagree": {
       "1": "Kopia twierdzi, że to ona przybyła pierwsza.",
@@ -116,7 +116,7 @@
     "desc2": "Mapy są dokładne. Terenu nie sprawdzano.",
     "desc3": "Strzela z daleka, ponieważ stamtąd lepiej widać.",
     "quirk": "Mapę strony widzi w całości już przy wejściu. Pozostali widzą białą kartkę.",
-    "auto": "Strzał pomiarowy. Mechaniczny, daleki zasięg, przebija przy trafieniu krytycznym.",
+    "auto": "Strzał pomiarowy. Mechaniczny, daleki zasięg. Argument nie do odparcia przebija cel.",
     "decoy": "błąd pomiaru",
     "skill1": {
       "name": "Triangulacja",

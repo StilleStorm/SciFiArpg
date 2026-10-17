@@ -49,7 +49,7 @@
     "pewnosc": "Pew.",
     "upor": "Upór",
     "racja": "Racja",
-    "crit": "Nd.od.",
+    "crit": "N.d.o.",
     "resMechaniczny": "Odp.m.",
     "resRegulaminowy": "Odp.r.",
     "resEgzystencjalny": "Odp.e."
@@ -63,11 +63,11 @@
     },
     "odkurzacz": {
       "noun": "odkurzacz ręczny",
-      "desc": "Urządzenie o napędzie elektrycznym, prawdopodobnie do zbierania. Nie ustalono, co zbiera."
+      "desc": "Urządzenie elektryczne do zbierania. Nie ustalono, czego."
     },
     "wskaznik": {
       "noun": "wskaźnik laserowy",
-      "desc": "Pióro świecące na czerwono, służące do wskazywania. Wskazane rzeczy zwykle okazują się wątpliwe."
+      "desc": "Pióro świecące na czerwono. Rzecz wskazana traci pewność, że istnieje."
     },
     "kabel": {
       "noun": "kabel różny",
@@ -83,7 +83,7 @@
     },
     "sluchawki": {
       "noun": "słuchawki douszne",
-      "desc": "Dwa elementy połączone ze sobą lub nie. Producent określił je jako bezprzewodowe, co potwierdzono w jednym przypadku z dwóch."
+      "desc": "Dwa elementy, połączone ze sobą lub nie. Producent deklaruje, że są bezprzewodowe. Potwierdzono to w przypadku jednego z dwóch."
     },
     "czapka": {
       "noun": "czapka z daszkiem",
@@ -99,7 +99,7 @@
     },
     "rekawiczki": {
       "noun": "rękawiczki dotykowe",
-      "desc": "Pięć palców z każdej strony. Palce rozpoznają ekran, nie rozpoznają osoby."
+      "desc": "Po pięć palców na dłoń. Ekran rozpoznaje palce. Właściciela nie rozpoznaje."
     },
     "ladowarka": {
       "noun": "ładowarka",
@@ -199,9 +199,9 @@
   "unwanted": {
     "asystent": "Nowość! Dodano asystenta głosowego. Asystent nie wykonuje poleceń, lecz je komentuje.",
     "powiadomienia": "Nowość! Przedmiot informuje teraz o swoim stanie. Informuje często.",
-    "ciasteczka": "Nowość! Przedmiot używa ciasteczek. Do czego, nie podano.",
+    "ciasteczka": "Nowość! Przedmiot używa ciasteczek. Celu nie podano.",
     "konto": "Nowość! Do korzystania z przedmiotu wymagane jest konto. Konto założono w Twoim imieniu.",
-    "inteligentny": "Nowość! Przedmiot jest inteligentny. Nie wynika z tego nic dla Ciebie.",
+    "inteligentny": "Nowość! Przedmiot jest teraz inteligentny. Wnioski wyciąga samodzielnie i zachowuje dla siebie.",
     "chmura": "Nowość! Przedmiot synchronizuje się z chmurą. Chmura jest w innym miejscu niż przedmiot.",
     "spersonalizowany": "Nowość! Przedmiot został spersonalizowany. Dla kogo, nie ustalono.",
     "ciemny": "Nowość! Dodano tryb ciemny. Przedmiot jest w nim trudniejszy do znalezienia."
@@ -210,19 +210,19 @@
     "odmowa": {
       "name": "Pieczątka «Odmowa»",
       "desc": "Stempel kauczukowy z rękojeścią z drewna, którego nie zidentyfikowano.",
-      "story": "Używana przez 31 lat w dziale reklamacji. Odbiła 412 000 odmów, z czego żadna nie została odwołana. Jedyna decyzja pozytywna w jej historii dotyczyła jej samej i została odrzucona.",
-      "note": "Przedmiot unikatowy. Pieczątka «Odmowa» odmawia, że jest unikatowa."
+      "story": "Używana przez 31 lat w dziale reklamacji. Odbiła 412\u00a0000 odmów i żadnej nie odwołano. Jedyna decyzja pozytywna w jej historii dotyczyła jej samej. Odrzucono ją.",
+      "note": "Przedmiot unikatowy. Pieczątka «Odmowa» odmawia uznania tego faktu."
     },
     "kabelrozny": {
       "name": "Kabel (różny), egzemplarz jedyny",
       "desc": "Przewód w kartonie opisanym jako «kabel (różny)». Karton zachowano.",
-      "story": "Pasuje do trzech gniazd, z których żadne nie istnieje w tym wszechświecie. Producent nie odpowiada na pytania, ponieważ również jest różny. Kto go użył, mówi, że działa, i nie umie wskazać, co.",
+      "story": "Pasuje do trzech gniazd, z których żadne nie istnieje w tym wszechświecie. Producent nie odpowiada na pytania, ponieważ również jest różny. Każdy, kto go użył, potwierdza, że coś zaczęło działać. Nie umie wskazać, co.",
       "note": "Przedmiot unikatowy. Producent kabla pozostaje różny."
     },
     "regulamin43": {
       "name": "Regulamin, wersja ostateczna (3)",
       "desc": "Dokument w trzecim wydaniu ostatecznym. Wydań wcześniejszych nie wycofano.",
-      "story": "Pierwsze wydanie liczyło dwie strony. To liczy 1 140 i nikt nie umie wskazać, które zdanie doszło. Przeczytał je jeden człowiek, zaakceptował bez zastrzeżeń i od tej pory go nie widziano.",
+      "story": "Pierwsze wydanie liczyło dwie strony, obecne liczy 1\u00a0140. Nie ustalono, które zdanie dopisano. Jedna osoba przeczytała całość, zaakceptowała bez zastrzeżeń i od tej pory jej nie widziano.",
       "note": "Przedmiot unikatowy. Przeczytano go w całości, co odnotowano jako błąd."
     },
     "kaskmili": {
@@ -234,13 +234,13 @@
     "cisza": {
       "name": "Słuchawki z redukcją rzeczywistości",
       "desc": "Słuchawki douszne. Etui zawiera instrukcję w języku, którego brak.",
-      "story": "Redukcja szumów osiągnęła 100% i poszła dalej. Użytkownik przestaje słyszeć także to, że coś nie istnieje. Producent uznaje to za funkcję.",
+      "story": "Redukcja szumów osiągnęła 100% i nie zatrzymała się. Użytkownik nie słyszy już także wątpliwości. Producent uznał to za funkcję.",
       "note": "Przedmiot unikatowy. Redukcja rzeczywistości: aktywna."
     },
     "istnienie": {
       "name": "Zaświadczenie o istnieniu",
       "desc": "Pismo urzędowe z pieczątką. Pieczątka potwierdza pieczątkę.",
-      "story": "Wystawione na wniosek rzeczy, która nie była pewna. Poświadcza istnienie wnioskodawcy od daty wystawienia, nie wcześniej. Wnioskodawca zachował zaświadczenie; samego siebie nie odnaleziono.",
+      "story": "Wystawione na wniosek rzeczy, która nie była pewna, czy istnieje. Poświadcza jej istnienie od daty wystawienia, nie wcześniej. Zaświadczenie odnaleziono. Wnioskodawcy nie.",
       "note": "Przedmiot unikatowy. Istnienie posiadacza poświadczono od dziś."
     }
   },
@@ -252,7 +252,7 @@
     },
     "label": "Opinie",
     "unverified": "Opinie nie były weryfikowane.",
-    "none": "Przedmiot unikatowy. Opinii nie zebrano, ponieważ nie ma z czym porównywać.",
+    "none": "Przedmiot unikatowy. Opinii nie zebrano, ponieważ nie ma go z czym porównać.",
     "trial": "Próba użytkowania: {done} z {total}.",
     "trialDone": "Próba użytkowania zakończona.",
     "honest": "Opinie potwierdzono w granicach błędu.",
@@ -268,7 +268,7 @@
   "compat": {
     "blocked": "Ten przedmiot nie jest kompatybilny z Twoim urządzeniem.",
     "clash": "Przedmiot nr {a} nie jest kompatybilny z przedmiotem nr {b}. Powód: {tag}. Dostępny adapter.",
-    "set": "Przedmioty nr {a} i nr {b} tworzą zestaw (wspólna słabość: {tag}). Dodano {bonus} punktów pewności siebie i uporu.",
+    "set": "Przedmioty nr {a} i nr {b} tworzą zestaw (wspólna słabość: {tag}). Pewność siebie i upór: +{bonus}.",
     "likes": "Lubi: {tag}",
     "dislikes": "Nie znosi: {tag}",
     "adapter": "Adapter",
@@ -276,8 +276,8 @@
     "adapterPoor": "Adapter kosztuje {price}. Stan konta nie pozwala na jego zakup."
   },
   "free": {
-    "note": "Wersja darmowa. Po {n} eliminacjach przedmiot działa słabiej o 40% i wyświetla reklamy.",
-    "active": "Wersja darmowa po okresie próbnym: -40% i reklamy co 30 sekund.",
+    "note": "Wersja darmowa. Po {n} skreśleniach przedmiot działa słabiej o 40% i wyświetla reklamy.",
+    "active": "Wersja darmowa po okresie próbnym: −40% i reklamy co 30 sekund.",
     "boughtNote": "Wersja wykupiona. Reklam nie ma.",
     "bought": "Przedmiot nr {n} wykupiono. Reklam więcej nie będzie, o ile nie zostaną wznowione.",
     "poor": "Wykup kosztuje {price}. Stan konta nie pozwala na jego zakup."
@@ -315,12 +315,12 @@
     "current": "Obecnie",
     "chosen": "Ten przedmiot",
     "noneWorn": "nic nie założono",
-    "dropped": "Przedmiot nr {n} wyrzucono. Odzyskanie nie jest przewidziane.",
+    "dropped": "Przedmiot nr {n} wyrzucono. Odzyskania nie przewidziano.",
     "worn2": "Przedmiot nr {n} założono.",
     "taken": "Przedmiot nr {n} zdjęto.",
-    "full": "Załączniki są pełne. Zdjęcie przedmiotu nie jest możliwe.",
+    "full": "Załączniki są pełne. Przedmiotu nie można zdjąć.",
     "claimedHead": "Deklarowane",
-    "kills": "eliminacji",
+    "kills": "skreśleń",
     "tierLine": "Klasa: {tier}. Poziom: {level}.",
     "stars": "Gwiazdki: {n}"
   }

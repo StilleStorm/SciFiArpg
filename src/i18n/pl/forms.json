@@ -1,7 +1,7 @@
 {
   "permission": {
     "granted": "Nadano uprawnienia: {family}. Odblokowano wpisy, które ich wymagały.",
-    "again": "Uprawnienia: {family} zostały już nadane. Nadano je ponownie."
+    "again": "Uprawnienia ({family}) nadano już wcześniej. Nadano je ponownie."
   },
   "update": {
     "title": "Aktualizacja 1.{n}",
@@ -55,7 +55,7 @@
         },
         "6": {
           "name": "Pranie delikatne",
-          "desc": "Czas działania dłuższy o 25%. Każde skreślenie przywraca 2 racji."
+          "desc": "Czas działania dłuższy o 25%. Każde skreślenie przywraca 2 punkty racji."
         }
       },
       "konsultant": {
@@ -68,8 +68,8 @@
           "desc": "Odnowienie umiejętności krótsze o 8%."
         },
         "3": {
-          "name": "Nagrywane w celach jakości",
-          "desc": "Szansa na trafienie krytyczne wyższa o 5 punktów."
+          "name": "W celu poprawy jakości",
+          "desc": "Szansa na argument nie do odparcia wyższa o 5 punktów."
         },
         "4": {
           "name": "Muzyka oczekiwania",
@@ -77,7 +77,7 @@
         },
         "5": {
           "name": "Ankieta satysfakcji",
-          "desc": "Reputacja większa o 10%."
+          "desc": "Przyrost reputacji większy o 10%."
         },
         "6": {
           "name": "Eskalacja do przełożonego",
@@ -95,7 +95,7 @@
         },
         "3": {
           "name": "Niezgodność wersji",
-          "desc": "Szansa na trafienie krytyczne wyższa o 5 punktów."
+          "desc": "Szansa na argument nie do odparcia wyższa o 5 punktów."
         },
         "4": {
           "name": "Skrócony cykl",
@@ -125,7 +125,7 @@
         },
         "4": {
           "name": "Buty terenowe",
-          "desc": "Szybszy chód o 10%."
+          "desc": "Chód szybszy o 10%."
         },
         "5": {
           "name": "Znaki w terenie",
@@ -133,7 +133,7 @@
         },
         "6": {
           "name": "Odczyt niezależny",
-          "desc": "Szansa na trafienie krytyczne wyższa o 6 punktów, obrażenia o 10%."
+          "desc": "Szansa na argument nie do odparcia wyższa o 6 punktów, obrażenia o 10%."
         }
       }
     },
@@ -195,13 +195,13 @@
     "petla": {
       "title": "Pętla",
       "lead": "Przywrócono poprzedni stan strony.",
-      "body": "Stan, w którym zgłaszający zmarł, pozostawiono na miejscu. Jest dostępny dla innych użytkowników.",
+      "body": "Poprzednią wersję zgłaszającego pozostawiono na stronie. Nie poinformowano jej, że jest poprzednia.",
       "go": "Kontynuuj"
     },
     "zawieszenie": {
       "title": "Konto zawieszone",
       "lead": "Przyczyna: naruszenie standardów społeczności (nie podano których).",
-      "body": "Przeciwnicy nie widzą zgłaszającego. Zgłaszający nie może podnosić przedmiotów i zadaje o 30% mniej obrażeń. Odwołanie złożyć można po znalezieniu formularza.",
+      "body": "Przeciwnicy nie widzą zgłaszającego. Zgłaszający nie może podnosić przedmiotów i zadaje o 30% mniej obrażeń. Odwołanie można złożyć po odnalezieniu formularza.",
       "stamp": "Zawieszono",
       "go": "Rozumiem",
       "appealed": "Odwołanie rozpatrzono pozytywnie. Przyczyny nie podano."
