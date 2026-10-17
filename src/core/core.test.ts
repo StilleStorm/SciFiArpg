@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createBus } from './events';
-import { createStepper, createTimers } from './loop';
+import { createFreezer, createStepper, createTimers, FREEZE_MAX_MS, FREEZE_REST_MS } from './loop';
 import { createRng } from './rng';
 
 describe('rng', () => {
@@ -68,5 +68,36 @@ describe('bus', () => {
     off();
     bus.emit('enemy:miss', { id: 4 });
     expect(got).toEqual([3]);
+  });
+});
+
+describe('hit-stop', () => {
+  it('holds the simulation for the requested time, never more than 40 ms', () => {
+    expect(FREEZE_MAX_MS).toBe(40);
+    const f = createFreezer();
+    expect(f.request(500)).toBe(true);
+    let frozenFor = 0;
+    while (f.frame(16.7)) frozenFor += 16.7;
+    expect(frozenFor).toBeGreaterThanOrEqual(FREEZE_MAX_MS - 0.1);
+    expect(frozenFor).toBeLessThan(FREEZE_MAX_MS + 17);
+  });
+
+  it('ignores a request while frozen and during the rest after it, then works again', () => {
+    const f = createFreezer();
+    expect(f.request(40)).toBe(true);
+    expect(f.request(40)).toBe(false);
+    while (f.frame(10)) {
+      /* run it out */
+    }
+    expect(f.request(40)).toBe(false);
+    f.frame(FREEZE_REST_MS + 1);
+    expect(f.request(40)).toBe(true);
+  });
+
+  it('a frame without a freeze is not held, and a zero request does nothing', () => {
+    const f = createFreezer();
+    expect(f.frame(16)).toBe(false);
+    expect(f.request(0)).toBe(false);
+    expect(f.frozen).toBe(false);
   });
 });

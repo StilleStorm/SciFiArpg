@@ -55,14 +55,14 @@ function nearby(rng: Rng, n: number, min = 1): number {
   return rng.chance(0.5) || n - delta < min ? n + delta : n - delta;
 }
 
-export function createNarrator(rng: Rng, say: (text: string) => number): Narrator {
+export function createNarrator(rng: Rng, say: (text: string, correction?: boolean) => number): Narrator {
   let time = 0;
   let lastSay = -100;
   const pending: Pending[] = [];
 
-  const speak = (text: string): number => {
+  const speak = (text: string, correction = false): number => {
     lastSay = time;
-    return say(text);
+    return say(text, correction);
   };
 
   return {
@@ -92,7 +92,7 @@ export function createNarrator(rng: Rng, say: (text: string) => number): Narrato
         const c = pending[i];
         if (!c || time < c.at) continue;
         pending.splice(i, 1);
-        speak(t(`narration.${c.key}.fix.${c.index}`, { ...c.params, ref: c.ref }));
+        speak(t(`narration.${c.key}.fix.${c.index}`, { ...c.params, ref: c.ref }), true);
       }
     },
     get time() {
@@ -105,8 +105,8 @@ export function createNarrator(rng: Rng, say: (text: string) => number): Narrato
 }
 
 export interface AsystentDeps {
-  /** Show a footnote and return its number (ui/footnotes.ts). */
-  say(text: string): number;
+  /** Show a footnote and return its number (ui/footnotes.ts). `correction` marks the Asystent's correction of an earlier note. */
+  say(text: string, correction?: boolean): number;
   getState(): RunState | null;
 }
 

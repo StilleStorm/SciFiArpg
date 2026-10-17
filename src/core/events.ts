@@ -17,6 +17,8 @@ export interface GameEvents {
   'pickup:taken': { id: number; number: number };
   'page:edge': { x: number; y: number; side: Side };
   footnote: { text: string };
+  /** A footnote was printed with number `n`; `correction` = the Asystent's later correction of a wrong note (audio: typewriter key / carriage return). */
+  'footnote:added': { n: number; text: string; correction: boolean };
   stamp: { text: string; x: number; y: number };
   /** A short handwritten note in the margin next to world x, y (text is already translated). */
   'margin:note': { text: string; x: number; y: number; ttl?: number };
@@ -48,6 +50,8 @@ export interface GameEvents {
   'enemy:offTopic': { id: number; x: number; y: number };
   /** A notification climbed to the next tier. */
   'enemy:escalated': { id: number; tier: number; x: number; y: number };
+  /** A boss reached a new phase (Prototyp at half racja, Weryfikacja's grid solved, Hipoteza confirmed). */
+  'boss:phase': { id: number; family: 'urzadzenia' | 'powiadomienia' | 'wygenerowane'; x: number; y: number };
   /** A boss fell (also reported through enemy:died). */
   'boss:died': { id: number; family: 'urzadzenia' | 'powiadomienia' | 'wygenerowane'; x: number; y: number };
 }

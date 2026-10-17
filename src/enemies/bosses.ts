@@ -140,6 +140,7 @@ export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
       rt.phase = 2;
       rt.speedMul = 1.45;
       bus.emit('footnote', { text: t('enemies.boss.prototyp.half') });
+      bus.emit('boss:phase', { id: e.id, family: e.family, x: e.x, y: e.y });
     }
   } else if (boss === 'weryfikacja') {
     const g = rt.grid;
@@ -153,6 +154,7 @@ export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
         g.time = 0;
         applyStatus(e, 'zablokowany', GRID_BLOCK_S, p.id);
         bus.emit('footnote', { text: t('enemies.boss.weryfikacja.solved') });
+        bus.emit('boss:phase', { id: e.id, family: e.family, x: e.x, y: e.y });
       }
     }
     if (!isSilenced(e) && !s.law.botTime) {
@@ -178,6 +180,7 @@ export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
         rt.speedMul = 1.4;
         bus.emit('footnote', { text: t('enemies.boss.hipoteza.confirmed') });
         bus.emit('stamp', { text: t('combat.verified'), x: e.x, y: e.y - 70 });
+        bus.emit('boss:phase', { id: e.id, family: e.family, x: e.x, y: e.y });
       }
     } else e.existence = 1;
   }

@@ -59,11 +59,44 @@ export interface LoopHandlers {
   render(frameDt: number, alpha: number): void;
 }
 
+/** The longest hit-stop (DESIGN 14.1: 40 ms on crits and kills). */
+export const FREEZE_MAX_MS = 40;
+/** After a freeze ends, this long must pass before the next one can start (a swarm of kills must not lock the game). */
+export const FREEZE_REST_MS = 90;
+
+/** Hit-stop bookkeeping, pure: `request` asks for a freeze, `frame(dtMs)` says whether this frame is frozen. */
+export function createFreezer(maxMs = FREEZE_MAX_MS, restMs = FREEZE_REST_MS) {
+  let frozen = 0;
+  let rest = 0;
+  return {
+    request(ms: number): boolean {
+      if (rest > 0 || frozen > 0 || ms <= 0) return false;
+      frozen = Math.min(maxMs, ms);
+      return true;
+    },
+    /** True while the simulation must hold this frame. */
+    frame(dtMs: number): boolean {
+      if (frozen > 0) {
+        frozen -= dtMs;
+        if (frozen <= 0) rest = restMs;
+        return true;
+      }
+      rest = Math.max(0, rest - dtMs);
+      return false;
+    },
+    get frozen(): boolean {
+      return frozen > 0;
+    },
+  };
+}
+
 export interface Loop {
   start(): void;
   stop(): void;
   readonly running: boolean;
   after(seconds: number, fn: () => void): () => void;
+  /** Hit-stop: the simulation holds for `ms` (at most FREEZE_MAX_MS) while frames keep rendering. */
+  freeze(ms: number): void;
 }
 
 export function createLoop(h: LoopHandlers): Loop {
@@ -72,12 +105,15 @@ export function createLoop(h: LoopHandlers): Loop {
   let raf = 0;
   let last = 0;
   let running = false;
+  const freezer = createFreezer();
 
   const frame = (now: number): void => {
     raf = requestAnimationFrame(frame);
     const dt = Math.min((now - last) / 1000, MAX_FRAME);
     last = now;
-    const alpha = stepper.advance(dt, (s) => {
+    // Hit-stop: no simulation while frozen; the accumulator keeps what it had so nothing is lost or replayed.
+    const held = freezer.frame(dt * 1000);
+    const alpha = stepper.advance(held ? 0 : dt, (s) => {
       timers.update(s);
       h.update(s);
     });
@@ -113,5 +149,8 @@ export function createLoop(h: LoopHandlers): Loop {
       return running;
     },
     after: timers.after,
+    freeze(ms) {
+      freezer.request(ms);
+    },
   };
 }
