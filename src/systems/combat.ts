@@ -3,11 +3,26 @@ import { canMelee, enemyOutgoing, modifyDamage, onEnemyHurt } from '../enemies/h
 import type { Bus } from '../core/events';
 import type { Grid } from '../entities';
 import type { Enemy, Player } from '../entities';
+import { isStunned } from '../combat/status';
+import { resolveMove } from '../world/pages';
 import { type RunState } from '../world/run';
 import { fireAuto } from '../heroes/auto';
 import { absorbShield, playerDamageMul } from '../heroes/shield';
 
 type Fighter = Player | Enemy;
+
+/** A crit shoves the enemy this far away from the player; the clause Grawitacja doradcza multiplies it. */
+export const CRIT_KNOCKBACK = 12;
+
+/** Push `e` away from (fromX, fromY) by `dist * state.law.knockbackMul` units, stopping at walls and obstacles. */
+export function knockback(s: RunState, e: Enemy, fromX: number, fromY: number, dist: number): void {
+  const d = Math.hypot(e.x - fromX, e.y - fromY);
+  const push = dist * s.law.knockbackMul;
+  if (d < 0.001 || push <= 0) return;
+  e.x += ((e.x - fromX) / d) * push;
+  e.y += ((e.y - fromY) / d) * push;
+  resolveMove(s.page, e, e.r);
+}
 
 /** One attack: roll, apply, emit. Returns true if the defender died. */
 export function attack(s: RunState, bus: Bus, attacker: Fighter, defender: Fighter): boolean {
@@ -34,7 +49,10 @@ export function applyDamage(s: RunState, bus: Bus, defender: Fighter, amount: nu
   if (defender.kind === 'enemy') bus.emit('enemy:hit', { id: defender.id, ...payload });
   else bus.emit('player:hit', payload);
   if (defender.hp > 0) {
-    if (defender.kind === 'enemy') onEnemyHurt(s, bus, defender, type);
+    if (defender.kind === 'enemy') {
+      onEnemyHurt(s, bus, defender, type);
+      if (crit && !defender.boss) knockback(s, defender, s.player.x, s.player.y, CRIT_KNOCKBACK);
+    }
     return false;
   }
   if (defender.kind === 'enemy') killEnemy(s, bus, defender);
@@ -62,7 +80,7 @@ function killPlayer(s: RunState, bus: Bus, p: Player): void {
 export function playerAttacks(s: RunState, grid: Grid<Enemy>, bus: Bus, dt: number): void {
   const p = s.player;
   p.attackTimer = Math.max(0, p.attackTimer - dt);
-  if (p.attackTimer > 0) return;
+  if (p.attackTimer > 0 || isStunned(p)) return;
   let nearest: Enemy | null = null;
   let best = Infinity;
   let adjacent = false;

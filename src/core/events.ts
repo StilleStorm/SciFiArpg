@@ -18,6 +18,8 @@ export interface GameEvents {
   'page:edge': { x: number; y: number; side: Side };
   footnote: { text: string };
   stamp: { text: string; x: number; y: number };
+  /** A short handwritten note in the margin next to world x, y (text is already translated). */
+  'margin:note': { text: string; x: number; y: number; ttl?: number };
   'run:ended': { outcome: 'zgloszenie' | 'petla' | 'zawieszenie' | 'ukonczono' };
   'player:levelup': { level: number };
   /** The player is on page `index` (0-based) of `count`; emitted at run start and after every page turn. */

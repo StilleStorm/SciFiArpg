@@ -56,12 +56,13 @@ export function aim(s: RunState, range: number): { dx: number; dy: number; targe
  * `mult` multiplies the roll (callers pass power(slot) times their own factor).
  */
 export function skillDamage(s: RunState, bus: Bus, target: Enemy, type: DamageType, mult: number): boolean {
+  if (s.law.botTime) return false; // Godziny konsultanta: nobody deals damage during the bot hours
   const p = s.player;
   const rng = s.rngs.combat;
   const crit = rng.chance(Math.min(0.95, p.stats.critChance));
   const raw = Math.floor(rng.range(p.stats.dmgMin, p.stats.dmgMax + 1));
   const scaled = raw * mult * playerDamageMul(p) * (crit ? 2 : 1) * (1 - effectiveResist(target.stats, type) / 100);
-  return applyDamage(s, bus, target, Math.max(1, Math.round(scaled)), crit);
+  return applyDamage(s, bus, target, Math.max(1, Math.round(scaled)), crit, type); // the type lets claims, rebuttals and existence apply
 }
 
 /** Keep a status alive without allocating every step: refresh only if it would run out. */

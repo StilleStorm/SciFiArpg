@@ -150,6 +150,8 @@ export interface HeroRun {
   appealOwed: boolean;
   /** Kill count when the suspension began (fallback when enemy:died carries no tier). */
   suspendedAtKills: number;
+  /** Run time of the last "wyciszony" margin note (so a mashed pad does not stack them). */
+  silenceNoteAt: number;
 }
 
 export function createHeroRun(heroId: HeroId): HeroRun {
@@ -178,6 +180,7 @@ export function createHeroRun(heroId: HeroId): HeroRun {
     appeals: [],
     appealOwed: false,
     suspendedAtKills: 0,
+    silenceNoteAt: -99,
   };
 }
 

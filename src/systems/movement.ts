@@ -1,3 +1,4 @@
+import { isStunned, statusSpeedMul } from '../combat/status';
 import type { Bus } from '../core/events';
 import { resolveMove } from '../world/pages';
 import type { RunState } from '../world/run';
@@ -11,6 +12,12 @@ export function movePlayer(s: RunState, bus: Bus, dt: number): void {
   const p = s.player;
   s.edgeCooldown = Math.max(0, s.edgeCooldown - dt);
   p.moving = false;
+  const speed = p.speed * statusSpeedMul(p); // do_weryfikacji halves it, zablokowany stops it
+  if (isStunned(p)) {
+    p.stuck = 0;
+    resolveMove(s.page, p, p.r);
+    return;
+  }
   if (p.target) {
     const dx = p.target.x - p.x;
     const dy = p.target.y - p.y;
@@ -18,7 +25,7 @@ export function movePlayer(s: RunState, bus: Bus, dt: number): void {
     if (d < ARRIVE) {
       p.target = null;
     } else {
-      const step = Math.min(d, p.speed * dt);
+      const step = Math.min(d, speed * dt);
       const bx = p.x;
       const by = p.y;
       p.x += (dx / d) * step;

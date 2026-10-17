@@ -17,6 +17,7 @@
     "skills": "Umiejętności",
     "quirk": "Cecha"
   },
+  "silenced": "wyciszony",
   "copy": {
     "caption": "kopia",
     "spawn": "Pozostawiono kopię zgłaszającego z poprzedniego przebiegu. Kopia nie zgadza się z tym ustaleniem.",

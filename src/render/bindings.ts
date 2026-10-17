@@ -37,4 +37,5 @@ export function bindFx(bus: Bus, views: Views): void {
     marginNote(t('ui.ink.margin'), m.x, m.y, -4);
   });
   bus.on('stamp', (e) => stamp(e.text, e.x, e.y));
+  bus.on('margin:note', (e) => marginNote(e.text, e.x, e.y, jitter.range(-5, 3), e.ttl));
 }

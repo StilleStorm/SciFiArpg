@@ -1,5 +1,5 @@
 /** The twelve skills as functions on the run state. Cooldowns only, no mana. Returning false = nothing happened, no cooldown. */
-import { applyStatus } from '../combat/status';
+import { applyStatus, isSilenced, isStunned } from '../combat/status';
 import type { Bus } from '../core/events';
 import { createSummon, createZone } from '../entities/factory';
 import { t } from '../i18n';
@@ -31,7 +31,7 @@ const wirowanie: SkillFn = (s, bus, hero) => {
   fx(bus, 'swirl', p.x, p.y, radius);
   for (const e of enemiesWithin(s, p.x, p.y, radius)) {
     const d = Math.hypot(e.x - p.x, e.y - p.y) || 1;
-    const pull = Math.max(0, Math.min(34, d - (p.r + e.r + 2)));
+    const pull = Math.max(0, Math.min(34 * s.law.knockbackMul, d - (p.r + e.r + 2)));
     e.x -= ((e.x - p.x) / d) * pull;
     e.y -= ((e.y - p.y) / d) * pull;
     resolveMove(s.page, e, e.r);
@@ -274,9 +274,16 @@ export function castSkill(s: RunState, bus: Bus, slot: 0 | 1 | 2, free = false):
   const p = s.player;
   const def = heroDef(p.heroId);
   const sk = def.skills[slot];
+  if (s.law.botTime || isStunned(p)) return false; // the bot hours: skills do nothing, no cooldown is spent
   if (!free) {
     if (s.hero.cd[slot] > 0) return false;
-    if (p.statuses.some((st) => st.kind === 'wyciszony')) return false;
+    if (isSilenced(p)) {
+      if (s.time - s.hero.silenceNoteAt > 1.5) {
+        s.hero.silenceNoteAt = s.time;
+        bus.emit('margin:note', { text: t('heroes.silenced'), x: p.x, y: p.y - p.r - 30 });
+      }
+      return false;
+    }
   }
   const fn = SKILLS[sk.id];
   if (!fn || fn(s, bus, def) === false) return false;

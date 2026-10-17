@@ -96,10 +96,10 @@ function stepRedirects(s: RunState, bus: Bus, dt: number): void {
       e.y += ((other.y - e.y) / best) * 60 * dt;
       resolveMove(s.page, e, e.r);
     }
-    if (s.time >= r.next && best <= e.attackRange + e.r + other.r) {
+    if (s.time >= r.next && best <= e.attackRange + e.r + other.r && !s.law.botTime) {
       r.next = s.time + 0.8;
       const res = rollDamage(e.stats, other.stats, e.damageType, s.rngs.combat);
-      if (res.hit) applyDamage(s, bus, other, res.amount, res.crit);
+      if (res.hit) applyDamage(s, bus, other, res.amount, res.crit, e.damageType);
     }
   }
 }
@@ -147,7 +147,7 @@ function stepSummons(s: RunState, bus: Bus, dt: number): void {
       resolveMove(s.page, m, m.r);
     }
     m.attackTimer = Math.max(0, m.attackTimer - dt);
-    if (target && m.attackTimer <= 0 && Math.hypot(target.x - m.x, target.y - m.y) <= m.attackRange) {
+    if (target && m.attackTimer <= 0 && !s.law.botTime && Math.hypot(target.x - m.x, target.y - m.y) <= m.attackRange) {
       m.attackTimer = m.attackCooldown;
       fireFrom(s, m, target);
     }
@@ -208,7 +208,7 @@ function stepProjectiles(s: RunState, bus: Bus, dt: number): void {
     pr.y += pr.vy * dt;
     pr.ttl -= dt;
     let done = pr.ttl <= 0 || pr.x < 0 || pr.y < 0 || pr.x > PAGE_W || pr.y > PAGE_H;
-    if (!done) {
+    if (!done && !s.law.botTime) {
       for (const e of enemiesWithin(s, pr.x, pr.y, pr.r)) {
         if (pr.passed?.includes(e.id)) continue;
         if (projectileHit(s, bus, pr, e)) {
