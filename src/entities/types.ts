@@ -136,6 +136,8 @@ export interface Pickup extends Base {
   gwiazdki?: number;
   /** The number printed on the plate and used in the footnote. */
   number: number;
+  /** A permission card (a checkbox and the family word): taking it adds the family to player.permissions, never the inventory. */
+  permission?: FamilyId;
 }
 
 /** A friendly figure: a Petlowiec copy, a Kartograf decoy, or the 10-second friendly copy after Petla. */

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createBus } from '../core/events';
 import { INVENTORY_CAP } from '../items/inventory';
 import { createRun } from '../world/run';
-import { DROPS, bindLoot, dropLoot, takePickup, updateLoot } from './loot';
+import { DROPS, bindLoot, dropLoot, dropPermission, rollPermission, takePickup, updateLoot } from './loot';
 
 describe('loot', () => {
   it('common kills drop an item about one time in five, and stars about half the time', () => {
@@ -94,5 +94,44 @@ describe('loot', () => {
     bus.emit('enemy:died', { id: 2, x: 5, y: 5 });
     updateLoot(s, bus, 1);
     expect(notes).toEqual([]);
+  });
+});
+
+describe('permission cards', () => {
+  it('a boss always drops its family card, a common enemy never, an elite about one time in three', () => {
+    const s = createRun(9);
+    for (let i = 0; i < 20; i++) expect(rollPermission(s, 'boss', 'wygenerowane')).toBe('wygenerowane');
+    for (let i = 0; i < 200; i++) expect(rollPermission(s, 'common', 'urzadzenia')).toBeNull();
+    let n = 0;
+    for (let i = 0; i < 3000; i++) if (rollPermission(s, 'elite', 'powiadomienia')) n++;
+    expect(n / 3000).toBeGreaterThan(0.29);
+    expect(n / 3000).toBeLessThan(0.37);
+  });
+  it('taking the card grants the permission, footnotes it and never fills the inventory', () => {
+    const s = createRun(9);
+    const bus = createBus();
+    const notes: string[] = [];
+    bus.on('footnote', (e) => notes.push(e.text));
+    const k = dropPermission(s, 10, 10, 'urzadzenia');
+    expect(takePickup(s, bus, k)).toBe(true);
+    expect(s.player.permissions).toEqual(['urzadzenia']);
+    expect(s.player.inventory).toHaveLength(0);
+    expect(notes).toHaveLength(1);
+    takePickup(s, bus, k);
+    expect(s.player.permissions).toEqual(['urzadzenia']);
+  });
+  it('dying bosses and elites put the card on the page through the bus', () => {
+    const s = createRun(9);
+    const bus = createBus();
+    bindLoot(bus, () => s);
+    bus.emit('enemy:died', { id: 99, x: 50, y: 50, tier: 'boss', family: 'powiadomienia' });
+    expect(s.pickups.some((k) => k.permission === 'powiadomienia')).toBe(true);
+  });
+  it('the update form unlocks an entry once the permission is held', async () => {
+    const { hasPermission } = await import('../progression/update');
+    const s = createRun(9);
+    expect(hasPermission(s, 'wygenerowane')).toBe(false);
+    takePickup(s, createBus(), dropPermission(s, 1, 1, 'wygenerowane'));
+    expect(hasPermission(s, 'wygenerowane')).toBe(true);
   });
 });

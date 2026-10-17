@@ -1,4 +1,8 @@
 {
+  "permission": {
+    "granted": "Nadano uprawnienia: {family}. Odblokowano wpisy, które ich wymagały.",
+    "again": "Uprawnienia: {family} zostały już nadane. Nadano je ponownie."
+  },
   "update": {
     "title": "Aktualizacja 1.{n}",
     "subtitle": "Poprawki błędów i usprawnienia.",

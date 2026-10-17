@@ -1,5 +1,9 @@
 import type { Enemy, Pickup, Player, Summon, Zone } from './types';
+import type { FamilyId } from '../enemies/ids';
 import type { Item } from '../items';
+
+/** Collision radius of a card on the ground (drawn 1.3 times larger than it was). */
+export const CARD_R = 18;
 
 export function createPlayer(id: number, x: number, y: number): Player {
   return {
@@ -73,11 +77,16 @@ export function createEnemy(id: number, x: number, y: number, seed: number): Ene
 
 /** A plate on the ground: an item, or (with `gwiazdki`) a small star. Neither given = one star. */
 export function createPickup(id: number, x: number, y: number, number: number, item?: Item, gwiazdki?: number): Pickup {
-  const pickup: Pickup = { kind: 'pickup', id, x, y, r: 14, number };
+  const pickup: Pickup = { kind: 'pickup', id, x, y, r: item ? CARD_R : 14, number };
   if (item) pickup.item = item;
   if (gwiazdki !== undefined) pickup.gwiazdki = gwiazdki;
   else if (!item) pickup.gwiazdki = 1;
   return pickup;
+}
+
+/** A permission card for a family: a small checkbox on the ground. Number 0, never an inventory item. */
+export function createPermissionPickup(id: number, x: number, y: number, family: FamilyId): Pickup {
+  return { kind: 'pickup', id, x, y, r: CARD_R, number: 0, permission: family };
 }
 
 export function createSummon(id: number, x: number, y: number, init: Pick<Summon, 'variant' | 'heroId' | 'ttl'> & Partial<Summon>): Summon {

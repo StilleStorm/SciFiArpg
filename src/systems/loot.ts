@@ -1,5 +1,6 @@
 import type { Bus } from '../core/events';
-import { createPickup } from '../entities/factory';
+import { createPermissionPickup, createPickup } from '../entities/factory';
+import type { FamilyId } from '../enemies/ids';
 import type { Pickup } from '../entities/types';
 import { addStars } from '../economy/stars';
 import { t } from '../i18n';
@@ -77,6 +78,25 @@ export function dropLoot(s: RunState, x: number, y: number, source: DropSource):
   }
 }
 
+/** An elite leaves a permission card one time in three; a boss always does. */
+export const ELITE_PERMISSION_CHANCE = 1 / 3;
+
+/** Roll the permission card for a dead enemy of `family`. Null when none drops. */
+export function rollPermission(s: RunState, tier: DropSource, family: FamilyId | undefined): FamilyId | null {
+  if (!family) return null;
+  if (tier === 'boss') return family;
+  if (tier === 'elite' && s.rngs.loot.chance(ELITE_PERMISSION_CHANCE)) return family;
+  return null;
+}
+
+/** Place the permission card beside the others. */
+export function dropPermission(s: RunState, x: number, y: number, family: FamilyId): Pickup {
+  const at = scatter(s, x, y);
+  const k = createPermissionPickup(nextId(s), at.x, at.y, family);
+  s.pickups.push(k);
+  return k;
+}
+
 const fullNoted = new WeakMap<object, number>();
 
 /**
@@ -86,6 +106,14 @@ const fullNoted = new WeakMap<object, number>();
 export function takePickup(s: RunState, bus: Bus, k: Pickup): boolean {
   const p = s.player;
   if (p.suspended) return false;
+  if (k.permission) {
+    // A permission is not an item: it goes straight into player.permissions (progression/update.ts reads it).
+    const fam = t(`forms.update.family.${k.permission}`);
+    const had = p.permissions.includes(k.permission);
+    if (!had) p.permissions.push(k.permission);
+    bus.emit('footnote', { text: t(had ? 'forms.permission.again' : 'forms.permission.granted', { family: fam }) });
+    return true;
+  }
   if (k.gwiazdki !== undefined && !k.item) {
     addStars(p, k.gwiazdki);
     return true;
@@ -115,7 +143,10 @@ export function bindLoot(bus: Bus, getState: () => RunState | null): void {
   bus.on('enemy:died', (e) => {
     const s = getState();
     if (!s) return;
-    dropLoot(s, e.x, e.y, e.tier ?? 'common');
+    const tier = e.tier ?? 'common';
+    dropLoot(s, e.x, e.y, tier);
+    const fam = rollPermission(s, tier, e.family);
+    if (fam) dropPermission(s, e.x, e.y, fam);
     for (const r of advanceTrial(s.player)) bus.emit('footnote', { text: revealNote(r) });
   });
 }

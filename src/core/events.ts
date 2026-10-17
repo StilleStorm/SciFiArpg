@@ -13,7 +13,7 @@ export interface GameEvents {
   'player:died': { x: number; y: number };
   'enemy:hit': { id: number; x: number; y: number; amount: number; crit: boolean };
   'enemy:miss': { id: number };
-  'enemy:died': { id: number; x: number; y: number; tier?: 'common' | 'elite' | 'boss'; family?: string };
+  'enemy:died': { id: number; x: number; y: number; tier?: 'common' | 'elite' | 'boss'; family?: 'urzadzenia' | 'powiadomienia' | 'wygenerowane' };
   'pickup:taken': { id: number; number: number };
   'page:edge': { x: number; y: number; side: Side };
   footnote: { text: string };

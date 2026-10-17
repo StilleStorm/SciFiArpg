@@ -9,7 +9,7 @@ import type { Rng } from '../core/rng';
 import { createEnemy, createSummon } from '../entities/factory';
 import type { Enemy } from '../entities/types';
 import type { CopySpec } from '../heroes/state';
-import { allItems, type Item } from '../items';
+import { allItems, dropItem, type Item } from '../items';
 import { t } from '../i18n';
 import { resolveMove } from '../world/pages';
 import { nextId, type RunState } from '../world/run';
@@ -70,7 +70,11 @@ export function spawnHostileCopy(s: RunState, bus: Bus, c: CopySpec, x = c.x, y 
   e.attackTimer = 1;
   e.copyOf = { heroId: c.heroId, level: c.level };
   e.home = { x, y };
-  if (c.drop) {
+  // The copy carries the item away: it leaves the player's hands (no second copy of the same object)
+  // and comes back to the page only when the copy is crossed out.
+  if (c.drop && dropItem(s.player, c.drop)) {
+    delete c.drop.equippedAt;
+    delete c.drop.blockedBy;
     e.drops = c.drop;
     s.hero.copyDrops.push({ enemyId: e.id, item: c.drop });
   }

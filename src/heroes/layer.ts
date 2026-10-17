@@ -110,7 +110,7 @@ export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
     maybeDropAppeal(s, ev.x, ev.y, tier);
     const item = takeCopyDrop(s, ev.id);
     if (item) {
-      s.pickups.push(createPickup(nextId(s), ev.x, ev.y, s.nextItemNumber++, item));
+      s.pickups.push(createPickup(nextId(s), ev.x, ev.y, item.number > 0 ? item.number : s.nextItemNumber++, item));
       bus.emit('footnote', { text: t('heroes.copy.killed') });
     }
     gainXp(s, bus, xpForKill(tier)); // each level gained emits player:levelup, handled below
