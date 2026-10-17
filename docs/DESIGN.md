@@ -452,56 +452,80 @@ and is funny precisely because the Asystent reads it out flatly.
 
 ## 14. Sound (phase after the first playable; design is final, build later)
 
-Same method as the look: one real anchor, a ban list, verified against it.
+Same method as the look: real anchors, a ban list, verified against them. Three sources,
+mixed per stage: **A** the document's foley, **B** tape-treated hold music, **C** the page as a
+punched roll. Conventional adaptive ambient is out.
 
-### 14.1 Anchor
-Two things. First, the **document's own foley**: the sounds of producing the printout, not of
-the fictional world. Second, **hold music made the way the Studio Eksperymentalne Polskiego
-Radia (1958–) made tape music**: loops, splices, wow and flutter, hiss, filtered noise, early
-electronics, Rudnik and Kotoński rather than any film score. Framed as the ticket system's
-hold line: "Muzyka na czekanie, utwór nr 7."
+### 14.1 Where each source is used
+- **Menus, forms, footnotes, inventory, store, ticket, base: A only.** Quiet, dry, paper.
+- **Combat: A sources with Diablo 3 weight.** A fight that is too quiet is worse than one that
+  is too loud. Every combat sound is layered like an action-RPG hit: a **transient** (click,
+  crack, pen snap), a **body** (a 60–140 Hz thump or a damped low pluck, 80–200 ms), and a
+  **tail** (scratch debris, paper crackle, a short ring). The sources stay absurd (a pen, a
+  stapler, a rubber stamp) but the mix gives them mass. Crits add a sub layer and a longer
+  tail. Kills add a second, heavier stroke. Short hit-stop (40 ms) on crits and kills.
+- **Music: chosen per planet by a sound profile** (see 14.4). B and C are the first two
+  profiles; more come later (a heavy-metal planet is explicitly planned; its anchor and ban
+  list get written when it is built, not improvised).
+- **Mix:** SFX sit in front; music sits under (−10 to −14 dB relative), ducked a further 6 dB
+  for 300 ms on kills and boss phases. Everything through one master limiter; nothing clips.
 
 ### 14.2 Ban list
 Sawtooth or supersaw pads, big reverbs, chiptune square-wave bleeps, "sci-fi" whooshes and
 risers, major/minor pop scales, four-on-the-floor loops, orchestral hits, sidechain pumping,
-any sample pack sound. No oscillator tone may be heard raw.
+sample packs. No oscillator tone may be heard raw. A combat sound without a body layer.
 
 ### 14.3 SFX (all synthesized in Web Audio from noise, clicks and short plucks; no samples)
-- hit: pen scratch (short filtered-noise burst with a pitch drop); crit: longer scratch + a
-  blot "plop" (low filtered click).
-- kill: two fast strokes (scratches) + a pencil scribble (crackly noise, 250 ms) as the
-  figure is rubbed out.
-- stamp: rubber stamp thud (low click + damped noise) with a tiny paper slap.
-- footnote: one typewriter key per footnote; a carriage-return "ding + zip" for corrections.
-- loot: paper slide (soft noise sweep); card sketch: three quick scratches.
-- level up / aktualizacja: stapler clack; confirm: stamp thud.
-- page turn: a sheet being lifted and laid down (two noise sweeps, 400 ms).
-- walking: nothing (paper does not make steps); page edge: a dull paper bump.
-- notifications family: a dry "ping" made from a damped pluck, never a chat-app ping.
-- bot hours: a hold-line beep (one sine, telephone-band filtered, is the single allowed tone).
+Menus and page (dry, light):
+- footnote: one typewriter key; correction: carriage return "ding + zip".
+- stamp (forms, confirmations): rubber stamp thud + tiny paper slap.
+- loot card drawn, inventory open/close: paper slide, three quick scratches.
+- page turn: a sheet lifted and laid down (two noise sweeps, 400 ms).
+- page edge: a dull paper bump. Walking: nothing.
+- bot hours: a hold-line beep (one telephone-band sine is the single allowed raw tone).
 
-### 14.4 Music: the page as a punched roll, played as hold music
-- **Material.** Each page's obstacle layout is read as a piano roll: x = time, y = pitch
-  class. So every page has its own motif, deterministic from the seed. Each planet picks a
-  fixed, strange scale (never major/minor): Bohlen–Pierce subsets, a 7-note mode with two
-  microtonally detuned degrees, or a pentatonic with one wrong note. Tempo is slow.
-- **Instrument.** Music box / barrel organ: Karplus–Strong plucks and 2-operator FM bells with
-  slight detune per note, like a worn mechanism. No pads.
-- **Treatment.** Then the Experimental Studio: tape loop with wow (0.3–0.8 Hz) and flutter,
-  hiss bed, splices (hard cuts), a bandpass that narrows toward telephone bandwidth
-  (300–3400 Hz) as the hold line "degrades", an occasional hold-line beep.
-- **Adaptation** (state → layers, crossfaded over 2–4 s):
-  - calm: the roll alone, sparse.
-  - enemies near (count > 2): a second voice enters, a fifth below, slightly late.
-  - elite present: the splices start; a reversed fragment every 8 bars.
-  - boss: loop speed ×1.25 and the hiss rises; on each boss phase a hard cut to a new splice.
-  - bot hours (Godziny konsultanta): telephone band only + hold beep every 4 s.
-  - Czas wsteczny: the whole loop plays backwards.
-  - suspended (Zawieszenie): the music continues but ducked to −12 dB, as if behind a door.
-  - death: the roll stops with a ritardando of the mechanism, not a sting.
-- **Implementation notes.** One `AudioContext` unlocked on the first tap ("Akceptuję
-  regulamin" is the natural unlock). A `music/` module exposes `setState(flags)` and renders
-  everything from a seed with the run rng fork 'music'. An offline render script
-  (`npm run render-audio`) writes a 20 s WAV per state for inspection: peak level, spectrum
-  within band, no clipping. Taste is judged by the player on the phone. Settings: music and SFX
-  volume, both persisted; defaults on.
+Combat (weighted, see 14.1):
+- hit: pen scratch transient + 90 Hz thump body + scratch-debris tail.
+- crit: longer scratch + sub thump (50 Hz) + blot "plop" + splatter dots as tail.
+- kill: two heavy strokes (each with body) + pencil scribble tail as the figure is rubbed out.
+- player hurt: a paper tear with a low body; low racja: the tear gets a faint hiss bed.
+- skills: each hero has three distinct sounds from the same recipe (Pralka: drum spin, foam
+  hiss, dragged box; Konsultant: hold beep stab, redirect zip, headset click; Pętlowiec: two
+  overlapping remarks, a tape splice, a loop rewind; Kartograf: theodolite click-shot, dashed
+  area hum, a pin pulled).
+- enemy families: devices clank (metal body), notifications ping dry (damped pluck, never a
+  chat-app ping), generated beasts sound like dotted lines: granular ticks with no body until
+  confirmed (existence coefficient scales the body layer).
+- boss: a low tape-motor hum under the whole fight; each phase a hard splice.
+
+### 14.4 Music profiles (one per planet, chosen from the seed and the family mix)
+- **Profile B: hold line.** Hold music the way the Studio Eksperymentalne Polskiego Radia
+  (1958–) made tape music: loops, splices, wow and flutter, hiss, filtered noise. Framed as
+  "Muzyka na czekanie, utwór nr 7". Default for Powiadomienia-dominant planets.
+- **Profile C: punched roll.** The page's obstacle layout read as a piano roll (x = time, y =
+  pitch class), so each page plays its own motif. Music box / barrel organ timbre
+  (Karplus–Strong plucks, 2-op FM bells, slight detune), then a light tape treatment. Each
+  planet picks a strange fixed scale (never major/minor). Default for Urządzenia planets.
+- **Profile B+C** for Wygenerowane planets: the roll played through the hold line, with
+  reversed fragments.
+- **Variety inside a profile:** tempo, scale, loop length, filter band and splice rate are
+  rolled from the seed, so two planets with the same profile do not sound the same.
+- **Adaptation** (state → layers, crossfaded over 2–4 s), shared by all profiles:
+  calm: sparse. Enemies near (>2): second voice, a fifth below, slightly late. Elite: splices
+  begin, a reversed fragment every 8 bars. Boss: tempo ×1.25, hiss up, hard cut per phase.
+  Bot hours: telephone band only + hold beep every 4 s. Czas wsteczny: the loop runs
+  backwards. Zawieszenie: music ducked −12 dB, as if behind a door. Death: the mechanism
+  slows to a stop, no sting. Page turn: a splice.
+- **Planned profiles:** heavy metal (own anchor and ban list to be written), others as the
+  map themes grow.
+
+### 14.5 Implementation notes
+One `AudioContext` unlocked on the first tap ("Akceptuję regulamin" is the natural unlock).
+`audio/sfx.ts` (recipes as data: layers with type, frequency, envelope, gain), `audio/music/`
+(profiles as modules sharing the adaptation layer), `audio/mix.ts` (buses: sfx, music, master
+limiter, ducking). State in, sound out: `setState(flags)` from the run each frame; no sound
+code inside game systems beyond emitting events. Everything renders from a seed with the run
+rng fork 'music'. An offline render script (`npm run render-audio`) writes a 20 s WAV per
+profile and state for inspection: peak and RMS levels, spectrum within band, no clipping,
+every combat sound shows a body layer. Taste is judged by the player on the phone. Settings:
+music and SFX volume, both persisted; defaults on.
