@@ -1,4 +1,4 @@
-# Sprawozdanie — rules for agents working in this repo
+# Zgłoszenie — rules for agents working in this repo
 
 Read `docs/DESIGN.md` first, whole. It is the source of truth for mechanics, look, and voice.
 This file is about how we build.
@@ -29,7 +29,7 @@ src/
                      stamp(), inkBlot(), strike(), drawIn(), footnote area, night edition
   world/             run generation, pages, obstacles, page turn, laws (modifiers)
   entities/          types for player, enemy, projectile, pickup, summon; spatial grid
-  combat/            damage.ts (types, resist, crit, racja vocab), status effects, targeting
+  combat/            damage.ts (types, resist, crit, racja vocab), claims.ts (teza/rebuttal), status.ts, spor.ts (stub), targeting
   enemies/           parts (SVG part library as path data), assemble (procedural contraption),
                      families (stats, resist, traits: defect / escalation / existence), ai, bosses
   items/             bases, affixes, grammar (gender agreement), generate, audit, opinions, warranty, uniques
@@ -55,7 +55,7 @@ src/
 - Plural forms via `t()` with `{count}`; Polish has one/few/many.
 
 ## Look rules (short form; full list in DESIGN §3)
-Cream paper, black ink strokes, one red accent, typewriter + Garamond, wobble filter on the
+Cream paper, black ink strokes, one red accent, Michroma titles + Space Mono forms + Garamond narration, wobble filter on the
 world group, drawn-in spawns, crossed-out deaths, ink blots for hits, stamps for events,
 HUD as a filled form, footnotes as tooltips. No gradients, glow, shadows, blur, neon, rounded
 glass cards, emoji, icon fonts, sans-serif, particle bursts, big shake.
