@@ -97,13 +97,22 @@ export function spawnEntryWave(s: RunState, family: FamilyId, count: number, vie
   const margin = 70;
   const inner: Rect = { x0: view.x0 + margin, y0: view.y0 + margin, x1: view.x1 - margin, y1: view.y1 - margin };
   const out: Enemy[] = [];
-  // an anchor inside the view, 220..340 from the player, where the group gathers
-  for (let tries = 0; tries < 60 && out.length === 0; tries++) {
-    const ax = r.range(Math.max(inner.x0, 80), Math.min(inner.x1, s.page.w - 80));
-    const ay = r.range(Math.max(inner.y0, 80), Math.min(inner.y1, s.page.h - 80));
-    const d = Math.hypot(ax - p.x, ay - p.y);
-    if (d < ENTRY_MIN + 40 || d > 340) continue;
-    out.push(...spawnWave(s, family, count, { x: ax, y: ay }, { minRadius: 20, maxRadius: 80, minPlayer: ENTRY_MIN }));
+  // One spot per enemy, spread over the view (at least 110 units apart, 220..340 from the player), so the
+  // first screen is a loose crowd and not one pile. Under Parzystosc each spot gets its twin beside it.
+  const spots: { x: number; y: number }[] = [];
+  for (let i = 0; i < count; i++) {
+    for (let tries = 0; tries < 80; tries++) {
+      const ax = r.range(Math.max(inner.x0, 80), Math.min(inner.x1, s.page.w - 80));
+      const ay = r.range(Math.max(inner.y0, 80), Math.min(inner.y1, s.page.h - 80));
+      const d = Math.hypot(ax - p.x, ay - p.y);
+      if (d < ENTRY_MIN + 30 || d > 340) continue;
+      if (spots.some((q) => Math.hypot(q.x - ax, q.y - ay) < 110)) continue;
+      const got = spawnWave(s, family, 1, { x: ax, y: ay }, { minRadius: 0, maxRadius: 30, minPlayer: ENTRY_MIN });
+      if (got.length === 0) continue;
+      spots.push({ x: ax, y: ay });
+      out.push(...got);
+      break;
+    }
   }
   // top up: single enemies anywhere in the view
   for (let tries = 0; tries < 200 && s.enemies.filter((e) => inRect(e, view) && Math.hypot(e.x - p.x, e.y - p.y) >= ENTRY_MIN).length < ENTRY_VISIBLE; tries++) {

@@ -1,95 +1,105 @@
 # Architecture (read this before the code)
 
-Plain data, pure functions, one thin render layer. The page is one `<svg id="stage">` plus an HTML
-overlay `<div id="ui">`. `npm run dev` runs it; `window.__game` drives it from tests and shots.
+Plain data, pure functions, one thin render layer. The page is one `<svg id="stage">` plus an HTML overlay
+`<div id="ui">`. `npm run dev` runs it; `window.__game` drives it from tests, shots and the smoke script.
+Fonts: Michroma (titles, stamps), Space Mono (HUD, forms, buttons), EB Garamond (narration, footnotes).
+Damage types: `mechaniczny | regulaminowy | egzystencjalny`. Folder READMEs in `src/*/` say what each domain owns.
 
-## Brief changes already applied
-Fonts: Michroma (titles, stamps, screen headers; `--title`), Space Mono (HUD, labels, buttons, forms;
-`--mono`), EB Garamond (narration, footnotes; `--serif`). Damage types are `mechaniczny |
-regulaminowy | egzystencjalny`. HUD labels: Racja, Reputacja, Gwiazdki, Strona. Title screen is
-"ZGLOSZENIE NR 48213" with the stamp "ZGLOSZENIE PRZYJETO". Stubs exist for claims, statuses, spor.
-
-## Layout of the stage (index.html)
-`#page` (paper beyond the edge, grain, hatched border, obstacles; no filter) -> `#world` (entities;
-wobble filter) -> `#fx` (blots, strikes, stamps, margin notes, tap marks) -> `#ui` (HTML: HUD form,
-pads, footnotes, cover, death form). `<defs>` hold `#wobble`, `#wobble-cover`, `#hatch`, `#hatch-wide`,
-`#stamp-mask`, `#paper`. The camera shows at least 390 x 700 world units; the `#wobble` filter region is
-moved to the visible area each frame by `camera.apply()`. Colors are CSS variables on `:root`
-(`--paper --paper-edge --ink --ink-wet --accent`); `data-theme="night"` on `<html>` swaps them
-(`setTheme('day'|'night'|'auto')` in `render/stage.ts`). SVG layers get stroke styles from CSS (`#world`
-etc.); never set stroke width on a figure's root `<g>`.
+## Stage (index.html)
+`#page` (paper, hatched border, obstacles, the exit dog-ear; no filter) -> `#world` (entities; wobble filter,
+re-seeded every 500 ms) -> `#fx` (blots, strikes, stamps, margin notes) -> `#ui` (HTML: HUD, pads, footnotes, sheets).
+The camera shows at least 390 x 700 world units (`render/camera.ts`, `viewRect()` gives the clamped rectangle).
+Colours are CSS variables on `:root`; `data-theme="night"` swaps them. SVG layers get their strokes from CSS; never
+set a stroke width on a figure's root `<g>`. `#stage` has `touch-action: none`.
 
 ## State
-`RunState` (`world/run.ts`), created by `createRun(seed)`:
-`{ seed, rng, rngs:{ai,combat,loot,spawn}, time (s), status:'running'|'dead', page, pageIndex, pageCount,
-lawId, player, enemies[], projectiles[], pickups[], nextId, nextItemNumber, kills, edgeCooldown, spawnTimer }`.
-`Page` = `{ w:1200, h:1600, inset, spawn, obstacles[] }`; each obstacle has `colliders: Circle[]`.
-Entities (`entities/types.ts`): `Player`, `Enemy`, `Projectile`, `Pickup`, all `{ kind, id, x, y, r }`;
-fighters add `hp, hpMax` (Racja), `speed, facing, moving, stats, damageType, attackRange, attackCooldown,
-attackTimer, statuses[]`. `Enemy.claim?: Claim`. `MetaState` (`save/save.ts`): `{ version, heroId?, stamps,
-runsCompleted }`, localStorage key `zgloszenie.meta`, `loadMeta()/saveMeta()` never throw.
-Random: every gameplay roll uses `s.rngs.<stream>` (mulberry32, `rng.fork(label)` depends only on seed+label).
-Render-only randomness uses its own generators in `render/` and never touches `s.rng*`.
+`RunState` (`world/run.ts`, `createRun(seed, opts)`): seed and four rng streams (`ai combat loot spawn`),
+`time`, `status` (`running | paused | dead`; sheets and forms use `paused`), `modal` (law sheets), `turning`
+(page sweep), pages, `player`, arrays `enemies projectiles pickups summons zones`, `law` (flags), `hero`
+(`heroes/state.ts`: cooldowns, update ranks, ring buffer, `pendingLevels`, death bookkeeping), `victoryAt`.
+Every roll goes through `s.rngs.*`; render-only randomness never touches them. `MetaState` (`save/save.ts`) is
+localStorage (`zgloszenie.meta`, plus `.sklep`); loading never throws.
+
+### Entity kinds (`entities/types.ts`, all `{ kind, id, x, y, r }`)
+`player`, `enemy` (family, tier, claim, defect, elite, boss, `rt` runtime bag via `rtOf()`), `projectile`, `pickup`
+(an item plate, a gwiazdki star, or a **permission card**: `permission?: FamilyId`), **`summon`** (`copy` of the
+Petlowiec, `decoy` of the Kartograf, `ghost`; they walk and shoot in `heroes/system.ts`) and **`zone`** (`teren`
+marked area, `hourglass` over a blocked enemy). Collision radii match the drawing: enemies are drawn x1.2
+(`ENEMY_SCALE`), heroes x1.15 (`HERO_SCALE`), ground cards x1.3 (`CARD_SCALE`).
+Adding a kind: type + factory, array on `RunState`, a `Builder` in `render/` (`create`, `patch`, `drawInMs`),
+a case in `render/view.ts`.
 
 ## Loop and systems
-`core/loop.ts`: fixed 60 Hz `update(dt)`, rAF `render(frameDt, alpha)`, pauses on `visibilitychange`,
-`loop.after(seconds, fn)` for timers (never setTimeout). `main.ts` wires: update -> `game.update`;
-render -> `tickTweens`, wobble re-seed (every 500 ms), `game.render`, `hud.update`.
-`systems/step.ts` fixes the order: statuses, `movePlayer`, `updateEnemies`, `playerAttacks`,
-`enemiesAttack`, `collectPickups`, `trickleSpawn`. A system is `(state, bus, dt)`. Add one by writing a
-file in `systems/` and calling it in `step.ts`. `systems/combat.ts` has `attack()` and `applyDamage()`
-(the only place hp changes and `enemy:hit|player:hit|enemy:died|player:died` are emitted).
-Damage formula: `combat/damage.ts` `rollDamage(attacker, defender, type, rng)` (roll order: hit, crit,
-range). Hit chance `clamp(2A/(A+D), .05, .95)`, crit x2 before resist, resist capped at 75, min 1.
+`core/loop.ts`: fixed 60 Hz `update`, rAF `render`, `loop.after()` for timers (never `setTimeout`).
+`systems/step.ts` fixes the order: law pre, statuses, `movePlayer` (statuses slow or hold the player), enemy AI,
+`playerAttacks` + `enemiesAttack` (skipped in bot hours), `heroStep` (cooldowns, dash, summons, zones, player
+projectiles, update queue), `collectPickups`, `updateLoot`, `trickleSpawn`, law post, `tickLaw`, `tickPageTurn`.
+`systems/combat.ts` `applyDamage(s, bus, defender, amount, crit, type?)` is the only place racja changes: it runs
+`enemies/hooks.ts` `modifyDamage` (claim rebuttal = crit and struck bubble, existence, zgloszony), then death.
+Pass `type` always: skills do (`heroes/helpers.ts` `skillDamage`). Crits shove an enemy 12 units x `law.knockbackMul`.
+Damage formula: `combat/damage.ts` (hit `clamp(2A/(A+D), .05, .95)`, crit x2 before resist, resist cap 75).
 
-## Events (`core/events.ts`, typed bus: `bus.on(name, fn)`, `bus.emit(name, payload)`)
-`skill:1|2|3`, `inventory` (no payload; pads only emit these) - `screen:changed {screen}` -
-`run:started {seed}` - `player:hit {x,y,amount,crit}` - `player:died {x,y}` -
-`enemy:hit {id,x,y,amount,crit}` - `enemy:miss {id}` - `enemy:died {id,x,y}` - `pickup:taken {id,number}` -
-`page:edge {x,y,side}` - `footnote {text}` (shows a footnote) - `stamp {text,x,y}` (slams a stamp at world x,y).
-To add an event: add it to `GameEvents`; TypeScript then checks every emit/on.
+## Hero layer (`heroes/`)
+Four heroes (`defs.ts`), twelve skills (`skills.ts`, `castSkill` refuses during bot hours, while `zablokowany`, and
+while `wyciszony` with a margin note), quirks (`quirks.ts`: Pralka's 10th hit, Konsultant's trial speed and
+`seesDefects`, Kartograf's `revealsPage`), the per-step `system.ts`. `layer.ts` ties it to the forms: update form
+(`ui/update.ts`), death forms (`ui/deathForms.ts`), pads (`ui/pads.ts`). Death (`death/outcomes.ts`): zgloszenie,
+petla (a hostile copy that carries one of your items away and drops it when crossed out), zawieszenie (suspended
+until the appeal form from the next elite is filed).
 
-## Adding an entity kind
-1. Type in `entities/types.ts` (add to the `Entity` union), factory in `entities/factory.ts`.
-2. Array on `RunState` and a system for it.
-3. A `Builder` in `render/`: `{ create(e): SVGGElement, patch?(e, g, timeMs), drawInMs? }` and add it to the
-   `Builders` map that `createGame` passes to `createViews` (see `render/figures.ts`, `placeholderBuilders`).
-   Extend the `switch` in `render/view.ts` `make`/`patch` (the compiler flags it).
+## Deferred update queue (`progression/queue.ts`)
+A level up (`player:levelup`) only does `hero.pendingLevels++`, writes the margin note "Dostepna aktualizacja"
+and shows the typed HUD line under Reputacja (a 44 px button). `heroStep` ticks the queue and emits `update:ready`
+when no enemy has been within 320 units for 1.5 s, or `hero.updateRequested` is set (page turn, HUD tap).
+`canOpenUpdate` refuses while a boss lives, while any sheet holds the screen (`status !== running`, `modal`,
+`turning`, form open) and after the boss fell. Queued updates open one after another.
 
-## How `render/view.ts` patches
-`views.sync(entities, timeMs)` each frame: unseen id -> `builder.create`, append to `#world` (pickups
-are prepended so they lie under actors), `data-id` and `data-kind` set, `drawIn` if `drawInMs`; seen id -> only
-`transform` (`translate(x y)` plus `scale(-1 1)` when `facing < 0`; written only when the string changes)
-and `builder.patch` (legs: swap `d` when the 150 ms phase changes); ids that vanished -> node removed.
-`views.detach(id)` forgets a view but leaves the node so `strike()` can finish and remove it
-(done in `render/bindings.ts` on `enemy:died`). Never rebuild children in `patch`.
+## Enemies and loot
+Families, assembly of drawn parts, claims, AI, bosses: `enemies/` (README). The first wave of every page is placed
+in the 390 x 700 entry view, none closer than 180 units (`spawnEntryWave`). Claim bubbles are shown only for elites,
+bosses, the nearest enemy within 260 units and for 2 s after draw-in (`render/bubbleFocus.ts`, class `bubble-off`).
+`systems/loot.ts`: `dropLoot` (items, stars; tables per tier), `rollPermission` (elite 1/3, boss always) and
+`dropPermission` (a checkbox card with the family word). `takePickup` pushes the family into `player.permissions`
+(read by `progression/update.ts` `hasPermission`); a permission never enters the inventory. A copy's item comes back
+through `heroes/layer.ts`. The exit dog-ear is drawn in when the player is within 400 units, at once for the
+Kartograf, who also gets a footnote naming the corner (`render/exitReveal.ts`, `world/pages.ts` `exitVisible`).
 
-## Ink primitives (`render/ink.ts`; call `initInk(stage.fx)` once, `tickTweens(ms)` per frame)
-- `drawIn(g, ms)` / `eraseOut(g, ms, delay?, done?)`: dash animation of every stroked descendant; hatch fills pop in at 60%.
-- `strike(g)`: two red strokes across the bbox, "skreslono" (`ui.ink.struck`), rub-out, fade, removes `g`. `g` must be in the DOM and out of the view map (`detach`).
-- `blot(x, y, radiusUnits, crit?)`: pooled (20), darkens over 300 ms via `color-mix`; crit adds 3-5 dots.
-- `stamp(text, x, y, {parent?, ttl?, rotation?, fontSize?})`: uppercased, Michroma, red, mask `#stamp-mask`; scale 1.4 -> 1 in 120 ms; `ttl: Infinity` keeps it. `parent` lets HTML-hosted SVG (cover) use it.
-- `marginNote(text, x, y, rot?, ttl?)`, `tapMark(x, y)`. Tweens: `render/tween.ts` `tween(ms, step(p), {delay, ease, done})`.
-Rules: no gradients, glow, shadows, translucent fills; red only for stamps, strikes, Racja.
+## Law flags (`world/laws.ts`, neutral values when no clause is active; read them unconditionally)
+| flag | read by |
+|---|---|
+| `spawnPairs`, `lootPairs`, `extraElites`, `enemyCountMul`, `lootMul`, `lootTierBonus` | spawn and loot code |
+| `speedMul`, `weaponDamageMul` | `lawPre/lawPost` around the step |
+| `knockbackMul` | `systems/combat.ts` `knockback`, Wirowanie pull |
+| `botTime` | `step.ts`, skills, summons, player projectiles, enemy shots and bosses (nobody deals damage) |
+| `noiseAggroMul`, `noisyUntil` | `aggroMul(state)` in `enemies/ai.ts` |
+| `reversed`, `reverseAfter` | `tickLaw` pushes enemies back; HUD prints negative reputacja |
+| `killCost`, `cookies`, `twoFactorExit`, `officeOpen`, `hours` | economy, `ui/lawSheets.ts`, kiosk |
+
+## Events (`core/events.ts`, typed bus; `bus.on`, `bus.emit`)
+Input: `skill:1|2|3`, `inventory`, `player:tap`. Run: `run:started`, `run:ended {outcome}`, `screen:changed`,
+`page:entered`, `page:turn`, `page:edge`. Combat: `player:hit`, `enemy:hit|miss|died {tier, family}`, `boss:died`,
+`enemy:rebutted|offTopic|escalated`. Heroes: `skill:cast`, `skill:fx`, `summon:expired`, `player:levelup`,
+`update:ready`, `player:died`, `player:unsuspended`. Presentation: `footnote {text}`, `stamp`, `margin:note
+{text, x, y, ttl?}`, `law:trigger`, `law:ask`, `pickup:taken`. Adding one to `GameEvents` makes the compiler check all uses.
+
+## Render
+`views.sync` creates one `<g data-id>` per entity, then patches only `transform` and a few attributes
+(never rebuild children per frame). Ink primitives in `render/ink.ts`: `drawIn`, `eraseOut`, `strike`, `blot`,
+`stamp`, `marginNote`, `tapMark`. No gradients, glow, shadows, translucent fills; red only for stamps, strikes, Racja.
+HTML sheets share `ui/sheet.ts`; long ones scroll in their own area (`overscroll-behavior: contain`,
+`touch-action: pan-y`) with the action row sticky or below the scroll, and every `#ui button` is at least 44 x 44 px.
 
 ## i18n
-`t('ui.hud.racja')`; files `src/i18n/pl/<domain>.json` are picked up automatically, file name = key prefix,
-nested keys are joined with dots. A leaf is a string or `{ "one", "few", "many" }`; pass `{ count }` to select
-(1 -> one; 2-4 except 12-14 -> few; else many). `{name}` placeholders. Missing key returns the key and warns
-once. `genderForm({m,f,n,pl}, gender)` for generated names. No UI strings in `.ts` files; no `!` outside tests.
+`t('domain.key')`; `src/i18n/pl/<domain>.json` are picked up automatically (file name = key prefix). A leaf is a
+string or `{ one, few, many }` with `{count}`. No UI strings in `.ts` files, no `any`, no `!` outside tests.
 
-## Test hook (`src/testHook.ts`, always installed as `window.__game`)
-`start(seed=1)`, `screen()`, `go('title'|'run'|'death')`, `hitEnemy()` (4 damage to nearest; if farther than 150 it is
-pulled next to the player first), `killEnemy()`, `hurtPlayer(n)` (lethal values kill and lead to the death form after 1 s),
-`placePlayer(x, y)`, `setTheme('day'|'night'|'auto')`, `theme()`, `footnote(text)`, `snapshot()` (plain data).
-
-## Commands
-`npm run dev | build | preview | typecheck | test | icons`; `npm run shot` builds, serves `dist` with
-`vite preview`, drives the bundled Chromium (`scripts/browser.mjs` finds it under `/opt/pw-browsers`; override
-with `PLAYWRIGHT_CHROMIUM`) at 390x844 @2x and writes `shots/{title,run,strike,tap,edge,run-night,hurt,death}.png`.
-It exits non-zero on page errors or console errors. Look at the PNGs after every rendering change.
-
-## Placeholders to replace (each owner agent)
-`render/figures.ts` (player, enemy, pickup, projectile drawings), `systems/enemies.ts` (AI, spawning),
-`narration/placeholder.ts` (three notes), `ui/pads.ts` words and drawings (skills are not wired to anything),
-`world/laws.ts` (`applyLaw` no-op), `items` (`placeholderItem`), the death form (`ui/death.ts`).
+## Test hook, scripts, commands
+`window.__game`: `start(seed, opts)`, `go(screen)`, `state()`, `advance(s)`, `turnTo(page)`, `hitEnemy()`,
+`killEnemy()`, `hurtPlayer(n)`, `placePlayer`, `snapshot()`, `giveItem`, `demoInventory`, `openInventory`, `openSklep`,
+`hero.{cast, levelUp, grantXp, openUpdate, pickUpdate, die, givePermission}`, `enemies.{spawnFamily, spawnBoss, hit, clear, list}`.
+`npm run dev | build | typecheck | test`. `npm run shot` builds, serves with `vite preview`, drives the bundled
+Chromium at 390x844 @2x and writes `shots/*.png` (exits non-zero on page errors). `npm run smoke` builds and plays
+a whole ticket in the same browser: real buttons into a run, kills, the queued update opened from the HUD line,
+inventory, boss on the last page, `baza` after it, a death form, then 5 s of `requestAnimationFrame` deltas with 40
+enemies; pictures in `shots-smoke/`, exit code 1 on a page error or a failed check (`SMOKE_UNCAPPED=1` lifts the 60 Hz
+limit, `PERF_MAX_MS` fails above a bound). Everything must pass `npm run typecheck && npm test && npm run build`.
