@@ -26,7 +26,8 @@ export interface Mix {
   /** Where the music engine connects (already under the duck and the base level). */
   readonly music: GainNode;
   readonly limiter: DynamicsCompressorNode;
-  setVolumes(music: number, sfx: number, at?: number): void;
+  /** `immediate` sets the gains at once (a fresh context, an offline render) instead of easing over 30 ms. */
+  setVolumes(music: number, sfx: number, at?: number, immediate?: boolean): void;
   /** Dip the music by `db` for `holdMs` (on the audio clock). */
   duck(db?: number, holdMs?: number, at?: number): void;
 }
@@ -54,20 +55,23 @@ export function createMix(ctx: BaseAudioContext, now: () => number = () => ctx.c
   duckGain.connect(master);
 
   let musicBase = 1;
-  const apply = (at: number): void => {
-    musicVol.gain.setTargetAtTime(musicBase * dbToGain(MUSIC_BASE_DB), at, 0.03);
+  const apply = (at: number, immediate: boolean): void => {
+    const g = musicBase * dbToGain(MUSIC_BASE_DB);
+    if (immediate) musicVol.gain.setValueAtTime(g, at);
+    else musicVol.gain.setTargetAtTime(g, at, 0.03);
   };
-  apply(now());
+  apply(now(), true);
 
   return {
     ctx,
     sfx,
     music: musicVol,
     limiter,
-    setVolumes(music, sfxV, at = now()) {
+    setVolumes(music, sfxV, at = now(), immediate = false) {
       musicBase = volumeToGain(music);
-      apply(at);
-      sfx.gain.setTargetAtTime(volumeToGain(sfxV), at, 0.03);
+      apply(at, immediate);
+      if (immediate) sfx.gain.setValueAtTime(volumeToGain(sfxV), at);
+      else sfx.gain.setTargetAtTime(volumeToGain(sfxV), at, 0.03);
     },
     duck(db = DUCK_DB, holdMs = DUCK_MS, at = now()) {
       const g = duckGain.gain;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ceilingCurve, dbToGain, fmBellSamples, gainToDb, ksSamples, motorSamples, noiseSamples, peakOf, reversed, saturationCurve, swellSamples } from './dsp';
+import { ceilingCurve, dbToGain, fmBellSamples, gainToDb, ksSamples, motorSamples, noiseSamples, peakOf, reversed, saturationCurve, sinCycles, swellSamples } from './dsp';
 
 const SR = 24000;
 
@@ -57,6 +57,23 @@ describe('Karplus-Strong pluck', () => {
 });
 
 describe('other generators', () => {
+  it('the table sine is accurate to 1e-5 over many cycles and for negative phases', () => {
+    let worst = 0;
+    for (let i = -2000; i < 6000; i++) {
+      const p = i * 0.0137;
+      worst = Math.max(worst, Math.abs(sinCycles(p) - Math.sin(2 * Math.PI * p)));
+    }
+    expect(worst).toBeLessThan(1e-5);
+  });
+
+  it('the FM bell sounds at its carrier (within 25 cents; the detune pair beats around it)', () => {
+    for (const f of [262, 523, 1046]) {
+      const x = fmBellSamples(f, SR, 0.8, { t60: 1.2, detune: 7 });
+      const got = pitchNear(x, SR, f);
+      expect(Math.abs(1200 * Math.log2(got / f))).toBeLessThan(25);
+    }
+  });
+
   it('the FM bell is finite, normalised and decays', () => {
     const x = fmBellSamples(660, SR, 1.5, { t60: 1 });
     expect(peakOf(x)).toBeCloseTo(0.8, 5);

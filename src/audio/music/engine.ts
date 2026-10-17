@@ -11,7 +11,7 @@ import type { Rng } from '../../core/rng';
 import { bellBuffer, noiseBuffer, pluckBuffer, swellBuffer } from '../buffers';
 import { adaptTargets, CALM_FLAGS, CROSSFADE_TAU, ease, type MusicFlags, type Targets } from './adapt';
 import { createTapeChain, generateHoldLoop, type TapeChain } from './holdline';
-import { STEPS_PER_BAR, type ProfileParams } from './profiles';
+import { STEPS_PER_BAR, type ProfileId, type ProfileParams } from './profiles';
 import { readRoll, type RollNote, type RollPage, type Voice } from './roll';
 import { createScheduler, type StepScheduler } from './scheduler';
 import { degreeBelow, degreeFreq } from './scale';
@@ -27,9 +27,9 @@ export const TRANSIENT_NODES = 4;
 export const NODE_LIMIT = 40;
 
 /** Level of one voice kind before the layer gain; velocity multiplies it. */
-const VOICE_LEVEL: Record<Voice, number> = { pluck: 1.5, bell: 1.0, tick: 0.9, swell: 1.2 };
-/** Where the chain's fade sits at full level: the music's own headroom under the SFX. */
-const OUT_LEVEL = 0.5;
+const VOICE_LEVEL: Record<Voice, number> = { pluck: 1.5, bell: 1.0, tick: 0.35, swell: 1.2 };
+/** Where the chain's fade sits at full level, per profile: the music's own headroom under the SFX (B is sparser, so a little more). */
+const OUT_LEVEL: Record<ProfileId, number> = { B: 0.7, C: 0.5, BC: 0.5 };
 /** Hiss: the profile's value is multiplied by this. */
 const HISS_SCALE = 1;
 /** Below this tempo multiplier the mechanism has stopped and nothing more is scheduled. */
@@ -109,6 +109,22 @@ export function createMusicEngine(o: EngineOpts): MusicEngine {
 
   let page: RollPage | null = o.page;
   let content = build(page);
+  /** Buffers still to be synthesized ahead of need, one per tick: no frame pays for a whole bell at once. */
+  let warm: (() => void)[] = [];
+  const queueWarm = (c: Content): void => {
+    const seen = new Set<string>();
+    warm = [];
+    for (const list of c.byStep.values()) {
+      for (const ev of list) {
+        if (ev.voice === 'tick') continue;
+        const k = `${ev.voice}|${ev.degree}|${ev.steps}`;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        warm.push(() => void bufferFor(ev, ev.degree, false));
+        if (ev.voice !== 'swell') warm.push(() => void bufferFor({ ...ev, voice: 'pluck' }, degreeBelow(params.scale, ev.degree), false));
+      }
+    }
+  };
   let pending: { page: RollPage | null } | undefined;
   let tgt: Targets = adaptTargets(o.flags ?? CALM_FLAGS, params.id);
   let flags: MusicFlags = o.flags ?? CALM_FLAGS;
@@ -121,6 +137,9 @@ export function createMusicEngine(o: EngineOpts): MusicEngine {
   let prevBar: { ev: RollNote; k: number }[] = [];
   let thisBar: { ev: RollNote; k: number }[] = [];
   let reverseThisBar = false;
+  /** The last pitched note played, and an echo of it armed for a bar the page leaves empty. */
+  let lastNote: RollNote | null = null;
+  let echo: RollNote | null = null;
   let voices: Voice1[] = [];
   let parked = false;
   let stopped = false;
@@ -143,7 +162,7 @@ export function createMusicEngine(o: EngineOpts): MusicEngine {
     set(chain.hp.frequency, band[0]);
     set(chain.lp.frequency, band[1]);
     set(chain.door.frequency, tgt.door);
-    set(chain.fade.gain, tgt.level * OUT_LEVEL, flags.dead ? 1.4 : CROSSFADE_TAU);
+    set(chain.fade.gain, tgt.level * OUT_LEVEL[params.id], flags.dead ? 1.4 : CROSSFADE_TAU);
     if (immediate) {
       cur.tempo = tgt.tempo;
       cur.density = tgt.density;
@@ -155,7 +174,7 @@ export function createMusicEngine(o: EngineOpts): MusicEngine {
   applyTargets(true);
   // start of the run: ease in rather than switch on
   chain.fade.gain.setValueAtTime(0, clock.now());
-  chain.fade.gain.linearRampToValueAtTime(tgt.level * OUT_LEVEL, clock.now() + (o.fadeInS ?? 1.5));
+  chain.fade.gain.linearRampToValueAtTime(tgt.level * OUT_LEVEL[params.id], clock.now() + (o.fadeInS ?? 1.5));
 
   // ---- voices ----
   const aliveAt = (t: number): number => {
@@ -165,18 +184,27 @@ export function createMusicEngine(o: EngineOpts): MusicEngine {
 
   const layerNode = (layer: 'main' | 'second' | 'reversed'): GainNode => (layer === 'main' ? chain.main : layer === 'second' ? chain.second : chain.reversed);
 
+  /** The buffer of a note, synthesized on first use and cached; null for a tick (noise, no pitch). */
+  const bufferFor = (ev: RollNote, degree: number, reverse: boolean): AudioBuffer | null => {
+    const freq = degreeFreq(params.scale, params.rootHz, degree);
+    if (freq < 40 || freq > 5000) return null;
+    const sec = stepBase * Math.max(1, ev.steps);
+    if (ev.voice === 'bell') return bellBuffer(ctx, freq, Math.min(2, 0.8 + sec * 0.9), { t60: 0.7 + sec * 0.5, detune: 7 }, reverse);
+    if (ev.voice === 'swell') return swellBuffer(ctx, freq, Math.min(5, sec), params.seed & 7);
+    if (ev.voice === 'tick') return null;
+    return pluckBuffer(ctx, freq, Math.min(2.4, 0.7 + sec * 1.1), { t60: 0.6 + sec * 0.9, bright: 3200, seed: 11 }, reverse);
+  };
+
+  queueWarm(content);
+
   const playNote = (ev: RollNote, time: number, layer: 'main' | 'second' | 'reversed', degree: number, vel: number, reverse: boolean): void => {
     if (aliveAt(time) >= MAX_VOICES) return;
-    const freq = degreeFreq(params.scale, params.rootHz, degree);
-    if (freq < 40 || freq > 5000) return;
-    const sec = stepBase * Math.max(1, ev.steps);
-    let buf: AudioBuffer;
-    if (ev.voice === 'bell') buf = bellBuffer(ctx, freq, Math.min(2, 0.8 + sec * 0.9), { t60: 0.7 + sec * 0.5, detune: 7 }, reverse);
-    else if (ev.voice === 'swell') buf = swellBuffer(ctx, freq, Math.min(6, sec), params.seed & 7);
-    else if (ev.voice === 'tick') {
+    if (ev.voice === 'tick') {
       tickAt(time, vel);
       return;
-    } else buf = pluckBuffer(ctx, freq, Math.min(2.4, 0.7 + sec * 1.1), { t60: 0.6 + sec * 0.9, bright: 3200, seed: 11 }, reverse);
+    }
+    const buf = bufferFor(ev, degree, reverse);
+    if (!buf) return;
     const src = ctx.createBufferSource();
     src.buffer = buf;
     src.detune.value = rng.range(-5, 5);
@@ -224,6 +252,7 @@ export function createMusicEngine(o: EngineOpts): MusicEngine {
       playNote({ ...ev, voice: 'pluck' }, time + 0.06 + rng.range(0, 0.03), 'second', degreeBelow(params.scale, ev.degree), ev.vel * 0.8, reverse);
     }
     if (thisBar.length < 8) thisBar.push({ ev, k: stepInBar });
+    if (ev.voice !== 'tick') lastNote = ev;
   };
 
   const splice = (time: number, jump: boolean): void => {
@@ -237,9 +266,18 @@ export function createMusicEngine(o: EngineOpts): MusicEngine {
     if (pending !== undefined) {
       page = pending.page;
       content = build(page);
+      queueWarm(content);
       pending = undefined;
       pos = cur.direction < 0 ? (content.start + STEPS_PER_BAR - 1) % loopSteps : content.start;
     }
+    // A bar the page leaves empty is not silence: the last note comes back twice, softer, like paper creaking.
+    const bar0 = cur.direction < 0 ? pos - (STEPS_PER_BAR - 1) : pos;
+    let anyNote = false;
+    for (let k = 0; k < STEPS_PER_BAR && !anyNote; k++) {
+      const list = content.byStep.get((((bar0 + k) % loopSteps) + loopSteps) % loopSteps);
+      anyNote = list !== undefined && list.some((e) => e.rank <= cur.density);
+    }
+    echo = anyNote ? null : lastNote;
     // a reversed fragment: this bar echoes the notes of the last one, backwards, step by step
     reverseThisBar = tgt.reversedEvery > 0 && bars % tgt.reversedEvery === 0;
     prevBar = thisBar;
@@ -258,6 +296,7 @@ export function createMusicEngine(o: EngineOpts): MusicEngine {
     if (atBarLine) barLine(time);
     const list = content.byStep.get(pos);
     if (list) for (const ev of list) if (ev.rank <= cur.density) playEvent(ev, time);
+    if (echo && (stepInBar === 0 || stepInBar === 4)) playNote(echo, time, 'main', echo.degree, echo.vel * (stepInBar === 0 ? 0.45 : 0.3), cur.direction < 0);
     if (reverseThisBar) for (const e of prevBar) if (e.k === stepInBar) playNote(e.ev, time, 'reversed', e.ev.degree, e.ev.vel * 0.9, true);
     stepInBar++;
     pos = (((pos + dir) % loopSteps) + loopSteps) % loopSteps;
@@ -298,6 +337,7 @@ export function createMusicEngine(o: EngineOpts): MusicEngine {
         sched.reset(now);
       }
       sched.run(now, () => stepBase / Math.max(PARK_TEMPO, cur.tempo), onStep);
+      warm.shift()?.();
       if (tgt.beepEvery > 0) {
         if (nextBeep < 0) nextBeep = now + 0.4;
         while (nextBeep < now + 0.1) {
@@ -327,6 +367,7 @@ export function createMusicEngine(o: EngineOpts): MusicEngine {
         // The roll of the new page begins at once: swap now, play it from the first step.
         if (pending) page = pending.page;
         content = build(page);
+        queueWarm(content);
         pending = undefined;
         pos = cur.direction < 0 ? (content.start + STEPS_PER_BAR - 1) % loopSteps : content.start;
       } else {

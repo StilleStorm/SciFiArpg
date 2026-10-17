@@ -59,6 +59,41 @@ describe('music engine node budget', () => {
   }
 });
 
+describe('the tape treatment', () => {
+  it('wow (0.3-0.8 Hz) and flutter (faster, smaller) swing one delay line, with a hiss bed and a band', () => {
+    for (const id of PROFILE_IDS) {
+      const ctx = new FakeContext();
+      const rng = createRng(31).fork('music');
+      const params = rollProfile(id, rng);
+      createMusicEngine({ ctx: ctx.asContext(), out: ctx.destination as unknown as AudioNode, clock: { now: () => 0 }, params, rng, page: null });
+      const delay = ctx.nodes.find((n) => n.kind === 'delay');
+      expect(delay).toBeDefined();
+      const depthGains = ctx.nodes.filter((n) => n.kind === 'gain' && delay && n.paramTargets.includes(delay.delayTime));
+      expect(depthGains).toHaveLength(2);
+      const lfos = depthGains.map((g) => ctx.nodes.find((n) => n.kind === 'osc' && n.connected.includes(g)));
+      const [wowGain, flutterGain] = depthGains;
+      const [wow, flutter] = lfos;
+      expect(wow?.frequency.value).toBeGreaterThanOrEqual(0.3);
+      expect(wow?.frequency.value).toBeLessThanOrEqual(0.8);
+      expect(flutter?.frequency.value).toBeGreaterThan(wow?.frequency.value ?? 99);
+      expect(flutterGain?.gain.value).toBeLessThan(wowGain?.gain.value ?? 0);
+      // a hiss bed: looped noise through a high-pass into a gain that starts quiet
+      expect(ctx.nodes.some((n) => n.kind === 'buffer' && n.loop && n.started === 0)).toBe(true);
+      // band: a high-pass and a low-pass pair
+      const bands = ctx.nodes.filter((n) => n.kind === 'biquad' && (n.type === 'highpass' || n.type === 'lowpass'));
+      expect(bands.length).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it('the C profile gets a lighter treatment than the hold line', () => {
+    const rng = createRng(31).fork('music');
+    const b = rollProfile('B', rng);
+    const c = rollProfile('C', createRng(31).fork('music'));
+    expect(c.wowDepth).toBeLessThan(b.wowDepth);
+    expect(c.hiss).toBeLessThan(b.hiss);
+  });
+});
+
 describe('music engine behaviour', () => {
   it('is deterministic for a seed and different for another', () => {
     expect(timeline(run('C', 5, 40))).toBe(timeline(run('C', 5, 40)));
@@ -140,6 +175,20 @@ describe('music engine behaviour', () => {
         expect(r.ctx.voices().length, `${id} ${name}`).toBeGreaterThan(0);
       }
     }
+  });
+
+  it('a bar the page leaves empty is not silence: the last note comes back softer', () => {
+    const ctx = new FakeContext();
+    let t = 0;
+    const rng = createRng(12).fork('music');
+    const params = { ...rollProfile('C', rng), loopBars: 10, bpm: 80 };
+    const page = { w: 1200, h: 1600, inset: 18, obstacles: [{ kind: 'blot' as const, colliders: [{ x: 120, y: 700, r: 40 }] }] };
+    const engine = createMusicEngine({ ctx: ctx.asContext(), out: ctx.destination as unknown as AudioNode, clock: { now: () => t }, params, rng: rng.fork('voices'), page });
+    for (t = 0; t < 40; t += 0.025) engine.tick();
+    // the one blot is a 3-pin figure in the first bar of ten; without echoes 40 s (about 13 bars) would hold at most 6 voices
+    expect(ctx.voices().length).toBeGreaterThan(10);
+    const gaps = ctx.voices().map((v, i, all) => v.start - (all[i - 1]?.start ?? 0));
+    expect(Math.max(...gaps.slice(1))).toBeLessThan(2.5 * (60 / params.bpm / 2) * 8 / 2); // no stretch longer than about a bar and a half
   });
 
   it('a cut (page turn) swaps the roll and does not break the schedule', () => {

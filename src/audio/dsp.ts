@@ -7,12 +7,34 @@
  */
 import { createRng } from '../core/rng';
 
-/** White noise in [-1, 1]. */
+/** White noise in [-1, 1] (mulberry32 inlined: this runs over hundreds of thousands of samples). */
 export function noiseSamples(sr: number, seconds: number, seed = 1): Float32Array<ArrayBuffer> {
-  const rng = createRng(seed);
   const out = new Float32Array(Math.floor(sr * seconds));
-  for (let i = 0; i < out.length; i++) out[i] = rng.next() * 2 - 1;
+  let s = seed >>> 0;
+  for (let i = 0; i < out.length; i++) {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    out[i] = (((t ^ (t >>> 14)) >>> 0) / 4294967296) * 2 - 1;
+  }
   return out;
+}
+
+const SIN_N = 4096;
+const SIN_TABLE = (() => {
+  const t = new Float32Array(SIN_N + 1);
+  for (let i = 0; i <= SIN_N; i++) t[i] = Math.sin((2 * Math.PI * i) / SIN_N);
+  return t;
+})();
+
+/** sin(2 pi p) from a table with linear interpolation (error below 1e-6); p in cycles. */
+export function sinCycles(p: number): number {
+  const x = (p - Math.floor(p)) * SIN_N;
+  const i = x | 0;
+  const f = x - i;
+  const a = SIN_TABLE[i] ?? 0;
+  return a + ((SIN_TABLE[i + 1] ?? 0) - a) * f;
 }
 
 export function reversed(a: Float32Array): Float32Array<ArrayBuffer> {
@@ -117,11 +139,15 @@ export function fmBellSamples(freq: number, sr: number, seconds: number, o: Bell
   for (let v = 0; v < 2; v++) {
     const fc = freq * (v === 0 ? det : 1 / det);
     const fm = fc * ratio;
+    const decayA = Math.exp(-kAmp / sr);
+    const decayI = Math.exp(-kIdx / sr);
+    let env = 1;
+    let idx = index;
     for (let i = 0; i < len; i++) {
       const t = i / sr;
-      const env = Math.exp(-kAmp * t) * Math.min(1, t / 0.002);
-      const idx = index * Math.exp(-kIdx * t);
-      out[i] = (out[i] ?? 0) + env * Math.sin(2 * Math.PI * fc * t + idx * Math.sin(2 * Math.PI * fm * t));
+      out[i] = (out[i] ?? 0) + env * Math.min(1, t / 0.002) * sinCycles(fc * t + (idx / (2 * Math.PI)) * sinCycles(fm * t));
+      env *= decayA;
+      idx *= decayI;
     }
   }
   fadeOut(out, sr);

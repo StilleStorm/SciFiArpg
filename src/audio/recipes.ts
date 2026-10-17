@@ -113,9 +113,9 @@ export const RECIPES = {
   ], 0.15, 2),
   /** A sheet lifted and laid down: two noise sweeps, about 400 ms. */
   pageTurn: light([
-    noise(600, 0.2, 0.3, { q: 0.9, attack: 0.08, pitchDrop: -3, role: 'tail' }),
-    noise(2800, 0.2, 0.3, { q: 0.9, attack: 0.02, pitchDrop: 0.8, delay: 0.2, role: 'tail' }),
-    thump(88, 0.07, 0.34, { delay: 0.37, pitchDrop: 0.25 }),
+    noise(600, 0.2, 0.9, { q: 0.9, attack: 0.08, pitchDrop: -3, role: 'tail' }),
+    noise(2800, 0.2, 0.9, { q: 0.9, attack: 0.02, pitchDrop: 0.8, delay: 0.2, role: 'tail' }),
+    thump(88, 0.07, 0.3, { delay: 0.37, pitchDrop: 0.25 }),
   ], 0.5, 3),
   /** The paper ends: a dull bump. */
   pageEdge: light([
@@ -175,7 +175,8 @@ export const RECIPES = {
   kill: combat([
     click(4200, 0.55),
     noise(3200, 0.06, 0.55, { q: 1.2, pitchDrop: 0.4 }),
-    thump(96, 0.13, 0.9, { pitchDrop: 0.4 }),
+    thump(96, 0.13, 1.0, { pitchDrop: 0.4 }),
+    thump(52, 0.1, 0.55, { delay: 0.004, pitchDrop: 0.1, role: 'sub' }),
     click(3600, 0.6, { delay: 0.12 }),
     noise(2800, 0.08, 0.6, { q: 1.2, pitchDrop: 0.5, delay: 0.12 }),
     thump(76, 0.18, 1.0, { delay: 0.12, pitchDrop: 0.4 }),

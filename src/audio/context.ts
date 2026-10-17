@@ -55,7 +55,7 @@ function make(): void {
     }
     ctx = new C({ latencyHint: 'interactive' });
     mix = createMix(ctx);
-    mix.setVolumes(volumes.music, volumes.sfx);
+    mix.setVolumes(volumes.music, volumes.sfx, undefined, true);
     // iOS: a silent one-sample buffer played inside the gesture finishes the unlock.
     const b = ctx.createBuffer(1, 1, 22050);
     const s = ctx.createBufferSource();

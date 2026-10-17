@@ -31,6 +31,8 @@ export class FakeParam {
 
 export class FakeNode {
   connected: FakeNode[] = [];
+  /** Params this node modulates (an LFO's gain connected to a delayTime). */
+  paramTargets: FakeParam[] = [];
   disconnected = false;
   onended: (() => void) | null = null;
   started: number | null = null;
@@ -53,6 +55,7 @@ export class FakeNode {
   constructor(readonly kind: string) {}
   connect(to: unknown): unknown {
     if (to instanceof FakeNode) this.connected.push(to);
+    else if (to instanceof FakeParam) this.paramTargets.push(to);
     return to;
   }
   disconnect(): void {
@@ -77,6 +80,9 @@ export class FakeBuffer {
   }
   copyToChannel(): void {
     /* the samples are not needed */
+  }
+  getChannelData(): Float32Array<ArrayBuffer> {
+    return new Float32Array(this.length);
   }
 }
 

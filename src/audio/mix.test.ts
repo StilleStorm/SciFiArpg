@@ -40,10 +40,11 @@ describe('mix', () => {
   it('music sits 12 dB under the sfx at equal sliders', () => {
     expect(MUSIC_BASE_DB).toBe(-12);
     const { mix, nodes } = build();
-    mix.setVolumes(100, 100, 1);
+    mix.setVolumes(100, 100, 1, true);
     const music = mix.music as unknown as FakeNode;
     const last = music.gain.calls[music.gain.calls.length - 1];
     expect(20 * Math.log10(last?.value ?? 0)).toBeCloseTo(-12, 1);
+    expect(last?.kind).toBe('set'); // at once: no 100 ms of full volume while the target is still being approached
     const sfx = mix.sfx as unknown as FakeNode;
     expect(sfx.gain.calls[sfx.gain.calls.length - 1]?.value).toBe(1);
     expect(nodes.length).toBeGreaterThan(5);
@@ -51,7 +52,7 @@ describe('mix', () => {
 
   it('the sliders drive the gains (settings-driven)', () => {
     const { mix } = build();
-    mix.setVolumes(0, 50, 1);
+    mix.setVolumes(0, 50, 1, true);
     const music = mix.music as unknown as FakeNode;
     const sfx = mix.sfx as unknown as FakeNode;
     expect(music.gain.calls[music.gain.calls.length - 1]?.value).toBe(0);

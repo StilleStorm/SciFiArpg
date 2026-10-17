@@ -9,7 +9,7 @@ export const TRIMS: Record<string, number> = {
   cardDrawn: 0.48,
   inventoryOpen: 0.42,
   inventoryClose: 0.47,
-  pageTurn: 0.36,
+  pageTurn: 0.23,
   pageEdge: 1.35,
   holdBeep: 1.47,
   botOn: 0.38,

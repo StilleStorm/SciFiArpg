@@ -41,6 +41,11 @@ function cached(ctx: BaseAudioContext, key: string, make: () => Float32Array<Arr
 
 const round = (x: number, d = 1): number => Math.round(x * 10 ** d) / 10 ** d;
 
+/** A reversed copy of a cached buffer (so the forward note is synthesized once and the reverse costs a copy). */
+function reversedOf(ctx: BaseAudioContext, key: string, fwd: AudioBuffer): AudioBuffer {
+  return cached(ctx, `${key}|r`, () => reversed(fwd.getChannelData(0)), fwd.sampleRate);
+}
+
 /** Two seconds of white noise, looped by every noise layer (each starts at its own offset). */
 export function noiseBuffer(ctx: BaseAudioContext): AudioBuffer {
   const s = storeOf(ctx);
@@ -53,23 +58,21 @@ export function noiseBuffer(ctx: BaseAudioContext): AudioBuffer {
 }
 
 export function pluckBuffer(ctx: BaseAudioContext, freq: number, seconds: number, o: PluckOpts = {}, reverse = false): AudioBuffer {
-  const key = `ks|${round(freq)}|${round(seconds, 2)}|${round(o.t60 ?? 1, 2)}|${o.bright ?? 0}|${reverse ? 'r' : 'f'}`;
-  return cached(ctx, key, () => {
-    const a = ksSamples(freq, BUF_SR, seconds, o);
-    return reverse ? reversed(a) : a;
-  });
+  const key = `ks|${round(freq)}|${round(seconds, 2)}|${round(o.t60 ?? 1, 2)}|${o.bright ?? 0}`;
+  const fwd = cached(ctx, key, () => ksSamples(freq, BUF_SR, seconds, o));
+  return reverse ? reversedOf(ctx, key, fwd) : fwd;
 }
 
 export function bellBuffer(ctx: BaseAudioContext, freq: number, seconds: number, o: BellOpts = {}, reverse = false): AudioBuffer {
-  const key = `fm|${round(freq)}|${round(seconds, 2)}|${round(o.t60 ?? 1.2, 2)}|${o.ratio ?? 0}|${o.index ?? 0}|${reverse ? 'r' : 'f'}`;
-  return cached(ctx, key, () => {
-    const a = fmBellSamples(freq, BUF_SR, seconds, o);
-    return reverse ? reversed(a) : a;
-  });
+  const key = `fm|${round(freq)}|${round(seconds, 2)}|${round(o.t60 ?? 1.2, 2)}|${o.ratio ?? 0}|${o.index ?? 0}`;
+  const fwd = cached(ctx, key, () => fmBellSamples(freq, BUF_SR, seconds, o));
+  return reverse ? reversedOf(ctx, key, fwd) : fwd;
 }
 
+/** Swells are low and narrow-band: 16 kHz is plenty and halves the work. */
+const SWELL_SR = 16000;
 export function swellBuffer(ctx: BaseAudioContext, freq: number, seconds: number, seed = 1): AudioBuffer {
-  return cached(ctx, `sw|${round(freq)}|${round(seconds, 1)}|${seed}`, () => swellSamples(freq, BUF_SR, seconds, 28, seed, 0.7));
+  return cached(ctx, `sw|${round(freq)}|${round(seconds, 1)}|${seed}`, () => swellSamples(freq, SWELL_SR, seconds, 28, seed, 0.7), SWELL_SR);
 }
 
 export function motorBuffer(ctx: BaseAudioContext): AudioBuffer {
