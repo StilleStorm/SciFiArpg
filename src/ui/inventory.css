@@ -184,4 +184,12 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 6px;
+  /* A long detail scrolls under its own buttons: they stay at the bottom of the sheet until the end. */
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding: 8px 0 4px;
+  border-top: 1px solid var(--ink);
+  background-color: var(--paper);
+  background-image: var(--paper-noise, none);
 }

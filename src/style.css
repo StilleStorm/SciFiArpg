@@ -791,7 +791,10 @@ s.struck-out.fresh::after {
   width: 100%;
   max-width: 360px;
   max-height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  scrollbar-width: none;
   padding: 20px 18px 16px;
   border: 1.5px solid var(--ink);
   outline: 1px solid var(--ink);
@@ -846,4 +849,41 @@ s.struck-out.fresh::after {
 }
 .bubble.bubble-off {
   opacity: 0;
+}
+
+/* ---------- Touch: every tappable HTML control is at least 44 x 44 css px ---------- */
+#stage {
+  touch-action: none;
+}
+#ui button {
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+/* Underlined links keep the line under the text however tall the hit box is. */
+#ui .link-btn,
+#ui .arrow,
+#ui .ps-close,
+#ui .report:not([disabled]),
+#ui .ps-btn.quiet {
+  border-bottom: 0;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+#ui .ps-close {
+  text-decoration-thickness: 1.5px;
+  padding-left: 8px;
+  padding-right: 4px;
+}
+#ui .report[disabled] {
+  border-bottom: 0;
+}
+/* A very long sheet scrolls inside its own area and never drags the page. */
+.ps-scroll,
+.sheet-scroll,
+.baza .scroll {
+  overscroll-behavior: contain;
 }

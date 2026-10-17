@@ -60,7 +60,10 @@ export function createUpdateForm(root: HTMLElement): UpdateForm {
   const layer = el('svg', { class: 'stamp-layer', 'aria-hidden': 'true' });
   const layerG = el('g', {});
   layer.append(layerG);
-  sheet.append(title, sub, instr, rule, list, actions, layer);
+  // The text scrolls on its own on a small phone; the buttons stay in a bottom row that is always reachable.
+  const scroll = h('div', 'sheet-scroll');
+  scroll.append(title, sub, instr, rule, list);
+  sheet.append(scroll, actions, layer);
   root.append(sheet);
 
   let current: UpdateOpen | null = null;

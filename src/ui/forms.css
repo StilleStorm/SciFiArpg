@@ -172,12 +172,30 @@
   font-size: 10.5px;
   color: var(--ink-wet);
 }
+.sheet-scroll {
+  flex: 1;
+  min-height: 0;
+  margin: 0 -8px;
+  padding: 0 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.sheet-scroll::-webkit-scrollbar {
+  display: none;
+}
 .sheet .actions {
-  margin-top: auto;
+  flex: none;
+  margin-top: 8px;
+  padding-top: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
+  background-color: var(--paper);
+  background-image: var(--paper-noise, none);
 }
 .report {
   font-family: var(--mono);
@@ -276,6 +294,20 @@
   padding: 22px 20px 18px;
   align-items: stretch;
   text-align: left;
+}
+.profile .pscroll {
+  flex: 1;
+  min-height: 0;
+  margin: 0 -6px;
+  padding: 0 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.profile .pscroll::-webkit-scrollbar {
+  display: none;
 }
 .profile .head {
   display: flex;

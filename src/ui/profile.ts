@@ -112,7 +112,10 @@ function buildProfile(root: HTMLElement, onChosen: (heroId: HeroId) => void): Pr
   const nav = h('div', 'nav');
   nav.append(prev, choose, next);
 
-  frame.append(head, h('hr', 'rule'), top, name, desc, autoLabel, autoText, skillsLabel, skills, quirkLabel, quirk, nav);
+  // The long text scrolls on a small phone; the buttons stay below it.
+  const body = h('div', 'pscroll');
+  body.append(top, name, desc, autoLabel, autoText, skillsLabel, skills, quirkLabel, quirk);
+  frame.append(head, h('hr', 'rule'), body, nav);
   root.append(screen);
 
   let index = 0;
