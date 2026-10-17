@@ -1,0 +1,47 @@
+{
+  "hud": {
+    "racja": "Racja",
+    "reputacja": "Reputacja",
+    "gwiazdki": "Gwiazdki",
+    "strona": "Strona",
+    "pages": "{page}/{total}"
+  },
+  "title": {
+    "agency": "Centrum Obsługi Planet",
+    "department": "Dział Zgłoszeń Nieistniejących",
+    "ticket": "Zgłoszenie",
+    "number": "nr 48213",
+    "subject": "Dotyczy: planeta",
+    "stamp": "Zgłoszenie przyjęto",
+    "start": "Rozpocznij",
+    "footer": "Szacowany czas rozpatrzenia: 12 minut."
+  },
+  "pads": {
+    "skill1": "Zarzut",
+    "skill2": "Zażalenie",
+    "skill3": "Sprostowanie",
+    "inventory": "Załączniki"
+  },
+  "ink": {
+    "struck": "skreślono",
+    "margin": "margines"
+  },
+  "run": {
+    "stamp": "Zweryfikowano"
+  },
+  "note": {
+    "start": "Zgłoszenie zostało przyjęte. Planu rozpatrzenia nie załączono.",
+    "firstKill": "Urządzenie nr {n} zostało skreślone. Uzasadnienia nie sporządzono.",
+    "pickup": "Przedmiot nr {n} dodano do załączników."
+  },
+  "death": {
+    "title": "Utrata racji",
+    "body": "Zgłaszający utracił rację. Okoliczności nie zostały ustalone.",
+    "kills": {
+      "one": "Skreślono {count} urządzenie.",
+      "few": "Skreślono {count} urządzenia.",
+      "many": "Skreślono {count} urządzeń."
+    },
+    "back": "Wróć"
+  }
+}
