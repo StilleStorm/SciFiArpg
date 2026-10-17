@@ -1,8 +1,36 @@
 import { clamp, type Vec } from '../core/vec';
 
-/** The view always shows at least 390 x 700 world units (1 unit = 1 css px at 390 px width). */
+/**
+ * The view always shows at least MIN_VIEW_W wide and a minimum height that depends on the orientation (1 unit =
+ * 1 css px at 390 px width). `preserveAspectRatio` is "slice", so the viewBox must have the window's aspect.
+ * Portrait shows 390 wide and at least 700 tall (390 x 844 -> 390 x 844 units). Landscape (window wider than tall,
+ * the same rule as `ui/layout.ts` `orientationOf`) shows at least 520 tall and the window's width at that scale
+ * (844 x 390 -> about 1125 x 520 units), so the 1200-unit page fills the width and the figures read a third larger.
+ */
 export const MIN_VIEW_W = 390;
 export const MIN_VIEW_H = 700;
+export const MIN_VIEW_H_LANDSCAPE = 520;
+
+/** World size of the view for a window of vw x vh css px: at least MIN_VIEW_W x the orientation's minimum height. */
+export function viewSizeFor(vw: number, vh: number): { w: number; h: number } {
+  const w = Math.max(1, vw);
+  const h = Math.max(1, vh);
+  const minH = w > h ? MIN_VIEW_H_LANDSCAPE : MIN_VIEW_H;
+  const k = Math.max(MIN_VIEW_W / w, minH / h);
+  return { w: w * k, h: h * k };
+}
+
+let viewSize = { w: MIN_VIEW_W, h: MIN_VIEW_H };
+
+/** The world size the camera shows right now (set by `camera.resize()`); used to place the entry wave. */
+export function currentViewSize(): { w: number; h: number } {
+  return viewSize;
+}
+
+/** Set the size `currentViewSize()` reports (`camera.resize()` does this from the window; tests call it directly). */
+export function setViewSize(size: { w: number; h: number }): void {
+  viewSize = size;
+}
 /** How much blank paper may show beyond the page edge. */
 const OVERSCAN = 60;
 /** Camera lag: bigger = snappier. */
@@ -15,6 +43,8 @@ export interface Camera {
   w: number;
   h: number;
   resize(): void;
+  /** The rectangle in world units the camera shows at its current centre, clamped to the page like `apply()`. */
+  viewRect(): { x0: number; y0: number; x1: number; y1: number };
   follow(tx: number, ty: number, dtSec: number): void;
   snap(tx: number, ty: number): void;
   /** Write viewBox and filter region to the DOM. */
@@ -36,11 +66,12 @@ export function createCamera(
     w: MIN_VIEW_W,
     h: MIN_VIEW_H,
     resize() {
-      const vw = Math.max(1, window.innerWidth);
-      const vh = Math.max(1, window.innerHeight);
-      const k = Math.max(MIN_VIEW_W / vw, MIN_VIEW_H / vh);
-      cam.w = vw * k;
-      cam.h = vh * k;
+      setViewSize(viewSizeFor(window.innerWidth, window.innerHeight));
+      cam.w = viewSize.w;
+      cam.h = viewSize.h;
+    },
+    viewRect() {
+      return viewRect(cam.x, cam.y, cam.w, cam.h, bounds);
     },
     follow(tx, ty, dt) {
       const a = 1 - Math.exp(-FOLLOW_RATE * dt);

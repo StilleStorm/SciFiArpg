@@ -12,7 +12,7 @@ import { t } from '../i18n';
 import { openKiosk } from '../economy/kiosk';
 import { spawnBoss } from '../enemies/bosses';
 import { spawnEntryWave, spawnWave } from '../enemies/spawn';
-import { MIN_VIEW_H, MIN_VIEW_W, viewRect, type Camera } from '../render/camera';
+import { currentViewSize, viewRect, type Camera } from '../render/camera';
 import { drawIn, stamp } from '../render/ink';
 import { drawPage, type PageHeader } from '../render/obstacles';
 import type { Stage } from '../render/stage';
@@ -60,9 +60,10 @@ export function planWaves(s: RunState): Wave[] {
   return waves;
 }
 
-/** What the camera shows on entering the page: at least 390 x 700 units around the player, clamped to the paper. */
+/** What the camera shows on entering the page: its real view (portrait or landscape) around the player, clamped to the paper. */
 export function entryView(s: RunState): { x0: number; y0: number; x1: number; y1: number } {
-  return viewRect(s.player.x, s.player.y, MIN_VIEW_W, MIN_VIEW_H, { w: s.page.w, h: s.page.h });
+  const v = currentViewSize();
+  return viewRect(s.player.x, s.player.y, v.w, v.h, { w: s.page.w, h: s.page.h });
 }
 
 /** Fill the current page (and, on the last page, put the boss on it). Clears `s.populate`. */

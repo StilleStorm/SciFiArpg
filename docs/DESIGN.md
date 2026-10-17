@@ -54,9 +54,9 @@ Language of code, comments and docs: English. Language of the game: Polish, thro
   bottom-right, footnotes bottom-centre on at most two lines (older ones scroll off sooner),
   the inventory and form sheets as two-column pages. **Portrait layout** stays as built: HUD
   top, pads bottom-right, Załączniki bottom-left, footnotes bottom.
-- The camera shows the same world height in both orientations (about 700 units) and more
-  width in landscape, so landscape is the better ARPG view; enemy entry waves are placed in
-  the actual view rect.
+- The camera shows at least 700 units of height in portrait and 520 in landscape (844 x 390
+  shows about 1125 x 520, so the page fills the width and figures read a third larger);
+  enemy entry waves are placed in the actual view rect.
 - No pinch. No double-tap. No long menus mid-run. Walking over loot picks it up. Tapping an
   item on the ground shows its card first (not built yet).
 - Must run at 60 fps on a mid-range phone with ~60 moving SVG elements. Entities are `<g>` with
