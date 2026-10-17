@@ -57,10 +57,10 @@ describe('Historia zgloszen', () => {
   });
 
   it('survives a round trip through the save format, with settings and unknown fields', () => {
-    const m = recordRun({ ...defaultMeta(), settings: { theme: 'night', leftHanded: true } }, run(9));
+    const m = recordRun({ ...defaultMeta(), settings: { theme: 'night', leftHanded: true, musicVolume: 30, sfxVolume: 0 } }, run(9));
     const back = migrate(JSON.parse(JSON.stringify({ ...m, futureField: 3 })));
     expect(back.history).toEqual(m.history);
-    expect(back.settings).toEqual({ theme: 'night', leftHanded: true });
+    expect(back.settings).toEqual({ theme: 'night', leftHanded: true, musicVolume: 30, sfxVolume: 0 });
     expect(back['futureField']).toBe(3);
     expect(migrate({ history: [{ nonsense: true }, null, 4], settings: { theme: 'blue' } })).toEqual(defaultMeta());
   });

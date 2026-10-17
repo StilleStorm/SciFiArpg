@@ -69,6 +69,10 @@
     "hand": "Układ przycisków",
     "right": "Praworęczny",
     "left": "Leworęczny",
+    "sound": "Dźwięk",
+    "music": "Muzyka na czekanie",
+    "sfx": "Odgłosy kancelaryjne",
+    "soundNote": "Muzyka towarzyszy wyłącznie rozpatrywaniu zgłoszenia. Poza nim obowiązuje cisza biurowa.",
     "back": "Wróć",
     "note": "Zmiany zapisano. Nie zapytano, czy chcesz."
   },

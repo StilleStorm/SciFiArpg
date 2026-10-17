@@ -27,6 +27,18 @@ export interface TicketEntry {
 export interface Settings {
   theme: Theme;
   leftHanded: boolean;
+  /** Music volume 0..100 (default 80). */
+  musicVolume: number;
+  /** SFX volume 0..100 (default 100). */
+  sfxVolume: number;
+}
+
+export const DEFAULT_MUSIC_VOLUME = 80;
+export const DEFAULT_SFX_VOLUME = 100;
+
+/** A saved volume: a whole number 0..100, or the default when it is missing or nonsense. */
+export function toVolume(v: unknown, fallback: number): number {
+  return typeof v === 'number' && Number.isFinite(v) ? Math.min(100, Math.max(0, Math.round(v))) : fallback;
 }
 
 /** What the player carries between runs (the Sklep at the base spends gwiazdki and fills it). */
@@ -62,7 +74,7 @@ export function defaultMeta(): MetaState {
     runsCompleted: 0,
     gwiazdki: 0,
     history: [],
-    settings: { theme: 'auto', leftHanded: false },
+    settings: { theme: 'auto', leftHanded: false, musicVolume: DEFAULT_MUSIC_VOLUME, sfxVolume: DEFAULT_SFX_VOLUME },
   };
 }
 
@@ -116,6 +128,8 @@ export function migrate(raw: unknown): MetaState {
     settings: {
       theme: theme === 'day' || theme === 'night' || theme === 'auto' ? theme : base.settings.theme,
       leftHanded: rawSettings['leftHanded'] === true,
+      musicVolume: toVolume(rawSettings['musicVolume'], DEFAULT_MUSIC_VOLUME),
+      sfxVolume: toVolume(rawSettings['sfxVolume'], DEFAULT_SFX_VOLUME),
     },
   };
   delete out.heroId;
