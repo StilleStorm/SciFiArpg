@@ -8,7 +8,10 @@ Damage types: `mechaniczny | regulaminowy | egzystencjalny`. Folder READMEs in `
 ## Stage (index.html)
 `#page` (paper, hatched border, obstacles, the exit dog-ear; no filter) -> `#world` (entities; wobble filter,
 re-seeded every 500 ms) -> `#fx` (blots, strikes, stamps, margin notes) -> `#ui` (HTML: HUD, pads, footnotes, sheets).
-The camera shows at least 390 x 700 world units (`render/camera.ts`, `viewRect()` gives the clamped rectangle).
+The camera (`render/camera.ts`) shows at least 390 units wide and, by orientation (window wider than tall), at least
+700 tall in portrait (390x844 -> 390 x 844 units) or 520 tall in landscape (844x390 -> about 1125 x 520, the 1200-unit
+page fills the width). `viewSizeFor(vw, vh)` is the rule, `camera.resize()` stores it for `currentViewSize()`, and
+`camera.viewRect()` / `viewRect()` give the rectangle clamped to the page plus 60 units of overscan.
 Colours are CSS variables on `:root`; `data-theme="night"` swaps them. SVG layers get their strokes from CSS; never
 set a stroke width on a figure's root `<g>`. `#stage` has `touch-action: none`.
 
@@ -32,7 +35,8 @@ a case in `render/view.ts`.
 ## Loop and systems
 `core/loop.ts`: fixed 60 Hz `update`, rAF `render`, `loop.after()` for timers (never `setTimeout`).
 `systems/step.ts` fixes the order: law pre, statuses, `movePlayer` (statuses slow or hold the player), enemy AI,
-`playerAttacks` + `enemiesAttack` (skipped in bot hours), `heroStep` (cooldowns, dash, summons, zones, player
+`playerAttacks` (nearest enemy in range, standing or moving; a walking player keeps his facing) + `enemiesAttack`
+(skipped in bot hours), `heroStep` (cooldowns, dash, summons, zones, player
 projectiles, update queue), `collectPickups`, `updateLoot`, `trickleSpawn`, law post, `tickLaw`, `tickPageTurn`.
 `systems/combat.ts` `applyDamage(s, bus, defender, amount, crit, type?)` is the only place racja changes: it runs
 `enemies/hooks.ts` `modifyDamage` (claim rebuttal = crit and struck bubble, existence, zgloszony), then death.
@@ -56,7 +60,7 @@ when no enemy has been within 320 units for 1.5 s, or `hero.updateRequested` is 
 
 ## Enemies and loot
 Families, assembly of drawn parts, claims, AI, bosses: `enemies/` (README). The first wave of every page is placed
-in the 390 x 700 entry view, none closer than 180 units (`spawnEntryWave`). Claim bubbles are shown only for elites,
+in the real entry view (`world/pageTurn.ts` `entryView` from `currentViewSize()`), none closer than 180 units (`spawnEntryWave`). Claim bubbles are shown only for elites,
 bosses, the nearest enemy within 260 units and for 2 s after draw-in (`render/bubbleFocus.ts`, class `bubble-off`).
 `systems/loot.ts`: `dropLoot` (items, stars; tables per tier), `rollPermission` (elite 1/3, boss always) and
 `dropPermission` (a checkbox card with the family word). `takePickup` pushes the family into `player.permissions`
@@ -132,18 +136,37 @@ a calm-to-boss crossfade and a death per profile, 1 s per sound and the composit
 `audio-renders/` (gitignored); prints peak, RMS, the 60-140 Hz body share and clipping, and exits 1 on a clip, a peak
 above -1 dBFS or a combat sound without body. After changing a recipe, re-measure and update `levels.ts`.
 
+## Controls and layout (DESIGN 2)
+`ui/layout.ts` writes `data-orient="landscape|portrait"` (window wider than tall) and `data-steer="joystick|tap"` on
+`<html>`; `ui/landscape.css` holds every landscape rule, the joystick drawing and the portrait-joystick pad move (portrait
+rules stay in `style.css`). Settings (`save/save.ts`): `orientation?` (default landscape; `lockOrientation` asks the Screen
+Orientation API and never throws), `steering?` + `steeringTouched?` (until the player picks, `effectiveSteering` gives
+joystick in landscape, tap in portrait). The manifest is `fullscreen`, `orientation: landscape`.
+`input.ts` `Input`: `held()` (tap mode: the walking finger), `steer()` (joystick mode: `{dx, dy, mag}` or null),
+`setEnabled`, `setMode(steering)`, `setLeftHanded` (steering half = right), `inject(steer)` (test hook). Joystick mode: the
+first pointer on the steering half owns the stick (`ui/joystick.ts`: floating, base 56 px, dead zone 12%, `steerVector`),
+other pointers stay independent; a quick tap (<260 ms, <10 px) calls `game.onTap(x, y, walk=false)`, which only reaches the
+kiosk. Tap mode calls `onTap(x, y, true)`: walk there, ink "x". `game.update` copies `input.steer()` into `Player.steer`
+each step (deleted on release, so the player stops on the next step); `movePlayer` lets `steer` override `target`.
+Skill pads cast on `pointerdown` (a second touch gets no `click` while a thumb steers); a `click` within 700 ms of the
+press is swallowed, a lone click (keyboard, script) still casts. The Załączniki pad stays on `click`.
+
 ## i18n
 `t('domain.key')`; `src/i18n/pl/<domain>.json` are picked up automatically (file name = key prefix). A leaf is a
-string or `{ one, few, many }` with `{count}`. No UI strings in `.ts` files, no `any`, no `!` outside tests.
+string or `{ one, few, many }` with `{count}`. `t()` ends with `bindOrphans` (`i18n/typography.ts`): the space after a
+one-letter word (a i o u w z) becomes U+00A0, so tests that compare text use `\u00a0`. No UI strings in `.ts` files.
 
 ## Test hook, scripts, commands
 `window.__game`: `start(seed, opts)`, `go(screen)`, `state()`, `advance(s)`, `turnTo(page)`, `hitEnemy()`,
 `killEnemy()`, `hurtPlayer(n)`, `placePlayer`, `snapshot()`, `giveItem`, `demoInventory`, `openInventory`, `openSklep`,
+`setOrientation`, `setSteering`, `setLeftHanded`, `controls()`, `joystick(dx, dy)` (0, 0 lets go),
 `hero.{cast, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`, `enemies.{spawnFamily, spawnBoss, hit, clear, list}`,
 `audio.{renderProfile, renderSfx, music, contextState, running, sfxNames}`.
 `npm run dev | build | typecheck | test | lint:rules | check | render-audio`. `npm run shot` builds, serves with `vite preview`, drives the bundled
-Chromium at 390x844 @2x and writes `shots/*.png` (exits non-zero on page errors). `npm run smoke` builds and plays
+Chromium at 390x844 @2x and writes `shots/*.png`, then the same screens at 844x390 as `shots/land-*.png` (exits non-zero
+on page errors). `npm run smoke` builds and plays
 a whole ticket in the same browser: real buttons into a run, kills, the queued update opened from the HUD line,
-inventory, boss on the last page, `baza` after it, a death form, then 5 s of `requestAnimationFrame` deltas with 40
-enemies; pictures in `shots-smoke/`, exit code 1 on a page error or a failed check (`SMOKE_UNCAPPED=1` lifts the 60 Hz
+inventory, boss on the last page, `baza` after it, a death form, a landscape leg at 844x390 with CDP touches (joystick by default, a
+second finger taps a skill pad while the thumb steers, auto-attack while steering, stop within one step of the release),
+then 5 s of `requestAnimationFrame` deltas with 40 enemies; pictures in `shots-smoke/`, exit code 1 on a page error or a failed check (`SMOKE_UNCAPPED=1` lifts the 60 Hz
 limit, `PERF_MAX_MS` fails above a bound); it also checks that the real clicks unlock the audio context and that music plays. Everything must pass `npm run check`.
