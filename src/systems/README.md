@@ -1,1 +1,1 @@
-Per-step systems, each (state, bus, dt): movement, combat (attack, kill), enemies (placeholder AI), pickups. step.ts fixes the order.
+Per-step systems, each (state, bus, dt): movement (statuses apply to the player), combat (attack, applyDamage, knockback, kill), enemies (entry to enemies/ai.ts and the spawners), pickups, loot (drops, permission cards, trial). step.ts fixes the order.

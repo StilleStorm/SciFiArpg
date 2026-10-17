@@ -1,1 +1,1 @@
-Four hero definitions, their skills and quirks (DESIGN section 10). Replace the stub in index.ts.
+Four hero definitions, twelve skills, quirks, the per-step hero system (cooldowns, summons, zones, player projectiles) and the layer that ties them to the update and death forms (layer.ts). Run state: state.ts.

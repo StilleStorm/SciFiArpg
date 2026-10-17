@@ -1,1 +1,1 @@
-Entity types (Player, Enemy, Projectile, Pickup) as plain data, plus the uniform grid for neighbor queries. No behavior here.
+Entity types (Player, Enemy, Projectile, Pickup, Summon, Zone) as plain data, factories, plus the uniform grid for neighbor queries. No behavior here.

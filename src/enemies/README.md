@@ -1,1 +1,1 @@
-Enemy families (Urzadzenia, Powiadomienia, Wygenerowane), procedural assembly of drawn parts, claims, AI and bosses (DESIGN section 6). The placeholder enemy figure lives in render/figures.ts and the placeholder AI in systems/enemies.ts.
+Enemy families (Urzadzenia, Powiadomienia, Wygenerowane), procedural assembly of drawn parts, claims, AI and bosses (DESIGN section 6). Drawing: render/enemyFigures.ts. AI: ai.ts (entry updateEnemyAi, called from systems/enemies.ts). Combat hooks: hooks.ts.

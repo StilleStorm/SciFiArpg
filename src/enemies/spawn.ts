@@ -79,7 +79,7 @@ export function spawnElite(s: RunState, family: FamilyId, around?: Vec, affix?: 
   return got[0] ?? null;
 }
 
-/** A random-family enemy somewhere on the page, away from the player (the old placeholder entry). */
+/** A random-family enemy somewhere on the page, away from the player. */
 export function spawnEnemy(s: RunState, minDistance = MIN_SPAWN_DISTANCE): Enemy | null {
   const r = s.rngs.spawn;
   const family = pickFamily(r, s.mix ?? makeMix(s.ticket.family));

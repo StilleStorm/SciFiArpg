@@ -5,7 +5,7 @@ import { t } from './i18n';
 import type { Camera } from './render/camera';
 import { bindEnemyFx, enemyBuilder } from './render/enemyFigures';
 import { createViews, type Views } from './render/view';
-import { placeholderBuilders } from './render/figures';
+import { groundBuilders } from './render/figures';
 import { drawPage } from './render/obstacles';
 import { onPageEntered } from './world/laws';
 import { headerFor, tapKiosk } from './world/pageTurn';
@@ -35,7 +35,7 @@ export interface Game {
 /** Ties run state to the stage: simulation step, view sync, camera. Owns no rules. */
 export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input): Game {
   const views = createViews(stage.world, {
-    ...placeholderBuilders,
+    ...groundBuilders,
     ...heroBuilders,
     enemy: wrapEnemyBuilder(enemyBuilder),
     zone: zoneBuilder,

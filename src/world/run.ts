@@ -29,7 +29,7 @@ export interface RunState {
   kills: number;
   /** Seconds until the next margin note may be shown. */
   edgeCooldown: number;
-  /** Seconds until the next placeholder enemy trickles in. */
+  /** Seconds until the next trickle spawn (enemies/spawn.ts). */
   spawnTimer: number;
   /** Which enemy families this mission sends (enemies/families.ts); absent = Urzadzenia dominant. */
   mix?: MissionMix;

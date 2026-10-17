@@ -76,14 +76,14 @@ export interface Player extends Fighter {
 
 export interface Enemy extends Fighter {
   kind: 'enemy';
-  /** Drives the procedural look (see render/figures.ts). */
+  /** Drives the procedural look (enemies/assemble.ts). */
   seed: number;
   home: Vec;
   mode: 'wander' | 'chase';
   wanderTarget: Vec | null;
   /** Seconds until a new wander target is picked. */
   wanderTimer: number;
-  /** The thesis in the speech bubble (combat/claims.ts). Placeholder enemies have none. */
+  /** The thesis in the speech bubble (combat/claims.ts); absent on a hero copy. */
   claim?: Claim;
   /** A copy of a hero left behind by the death outcome Petla (death/outcomes.ts). */
   copyOf?: { heroId: HeroId; level: number };

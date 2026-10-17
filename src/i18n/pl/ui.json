@@ -35,16 +35,6 @@
     "firstKill": "Urządzenie nr {n} zostało skreślone. Uzasadnienia nie sporządzono.",
     "pickup": "Przedmiot nr {n} dodano do załączników."
   },
-  "death": {
-    "title": "Utrata racji",
-    "body": "Zgłaszający utracił rację. Okoliczności nie zostały ustalone.",
-    "kills": {
-      "one": "Skreślono {count} urządzenie.",
-      "few": "Skreślono {count} urządzenia.",
-      "many": "Skreślono {count} urządzeń."
-    },
-    "back": "Wróć"
-  },
   "notes": {
     "history": "Przypisy"
   },
