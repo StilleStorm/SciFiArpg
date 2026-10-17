@@ -97,7 +97,7 @@ export function spawnEntryWave(s: RunState, family: FamilyId, count: number, vie
   const margin = 70;
   const inner: Rect = { x0: view.x0 + margin, y0: view.y0 + margin, x1: view.x1 - margin, y1: view.y1 - margin };
   const out: Enemy[] = [];
-  // One spot per enemy, spread over the view (at least 110 units apart, 220..340 from the player), so the
+  // One spot per enemy, spread over the view (at least 110 units apart, 260..420 from the player), so the
   // first screen is a loose crowd and not one pile. Under Parzystosc each spot gets its twin beside it.
   const spots: { x: number; y: number }[] = [];
   for (let i = 0; i < count; i++) {
@@ -105,7 +105,7 @@ export function spawnEntryWave(s: RunState, family: FamilyId, count: number, vie
       const ax = r.range(Math.max(inner.x0, 80), Math.min(inner.x1, s.page.w - 80));
       const ay = r.range(Math.max(inner.y0, 80), Math.min(inner.y1, s.page.h - 80));
       const d = Math.hypot(ax - p.x, ay - p.y);
-      if (d < ENTRY_MIN + 30 || d > 340) continue;
+      if (d < ENTRY_MIN + 80 || d > 420) continue;
       if (spots.some((q) => Math.hypot(q.x - ax, q.y - ay) < 110)) continue;
       const got = spawnWave(s, family, 1, { x: ax, y: ay }, { minRadius: 0, maxRadius: 30, minPlayer: ENTRY_MIN });
       if (got.length === 0) continue;

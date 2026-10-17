@@ -1,13 +1,13 @@
 /**
  * Which claim bubbles are shown. A crowd of speech bubbles hides the page, so only these speak: elites, bosses,
- * the enemy nearest to the player (within 260 units) and every enemy for 2 s after it was drawn in.
+ * the enemy nearest to the player (within 260 units) and every enemy for 1.2 s after it was drawn in.
  * The others keep their bubble in the DOM with opacity 0; nothing is rebuilt when it comes back.
  */
 import type { Enemy, Player } from '../entities/types';
 import { rtOf } from '../enemies/runtime';
 
 export const BUBBLE_RADIUS = 260;
-export const BUBBLE_NEW_S = 2;
+export const BUBBLE_NEW_S = 1.2;
 
 let focusId = -1;
 

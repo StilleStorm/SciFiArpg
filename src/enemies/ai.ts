@@ -37,6 +37,8 @@ const WANDER_RADIUS = 120;
 const LEASH = 480;
 const LEASH_HOME_S = 6;
 const WAKE_RADIUS = 100;
+/** Seconds after being drawn in during which an untouched enemy minds its own business instead of charging. */
+const SETTLE_S = 1.6;
 const MEET_RANGE = 300;
 const MEET_RANGE_SEES_DEFECTS = 620;
 const MEET_GAP_S = 2.5;
@@ -295,7 +297,8 @@ function tickEnemy(s: RunState, e: Enemy, grid: Grid<Enemy>, near: Enemy[], bus:
   const aggro = aggroRadius(s, e);
   if (rt.leash > 0) rt.leash -= dt;
   if (!e.boss && rt.leash <= 0 && Math.hypot(e.x - e.home.x, e.y - e.home.y) > LEASH) rt.leash = LEASH_HOME_S;
-  const chasing = tg !== null && rt.leash <= 0 && !rt.asleep && (taunted || dp < (e.mode === 'chase' ? aggro * 1.3 : aggro));
+  const settling = rt.age < SETTLE_S && e.hp >= e.hpMax && !taunted;
+  const chasing = tg !== null && rt.leash <= 0 && !rt.asleep && !settling && (taunted || dp < (e.mode === 'chase' ? aggro * 1.3 : aggro));
   e.mode = chasing ? 'chase' : 'wander';
 
   tickDefects(s, e, dt, chasing);

@@ -26,6 +26,7 @@ const put = (s: RunState, family: (typeof FAMILY_IDS)[number], x = 600, y = 600,
   e.home = { x, y };
   e.defect = undefined;
   rtOf(e).asleep = false;
+  rtOf(e).age = 10; // past the settle period
   s.enemies.push(e);
   return e;
 };
