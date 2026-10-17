@@ -29,6 +29,7 @@ src/
                      stamp(), inkBlot(), strike(), drawIn(), footnote area, night edition
   world/             run generation, pages, obstacles, page turn, laws (modifiers)
   entities/          types for player, enemy, projectile, pickup, summon; spatial grid
+  systems/           per-step systems (movement, combat, ai, pickups) and their fixed order (step.ts)
   combat/            damage.ts (types, resist, crit, racja vocab), claims.ts (teza/rebuttal), status.ts, spor.ts (stub), targeting
   enemies/           parts (SVG part library as path data), assemble (procedural contraption),
                      families (stats, resist, traits: defect / escalation / existence), ai, bosses
