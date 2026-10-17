@@ -24,8 +24,8 @@ async function waitForServer(url, ms = 20000) {
 }
 
 mkdirSync('shots', { recursive: true });
-const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort', '--host', '127.0.0.1'], {
-  stdio: ['ignore', 'pipe', 'pipe'],
+const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--port', String(PORT), '--strictPort', '--host', '127.0.0.1'], {
+  stdio: 'ignore',
 });
 const stop = () => server.kill('SIGTERM');
 process.on('exit', stop);
@@ -108,7 +108,7 @@ try {
 
 if (problems.length) {
   console.error(problems.join('\n'));
-  process.exitCode = 1;
 } else {
   console.log('shots written to shots/');
 }
+process.exit(problems.length ? 1 : 0);
