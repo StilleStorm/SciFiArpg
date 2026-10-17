@@ -1,0 +1,31 @@
+import { tickStatuses } from '../combat/status';
+import type { Bus } from '../core/events';
+import { createGrid, type Enemy } from '../entities';
+import type { RunState } from '../world/run';
+import { enemiesAttack, playerAttacks } from './combat';
+import { trickleSpawn, updateEnemies } from './enemies';
+import { movePlayer } from './movement';
+import { collectPickups } from './pickups';
+
+/** The fixed update. Order matters: move, ai, combat, loot. One grid is rebuilt each step. */
+export function createSim(bus: Bus) {
+  const grid = createGrid<Enemy>(64);
+  return {
+    step(s: RunState, dt: number): void {
+      if (s.status !== 'running') return;
+      s.time += dt;
+      tickStatuses(s.player, dt);
+      for (const e of s.enemies) tickStatuses(e, dt);
+      movePlayer(s, bus, dt);
+      grid.clear();
+      for (const e of s.enemies) grid.insert(e);
+      updateEnemies(s, grid, dt);
+      grid.clear();
+      for (const e of s.enemies) grid.insert(e);
+      playerAttacks(s, grid, bus, dt);
+      enemiesAttack(s, bus, dt);
+      collectPickups(s, bus);
+      trickleSpawn(s, dt);
+    },
+  };
+}
