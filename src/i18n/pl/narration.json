@@ -1,0 +1,158 @@
+{
+  "start": {
+    "ok": [
+      "Zgłoszenie zostało przyjęte. Planu rozpatrzenia nie załączono.",
+      "Zgłoszenie nr {number} zarejestrowano. Planeta została przydzielona automatycznie.",
+      "Przyjęto zgłoszenie. Asystent jest do dyspozycji, o ile nie jest zajęty."
+    ]
+  },
+  "clause": {
+    "ok": [
+      "Obowiązuje regulamin: «{name}». {short}",
+      "Planeta ma własny regulamin: «{name}». Akceptację zaznaczono za Ciebie."
+    ]
+  },
+  "kill_urzadzenia": {
+    "ok": [
+      "Urządzenie nr {n} zostało skreślone zgodnie z procedurą. Procedury nie odnaleziono.",
+      "Urządzenie nr {n} przestało działać. Gwarancja nie obejmuje skreślenia."
+    ],
+    "bad": [
+      "Napotkano niedźwiedzia. Niedźwiedź został skreślony."
+    ],
+    "fix": [
+      "Przepraszam za nieścisłość w przypisie {ref}. Nie był to niedźwiedź, lecz urządzenie nr {n}."
+    ]
+  },
+  "kill_powiadomienia": {
+    "ok": [
+      "Powiadomienie nr {n} zostało odczytane i skreślone. Odpowiedzi nie przewidziano.",
+      "Powiadomienie nr {n} zostało skreślone. Przypomnienie o skreśleniu nastąpi."
+    ],
+    "bad": [
+      "Skreślono trzy powiadomienia."
+    ],
+    "fix": [
+      "Przepraszam za nieścisłość w przypisie {ref}. Powiadomienie było jedno. Pozostałe dwa były przypomnieniami o nim."
+    ]
+  },
+  "kill_wygenerowane": {
+    "ok": [
+      "Zjawisko nr {n} przestało istnieć w stopniu wymaganym do skreślenia.",
+      "Zjawisko nr {n} zostało skreślone. Według części użytkowników nigdy nie istniało."
+    ],
+    "bad": [
+      "Skreślono smoka. Smok miał siedem palców."
+    ],
+    "fix": [
+      "Przepraszam za nieścisłość w przypisie {ref}. Nie był to smok, lecz coś, co według 87% użytkowników nim bywa."
+    ]
+  },
+  "kill_other": {
+    "ok": [
+      "Egzemplarz nr {n} skreślono. Uzasadnienia nie sporządzono."
+    ],
+    "bad": [
+      "Skreślono dwa egzemplarze."
+    ],
+    "fix": [
+      "Przepraszam za nieścisłość w przypisie {ref}. Egzemplarz był jeden, nr {n}. Drugi został domniemany."
+    ]
+  },
+  "pickup": {
+    "ok": [
+      "Przedmiot nr {n} dodano do załączników.",
+      "Przedmiot nr {n} został podniesiony. Jego stan jest zgodny z opisem w zakresie, w jakim opis istnieje.",
+      "Do załączników dodano przedmiot nr {n}. Pochodzenie nieustalone."
+    ],
+    "bad": [
+      "Do załączników dodano przedmiot nr {wrong}."
+    ],
+    "fix": [
+      "Przepraszam za nieścisłość w przypisie {ref}. Przedmiot ma numer {n}, nie {wrong}."
+    ]
+  },
+  "page": {
+    "ok": [
+      "Strona {page} z {total}. Poprzednią uznano za przeczytaną.",
+      "Strona {page}. Spis treści nie obejmuje tej strony.",
+      "Wejście na stronę {page} z {total} zarejestrowano. Wyjść się nie rejestruje."
+    ],
+    "bad": [
+      "Strona {wrong} z {total}."
+    ],
+    "fix": [
+      "Przepraszam za nieścisłość w przypisie {ref}. Jest to strona {page}, nie {wrong}."
+    ]
+  },
+  "edge": {
+    "ok": [
+      "Dotarto do marginesu. Margines jest ostateczny.",
+      "Poza marginesem nie przewidziano treści.",
+      "Strona się kończy. Zgłaszający nie."
+    ]
+  },
+  "idle": {
+    "ok": [
+      "Od 40 sekund nie skreślono żadnego urządzenia. Zgłaszający pozostaje bierny.",
+      "Brak aktywności. Szacowany czas do jej wznowienia: nieustalony."
+    ],
+    "bad": [
+      "Od 400 sekund nie skreślono żadnego urządzenia."
+    ],
+    "fix": [
+      "Przepraszam za nieścisłość w przypisie {ref}. Było to 40 sekund. Pozostałe 360 doliczono z ostrożności."
+    ]
+  },
+  "levelup": {
+    "ok": [
+      "Reputacja zgłaszającego wzrosła do poziomu {level}. Zmiany nie są widoczne.",
+      "Poziom {level} został przyznany. Uzasadnienie wkrótce."
+    ],
+    "bad": [
+      "Reputacja zgłaszającego wzrosła do poziomu {wrong}."
+    ],
+    "fix": [
+      "Przepraszam za nieścisłość w przypisie {ref}. Poziom wynosi {level}. Poziom {wrong} jest zarezerwowany."
+    ]
+  },
+  "death": {
+    "ok": [
+      "Zgłaszający utracił rację w sprawie, której dotyczyło zgłoszenie.",
+      "Zgłoszenie uznano za zasadne. Zgłaszającego mniej."
+    ]
+  },
+  "law_hours_bot": {
+    "ok": [
+      "Godziny pracy konsultanta zakończyły się. Od tej chwili obsługuje Cię bot."
+    ],
+    "bad": [
+      "Godziny pracy konsultanta właśnie się rozpoczęły."
+    ],
+    "fix": [
+      "Przepraszam za nieścisłość w przypisie {ref}. Godziny pracy konsultanta zakończyły się, a nie rozpoczęły."
+    ]
+  },
+  "law_hours_consultant": {
+    "ok": [
+      "Konsultant powrócił. Bot został poinformowany, że nie jest już potrzebny."
+    ]
+  },
+  "law_reverse_start": {
+    "ok": [
+      "Godzina 17:00. Czas płynie wstecz. Wrogowie zostali o tym poinformowani."
+    ],
+    "bad": [
+      "Czas płynie wstecz od dwudziestu minut."
+    ],
+    "fix": [
+      "Przepraszam za nieścisłość w przypisie {ref}. Czas płynie wstecz od teraz. Wcześniej płynął, jak zwykle, w przód."
+    ]
+  },
+  "law_noise": {
+    "ok": [
+      "Użycie umiejętności wygenerowało hałas. Hałas został odnotowany przez otoczenie.",
+      "Tryb nie przeszkadzać nie obejmuje umiejętności."
+    ]
+  }
+}

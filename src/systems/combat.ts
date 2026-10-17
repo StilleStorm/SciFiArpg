@@ -1,9 +1,11 @@
-import { rollDamage } from '../combat/damage';
+import { rollDamage, type DamageType } from '../combat/damage';
+import { canMelee, enemyOutgoing, modifyDamage, onEnemyHurt } from '../enemies/hooks';
 import type { Bus } from '../core/events';
 import type { Grid } from '../entities';
-import { createPickup } from '../entities/factory';
 import type { Enemy, Player } from '../entities';
-import { nextId, type RunState } from '../world/run';
+import { type RunState } from '../world/run';
+import { fireAuto } from '../heroes/auto';
+import { absorbShield, playerDamageMul } from '../heroes/shield';
 
 type Fighter = Player | Enemy;
 
@@ -17,16 +19,24 @@ export function attack(s: RunState, bus: Bus, attacker: Fighter, defender: Fight
     if (defender.kind === 'enemy') bus.emit('enemy:miss', { id: defender.id });
     return false;
   }
-  return applyDamage(s, bus, defender, res.amount, res.crit);
+  const dealt =
+    attacker.kind === 'player' ? Math.max(1, Math.round(res.amount * playerDamageMul(attacker))) : enemyOutgoing(attacker, res.amount);
+  return applyDamage(s, bus, defender, dealt, res.crit, attacker.damageType);
 }
 
 /** Subtract racja, emit the hit event, and handle death. Returns true if the defender died. */
-export function applyDamage(s: RunState, bus: Bus, defender: Fighter, amount: number, crit: boolean): boolean {
+export function applyDamage(s: RunState, bus: Bus, defender: Fighter, amount: number, crit: boolean, type?: DamageType): boolean {
+  ({ amount, crit } = modifyDamage(bus, defender, amount, crit, type)); // claims, existence, zgloszony
+  if (defender.kind === 'player') amount = absorbShield(defender, amount);
+  if (amount <= 0) return false;
   defender.hp -= amount;
   const payload = { x: defender.x, y: defender.y, amount, crit };
   if (defender.kind === 'enemy') bus.emit('enemy:hit', { id: defender.id, ...payload });
   else bus.emit('player:hit', payload);
-  if (defender.hp > 0) return false;
+  if (defender.hp > 0) {
+    if (defender.kind === 'enemy') onEnemyHurt(s, bus, defender, type);
+    return false;
+  }
   if (defender.kind === 'enemy') killEnemy(s, bus, defender);
   else killPlayer(s, bus, defender);
   return true;
@@ -37,9 +47,8 @@ export function killEnemy(s: RunState, bus: Bus, e: Enemy): void {
   if (i < 0) return;
   s.enemies.splice(i, 1);
   s.kills++;
-  s.player.gwiazdki++; // placeholder income; the economy agent owns gwiazdki
-  s.pickups.push(createPickup(nextId(s), e.x, e.y, s.nextItemNumber++));
-  bus.emit('enemy:died', { id: e.id, x: e.x, y: e.y });
+  bus.emit('enemy:died', { id: e.id, x: e.x, y: e.y, tier: e.boss ? 'boss' : e.elite ? 'elite' : 'common', family: e.family });
+  if (e.boss) bus.emit('boss:died', { id: e.id, family: e.family, x: e.x, y: e.y });
 }
 
 function killPlayer(s: RunState, bus: Bus, p: Player): void {
@@ -65,14 +74,14 @@ export function playerAttacks(s: RunState, grid: Grid<Enemy>, bus: Bus, dt: numb
     }
     if (d <= p.r + e.r + 8) adjacent = true;
   }
-  if (nearest && (!p.moving || adjacent)) attack(s, bus, p, nearest);
+  if (nearest && (!p.moving || adjacent) && !fireAuto(s, p, nearest)) attack(s, bus, p, nearest);
 }
 
 export function enemiesAttack(s: RunState, bus: Bus, dt: number): void {
   const p = s.player;
   for (const e of [...s.enemies]) {
     e.attackTimer = Math.max(0, e.attackTimer - dt);
-    if (e.attackTimer > 0 || s.status !== 'running') continue;
+    if (e.attackTimer > 0 || s.status !== 'running' || p.suspended || !canMelee(s, e)) continue;
     if (Math.hypot(p.x - e.x, p.y - e.y) <= e.attackRange + p.r) attack(s, bus, e, p);
   }
 }

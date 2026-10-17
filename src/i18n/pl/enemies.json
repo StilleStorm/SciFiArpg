@@ -1,0 +1,151 @@
+{
+  "family": {
+    "urzadzenia": {
+      "name": "Urządzenia",
+      "meet": "Napotkano urządzenia. Nie czytają regulaminu. Wątpliwość zatrzymuje je bardziej niż uderzenie."
+    },
+    "powiadomienia": {
+      "name": "Powiadomienia",
+      "meet": "Napotkano powiadomienia. Przypomnienie pozostawione bez odpowiedzi staje się ostatnią szansą. Uderzenia nie robią na nich wrażenia, regulamin tak."
+    },
+    "wygenerowane": {
+      "name": "Wygenerowane",
+      "meet": "Napotkano istoty wygenerowane. Istnieją w stopniu zależnym od liczby polubień. Wątpliwość im służy, uderzenie czyni je na chwilę prawdziwymi."
+    }
+  },
+  "body": {
+    "fridge": { "noun": "lodówka", "gender": "f" },
+    "vacuum": { "noun": "odkurzacz", "gender": "m" },
+    "speaker": { "noun": "głośnik", "gender": "m" },
+    "router": { "noun": "router", "gender": "m" },
+    "printer": { "noun": "drukarka", "gender": "f" },
+    "paczkomat": { "noun": "paczkomat", "gender": "m" },
+    "card": { "noun": "przypomnienie", "gender": "n" },
+    "envelope": { "noun": "ostatnia szansa", "gender": "f" },
+    "basket": { "noun": "koszyk", "gender": "m" },
+    "telegram": { "noun": "telegram", "gender": "m" },
+    "dragon": { "noun": "smok", "gender": "m" },
+    "nogacz": { "noun": "stworzenie nogate", "gender": "n" },
+    "bear": { "noun": "niedźwiedź ewentualny", "gender": "m" },
+    "hand": { "noun": "dłoń siedmiopalczasta", "gender": "f" },
+    "proto": { "noun": "prototyp", "gender": "m" },
+    "captcha": { "noun": "weryfikacja", "gender": "f" },
+    "hipoteza": { "noun": "hipoteza", "gender": "f" }
+  },
+  "deco": {
+    "smart": "smart",
+    "stop": "stop"
+  },
+  "claim": {
+    "urzadzenia": {
+      "update": "Wymagam aktualizacji",
+      "offline": "Nie znaleziono sieci",
+      "newVersion": "Dostępna nowa wersja",
+      "warranty": "Gwarancja do 2031",
+      "unauthorized": "Wykryto nieautoryzowany ruch",
+      "faultless": "Działam prawidłowo"
+    },
+    "powiadomienia": {
+      "reminder": "Przypomnienie",
+      "lastChance": "Ostatnia szansa",
+      "cart": "Twój koszyk tęskni",
+      "deleted": "Konto zostanie usunięte"
+    },
+    "wygenerowane": {
+      "users": "Istnieję według 87% użytkowników",
+      "community": "Zweryfikowane przez społeczność",
+      "resolution": "Rozdzielczość 4K",
+      "anatomy": "Bez wad anatomicznych",
+      "unknown": "Autor nieznany",
+      "likes": "Polubiło 12 tys. osób"
+    },
+    "boss": {
+      "prototyp": "Wersja ostateczna",
+      "weryfikacja": "Czy jesteś robotem?",
+      "hipoteza": "Jestem prawdopodobna"
+    }
+  },
+  "defect": {
+    "footnote": "Egzemplarz nr {serial}. Wada fabryczna: {cause}. Skutek: {effect}. Podatność: {vuln}.",
+    "spins": {
+      "cause": "lewa noga zamontowana w prawo",
+      "effect": "obraca się przy każdym trafieniu"
+    },
+    "limp": {
+      "cause": "jedna noga nie została dokręcona",
+      "effect": "po utracie połowy racji odpada, a urządzenie zwalnia"
+    },
+    "thinks": {
+      "cause": "moduł rozumowania nie przewiduje wątpliwości",
+      "effect": "po argumencie egzystencjalnym zatrzymuje się na sekundę, aby go rozważyć"
+    },
+    "overheat": {
+      "cause": "wentylator zamontowany odwrotnie",
+      "effect": "przyspiesza ataki, po czym musi ostygnąć"
+    },
+    "firmware": {
+      "cause": "wgrano oprogramowanie od innego urządzenia",
+      "effect": "co piąty ruch wykonuje w losowym kierunku"
+    },
+    "loud": {
+      "cause": "głośnik zamontowany zamiast czujnika",
+      "effect": "zauważa użytkownika z dwukrotnie większej odległości"
+    },
+    "standby": {
+      "cause": "tryb czuwania nie ma wyłącznika",
+      "effect": "nie reaguje, dopóki ktoś się nie zbliży lub nie uderzy"
+    }
+  },
+  "elite": {
+    "footnote": "Egzemplarz nr {serial}: {name}. {effect}",
+    "zweryfikowany": {
+      "m": "zweryfikowany",
+      "f": "zweryfikowana",
+      "n": "zweryfikowane",
+      "pl": "zweryfikowane",
+      "effect": "Aura zaufania: pobliskie egzemplarze zadają o 25% większe obrażenia."
+    },
+    "sponsorowany": {
+      "m": "sponsorowany",
+      "f": "sponsorowana",
+      "n": "sponsorowane",
+      "pl": "sponsorowane",
+      "effect": "Porusza się szybciej, ponieważ ktoś za to zapłacił."
+    },
+    "nieuchronny": {
+      "m": "nieuchronny",
+      "f": "nieuchronna",
+      "n": "nieuchronne",
+      "pl": "nieuchronne",
+      "effect": "Ma o połowę więcej racji, niż deklaruje."
+    },
+    "domniemany": {
+      "m": "domniemany",
+      "f": "domniemana",
+      "n": "domniemane",
+      "pl": "domniemane",
+      "effect": "Raz, w połowie trafienia, przestaje być w tym miejscu."
+    }
+  },
+  "boss": {
+    "prototyp": {
+      "name": "Prototyp",
+      "meet": "Napotkano Prototyp. Urządzenie zawiera wszystkie części, także te, które w serii usunięto.",
+      "half": "Prototyp utracił nogę. Producent nie przewidział tej funkcji."
+    },
+    "weryfikacja": {
+      "name": "Weryfikacja",
+      "meet": "Napotkano Weryfikację. Pyta, czy użytkownik jest robotem. Odpowiedź „tak” nie została przewidziana.",
+      "hint": "Zaznacz wszystkie kratki z hydrantami.",
+      "solved": "Wszystkie hydranty zaznaczono. Weryfikacja zostaje wstrzymana."
+    },
+    "hipoteza": {
+      "name": "Hipoteza",
+      "meet": "Napotkano Hipotezę. Istnieje w stopniu 0,3. Aby ją potwierdzić, należy stanąć w jej obrysie.",
+      "confirmed": "Hipotezę potwierdzono. Nie jest to dobra wiadomość."
+    }
+  },
+  "summon": {
+    "reminder": "Przypomnienie"
+  }
+}

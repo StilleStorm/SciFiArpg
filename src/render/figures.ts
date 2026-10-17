@@ -5,6 +5,7 @@
 import { createRng } from '../core/rng';
 import type { Enemy, Pickup, Player, Projectile } from '../entities';
 import { el, n2 } from './svg';
+import { buildPickupCard } from './pickupCard';
 import type { Builder } from './view';
 
 const LEG_PERIOD_MS = 150;
@@ -100,14 +101,7 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
 
 // ---------- pickup: a small numbered plate ----------
 export function buildPickup(e: Pickup): SVGGElement {
-  const g = el('g', { class: 'pickup' });
-  const tilt = (e.number % 5) - 2;
-  g.append(
-    el('rect', { x: -11, y: -7, width: 22, height: 14, transform: `rotate(${tilt})` }),
-    el('rect', { x: -8.5, y: -4.5, width: 17, height: 9, 'stroke-width': 0.8, transform: `rotate(${tilt})` }),
-    el('text', { class: 't-plate', x: 0, y: 3.2 }, [String(e.number)]),
-  );
-  return g;
+  return buildPickupCard(e);
 }
 
 // ---------- projectile ----------

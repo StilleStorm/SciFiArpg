@@ -1,0 +1,99 @@
+{
+  "parzystosc": {
+    "name": "Parzystość",
+    "text": "Na tej planecie wszystko występuje parami, włącznie z nieszczęściem.",
+    "header": "Na {planet} wszystko występuje parami, włącznie z nieszczęściem. Korzystając z planety, akceptujesz ten stan rzeczy.",
+    "short": "Wrogowie i łupy występują parami."
+  },
+  "grawitacja": {
+    "name": "Grawitacja doradcza",
+    "text": "Grawitacja ma tu charakter zalecenia.",
+    "header": "Grawitacja ma tu charakter zalecenia. Użytkownik może się do niej stosować, jeżeli uzna to za stosowne.",
+    "short": "Szybszy ruch, odrzut ×3, wrogowie dryfują."
+  },
+  "godziny-konsultanta": {
+    "name": "Godziny konsultanta",
+    "text": "Konsultant dostępny pon–pt 8–16. Poza godzinami obsługuje Cię bot.",
+    "header": "Konsultant dostępny pon–pt 8–16. Poza godzinami obsługuje Cię bot. Bot nie ponosi odpowiedzialności za to, co się wówczas wydarzy.",
+    "short": "Co 40 s: 10 s obsługi przez bota, bez obrażeń."
+  },
+  "czas-wsteczny": {
+    "name": "Czas wsteczny",
+    "text": "Po 17:00 czas płynie wstecz.",
+    "header": "Po 17:00 czas płynie wstecz. Godzina 17:00 nastąpi po piątej minucie pobytu na {planet}.",
+    "short": "Po 5 minutach wrogowie cofają się, reputacja ujemna."
+  },
+  "wymagana-aktualizacja": {
+    "name": "Wymagana aktualizacja",
+    "text": "Twoja broń wymaga aktualizacji.",
+    "header": "Twoja broń wymaga aktualizacji. Do czasu jej zainstalowania działa w trybie ograniczonym.",
+    "short": "Broń −50% do aktualizacji z pierwszego elitarnego."
+  },
+  "nie-przeszkadzac": {
+    "name": "Nie przeszkadzać",
+    "text": "Na planecie obowiązuje tryb nie przeszkadzać.",
+    "header": "Na {planet} obowiązuje tryb nie przeszkadzać. Umiejętności generują hałas. Zwykłe uderzenia są traktowane jako cisza.",
+    "short": "Umiejętności podwajają zasięg alarmu."
+  },
+  "oplata-serwisowa": {
+    "name": "Opłata serwisowa",
+    "text": "Każde zwycięstwo podlega opłacie serwisowej.",
+    "header": "Każde zwycięstwo podlega opłacie serwisowej w wysokości jednej gwiazdki. Jakość łupów podniesiono w ramach rekompensaty.",
+    "short": "Każde zabicie kosztuje 1 gwiazdkę, łupy o klasę lepsze."
+  },
+  "ciasteczka": {
+    "name": "Ciasteczka",
+    "text": "Ta strona używa ciasteczek.",
+    "header": "Ta strona używa ciasteczek. Kontynuując przeglądanie strony, wyrażasz zgodę na personalizację wrogów.",
+    "short": "Na każdej stronie baner: więcej wrogów albo mniej łupów."
+  },
+  "weryfikacja-dwuetapowa": {
+    "name": "Weryfikacja dwuetapowa",
+    "text": "Wyjście wymaga weryfikacji dwuetapowej.",
+    "header": "Wyjście ze strony wymaga weryfikacji dwuetapowej. Kod zostanie wysłany po zażądaniu go. Czas dostarczenia nie jest gwarantowany.",
+    "short": "Wyjście otwiera kod z SMS, który przychodzi po 6–12 s."
+  },
+  "bot": {
+    "0": "Rozumiem. Czy chodzi o: a) fakturę, b) dostawę, c) inne?",
+    "1": "Dziękuję za wiadomość. Twoja sprawa jest dla nas ważna.",
+    "2": "Nie jestem pewien, czy dobrze zrozumiałem. Czy możesz sformułować to inaczej?",
+    "3": "Przekazuję zgłoszenie do konsultanta. Konsultant jest poza godzinami.",
+    "4": "Czy to odpowiada na Twoje pytanie? Tak / Nie / Nie wiem.",
+    "5": "Zanotowałem. Proszę o cierpliwość. Szacowany czas: nieustalony.",
+    "6": "Widzę, że próbujesz się ruszyć. Czy chodzi o zmianę adresu?",
+    "7": "Aby kontynuować, wybierz jedną z opcji. Opcji nie wyświetlono."
+  },
+  "fee": {
+    "first": "Pobrano opłatę serwisową: 1 gwiazdka. Opłata nie podlega zwrotowi.",
+    "none": "Opłata serwisowa nie została pobrana, ponieważ nie było z czego."
+  },
+  "update": {
+    "title": "Dostępna aktualizacja",
+    "body": "Z pokonanego wroga wypadła aktualizacja uzbrojenia. Instalacja jest zalecana. Brak instalacji jest niezalecany.",
+    "install": "Zainstaluj",
+    "installed": "Zaktualizowano broń. Przywrócono pełną skuteczność.",
+    "featureDefault": "Nowość! Broń jest teraz o 5% wolniejsza. Poprawiono stabilność.",
+    "needed": "Broń działa w trybie ograniczonym. Wymagana aktualizacja."
+  },
+  "cookies": {
+    "title": "Ta strona używa ciasteczek",
+    "body": "Używamy ciasteczek, aby dopasować wrogów do Twoich preferencji. Możesz zaakceptować wszystkie albo tylko niezbędne.",
+    "all": "Akceptuję wszystkie",
+    "minimal": "Tylko niezbędne",
+    "allDone": "Wrogowie zostali spersonalizowani. Dodano jednego elitarnego.",
+    "minimalDone": "Zastosowano wyłącznie niezbędnych wrogów. Łupy ograniczono do niezbędnych.",
+    "again": "Przez 30 sekund nie wykryto aktywności. Baner wyświetlono ponownie."
+  },
+  "code": {
+    "requested": "Kod weryfikacyjny został wysłany. Czas dostarczenia: od 6 do 12 sekund. Nie jest to zobowiązanie.",
+    "sms": "SMS: Twój kod weryfikacyjny to {code}. Nie udostępniaj go nikomu, także nam.",
+    "title": "Weryfikacja dwuetapowa",
+    "body": "Wpisz kod z SMS-a, aby opuścić stronę.",
+    "enter": "Wpisz kod",
+    "accepted": "Kod przyjęty. Wyjście odblokowane.",
+    "locked": "Wyjście wymaga weryfikacji dwuetapowej. Prosimy o oczekiwanie na kod."
+  },
+  "kiosk": {
+    "label": "PACZKOMAT"
+  }
+}

@@ -1,4 +1,5 @@
 import { t } from '../i18n';
+import { xpToNext } from '../progression/xp';
 import type { RunState } from '../world/run';
 import { h } from './dom';
 import { el as svgEl, n2 } from '../render/svg';
@@ -36,6 +37,16 @@ function field(labelKey: string, extra = ''): { root: HTMLElement; value: HTMLEl
   return { root, value, blank };
 }
 
+/**
+ * Level and progress. Under "Czas wsteczny" (after it begins) the form prints the absurd negative:
+ * the reputacja already earned is shown as a debt, although it is in fact subtracted from the next level.
+ */
+export function reputacjaText(s: RunState): string {
+  const p = s.player;
+  const progress = `${s.law.reversed ? '\u2212' : ''}${Math.round(p.xp)}/${xpToNext(p.level)}`;
+  return `${p.level} \u00b7 ${progress}`;
+}
+
 export function createHud(root: HTMLElement): Hud {
   const el = h('div', 'hud paper');
   const racja = field('ui.hud.racja', 'racja');
@@ -44,6 +55,7 @@ export function createHud(root: HTMLElement): Hud {
   const strona = field('ui.hud.strona');
   const row1 = h('div', 'hud-row');
   const row2 = h('div', 'hud-row');
+  reputacja.root.classList.add('rep');
   row1.append(racja.root);
   row2.append(reputacja.root, gwiazdki.root, strona.root);
   el.append(row1, row2);
@@ -71,7 +83,7 @@ export function createHud(root: HTMLElement): Hud {
     update(s) {
       const p = s.player;
       setText(racja.value, 'racja', `${Math.max(0, Math.ceil(p.hp))}/${p.hpMax}`);
-      setText(reputacja.value, 'reputacja', String(p.level));
+      setText(reputacja.value, 'reputacja', reputacjaText(s));
       setText(gwiazdki.value, 'gwiazdki', String(p.gwiazdki));
       setText(strona.value, 'strona', t('ui.hud.pages', { page: s.pageIndex + 1, total: s.pageCount }));
       const ratio = Math.max(0, p.hp) / p.hpMax;

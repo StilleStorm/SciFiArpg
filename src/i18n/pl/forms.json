@@ -1,0 +1,203 @@
+{
+  "update": {
+    "title": "Aktualizacja 1.{n}",
+    "subtitle": "Poprawki błędów i usprawnienia.",
+    "instruction": "Wybierz jedną nowość. Pozostałe zostaną usunięte w przyszłej wersji.",
+    "section": "§ {n}",
+    "noPermission": "Brak uprawnień",
+    "requires": "Wymaga uprawnień: {family}.",
+    "family": {
+      "urzadzenia": "urządzenia",
+      "powiadomienia": "powiadomienia",
+      "wygenerowane": "wygenerowane"
+    },
+    "report": "Zgłoś problem z aktualizacją",
+    "reportUsed": "Problem zgłoszono. Zgłoszenie rozpatrzono.",
+    "reportNote": "Zgłoszenie problemu przyjęto. Nowości zastąpiono innymi.",
+    "install": "Zainstaluj",
+    "installed": "Zaktualizowano",
+    "installedNote": "Aktualizację 1.{n} zainstalowano. Pozostałe nowości usunięto.",
+    "tag": {
+      "skill": "Umiejętność, {type}",
+      "passive": "Cecha",
+      "stat": "Parametr"
+    },
+    "skillRank": "{skill}, ulepszenie {rank}",
+    "skillRankDesc": "Obrażenia i obszar większe, czas działania dłuższy, odnowienie krótsze.",
+    "passive": {
+      "pralka": {
+        "1": {
+          "name": "Dodatkowy cykl",
+          "desc": "Odnowienie umiejętności krótsze o 8%."
+        },
+        "2": {
+          "name": "Zawór bezpieczeństwa",
+          "desc": "Piana pochłania o 20 obrażeń więcej."
+        },
+        "3": {
+          "name": "Wyższe obroty",
+          "desc": "Umiejętności zadają o 10% więcej obrażeń."
+        },
+        "4": {
+          "name": "Filtr kłaczków",
+          "desc": "Odzyskuje 0,6 racji na sekundę."
+        },
+        "5": {
+          "name": "Wirnik zapasowy",
+          "desc": "Obszar umiejętności większy o 12%."
+        },
+        "6": {
+          "name": "Pranie delikatne",
+          "desc": "Czas działania dłuższy o 25%. Każde skreślenie przywraca 2 racji."
+        }
+      },
+      "konsultant": {
+        "1": {
+          "name": "Skrypt rozmowy",
+          "desc": "Umiejętności zadają o 10% więcej obrażeń."
+        },
+        "2": {
+          "name": "Kolejka priorytetowa",
+          "desc": "Odnowienie umiejętności krótsze o 8%."
+        },
+        "3": {
+          "name": "Nagrywane w celach jakości",
+          "desc": "Szansa na trafienie krytyczne wyższa o 5 punktów."
+        },
+        "4": {
+          "name": "Muzyka oczekiwania",
+          "desc": "Czas działania dłuższy o 20%."
+        },
+        "5": {
+          "name": "Ankieta satysfakcji",
+          "desc": "Reputacja większa o 10%."
+        },
+        "6": {
+          "name": "Eskalacja do przełożonego",
+          "desc": "Obrażenia większe o 15%, obszar o 10%."
+        }
+      },
+      "petlowiec": {
+        "1": {
+          "name": "Nadgodziny",
+          "desc": "Czas działania dłuższy o 20%. Kopie zostają dłużej."
+        },
+        "2": {
+          "name": "Pamięć mięśniowa",
+          "desc": "Umiejętności zadają o 10% więcej obrażeń."
+        },
+        "3": {
+          "name": "Niezgodność wersji",
+          "desc": "Szansa na trafienie krytyczne wyższa o 5 punktów."
+        },
+        "4": {
+          "name": "Skrócony cykl",
+          "desc": "Odnowienie umiejętności krótsze o 8%."
+        },
+        "5": {
+          "name": "Zapas tlenu",
+          "desc": "Odzyskuje 0,5 racji na sekundę."
+        },
+        "6": {
+          "name": "Dodatkowa pętla",
+          "desc": "Jedna kopia więcej w tym samym czasie."
+        }
+      },
+      "kartograf": {
+        "1": {
+          "name": "Dokładniejsza skala",
+          "desc": "Obszar umiejętności większy o 12%."
+        },
+        "2": {
+          "name": "Poprawka na krzywiznę",
+          "desc": "Umiejętności zadają o 10% więcej obrażeń."
+        },
+        "3": {
+          "name": "Szybki pomiar",
+          "desc": "Odnowienie umiejętności krótsze o 8%."
+        },
+        "4": {
+          "name": "Buty terenowe",
+          "desc": "Szybszy chód o 10%."
+        },
+        "5": {
+          "name": "Znaki w terenie",
+          "desc": "Czas działania dłuższy o 20%."
+        },
+        "6": {
+          "name": "Odczyt niezależny",
+          "desc": "Szansa na trafienie krytyczne wyższa o 6 punktów, obrażenia o 10%."
+        }
+      }
+    },
+    "stat": {
+      "racja": {
+        "name": "Zapas racji",
+        "desc": "Racja większa o 12."
+      },
+      "pewnosc": {
+        "name": "Pewność siebie",
+        "desc": "Pewność siebie wyższa o 10."
+      },
+      "upor": {
+        "name": "Upór",
+        "desc": "Upór wyższy o 8."
+      },
+      "resist_mechaniczny": {
+        "name": "Odporność mechaniczna",
+        "desc": "Odporność na obrażenia mechaniczne wyższa o 8%."
+      },
+      "resist_regulaminowy": {
+        "name": "Odporność regulaminowa",
+        "desc": "Odporność na obrażenia regulaminowe wyższa o 8%."
+      },
+      "resist_egzystencjalny": {
+        "name": "Odporność egzystencjalna",
+        "desc": "Odporność na obrażenia egzystencjalne wyższa o 8%."
+      },
+      "trial": {
+        "name": "Szybsza weryfikacja",
+        "desc": "Przedmioty są weryfikowane o połowę szybciej."
+      },
+      "gwiazdki": {
+        "name": "Wyższa ocena",
+        "desc": "Każde skreślenie przynosi o jedną gwiazdkę więcej."
+      }
+    }
+  },
+  "death": {
+    "zgloszenie": {
+      "title": "Zgłoszenie",
+      "lead": "Twoje zgłoszenie jest dla nas ważne.",
+      "number": "Zgłoszenie nr 48213",
+      "wait": "Szacowany czas oczekiwania:",
+      "verdict": "Zgłaszający twierdzi, że zmarł. Zgłoszenie uznano za zasadne.",
+      "kills": {
+        "one": "Skreślono {count} urządzenie.",
+        "few": "Skreślono {count} urządzenia.",
+        "many": "Skreślono {count} urządzeń."
+      },
+      "closed": "Planeta została zamknięta wraz ze zgłoszeniem.",
+      "stamp": "Zamknięto",
+      "aboutLabel": "Dotyczy",
+      "aboutValue": "utrata racji",
+      "statusLabel": "Status",
+      "statusOpen": "w toku",
+      "statusClosed": "zamknięte"
+    },
+    "petla": {
+      "title": "Pętla",
+      "lead": "Przywrócono poprzedni stan strony.",
+      "body": "Stan, w którym zgłaszający zmarł, pozostawiono na miejscu. Jest dostępny dla innych użytkowników.",
+      "go": "Kontynuuj"
+    },
+    "zawieszenie": {
+      "title": "Konto zawieszone",
+      "lead": "Przyczyna: naruszenie standardów społeczności (nie podano których).",
+      "body": "Przeciwnicy nie widzą zgłaszającego. Zgłaszający nie może podnosić przedmiotów i zadaje o 30% mniej obrażeń. Odwołanie złożyć można po znalezieniu formularza.",
+      "stamp": "Zawieszono",
+      "go": "Rozumiem",
+      "appealed": "Odwołanie rozpatrzono pozytywnie. Przyczyny nie podano."
+    }
+  }
+}

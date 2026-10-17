@@ -8,7 +8,8 @@ import { h } from './dom';
 
 export interface Title {
   el: HTMLElement;
-  show(): void;
+  /** `done` = tickets closed so far (MetaState.runsCompleted). */
+  show(done?: number): void;
   hide(): void;
 }
 
@@ -23,6 +24,7 @@ export function createTitle(root: HTMLElement, onStart: () => void): Title {
   const start = h('button', 'start', t('ui.title.start'));
   start.type = 'button';
   start.addEventListener('click', onStart);
+  const done = h('p', 'cover-done');
   frame.append(
     h('div', 'agency', t('ui.title.agency')),
     h('div', 'department', t('ui.title.department')),
@@ -33,6 +35,7 @@ export function createTitle(root: HTMLElement, onStart: () => void): Title {
     art,
     stampSvg,
     start,
+    done,
     h('p', 'cover-footer', t('ui.title.footer')),
   );
   screen.append(frame);
@@ -41,7 +44,8 @@ export function createTitle(root: HTMLElement, onStart: () => void): Title {
   let cancel: () => void = () => undefined;
   return {
     el: screen,
-    show() {
+    show(n = 0) {
+      done.textContent = t('ui.title.done', { count: n });
       screen.classList.remove('hidden');
       cancel();
       art.replaceChildren();

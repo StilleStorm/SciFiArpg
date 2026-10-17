@@ -1,0 +1,327 @@
+{
+  "slot": {
+    "bron": "Broń",
+    "nakrycie": "Nakrycie głowy",
+    "odziez": "Odzież",
+    "przyrzad": "Przyrząd",
+    "dokument": "Dokument"
+  },
+  "slotShort": {
+    "bron": "Broń",
+    "nakrycie": "Głowa",
+    "odziez": "Odzież",
+    "przyrzad": "Przyrząd",
+    "dokument": "Dokument"
+  },
+  "tier": {
+    "zwykly": "zwykły",
+    "nietypowy": "nietypowy",
+    "rzadki": "rzadki",
+    "unikatowy": "unikatowy"
+  },
+  "tag": {
+    "papier": "papier",
+    "metal": "metal",
+    "watpliwosc": "wątpliwość",
+    "halas": "hałas",
+    "porzadek": "porządek",
+    "chaos": "chaos"
+  },
+  "dtype": {
+    "mechaniczny": "mechaniczny",
+    "regulaminowy": "regulaminowy",
+    "egzystencjalny": "egzystencjalny"
+  },
+  "stat": {
+    "dmg": "Siła argumentu",
+    "pewnosc": "Pewność siebie",
+    "upor": "Upór",
+    "racja": "Racja",
+    "crit": "Nie do odparcia",
+    "resMechaniczny": "Odporność mech.",
+    "resRegulaminowy": "Odporność reg.",
+    "resEgzystencjalny": "Odporność egz.",
+    "type": "Rodzaj argumentu",
+    "range": "Zasięg"
+  },
+  "statShort": {
+    "dmg": "Arg.",
+    "pewnosc": "Pew.",
+    "upor": "Upór",
+    "racja": "Racja",
+    "crit": "Nd.od.",
+    "resMechaniczny": "Odp.m.",
+    "resRegulaminowy": "Odp.r.",
+    "resEgzystencjalny": "Odp.e."
+  },
+  "variant": "wariant",
+  "full": "Załączniki są pełne. Przedmiot pozostawiono na stronie.",
+  "base": {
+    "pieczatka": {
+      "noun": "pieczątka serwisowa",
+      "desc": "Stempel kauczukowy z rękojeścią. Odbija się nim to, co zostało już postanowione."
+    },
+    "odkurzacz": {
+      "noun": "odkurzacz ręczny",
+      "desc": "Urządzenie o napędzie elektrycznym, prawdopodobnie do zbierania. Nie ustalono, co zbiera."
+    },
+    "wskaznik": {
+      "noun": "wskaźnik laserowy",
+      "desc": "Pióro świecące na czerwono, służące do wskazywania. Wskazane rzeczy zwykle okazują się wątpliwe."
+    },
+    "kabel": {
+      "noun": "kabel różny",
+      "desc": "Przewód zakończony wtyczkami, których rodzaju nie podano. Pasuje do każdego gniazda z wyjątkiem tego, do którego go przyłożono."
+    },
+    "czytnik": {
+      "noun": "czytnik kodów",
+      "desc": "Skaner kodów kreskowych. Odczytuje wszystko, co ma paski, oraz kilka rzeczy, które ich nie mają."
+    },
+    "kask": {
+      "noun": "kask kurierski",
+      "desc": "Nakrycie głowy z logo, którego nie rozpoznano. Chroni głowę zgodnie z deklaracją."
+    },
+    "sluchawki": {
+      "noun": "słuchawki douszne",
+      "desc": "Dwa elementy połączone ze sobą lub nie. Producent określił je jako bezprzewodowe, co potwierdzono w jednym przypadku z dwóch."
+    },
+    "czapka": {
+      "noun": "czapka z daszkiem",
+      "desc": "Daszek skierowany jest do przodu. Pod daszkiem znajduje się osoba, której nie opisano."
+    },
+    "kamizelka": {
+      "noun": "kamizelka odblaskowa",
+      "desc": "Odzież koloru widocznego z daleka. Osobę w niej odzianą widać z jeszcze większej odległości."
+    },
+    "fartuch": {
+      "noun": "fartuch roboczy",
+      "desc": "Okrycie wierzchnie z kieszenią na przedmioty, których w kieszeni nie powinno być."
+    },
+    "rekawiczki": {
+      "noun": "rękawiczki dotykowe",
+      "desc": "Pięć palców z każdej strony. Palce rozpoznają ekran, nie rozpoznają osoby."
+    },
+    "ladowarka": {
+      "noun": "ładowarka",
+      "desc": "Wtyczka z przewodem. Dostarcza energię urządzeniom, które o nią nie prosiły."
+    },
+    "dongle": {
+      "noun": "dongle",
+      "desc": "Mały element elektroniczny, którego przeznaczenie zna wyłącznie sprzedawca. Sprzedawcy nie odnaleziono."
+    },
+    "karta": {
+      "noun": "karta lojalnościowa",
+      "desc": "Plastikowa karta potwierdzająca, że ktoś kiedyś coś kupił. Lojalności nie sprawdzano."
+    },
+    "urzadzenie": {
+      "noun": "urządzenie",
+      "desc": "Urządzenie. Więcej danych nie podano."
+    },
+    "regulamin": {
+      "noun": "regulamin",
+      "desc": "Dokument liczący 43 strony drobnego druku. Zaakceptowany przez wszystkich, którzy go nie otworzyli."
+    },
+    "certyfikat": {
+      "noun": "certyfikat",
+      "desc": "Dokument potwierdzający, że coś zostało potwierdzone. Instytucji wystawiającej nie wskazano."
+    },
+    "zrzut": {
+      "noun": "zrzut ekranu",
+      "desc": "Obraz tego, co było widać. Nie ustalono, czy było."
+    },
+    "zaswiadczenie": {
+      "noun": "zaświadczenie",
+      "desc": "Pismo urzędowe z pieczątką. Pieczątka jest czytelna, pismo mniej."
+    }
+  },
+  "affix": {
+    "gwarancyjny": { "m": "gwarancyjny", "f": "gwarancyjna", "n": "gwarancyjne", "pl": "gwarancyjne" },
+    "zweryfikowany": { "m": "zweryfikowany", "f": "zweryfikowana", "n": "zweryfikowane", "pl": "zweryfikowane" },
+    "odnowiony": { "m": "odnowiony", "f": "odnowiona", "n": "odnowione", "pl": "odnowione" },
+    "poleasingowy": { "m": "poleasingowy", "f": "poleasingowa", "n": "poleasingowe", "pl": "poleasingowe" },
+    "uzywany": { "m": "używany", "f": "używana", "n": "używane", "pl": "używane" },
+    "sponsorowany": { "m": "sponsorowany", "f": "sponsorowana", "n": "sponsorowane", "pl": "sponsorowane" },
+    "nieuchronny": { "m": "nieuchronny", "f": "nieuchronna", "n": "nieuchronne", "pl": "nieuchronne" },
+    "domniemany": { "m": "domniemany", "f": "domniemana", "n": "domniemane", "pl": "domniemane" },
+    "ewentualny": { "m": "ewentualny", "f": "ewentualna", "n": "ewentualne", "pl": "ewentualne" },
+    "zgodny": { "m": "zgodny z regulaminem", "f": "zgodna z regulaminem", "n": "zgodne z regulaminem", "pl": "zgodne z regulaminem" },
+    "wzmocniony": { "m": "wzmocniony", "f": "wzmocniona", "n": "wzmocnione", "pl": "wzmocnione" },
+    "certyfikowany": { "m": "certyfikowany", "f": "certyfikowana", "n": "certyfikowane", "pl": "certyfikowane" },
+    "markowy": { "m": "markowy", "f": "markowa", "n": "markowe", "pl": "markowe" },
+    "oryginalny": { "m": "oryginalny", "f": "oryginalna", "n": "oryginalne", "pl": "oryginalne" },
+    "limitowany": { "m": "limitowany", "f": "limitowana", "n": "limitowane", "pl": "limitowane" },
+    "fabrycznienowy": { "m": "fabrycznie nowy", "f": "fabrycznie nowa", "n": "fabrycznie nowe", "pl": "fabrycznie nowe" },
+    "darmowy": {
+      "m": "w wersji darmowej",
+      "f": "w wersji darmowej",
+      "n": "w wersji darmowej",
+      "pl": "w wersji darmowej"
+    },
+    "asystent": {
+      "m": "z asystentem głosowym",
+      "f": "z asystentem głosowym",
+      "n": "z asystentem głosowym",
+      "pl": "z asystentem głosowym"
+    },
+    "powiadomienia": {
+      "m": "z powiadomieniami",
+      "f": "z powiadomieniami",
+      "n": "z powiadomieniami",
+      "pl": "z powiadomieniami"
+    },
+    "ciasteczka": {
+      "m": "z ciasteczkami",
+      "f": "z ciasteczkami",
+      "n": "z ciasteczkami",
+      "pl": "z ciasteczkami"
+    },
+    "konto": {
+      "m": "z kontem obowiązkowym",
+      "f": "z kontem obowiązkowym",
+      "n": "z kontem obowiązkowym",
+      "pl": "z kontem obowiązkowym"
+    },
+    "inteligentny": { "m": "inteligentny", "f": "inteligentna", "n": "inteligentne", "pl": "inteligentne" },
+    "chmura": {
+      "m": "zsynchronizowany z chmurą",
+      "f": "zsynchronizowana z chmurą",
+      "n": "zsynchronizowane z chmurą",
+      "pl": "zsynchronizowane z chmurą"
+    },
+    "spersonalizowany": { "m": "spersonalizowany", "f": "spersonalizowana", "n": "spersonalizowane", "pl": "spersonalizowane" },
+    "ciemny": {
+      "m": "z trybem ciemnym",
+      "f": "z trybem ciemnym",
+      "n": "z trybem ciemnym",
+      "pl": "z trybem ciemnym"
+    }
+  },
+  "unwanted": {
+    "asystent": "Nowość! Dodano asystenta głosowego. Asystent nie wykonuje poleceń, lecz je komentuje.",
+    "powiadomienia": "Nowość! Przedmiot informuje teraz o swoim stanie. Informuje często.",
+    "ciasteczka": "Nowość! Przedmiot używa ciasteczek. Do czego, nie podano.",
+    "konto": "Nowość! Do korzystania z przedmiotu wymagane jest konto. Konto założono w Twoim imieniu.",
+    "inteligentny": "Nowość! Przedmiot jest inteligentny. Nie wynika z tego nic dla Ciebie.",
+    "chmura": "Nowość! Przedmiot synchronizuje się z chmurą. Chmura jest w innym miejscu niż przedmiot.",
+    "spersonalizowany": "Nowość! Przedmiot został spersonalizowany. Dla kogo, nie ustalono.",
+    "ciemny": "Nowość! Dodano tryb ciemny. Przedmiot jest w nim trudniejszy do znalezienia."
+  },
+  "unique": {
+    "odmowa": {
+      "name": "Pieczątka «Odmowa»",
+      "desc": "Stempel kauczukowy z rękojeścią z drewna, którego nie zidentyfikowano.",
+      "story": "Używana przez 31 lat w dziale reklamacji. Odbiła 412 000 odmów, z czego żadna nie została odwołana. Jedyna decyzja pozytywna w jej historii dotyczyła jej samej i została odrzucona.",
+      "note": "Przedmiot unikatowy. Pieczątka «Odmowa» odmawia, że jest unikatowa."
+    },
+    "kabelrozny": {
+      "name": "Kabel (różny), egzemplarz jedyny",
+      "desc": "Przewód w kartonie opisanym jako «kabel (różny)». Karton zachowano.",
+      "story": "Pasuje do trzech gniazd, z których żadne nie istnieje w tym wszechświecie. Producent nie odpowiada na pytania, ponieważ również jest różny. Kto go użył, mówi, że działa, i nie umie wskazać, co.",
+      "note": "Przedmiot unikatowy. Producent kabla pozostaje różny."
+    },
+    "regulamin43": {
+      "name": "Regulamin, wersja ostateczna (3)",
+      "desc": "Dokument w trzecim wydaniu ostatecznym. Wydań wcześniejszych nie wycofano.",
+      "story": "Pierwsze wydanie liczyło dwie strony. To liczy 1 140 i nikt nie umie wskazać, które zdanie doszło. Przeczytał je jeden człowiek, zaakceptował bez zastrzeżeń i od tej pory go nie widziano.",
+      "note": "Przedmiot unikatowy. Przeczytano go w całości, co odnotowano jako błąd."
+    },
+    "kaskmili": {
+      "name": "Kask Ostatniej Mili",
+      "desc": "Kask kurierski ze śladami po licznych doręczeniach. Jedno nie zostało zakończone.",
+      "story": "Jego właściciel dostarczał paczkę w oknie doręczeń od 8 do 16 i nie wrócił. Kask wrócił sam, z potwierdzeniem odbioru podpisanym «Sąsiad». Sąsiada nie ustalono.",
+      "note": "Przedmiot unikatowy. Doręczono. Odbiorca: Sąsiad."
+    },
+    "cisza": {
+      "name": "Słuchawki z redukcją rzeczywistości",
+      "desc": "Słuchawki douszne. Etui zawiera instrukcję w języku, którego brak.",
+      "story": "Redukcja szumów osiągnęła 100% i poszła dalej. Użytkownik przestaje słyszeć także to, że coś nie istnieje. Producent uznaje to za funkcję.",
+      "note": "Przedmiot unikatowy. Redukcja rzeczywistości: aktywna."
+    },
+    "istnienie": {
+      "name": "Zaświadczenie o istnieniu",
+      "desc": "Pismo urzędowe z pieczątką. Pieczątka potwierdza pieczątkę.",
+      "story": "Wystawione na wniosek rzeczy, która nie była pewna. Poświadcza istnienie wnioskodawcy od daty wystawienia, nie wcześniej. Wnioskodawca zachował zaświadczenie; samego siebie nie odnaleziono.",
+      "note": "Przedmiot unikatowy. Istnienie posiadacza poświadczono od dziś."
+    }
+  },
+  "review": {
+    "line": {
+      "one": "{rating} · {count} opinia zweryfikowana",
+      "few": "{rating} · {count} opinie zweryfikowane",
+      "many": "{rating} · {count} opinii zweryfikowanych"
+    },
+    "label": "Opinie",
+    "unverified": "Opinie nie były weryfikowane.",
+    "none": "Przedmiot unikatowy. Opinii nie zebrano, ponieważ nie ma z czym porównywać.",
+    "trial": "Próba użytkowania: {done} z {total}.",
+    "trialDone": "Próba użytkowania zakończona.",
+    "honest": "Opinie potwierdzono w granicach błędu.",
+    "bought": "Opinie nie znalazły potwierdzenia w użytkowaniu.",
+    "underrated": "Opinie zaniżono. Przedmiot jest lepszy, niż go opisano."
+  },
+  "reveal": {
+    "honest": "Przedmiot nr {n} zweryfikowano w użytkowaniu. Opinie potwierdzono w granicach błędu.",
+    "bought": "Przedmiot nr {n}: opinie nie znalazły potwierdzenia w użytkowaniu.",
+    "underrated": "Przedmiot nr {n}: opinie zaniżono. Przedmiot okazał się lepszy, niż go opisano.",
+    "free": "Okres próbny przedmiotu nr {n} dobiegł końca. Przedmiot działa nadal, z ograniczeniem o 40%."
+  },
+  "compat": {
+    "blocked": "Ten przedmiot nie jest kompatybilny z Twoim urządzeniem.",
+    "clash": "Przedmiot nr {a} nie jest kompatybilny z przedmiotem nr {b}. Powód: {tag}. Dostępny adapter.",
+    "set": "Przedmioty nr {a} i nr {b} tworzą zestaw (wspólna słabość: {tag}). Dodano {bonus} punktów pewności siebie i uporu.",
+    "likes": "Lubi: {tag}",
+    "dislikes": "Nie znosi: {tag}",
+    "adapter": "Adapter",
+    "adapterBought": "Adapter do przedmiotu nr {n} zakupiono. Przedmiot jest teraz kompatybilny w stopniu uznanym za wystarczający.",
+    "adapterPoor": "Adapter kosztuje {price}. Stan konta nie pozwala na jego zakup."
+  },
+  "free": {
+    "note": "Wersja darmowa. Po {n} eliminacjach przedmiot działa słabiej o 40% i wyświetla reklamy.",
+    "active": "Wersja darmowa po okresie próbnym: -40% i reklamy co 30 sekund.",
+    "boughtNote": "Wersja wykupiona. Reklam nie ma.",
+    "bought": "Przedmiot nr {n} wykupiono. Reklam więcej nie będzie, o ile nie zostaną wznowione.",
+    "poor": "Wykup kosztuje {price}. Stan konta nie pozwala na jego zakup."
+  },
+  "ads": {
+    "a1": "Reklama: Przeglądaj planety bez ograniczeń.",
+    "a2": "Reklama: Twój przedmiot jest w wersji darmowej. Wersja płatna jest taka sama, tylko bez tego zdania.",
+    "a3": "Reklama: Odkryj regulamin, który pokochasz!",
+    "a4": "Reklama: Czy wiesz, że gwiazdki można wydawać? Sprawdź, na co!",
+    "a5": "Reklama: 9 na 10 konsultantów poleca ten przedmiot. Dziesiąty jest na urlopie.",
+    "a6": "Reklama: Przejdź na wersję bez reklam. Reklama o tym zniknie jako ostatnia."
+  },
+  "ui": {
+    "title": "Załączniki",
+    "sub": "Wykaz przedmiotów załączonych do zgłoszenia.",
+    "count": "Załączono: {n} z {max}.",
+    "close": "Zamknij",
+    "worn": "Wyposażenie",
+    "bag": "Przedmioty",
+    "caption": "Ryc. {n}.",
+    "empty": "Załączników brak. Zgłoszenie jest kompletne.",
+    "emptySlot": "puste",
+    "equip": "Załóż",
+    "unequip": "Zdejmij",
+    "drop": "Wyrzuć",
+    "buyAdapter": "Kup adapter",
+    "buyOut": "Wykup",
+    "price": "{count} gw.",
+    "worn1": "założony",
+    "blocked": "niekompatybilny",
+    "tableStat": "Parametr",
+    "declared": "Deklarowane",
+    "actual": "Faktyczne",
+    "afterTrial": "po próbie",
+    "current": "Obecnie",
+    "chosen": "Ten przedmiot",
+    "noneWorn": "nic nie założono",
+    "dropped": "Przedmiot nr {n} wyrzucono. Odzyskanie nie jest przewidziane.",
+    "worn2": "Przedmiot nr {n} założono.",
+    "taken": "Przedmiot nr {n} zdjęto.",
+    "full": "Załączniki są pełne. Zdjęcie przedmiotu nie jest możliwe.",
+    "claimedHead": "Deklarowane",
+    "kills": "eliminacji",
+    "tierLine": "Klasa: {tier}. Poziom: {level}.",
+    "stars": "Gwiazdki: {n}"
+  }
+}

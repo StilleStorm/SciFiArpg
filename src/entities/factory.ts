@@ -1,5 +1,5 @@
-import type { Enemy, Pickup, Player } from './types';
-import { placeholderItem } from '../items';
+import type { Enemy, Pickup, Player, Summon, Zone } from './types';
+import type { Item } from '../items';
 
 export function createPlayer(id: number, x: number, y: number): Player {
   return {
@@ -23,6 +23,23 @@ export function createPlayer(id: number, x: number, y: number): Player {
     stuck: 0,
     level: 1,
     gwiazdki: 0,
+    equipment: {},
+    inventory: [],
+    baseStats: {
+      hpMax: 60,
+      stats: { pewnoscSiebie: 90, upor: 40, dmgMin: 4, dmgMax: 8, critChance: 0.1, resist: {} },
+      damageType: 'mechaniczny',
+      attackRange: 64,
+      attackCooldown: 0.6,
+    },
+    heroId: 'pralka',
+    xp: 0,
+    shield: 0,
+    trialSpeed: 1,
+    seesDefects: false,
+    revealsPage: false,
+    suspended: false,
+    permissions: [],
   };
 }
 
@@ -49,9 +66,39 @@ export function createEnemy(id: number, x: number, y: number, seed: number): Ene
     mode: 'wander',
     wanderTarget: null,
     wanderTimer: 0,
+    family: 'urzadzenia',
+    tier: 1,
   };
 }
 
-export function createPickup(id: number, x: number, y: number, number: number): Pickup {
-  return { kind: 'pickup', id, x, y, r: 14, item: placeholderItem(), number };
+/** A plate on the ground: an item, or (with `gwiazdki`) a small star. Neither given = one star. */
+export function createPickup(id: number, x: number, y: number, number: number, item?: Item, gwiazdki?: number): Pickup {
+  const pickup: Pickup = { kind: 'pickup', id, x, y, r: 14, number };
+  if (item) pickup.item = item;
+  if (gwiazdki !== undefined) pickup.gwiazdki = gwiazdki;
+  else if (!item) pickup.gwiazdki = 1;
+  return pickup;
+}
+
+export function createSummon(id: number, x: number, y: number, init: Pick<Summon, 'variant' | 'heroId' | 'ttl'> & Partial<Summon>): Summon {
+  return {
+    kind: 'summon',
+    id,
+    x,
+    y,
+    r: 10,
+    facing: 1,
+    moving: false,
+    damageType: 'egzystencjalny',
+    attackRange: 120,
+    attackCooldown: 1.1,
+    attackTimer: 0.4,
+    damageMul: 0.6,
+    speed: 105,
+    ...init,
+  };
+}
+
+export function createZone(id: number, x: number, y: number, init: Pick<Zone, 'variant' | 'r' | 'ttl'> & Partial<Zone>): Zone {
+  return { kind: 'zone', id, x, y, ...init };
 }

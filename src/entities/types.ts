@@ -2,7 +2,19 @@ import type { Claim } from '../combat/claims';
 import type { DamageType, Stats } from '../combat/damage';
 import type { Status } from '../combat/status';
 import type { Vec } from '../core/vec';
-import type { Item } from '../items';
+import type { EnemyRt } from '../enemies/runtime';
+import type { DefectId, EliteId, FamilyId } from '../enemies/ids';
+import type { HeroId } from '../heroes';
+import type { Item, Slot } from '../items';
+
+/** What a hero gives before any equipment (items/stats.ts adds the gear). B3 sets it per hero. */
+export interface BaseStats {
+  hpMax: number;
+  stats: Stats;
+  damageType: DamageType;
+  attackRange: number;
+  attackCooldown: number;
+}
 
 interface Base {
   id: number;
@@ -38,6 +50,28 @@ export interface Player extends Fighter {
   stuck: number;
   level: number;
   gwiazdki: number;
+  /** Worn items by slot (items/inventory.ts equips; items/stats.ts recomputes stats from them). */
+  equipment: Partial<Record<Slot, Item>>;
+  /** Carried items, at most INVENTORY_CAP (20). */
+  inventory: Item[];
+  /** What the hero gives before equipment; items/stats.ts recomputeStats(player) adds the gear on top. */
+  baseStats: BaseStats;
+  /** Which hero is being played (heroes/defs.ts). */
+  heroId: HeroId;
+  /** Reputacja collected towards the next level (progression/xp.ts). */
+  xp: number;
+  /** Foam shield: absorbs this much damage before racja is touched (heroes/skills.ts). */
+  shield: number;
+  /** Items are trialed this many times faster (Konsultant: 2). */
+  trialSpeed: number;
+  /** Enemy defects are visible at once (Konsultant). */
+  seesDefects: boolean;
+  /** The whole page map is revealed on entry (Kartograf). */
+  revealsPage: boolean;
+  /** Shadowbanned: enemies ignore the player, no pickups, -30% damage (death/outcomes.ts). */
+  suspended: boolean;
+  /** Permission tokens (a family id such as 'urzadzenia') that unlock gated updates. */
+  permissions: string[];
 }
 
 export interface Enemy extends Fighter {
@@ -51,6 +85,26 @@ export interface Enemy extends Fighter {
   wanderTimer: number;
   /** The thesis in the speech bubble (combat/claims.ts). Placeholder enemies have none. */
   claim?: Claim;
+  /** A copy of a hero left behind by the death outcome Petla (death/outcomes.ts). */
+  copyOf?: { heroId: HeroId; level: number };
+  /** What this enemy drops when killed in addition to ordinary loot (the copy drops one of your items). */
+  drops?: Item;
+  /** Enemy family (enemies/families.ts); copies and plain test enemies are Urzadzenia. */
+  family: FamilyId;
+  /** Powiadomienia: escalation tier 1..4. Others: revision 1.. (scales hp and damage). */
+  tier: number;
+  /** Elite affix (enemies/families.ts ELITES); the object form is what world/enemyInfo.ts expects. */
+  elite?: { affix: EliteId };
+  /** Urzadzenia: the factory defect printed in the footnote. */
+  defect?: DefectId;
+  /** Wygenerowane: existence coefficient e in [0.3, 1]; damage dealt and taken is multiplied by it. */
+  existence?: number;
+  /** Powiadomienia: seconds until the next tier. */
+  escalateIn?: number;
+  /** True for the family's boss (which boss: BOSS_OF[family]). */
+  boss?: true;
+  /** AI timers, defect and boss state (enemies/runtime.ts); read through rtOf(). */
+  rt?: EnemyRt;
 }
 
 export interface Projectile extends Base {
@@ -62,14 +116,55 @@ export interface Projectile extends Base {
   damage: number;
   damageType: DamageType;
   owner: 'player' | 'enemy';
+  /** How many more enemies it may pass through (0 or absent: stops at the first). */
+  pierce?: number;
+  /** Roll hit/crit with the owner's stats on impact instead of using `damage`. */
+  roll?: boolean;
+  /** Extra damage added per enemy already passed (Triangulacja). */
+  bonusPerPass?: number;
+  /** Gains one more pierce when its hit was a crit (Kartograf auto-attack). */
+  pierceOnCrit?: boolean;
+  /** Ids of enemies already hit. */
+  passed?: number[];
 }
 
 export interface Pickup extends Base {
   kind: 'pickup';
-  item: Item;
+  /** The item on the plate. Absent on a gwiazdki pickup. */
+  item?: Item;
+  /** A small five-pointed scribble worth this many gwiazdki (items/loot: systems/loot.ts). */
+  gwiazdki?: number;
   /** The number printed on the plate and used in the footnote. */
   number: number;
 }
 
-export type Entity = Player | Enemy | Projectile | Pickup;
+/** A friendly figure: a Petlowiec copy, a Kartograf decoy, or the 10-second friendly copy after Petla. */
+export interface Summon extends Base {
+  kind: 'summon';
+  variant: 'copy' | 'decoy' | 'ghost';
+  heroId: HeroId;
+  facing: 1 | -1;
+  moving: boolean;
+  /** Seconds left to live. */
+  ttl: number;
+  damageType: DamageType;
+  attackRange: number;
+  attackCooldown: number;
+  attackTimer: number;
+  /** Damage as a fraction of the player's damage range (0 for a decoy). */
+  damageMul: number;
+  speed: number;
+}
+
+/** A marked patch of paper: Teren nieistniejacy, or an hourglass drawn over a blocked enemy. */
+export interface Zone extends Base {
+  kind: 'zone';
+  variant: 'teren' | 'hourglass';
+  /** Seconds left. */
+  ttl: number;
+  /** Id of the enemy the zone follows (hourglass). */
+  follow?: number;
+}
+
+export type Entity = Player | Enemy | Projectile | Pickup | Summon | Zone;
 export type EntityKind = Entity['kind'];

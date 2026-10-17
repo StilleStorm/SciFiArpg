@@ -1,0 +1,18 @@
+{
+  "offTopic": "nie na temat",
+  "escalation": "eskalacja",
+  "verified": "zweryfikowano",
+  "type": {
+    "mechaniczny": "obrażenia mechaniczne",
+    "regulaminowy": "obrażenia regulaminowe",
+    "egzystencjalny": "obrażenia egzystencjalne"
+  },
+  "status": {
+    "zablokowany": "zablokowany",
+    "wyciszony": "wyciszony",
+    "zgloszony": "zgłoszony",
+    "przeczytane": "przeczytane, bez odpowiedzi",
+    "do_weryfikacji": "do weryfikacji"
+  },
+  "mark": "!"
+}

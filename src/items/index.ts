@@ -1,12 +1,17 @@
-export type Slot = 'bron' | 'nakrycie' | 'odziez' | 'przyrzad' | 'dokument';
-export const SLOTS: readonly Slot[] = ['bron', 'nakrycie', 'odziez', 'przyrzad', 'dokument'];
-
-/** Placeholder item. Items agent: replace with generated items (base, affixes, tier, claimed/actual stats). */
-export interface Item {
-  name: string;
-  slot: Slot;
-}
-
-export function placeholderItem(): Item {
-  return { name: 'przedmiot', slot: 'przyrzad' };
-}
+/**
+ * Items (DESIGN section 7). Public surface: `Item`, `rollItem`, `recomputeStats`, `UNWANTED_FEATURES`.
+ * Other agents normally need only those.
+ */
+export * from './types';
+export * from './bases';
+export * from './affixes';
+export * from './grammar';
+export * from './generate';
+export * from './uniques';
+export * from './reviews';
+export * from './compat';
+export * from './stats';
+export * from './inventory';
+export * from './ads';
+export * from './rename';
+export * from './unwanted';

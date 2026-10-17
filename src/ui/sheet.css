@@ -1,0 +1,203 @@
+/* Shared by the Załączniki and Sklep sheets: a printed page laid over the game. Paper, ink, no rounded cards. */
+.ps {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  padding: calc(env(safe-area-inset-top) + 10px) 10px calc(env(safe-area-inset-bottom) + 10px);
+  background-color: var(--paper);
+  background-image: var(--paper-noise, none);
+  color: var(--ink);
+}
+.ps-frame {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1.5px solid var(--ink);
+  outline: 1px solid var(--ink);
+  outline-offset: -6px;
+  padding: 16px 16px 10px;
+}
+.ps-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ink);
+}
+.ps-title {
+  margin: 0;
+  font-family: var(--title);
+  font-size: 15px;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ps-sub {
+  margin: 3px 0 0;
+  font-style: italic;
+  font-size: 13.5px;
+  line-height: 1.25;
+}
+.ps-close {
+  flex: none;
+  padding: 4px 2px 1px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-bottom: 1.5px solid var(--ink);
+}
+.ps-close:active {
+  border-bottom-width: 3px;
+}
+.ps-scroll {
+  flex: 1;
+  min-height: 0;
+  margin: 8px -4px 0 0;
+  padding-right: 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+.ps-notes {
+  flex: none;
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid var(--ink);
+  min-height: 46px;
+  font-size: 12.5px;
+  line-height: 15px;
+  position: relative;
+}
+.ps-notes::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 64px;
+  border-top: 2px solid var(--ink);
+}
+.ps-notes .fn {
+  margin: 0 0 2px;
+  max-height: 30px;
+  overflow: hidden;
+}
+.ps-notes .fn sup {
+  font-size: 9px;
+  line-height: 0;
+  margin-right: 3px;
+}
+
+.ps-btn {
+  padding: 8px 12px 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 1.5px solid var(--ink);
+  background: none;
+}
+.ps-btn:active {
+  border-width: 3px;
+  padding: 6.5px 10.5px 4.5px;
+}
+.ps-btn[disabled] {
+  border-style: dashed;
+  color: var(--ink-wet);
+  cursor: default;
+}
+.ps-btn.quiet {
+  border-width: 0 0 1.5px;
+  padding: 8px 2px 2px;
+}
+
+/* A drawing in a plate */
+.pfig {
+  position: relative;
+  flex: none;
+  display: block;
+  border: 1px solid var(--ink);
+  background: none;
+}
+.pfig-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The pen: handwritten additions in the accent */
+.pen {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--accent);
+  display: inline-block;
+  transform: rotate(-3deg);
+}
+
+/* A rubber stamp laid on the sheet */
+.stamp-tag {
+  display: inline-block;
+  padding: 2px 7px 1px;
+  font-family: var(--title);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  transform: rotate(-4deg);
+}
+
+/* Typed tables */
+.ttab {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.25;
+}
+.ttab th {
+  padding: 0 4px 3px;
+  font-size: 9px;
+  font-weight: 400;
+  text-align: right;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--ink);
+  white-space: nowrap;
+}
+.ttab th:first-child,
+.ttab td:first-child {
+  text-align: left;
+  padding-left: 0;
+}
+.ttab td {
+  padding: 3px 4px 2px;
+  text-align: right;
+  border-bottom: 1px dotted var(--ink-wet);
+  white-space: nowrap;
+}
+.ttab td.pending {
+  color: var(--ink-wet);
+}
+.ttab td.pending span {
+  display: inline-block;
+  min-width: 34px;
+  border-bottom: 1px dashed var(--ink-wet);
+}
+.ttab .delta-cell {
+  width: 38px;
+  padding-right: 0;
+  border-bottom-color: transparent;
+}

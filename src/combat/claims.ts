@@ -9,4 +9,11 @@ export interface Claim {
   /** i18n key, e.g. 'enemies.urzadzenia.claim.update'. */
   textKey: string;
   type: DamageType;
+  /** The claim was rebutted (the bubble is struck through); a refuted claim no longer matches. */
+  struck?: boolean;
+}
+
+/** A hit of `type` is a rebuttal when it matches a claim that still stands. */
+export function isRebuttal(claim: Claim | undefined, type: DamageType): boolean {
+  return claim !== undefined && claim.struck !== true && claim.type === type;
 }

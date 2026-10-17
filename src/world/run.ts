@@ -1,8 +1,12 @@
 import { createRng, type Rng } from '../core/rng';
-import type { Enemy, Pickup, Player, Projectile } from '../entities';
+import type { Enemy, Pickup, Player, Projectile, Summon, Zone } from '../entities';
+import { applyHero, createHeroRun, heroDef, type HeroId, type HeroRun } from '../heroes';
 import { createPlayer } from '../entities/factory';
-import { generatePage, type Page } from './pages';
-import { applyLaw, type LawId } from './laws';
+import { generateRunPages, type Page } from './pages';
+import { applyLaw, neutralLaw, type LawFlags, type LawId } from './laws';
+import { ticketForSeed, type TicketInfo } from './ticket';
+
+import type { MissionMix } from '../enemies/families';
 
 export interface RunState {
   seed: number;
@@ -11,7 +15,7 @@ export interface RunState {
   rngs: { ai: Rng; combat: Rng; loot: Rng; spawn: Rng };
   /** Seconds of simulated time. */
   time: number;
-  status: 'running' | 'dead';
+  status: 'running' | 'dead' | 'paused';
   page: Page;
   pageIndex: number;
   pageCount: number;
@@ -27,11 +31,50 @@ export interface RunState {
   edgeCooldown: number;
   /** Seconds until the next placeholder enemy trickles in. */
   spawnTimer: number;
+  /** Which enemy families this mission sends (enemies/families.ts); absent = Urzadzenia dominant. */
+  mix?: MissionMix;
+  /** All pages of the run (world/pages.ts); `page` is pages[pageIndex]. */
+  pages: Page[];
+  /** The ticket header: planet, regulamin, dominant family (world/ticket.ts). */
+  ticket: TicketInfo;
+  /** The regulamin's modifiers; neutral values when none is active (world/laws.ts documents each). */
+  law: LawFlags;
+  /** A sheet that waits for an answer; the simulation is frozen while it is open. */
+  modal: 'cookies' | 'update' | 'code' | null;
+  /** The page-turn sweep is running; the simulation is frozen. */
+  turning: boolean;
+  /** The current page still needs its enemies (set on entry, cleared by populate). */
+  populate: boolean;
+  /** The player tapped the kiosk and is walking there. */
+  kioskPending: boolean;
+  /** Run time at which the boss's death closes the run (null until the boss falls; -1 once reported). */
+  victoryAt: number | null;
+  /** Per-run hero state: cooldowns, update ranks, ring buffer, death bookkeeping (heroes/state.ts). */
+  hero: HeroRun;
+  /** Friendly figures: Petlowiec copies, Kartograf decoys (systems/hero.ts moves them). */
+  summons: Summon[];
+  /** Marked areas and hourglasses drawn on the page. */
+  zones: Zone[];
 }
 
-export function createRun(seed: number): RunState {
+/** Optional overrides for tests and screenshots; everything else comes from the seed. */
+export interface RunOptions {
+  /** Printed on the header; default is the first ticket number. */
+  ticketNumber?: number;
+  lawId?: LawId;
+  pageCount?: number;
+  /** Which hero to play; default Pralka. */
+  heroId?: HeroId;
+}
+
+export function createRun(seed: number, opts: RunOptions = {}): RunState {
   const rng = createRng(seed);
-  const page = generatePage(rng);
+  const ticket = ticketForSeed(seed, opts.ticketNumber);
+  if (opts.lawId) ticket.lawId = opts.lawId;
+  if (opts.pageCount) ticket.pageCount = opts.pageCount;
+  const pages = generateRunPages(rng, ticket.pageCount);
+  const page = pages[0] ?? generateRunPages(rng, 1)[0];
+  if (!page) throw new Error('no page');
   const state: RunState = {
     seed,
     rng,
@@ -40,7 +83,7 @@ export function createRun(seed: number): RunState {
     status: 'running',
     page,
     pageIndex: 0,
-    pageCount: 1,
+    pageCount: ticket.pageCount,
     lawId: null,
     player: createPlayer(1, page.spawn.x, page.spawn.y),
     enemies: [],
@@ -51,8 +94,20 @@ export function createRun(seed: number): RunState {
     kills: 0,
     edgeCooldown: 0,
     spawnTimer: 10,
+    pages,
+    ticket,
+    law: neutralLaw(),
+    modal: null,
+    turning: false,
+    populate: true,
+    kioskPending: false,
+    victoryAt: null,
+    hero: createHeroRun(opts.heroId ?? 'pralka'),
+    summons: [],
+    zones: [],
   };
-  if (state.lawId) applyLaw(state, state.lawId);
+  applyHero(state.player, heroDef(opts.heroId ?? 'pralka'));
+  applyLaw(state, ticket.lawId);
   return state;
 }
 

@@ -63,7 +63,15 @@ try {
   await wait(2200);
   await shot('title');
 
-  await page.evaluate(() => window.__game.start(7));
+  // ticket screen: the run start, then the declined note
+  await page.evaluate(() => window.__game.go('ticket'));
+  await wait(700);
+  await shot('ticket');
+  await page.click('.ticket .link-btn');
+  await wait(500);
+  await shot('ticket-declined');
+
+  await page.evaluate(() => window.__game.start(7, { lawId: 'parzystosc', pageCount: 5 }));
   await wait(1500);
   await shot('run');
 
@@ -89,21 +97,129 @@ try {
   await wait(900);
   await shot('edge');
 
+  // the top of the page: the regulamin printed as the header, and the folded-corner exit
+  await page.evaluate(() => {
+    const s = window.__game.state();
+    const e = s.page.exit;
+    window.__game.placePlayer(e.x + (e.corner[1] === 'l' ? 150 : -150), e.y + (e.corner[0] === 't' ? 170 : -170));
+  });
+  await wait(1200);
+  await shot('header-exit');
+
+  // mid page-turn: stand in the exit, capture the sweep
+  await page.evaluate(() => {
+    const s = window.__game.state();
+    const e = s.page.exit;
+    window.__game.placePlayer(e.x + (e.corner[1] === 'l' ? 55 : -55), e.y + (e.corner[0] === 't' ? 55 : -55));
+  });
+  await wait(260);
+  await shot('pageturn');
+  await wait(1100);
+  const turned = await page.evaluate(() => window.__game.state().pageIndex);
+  if (turned !== 1) problems.push(`expected page index 1 after the exit, got ${turned}`);
+  await shot('page2');
+
+  // kiosk page and the QR code, sticky note, clip
+  await page.evaluate(() => {
+    const s = window.__game.state();
+    const k = s.pages.find((p) => p.hasKiosk);
+    window.__game.turnTo(k.index);
+  });
+  await wait(1300);
+  await page.evaluate(() => {
+    const s = window.__game.state();
+    const k = s.page.obstacles.find((o) => o.kind === 'kiosk');
+    window.__game.placePlayer(k.x, k.y + 150);
+  });
+  await wait(1500);
+  await shot('kiosk');
+
+  // the hand-drawn obstacles: a QR code, a sticky note, a paperclip, a stapled note
+  for (const kind of ['qr', 'sticky', 'clip']) {
+    const found = await page.evaluate((kind) => {
+      const s = window.__game.state();
+      const p = s.pages.find((pg) => pg.obstacles.some((o) => o.kind === kind));
+      if (!p) return false;
+      if (p.index !== s.pageIndex) window.__game.turnTo(p.index);
+      return true;
+    }, kind);
+    if (!found) continue;
+    await wait(1300);
+    await page.evaluate((kind) => {
+      const s = window.__game.state();
+      const o = s.page.obstacles.find((o) => o.kind === kind);
+      window.__game.placePlayer(o.x, o.y + 190);
+    }, kind);
+    await wait(1400);
+    await shot(`obstacle-${kind}`);
+  }
+
   await page.evaluate(() => window.__game.setTheme('night'));
   await wait(400);
   await shot('run-night');
   await page.evaluate(() => window.__game.setTheme('day'));
 
-  await page.evaluate(() => window.__game.hurtPlayer(25));
+  // godziny konsultanta: advance into the bot hours, act, and read the scripted answer
+  await page.evaluate(() => window.__game.start(11, { lawId: 'godziny-konsultanta', pageCount: 4 }));
+  await wait(1200);
+  await page.evaluate(() => window.__game.advance(31));
+  await page.evaluate(() => document.querySelector('.pad.s1').click());
+  await wait(500);
+  await shot('bot-hours');
+
+  // ciasteczka: the banner on page entry
+  await page.evaluate(() => window.__game.start(12, { lawId: 'ciasteczka', pageCount: 4 }));
+  await wait(1500);
+  await shot('cookies');
+
+  // the footnote history sheet
+  await page.evaluate(() => document.querySelector('.pop-buttons .form-btn').click());
+  await page.evaluate(() => window.__game.advance(1));
+  await page.evaluate(() => window.__game.footnote('Przypis kontrolny.'));
   await wait(300);
-  await shot('hurt');
+  await page.touchscreen.tap(190, 800);
+  await wait(400);
+  await shot('footnote-history');
 
-  await page.evaluate(() => window.__game.hurtPlayer(9999));
-  await wait(1600);
+  // base screen with a history; the lost run is rewritten on the first visit
+  await page.evaluate(() => {
+    const m = window.__game.meta();
+    window.__game.setMeta({
+      ...m,
+      heroId: 'pralka',
+      gwiazdki: 37,
+      runsCompleted: 3,
+      history: [
+        { number: 48213, planet: 'Planeta Dwudziesta Trzecia (Nieprzyjemna)', clause: 'parzystosc', outcome: 'ukonczono', kills: 61, pages: 5, total: 5 },
+        { number: 48214, planet: 'Planeta Siódma (Domniemana)', clause: 'godziny-konsultanta', outcome: 'zgloszenie', kills: 14, pages: 2, total: 4 },
+        { number: 48215, planet: 'Planeta Trzynasta (Sporna)', clause: 'oplata-serwisowa', outcome: 'zgloszenie', kills: 9, pages: 3, total: 6, rewritten: true },
+      ],
+    });
+    window.__game.go('baza');
+  });
+  await wait(900);
+  await shot('baza');
+  await wait(3200);
+  await shot('baza-rewritten');
+
+  await page.getByText('Ustawienia', { exact: true }).click();
+  await wait(500);
+  await shot('settings');
+  await page.getByText('Leworęczny').click();
+  await wait(200);
+  await page.evaluate(() => window.__game.start(5));
+  await wait(1300);
+  await shot('run-lefty');
+
+  // death: the ticket form counts down, then the base screen shows the new entry
+  await page.evaluate(() => window.__game.hero.die('zgloszenie'));
+  await wait(2500);
   await shot('death');
-
+  await wait(6000);
   const snap = await page.evaluate(() => window.__game.screen());
-  if (snap !== 'death') problems.push(`expected death screen, got ${snap}`);
+  if (snap !== 'baza') problems.push(`expected the base screen after death, got ${snap}`);
+  await wait(500);
+  await shot('baza-after-death');
 } finally {
   await browser?.close();
   stop();

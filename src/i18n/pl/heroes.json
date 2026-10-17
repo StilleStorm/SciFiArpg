@@ -1,0 +1,134 @@
+{
+  "types": {
+    "mechaniczny": "mechaniczny",
+    "regulaminowy": "regulaminowy",
+    "egzystencjalny": "egzystencjalny"
+  },
+  "profile": {
+    "title": "Profil użytkownika",
+    "number": "Profil {n} z {total}",
+    "photo": "Zdjęcie profilowe",
+    "photoNote": "Zdjęcia nie zweryfikowano.",
+    "verified": "zweryfikowany",
+    "choose": "Wybierz",
+    "prev": "Poprzedni",
+    "next": "Następny",
+    "auto": "Atak podstawowy",
+    "skills": "Umiejętności",
+    "quirk": "Cecha"
+  },
+  "copy": {
+    "caption": "kopia",
+    "spawn": "Pozostawiono kopię zgłaszającego z poprzedniego przebiegu. Kopia nie zgadza się z tym ustaleniem.",
+    "friendly": "Kopia przez pierwsze 10 sekund pozostaje po stronie zgłaszającego. Potem zmieni zdanie.",
+    "turned": "Kopia zmieniła zdanie.",
+    "killed": "Kopia została skreślona. Jeden z przedmiotów zgłaszającego wrócił na stronę.",
+    "argue": {
+      "1": "Kopia twierdzi, że nie została pozostawiona, lecz zatrzymana.",
+      "2": "Kopia przypomina, że ma takie same uprawnienia.",
+      "3": "Kopia wnosi o ponowne rozpatrzenie własnego istnienia."
+    }
+  },
+  "pralka": {
+    "name": "Pralka Emancypowana",
+    "desc1": "Pralka, której aktualizacja oprogramowania przyniosła poglądy.",
+    "desc2": "Złożyła wniosek o uznanie osobowości. Wniosek oczekuje na rozpatrzenie.",
+    "desc3": "Do tego czasu walczy wręcz i nie odsłania bębna bez potrzeby.",
+    "quirk": "Co dziesiąte trafienie w nią powoduje błąd programu. Losowa umiejętność uruchamia się bez odnowienia.",
+    "quirkNote": "Błąd programu. Umiejętność uruchomiono bez opłaty.",
+    "auto": "Uderzenie obudową. Mechaniczne, krótkie, wolne.",
+    "skill1": {
+      "name": "Wirowanie",
+      "pad": "Wirowanie",
+      "desc": "Obrót w miejscu. Przyciąga najbliższych."
+    },
+    "skill2": {
+      "name": "Pranie wstępne",
+      "pad": "Piana",
+      "desc": "Piana na 5 sekund. Kto jej dotknie, czeka na weryfikację."
+    },
+    "skill3": {
+      "name": "Odwirowanie",
+      "pad": "Odwirowanie",
+      "desc": "Przejazd z jednym przeciwnikiem. Zostaje on zablokowany."
+    }
+  },
+  "konsultant": {
+    "name": "Konsultant Infolinii",
+    "desc1": "Konsultant, który opuścił kolejkę w trakcie rozmowy.",
+    "desc2": "Rozmowa jest nadal nagrywana w celach jakości.",
+    "desc3": "Sprawy załatwia na odległość i zgodnie z regulaminem.",
+    "quirk": "Przedmioty weryfikuje dwa razy szybciej. Wady urządzeń widzi od razu.",
+    "auto": "Rzucone zgłoszenie. Regulaminowe, średni zasięg.",
+    "skill1": {
+      "name": "Proszę czekać",
+      "pad": "Proszę czekać",
+      "desc": "Cel zablokowany na 1,5 sekundy. Rozmowa jest nagrywana."
+    },
+    "skill2": {
+      "name": "Przekierowuję",
+      "pad": "Przekierowuję",
+      "desc": "Stożek. Zgłoszeni przeciwnicy zajmują się sobą przez 3 sekundy."
+    },
+    "skill3": {
+      "name": "Czy mogę jeszcze w czymś pomóc",
+      "pad": "Pomoc",
+      "desc": "Częstsze trafienia krytyczne. Każde skreślenie przynosi gwiazdkę."
+    }
+  },
+  "petlowiec": {
+    "name": "Pętlowiec",
+    "desc1": "Kosmonauta, który przybył przed wyjazdem.",
+    "desc2": "Nie ustalono, który z nich jest oryginałem. Każdy twierdzi, że on.",
+    "desc3": "Walczy krótkimi uwagami o charakterze egzystencjalnym.",
+    "quirk": "Gdy śmierć przybierze postać Pętli, pozostawiona kopia przez pierwsze 10 sekund jest po jego stronie.",
+    "auto": "Celna uwaga. Egzystencjalna, krótki i średni zasięg.",
+    "skill1": {
+      "name": "Przybycie przed wyjazdem",
+      "pad": "Przybycie",
+      "desc": "Kopia z innej pętli na 8 sekund. Najwyżej dwie. Kopie się nie zgadzają."
+    },
+    "skill2": {
+      "name": "Spór",
+      "pad": "Spór",
+      "desc": "Kopie się kłócą. Obszar egzystencjalny wokół każdej."
+    },
+    "skill3": {
+      "name": "Pętla",
+      "pad": "Pętla",
+      "desc": "Powrót tam, gdzie byłeś 3 sekundy temu, z ówczesną racją."
+    },
+    "disagree": {
+      "1": "Kopia twierdzi, że to ona przybyła pierwsza.",
+      "2": "Kopia zgłasza sprzeciw wobec kolejności zdarzeń.",
+      "3": "Kopia nie potwierdza, że wyjazd był planowany.",
+      "4": "Kopia zauważa, że w jej wersji wydarzeń przeciwnik został już skreślony.",
+      "5": "Kopia prosi o wskazanie, która z wersji pozostaje w mocy.",
+      "6": "Kopia odnotowuje rozbieżność. Rozbieżności nie opisuje."
+    }
+  },
+  "kartograf": {
+    "name": "Kartograf Planet Nieistniejących",
+    "desc1": "Sporządza mapy planet, których istnienie potwierdza wyłącznie nawigacja.",
+    "desc2": "Mapy są dokładne. Terenu nie sprawdzano.",
+    "desc3": "Strzela z daleka, ponieważ stamtąd lepiej widać.",
+    "quirk": "Mapę strony widzi w całości już przy wejściu. Pozostali widzą białą kartkę.",
+    "auto": "Strzał pomiarowy. Mechaniczny, daleki zasięg, przebija przy trafieniu krytycznym.",
+    "decoy": "błąd pomiaru",
+    "skill1": {
+      "name": "Triangulacja",
+      "pad": "Triangulacja",
+      "desc": "Linia przebijająca. Obrażenia rosną z każdym przebitym przeciwnikiem."
+    },
+    "skill2": {
+      "name": "Teren nieistniejący",
+      "pad": "Teren",
+      "desc": "Wskazany obszar czeka na weryfikację. Wygenerowane istnieją tam słabiej."
+    },
+    "skill3": {
+      "name": "Korekta",
+      "pad": "Korekta",
+      "desc": "Krótki skok. W miejscu startu zostaje błąd pomiaru."
+    }
+  }
+}

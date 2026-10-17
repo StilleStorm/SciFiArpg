@@ -128,7 +128,8 @@ button {
 }
 #page,
 #world,
-#fx {
+#fx,
+.swept {
   fill: none;
   stroke: var(--ink);
   stroke-width: 1.6;
@@ -175,6 +176,9 @@ button {
   gap: 5px;
   flex: 1;
   min-width: 0;
+}
+.field.rep {
+  flex: 1.9;
 }
 .field > label {
   font-size: 10px;
@@ -298,10 +302,11 @@ button {
 .pad.s2 { right: 88px; bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom) + 6px); }
 .pad.s3 { right: 4px; bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom) + 82px); }
 .pad.inv { left: 4px; bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom) + 10px); }
-[data-hand='left'] .pad.s1 { right: auto; left: 4px; }
-[data-hand='left'] .pad.s2 { right: auto; left: 88px; }
-[data-hand='left'] .pad.s3 { right: auto; left: 4px; }
-[data-hand='left'] .pad.inv { left: auto; right: 4px; }
+/* Left-handed: the pads swap sides (class on #ui, set from the settings screen). */
+.lefty .pad.s1 { right: auto; left: 4px; }
+.lefty .pad.s2 { right: auto; left: 88px; }
+.lefty .pad.s3 { right: auto; left: 4px; }
+.lefty .pad.inv { left: auto; right: 4px; }
 
 /* ---------- Full-page screens: cover and death form ---------- */
 .screen {
@@ -464,4 +469,355 @@ button {
 }
 pattern line {
   stroke: var(--ink);
+}
+
+/* ---------- Page header (SVG text on the sheet): one printed form with the HUD ---------- */
+.t-head-top {
+  fill: var(--ink);
+  stroke: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.t-head {
+  fill: var(--ink);
+  stroke: none;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+}
+
+/* ---------- Footnotes: a fresh note slides up into place ---------- */
+.fn.fresh {
+  animation: fn-in 220ms ease-out;
+}
+@keyframes fn-in {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.foot {
+  pointer-events: auto;
+}
+.fn-history .fn {
+  max-height: none;
+  margin: 0 0 7px;
+}
+
+/* ---------- Forms: ticket, base, settings ---------- */
+.frame > .agency + .form-title,
+.form-title.tight {
+  margin-top: 14px;
+}
+.frame .rule {
+  margin: 14px 0 12px;
+}
+.tform {
+  width: 100%;
+  text-align: left;
+}
+.trow {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 0 0 11px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.trow > label {
+  flex: none;
+  min-width: 78px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 10px;
+}
+.tval {
+  flex: 1;
+  min-width: 0;
+  padding: 0 2px 1px;
+  border-bottom: 1px solid var(--ink);
+  font-size: 13px;
+  line-height: 17px;
+  text-align: left;
+}
+.clause {
+  margin: 4px 0 18px;
+  padding: 2px 0 2px 12px;
+  border-left: 2px solid var(--ink);
+  font-style: italic;
+  font-size: 18px;
+  line-height: 1.32;
+}
+.eta {
+  margin: 8px 0 0;
+  font-style: italic;
+  font-size: 14px;
+}
+.declined {
+  min-height: 21px;
+  margin: 14px 0 0;
+  color: var(--accent);
+  font-size: 15px;
+  font-style: italic;
+}
+.ticket .start {
+  margin-top: 8px;
+}
+.ticket-art {
+  width: 240px;
+  height: 156px;
+  margin: auto 0;
+  overflow: visible;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ticket-stamp {
+  position: absolute;
+  left: 50%;
+  bottom: 118px;
+  width: 320px;
+  height: 90px;
+  margin-left: -160px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.4;
+  pointer-events: none;
+}
+.link-btn {
+  margin-top: 14px;
+  padding: 4px 6px 1px;
+  font-family: var(--mono);
+  font-size: 12px;
+  border-bottom: 1px solid var(--ink);
+  letter-spacing: 0.04em;
+}
+.redraw {
+  animation: redraw 260ms ease-out;
+}
+@keyframes redraw {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.group {
+  margin: 16px 0 10px;
+  align-self: flex-start;
+  font-family: var(--title);
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.opts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+}
+.opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  font-family: var(--mono);
+  font-size: 15px;
+}
+.opt svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.opt.chosen span {
+  font-weight: 700;
+}
+.cover-done {
+  margin: 14px 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.cover-done + .cover-footer {
+  margin-top: 6px;
+}
+
+/* ---------- Base screen (panel uzytkownika) ---------- */
+.baza {
+  padding-bottom: 16px;
+}
+.baza .scroll {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  touch-action: pan-y;
+  text-align: left;
+  scrollbar-width: none;
+}
+.baza .scroll::-webkit-scrollbar {
+  display: none;
+}
+.baza .trow .link-btn {
+  margin: 0;
+  flex: none;
+  font-size: 10px;
+}
+.baza .start {
+  margin-top: 12px;
+}
+.baza .link-btn {
+  margin-top: 10px;
+}
+.sklep-slot {
+  margin: 4px 0 0;
+}
+.hist-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hist-entry {
+  margin: 0 0 12px;
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--ink);
+  font-size: 15px;
+  line-height: 1.3;
+}
+.hist-entry.empty {
+  border-bottom: 0;
+  font-style: italic;
+}
+.e-head {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+}
+.e-meta {
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.e-result {
+  margin-top: 3px;
+  font-style: italic;
+}
+.e-result.typed,
+.e-meta .typed {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 12px;
+}
+.e-meta .typed {
+  font-size: 11px;
+}
+.e-note {
+  margin-top: 4px;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--accent);
+}
+s.struck-out {
+  position: relative;
+  text-decoration: none;
+}
+s.struck-out::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 52%;
+  border-top: 2px solid var(--accent);
+  transform: rotate(-1.2deg);
+  transform-origin: left center;
+}
+s.struck-out.fresh::after {
+  animation: strike-in 380ms ease-out 600ms both;
+}
+@keyframes strike-in {
+  from {
+    transform: scaleX(0) rotate(-1.2deg);
+  }
+  to {
+    transform: scaleX(1) rotate(-1.2deg);
+  }
+}
+
+/* ---------- Pop-up forms (cookie banner, update notice, SMS code, footnote history) ---------- */
+.pop-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 18px;
+  pointer-events: auto;
+}
+.pop {
+  width: 100%;
+  max-width: 360px;
+  max-height: 100%;
+  overflow: hidden;
+  padding: 20px 18px 16px;
+  border: 1.5px solid var(--ink);
+  outline: 1px solid var(--ink);
+  outline-offset: -6px;
+  text-align: center;
+}
+.pop.pop-history {
+  text-align: left;
+  max-width: 372px;
+}
+.pop-title {
+  margin: 4px 0 10px;
+  font-family: var(--title);
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.pop-body {
+  margin: 0 0 12px;
+  font-size: 16px;
+  line-height: 1.35;
+}
+.pop .code {
+  margin: 4px 0 14px;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0.2em;
+}
+.pop-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.pop .form-btn {
+  margin-top: 4px;
+  font-size: 15px;
+}
+.pop.cookie {
+  margin-top: auto;
+  margin-bottom: 120px;
+}
+.pop-wrap:has(.pop.cookie) {
+  align-items: flex-end;
 }

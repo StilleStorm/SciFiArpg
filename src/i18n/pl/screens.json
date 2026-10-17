@@ -1,0 +1,86 @@
+{
+  "planet": {
+    "name": "Planeta {ordinal} ({adjective})",
+    "loc": "Planecie {ordinal}",
+    "units_nom": "Pierwsza|Druga|Trzecia|Czwarta|Piąta|Szósta|Siódma|Ósma|Dziewiąta|Dziesiąta|Jedenasta|Dwunasta|Trzynasta|Czternasta|Piętnasta|Szesnasta|Siedemnasta|Osiemnasta|Dziewiętnasta",
+    "units_loc": "Pierwszej|Drugiej|Trzeciej|Czwartej|Piątej|Szóstej|Siódmej|Ósmej|Dziewiątej|Dziesiątej|Jedenastej|Dwunastej|Trzynastej|Czternastej|Piętnastej|Szesnastej|Siedemnastej|Osiemnastej|Dziewiętnastej",
+    "tens_nom": "Dwudziesta|Trzydziesta|Czterdziesta|Pięćdziesiąta",
+    "tens_loc": "Dwudziestej|Trzydziestej|Czterdziestej|Pięćdziesiątej",
+    "adjectives": "Nieprzyjemna|Domniemana|Ewentualna|Zaległa|Tymczasowa|Niepotwierdzona|Wstępna|Uciążliwa|Nieaktualna|Sporna|Zawieszona|Zbędna|Niekompletna|Obowiązkowa"
+  },
+  "family": {
+    "urzadzenia": "Urządzenia",
+    "powiadomienia": "Powiadomienia",
+    "wygenerowane": "Wygenerowane"
+  },
+  "header": {
+    "top": "Zgłoszenie nr {number} · strona {page} z {total}"
+  },
+  "ticket": {
+    "title": "Zgłoszenie",
+    "number": "nr {number}",
+    "planet": "Dotyczy",
+    "clause": "Regulamin",
+    "family": "Dominujące zjawisko",
+    "pages": "Zakres",
+    "pagesValue": {
+      "one": "{count} strona",
+      "few": "{count} strony",
+      "many": "{count} stron"
+    },
+    "eta": "Szacowany czas rozpatrzenia: 12 minut",
+    "accept": "Akceptuję regulamin",
+    "decline": "Nie akceptuję",
+    "declined": "Aby kontynuować, zaakceptuj regulamin.",
+    "stamp": "Zgłoszenie przyjęto"
+  },
+  "baza": {
+    "title": "Panel użytkownika",
+    "agency": "Centrum Obsługi Planet",
+    "hero": "Profil",
+    "noHero": "nie wybrano",
+    "gwiazdki": "Gwiazdki",
+    "history": "Historia zgłoszeń",
+    "emptyHistory": "Brak zgłoszeń. Każde zostanie zarejestrowane.",
+    "newTicket": "Nowe zgłoszenie",
+    "settings": "Ustawienia",
+    "changeHero": "Zmień profil",
+    "shop": "Sklep",
+    "openShop": "Otwórz",
+    "shopNote": "aplikacje i przedmioty użytkowe"
+  },
+  "history": {
+    "line": "Nr {number} · {planet}",
+    "meta": "Regulamin: {clause} · Skreślono: {kills} · Stron:",
+    "result": "Wynik: {outcome}",
+    "lost": "Utrata racji. Zgłoszenie zamknięto.",
+    "won": "Rozpatrzono. Planeta zamknięta.",
+    "petla": "Pętla. Zgłoszenie wznowiono.",
+    "zawieszenie": "Zawieszono. Przyczyna: standardy społeczności.",
+    "rewrites": "Rozpatrzono pozytywnie.|Zamknięto bez uwag.|Załatwiono w terminie.|Zgłaszający uzyskał rację w całości.|Sprawa nie wymagała rozpatrzenia.",
+    "note": "Poprzednia wersja wpisu była błędem systemu. Za utrudnienia nie przepraszamy."
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "theme": "Wydanie",
+    "day": "Dzienne",
+    "night": "Nocne",
+    "auto": "Wg urządzenia",
+    "hand": "Układ przycisków",
+    "right": "Praworęczny",
+    "left": "Leworęczny",
+    "back": "Wróć",
+    "note": "Zmiany zapisano. Nie zapytano, czy chcesz."
+  },
+  "profile": {
+    "title": "Profil użytkownika",
+    "pick": "Wybierz profil",
+    "pralka": "Pralka Emancypowana",
+    "konsultant": "Konsultant Infolinii",
+    "petlowiec": "Pętlowiec",
+    "kartograf": "Kartograf Planet Nieistniejących"
+  },
+  "pageStamp": "Strona {page}",
+  "victoryStamp": "Rozpatrzono",
+  "noBoss": "Przeciwnika ostatniej strony nie przydzielono. Strona zostaje zamknięta bez niego."
+}

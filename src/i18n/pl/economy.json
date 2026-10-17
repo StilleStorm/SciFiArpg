@@ -1,0 +1,45 @@
+{
+  "sklep": {
+    "title": "Sklep",
+    "sub": "Aplikacje i przedmioty użytkowe.",
+    "get": "Pobierz",
+    "got": "Pobrano",
+    "price": "Cena",
+    "fee": "Opłata serwisowa ({percent}%)",
+    "total": "Do zapłaty",
+    "balance": "Stan konta",
+    "confirm": "Zapłać",
+    "cancel": "Anuluj",
+    "feeNote": "Cena nie zawiera opłaty serwisowej.",
+    "bought": "Przedmiot nr {n} pobrano i zainstalowano. Zapłacono łącznie: {total} gw.",
+    "refused": "Płatność odrzucona. Przyczyny nie podano.",
+    "gone": "Pozycja została już pobrana. Pozostaje w sprzedaży.",
+    "report": "Zgłoś problem",
+    "reported": "Zgłoszenie problemu przyjęto ({count} z {max}). Szacowany czas rozpatrzenia: 12 minut.",
+    "reports": "Zgłoszeń: {count}/{max}",
+    "updated": "Sklep zaktualizowano do wersji {version}. Poprawki błędów i usprawnienia. Oferta została odświeżona.",
+    "stamp": "Zaktualizowano",
+    "version": "Wersja sklepu: {version}."
+  },
+  "lie": {
+    "wariant": "Sprostowanie: zamiast «{listed}» wydano «{got}» (wariant). Gwiazdek nie zwraca się.",
+    "cena": "Sprostowanie: cena podana na stronie ({listed} gw.) nie dotyczyła tej wersji. Pobrano {charged} gw. przed opłatą serwisową. Gwiazdek nie zwraca się."
+  },
+  "hours": {
+    "consultant": "Obsługuje konsultant.",
+    "open": "Obsługuje konsultant. Przerwa za {time}.",
+    "bot": "Konsultant na przerwie. Obsługuje bot. Powrót za {time}.",
+    "opened": "Konsultant wrócił z przerwy.",
+    "closed": "Konsultant udał się na przerwę. Dalszą obsługę prowadzi bot.",
+    "kioskOpened": "Sklep jest czynny. Okno obsługi jest ograniczone.",
+    "kioskClosed": "Okno obsługi zamknięto. Dalszą obsługę prowadzi bot."
+  },
+  "bot": {
+    "a": "Rozumiem. Czy chodzi o: a) fakturę, b) dostawę, c) inne?",
+    "b": "Dziękuję za zgłoszenie. Kontynuując rozmowę, akceptujesz regulamin rozmowy.",
+    "c": "Nie rozumiem. Czy chodzi o: a) fakturę, b) dostawę, c) inne?",
+    "d": "Przekazuję do konsultanta. Konsultant jest niedostępny. Przekazuję do bota.",
+    "e": "Twoja wiadomość jest dla nas ważna. Jesteś 4. w kolejce. Poprzednia osoba też.",
+    "f": "Sklep jest nieczynny. Godziny pracy podano w innym kanale."
+  }
+}

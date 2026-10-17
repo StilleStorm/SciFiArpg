@@ -1,11 +1,16 @@
 import { tickStatuses } from '../combat/status';
 import type { Bus } from '../core/events';
 import { createGrid, type Enemy } from '../entities';
+import { trackEnemies } from '../world/enemyInfo';
+import { lawPre, tickLaw } from '../world/laws';
+import { tickPageTurn } from '../world/pageTurn';
 import type { RunState } from '../world/run';
 import { enemiesAttack, playerAttacks } from './combat';
 import { trickleSpawn, updateEnemies } from './enemies';
 import { movePlayer } from './movement';
 import { collectPickups } from './pickups';
+import { updateLoot } from './loot';
+import { heroStep } from '../heroes/system';
 
 /** The fixed update. Order matters: move, ai, combat, loot. One grid is rebuilt each step. */
 export function createSim(bus: Bus) {
@@ -13,19 +18,30 @@ export function createSim(bus: Bus) {
   return {
     step(s: RunState, dt: number): void {
       if (s.status !== 'running') return;
+      if (s.modal || s.turning) return; // a sheet waits for an answer, or the page is turning
       s.time += dt;
+      trackEnemies(s.enemies);
+      const undoLaw = lawPre(s);
       tickStatuses(s.player, dt);
       for (const e of s.enemies) tickStatuses(e, dt);
       movePlayer(s, bus, dt);
       grid.clear();
       for (const e of s.enemies) grid.insert(e);
-      updateEnemies(s, grid, dt);
+      updateEnemies(s, grid, bus, dt);
       grid.clear();
       for (const e of s.enemies) grid.insert(e);
-      playerAttacks(s, grid, bus, dt);
-      enemiesAttack(s, bus, dt);
+      if (!s.law.botTime) {
+        // Godziny konsultanta: during bot hours nobody deals damage.
+        playerAttacks(s, grid, bus, dt);
+        enemiesAttack(s, bus, dt);
+      }
+      heroStep(s, bus, dt);
       collectPickups(s, bus);
+      updateLoot(s, bus, dt);
       trickleSpawn(s, dt);
+      undoLaw();
+      tickLaw(s, bus, dt);
+      tickPageTurn(s, bus);
     },
   };
 }

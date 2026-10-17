@@ -14,7 +14,8 @@
     "subject": "Dotyczy: planeta",
     "stamp": "Zgłoszenie przyjęto",
     "start": "Rozpocznij",
-    "footer": "Szacowany czas rozpatrzenia: 12 minut."
+    "footer": "Szacowany czas rozpatrzenia: 12 minut.",
+    "done": "Zgłoszeń rozpatrzonych: {count}"
   },
   "pads": {
     "skill1": "Zarzut",
@@ -43,5 +44,11 @@
       "many": "Skreślono {count} urządzeń."
     },
     "back": "Wróć"
+  },
+  "notes": {
+    "history": "Przypisy"
+  },
+  "exit": {
+    "next": "dalej"
   }
 }

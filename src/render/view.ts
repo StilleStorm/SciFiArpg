@@ -46,6 +46,10 @@ export function createViews(layer: SVGGElement, builders: Builders): Views {
         return decorate(builders.pickup.create(e), builders.pickup.drawInMs);
       case 'projectile':
         return decorate(builders.projectile.create(e), builders.projectile.drawInMs);
+      case 'summon':
+        return decorate(builders.summon.create(e), builders.summon.drawInMs);
+      case 'zone':
+        return decorate(builders.zone.create(e), builders.zone.drawInMs);
     }
   }
   function patch(e: Entity, g: SVGGElement, timeMs: number): void {
@@ -61,6 +65,12 @@ export function createViews(layer: SVGGElement, builders: Builders): Views {
         break;
       case 'projectile':
         builders.projectile.patch?.(e, g, timeMs);
+        break;
+      case 'summon':
+        builders.summon.patch?.(e, g, timeMs);
+        break;
+      case 'zone':
+        builders.zone.patch?.(e, g, timeMs);
         break;
     }
   }
@@ -79,7 +89,7 @@ export function createViews(layer: SVGGElement, builders: Builders): Views {
           const g = make(e);
           g.dataset['id'] = String(e.id);
           g.dataset['kind'] = e.kind;
-          if (e.kind === 'pickup') layer.prepend(g);
+          if (e.kind === 'pickup' || e.kind === 'zone') layer.prepend(g);
           else layer.append(g);
           slot = { g, transform: '', seen: pass };
           slots.set(e.id, slot);
@@ -87,7 +97,7 @@ export function createViews(layer: SVGGElement, builders: Builders): Views {
           if (ms) drawIn(g, ms);
         }
         slot.seen = pass;
-        const flip = e.kind === 'player' || e.kind === 'enemy' ? e.facing : 1;
+        const flip = e.kind === 'player' || e.kind === 'enemy' || e.kind === 'summon' ? e.facing : 1;
         const tf = `translate(${r1(e.x)} ${r1(e.y)})${flip < 0 ? ' scale(-1 1)' : ''}`;
         if (tf !== slot.transform) {
           slot.transform = tf;
