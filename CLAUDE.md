@@ -15,8 +15,11 @@ This file is about how we build.
 - Fonts live in `public/fonts/` (OFL). Load with `@font-face` only.
 
 ## Commands
-- `npm install` · `npm run dev` · `npm run build` · `npm test` · `npm run shot` · `npm run typecheck`
-- Everything must pass `npm run typecheck && npm test && npm run build` before a commit.
+- `npm install` · `npm run dev` · `npm run build` · `npm test` · `npm run shot` · `npm run smoke` · `npm run typecheck` · `npm run lint:rules` · `npm run check`
+- Everything must pass `npm run check` (typecheck, tests, lint:rules, build) before a commit; `npm run smoke` when the run flow is touched.
+
+## How work is divided
+See `docs/WORKFLOW.md`. Builders (Sonnet) own folders and code against the contracts in `docs/ARCHITECTURE.md`; the integrator (Opus) closes every `// SEAM:`; the voice editor (Opus) owns `src/i18n/pl/*.json`; the look reviewer judges screenshots. Agent definitions are in `.claude/agents/`. Any need from another domain that is not in ARCHITECTURE.md becomes a typed stub with a `// SEAM:` comment, never a reach into the other domain's files.
 
 ## Architecture
 Plain data + pure functions + one thin render layer. No classes with deep hierarchies.
@@ -31,6 +34,7 @@ src/
   entities/          types for player, enemy, projectile, pickup, summon; spatial grid
   systems/           per-step systems (movement, combat, ai, pickups) and their fixed order (step.ts)
   combat/            damage.ts (types, resist, crit, racja vocab), claims.ts (teza/rebuttal), status.ts, spor.ts (stub), targeting
+  audio/             context, mix (buses, limiter, ducking), sfx recipes, bindings (events -> sounds), music/ (profiles, roll, holdline, adapt, scheduler)
   enemies/           parts (SVG part library as path data), assemble (procedural contraption),
                      families (stats, resist, traits: defect / escalation / existence), ai, bosses
   items/             bases, affixes, grammar (gender agreement), generate, audit, opinions, warranty, uniques
