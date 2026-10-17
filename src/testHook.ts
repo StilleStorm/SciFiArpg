@@ -14,6 +14,7 @@ import type { Item, ItemTier, Slot } from './items';
 import { mountSklep, type SklepHandle } from './ui/sklep';
 import { createHeroHook, type HeroHook } from './heroes/hook';
 import { createEnemyHook, type EnemyHook } from './enemies/hook';
+import { createAudioHook, type AudioHook } from './audio/hook';
 
 export interface GameHook {
   /** Start a run from a seed (default 1) and show the run screen. */
@@ -53,6 +54,8 @@ export interface GameHook {
   hero: HeroHook;
   /** Families, bosses and statuses on demand (enemies/hook.ts). */
   enemies: EnemyHook;
+  /** Offline audio renders and the live context state (audio/hook.ts). */
+  audio: AudioHook;
   /** Plain-data snapshot for assertions. */
   snapshot(): { screen: Screen; time: number; hp: number; enemies: number; pickups: number; kills: number; x: number; y: number } | null;
 }
@@ -102,6 +105,7 @@ export function installTestHook(deps: HookDeps): void {
     state: () => game.state,
     hero: createHeroHook(game, deps.bus),
     enemies: createEnemyHook(() => game.state, deps.bus),
+    audio: createAudioHook(),
     turnTo(index) {
       const s = game.state;
       if (!s || s.turning) return;

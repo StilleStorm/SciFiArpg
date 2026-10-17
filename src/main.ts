@@ -1,4 +1,5 @@
 import './style.css';
+import { createAudio, setVolumes, unlockAudio } from './audio';
 import { setOfficeOpen } from './economy/hours';
 import { createBus, type Screen } from './core/events';
 import { createLoop } from './core/loop';
@@ -46,6 +47,7 @@ let screen: Screen = 'title';
 function applySettings(s: Settings): void {
   setTheme(s.theme);
   stage.ui.classList.toggle('lefty', s.leftHanded);
+  setVolumes(s.musicVolume, s.sfxVolume);
 }
 applySettings(meta.settings);
 
@@ -88,9 +90,13 @@ const settings = createSettings(
     applySettings(next);
   },
   () => go('baza'),
+  (which) => {
+    if (which === 'sfx') audio.preview();
+  },
 );
 let pendingTicket: { seed: number; info: TicketInfo } | null = null;
 const ticket = createTicket(stage.ui, () => {
+  unlockAudio(); // the accept button is the natural unlock (DESIGN 14.5); any first tap also unlocks
   if (pendingTicket) go('run', pendingTicket.seed);
 });
 
@@ -151,8 +157,16 @@ bindPageTurn(bus, { stage, camera, views: game.views, getState: () => game.state
 bindRunEvents(bus, () => game.state);
 bindLaws(bus, () => game.state);
 bindLawSheets(stage.ui, bus, () => game.state);
-const asystent = bindAsystent(bus, { say: (text) => footnotes.add(text), getState: () => game.state });
-bus.on('footnote', (e) => footnotes.add(e.text));
+/** Print a footnote and tell the bus (the typewriter key and the carriage return are heard from `footnote:added`). */
+const printNote = (text: string, correction = false): number => {
+  const n = footnotes.add(text);
+  bus.emit('footnote:added', { n, text, correction });
+  return n;
+};
+const asystent = bindAsystent(bus, { say: printNote, getState: () => game.state });
+bus.on('footnote', (e) => printNote(e.text));
+// Sound: the bindings are the only place where events meet sounds (src/audio/bindings.ts).
+const audio = createAudio(bus, { getState: () => game.state, freeze: (ms) => loop.freeze(ms) });
 // The kiosk's office hours are decided by the clause (economy/hours.ts keeps the decision).
 lawHooks.officeReset = () => setOfficeOpen(null);
 
@@ -187,6 +201,7 @@ const loop = createLoop({
     tickTweens(dt * 1000);
     wobble.tick(dt * 1000);
     game.render(dt);
+    audio.frame();
     if (screen === 'run' && game.state) hud.update(game.state);
   },
 });

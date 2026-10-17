@@ -1,0 +1,207 @@
+/**
+ * The only place where game events meet sounds (DESIGN 14.5: no sound code inside game systems beyond emitting events).
+ * Every handler is a no-op while the audio context is locked, so the game never depends on sound.
+ */
+import type { Bus, GameEvents } from '../core/events';
+import type { Enemy } from '../entities';
+import type { RunState } from '../world/run';
+import { getMix } from './context';
+import { musicPhase, musicTurn, startMusic, stopMusic, tickMusic } from './music';
+import { FAMILY_FLAVOUR, HERO_SKILL_SOUNDS, play, startHum, type Hum, type PlayOpts, type SfxName } from './sfx';
+
+export interface AudioDeps {
+  getState(): RunState | null;
+  /** Hit-stop from the game loop (`loop.freeze`). */
+  freeze(ms: number): void;
+}
+
+export interface AudioBindings {
+  /** Once per rendered frame: the music scheduler, the boss hum, new loot cards. */
+  frame(): void;
+}
+
+/** Racja below this share of the maximum adds the hiss bed to the tear. */
+export const LOW_RACJA = 0.3;
+export const HIT_STOP_MS = 40;
+
+/** How much body a hit has against a generated beast: it only exists as much as it is confirmed (DESIGN 14.3). */
+export function beastBody(existence: number | undefined): number {
+  const e = Math.min(1, Math.max(0.3, existence ?? 1));
+  return ((e - 0.3) / 0.7) ** 2 * 0.95 + 0.05;
+}
+
+/** Which law:trigger kinds make a sound, and which. */
+export const LAW_SOUNDS: Record<string, SfxName> = {
+  'hours:bot': 'botOn',
+  'hours:consultant': 'consultantOn',
+  'reverse:start': 'reverseStart',
+  noise: 'crumple',
+  'cookies:all': 'stamp',
+  'cookies:minimal': 'stamp',
+  'update:installed': 'stamp',
+  'code:requested': 'footnote',
+  'code:accepted': 'stamp',
+};
+
+/** After this many exceptions the sound is switched off for the session; the game never depends on it. */
+const MAX_FAILURES = 20;
+
+export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
+  let failures = 0;
+  const guard =
+    <A extends unknown[]>(fn: (...a: A) => void) =>
+    (...a: A): void => {
+      if (failures >= MAX_FAILURES) return;
+      try {
+        fn(...a);
+      } catch (e) {
+        // A browser with a half-working Web Audio must not take the game with it: say it once, go on silent.
+        if (failures++ === 0) console.warn(`audio: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    };
+  const on = <K extends keyof GameEvents>(name: K, fn: (payload: GameEvents[K]) => void): void => {
+    bus.on(name, guard(fn));
+  };
+  let hum: Hum | null = null;
+  let seenId = 0;
+  let invOpen = false;
+  let fxRadius = 0;
+
+  const enemyOf = (id: number): Enemy | undefined => deps.getState()?.enemies.find((e) => e.id === id);
+  const duck = (): void => getMix()?.duck();
+
+  /** The family's flavour laid over a hit, a crit or a kill. */
+  const flavour = (family: Enemy['family'] | undefined, opts: PlayOpts = {}): void => {
+    if (family) play(FAMILY_FLAVOUR[family], opts);
+  };
+
+  on('run:started', () => {
+    hum?.stop(0.2);
+    hum = null;
+    const s = deps.getState();
+    seenId = s ? s.nextId - 1 : 0;
+    invOpen = false;
+    startMusic(deps.getState);
+  });
+  on('run:ended', () => {
+    hum?.stop(1);
+    hum = null;
+    stopMusic(1.5);
+  });
+  on('screen:changed', (e) => {
+    invOpen = false;
+    if (e.screen !== 'run') {
+      hum?.stop(0.5);
+      hum = null;
+      stopMusic(1);
+      if (e.screen !== 'title') play('paperSlide');
+    }
+  });
+
+  // ---- combat ----
+  on('enemy:hit', (e) => {
+    const en = enemyOf(e.id);
+    const lethal = en !== undefined && en.hp <= 0;
+    if (e.crit) deps.freeze(HIT_STOP_MS);
+    if (lethal) return; // the kill sound covers it
+    const beast = en?.family === 'wygenerowane';
+    const body = beast ? beastBody(en?.existence) : 1;
+    const opts: PlayOpts = beast ? { scale: { body, sub: body, transient: 0.7 } } : {};
+    play(e.crit ? 'crit' : 'hit', opts);
+    flavour(en?.family, e.crit ? { gain: 1.1 } : {});
+  });
+  on('enemy:died', (e) => {
+    deps.freeze(HIT_STOP_MS);
+    duck();
+    const beast = e.family === 'wygenerowane';
+    play('kill', beast ? { scale: { body: 0.5, sub: 0.5 } } : {});
+    flavour(e.family, { gain: 1.2 });
+  });
+  on('boss:died', () => {
+    hum?.stop(1);
+    hum = null;
+    play('bossPhase', { gain: 1.1, rate: 0.85, when: 0.2 });
+    duck();
+  });
+  on('boss:phase', () => {
+    play('bossPhase');
+    duck();
+    musicPhase();
+  });
+  on('enemy:escalated', () => play('escalate'));
+  on('enemy:rebutted', () => play('strikeThrough', { when: 0.08 }));
+  on('player:died', () => {
+    // no sting: the mechanism slows to a stop (the music reads the dead state), the boss hum runs down
+    hum?.stop(2.5);
+    hum = null;
+    invOpen = false;
+  });
+  on('player:hit', (e) => {
+    const p = deps.getState()?.player;
+    const low = p !== undefined && p.hpMax > 0 && p.hp / p.hpMax < LOW_RACJA;
+    play(low ? 'playerHurtLow' : 'playerHurt', e.crit ? { gain: 1.15 } : {});
+  });
+  on('skill:fx', (e) => {
+    fxRadius = e.r;
+  });
+  on('skill:cast', (e) => {
+    const s = deps.getState();
+    const hero = s?.player.heroId;
+    if (!hero) return;
+    const gain = (e.free ? 0.85 : 1) * (1 + Math.min(0.2, fxRadius / 500));
+    fxRadius = 0;
+    play(HERO_SKILL_SOUNDS[hero][e.slot], { gain });
+  });
+
+  // ---- paper, forms, the document ----
+  on('stamp', () => play('stamp'));
+  on('player:levelup', () => play('stamp'));
+  on('player:unsuspended', () => play('stamp'));
+  on('footnote:added', (e) => play(e.correction ? 'correction' : 'footnote'));
+  on('pickup:taken', () => play('pickup'));
+  on('page:edge', () => play('pageEdge'));
+  on('page:turn', (e) => {
+    play('pageTurn');
+    const s = deps.getState();
+    if (s) musicTurn(s, e.to);
+  });
+  on('update:ready', () => play('paperSlide'));
+  on('law:ask', () => play('paperSlide'));
+  on('law:trigger', (e) => {
+    const name = LAW_SOUNDS[e.kind];
+    if (name) play(name);
+  });
+  on('inventory', () => {
+    const s = deps.getState();
+    if (!s) return;
+    // the sheet pauses the run while it is open; this handler runs after the sheet's own
+    const open = s.status === 'paused' && !s.modal && !s.turning;
+    if (open === invOpen) return;
+    invOpen = open;
+    play(open ? 'inventoryOpen' : 'inventoryClose');
+  });
+
+  return {
+    frame: guard(() => {
+      const s = deps.getState();
+      if (s) {
+        // loot cards sketched into the margin: pickups that appeared since the last frame
+        let drawn = false;
+        for (const k of s.pickups) {
+          if (k.id <= seenId) continue;
+          if (k.item || k.permission) drawn = true;
+        }
+        seenId = Math.max(seenId, s.nextId - 1);
+        if (drawn) play('cardDrawn');
+        // the tape-motor hum under the whole boss fight
+        const boss = s.status !== 'dead' && s.enemies.some((e) => e.boss);
+        if (boss && !hum) hum = startHum();
+        else if (!boss && hum) {
+          hum.stop(1.2);
+          hum = null;
+        }
+      }
+      tickMusic();
+    }),
+  };
+}
