@@ -6,6 +6,9 @@ import { chromium } from 'playwright-core';
 import { chromiumPath, launchArgs } from './browser.mjs';
 
 const PORT = Number(process.env.SHOT_PORT ?? 4173);
+// Several agents may run this at once: give each its own port, build dir and shots dir.
+const OUT = process.env.SHOT_OUT ?? 'dist';
+const SHOTS = process.env.SHOT_DIR ?? 'shots';
 const BASE = `http://127.0.0.1:${PORT}/SciFiArpg/`;
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
@@ -23,8 +26,8 @@ async function waitForServer(url, ms = 20000) {
   throw new Error(`preview server did not start at ${url}`);
 }
 
-mkdirSync('shots', { recursive: true });
-const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--port', String(PORT), '--strictPort', '--host', '127.0.0.1'], {
+mkdirSync(SHOTS, { recursive: true });
+const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--outDir', OUT, '--port', String(PORT), '--strictPort', '--host', '127.0.0.1'], {
   stdio: 'ignore',
 });
 const stop = () => server.kill('SIGTERM');
@@ -54,7 +57,7 @@ try {
   await page.waitForFunction(() => window.__game !== undefined);
   await page.evaluate(() => document.fonts.ready);
 
-  const shot = (name) => page.screenshot({ path: `shots/${name}.png` });
+  const shot = (name) => page.screenshot({ path: `${SHOTS}/${name}.png` });
   const wait = (ms) => page.waitForTimeout(ms);
 
   await wait(2200);

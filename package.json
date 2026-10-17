@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "icons": "node scripts/icons.mjs",
-    "shot": "vite build && node scripts/shot.mjs"
+    "shot": "vite build --outDir ${SHOT_OUT:-dist} && node scripts/shot.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.64.1",
