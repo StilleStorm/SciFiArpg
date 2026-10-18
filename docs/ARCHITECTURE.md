@@ -63,7 +63,7 @@ after the boss fell (`canOpenUpdate`). In the base only the HUD tap opens it.
   `tunnel:closed {reason: return | second | death | end | page}` (the first three are taped).
 - Combat: `attack:started {attackerId, attacker, x, y, tx, ty, ranged}`, `player:hit`, `enemy:hit|miss`,
   `enemy:died {id, x, y, tier?, family?}`, `boss:died`, `boss:phase`, `enemy:rebutted|offTopic|escalated`.
-- Hero: `skill:cast`, `skill:fx`, `summon:expired`, `player:levelup`, `update:ready`, `player:died`, `player:unsuspended`.
+- Hero: `skill:cast {slot, skill, free, aim}`, `skill:fx` (kind, x, y, x2, y2, r), `summon:expired`, `player:levelup`, `update:ready`, `player:died`, `player:unsuspended`.
 - Presentation: `footnote {text}`, `footnote:added {n, text, correction}` (every printed footnote), `stamp`,
   `margin:note {text, x, y, ttl?}`, `law:trigger`, `law:ask`, `pickup:taken`.
 
@@ -128,10 +128,10 @@ words are bound to the next with U+00A0 by `t()`. No user-facing strings in `.ts
 `demoInventory`, `openInventory`, `openSklep`, `openKiosk`, `setTheme`, `setOrientation`, `setSteering`,
 `setLeftHanded`, `controls`, `joystick(dx, dy)`, `pause`, `resume`, `endTicket`, `resumeTicket`, `character`,
 `startBase(seed?)`, `station(name)`, `acceptTicket`, `walkToExit`, `openTunnel`, `enterTunnel`, `returnFromTunnel`,
-`hero.{cast, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
+`hero.{cast, installSkill, openAssign, assignPad, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
 `enemies.{spawnFamily, spawnBoss, hit, clear, list}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
 `npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot` (390x844 @2x and 844x390 into `shots/`);
-per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items}.mjs` (each with its own
+per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout}.mjs` (each with its own
 SHOT_PORT/SHOT_OUT/SHOT_DIR, usage in the header). `npm run smoke` plays a ticket with real buttons: profile, base
 (HUD, margin note, update from the HUD line), desk, ticket, exit, run, fight, update, inventory, pause, Zakończ,
 bookmark resume, two tunnels and the return, boss, death, a landscape joystick leg (two touches, the footnote slip),
@@ -144,27 +144,39 @@ Every `SkillDef` has `aim: 'auto' | 'kierunek' | 'wskazanie'`. Pads (`ui/pads.ts
 Stations open on a tap anywhere on their drawing or label (`Game.onTap` emits `station:opened`); walking into them does nothing; labels are permanent. The notice board (`ui/board.ts`) shows three announcements and the ticket history; the desk keeps Nowe/Wznów zgłoszenie and Zmień profil; settings live only in the pause sheet (`go('settings')` opens pause + settings). `ui/sheet.ts guardGhostClicks()` drops the compatibility mouse events that follow a touch `pointerdown` so a sheet opened by a tap does not receive that tap's click. Opening a station sheet (`holdBase`) disables input and `releaseBase` re-enables it (the former hang).
 
 ## Fifth hero and the laser (2026-10-18)
-Heroes: pralka, konsultant, petlowiec, kartograf, nalesnik (`HERO_IDS` in save/character.ts and the save check list it too). Naleśnik logic in `heroes/nalesnik.ts` (orbit roll with a satellite, gravity pull, the `Zone` variant `'wniosek'` with `inside`), quirk in `heroes/shield.ts` (`projectileDamageMul`: skim from 90% racja; `Player.round` while rounded). Kartograf's auto is a hitscan laser: `fireAuto` → `fireLaser` → shared `attack()`; `attack:started` carries `laser {sx, sy, ex, ey, crit, metres}`; crit pierces along the line. The base page animates on a render clock `animMs` in game.ts because `RunState.time` does not advance in phase 'base'. Sounds: `nalesSlap`, `nalesOrbita`, `nalesGravity`, `nalesFlag`.
+Heroes: pralka, konsultant, petlowiec, kartograf, nalesnik (`HERO_IDS` in save/character.ts and the save check list it too). Naleśnik logic in `heroes/nalesnik.ts` (orbit roll with a satellite, gravity pull, the `Zone` variant `'wniosek'` with `inside`), quirk in `heroes/shield.ts` (`projectileDamageMul`: skim from 90% racja; `Player.round` while rounded). Kartograf's auto is a hitscan laser: `fireAuto` → `fireLaser` → shared `attack()`; `attack:started` carries `laser {sx, sy, ex, ey, crit, metres, scale?}`; crit pierces along the line. The base page animates on a render clock `animMs` in game.ts because `RunState.time` does not advance in phase 'base'. Sounds: `nalesSlap`, `nalesOrbita`, `nalesGravity`, `nalesFlag`.
 
 ## Fourth and fifth skills (DESIGN 10.1)
-Types (`heroes/defs.ts`): `SkillIndex = 0 | 1 | 2 | 3 | 4` (a skill of the hero), `PadSlot = 0 | 1 | 2` (a pad). `HeroDef.skills` is a
-five-tuple; `SkillDef` gains `requires?: FamilyId` (type-only import from `enemies/ids`; the permission the first rank of skills 3 and 4 wants;
-`progression/update.ts Family` is the same union). `HeroRun.cd`, `cdTotal`, `ranks` are keyed by **SkillIndex**
-(length 5); `HeroRun.pads: [SkillIndex, SkillIndex, SkillIndex]` (default `[0, 1, 2]`) says which skill each pad fires.
-`heroes/loadout.ts` (heroes agent): `isInstalled(s, i)` (0..2 always; 3 and 4 when `ranks[i] > 0`), `installedSkills(s): SkillIndex[]`,
-`padSkill(s, slot): SkillDef`, `assignPad(s, slot, skill): boolean` (refuses a not-installed skill; a skill already on another
-pad swaps with the one on `slot`; after it the three pads always hold three different installed skills), `fixPads(s)` (after a
-load: any pad holding a not-installed or duplicate skill falls back so the invariant holds). `castSkill(s, bus, slot: PadSlot, free, aim)`
-casts `pads[slot]`; the free cast (Pralka's quirk) draws from `installedSkills`. `skill:cast` carries `{slot, skill: SkillIndex, free, aim}`;
-`skill:aim` keeps `slot`. `HERO_SKILL_SOUNDS[hero]` has five entries (index = SkillIndex). `helpers.ts power/areaOf/durationOf/cooldownOf`
-take a SkillIndex. Pads (`ui/pads.ts`): `syncPads(s)` every frame redraws a pad's word and glyph when `s.hero.pads` changed
-(`SKILL_DRAWINGS[hero]` has five glyphs), `updatePadCooldowns` reads `cd[pads[i]]`, a press resolves the skill through `padSkill`.
-Progression (`progression/update.ts`): pool entries `skill1..skill5` (`slot` is a SkillIndex), `requirementOf`: skills 0..2 gate rank 3 by
-`SKILL_FAMILY[slot]`, skills 3..4 gate rank 1 by `SkillDef.requires`; `entryView` of a skill's rank 1 for index 3..4 reads
-"Nowa umiejętność: <name>" with the skill's own desc. `applyUpgrade` sets `ranks[slot]`; the form (`ui/update.ts`) follows the
-install of such a rank 1 with the step "Przypisz do przycisku" (three pad buttons with their current words, "Później"), which
-calls `assignPad`. `ui/loadout.ts` is the sheet the pause line "Umiejętności" opens (run and base): five rows, pad numbers,
-`assignPad` on tap. Save: `ProgressData.pads` (`progression/persist.ts`), `applyProgress` sets it then `fixPads`; `save/character.ts`
-reads it leniently (missing -> `[0, 1, 2]`). New entity variants: `Summon.variant 'moon'` (Nalesnik's Księżyc; `orbit?: {angle, r}`),
-`Zone.variant 'legenda' | 'start' | 'numer'` (Kartograf's legend box, Pętlowiec's landing countdown with `follow` unused, Konsultant's case number following its target).
-Smoke: `.pad.s1` still fires skill 0 on a fresh character.
+Types (`heroes/defs.ts`): `SkillIndex = 0..4` (a skill of the hero), `PadSlot = 0..2` (a pad); `HeroDef.skills` is a five-tuple;
+`SkillDef.requires?: FamilyId` is the permission rank 1 of skills 3 and 4 wants. `HeroRun.cd/cdTotal/ranks` are keyed by SkillIndex
+(length 5, all five cool down every step, run and base); `HeroRun.pads: [SkillIndex x3]` (default `[0, 1, 2]`).
+`heroes/loadout.ts`: `isInstalled`, `installedSkills`, `padSkill`, `padOf`, `assignPad(s, slot, i)` (refuses a not-installed skill; a skill on
+another pad swaps; the pads always hold three different installed skills), `fixPads` (after a load). `castSkill(s, bus, slot, free, aim)`
+checks and then runs the private `fire(s, bus, skill, slot, free, aim)`: the skill fn, the cooldown unless free, `skill:cast {slot, skill, free, aim}`,
+and `HeroRun.lastCast {skill, aim}` (resolved, concrete aim; not for free casts nor Już to było). Pralka's błąd programu (`quirks.ts`) picks
+from `installedSkills`; an off-pad skill is cast through pad 0 with `pads[0]` swapped for that one call and put back.
+Code: casts in `heroes/skills2.ts` (`SKILLS2`, merged into `SKILLS`; Już to było stays in `skills.ts` because it calls `fire` and lets each
+live copy recast from its own position by standing the player there for the call), per-step effects in `heroes/steps2.ts` (called from
+`heroes/system.ts` in its fixed order), all numbers in `heroes/numbers.ts`, aim geometry in `heroes/aim.ts GEOMETRY`. New `HeroRun` fields:
+`reading` (Pralka's Wniosek o osobowość: until, acc, upor), `numer` (Konsultant's case number: id, until, handovers, number, x, y),
+`scale` (Kartograf's Skala 1:1: until, from, to on `attackRange`), `tide` (Naleśnik's Pływy ring), `moonUpor`, `lastCast`, `noted` (first-cast
+footnote bits). Numer sprawy's +35% is an `enemy:hit` listener (`bindNumerBonus`, bound once per bus) that takes the extra racja before the
+death check. Skala 1:1 makes every laser pierce and sets `laser.scale` on `attack:started` (render/attackFx.ts halves the tick spacing).
+Entities: `Summon.variant 'moon'` with `orbit {angle, r, ring?, hits?}`, stepped by `stepMoon` (render: `heroFx.ts buildMoon/patchMoon`);
+`Zone.variant 'legenda'` (`inside`, `acc`, `order` of the wrong names), `'start'` (lands when `ttl` runs out: `landStart`), `'numer'`
+(`follow`, `number`). `skill:fx` kinds added: `drum`, `wet`, `section`, `cut`, `tide`, `capsule`.
+Pads (`ui/pads.ts`): `syncPads(s)` each frame (heroes/layer.ts) redraws word, label and glyph when `pads` changed (`SKILL_DRAWINGS` has five
+glyphs per hero); `updatePadCooldowns` draws `cd[pads[i]]`; a press resolves the skill through `padSkill`.
+Progression (`progression/update.ts`): pool `skill1..skill5`; `requirementOf` gates rank 3 of skills 0..2 by family and rank 1 of 3..4 by
+`requires`; `newSkillOf(before, after)` is the index whose rank went 0 -> >0; `roman(rank)`. The update form's `onPick` (heroes/layer.ts)
+snapshots `ranks`, confirms, and for a new skill calls `UpdateForm.assign(s, skill, done)`: the same sheet becomes "Przypisz do przycisku"
+(`.sheet.assigning`, three `.assign-pad[data-pad]` with the words they carry, `.report.later` "Później"); `done` closes and resumes.
+`ui/loadout.ts openLoadout(root, s, onBack)` (+ pure `loadoutRows`) is the sheet behind the pause line `[data-pause=skills]`
+"Umiejętności" (run and base; main.ts `openPauseSkills/closePauseSkills`, `clearPause` closes it): five `.lo-row[data-skill]`, a greyed
+`.off` row for a skill not installed, `.lo-pad[data-pad]` (`.on` = occupied). Save: `ProgressData.pads`; `padsFrom(v)` reads it leniently
+(not three indexes 0..4 -> `[0, 1, 2]`), `applyProgress` sets it then `fixPads`; `save/character.ts toCharacter` uses `padsFrom`.
+Hook (`heroes/hook.ts`): `hero.cast(slot, aim?)`, `installSkill(3|4)` (gives the permission, installs rank 1), `openAssign(3|4)` (the assign
+step at once), `assignPad(pad 1..3, index)`, `info().pads`. Smoke 3b: skill 4 from an offered entry reaches the assign step; then the
+hook's assign step on pad 1, a tap casting skill 4 with its ring, the loadout from the pause sheet (swap, Wróć, words after Wznów), Później
+for skill 5. Shots: `scripts/shot-skills.mjs` (port 4197, `shots-skills/`: each new skill mid-effect), `scripts/shot-loadout.mjs` (port 4198,
+`shots-loadout/`: assign step, pads, loadout run/base, the glyph strips).

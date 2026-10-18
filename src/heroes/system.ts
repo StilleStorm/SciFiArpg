@@ -13,14 +13,16 @@ import { durationOf, enemiesWithin, nearestEnemy, power, setExistence, skillDama
 import { FOAM_RADIUS } from './skills';
 import { heroDef } from './defs';
 import { stepFlag, stepGravity, stepOrbit, stepRoll } from './nalesnik';
+import { bindNumerBonus, landStart, stepLegend, stepMoon, stepNumer, stepReading, stepScale, stepTide, syncMoonUpor } from './steps2';
 import { tickRound } from './quirks';
 import { pushRing, RING_STEP } from './state';
 
 export function heroStep(s: RunState, bus: Bus, dt: number): void {
   trackRun(s); // the pad reads the live run to draw a held aim (heroes/aim.ts)
+  bindNumerBonus(bus);
   const h = s.hero;
   const p = s.player;
-  for (let i = 0; i < 3; i++) h.cd[i] = Math.max(0, (h.cd[i] ?? 0) - dt);
+  for (let i = 0; i < h.cd.length; i++) h.cd[i] = Math.max(0, (h.cd[i] ?? 0) - dt);
 
   h.ringTimer -= dt;
   if (h.ringTimer <= 0) {
@@ -43,6 +45,11 @@ export function heroStep(s: RunState, bus: Bus, dt: number): void {
   stepRoll(s, bus, dt);
   stepOrbit(s, dt);
   stepGravity(s, bus, dt);
+  stepReading(s, bus, dt);
+  stepNumer(s);
+  stepScale(s);
+  stepTide(s, bus, dt);
+  syncMoonUpor(s);
   tickRound(s, bus);
   stepRedirects(s, bus, dt);
   stepSummons(s, bus, dt);
@@ -59,7 +66,7 @@ export function heroStep(s: RunState, bus: Bus, dt: number): void {
 export function heroBaseStep(s: RunState, bus: Bus, dt: number): void {
   trackRun(s);
   const h = s.hero;
-  for (let i = 0; i < 3; i++) h.cd[i] = Math.max(0, (h.cd[i] ?? 0) - dt);
+  for (let i = 0; i < h.cd.length; i++) h.cd[i] = Math.max(0, (h.cd[i] ?? 0) - dt);
   if (h.pendingLevels <= 0) h.updateRequested = false;
   else if (h.updateRequested && canOpenUpdate(s, false)) bus.emit('update:ready');
 }
@@ -138,6 +145,10 @@ function stepSummons(s: RunState, bus: Bus, dt: number): void {
       bus.emit('summon:expired', { id: m.id });
       continue;
     }
+    if (m.variant === 'moon') {
+      stepMoon(s, bus, m, dt);
+      continue;
+    }
     if (m.variant === 'decoy') {
       if (Math.floor(s.time * 4) !== Math.floor((s.time - dt) * 4)) {
         for (const e of enemiesWithin(s, m.x, m.y, 190)) touchStatus(e, 'przeczytane', 1, m.id);
@@ -202,7 +213,12 @@ function stepZones(s: RunState, bus: Bus, dt: number): void {
     const z = s.zones[i];
     if (!z) continue;
     z.ttl -= dt;
-    if (z.variant === 'hourglass') {
+    if (z.variant === 'start' && z.ttl <= 0) {
+      s.zones.splice(i, 1);
+      landStart(s, bus, z);
+      continue;
+    }
+    if (z.variant === 'hourglass' || z.variant === 'numer') {
       const e = s.enemies.find((x) => x.id === z.follow);
       if (!e || z.ttl <= 0) {
         s.zones.splice(i, 1);
@@ -220,6 +236,11 @@ function stepZones(s: RunState, bus: Bus, dt: number): void {
       stepFlag(s, bus, z, dt);
       continue;
     }
+    if (z.variant === 'legenda') {
+      stepLegend(s, bus, z, dt);
+      continue;
+    }
+    if (z.variant === 'start') continue; // the countdown; it lands when the time is up (above)
     for (const e of enemiesWithin(s, z.x, z.y, z.r)) {
       touchStatus(e, 'do_weryfikacji', 0.6, z.id);
       setExistence(e, 0.3);

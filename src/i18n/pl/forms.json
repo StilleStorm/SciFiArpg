@@ -197,7 +197,14 @@
         "desc": "Każde skreślenie przynosi o jedną gwiazdkę więcej."
       }
     },
-    "newSkill": "Nowa umiejętność: {skill}"
+    "newSkill": "Nowa umiejętność: {skill}",
+    "assign": {
+      "title": "Przypisz do przycisku",
+      "lead": "Zainstalowano umiejętność «{skill}». Przyciski są trzy i wszystkie są zajęte. Wskaż jeden.",
+      "button": "Przycisk {n}",
+      "later": "Później",
+      "note": "Dotychczasowa umiejętność zostanie zdjęta z przycisku i pozostanie zainstalowana. Odnawia się nadal."
+    }
   },
   "death": {
     "zgloszenie": {

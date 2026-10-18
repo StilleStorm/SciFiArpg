@@ -56,13 +56,14 @@
     "skill4": {
       "name": "Otwarcie bębna",
       "pad": "Bęben",
-      "desc": "Bęben otwarty w trakcie cyklu. Mokre pranie leci stożkiem, trafieni czekają na weryfikację."
+      "desc": "Bęben otwarty w trakcie cyklu. Mokre pranie wylatuje stożkiem, trafieni czekają na weryfikację do wyschnięcia."
     },
     "skill5": {
       "name": "Wniosek o osobowość",
       "pad": "Wniosek",
-      "desc": "Przez 6 sekund czyta wniosek na głos. Słuchający tracą rację; wygenerowani tracą pewność, że istnieją."
-    }
+      "desc": "Przez 6 sekund odczytuje swój wniosek na głos, z większym uporem. Słuchający tracą rację. Wygenerowane istnieją słabiej: wniosku nie złożyły."
+    },
+    "osobowoscNote": "Wniosek o uznanie osobowości nr {number} odczytano na głos. Odczytanie nie stanowi rozpatrzenia."
   },
   "konsultant": {
     "name": "Konsultant Infolinii",
@@ -89,13 +90,14 @@
     "skill4": {
       "name": "Numer sprawy",
       "pad": "Numer",
-      "desc": "Sprawa dostaje numer. Przez 6 sekund obrywa bardziej od wszystkich. Po śmierci numer przechodzi dalej."
+      "desc": "Cel otrzymuje numer sprawy. Przez 6 sekund zajmują się nim wszyscy, mocniej niż zwykle. Numer skreślonego przydziela się najbliższemu."
     },
     "skill5": {
       "name": "Rozłączenie",
       "pad": "Rozłącz",
-      "desc": "Rozmowa zakończona. Pierwszy na linii odrzucony daleko i zablokowany; poniżej jednej czwartej racji połączenie przerwane."
-    }
+      "desc": "Rozmowa została zakończona. Pierwszy na linii zostaje odrzucony daleko i zablokowany. Poniżej jednej czwartej racji rozłącza się go na stałe."
+    },
+    "cut": "połączenie"
   },
   "petlowiec": {
     "name": "Pętlowiec",
@@ -130,13 +132,14 @@
     "skill4": {
       "name": "Już to było",
       "pad": "Już było",
-      "desc": "Powtarza ostatnią umiejętność bez odnowienia. Kopie też. Bez niczego do powtórzenia: trzy uwagi naraz."
+      "desc": "Powtarza ostatnią umiejętność bez odnowienia. Kopie powtarzają za nim. Jeśli nic jeszcze nie było, trzy uwagi naraz."
     },
     "skill5": {
       "name": "Odłożony start",
       "pad": "Start",
-      "desc": "Kapsuła wreszcie odlatuje i ląduje we wskazanym punkcie po 0,8 sekundy. Odrzuca i zostawia przeczytanych."
-    }
+      "desc": "Kapsuła, którą przybył, wreszcie odlatuje i po 0,8 sekundy spada we wskazany punkt. Trafieni zostają odrzuceni i przeczytani bez odpowiedzi."
+    },
+    "alreadySaid": "Pętlowiec podtrzymuje, że już to mówił."
   },
   "kartograf": {
     "exit": "Kartograf zaznacza wyjście: w {corner} rogu strony. Terenu nie sprawdzano.",
@@ -172,12 +175,22 @@
     "skill4": {
       "name": "Skala 1:1",
       "pad": "Skala",
-      "desc": "Przez 5 sekund mapa w skali 1:1. Zasięg większy, każdy pomiar przebija, zmierzeni czekają na weryfikację."
+      "desc": "Przez 5 sekund mapa jest w skali 1:1. Zasięg większy, każdy pomiar przechodzi na wylot, zmierzeni czekają na weryfikację."
     },
     "skill5": {
       "name": "Legenda",
       "pad": "Legenda",
-      "desc": "Ramka legendy w punkcie. Każdy w środku dostaje złą nazwę, jest przeczytany bez odpowiedzi i traci rację."
+      "desc": "Ramka legendy we wskazanym miejscu. Przeciwnicy w ramce zostają objaśnieni błędnie, tracą rację i pozostają przeczytani bez odpowiedzi."
+    },
+    "skalaNote": "Skala 1:1. Teren przykryto mapą.",
+    "legendaTitle": "Legenda",
+    "legendaNames": {
+      "1": "jezioro okresowe",
+      "2": "punkt widokowy",
+      "3": "las mieszany",
+      "4": "lotnisko trawiaste",
+      "5": "granica powiatu",
+      "6": "ruiny (domniemane)"
     }
   },
   "nalesnik": {
@@ -207,12 +220,12 @@
     "skill4": {
       "name": "Pływy",
       "pad": "Pływy",
-      "desc": "Przypływ od krawędzi. Przeciwnicy wypchnięci, łup przyciągnięty."
+      "desc": "Przypływ od krawędzi. Przeciwnicy odpływają, przedmioty przypływają."
     },
     "skill5": {
       "name": "Księżyc",
       "pad": "Księżyc",
-      "desc": "Kamyk wystrzelony na orbitę krąży 8 sekund i trafia, kogo minie. Ciało z księżycem to planeta. Plus upór."
+      "desc": "Kamyk wystrzelony na orbitę krąży 8 sekund i trafia każdego, kogo minie. Ciało z księżycem uważa się za planetę i obstaje przy tym: upór wyższy."
     }
   }
 }

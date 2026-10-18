@@ -1,6 +1,7 @@
 import type { Bus } from '../core/events';
 import { createRng } from '../core/rng';
-import { heroDef, type HeroId } from '../heroes';
+import { heroDef, PAD_SLOTS, type HeroId, type PadSlot, type SkillDef, type SkillIndex } from '../heroes';
+import { padSkill } from '../heroes/loadout';
 import {
   AUTO_AIM,
   clearQueuedAim,
@@ -17,6 +18,7 @@ import {
   type Point,
 } from '../heroes/aim';
 import { t } from '../i18n';
+import type { RunState } from '../world/run';
 import { hideAim, showAim } from '../render/aimFx';
 import { el, wobblyCircle } from '../render/svg';
 import { h } from './dom';
@@ -28,7 +30,7 @@ const circ = (cx: number, cy: number, r: number): string => `M${cx - r} ${cy}a${
 
 /**
  * Small ink drawings, centered on 0,0 inside a 52 x 52 box. A leading "~" draws that stroke dotted.
- * Order per hero: skill 1, 2, 3.
+ * Order per hero: skills 1 to 5 (index = SkillIndex; the pads show the ones in `pads`).
  */
 const SKILL_DRAWINGS: Record<HeroId, readonly (readonly string[])[]> = {
   // a spinning drum, foam, a dragged box
@@ -36,30 +38,50 @@ const SKILL_DRAWINGS: Record<HeroId, readonly (readonly string[])[]> = {
     [circ(0, 0, 11), 'M0-11V11M-11 0H11', circ(0, 0, 4), 'M-17-8A19 19 0 0 1-6-17M-8-19L-6-17L-9-14', 'M17 8A19 19 0 0 1 6 17M8 19L6 17L9 14'],
     [circ(-6, 5, 7), circ(6, 7, 5), circ(1, -7, 5.5), circ(-9, -8, 2.5), circ(10, -4, 2.2), circ(11, 14, 1.6)],
     ['M-3-9H12V5H-3Z', 'M-3-9L2-13H12M12-9L17-13V1L12 5', 'M-17-2H-8M-19 3H-8M-17 8H-8', 'M-14 13H17'],
+    // an open drum with its flap and three strokes of wet load flying out
+    ['M-10-4V10Q0 15 10 10V-4', 'M-10-4A10 4 0 1 0 10-4A10 4 0 1 0-10-4', 'M10-4L16-11L9-14', 'M-5-8L-8-15', 'M0-8L0-17', 'M5-8L8-15'],
+    // a section sign with a rule under it
+    ['M6-12C0-17-8-12-6-7C-4-3 5-1 6 4C7 9-1 13-7 9', 'M-6-7C-4-5 2-4 5-1', 'M-12 16H12'],
   ],
   // an hourglass, a redirect arrow, a headset
   konsultant: [
     ['M-8-13H8M-8 13H8M-7-13C-7-4-1-2 0 0C-1 2-7 4-7 13M7-13C7-4 1-2 0 0C1 2 7 4 7 13', 'M-3.5 11H3.5M0 3V9'],
     ['M-13 12V0Q-13-11-2-11H11', 'M6-17L12-11L6-5', 'M-13 12H-6'],
     ['M-11 3A11 11 0 0 1 11 3', 'M-14 0H-10V9H-14Z', 'M10 0H14V9H10Z', 'M-12 9Q-10 15 0 15', circ(1, 15, 1.6)],
+    // a stamped box with the letters "No" and a rule under it
+    ['M-14-8H14V8H-14Z', 'M-9 4V-4L-5 4V-4', circ(3, 0, 3.4), 'M-16 14H16'],
+    // a line cut by a short bar, a handset at one end
+    ['M-17-5H-12V5H-17Z', 'M-12 0H-4', '~M4 0H17', 'M-3 8L3-8'],
   ],
   // two cosmonauts, a pair of speech bubbles, a loop
   petlowiec: [
     [circ(-8, -6, 5.5), 'M-13-3H-3L-4 9H-12Z', 'M-11 9V15M-5 9V15', '~' + circ(8, -4, 5.5), '~M3 -1H13L12 11H4Z', '~M5 11V17M11 11V17'],
     ['M-15-14H3V-1H-8L-12 4V-1H-15Z', 'M-4-3H15V10H9L6 15V10H-4Z', 'M-11-9H-1M0 2H11M0 6H8'],
     ['M-12 0C-12-12-2-12 0 0C2 12 12 12 12 0C12-12 2-12 0 0C-2 12-12 12-12 0', 'M7 8L12 2L16 8'],
+    // a loop arrow closing on itself
+    ['M9-9A12 12 0 1 0 12 2', 'M3-11L9-9L8-3', circ(0, 0, 3.5)],
+    // a capsule above a dotted fall line and the ground
+    ['M-6-15Q0-21 6-15V0Q0 6-6 0Z', circ(0, -9, 2.2), '~M0 6V14', 'M-12 16H12'],
   ],
   // a theodolite, a dashed area, a crossed pin
   kartograf: [
     ['M0 3L-10 15M0 3L10 15M0 3V15', 'M-6-8H6V3H-6Z', 'M-6-4H-15M-15-7V-1', circ(0, -2.5, 2.6), 'M-3-12H3V-8H-3Z'],
     ['~' + 'M-15 0A15 10 0 1 0 15 0A15 10 0 1 0 -15 0', 'M-6 0H6M0-5V5', 'M-10-6l2 2M10 6l2 2M10-6l-2 2M-10 6l-2 2'],
     ['M0-12C-6-12-7-4 0 5C7-4 6-12 0-12Z', circ(0, -7, 2), 'M0 5V13', 'M-13 12L13-12'],
+    // a ruler with ticks and the scale 1:1 above it
+    ['M-16-1H16V9H-16Z', 'M-12-1V4M-8-1V2M-4-1V4M0-1V2M4-1V4M8-1V2M12-1V4', 'M-9-14V-7', 'M-4-12.5v.1M-4-9v.1', 'M1-14V-7'],
+    // a legend box with three ruled lines, each with its swatch
+    ['M-14-13H14V13H-14Z', 'M-10-8H-6V-5H-10Z', 'M-2-6.5H10', 'M-10-1H-6V2H-10Z', 'M-2 0.5H10', 'M-10 6H-6V9H-10Z', 'M-2 7.5H10'],
   ],
   // a rolling disc seen edge-on with its trail, a spiral of dots falling in, a small flag
   nalesnik: [
     ['M5-14A6.5 14 0 1 0 5 14A6.5 14 0 1 0 5-14', circ(5, -6, 1.7), circ(6.5, 2, 2.1), circ(4, 9, 1.3), '~M-17-8H-4', '~M-17 0H-5', '~M-17 8H-4'],
     ['~M15.7 6.6L10.8 12.2L4.3 15.1L-2.5 14.8L-8.2 11.8L-11.9 6.7L-13.0 0.9L-11.5 -4.6L-8.0 -8.6L-3.3 -10.6L1.5 -10.3L5.4 -8.1L7.8 -4.6L8.4 -0.8L7.3 2.7L5.0 5.1L2.1 6.1L-0.7 5.8L-2.8 4.3L-3.8 2.4L-3.8 0.4L-3.0 -1.0L-1.8 -1.8', circ(0, 0, 2.6), 'M12-12L14-8L10-8'],
     ['M-5 15V-15', 'M-5-15L12-10L-5-5Z', 'M-14 15Q-5 11 6 15', 'M-5 15L-9 17M-5 15L-1 17'],
+    // two rings pushing out from a small disc
+    [circ(0, 0, 5), '~' + circ(0, 0, 10), 'M-12-12A17 17 0 0 1 12-12', 'M-12 12A17 17 0 0 0 12 12'],
+    // a dotted orbit with a pebble on it
+    ['~M-16 0A16 8 0 1 0 16 0A16 8 0 1 0 -16 0', circ(0, 0, 4.5), circ(11, -6, 2.4)],
   ],
 };
 
@@ -119,27 +141,49 @@ function drawGlyph(g: SVGGElement, strokes: readonly string[]): void {
   );
 }
 
-/** Show the skill drawings and words of this hero on the three pads. */
+/** The skill each pad shows now (SkillIndex per pad); `syncPads` keeps it equal to `s.hero.pads`. */
+let shownPads: readonly [SkillIndex, SkillIndex, SkillIndex] = [0, 1, 2];
+
+/** Put the word, the label and the glyph of skill `sk` of this hero on pad `slot`. */
+function drawPad(heroId: HeroId, slot: PadSlot, sk: SkillIndex): void {
+  const n = nodes[slot];
+  if (!n) return;
+  const def = heroDef(heroId).skills[sk];
+  n.word.textContent = t(def.padKey);
+  n.btn.setAttribute('aria-label', t(def.nameKey));
+  drawGlyph(n.glyph, SKILL_DRAWINGS[heroId][sk] ?? []);
+  n.last = -2; // the ring is redrawn for the skill that is here now
+}
+
+/** Show the skill drawings and words of this hero on the three pads (the default order; `syncPads` follows the run's pads). */
 export function setPadHero(heroId: HeroId): void {
   if (currentHero === heroId) return;
   currentHero = heroId;
-  const def = heroDef(heroId);
-  const drawings = SKILL_DRAWINGS[heroId];
-  nodes.slice(0, 3).forEach((n, i) => {
-    const sk = def.skills[i as 0 | 1 | 2];
-    n.word.textContent = t(sk.padKey);
-    n.btn.setAttribute('aria-label', t(sk.nameKey));
-    drawGlyph(n.glyph, drawings[i] ?? []);
-  });
+  shownPads = [0, 1, 2];
+  for (const slot of PAD_SLOTS) drawPad(heroId, slot, slot);
 }
 
-/** Cooldown rings: the circle around a pad is drawn as the cooldown runs out. Call every frame. */
+/**
+ * Every frame: when the hero or the pad assignment changed since the last call, redraw the words, labels and glyphs.
+ * Otherwise it only compares four values.
+ */
+export function syncPads(s: RunState): void {
+  const hero = s.player.heroId;
+  const pads = s.hero.pads;
+  if (currentHero === hero && pads[0] === shownPads[0] && pads[1] === shownPads[1] && pads[2] === shownPads[2]) return;
+  currentHero = hero;
+  shownPads = [pads[0], pads[1], pads[2]];
+  for (const slot of PAD_SLOTS) drawPad(hero, slot, shownPads[slot]);
+}
+
+/** Cooldown rings: the circle around a pad is drawn as the cooldown runs out; the cooldown belongs to the skill the pad holds. Call every frame. */
 export function updatePadCooldowns(cd: readonly number[], total: readonly number[]): void {
-  for (let i = 0; i < 3; i++) {
-    const n = nodes[i];
+  for (const slot of PAD_SLOTS) {
+    const n = nodes[slot];
     if (!n) continue;
-    const left = cd[i] ?? 0;
-    const len = Math.max(0.01, total[i] ?? 1);
+    const skill = shownPads[slot];
+    const left = cd[skill] ?? 0;
+    const len = Math.max(0.01, total[skill] ?? 1);
     const offset = left > 0 ? Math.round((left / len) * 200) / 2 : -1;
     if (offset === n.last) continue;
     n.last = offset;
@@ -151,7 +195,11 @@ export function updatePadCooldowns(cd: readonly number[], total: readonly number
 
 // ---------- hold, drag, release (DESIGN 5.6) ----------
 
-const skillOf = (slot: number) => (currentHero ? heroDef(currentHero).skills[slot as 0 | 1 | 2] : undefined);
+/** The skill pad `slot` holds in the tracked run (the one the pad fires), if a run is tracked. */
+function skillOf(slot: number): SkillDef | undefined {
+  const s = trackedRun();
+  return s && slot >= 0 && slot <= 2 ? padSkill(s, slot as PadSlot) : undefined;
+}
 
 /** The pad's circle centre in client px. */
 function centreOf(n: PadNode): Point {
@@ -187,7 +235,7 @@ function show(slot: number, n: PadNode, emit: boolean): void {
   const sk = skillOf(slot);
   const s = trackedRun();
   if (drawer !== slot) return;
-  if (!pr || !sk || !s || sk.aim === 'auto' || s.status !== 'running' || s.phase !== 'run' || (s.hero.cd[slot] ?? 0) > 0) {
+  if (!pr || !sk || !s || sk.aim === 'auto' || s.status !== 'running' || s.phase !== 'run' || (s.hero.cd[s.hero.pads[slot as PadSlot]] ?? 0) > 0) {
     hideAim();
     setThick(n, false);
     return;

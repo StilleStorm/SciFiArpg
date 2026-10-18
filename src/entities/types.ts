@@ -150,7 +150,7 @@ export interface Pickup extends Base {
 /** A friendly figure: a Petlowiec copy, a Kartograf decoy, or the 10-second friendly copy after Petla. */
 export interface Summon extends Base {
   kind: 'summon';
-  variant: 'copy' | 'decoy' | 'ghost';
+  variant: 'copy' | 'decoy' | 'ghost' | 'moon';
   heroId: HeroId;
   facing: 1 | -1;
   moving: boolean;
@@ -163,18 +163,25 @@ export interface Summon extends Base {
   /** Damage as a fraction of the player's damage range (0 for a decoy). */
   damageMul: number;
   speed: number;
+  /** Nalesnik's Ksiezyc (variant 'moon'): where it is on its circle round the player (`ring` is the circle's radius); `hits` is run time of the last strike per enemy id. */
+  orbit?: { angle: number; r: number; ring?: number; hits?: Record<number, number> };
 }
 
 /** A marked patch of paper: Teren nieistniejacy, or an hourglass drawn over a blocked enemy. */
 export interface Zone extends Base {
   kind: 'zone';
-  variant: 'teren' | 'hourglass' | 'wniosek';
+  variant: 'teren' | 'hourglass' | 'wniosek' | 'legenda' | 'start' | 'numer';
   /** Seconds left. */
   ttl: number;
   /** Id of the enemy the zone follows (hourglass). */
   follow?: number;
   /** Wniosek: ids of the enemies that have entered already (the entry effects fire once per entry). */
   inside?: number[];
+  /** Numer: the case number printed on the stamp (it stays with the case when the number is handed over; `follow` is the enemy). */
+  number?: number;
+  /** Legenda: seconds gathered towards the next tick of damage. Order of the wrong names for the enemies entering, and which have. */
+  acc?: number;
+  order?: number[];
 }
 
 export type Entity = Player | Enemy | Projectile | Pickup | Summon | Zone;

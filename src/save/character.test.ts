@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createBus } from '../core/events';
+import { assignPad, isInstalled } from '../heroes/loadout';
 import { fillDemoInventory } from '../items/demo';
 import { applyUpgrade, gainXp, MAX_LEVEL } from '../progression';
 import { createRun, type RunState } from '../world/run';
@@ -93,6 +94,76 @@ describe('the character record', () => {
     expect(s.hero.upgrades['skill1']).toBeLessThanOrEqual(3);
     expect(toCharacter(null)).toBeNull();
     expect(toCharacter({ heroId: 'nobody' })).toBeNull();
+  });
+});
+
+describe('the pad assignment (DESIGN 10.1)', () => {
+  /** A Konsultant who has skill 4 installed (the permission found, the update taken) and put on pad 1. */
+  function withFourth(): RunState {
+    const s = createRun(5, { heroId: 'konsultant' });
+    s.player.permissions.push('powiadomienia');
+    expect(applyUpgrade(s, 'skill4')).toBe(true);
+    expect(assignPad(s, 0, 3)).toBe(true);
+    return s;
+  }
+
+  it('round-trips through JSON: the pads and the ranks come back', () => {
+    const a = withFourth();
+    expect(a.hero.pads).toEqual([3, 1, 2]);
+    const c = toCharacter(JSON.parse(JSON.stringify(serializeCharacter(a))));
+    expect(c?.pads).toEqual([3, 1, 2]);
+    const b = createRun(9, { heroId: 'konsultant', character: c ?? undefined });
+    expect(b.hero.ranks[3]).toBe(1);
+    expect(b.hero.pads).toEqual([3, 1, 2]);
+    expect(isInstalled(b, 3)).toBe(true);
+  });
+
+  it('survives the whole meta save', () => {
+    const a = withFourth();
+    const store = memory();
+    saveMeta({ ...defaultMeta(), character: serializeCharacter(a) }, store);
+    const b = createRun(2, { heroId: 'konsultant', character: loadMeta(store).character });
+    expect(b.hero.pads).toEqual([3, 1, 2]);
+  });
+
+  it('a fresh character has the default pads, and a save without pads reads as [0, 1, 2]', () => {
+    expect(emptyCharacter().pads).toEqual([0, 1, 2]);
+    const old = JSON.parse(JSON.stringify(emptyCharacter('pralka'))) as Record<string, unknown>;
+    delete old['pads'];
+    expect(toCharacter(old)?.pads).toEqual([0, 1, 2]);
+    const s = createRun(1, { heroId: 'pralka', character: toCharacter(old) ?? undefined });
+    expect(s.hero.pads).toEqual([0, 1, 2]);
+  });
+
+  it.each([null, 'x', 7, [0, 1], [0, 1, 2, 3], [0, 1, 9], [0, 1, 1.5], [-1, 1, 2], ['0', 1, 2], { 0: 0 }])('an invalid pads value (%j) reads as [0, 1, 2]', (bad) => {
+    expect(toCharacter({ ...emptyCharacter('pralka'), pads: bad })?.pads).toEqual([0, 1, 2]);
+  });
+
+  it('a pad holding a skill that is not installed falls back, and the pads stay three different installed skills', () => {
+    // skill 4 on pad 1 with no rank in it (the update was lost, or the file was edited)
+    const c = toCharacter({ ...emptyCharacter('konsultant'), pads: [3, 1, 2] });
+    expect(c?.pads).toEqual([3, 1, 2]);
+    const s = createRun(4, { heroId: 'konsultant', character: c ?? undefined });
+    expect(isInstalled(s, 3)).toBe(false);
+    expect(s.hero.pads).toEqual([0, 1, 2]);
+    // a duplicate skill on two pads
+    const d = createRun(4, { heroId: 'konsultant', character: toCharacter({ ...emptyCharacter('konsultant'), pads: [1, 1, 2] }) ?? undefined });
+    expect(new Set(d.hero.pads).size).toBe(3);
+    expect(d.hero.pads.every((i) => isInstalled(d, i))).toBe(true);
+    // skill 5 on a pad while only skill 4 is installed
+    const e = withFourth();
+    const raw = { ...serializeCharacter(e), pads: [4, 3, 0] };
+    const f = createRun(6, { heroId: 'konsultant', character: toCharacter(raw) ?? undefined });
+    expect(f.hero.pads[0]).not.toBe(4);
+    expect(new Set(f.hero.pads).size).toBe(3);
+    expect(f.hero.pads.every((i) => isInstalled(f, i))).toBe(true);
+    expect(f.hero.pads[1]).toBe(3);
+  });
+
+  it('the pads of another hero are not applied', () => {
+    const a = withFourth();
+    const b = createRun(8, { heroId: 'kartograf', character: serializeCharacter(a) });
+    expect(b.hero.pads).toEqual([0, 1, 2]);
   });
 });
 

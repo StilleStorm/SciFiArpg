@@ -8,11 +8,11 @@ import type { Bus } from '../core/events';
 import { createPickup } from '../entities/factory';
 import type { Input } from '../input';
 import { t } from '../i18n';
-import { bossAlive, canOpenUpdate, entryView, gainXp, confirmUpdate, openOffer, requestUpdate, reroll, xpForKill } from '../progression';
+import { bossAlive, canOpenUpdate, entryView, gainXp, confirmUpdate, newSkillOf, openOffer, requestUpdate, reroll, xpForKill } from '../progression';
 import { eraseOut } from '../render/ink';
 import type { Views } from '../render/view';
 import { createDeathForms, type DeathForms } from '../ui/deathForms';
-import { updatePadCooldowns, setPadHero } from '../ui/pads';
+import { updatePadCooldowns, setPadHero, syncPads } from '../ui/pads';
 import { createUpdateForm, type UpdateForm } from '../ui/update';
 import { nextId, type RunState } from '../world/run';
 import { takeChosenNote } from './chosen';
@@ -76,12 +76,18 @@ export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
         return next.entries.map((e) => entryView(s, e));
       },
       onPick(id) {
+        const ranks = [...s.hero.ranks];
         if (!confirmUpdate(s, id)) return;
         bus.emit('footnote', { text: t('forms.update.installedNote', { n: s.player.level }) });
         s.hero.pendingLevels = Math.max(0, s.hero.pendingLevels - 1);
-        update.close();
-        resume(s);
-        flush(s); // several queued updates open one after another
+        const finish = (): void => {
+          update.close();
+          resume(s);
+          flush(s); // several queued updates open one after another
+        };
+        const fresh = newSkillOf(ranks, s.hero.ranks);
+        if (fresh === null) finish();
+        else update.assign(s, fresh, finish); // a new skill: the same sheet asks which pad gets it (DESIGN 10.1)
       },
     });
     return true;
@@ -198,6 +204,7 @@ export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
       if (takeChosenNote() === 'nalesnik') bus.emit('footnote', { text: t('heroes.nalesnik.chosen') });
     },
     frame(s) {
+      syncPads(s);
       updatePadCooldowns(s.hero.cd, s.hero.cdTotal);
     },
     forceOutcome(o) {

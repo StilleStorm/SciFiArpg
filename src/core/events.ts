@@ -29,7 +29,7 @@ export interface GameEvents {
     ty: number;
     ranged: boolean;
     /** The Kartograf's hitscan shot (heroes/auto.ts): a ruled line from the instrument (sx, sy) to (ex, ey), already resolved. */
-    laser?: { sx: number; sy: number; ex: number; ey: number; crit: boolean; metres: number };
+    laser?: { sx: number; sy: number; ex: number; ey: number; crit: boolean; metres: number; scale?: boolean };
   };
   'enemy:died': { id: number; x: number; y: number; tier?: 'common' | 'elite' | 'boss'; family?: 'urzadzenia' | 'powiadomienia' | 'wygenerowane' };
   'pickup:taken': { id: number; number: number };
@@ -63,7 +63,7 @@ export interface GameEvents {
   /** The appeal form was filed: the shadowban is lifted. */
   'player:unsuspended': undefined;
   /** A skill wants a sketch on the page (render/heroFx.ts draws it): from (x, y) to (x2, y2) or with radius r. */
-  'skill:fx': { kind: 'swirl' | 'foam' | 'cone' | 'ring' | 'line' | 'blink' | 'dash'; x: number; y: number; x2: number; y2: number; r: number };
+  'skill:fx': { kind: 'swirl' | 'foam' | 'cone' | 'ring' | 'line' | 'blink' | 'dash' | 'drum' | 'wet' | 'section' | 'cut' | 'tide' | 'capsule'; x: number; y: number; x2: number; y2: number; r: number };
   /** A hit matched the enemy's claim: the bubble is struck through (enemies/claims in systems/combat.ts). */
   'enemy:rebutted': { id: number };
   /** First hit of another type than the claim on this enemy ("nie na temat"). */

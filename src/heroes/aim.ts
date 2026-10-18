@@ -8,6 +8,7 @@ import type { Enemy } from '../entities/types';
 import type { RunState } from '../world/run';
 import type { AimMode, SkillDef } from './defs';
 import { areaOf, nearestEnemy } from './helpers';
+import { BEBEN_REACH, KSIEZYC_ORBIT, LEGENDA_R, ROZLACZENIE_REACH, START_R } from './numbers';
 
 export type Aim =
   | { kind: 'auto'; target?: Enemy | null }
@@ -64,6 +65,13 @@ const GEOMETRY: Record<string, Geometry> = {
   korekta: { autoRange: () => 260, reach: (s) => 150 * areaOf(s, 2), radius: () => 14 },
   orbita: { autoRange: () => DEFAULT_RANGE, reach: (s) => ORBITA_LENGTH * areaOf(s, 0), radius: () => 0 },
   wniosek: { autoRange: () => 260, reach: () => 260, radius: (s) => WNIOSEK_RADIUS * areaOf(s, 2) },
+  // the fourth and fifth skills (DESIGN 10.1); the area scales by the skill's own index (3 or 4)
+  beben: { autoRange: () => DEFAULT_RANGE, reach: (s) => BEBEN_REACH * areaOf(s, 3), radius: () => 0 },
+  numer: { autoRange: (s) => 300 * areaOf(s, 3), reach: (s) => 300 * areaOf(s, 3), radius: () => 14 },
+  rozlaczenie: { autoRange: () => DEFAULT_RANGE, reach: (s) => ROZLACZENIE_REACH * areaOf(s, 4), radius: () => 0 },
+  start: { autoRange: () => 260, reach: () => 260, radius: (s) => START_R * areaOf(s, 4) },
+  legenda: { autoRange: () => 260, reach: () => 260, radius: (s) => LEGENDA_R * areaOf(s, 4) },
+  ksiezyc: { autoRange: () => DEFAULT_RANGE, reach: (s) => KSIEZYC_ORBIT * areaOf(s, 4), radius: () => 0 },
 };
 
 /** The arrow length (kierunek) or the farthest point (wskazanie) of a skill; 0 for an auto skill. */
@@ -224,13 +232,13 @@ export function previewOf(s: RunState, skill: SkillDef, aim: Aim): AimPreview | 
   }
   if (skill.aim !== 'wskazanie') return null;
   const r = radiusOf(s, skill);
-  if (skill.id === 'prosze') {
+  if (skill.id === 'prosze' || skill.id === 'numer') {
     const target = pickTarget(s, skill, aim);
     if (target) return { kind: 'circle', x: target.x, y: target.y, r: target.r + TARGET_RING };
     const a = fitAim(skill, aim);
     return a.kind === 'wskazanie' ? { kind: 'circle', x: a.x, y: a.y, r } : null;
   }
-  if (skill.id === 'teren' || skill.id === 'wniosek') {
+  if (skill.id === 'teren' || skill.id === 'wniosek' || skill.id === 'start' || skill.id === 'legenda') {
     const c = terenCentre(s, skill, aim);
     return { kind: 'circle', x: c.x, y: c.y, r };
   }

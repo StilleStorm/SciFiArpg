@@ -281,6 +281,8 @@ export interface LaserLine {
   ex: number;
   ey: number;
   crit: boolean;
+  /** Skala 1:1 (Kartograf's skill 4): the survey ticks come twice as often. */
+  scale?: boolean;
 }
 
 export interface LaserPaths {
@@ -294,7 +296,8 @@ export interface LaserPaths {
 
 /**
  * The ruled line from the instrument (sx, sy) to (ex, ey), rubbed out from the instrument end: `erase` is the share of the
- * length already gone (0 = whole, 1 = nothing). Ticks sit every TICK_EVERY units from the instrument and go with the part of
+ * length already gone (0 = whole, 1 = nothing). Ticks sit every TICK_EVERY units from the instrument (half that under Skala 1:1)
+ * and go with the part of
  * the line they stood on. The crosshair is at (cx, cy), the target.
  */
 export function laserPaths(l: LaserLine, cx: number, cy: number, erase = 0): LaserPaths {
@@ -315,7 +318,8 @@ export function laserPaths(l: LaserLine, cx: number, cy: number, erase = 0): Las
   }
   let ticks = '';
   const half = l.crit ? CRIT_GAP / 2 + 3 : 3.5;
-  for (let along = TICK_EVERY; along < len - 4; along += TICK_EVERY) {
+  const every = l.scale ? TICK_EVERY / 2 : TICK_EVERY;
+  for (let along = every; along < len - 4; along += every) {
     if (along < from) continue;
     const x = l.sx + ux * along;
     const y = l.sy + uy * along;

@@ -9,6 +9,7 @@ import type { Enemy, Player, Projectile, Summon } from '../entities/types';
 import type { HeroId } from '../heroes';
 import { t } from '../i18n';
 import { HERO_ATTACK_MS, attackAt, driveHeroStroke, driveLash, driveLaser, heroPose, scribblePath, setStroke, trackRemark } from './attackFx';
+import { buildMoon, patchMoon } from './heroFx';
 import { blobPoints, el, n2, smoothClosed } from './svg';
 import type { Builder } from './view';
 import { HERO_HUE, washGroup } from './wash';
@@ -586,11 +587,12 @@ export const playerBuilder: Builder<Player> = {
 
 export const summonBuilder: Builder<Summon> = {
   create: (e) => {
+    if (e.variant === 'moon') return buildMoon(e);
     const opts: FigureOpts = { dotted: true, size: HERO_SCALE, wash: true, faint: true };
     if (e.variant === 'decoy') opts.caption = t('heroes.kartograf.decoy');
     return buildHeroFigure(e.heroId, opts);
   },
-  patch: patchFigure,
+  patch: (e, g, timeMs) => (e.variant === 'moon' ? patchMoon(e, g) : patchFigure(e, g, timeMs)),
   drawInMs: 260,
 };
 

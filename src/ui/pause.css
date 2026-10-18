@@ -137,3 +137,137 @@
   font-size: 14px;
   line-height: 1.3;
 }
+
+/* ---------- the loadout sheet: five typed rows, the pad numbers ruled like a form ---------- */
+.lo-rows {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 2px 0;
+}
+.lo-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 12px;
+  align-items: center;
+  padding: 8px 0 8px;
+  border-bottom: 1px solid var(--ink);
+}
+.lo-head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.lo-name {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+}
+.lo-type {
+  font-family: var(--mono);
+  font-style: italic;
+  font-size: 10.5px;
+  color: var(--ink-wet);
+}
+.lo-rank {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+.lo-desc {
+  grid-column: 1 / -1;
+  margin: 3px 0 0;
+  font-size: 15px;
+  line-height: 1.25;
+}
+.lo-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  grid-column: 1 / -1;
+}
+.lo-pad {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  border: 1.5px solid var(--ink);
+  margin: 3px;
+}
+.lo-pad.on {
+  outline: 1px solid var(--ink);
+  outline-offset: 2px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.lo-pad:active {
+  border-width: 3px;
+}
+.lo-row.off {
+  color: var(--ink-wet);
+}
+.lo-row.off .lo-name,
+.lo-row.off .lo-rank {
+  color: var(--ink-wet);
+}
+.lo-row.off .lo-foot {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin-top: 4px;
+}
+.lo-off {
+  font-family: var(--mono);
+  font-style: italic;
+  font-size: 12px;
+}
+.lo-req {
+  font-family: var(--mono);
+  font-size: 10.5px;
+}
+.lo-back {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  margin-bottom: 6px;
+}
+/* landscape (a page 390 px high): name and description on the left, the pad numbers on the right; rows tight enough that
+   all five fit without scrolling (the 44 px pads set the row height) */
+:root[data-orient='landscape'] .lo-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 3px 0;
+}
+:root[data-orient='landscape'] .lo-pad {
+  margin: 1px 3px;
+}
+:root[data-orient='landscape'] .lo-head {
+  grid-column: 1;
+}
+:root[data-orient='landscape'] .lo-desc {
+  grid-column: 1;
+  margin-top: 1px;
+  font-size: 14px;
+}
+:root[data-orient='landscape'] .lo-foot {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  margin-top: 0;
+  min-width: 156px;
+  justify-content: flex-end;
+}
+:root[data-orient='landscape'] .lo-row.off .lo-foot {
+  align-items: flex-end;
+}
+:root[data-orient='landscape'] .lo-back {
+  max-width: 260px;
+}
+:root[data-orient='landscape'] .loadout-sheet .ps-notes {
+  min-height: 0;
+}

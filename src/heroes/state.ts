@@ -3,6 +3,7 @@ import type { DamageType, Stats } from '../combat/damage';
 import type { Item } from '../items';
 import { recomputeStats } from '../items/stats';
 import type { Player } from '../entities/types';
+import type { Aim } from './aim';
 import { heroDef, type HeroDef, type SkillIndex } from './defs';
 import type { HeroId } from './index';
 
@@ -108,6 +109,44 @@ export interface Gravity {
   rim: number[];
 }
 
+/** Pralka's Wniosek o osobowosc: she reads aloud until `until`; `acc` gathers seconds towards the next tick of damage; `upor` is what she added. */
+export interface Reading {
+  until: number;
+  acc: number;
+  upor: number;
+}
+
+/** Konsultant's Numer sprawy: the case number stamped on enemy `id` until `until`; where it was last seen, for the handover. */
+export interface CaseNumber {
+  id: number;
+  until: number;
+  handovers: number;
+  number: number;
+  x: number;
+  y: number;
+}
+
+/** Kartograf's Skala 1:1: the auto range was `from` and is `to` while it lasts. */
+export interface FullScale {
+  until: number;
+  from: number;
+  to: number;
+}
+
+/** Nalesnik's Plywy: the tide ring runs out; the ids of the enemies it has struck. */
+export interface Tide {
+  age: number;
+  radius: number;
+  max: number;
+  hit: number[];
+}
+
+/** What a pad last cast, for Petlowiec's Juz to bylo: the skill and the aim as it was resolved (a concrete direction or point). */
+export interface LastCast {
+  skill: SkillIndex;
+  aim: Aim;
+}
+
 export interface Redirect {
   id: number;
   until: number;
@@ -171,6 +210,16 @@ export interface HeroRun {
   roll: Roll | null;
   orbit: Orbit | null;
   gravity: Gravity | null;
+  /** The fourth and fifth skills (DESIGN 10.1): Pralka reads her application, Konsultant's case number, Kartograf's full scale, Nalesnik's tide and the upor of his moon. */
+  reading: Reading | null;
+  numer: CaseNumber | null;
+  scale: FullScale | null;
+  tide: Tide | null;
+  moonUpor: number;
+  /** Petlowiec: the last skill cast by a pad (not Juz to bylo, not a free cast) with its aim. */
+  lastCast: LastCast | null;
+  /** First-cast footnotes already printed, one bit per SkillIndex. */
+  noted: number;
   /** Nalesnik's quirk: run time until which it is rounded, and from which it may round up again; upor added meanwhile. */
   roundUntil: number;
   roundReadyAt: number;
@@ -220,6 +269,13 @@ export function createHeroRun(heroId: HeroId): HeroRun {
     roll: null,
     orbit: null,
     gravity: null,
+    reading: null,
+    numer: null,
+    scale: null,
+    tide: null,
+    moonUpor: 0,
+    lastCast: null,
+    noted: 0,
     roundUntil: 0,
     roundReadyAt: 0,
     roundUpor: 0,

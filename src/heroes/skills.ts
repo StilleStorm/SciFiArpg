@@ -6,11 +6,15 @@ import { t } from '../i18n';
 import { recomputeStats } from '../items/stats';
 import { resolveMove } from '../world/pages';
 import { nextId, type RunState } from '../world/run';
-import { heroDef, type HeroDef, type PadSlot } from './defs';
-import { AUTO_AIM, blinkOf, fitAim, LINE_SPEED, LINE_TTL, pickTarget, radiusOf, reachOf, resolveAim, resolveDirection, takeQueuedAim, terenCentre, type Aim } from './aim';
-import { areaOf, cooldownOf, durationOf, enemiesWithin, power, skillDamage } from './helpers';
+import { heroDef, type HeroDef, type PadSlot, type SkillIndex } from './defs';
+import { AUTO_AIM, blinkOf, fitAim, LINE_SPEED, LINE_TTL, pickTarget, radiusOf, reachOf, resolveAim, resolveDirection, takeQueuedAim, terenCentre, type Aim, type ResolvedAim } from './aim';
+import { areaOf, cooldownOf, durationOf, enemiesWithin, nearestEnemy, power, skillDamage } from './helpers';
+import { padOf } from './loadout';
 import { FLAG_S, GRAVITY_R, GRAVITY_S, ORBITA_TIME } from './nalesnik';
+import { JUZ_SPREAD } from './numbers';
+import { SKILLS2 } from './skills2';
 import { pushRing, ringBack } from './state';
+import { fireAuto } from './auto';
 
 /** `aim` is what the player aimed (heroes/aim.ts); a skill of the auto mode ignores it. */
 export type SkillFn = (s: RunState, bus: Bus, hero: HeroDef, aim: Aim) => void | false;
@@ -261,6 +265,68 @@ const wniosek: SkillFn = (s, bus, hero, aim) => {
   fx(bus, 'ring', x, y, r);
 };
 
+// ---------- Petlowiec: Juz to bylo ----------
+
+/** Skills a copy can cast at its own position by standing the player there for the cast: an area or a line from the caster. */
+const COPY_CASTABLE: ReadonlySet<string> = new Set(['wirowanie', 'prosze', 'przekierowuje', 'triangulacja', 'beben', 'rozlaczenie', 'start', 'legenda']);
+
+/** The aim as the skill resolved it: a concrete direction or point, so that the repeat does what the first cast did. */
+function concreteAim(a: ResolvedAim): Aim {
+  if (a.kind === 'kierunek') return { kind: 'kierunek', dx: a.dx, dy: a.dy };
+  if (a.kind === 'wskazanie') return { kind: 'wskazanie', x: a.x, y: a.y };
+  return AUTO_AIM;
+}
+
+/** A copy casts `skill` from where it stands (a point aim moves with it); the skills a copy cannot cast are skipped. */
+function castFrom(s: RunState, bus: Bus, def: HeroDef, skill: SkillIndex, aim: Aim, at: { x: number; y: number }): void {
+  const sk = def.skills[skill];
+  const fn = COPY_CASTABLE.has(sk.id) ? SKILLS[sk.id] : undefined;
+  if (!fn) return;
+  const p = s.player;
+  const ox = p.x;
+  const oy = p.y;
+  const shifted: Aim = aim.kind === 'wskazanie' ? { kind: 'wskazanie', x: aim.x + (at.x - ox), y: aim.y + (at.y - oy) } : aim;
+  p.x = at.x;
+  p.y = at.y;
+  try {
+    fn(s, bus, def, shifted);
+  } finally {
+    p.x = ox;
+    p.y = oy;
+  }
+}
+
+/**
+ * Juz to bylo: the last skill cast (not this one) again, for free and with its last aim; every live copy casts it from its own
+ * place. With nothing to repeat: the auto, three at once.
+ */
+const juzBylo: SkillFn = (s, bus, hero) => {
+  const p = s.player;
+  const last = s.hero.lastCast;
+  if (!last) {
+    const target = nearestEnemy(s, p.x, p.y, p.attackRange + 160);
+    if (!target) return false;
+    const before = s.projectiles.length;
+    if (!fireAuto(s, p, target, bus)) return false;
+    const shot = s.projectiles[before];
+    if (shot) {
+      for (const turn of [-JUZ_SPREAD, JUZ_SPREAD]) {
+        const c = Math.cos(turn);
+        const sn = Math.sin(turn);
+        s.projectiles.push({ ...shot, id: nextId(s), vx: shot.vx * c - shot.vy * sn, vy: shot.vx * sn + shot.vy * c, passed: [] });
+      }
+    }
+    bus.emit('footnote', { text: t('heroes.petlowiec.alreadySaid') });
+    return;
+  }
+  fire(s, bus, last.skill, padOf(s, last.skill) ?? 0, true, last.aim);
+  for (const c of s.summons.filter((x) => x.variant === 'copy')) castFrom(s, bus, hero, last.skill, last.aim, { x: c.x, y: c.y });
+  if ((s.hero.noted & 8) === 0) {
+    s.hero.noted |= 8;
+    bus.emit('footnote', { text: t('heroes.petlowiec.alreadySaid') });
+  }
+};
+
 export const SKILLS: Record<string, SkillFn> = {
   wirowanie,
   pranieWstepne,
@@ -277,6 +343,8 @@ export const SKILLS: Record<string, SkillFn> = {
   orbita,
   grawitacja,
   wniosek,
+  ...SKILLS2,
+  juzBylo,
 };
 
 export function removeSummon(s: RunState, bus: Bus, id: number): void {
@@ -288,15 +356,13 @@ export function removeSummon(s: RunState, bus: Bus, id: number): void {
 
 /**
  * Fire the skill on pad `slot` (0..2) if it is ready and the hero is not wyciszony. `free` skips the cooldown check and
- * does not start one (Pralka's blad programu). `aim` is the player's aim (heroes/aim.ts); left out it is the auto cast. Returns
- * true if the skill did something. Cooldowns are kept per skill (`s.hero.pads[slot]`), not per pad (DESIGN 10.1).
+ * does not start one (Pralka's blad programu, Juz to bylo). `aim` is the player's aim (heroes/aim.ts); left out it is the auto cast.
+ * Returns true if the skill did something. Cooldowns are kept per skill (`s.hero.pads[slot]`), not per pad (DESIGN 10.1).
  */
 export function castSkill(s: RunState, bus: Bus, slot: PadSlot, free = false, aim?: Aim): boolean {
   if (s.status !== 'running' || s.phase === 'base') return false; // the base has nobody to argue with: a pad tap there does nothing
   const p = s.player;
-  const def = heroDef(p.heroId);
   const skill = s.hero.pads[slot];
-  const sk = def.skills[skill];
   if (s.law.botTime || isStunned(p)) return false; // the bot hours: skills do nothing, no cooldown is spent
   if (!free) {
     if (s.hero.cd[skill] > 0) return false;
@@ -308,16 +374,26 @@ export function castSkill(s: RunState, bus: Bus, slot: PadSlot, free = false, ai
       return false;
     }
   }
+  return fire(s, bus, skill, slot, free, aim ?? (free ? undefined : (takeQueuedAim(slot) ?? undefined)));
+}
+
+/**
+ * Run skill `skill` as if pad `slot` had been pressed (the checks are castSkill's): the function, the cooldown unless free, the
+ * `skill:cast` event, and the note of what was cast for Juz to bylo. A free cast takes the aim it is given (auto by default).
+ */
+function fire(s: RunState, bus: Bus, skill: SkillIndex, slot: PadSlot, free: boolean, aim: Aim | undefined): boolean {
+  const def = heroDef(s.player.heroId);
+  const sk = def.skills[skill];
   const fn = SKILLS[sk.id];
   if (!fn) return false;
-  // the pad hands the aim over through the queue (the `skill:N` events carry no payload); a free cast is always the auto one
-  const aimed = fitAim(sk, free ? AUTO_AIM : (aim ?? takeQueuedAim(slot) ?? AUTO_AIM));
+  const aimed = fitAim(sk, aim ?? AUTO_AIM);
   const resolved = resolveAim(s, sk, aimed);
   if (fn(s, bus, def, aimed) === false) return false;
   if (!free) {
     const total = cooldownOf(s, skill, sk.cooldown);
     s.hero.cd[skill] = total;
     s.hero.cdTotal[skill] = total;
+    if (sk.id !== 'juzBylo') s.hero.lastCast = { skill, aim: concreteAim(resolved) };
   }
   bus.emit('skill:cast', { slot, skill, free, aim: resolved });
   return true;

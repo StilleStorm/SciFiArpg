@@ -275,6 +275,13 @@ describe('geometry', () => {
     expect(TICK_EVERY).toBe(40);
   });
 
+  it('Skala 1:1 doubles the survey ticks', () => {
+    const plain = laserPaths({ sx: 0, sy: 0, ex: 200, ey: 0, crit: false }, 200, 0, 0);
+    const scaled = laserPaths({ sx: 0, sy: 0, ex: 200, ey: 0, crit: false, scale: true }, 200, 0, 0);
+    expect(plain.ticks.match(/M/g)).toHaveLength(4); // 40, 80, 120, 160
+    expect(scaled.ticks.match(/M/g)).toHaveLength(9); // every 20 up to 180
+  });
+
   it('a crit doubles the line: two parallel lines 2 units apart', () => {
     const l = { sx: 0, sy: 0, ex: 100, ey: 0, crit: true };
     const { lines } = laserPaths(l, 100, 0, 0);

@@ -201,6 +201,14 @@ try {
     for (let k = 0; k < 8; k++) {
       const st = await runState();
       if (!st) return closed;
+      const later = page.locator('.sheet.assigning:not(.hidden) .report.later');
+      if (await later.isVisible().catch(() => false)) {
+        // a new skill was installed: the form asks which pad gets it; "Później" leaves the pads as they are
+        await later.click({ timeout: 2000 });
+        await sleep(300);
+        closed++;
+        continue;
+      }
       const form = page.locator('.sheet:not(.hidden) .entry').first();
       if (await form.isVisible().catch(() => false)) {
         const open = page.locator('.sheet:not(.hidden) .entry:not(.locked)').first();
@@ -399,6 +407,116 @@ try {
   const closedForms = await settle();
   const afterUpdate = await runState();
   check('the update form closes after installing', closedForms > 0 && afterUpdate?.status === 'running' && afterUpdate.pending === 0, `status ${afterUpdate?.status}, pending ${afterUpdate?.pending}`);
+
+  // ---------- 3b. the fourth and fifth skill (DESIGN 10.1): installed by the update, put on a pad, moved in the loadout ----------
+  await settle();
+  // the real path first: a permission, a level, the offer with skill 4, its entry and Zainstaluj; the form goes on to the assign step
+  const fam = await page.evaluate(() => {
+    const g = window.__game;
+    g.enemies.clear();
+    for (const f of ['urzadzenia', 'powiadomienia', 'wygenerowane']) g.hero.givePermission(f);
+    return g.hero.info().ranks[3];
+  });
+  let viaForm = false;
+  for (let k = 0; k < 12 && fam === 0 && !viaForm; k++) {
+    await page.evaluate(() => {
+      window.__game.hero.levelUp();
+      window.__game.hero.requestUpdate();
+    });
+    await page.locator('.sheet:not(.hidden) .entry').first().waitFor({ state: 'visible', timeout: 3000 });
+    const offer = (await page.evaluate(() => window.__game.hero.info().offer)) ?? [];
+    const want = offer.indexOf('skill4');
+    const idx = want >= 0 ? want : Math.max(0, offer.findIndex((id) => id !== 'skill5'));
+    await page.locator('.sheet:not(.hidden) .entry').nth(idx).click({ timeout: 2000 });
+    await page.locator('.sheet:not(.hidden) .install').click({ timeout: 2000 });
+    await page.waitForFunction(() => !document.querySelector('.sheet:not(.hidden):not(.assigning) .entry.picked'), null, { timeout: 5000 });
+    await sleep(200);
+    if (await page.locator('.sheet.assigning:not(.hidden)').isVisible().catch(() => false)) {
+      viaForm = want >= 0;
+      await page.locator('.sheet.assigning:not(.hidden) .report.later').click({ timeout: 2000 }); // "Później": the pads stay [0, 1, 2]
+      await sleep(300);
+    }
+  }
+  const viaInfo = await page.evaluate(() => window.__game.hero.info());
+  check('installing skill 4 from an offered entry goes on to "Przypisz do przycisku"; Później keeps the pads', viaForm && viaInfo.ranks[3] === 1 && viaInfo.pads.join() === '0,1,2' && viaInfo.status === 'running', JSON.stringify({ ranks: viaInfo.ranks, pads: viaInfo.pads, status: viaInfo.status }));
+  const padWords = () => page.evaluate(() => ['s1', 's2', 's3'].map((c) => document.querySelector(`.pad.${c} .word`)?.textContent ?? ''));
+  const w0 = await padWords();
+  const asked = await page.evaluate(() => {
+    const g = window.__game;
+    g.enemies.clear();
+    return { ok: g.hero.openAssign(3), info: g.hero.info() };
+  });
+  await page.locator('.sheet.assigning:not(.hidden) .assign-pad').first().waitFor({ state: 'visible', timeout: 3000 });
+  const asWords = await page.locator('.sheet.assigning .assign-pad .assign-word').allTextContents();
+  const asHead = await page.locator('.sheet.assigning h2').textContent();
+  await shot('07b-update-assign');
+  check('a new skill: the update form asks "Przypisz do przycisku" with the three words on the pads', asked.ok && asked.info.ranks[3] === 1 && asWords.length === 3 && asWords.every((w, i) => w === w0[i]) && /Przypisz do przycisku/i.test(asHead ?? ''), JSON.stringify({ asWords, w0, asHead }));
+  await page.locator('.assign-pad[data-pad="1"]').click({ timeout: 3000 });
+  await sleep(500);
+  const assigned = await page.evaluate(() => ({ info: window.__game.hero.info(), form: !!document.querySelector('.sheet.assigning:not(.hidden)') }));
+  const w1 = await padWords();
+  check('picking pad 1 puts the new skill there, the form closes and the game runs on', assigned.info.pads.join() === '3,1,2' && !assigned.form && assigned.info.status === 'running', JSON.stringify(assigned.info.pads));
+  check('the pad word changed to the new skill, the other two stayed', w1[0] !== w0[0] && w1[0].length > 0 && w1[1] === w0[1] && w1[2] === w0[2], JSON.stringify({ w0, w1 }));
+  await page.evaluate(() => {
+    const g = window.__game;
+    g.hero.spawn(8);
+    const s = g.state();
+    // a ring of enemies round the player: the drum's cone (an aimed skill, auto-aimed on a tap) finds some whichever way it points
+    s.enemies.forEach((e, i) => {
+      e.x = s.player.x + Math.cos((i * Math.PI) / 4) * 60;
+      e.y = s.player.y + Math.sin((i * Math.PI) / 4) * 60;
+      e.hp = e.hpMax = 100000;
+    });
+    s.hero.cd.fill(0);
+  });
+  await page.locator('.pad.s1').click({ timeout: 3000 });
+  await sleep(250);
+  const cast4 = await page.evaluate(() => window.__game.hero.info().cd);
+  check('tapping pad 1 casts skill 4 (cd[3] runs), not skill 1', cast4[3] > 0 && cast4[0] === 0, JSON.stringify(cast4));
+  const ring = await page.evaluate(() => document.querySelector('.pad.s1')?.classList.contains('cooling') ?? false);
+  check('the cooldown ring of pad 1 follows skill 4', ring);
+  await page.evaluate(() => {
+    window.__game.enemies.clear();
+    window.__game.state().hero.cd.fill(0);
+  });
+  // the loadout: from the pause sheet, with the real buttons
+  await page.locator('.hud .pause-btn').click({ timeout: 3000 });
+  await sleep(400);
+  await page.locator('[data-pause=skills]').click({ timeout: 3000 });
+  await page.locator('.loadout-sheet .lo-row').first().waitFor({ state: 'visible', timeout: 3000 });
+  await shot('08a-loadout');
+  const lo = await page.evaluate(() => ({
+    rows: document.querySelectorAll('.loadout-sheet .lo-row').length,
+    off: [...document.querySelectorAll('.loadout-sheet .lo-row.off')].map((r) => r.getAttribute('data-skill')),
+    pause: !!document.querySelector('.pause-sheet:not(.hidden)'),
+    on: [...document.querySelectorAll('.loadout-sheet .lo-pad.on')].map((b) => `${b.closest('.lo-row').getAttribute('data-skill')}:${b.getAttribute('data-pad')}`),
+    padButtons: document.querySelectorAll('.loadout-sheet .lo-row:not(.off) .lo-pad').length,
+    small: [...document.querySelectorAll('.loadout-sheet .lo-pad')].filter((b) => b.getBoundingClientRect().height < 43).length,
+  }));
+  check('the pause line "Umiejętności" opens the loadout: five rows, skill 5 greyed, pad numbers on the four installed', lo.rows === 5 && lo.off.join() === '4' && !lo.pause && lo.padButtons === 12 && lo.small === 0, JSON.stringify(lo));
+  check('the loadout marks the pad each skill occupies', lo.on.join() === '1:2,2:3,3:1', lo.on.join());
+  // tap skill 2 onto pad 3: the two swap (skill 3 goes to pad 2)
+  await page.locator('.lo-row[data-skill="1"] .lo-pad[data-pad="3"]').click({ timeout: 3000 });
+  await sleep(200);
+  const swapped = await page.evaluate(() => ({ pads: window.__game.hero.info().pads, on: [...document.querySelectorAll('.loadout-sheet .lo-pad.on')].map((b) => `${b.closest('.lo-row').getAttribute('data-skill')}:${b.getAttribute('data-pad')}`) }));
+  check('tapping a pad number moves the skill there, the displaced one swaps, the rows redraw', swapped.pads.join() === '3,2,1' && swapped.on.join() === '1:3,2:2,3:1', JSON.stringify(swapped));
+  await page.locator('.lo-back').click({ timeout: 3000 });
+  await sleep(300);
+  const backed = await page.evaluate(() => ({ lo: !!document.querySelector('.loadout-sheet'), pause: !!document.querySelector('.pause-sheet:not(.hidden)'), status: window.__game.state().status }));
+  check('Wróć closes the loadout and shows the pause sheet again', !backed.lo && backed.pause && backed.status === 'paused', JSON.stringify(backed));
+  await page.locator('[data-pause=resume]').click({ timeout: 3000 });
+  await sleep(500);
+  const w2 = await padWords();
+  check('after Wznów the pads carry the words of the new order', w2[0] === w1[0] && w2[1] === w1[2] && w2[2] === w1[1], JSON.stringify({ w1, w2 }));
+  // the fifth skill, "Później": the pads stay
+  const laterOk = await page.evaluate(() => {
+    const g = window.__game;
+    return g.hero.openAssign(4);
+  });
+  await page.locator('.sheet.assigning:not(.hidden) .report.later').click({ timeout: 3000 });
+  await sleep(400);
+  const laterState = await page.evaluate(() => ({ info: window.__game.hero.info(), form: !!document.querySelector('.sheet.assigning:not(.hidden)') }));
+  check('"Później" leaves the pads as they are and closes the form', laterOk && laterState.info.pads.join() === '3,2,1' && laterState.info.ranks[4] === 1 && !laterState.form && laterState.info.status === 'running', JSON.stringify(laterState.info.pads));
 
   // ---------- 4. inventory sheet ----------
   await page.evaluate(() => window.__game.demoInventory());

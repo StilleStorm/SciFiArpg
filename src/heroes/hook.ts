@@ -1,17 +1,26 @@
 /** Test hook for window.__game.hero: drive skills, updates, permissions and deaths from tests and shots. */
 import type { DeathOutcome } from '../death/outcomes';
 import type { Game } from '../game';
-import { gainXp, xpToNext } from '../progression';
+import { applyUpgrade, gainXp, xpToNext } from '../progression';
 import type { Bus } from '../core/events';
 import { createEnemy } from '../entities/factory';
 import { applyDamage } from '../systems/combat';
 import { nextId } from '../world/run';
 import { mountProfile } from '../ui/profile';
+import type { Aim } from './aim';
 import { castSkill } from './skills';
+import { heroDef } from './defs';
+import { assignPad } from './loadout';
 
 export interface HeroHook {
   /** Fire skill 1, 2 or 3 now (same as the pad). Returns false on cooldown or if nothing happened. */
-  cast(slot: 1 | 2 | 3): boolean;
+  cast(slot: 1 | 2 | 3, aim?: Aim): boolean;
+  /** Give the permission the skill wants and install its first rank (skill index 3 or 4); the pads stay as they are. False when it was not installed. */
+  installSkill(index: 3 | 4): boolean;
+  /** Install skill 3 or 4 if needed and show the update form's step "Przypisz do przycisku" at once; the form closes itself on a choice. */
+  openAssign(index: 3 | 4): boolean;
+  /** Put skill `index` on pad 1..3 (heroes/loadout.ts assignPad). */
+  assignPad(pad: 1 | 2 | 3, index: 0 | 1 | 2 | 3 | 4): boolean;
   /** Add a permission token (a family id: 'urzadzenia', 'powiadomienia', 'wygenerowane'). */
   givePermission(family: string): void;
   /** Give reputacja; may open the update form. */
@@ -43,6 +52,7 @@ export interface HeroHook {
     summons: number;
     zones: number;
     ranks: number[];
+    pads: number[];
     permissions: string[];
     offer: string[];
     status: string;
@@ -51,10 +61,33 @@ export interface HeroHook {
 
 export function createHeroHook(game: Game, bus: Bus): HeroHook {
   const q = <T extends Element>(sel: string): T | null => document.querySelector<T>(sel);
+  const install = (index: 3 | 4): boolean => {
+    const s = game.state;
+    if (!s) return false;
+    const need = heroDef(s.player.heroId).skills[index].requires;
+    if (need && !s.player.permissions.includes(need)) s.player.permissions.push(need);
+    return (s.hero.ranks[index] ?? 0) > 0 || applyUpgrade(s, `skill${index + 1}`);
+  };
   return {
-    cast(slot) {
+    cast(slot, aim) {
       const s = game.state;
-      return s ? castSkill(s, bus, (slot - 1) as 0 | 1 | 2) : false;
+      return s ? castSkill(s, bus, (slot - 1) as 0 | 1 | 2, false, aim) : false;
+    },
+    installSkill: install,
+    openAssign(index) {
+      const s = game.state;
+      if (!s || !install(index)) return false;
+      const was = s.status;
+      s.status = 'paused';
+      game.hero.update.assign(s, index, () => {
+        game.hero.update.close();
+        s.status = was;
+      });
+      return true;
+    },
+    assignPad(pad, index) {
+      const s = game.state;
+      return s ? assignPad(s, (pad - 1) as 0 | 1 | 2, index) : false;
     },
     givePermission(family) {
       const s = game.state;
@@ -119,6 +152,7 @@ export function createHeroHook(game: Game, bus: Bus): HeroHook {
         summons: s.summons.length,
         zones: s.zones.length,
         ranks: [...s.hero.ranks],
+        pads: [...s.hero.pads],
         permissions: [...s.player.permissions],
         offer: s.hero.offer ? s.hero.offer.entries.map((e) => e.id) : [],
         status: s.status,

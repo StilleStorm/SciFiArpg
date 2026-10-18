@@ -1,6 +1,6 @@
 /**
  * Pause (DESIGN 2, 4.1). Two pieces: the margin note "Pauza" that hangs on the HUD, and the pause sheet, a printed form
- * with three lines: Wznów, Ustawienia, Zakończ zgłoszenie. The sheet owns no rules: it only calls back. The router
+ * with up to four lines: Wznów, Ustawienia, Umiejętności, Zakończ zgłoszenie. The sheet owns no rules: it only calls back. The router
  * (main.ts) pauses the game, shows the sheet, opens the settings in place and takes the run to the base.
  */
 import { createRng } from '../core/rng';
@@ -51,6 +51,8 @@ export interface PauseInfo {
 export interface PauseHandlers {
   onResume(): void;
   onSettings(): void;
+  /** The line "Umiejętności": the loadout sheet (run and base). */
+  onSkills(): void;
   onEnd(): void;
 }
 
@@ -89,6 +91,7 @@ export function createPauseSheet(root: HTMLElement, handlers: PauseHandlers): Pa
       lines.append(
         line(t('screens.pause.resume'), t('screens.pause.resumeNote'), handlers.onResume, 'resume'),
         line(t('screens.pause.settings'), t('screens.pause.settingsNote'), handlers.onSettings, 'settings'),
+        line(t('screens.pause.skills'), t('screens.pause.skillsNote'), handlers.onSkills, 'skills'),
       );
       if (!info.base) lines.append(line(t('screens.pause.end'), t('screens.pause.endNote'), handlers.onEnd, 'end'));
       made.scroll.append(lines);

@@ -66,7 +66,10 @@ joystick/tap steering (§2), editorial rules (§12.1).
   laser (hitscan, ticks, distance label, crit pierces), Naleśnik shipped (rolling walk, flip
   auto, Orbita/Grawitacja/Wniosek, hydrostatic quirk, profile, pool, four sounds, ochre wash).
   Builder's note: standing still it reads a bit like a moon; the folded edge could be stronger.
-- Next session first: `/pickup`, then the fourth and fifth skills per hero (5b).
+- Fourth round: the fourth and fifth skills (DESIGN 10.1) are built: ten skills, installed through
+  the update form (first rank wants a family permission), three of five on the pads, the pad step
+  after the install, the loadout sheet from the pause line Umiejętności, pads saved with the
+  character. Not yet heard from the player: whether the ten read well on the pads and the sheet.
 
 ## Open feedback wanted from the player
 - Real-phone frame rate with a crowd; tap accuracy; joystick feel once it lands.
@@ -79,8 +82,9 @@ joystick/tap steering (§2), editorial rules (§12.1).
 2. (done) Pause sheet, hold music on pause, character save between runs, bookmark resume.
 3. (done) Tunel serwisowy with exact-state return; Android back button opens the pause sheet.
 4. (done) Walkable base page per planet (§4.1).
-5. **Next:** aiming: tap / hold-and-drag, three modes, smart target by claim (§5.6). Then more skills.
-6. Spór for bosses (DESIGN §5.4).
+5. (done) Aiming; the fourth and fifth skills (§10.1).
+6. **Next:** Spór for bosses (DESIGN §5.4). Own sound recipes for the ten new skills (they borrow a
+   sibling's recipe, audio/recipes.ts HERO_SKILL_SOUNDS).
 7. Przesyłka / paczkomat deliveries (§7), tap an item on the ground to see its card first (§2).
 8. Act on phone feedback (feel of joystick, scale, sound levels, frame rate).
 9. Landscape 40-enemy perf measurement; the base clause header in landscape sits under the HUD

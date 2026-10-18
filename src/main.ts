@@ -25,6 +25,7 @@ import { createHud } from './ui/hud';
 import { createJoystick } from './ui/joystick';
 import { applySteering, currentOrient, effectiveSteering, initLayout, lockOrientation, orientationSetting } from './ui/layout';
 import { bindLawSheets } from './ui/lawSheets';
+import { openLoadout, type LoadoutSheet } from './ui/loadout';
 import { createPads } from './ui/pads';
 import { createPauseSheet } from './ui/pause';
 import { mountProfile } from './ui/profile';
@@ -134,7 +135,7 @@ const onVolumeSet = (which: 'music' | 'sfx'): void => {
 };
 // The settings live in the pause sheet only: Wróć returns to the sheet.
 const pauseSettings = createSettings(stage.ui, onSettingsChange, () => closePauseSettings(), onVolumeSet);
-const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onEnd: () => endTicket() });
+const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onSkills: () => openPauseSkills(), onEnd: () => endTicket() });
 const ticket = createTicket(stage.ui, {
   onAccept: () => acceptNow(),
   onClose: () => openSheet('biurko'),
@@ -422,8 +423,25 @@ function closePauseSettings(): void {
   pauseSheet.setHidden(false);
 }
 
+/** The loadout (DESIGN 10.1) stands over the pause sheet like the settings; Wróć brings the pause sheet back. */
+let loadout: LoadoutSheet | null = null;
+function openPauseSkills(): void {
+  const s = game.state;
+  if (!s || loadout) return;
+  pauseSheet.setHidden(true);
+  loadout = openLoadout(stage.ui, s, () => closePauseSkills());
+}
+
+function closePauseSkills(): void {
+  loadout?.close();
+  loadout = null;
+  pauseSheet.setHidden(false);
+}
+
 /** Take the pause sheet and its settings off the page and let the loop run (used by resume, Zakończ and every screen change). */
 function clearPause(): void {
+  loadout?.close();
+  loadout = null;
   pauseSettings.hide();
   pauseSheet.close();
   loop.resume(); // a run held in the tunnel is not stepped (it is not the live state), so the loop always runs

@@ -4,6 +4,9 @@ import type { Enemy, Player } from '../entities/types';
 import { attack } from '../systems/combat';
 import { nextId, type RunState } from '../world/run';
 import { heroDef } from './defs';
+import { SKALA_VERIFY_S } from './numbers';
+import { scaleActive } from './steps2';
+import { touchStatus } from './helpers';
 
 const SPEED = 520;
 /**
@@ -31,6 +34,8 @@ export interface Laser {
   ey: number;
   crit: boolean;
   metres: number;
+  /** Skala 1:1 was on: the picture doubles its survey ticks (render/attackFx.ts). */
+  scale: boolean;
   /** Ids of the enemies that were struck, the target first. */
   struck: number[];
 }
@@ -62,7 +67,10 @@ export function fireLaser(s: RunState, p: Player, target: Enemy, bus: Bus): Lase
   off();
   let ex = tx;
   let ey = ty;
-  if (crit && def.auto.pierceOnCrit) {
+  // Skala 1:1 (skill 4 of the Kartograf): every line pierces as if it had crit, and whoever it crosses waits for verification
+  const scale = scaleActive(s);
+  if (scale) touchStatus(target, 'do_weryfikacji', SKALA_VERIFY_S, p.id);
+  if ((crit || scale) && def.auto.pierceOnCrit) {
     const reach = Math.max(p.attackRange, dist + 24);
     ex = sx + ux * reach;
     ey = sy + uy * reach;
@@ -76,11 +84,12 @@ export function fireLaser(s: RunState, p: Player, target: Enemy, bus: Bus): Lase
     on.sort((a, b) => a.along - b.along);
     for (const { e } of on) {
       attack(s, bus, p, e);
+      if (scale) touchStatus(e, 'do_weryfikacji', SKALA_VERIFY_S, p.id);
       struck.push(e.id);
     }
   }
   p.attackTimer = p.attackCooldown;
-  return { sx, sy, ex, ey, crit, metres, struck };
+  return { sx, sy, ex, ey, crit, metres, scale, struck };
 }
 
 /** Returns true if the attack was made (a projectile fired, or the laser struck); the caller then skips the instant attack. */
@@ -92,9 +101,9 @@ export function fireAuto(s: RunState, p: Player, target: Enemy, bus?: Bus): bool
     if (Math.hypot(target.x - p.x, target.y - p.y) > p.attackRange + target.r + 40) return true; // out of reach: nothing is fired
     const tx = target.x;
     const ty = target.y;
-    const { sx, sy, ex, ey, crit, metres } = fireLaser(s, p, target, bus);
+    const { sx, sy, ex, ey, crit, metres, scale } = fireLaser(s, p, target, bus);
     if (!p.moving && Math.abs(tx - p.x) > 1) p.facing = tx > p.x ? 1 : -1;
-    bus.emit('attack:started', { attackerId: p.id, attacker: 'player', x: p.x, y: p.y, tx, ty, ranged: true, laser: { sx, sy, ex, ey, crit, metres } });
+    bus.emit('attack:started', { attackerId: p.id, attacker: 'player', x: p.x, y: p.y, tx, ty, ranged: true, laser: { sx, sy, ex, ey, crit, metres, scale } });
     return true;
   }
   const d = Math.hypot(target.x - p.x, target.y - p.y) || 1;

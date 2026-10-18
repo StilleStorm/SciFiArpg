@@ -257,6 +257,15 @@ export function confirmUpdate(s: RunState, id: string): boolean {
   return true;
 }
 
+/**
+ * The skill (3 or 4) that an update just installed: its rank went from 0 to above 0 between the two `ranks` arrays.
+ * Null for every other update. The form then asks which pad the new skill goes on (DESIGN 10.1).
+ */
+export function newSkillOf(before: readonly number[], after: readonly number[]): SkillIndex | null {
+  for (const i of [3, 4] as const) if ((before[i] ?? 0) === 0 && (after[i] ?? 0) > 0) return i;
+  return null;
+}
+
 // ---------- text for the form ----------
 
 export interface EntryView {
@@ -270,6 +279,9 @@ export interface EntryView {
 }
 
 const ROMAN = ['', 'I', 'II', 'III'] as const;
+
+/** A skill rank in roman numerals; an empty string for rank 0. */
+export const roman = (rank: number): string => ROMAN[rank] ?? String(rank);
 
 export function entryView(s: RunState, entry: OfferEntry): EntryView {
   const heroId = s.player.heroId;

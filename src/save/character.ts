@@ -7,7 +7,7 @@
 import type { HeroId } from '../heroes';
 import { recomputeStats } from '../items/stats';
 import { SLOTS, type Item, type Slot } from '../items/types';
-import { applyProgress, serializeProgress, type ProgressData } from '../progression/persist';
+import { applyProgress, padsFrom, serializeProgress, type ProgressData } from '../progression/persist';
 import type { RunState } from '../world/run';
 
 export const CHARACTER_VERSION = 1;
@@ -36,6 +36,7 @@ export function emptyCharacter(heroId: HeroId = 'pralka'): Character {
     upgrades: {},
     permissions: [],
     pendingLevels: 0,
+    pads: [0, 1, 2],
     gwiazdki: 0,
     equipment: {},
     inventory: [],
@@ -109,6 +110,7 @@ export function toCharacter(raw: unknown): Character | null {
     upgrades,
     permissions: perms,
     pendingLevels: Math.floor(num(raw['pendingLevels'], 0)),
+    pads: padsFrom(raw['pads']),
     gwiazdki: Math.floor(num(raw['gwiazdki'], 0)),
     equipment,
     inventory: inv,

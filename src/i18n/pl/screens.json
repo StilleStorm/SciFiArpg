@@ -103,10 +103,22 @@
     "resumeNote": "Zgłoszenie wraca do rozpatrywania w stanie, w jakim je wstrzymano.",
     "settings": "Ustawienia",
     "settingsNote": "Wydanie, układ przycisków, sterowanie, dźwięk.",
+    "skills": "Umiejętności",
+    "skillsNote": "Pięć umiejętności, trzy przyciski. Przydział można zmienić bez wniosku.",
     "end": "Zakończ zgłoszenie",
     "endNote": "Zgłoszenie zostanie przekazane innemu konsultantowi. Dotychczasowych ustaleń nie przekazuje się. Postać i wyposażenie zostaną zapisane. Strona zostanie wydrukowana od nowa, przeciwnicy również.",
     "hold": "Prosimy czekać. Rozmowa jest nagrywana.",
     "subBase": "Zgłoszenie nr {number}. {planet}, baza."
+  },
+  "loadout": {
+    "title": "Umiejętności",
+    "sub": "Pięć pozycji. Na przyciskach mieszczą się trzy, pozostałe oczekują.",
+    "notInstalled": "nie zainstalowano",
+    "noRank": "—",
+    "pad": "Przypisz do przycisku {n}",
+    "padTaken": "Przypisano do przycisku {n}",
+    "back": "Wróć",
+    "note": "Umiejętność zdjęta z przycisku odnawia się nadal. Czwartą i piątą umiejętność instaluje aktualizacja, po nadaniu uprawnień."
   },
   "base": {
     "header": "Zgłoszenie nr {number} · baza",

@@ -1,11 +1,14 @@
 /** AKTUALIZACJA as a typed form laid over the paused page. Dumb: it shows what it is given and calls back. */
 import { createRng } from '../core/rng';
+import { heroDef, PAD_SLOTS, type SkillIndex } from '../heroes';
+import { assignPad, padSkill } from '../heroes/loadout';
 import { t } from '../i18n';
 import { stamp } from '../render/ink';
 import { el, n2 } from '../render/svg';
 import { tween } from '../render/tween';
 import { h } from './dom';
 import type { EntryView } from '../progression/update';
+import type { RunState } from '../world/run';
 import './forms.css';
 
 export interface UpdateOpen {
@@ -22,6 +25,11 @@ export interface UpdateOpen {
 export interface UpdateForm {
   readonly isOpen: boolean;
   open(o: UpdateOpen): void;
+  /**
+   * The second step of the same sheet after skill 4 or 5 was installed: "Przypisz do przycisku", the three pads with the
+   * words they carry now, and "Później". A pad button calls `assignPad` and then `done`; "Później" only calls `done`.
+   */
+  assign(s: RunState, skill: SkillIndex, done: () => void): void;
   close(): void;
 }
 
@@ -48,7 +56,7 @@ export function createUpdateForm(root: HTMLElement): UpdateForm {
   const sheet = h('div', 'sheet full hidden');
   const title = h('h2');
   const sub = h('p', 'sub', t('forms.update.subtitle'));
-  const instr = h('p', 'lead', t('forms.update.instruction'));
+  const instr = h('p', 'lead instr', t('forms.update.instruction'));
   const rule = h('hr', 'rule');
   const list = h('div', 'entries');
   const report = h('button', 'report', t('forms.update.report'));
@@ -63,6 +71,16 @@ export function createUpdateForm(root: HTMLElement): UpdateForm {
   // The text scrolls on its own on a small phone; the buttons stay in a bottom row that is always reachable.
   const scroll = h('div', 'sheet-scroll');
   scroll.append(title, sub, instr, rule, list);
+  // Step two (assign): shown instead of the entries; the sheet keeps its frame and its stamp layer.
+  const assignBox = h('div', 'assign');
+  const assignLead = h('p', 'lead');
+  const assignPads = h('div', 'assign-pads');
+  const assignNote = h('p', 'eta', t('forms.update.assign.note'));
+  assignBox.append(assignLead, assignPads, assignNote);
+  const later = h('button', 'report later', t('forms.update.assign.later'));
+  later.type = 'button';
+  scroll.append(assignBox);
+  actions.append(later);
   sheet.append(scroll, actions, layer);
   root.append(sheet);
 
@@ -123,13 +141,45 @@ export function createUpdateForm(root: HTMLElement): UpdateForm {
     });
   });
 
+  function setStep(assigning: boolean): void {
+    sheet.classList.toggle('assigning', assigning);
+  }
+
   return {
+    assign(s, skill, done) {
+      const hero = s.player.heroId;
+      busy = false;
+      setStep(true);
+      sheet.classList.remove('hidden');
+      title.textContent = t('forms.update.assign.title');
+      assignLead.textContent = t('forms.update.assign.lead', { skill: t(heroDef(hero).skills[skill].nameKey) });
+      let closed = false;
+      const finish = (): void => {
+        if (closed) return;
+        closed = true;
+        done();
+      };
+      assignPads.replaceChildren();
+      for (const slot of PAD_SLOTS) {
+        const b = h('button', 'assign-pad');
+        b.type = 'button';
+        b.dataset['pad'] = String(slot + 1);
+        b.append(h('span', 'assign-n', t('forms.update.assign.button', { n: slot + 1 })), h('span', 'assign-word', t(padSkill(s, slot).padKey)));
+        b.addEventListener('click', () => {
+          assignPad(s, slot, skill);
+          finish();
+        });
+        assignPads.append(b);
+      }
+      later.onclick = finish;
+    },
     get isOpen() {
       return !sheet.classList.contains('hidden');
     },
     open(o) {
       current = o;
       busy = false;
+      setStep(false);
       title.textContent = t('forms.update.title', { n: o.version });
       report.disabled = o.rerollUsed;
       report.textContent = o.rerollUsed ? t('forms.update.reportUsed') : t('forms.update.report');
@@ -138,6 +188,7 @@ export function createUpdateForm(root: HTMLElement): UpdateForm {
       sheet.classList.remove('hidden');
     },
     close() {
+      setStep(false);
       sheet.classList.add('hidden');
       current = null;
       layerG.replaceChildren();
