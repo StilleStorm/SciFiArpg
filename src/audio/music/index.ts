@@ -40,6 +40,7 @@ export function deriveFlags(s: RunState): MusicFlags {
     suspended: p.suspended,
     dead: s.status === 'dead' || p.hp <= 0,
     pageTurn: s.turning,
+    base: s.phase === 'base',
   };
 }
 
@@ -73,6 +74,12 @@ function ensure(): void {
 
 /** The run began: music starts as soon as the audio context runs. */
 export function startMusic(getState: () => RunState | null): void {
+  // The base of a planet already plays its profile: the run proper that begins with the same seed goes on with it, no restart.
+  const live = getState();
+  if (engine && live && live.seed === seed) {
+    getStateFn = getState;
+    return;
+  }
   stopMusic(0.2);
   getStateFn = getState;
   ensure();

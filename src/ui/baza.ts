@@ -4,19 +4,21 @@ import type { Bookmark } from '../save/bookmark';
 import type { MetaState, TicketEntry } from '../save/save';
 import { tween } from '../render/tween';
 import { h } from './dom';
+import { createSheet, type Sheet } from './sheet';
+import './base.css';
 
 export interface BazaHandlers {
+  /** "Nowe zgłoszenie": the ticket form opens as a sheet over the base. */
   onNewTicket(): void;
-  onSettings(): void;
   onChangeHero(): void;
-  /** Open the Sklep sheet (economy/sklep UI) over the base. */
-  onShop(): void;
-  /** Take up the ticket that was left unfinished (Zakończ, or the app was closed during a run). */
+  /** Take up the ticket that was left unfinished (Zakończ, or the app was closed during a run): the exit of the base leads back into it. */
   onResume(bookmark: Bookmark): void;
   /** Called with the history indices whose corrected version was just shown (the caller saves them). */
   onRewritten(indices: number[]): void;
   /** "Wróć do zgłoszenia": back through the service tunnel into the held run (only offered while a run is held). */
   onReturn?(): void;
+  /** The sheet was closed with "Zamknij". */
+  onClose(): void;
 }
 
 /** The ticket that waits on its page while the player is in the base (world/tunnel.ts, main.ts). */
@@ -27,10 +29,11 @@ export interface TunnelWait {
 }
 
 export interface Baza {
-  el: HTMLElement;
-  show(meta: MetaState): void;
-  hide(): void;
-  /** While a run is held the base opens with the return line and does not offer the bookmark (it is the same ticket); null clears it. */
+  /** The desk sheet over the base page: history, profile, resume, "Nowe zgłoszenie" (the old base form, now a sheet). */
+  open(meta: MetaState): void;
+  close(): void;
+  isOpen(): boolean;
+  /** While a run is held the desk offers the return line and does not offer the bookmark (it is the same ticket); null clears it. */
   setTunnel(wait: TunnelWait | null): void;
 }
 
@@ -98,83 +101,82 @@ function entryView(e: TicketEntry, fresh: boolean): HTMLElement {
   return item;
 }
 
-/** The PANEL UZYTKOWNIKA: the ticket system's main page between runs. */
+/** The desk of the Asystent: the base form of the ticket system as a sheet that scrolls in its own area (portrait and landscape). */
 export function createBaza(root: HTMLElement, handlers: BazaHandlers): Baza {
-  const screen = h('div', 'screen paper hidden');
-  const frame = h('div', 'frame baza');
-  screen.append(frame);
-  root.append(screen);
+  let sheet: Sheet | null = null;
   let waiting: TunnelWait | null = null;
 
+  const render = (meta: MetaState): void => {
+    if (!sheet) return;
+    const scroll = sheet.scroll;
+    scroll.replaceChildren();
+    const heroName = meta.heroId ? t(`screens.profile.${meta.heroId}`) : t('screens.baza.noHero');
+
+    const change = h('button', 'link-btn', t('screens.baza.changeHero'));
+    change.type = 'button';
+    change.addEventListener('click', handlers.onChangeHero);
+    const profile = h('div', 'trow');
+    profile.append(h('label', '', t('screens.baza.hero')), h('span', 'tval', heroName), change);
+    const stars = h('div', 'trow');
+    stars.append(h('label', '', t('screens.baza.gwiazdki')), h('span', 'tval', String(meta.character?.gwiazdki ?? 0)));
+
+    const pending = pendingRewrites(meta);
+    const list = h('ol', 'hist-list');
+    if (meta.history.length === 0) {
+      list.append(h('li', 'hist-entry empty', t('screens.baza.emptyHistory')));
+    } else {
+      meta.history.forEach((e, i) => list.prepend(entryView(e, pending.includes(i))));
+    }
+
+    const left = h('div', 'desk-col desk-col-a');
+    const right = h('div', 'desk-col desk-col-b');
+    if (waiting) {
+      const back = h('button', 'resume-btn tunnel-return', t('screens.baza.tunnelReturn'));
+      back.type = 'button';
+      back.addEventListener('click', () => handlers.onReturn?.());
+      const block = h('div', 'resume-line tunnel-line');
+      block.append(h('p', 'tunnel-wait', t('screens.baza.tunnelWaiting', { number: waiting.number, page: waiting.page })), back, h('p', 'resume-note', t('screens.baza.tunnelNote')));
+      left.append(block);
+    }
+    const mark = waiting ? undefined : meta.bookmark;
+    if (mark) {
+      const resume = h('button', 'resume-btn', t('screens.baza.resume', { number: mark.ticketNumber }));
+      resume.type = 'button';
+      resume.addEventListener('click', () => handlers.onResume(mark));
+      const block = h('div', 'resume-line');
+      block.append(resume, h('p', 'resume-note', t('screens.baza.resumeNote', { planet: mark.planetName, page: mark.pageIndex + 1 })));
+      left.append(block);
+    }
+    left.append(profile, stars);
+    right.append(h('h3', 'group', t('screens.baza.history')), list);
+    const desk = h('div', 'desk');
+    desk.append(left, right);
+    scroll.append(desk);
+
+    // the action is pinned under the scrolling area, so a long history never pushes it off the page
+    sheet.el.querySelector('.desk-actions')?.remove();
+    const actions = h('div', 'desk-actions');
+    const fresh = h('button', 'start', t('screens.baza.newTicket'));
+    fresh.type = 'button';
+    fresh.addEventListener('click', handlers.onNewTicket);
+    actions.append(fresh);
+    scroll.after(actions);
+    if (pending.length) handlers.onRewritten(pending);
+  };
+
   return {
-    el: screen,
-    show(meta) {
-      screen.classList.remove('hidden');
-      frame.replaceChildren();
-      frame.classList.toggle('waiting', waiting !== null);
-      const heroName = meta.heroId ? t(`screens.profile.${meta.heroId}`) : t('screens.baza.noHero');
-
-      const change = h('button', 'link-btn', t('screens.baza.changeHero'));
-      change.type = 'button';
-      change.addEventListener('click', handlers.onChangeHero);
-      const profile = h('div', 'trow');
-      profile.append(h('label', '', t('screens.baza.hero')), h('span', 'tval', heroName), change);
-      const stars = h('div', 'trow');
-      stars.append(h('label', '', t('screens.baza.gwiazdki')), h('span', 'tval', String(meta.character?.gwiazdki ?? 0)));
-
-      const open = h('button', 'link-btn', t('screens.baza.openShop'));
-      open.type = 'button';
-      open.addEventListener('click', handlers.onShop);
-      const shop = h('div', 'trow');
-      shop.append(h('label', '', t('screens.baza.shop')), h('span', 'tval', t('screens.baza.shopNote')), open);
-
-      const pending = pendingRewrites(meta);
-      const list = h('ol', 'hist-list');
-      if (meta.history.length === 0) {
-        list.append(h('li', 'hist-entry empty', t('screens.baza.emptyHistory')));
-      } else {
-        meta.history.forEach((e, i) => list.prepend(entryView(e, pending.includes(i))));
-      }
-
-      const fresh = h('button', 'start', t('screens.baza.newTicket'));
-      fresh.type = 'button';
-      fresh.addEventListener('click', handlers.onNewTicket);
-      const settings = h('button', 'link-btn', t('screens.baza.settings'));
-      settings.type = 'button';
-      settings.addEventListener('click', handlers.onSettings);
-
-      const scroll = h('div', 'scroll');
-      const mark = waiting ? undefined : meta.bookmark;
-      if (waiting) {
-        const back = h('button', 'resume-btn tunnel-return', t('screens.baza.tunnelReturn'));
-        back.type = 'button';
-        back.addEventListener('click', () => handlers.onReturn?.());
-        const block = h('div', 'resume-line tunnel-line');
-        block.append(h('p', 'tunnel-wait', t('screens.baza.tunnelWaiting', { number: waiting.number, page: waiting.page })), back, h('p', 'resume-note', t('screens.baza.tunnelNote')));
-        scroll.append(block);
-      }
-      if (mark) {
-        const resume = h('button', 'resume-btn', t('screens.baza.resume', { number: mark.ticketNumber }));
-        resume.type = 'button';
-        resume.addEventListener('click', () => handlers.onResume(mark));
-        const block = h('div', 'resume-line');
-        block.append(resume, h('p', 'resume-note', t('screens.baza.resumeNote', { planet: mark.planetName, page: mark.pageIndex + 1 })));
-        scroll.append(block);
-      }
-      scroll.append(profile, stars, shop, h('h3', 'group', t('screens.baza.history')), list);
-      frame.append(
-        h('div', 'agency', t('screens.baza.agency')),
-        h('h2', 'form-title tight', t('screens.baza.title')),
-        h('hr', 'rule'),
-        scroll,
-        fresh,
-        settings,
-      );
-      if (pending.length) handlers.onRewritten(pending);
+    open(meta) {
+      sheet?.remove();
+      sheet = createSheet(root, { title: t('screens.base.deskTitle'), sub: t('screens.baza.agency'), onClose: handlers.onClose });
+      sheet.el.classList.add('desk-sheet');
+      sheet.note(t('screens.base.deskNote'));
+      render(meta);
     },
-    hide() {
-      screen.classList.add('hidden');
+    close() {
+      sheet?.remove();
+      sheet = null;
     },
+    isOpen: () => sheet !== null,
     setTunnel(wait) {
       waiting = wait;
     },

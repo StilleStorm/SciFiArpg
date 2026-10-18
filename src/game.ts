@@ -7,8 +7,11 @@ import { bindEnemyFx, enemyBuilder } from './render/enemyFigures';
 import { createViews, type Views } from './render/view';
 import { groundBuilders } from './render/figures';
 import { drawPage } from './render/obstacles';
+import { drawBase, type BaseView } from './render/stations';
+import { viewZoom } from './render/camera';
+import { arrivalKey, tapStation } from './world/base';
 import { onPageEntered } from './world/laws';
-import { headerFor, tapKiosk } from './world/pageTurn';
+import { baseHeaderFor, headerFor, tapKiosk } from './world/pageTurn';
 import { tapMark } from './render/ink';
 import type { Stage } from './render/stage';
 import { createSim } from './systems/step';
@@ -26,6 +29,11 @@ export interface Game {
   /** Hero skills, update form and death forms (heroes/layer.ts). */
   readonly hero: HeroLayer;
   start(seed: number, opts?: RunOptions): RunState;
+  /**
+   * Make a run that was held (the service tunnel) the live state again: its page and entities are drawn anew, nothing in the
+   * state changes. The caller resumes it (`resume()`), which needs the state to be 'paused' by this game's `pause()`.
+   */
+  adopt(s: RunState): void;
   /** Leave the run: the views and the page are cleared and input is off. */
   stop(): void;
   /** The pause sheet holds the run: status 'paused', input off, `game:paused {paused: true}`. False when a sheet or a form already holds it. */
@@ -40,7 +48,7 @@ export interface Game {
 }
 
 /** Ties run state to the stage: simulation step, view sync, camera. Owns no rules. */
-export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input): Game {
+export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input, bounds?: { w: number; h: number }): Game {
   const views = createViews(stage.world, {
     ...groundBuilders,
     ...heroBuilders,
@@ -56,6 +64,17 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
   const ents: Entity[] = [];
   let state: RunState | null = null;
   let pausedByGame = false;
+  /** The drawn base page, while the state is in the base (labels, the exit, the header). */
+  let baseView: BaseView | null = null;
+  /** The camera's page bounds follow the page that is shown (the base page is smaller than the run's pages). */
+  const fitBounds = (page: { w: number; h: number }): void => {
+    if (!bounds) return;
+    bounds.w = page.w;
+    bounds.h = page.h;
+  };
+  bus.on('ticket:accepted', () => {
+    if (state?.phase === 'base') baseView?.unlock(baseHeaderFor(state));
+  });
 
   const game: Game = {
     get state() {
@@ -84,6 +103,19 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
       bus.emit('game:paused', { paused: false });
       return true;
     },
+    adopt(s) {
+      state = s;
+      pausedByGame = s.status === 'paused';
+      baseView = null;
+      hero.onStart(s);
+      views.clear();
+      stage.world.replaceChildren();
+      stage.fx.replaceChildren();
+      fitBounds(s.page);
+      drawPage(stage.page, s.page, headerFor(s));
+      camera.snap(s.player.x, s.player.y);
+      camera.apply();
+    },
     start(seed, opts) {
       const s = createRun(seed, opts);
       pausedByGame = false;
@@ -91,6 +123,18 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
       hero.onStart(s);
       views.clear();
       stage.fx.replaceChildren();
+      fitBounds(s.page);
+      if (s.phase === 'base' && s.base) {
+        // The base page of the planet: stations, no enemies, a locked exit. The run starts when the exit is walked through.
+        baseView = drawBase(stage.page, s.page, { accepted: false, header: null });
+        camera.snap(s.player.x, s.player.y);
+        camera.apply();
+        input.setEnabled(true);
+        bus.emit('base:entered', { layout: s.base.layout });
+        bus.emit('footnote', { text: t(arrivalKey(seed, s.base.layout)) });
+        return s;
+      }
+      baseView = null;
       drawPage(stage.page, s.page, headerFor(s));
       camera.snap(s.player.x, s.player.y);
       camera.apply();
@@ -104,6 +148,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
       return s;
     },
     stop() {
+      baseView = null;
       pausedByGame = false;
       input.setEnabled(false);
       views.clear();
@@ -120,7 +165,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
       if (steer) s.player.steer = steer;
       else delete s.player.steer;
       sim.step(s, dt);
-      if (s.status !== 'running') input.setEnabled(false);
+      if (state === s && s.status !== 'running') input.setEnabled(false); // (a step that swapped the state — the tunnel, the end of a run — leaves the new one alone)
     },
     render(dtSec) {
       const s = state;
@@ -133,8 +178,12 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
       for (const m of s.summons) ents.push(m);
       for (const z of s.zones) ents.push(z);
       hero.frame(s);
-      exits.frame(s);
-      updateBubbleFocus(s.enemies, s.player);
+      if (s.phase === 'base') baseView?.frame(s);
+      else {
+        baseView = null; // the exit walked through: the base drawing went with the old sheet
+        exits.frame(s);
+        updateBubbleFocus(s.enemies, s.player);
+      }
       views.sync(ents, s.time * 1000);
       camera.follow(s.player.x, s.player.y, dtSec);
       camera.apply();
@@ -143,6 +192,18 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
       const s = state;
       if (!s || s.status !== 'running' || s.modal || s.turning) return;
       const w = camera.screenToWorld(clientX, clientY);
+      if (s.phase === 'base') {
+        // A station is tapped, then walked to; it opens when the player is within its label range (world/base.ts tickBase).
+        const hit = tapStation(s, w.x, w.y, viewZoom(), !walk);
+        if (!walk) {
+          if (hit) bus.emit('player:tap', { x: w.x, y: w.y });
+          return;
+        }
+        s.player.target = w;
+        tapMark(w.x, w.y);
+        bus.emit('player:tap', { x: w.x, y: w.y });
+        return;
+      }
       if (!walk) {
         // Joystick mode: a quick tap only matters on the kiosk (the player steers there himself).
         if (tapKiosk(s, w.x, w.y)) bus.emit('player:tap', { x: w.x, y: w.y });

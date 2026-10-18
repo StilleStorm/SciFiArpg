@@ -4,6 +4,7 @@ import { setOfficeOpen } from './economy/hours';
 import { createBus, type Screen } from './core/events';
 import { createLoop } from './core/loop';
 import { createGame } from './game';
+import { t } from './i18n';
 import { createInput } from './input';
 import { bindAsystent } from './narration';
 import { bindFx } from './render/bindings';
@@ -14,7 +15,6 @@ import { installPaper } from './render/paper';
 import { createWobble, getStage, setTheme } from './render/stage';
 import { tickTweens } from './render/tween';
 import { bindAutosave, settleRun, withBookmark, withCharacter } from './save/autosave';
-import { emptyCharacter } from './save/character';
 import { markRewritten } from './save/history';
 import { loadMeta, saveMeta, type Settings } from './save/save';
 import { installTestHook } from './testHook';
@@ -31,27 +31,28 @@ import { createSettings } from './ui/settings';
 import { mountSklep, type SklepHandle } from './ui/sklep';
 import { createTicket } from './ui/ticket';
 import { createTitle } from './ui/title';
+import { acceptTicket } from './world/base';
 import { bindLaws, lawHooks } from './world/laws';
 import { PAGE_H, PAGE_W } from './world/pages';
 import { bindPageTurn, bindRunEvents } from './world/pageTurn';
 import type { RunOptions, RunState } from './world/run';
-import { bindTunnel, carryPurse, closeFor, closeTunnel, createRunHold, fateOfHeldRun, openTunnel, type LeaveAction } from './world/tunnel';
-import { TICKET_BASE, ticketForSeed, type TicketInfo } from './world/ticket';
+import { bindTunnel, carryPurse, closeFor, closeTunnel, createRunHold, cutBaseHole, fateOfHeldRun, openTunnel, type LeaveAction } from './world/tunnel';
+import { TICKET_BASE } from './world/ticket';
 
 const stage = getStage();
 installPaper();
 initInk(stage.fx);
 
 const bus = createBus();
-const camera = createCamera(stage.svg, stage.wobble, { w: PAGE_W, h: PAGE_H });
+/** The page the camera clamps to: the base page is smaller than the run's pages, so the game and the page turn keep this in step. */
+const bounds = { w: PAGE_W, h: PAGE_H };
+const camera = createCamera(stage.svg, stage.wobble, bounds);
 camera.resize();
 const wobble = createWobble(stage);
 let meta = loadMeta();
 let screen: Screen = 'title';
 /** The run that waits while the player is in the base through the service tunnel (DESIGN 4.1): the same object, in memory only. */
 const hold = createRunHold<RunState>();
-/** The next `go('run')` is the return through the tunnel: it does not start a run. */
-let returning = false;
 
 /** Day / night / by device, the left-handed mirror, steering and the orientation lock. */
 let lockedFor: string | null = null;
@@ -75,19 +76,29 @@ const save = (next: typeof meta): void => {
   saveMeta(meta);
 };
 
-// Router: title -> profile -> baza <-> settings / Sklep, baza -> ticket -> run -> baza
+// Router: title -> profile (only without a hero) -> the base page of the planet (screen 'baza', walkable) -> the exit ->
+// the run (screen 'run') -> back to a base. The desk, the ticket, the Sklep and the settings are sheets over the base page.
 const input = createInput(stage.svg, (x, y, walk) => game.onTap(x, y, walk), createJoystick(stage.ui));
 initLayout(() => applySettings(meta.settings)); // data-orient on <html> follows the window; steering follows it until the player chooses
 applySettings(meta.settings);
-const game = createGame(stage, bus, camera, input);
+const game = createGame(stage, bus, camera, input, bounds);
 const hud = createHud(stage.ui, () => game.hero.requestUpdate(), () => pauseRun(), () => openTunnelNow());
 const footnotes = createFootnotes(stage.ui);
 const pads = createPads(stage.ui, bus);
 const title = createTitle(stage.ui, () => go(meta.heroId ? 'baza' : 'profile'));
+const freshSeed = (): number => (Date.now() ^ Math.floor(Math.random() * 0x100000000)) >>> 0;
+/** The planet of the next ticket: chosen when the previous ticket ended (a bookmark or a held run overrides it). */
+let nextSeed = freshSeed();
+
+/** The sheets over the base page. At most one is up; the base holds still while it is. */
+type SheetKind = 'biurko' | 'ticket' | 'kiosk' | 'tablica';
+let sheetKind: SheetKind | null = null;
+/** The base was running and a sheet paused it (the sheet gives it back). */
+let sheetHolds = false;
 let shop: SklepHandle | null = null;
+
 const baza = createBaza(stage.ui, {
-  onNewTicket: () => go('ticket'),
-  onSettings: () => go('settings'),
+  onNewTicket: () => openSheet('ticket'),
   onChangeHero: () => {
     leave('changeHero'); // another hero cannot walk back into this run
     go('profile');
@@ -95,19 +106,7 @@ const baza = createBaza(stage.ui, {
   onReturn: () => returnFromTunnel(),
   onRewritten: (indices) => save(markRewritten(meta, indices)),
   onResume: () => resumeTicket(),
-  onShop: () => {
-    // The base Sklep spends the gwiazdki and fills the bag and gear that the next run starts with (the character record).
-    shop?.unmount();
-    const character = meta.character ?? emptyCharacter(meta.heroId);
-    const purse = { gwiazdki: character.gwiazdki, inventory: [...character.inventory], equipment: { ...character.equipment }, level: 1 };
-    shop = mountSklep(stage.ui, { runsCompleted: meta.runsCompleted }, purse, {
-      onClose: () => {
-        shop = null;
-        save({ ...meta, character: { ...character, gwiazdki: purse.gwiazdki, inventory: purse.inventory, equipment: purse.equipment } });
-        if (screen === 'baza') baza.show(meta);
-      },
-    });
-  },
+  onClose: () => closeSheet(),
 });
 const onSettingsChange = (next: Settings): void => {
   save({ ...meta, settings: next });
@@ -116,32 +115,38 @@ const onSettingsChange = (next: Settings): void => {
 const onVolumeSet = (which: 'music' | 'sfx'): void => {
   if (which === 'sfx') audio.preview();
 };
-const settings = createSettings(stage.ui, onSettingsChange, () => go('baza'), onVolumeSet);
+const settings = createSettings(stage.ui, onSettingsChange, () => closeSheet(), onVolumeSet);
 // The same form, opened in place from the pause sheet: Wróć returns to the sheet, not to the base.
 const pauseSettings = createSettings(stage.ui, onSettingsChange, () => closePauseSettings(), onVolumeSet);
 const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onEnd: () => endTicket() });
-let pendingTicket: { seed: number; info: TicketInfo } | null = null;
-const ticket = createTicket(stage.ui, () => {
-  unlockAudio(); // the accept button is the natural unlock (DESIGN 14.5); any first tap also unlocks
-  if (pendingTicket) go('run', pendingTicket.seed);
+const ticket = createTicket(stage.ui, {
+  onAccept: () => acceptNow(),
+  onClose: () => openSheet('biurko'),
 });
 
-const freshSeed = (): number => (Date.now() ^ Math.floor(Math.random() * 0x100000000)) >>> 0;
+/** The walkable screens: the base page and the run. */
+const live = (): boolean => screen === 'run' || screen === 'baza';
 
 function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): void {
-  syncHistory(screen, next);
+  if (next === 'ticket' || next === 'settings') {
+    // These are sheets of the base now; the test hook still reaches them by name.
+    if (screen !== 'baza') go('baza');
+    openSheet(next === 'ticket' ? 'ticket' : 'tablica');
+    return;
+  }
+  // A sheet over the base is one history entry; leaving the base for another screen replaces it instead of popping and pushing.
+  syncHistory(sheetKind !== null && screen === 'baza' ? 'ticket' : screen, next);
+  dropSheets();
   screen = next;
-  const running = next === 'run';
-  hud.el.classList.toggle('hidden', !running);
-  footnotes.el.classList.toggle('hidden', !running);
-  pads.classList.toggle('hidden', !running);
-  if (next !== 'run') footnotes.closeHistory();
+  const walkable = next === 'run' || next === 'baza';
+  hud.el.classList.toggle('hidden', !walkable);
+  footnotes.el.classList.toggle('hidden', !walkable);
+  pads.classList.toggle('hidden', !walkable);
+  pads.classList.toggle('in-base', next === 'baza');
+  if (!walkable) footnotes.closeHistory();
   if (next !== 'title') title.hide();
-  if (next !== 'baza') baza.hide();
-  if (next !== 'ticket') ticket.hide();
-  if (next !== 'settings') settings.hide();
   if (next !== 'run') clearPause();
-  if (next !== 'run') input.setEnabled(false);
+  if (!walkable) input.setEnabled(false);
   switch (next) {
     case 'title':
       title.show(meta.runsCompleted);
@@ -154,25 +159,9 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
       });
       break;
     case 'baza':
-      baza.show(meta);
-      break;
-    case 'ticket': {
-      const s = freshSeed();
-      const info = ticketForSeed(s, TICKET_BASE + meta.history.length);
-      pendingTicket = { seed: s, info };
-      ticket.show(info);
-      break;
-    }
-    case 'settings':
-      settings.show(meta.settings);
+      enterBase();
       break;
     case 'run': {
-      if (returning) {
-        // Back through the tunnel: the held run continues, nothing is started, the footnotes and the page stay as they were.
-        returning = false;
-        hud.invalidate();
-        break;
-      }
       leave(opts.resume ? 'resumeBookmark' : 'newTicket'); // a run held in the tunnel is given up before another starts
       footnotes.reset();
       setOfficeOpen(null);
@@ -184,16 +173,155 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
     case 'death':
       break;
   }
-  bus.emit('screen:changed', { screen: next });
+  bus.emit('screen:changed', { screen });
 }
 
+/**
+ * The base page of a planet. Its planet is the held run's while a tunnel holds one, else the bookmarked one, else the next
+ * ticket's (chosen when the previous ticket ended). A bookmark makes the desk offer "Wznów zgłoszenie"; a held run puts the
+ * open hole near the landing spot. A new planet clears the footnotes; the tunnel's base keeps them.
+ */
+function enterBase(over: { seed?: number; number?: number } = {}): RunState {
+  const held = hold.peek();
+  const b = meta.bookmark;
+  const seed = over.seed ?? (held ? held.seed : b ? b.seed : nextSeed);
+  const number = over.number ?? (held ? held.ticket.number : b && !over.seed ? b.ticketNumber : TICKET_BASE + meta.history.length);
+  if (game.state && game.state !== held) game.stop();
+  if (!held) footnotes.reset();
+  setOfficeOpen(null);
+  const resume = b && !held && b.seed === seed ? b : undefined;
+  const state = game.start(seed, {
+    phase: 'base',
+    ticketNumber: number,
+    heroId: meta.heroId,
+    character: meta.character,
+    ...(held ? { lawId: held.ticket.lawId, pageCount: held.pageCount } : {}),
+    ...(resume ? { resume } : {}),
+  });
+  if (held?.tunnel) {
+    // the base end of the tunnel: the hole is cut near the landing spot, the way back into the held run
+    const hole = cutBaseHole(state);
+    if (hole) tunnelFx.show(hole.x, hole.y, true);
+    baza.setTunnel({ number: held.ticket.number, page: held.tunnel.pageIndex + 1 });
+  } else baza.setTunnel(null);
+  hud.invalidate();
+  return state;
+}
+
+// ---------- the sheets over the base page ----------
+/** Hold the base while a sheet is up: nothing walks, nothing opens. */
+function holdBase(): void {
+  const s = game.state;
+  if (!s || s.status !== 'running') return;
+  s.status = 'paused';
+  sheetHolds = true;
+  s.player.target = null;
+  delete s.player.steer;
+}
+
+function releaseBase(): void {
+  const s = game.state;
+  if (sheetHolds && s && s.status === 'paused' && !game.paused) s.status = 'running';
+  sheetHolds = false;
+}
+
+/** Take every sheet off the page without touching the history (the caller does that). */
+function dropSheets(): void {
+  baza.close();
+  ticket.close();
+  settings.hide();
+  shop?.unmount();
+  shop = null;
+  if (sheetKind !== null) {
+    sheetKind = null;
+    releaseBase();
+  }
+}
+
+/** Put a sheet over the base page: the desk, the ticket form, the Sklep or the settings. */
+function openSheet(kind: SheetKind): void {
+  const s = game.state;
+  if (screen !== 'baza' || !s || s.phase !== 'base') return;
+  const wasUp = sheetKind !== null;
+  baza.close();
+  ticket.close();
+  settings.hide();
+  shop?.unmount();
+  shop = null;
+  if (!wasUp) {
+    holdBase();
+    syncHistory('baza', 'ticket');
+  }
+  sheetKind = kind;
+  switch (kind) {
+    case 'biurko':
+      baza.open(meta);
+      break;
+    case 'ticket':
+      ticket.open(s.ticket);
+      break;
+    case 'tablica':
+      settings.show(meta.settings);
+      break;
+    case 'kiosk':
+      // The base Sklep spends the gwiazdki of the live player and fills the bag and gear the run starts with.
+      shop = mountSklep(stage.ui, { runsCompleted: meta.runsCompleted }, s.player, {
+        nextNumber: () => s.nextItemNumber++,
+        onClose: () => {
+          shop = null;
+          if (game.state === s) save(withCharacter(meta, s));
+          closeSheet();
+        },
+      });
+      break;
+  }
+}
+
+/** Close the sheet over the base page and give the base back (the history entry the sheet pushed is taken back). */
+function closeSheet(): void {
+  if (sheetKind === null) return;
+  dropSheets();
+  syncHistory('ticket', 'baza');
+}
+
+/** "Akceptuję regulamin": a run held in the tunnel is given up, the exit of the base opens, the clause header is printed. */
+function acceptNow(): boolean {
+  unlockAudio(); // the accept button is the natural unlock (DESIGN 14.5); any first tap also unlocks
+  const s = game.state;
+  if (screen !== 'baza' || !s || s.phase !== 'base') return false;
+  leave('newTicket');
+  if (!acceptTicket(s)) return false;
+  bus.emit('ticket:accepted');
+  closeSheet();
+  return true;
+}
+
+/** Open the sheet (or the footnote) of a station, as if the player had walked up to it and tapped. */
+function openStation(id: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean {
+  if (screen !== 'baza' || game.state?.phase !== 'base') return false;
+  if (id === 'paczkomat') bus.emit('footnote', { text: t('screens.base.paczkomatClosed') });
+  else openSheet(id);
+  return true;
+}
+bus.on('station:opened', (e) => void openStation(e.station));
+
 bindFx(bus, game.views);
-bindPageTurn(bus, { stage, camera, views: game.views, getState: () => game.state });
+bindPageTurn(bus, { stage, camera, views: game.views, getState: () => game.state, bounds });
 bindRunEvents(bus, () => game.state);
 // The tunnel closes itself on death, the end of the run and a page turn; both must hear `run:ended` before the handler below drops the state.
 bindTunnel(bus, () => game.state);
-bindTunnelFx(bus, { page: stage.page, pageWidth: () => game.state?.page.w ?? PAGE_W });
-bus.on('tunnel:entered', () => void holdRun());
+const tunnelFx = bindTunnelFx(bus, { page: stage.page, pageWidth: () => game.state?.page.w ?? PAGE_W });
+// The hole in the run takes the player to the base (holding the run); the hole in the base takes him back.
+bus.on('tunnel:entered', () => void (game.state?.phase === 'base' ? returnFromTunnel() : holdRun()));
+// The exit of the base was walked through: the same state goes on as the run proper.
+bus.on('run:started', () => {
+  if (screen !== 'baza') return;
+  syncHistory('baza', 'run');
+  screen = 'run';
+  pads.classList.remove('in-base');
+  hud.invalidate();
+  bus.emit('screen:changed', { screen: 'run' });
+});
 bindLaws(bus, () => game.state);
 bindLawSheets(stage.ui, bus, () => game.state);
 /** Print a footnote and tell the bus (the typewriter key and the carriage return are heard from `footnote:added`). */
@@ -215,6 +343,7 @@ bus.on('run:ended', (e) => {
   if (!s || screen !== 'run') return;
   save(settleRun(meta, s, e.outcome)); // Historia entry, the character as it ended, the bookmark torn up
   game.stop();
+  nextSeed = freshSeed(); // the next ticket is another planet
   go('baza');
 });
 
@@ -229,20 +358,20 @@ const loop = createLoop({
     wobble.tick(dt * 1000);
     game.render(dt);
     audio.frame();
-    if (screen === 'run' && game.state) hud.update(game.state);
+    if (live() && game.state) hud.update(game.state);
   },
 });
 
 // ---------- pause, Zakończ, resume (DESIGN 4.1) ----------
 /** The character and the bookmark are written at every page turn, on pause, on Zakończ and when the app is hidden. */
-const autosave = bindAutosave({ bus, getState: () => game.state, getMeta: () => meta, commit: save, inRun: () => screen === 'run' });
+const autosave = bindAutosave({ bus, getState: () => game.state, getMeta: () => meta, commit: save, inRun: live });
 
 /** Hold the run and put the pause sheet on the page. False when a form or the pause sheet already holds it. */
 function pauseRun(): boolean {
   const s = game.state;
-  if (screen !== 'run' || !s || !game.pause()) return false;
+  if (!live() || !s || !game.pause()) return false;
   loop.pause();
-  pauseSheet.open({ number: s.ticket.number, planet: s.ticket.planet, page: s.pageIndex + 1, total: s.pageCount });
+  pauseSheet.open({ number: s.ticket.number, planet: s.ticket.planet, page: s.pageIndex + 1, total: s.pageCount, base: s.phase === 'base' });
   return true;
 }
 
@@ -266,7 +395,7 @@ function closePauseSettings(): void {
 function clearPause(): void {
   pauseSettings.hide();
   pauseSheet.close();
-  if (!hold.held) loop.resume(); // a run held in the tunnel stays held while the player moves between base screens
+  loop.resume(); // a run held in the tunnel is not stepped (it is not the live state), so the loop always runs
 }
 
 /** Zakończ zgłoszenie: the character and a bookmark are saved, the run is dropped, back to the base. */
@@ -278,11 +407,20 @@ function endTicket(): void {
   go('baza');
 }
 
-/** Wznów zgłoszenie: the pages are regenerated from the bookmarked seed, the player stands on the bookmarked page. */
+/**
+ * Wznów zgłoszenie, at the desk: the exit of the base opens and leads straight to the bookmarked page, which is regenerated
+ * from the bookmarked seed (enemies back, floor loot gone, racja full, the reassigned footnote on arrival).
+ */
 function resumeTicket(): boolean {
+  if (screen !== 'baza') return false;
+  let s = game.state;
   const b = meta.bookmark;
-  if (!b || screen === 'run') return false;
-  go('run', b.seed, { resume: b });
+  if (!b) return false;
+  if (!s || s.phase !== 'base' || s.seed !== b.seed) s = enterBase();
+  leave('resumeBookmark');
+  if (!acceptTicket(s, b)) return false;
+  bus.emit('ticket:accepted');
+  closeSheet();
   return true;
 }
 
@@ -300,27 +438,37 @@ function openTunnelNow(): boolean {
  */
 function holdRun(): boolean {
   const s = game.state;
-  if (screen !== 'run' || !s?.tunnel || hold.held || !game.pause()) return false;
+  if (screen !== 'run' || !s?.tunnel || s.phase !== 'run' || hold.held || !game.pause()) return false;
   hold.hold(s);
-  baza.setTunnel({ number: s.ticket.number, page: s.tunnel.pageIndex + 1 });
-  go('baza');
-  loop.pause(); // go() leaves the loop alone while a run is held, this keeps its timers still too
+  go('baza'); // the base of the held run's planet, with the open hole near the landing spot; the run waits in `hold`
   return true;
 }
 
-/** "Wróć do zgłoszenia": the held run continues exactly as it was; the tunnel closes behind the player (a strip of tape). */
+/**
+ * The player walked into the hole of the base, or pressed "Wróć do zgłoszenia" at the desk: the held run continues exactly as
+ * it was, its page is drawn anew, and the tunnel closes behind the player (a strip of tape over the hole). The base goes away.
+ */
 function returnFromTunnel(): boolean {
-  const s = hold.peek();
-  if (screen !== 'baza' || !s || game.state !== s || fateOfHeldRun(true, 'return') !== 'continue') return false;
+  const held = hold.peek();
+  const here = game.state;
+  if (screen !== 'baza' || !held || !here || here === held || here.phase !== 'base' || fateOfHeldRun(true, 'return') !== 'continue') return false;
+  save(withCharacter(meta, here)); // what the player did in the base (the Sklep, the bag) is in the saved character now
+  closeSheet(); // the desk's "Wróć do zgłoszenia" is a button on a sheet
   hold.take();
-  carryPurse(s, meta.character); // what the base shop did to the purse goes along
+  carryPurse(held, meta.character); // ... and goes along into the held run
   baza.setTunnel(null);
-  returning = true;
-  go('run');
+  delete here.tunnel;
+  game.adopt(held);
+  if (held.tunnel) tunnelFx.show(held.tunnel.x, held.tunnel.y); // the hole is drawn again so the tape can lie across it
+  syncHistory('baza', 'run');
+  screen = 'run';
+  pads.classList.remove('in-base');
+  hud.invalidate();
+  bus.emit('screen:changed', { screen: 'run' });
   loop.resume();
   game.resume();
   bus.emit('tunnel:returned');
-  closeTunnel(s, bus, closeFor('return'));
+  closeTunnel(held, bus, closeFor('return'));
   autosave.save(); // the tunnel use is saved on the way back too
   return true;
 }
@@ -335,20 +483,23 @@ function leave(action: LeaveAction): void {
   if (fateOfHeldRun(hold.held, action) !== 'settle') return;
   const s = hold.take();
   if (!s) return;
+  const here = game.state;
+  if (here && here !== s && here.phase === 'base') save(withCharacter(meta, here)); // the base's own changes to the character
   carryPurse(s, meta.character);
   save(withBookmark(withCharacter(meta, s), s));
-  closeTunnel(s, bus, closeFor('abandon'));
+  closeTunnel(s, bus, closeFor('abandon')); // the hole in the base is rubbed out with it
   baza.setTunnel(null);
-  loop.resume();
+  if (here && here !== s) delete here.tunnel;
   if (game.state === s) game.stop();
 }
 
 // ---------- the back button (Android) ----------
 /**
- * The run screen and the screens that hang off the base (ticket, profile, settings) are one history entry above the base;
- * the base and the title are the root. Opening one of them pushes an entry, leaving it by a button takes it back, so the
- * system back button walks baza <- ticket / profile / settings. During a run the button never leaves: it opens the pause
- * sheet, and while the run is paused it resumes (the entry the press consumed is pushed again). At the root it leaves.
+ * The run screen, the profile screen and a sheet over the base page (the desk, the ticket, the Sklep, the settings; counted
+ * as 'ticket') are one history entry above the base; the base page and the title are the root. Opening one of them pushes an
+ * entry, leaving it by a button takes it back, so the system back button walks baza <- sheet / profile. During a run the button
+ * never leaves: it opens the pause sheet, and while the run is paused it resumes (the entry the press consumed is pushed
+ * again). At the root, the base page, it leaves.
  */
 const HISTORY_LEVEL: Record<Screen, 0 | 1> = { title: 0, baza: 0, death: 0, profile: 1, ticket: 1, settings: 1, run: 1 };
 let pushed = 0;
@@ -365,6 +516,14 @@ function pushEntry(replace: boolean, tag: Screen): void {
     /* a sandboxed frame: the back button then behaves as the browser's own */
   }
 }
+function ownEntry(): boolean {
+  try {
+    const st = history.state as { screen?: string } | null;
+    return typeof st?.screen === 'string';
+  } catch {
+    return false;
+  }
+}
 function syncHistory(from: Screen, to: Screen): void {
   const a = HISTORY_LEVEL[from];
   const b = HISTORY_LEVEL[to];
@@ -372,8 +531,11 @@ function syncHistory(from: Screen, to: Screen): void {
   else if (b === a && b === 1) pushEntry(true, to);
   else if (b < a && !poppedByUser && pushed > 0) {
     pushed--;
-    backsWeAsked++;
-    history.back();
+    // never step back past the entries this game pushed (the first entry has no state of ours): that would leave the app
+    if (ownEntry()) {
+      backsWeAsked++;
+      history.back();
+    }
   }
 }
 window.addEventListener('popstate', () => {
@@ -386,6 +548,13 @@ window.addEventListener('popstate', () => {
     pushEntry(false, 'run');
     if (pauseSheet.isOpen()) resumeRun();
     else pauseRun();
+    return;
+  }
+  if (screen === 'baza' && sheetKind !== null) {
+    // the back button closes the sheet over the base page; the entry it consumed is the sheet's own
+    poppedByUser = true;
+    closeSheet();
+    poppedByUser = false;
     return;
   }
   if (HISTORY_LEVEL[screen] === 1) {
@@ -419,6 +588,12 @@ installTestHook({
   returnFromTunnel,
   endTicket,
   resumeTicket,
+  startBase: (seed) => {
+    if (screen !== 'baza') go('baza');
+    return enterBase(seed === undefined ? {} : { seed });
+  },
+  station: openStation,
+  acceptTicket: acceptNow,
   changeSettings: (patch) => {
     const next = { ...meta.settings, ...patch };
     save({ ...meta, settings: next });

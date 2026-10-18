@@ -17,6 +17,8 @@ import type { RunState } from './run';
 
 /** The player is on the hole when closer than this (world units). */
 export const ENTER_R = 28;
+/** The page index of the base end of the tunnel: the base page is not one of the run's pages. */
+export const BASE_END = -1;
 
 export interface Tunnel {
   x: number;
@@ -157,9 +159,25 @@ export function carryPurse(s: RunState, c: Character | undefined): boolean {
 
 // ---------- applying the rules to a run ----------
 
-/** Cut a tunnel at the player's feet. Replaces (and closes) an open one. False when nothing can be cut now (sheet, form, page turn, dead). */
+/** The page key a tunnel is cut in: the run page's index, or `BASE_END` while the player is in the base. */
+export const tunnelPageOf = (s: Pick<RunState, 'phase' | 'pageIndex'>): number => (s.phase === 'base' ? BASE_END : s.pageIndex);
+
+/**
+ * The base end of the tunnel: while a run is held the base page shows the open hole near the landing spot, and walking
+ * into it returns to the held run. Cut by the router, without a footnote or a sound (the hole was cut in the run).
+ * False outside the base.
+ */
+export function cutBaseHole(s: RunState): Tunnel | null {
+  const hole = s.page.base?.hole;
+  if (s.phase !== 'base' || !hole) return null;
+  const tn: Tunnel = { x: hole.x, y: hole.y, pageIndex: BASE_END, armed: false };
+  s.tunnel = tn;
+  return tn;
+}
+
+/** Cut a tunnel at the player's feet. Replaces (and closes) an open one. False when nothing can be cut now (sheet, form, page turn, dead, the base). */
 export function openTunnel(s: RunState, bus: Bus): boolean {
-  if (s.status !== 'running' || s.modal || s.turning || s.player.hp <= 0) return false;
+  if (s.phase === 'base' || s.status !== 'running' || s.modal || s.turning || s.player.hp <= 0) return false;
   const plan = planOpen(s.tunnel, s.player, s.pageIndex);
   if (plan.replaced) closeTunnel(s, bus, closeFor('open'));
   s.tunnel = plan.tunnel;
@@ -179,7 +197,7 @@ export function closeTunnel(s: RunState | null, bus: Bus, reason: TunnelCloseRea
 export function tickTunnel(s: RunState, bus: Bus): void {
   const tn = s.tunnel;
   if (!tn || s.turning || s.modal || s.status !== 'running') return;
-  const r = stepTunnel(tn, s.player, s.pageIndex);
+  const r = stepTunnel(tn, s.player, tunnelPageOf(s));
   s.tunnel = r.tunnel;
   if (r.enter) bus.emit('tunnel:entered');
 }

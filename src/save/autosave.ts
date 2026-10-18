@@ -5,6 +5,7 @@
  * The functions on the meta state are pure; `bindAutosave` is the only part that listens to anything.
  */
 import type { Bus } from '../core/events';
+import { bookmarkAllowed } from '../world/base';
 import type { RunState } from '../world/run';
 import { bookmarkOf } from './bookmark';
 import { serializeCharacter } from './character';
@@ -14,8 +15,11 @@ import type { MetaState, RunOutcome } from './save';
 /** The meta state with the character as the run has it now. */
 export const withCharacter = (meta: MetaState, s: RunState): MetaState => ({ ...meta, character: serializeCharacter(s) });
 
-/** The meta state with a bookmark of the run as it stands. */
-export const withBookmark = (meta: MetaState, s: RunState): MetaState => ({ ...meta, bookmark: bookmarkOf(s) });
+/**
+ * The meta state with a bookmark of the run as it stands. Only the run proper is bookmarked: in the base page of a
+ * planet there is nothing to come back to, so the bookmark that is there (a ticket left unfinished) stays as it was.
+ */
+export const withBookmark = (meta: MetaState, s: RunState): MetaState => (bookmarkAllowed(s) ? { ...meta, bookmark: bookmarkOf(s) } : meta);
 
 /** The meta state without a bookmark (the ticket ended). */
 export function withoutBookmark(meta: MetaState): MetaState {
@@ -64,7 +68,7 @@ export function bindAutosave(deps: AutosaveDeps): Autosave {
     const s = deps.getState();
     if (!deps.inRun() || !savable(s)) return false;
     deps.commit(withBookmark(withCharacter(deps.getMeta(), s), s));
-    deps.bus.emit('run:bookmarked', { pageIndex: s.pageIndex });
+    if (bookmarkAllowed(s)) deps.bus.emit('run:bookmarked', { pageIndex: s.pageIndex });
     return true;
   };
   const offs = [

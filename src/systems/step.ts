@@ -1,6 +1,7 @@
 import { tickStatuses } from '../combat/status';
 import type { Bus } from '../core/events';
 import { createGrid, type Enemy } from '../entities';
+import { tickBase } from '../world/base';
 import { trackEnemies } from '../world/enemyInfo';
 import { lawPre, tickLaw } from '../world/laws';
 import { tickPageTurn } from '../world/pageTurn';
@@ -20,6 +21,13 @@ export function createSim(bus: Bus) {
     step(s: RunState, dt: number): void {
       if (s.status !== 'running') return;
       if (s.modal || s.turning) return; // a sheet waits for an answer, or the page is turning
+      if (s.phase === 'base') {
+        // The base page: the player walks, the stations and the exit are watched. No clock, no laws, no spawns, no fights.
+        movePlayer(s, bus, dt);
+        tickBase(s, bus, dt);
+        tickTunnel(s, bus);
+        return;
+      }
       s.time += dt;
       trackEnemies(s.enemies);
       const undoLaw = lawPre(s);

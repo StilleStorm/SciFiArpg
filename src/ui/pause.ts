@@ -44,6 +44,8 @@ export interface PauseInfo {
   /** 1-based page number and the page count of the planet. */
   page: number;
   total: number;
+  /** The player is in the base: there is no ticket in progress to end, so "Zakończ zgłoszenie" is not offered. */
+  base?: boolean;
 }
 
 export interface PauseHandlers {
@@ -79,7 +81,7 @@ export function createPauseSheet(root: HTMLElement, handlers: PauseHandlers): Pa
       sheet?.remove();
       const made = createSheet(root, {
         title: t('screens.pause.title'),
-        sub: t('screens.pause.sub', { number: info.number, planet: info.planet, page: info.page, total: info.total }),
+        sub: info.base ? t('screens.pause.subBase', { number: info.number, planet: info.planet }) : t('screens.pause.sub', { number: info.number, planet: info.planet, page: info.page, total: info.total }),
         onClose: handlers.onResume,
       });
       made.el.classList.add('pause-sheet');
@@ -87,8 +89,8 @@ export function createPauseSheet(root: HTMLElement, handlers: PauseHandlers): Pa
       lines.append(
         line(t('screens.pause.resume'), t('screens.pause.resumeNote'), handlers.onResume, 'resume'),
         line(t('screens.pause.settings'), t('screens.pause.settingsNote'), handlers.onSettings, 'settings'),
-        line(t('screens.pause.end'), t('screens.pause.endNote'), handlers.onEnd, 'end'),
       );
+      if (!info.base) lines.append(line(t('screens.pause.end'), t('screens.pause.endNote'), handlers.onEnd, 'end'));
       made.scroll.append(lines);
       made.note(t('screens.pause.hold'));
       sheet = made;

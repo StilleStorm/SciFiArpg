@@ -169,9 +169,26 @@ describe('audio bindings', () => {
     expect(music.startMusic).toHaveBeenCalledTimes(1);
     bus.emit('run:ended', { outcome: 'ukonczono' });
     expect(music.stopMusic).toHaveBeenCalledTimes(1);
-    bus.emit('screen:changed', { screen: 'baza' });
+    bus.emit('screen:changed', { screen: 'profile' });
     expect(music.stopMusic).toHaveBeenCalledTimes(2);
     expect(names()).toContain('paperSlide');
+  });
+
+  it('the base page keeps the planet music: entering it restarts the profile, the screen change does not stop it', () => {
+    const { bus } = setup();
+    bus.emit('base:entered', { layout: 'wioska' });
+    expect(music.startMusic).toHaveBeenCalledTimes(1);
+    const stops = vi.mocked(music.stopMusic).mock.calls.length;
+    bus.emit('screen:changed', { screen: 'baza' });
+    expect(music.stopMusic).toHaveBeenCalledTimes(stops);
+    expect(names()).toContain('paperSlide');
+  });
+
+  it('opening a station and accepting the ticket make paper and stamp sounds', () => {
+    const { bus } = setup();
+    bus.emit('station:opened', { station: 'biurko' });
+    bus.emit('ticket:accepted');
+    expect(names()).toEqual(['inventoryOpen', 'stamp']);
   });
 
   it('menus get foley only: the title screen is silent, other screens slide paper', () => {

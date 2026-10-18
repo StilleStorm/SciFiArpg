@@ -2,6 +2,7 @@ import { createRng, type Rng } from '../core/rng';
 import type { Enemy, Pickup, Player, Projectile, Summon, Zone } from '../entities';
 import { applyHero, createHeroRun, heroDef, type HeroId, type HeroRun } from '../heroes';
 import { createPlayer } from '../entities/factory';
+import { createBaseState, generateBase, layoutForSeed, type BaseState } from './base';
 import { generateRunPages, type Page } from './pages';
 import { applyLaw, neutralLaw, type LawFlags, type LawId } from './laws';
 import type { Tunnel } from './tunnel';
@@ -60,6 +61,13 @@ export interface RunState {
   zones: Zone[];
   /** The open service tunnel, if any (world/tunnel.ts). Never saved: it lives inside one session. */
   tunnel?: Tunnel;
+  /**
+   * 'base': the walkable base page of the planet (world/base.ts), no enemies, no clock, no laws, no deaths; `page` is the
+   * base page and `pageIndex` the run page its exit leads to. 'run': the run proper. The exit of the base turns the page and flips this.
+   */
+  phase: 'base' | 'run';
+  /** The state of the base page; present only while `phase` is 'base'. */
+  base?: BaseState;
 }
 
 /** Optional overrides for tests and screenshots; everything else comes from the seed. */
@@ -74,6 +82,8 @@ export interface RunOptions {
   resume?: Bookmark;
   /** The saved character to play: gear, purse, level, updates (save/character.ts), applied before the stats are computed. */
   character?: Character;
+  /** 'base' starts in the walkable base page of the planet (the exit is locked until the ticket is accepted); default 'run'. */
+  phase?: 'base' | 'run';
 }
 
 export function createRun(seed: number, opts: RunOptions = {}): RunState {
@@ -84,8 +94,10 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
   if (lawId) ticket.lawId = lawId;
   if (pageCount) ticket.pageCount = pageCount;
   const pages = generateRunPages(rng, ticket.pageCount);
-  const page = pages[0] ?? generateRunPages(rng, 1)[0];
-  if (!page) throw new Error('no page');
+  const runPage = pages[0] ?? generateRunPages(rng, 1)[0];
+  if (!runPage) throw new Error('no page');
+  const phase = opts.phase ?? 'run';
+  const page = phase === 'base' ? generateBase(seed) : runPage;
   const state: RunState = {
     seed,
     rng,
@@ -103,24 +115,26 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
     nextId: 2,
     nextItemNumber: 1,
     kills: 0,
-    edgeCooldown: 0,
+    edgeCooldown: phase === 'base' ? 1e9 : 0, // the base page's edge is a plain wall: no "margines" note outside the 1200-unit page
     spawnTimer: 10,
     pages,
     ticket,
     law: neutralLaw(),
     modal: null,
     turning: false,
-    populate: true,
+    populate: phase !== 'base',
     kioskPending: false,
     victoryAt: null,
     hero: createHeroRun(opts.heroId ?? 'pralka'),
     summons: [],
     zones: [],
+    phase,
   };
+  if (phase === 'base') state.base = createBaseState(layoutForSeed(seed), opts.resume ?? null);
   applyHero(state.player, heroDef(opts.heroId ?? 'pralka'));
   applyLaw(state, ticket.lawId);
   if (opts.character) applyCharacter(state, opts.character);
-  if (opts.resume) applyBookmark(state, opts.resume);
+  if (opts.resume && phase === 'run') applyBookmark(state, opts.resume);
   return state;
 }
 

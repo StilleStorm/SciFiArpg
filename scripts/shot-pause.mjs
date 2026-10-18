@@ -150,6 +150,8 @@ try {
     await shot('pause-sheet-page3');
     await page.locator('[data-pause=end]').click();
     await sleep(900);
+    await page.evaluate(() => window.__game.station('biurko')); // the desk of the base page holds the resume line
+    await sleep(500);
     const base = await page.evaluate(() => ({
       screen: window.__game.screen(),
       bookmark: window.__game.meta().bookmark ?? null,
@@ -163,7 +165,9 @@ try {
 
     // ---- resume: same page index, racja full, the reassignment footnote ----
     await page.locator('.resume-btn').click();
-    await sleep(1800);
+    await sleep(500);
+    await page.evaluate(() => window.__game.walkToExit()); // the exit of the base leads straight to the bookmarked page
+    await sleep(2200);
     const after = await page.evaluate(() => {
       const s = window.__game.state();
       return { screen: window.__game.screen(), page: s.pageIndex, hp: s.player.hp, hpMax: s.player.hpMax, time: s.time, level: s.player.level, enemies: s.enemies.length, pickups: s.pickups.length, bookmark: window.__game.meta().bookmark ?? null, note: document.querySelector('.foot')?.textContent ?? '' };

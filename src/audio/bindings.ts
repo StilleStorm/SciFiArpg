@@ -93,14 +93,21 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
     setMusicPaused(e.paused);
     play(e.paused ? 'inventoryOpen' : 'inventoryClose');
   });
+  // the base page of a planet plays the planet's calm layer (the `base` music flag); the menus have none
+  on('base:entered', () => {
+    stopMusic(0.4);
+    startMusic(deps.getState);
+  });
+  on('station:opened', () => play('inventoryOpen'));
+  on('ticket:accepted', () => play('stamp'));
   on('screen:changed', (e) => {
     invOpen = false;
-    if (e.screen !== 'run') {
+    if (e.screen !== 'run' && e.screen !== 'baza') {
       hum?.stop(0.5);
       hum = null;
       stopMusic(1);
       if (e.screen !== 'title') play('paperSlide');
-    }
+    } else if (e.screen === 'baza') play('paperSlide');
   });
 
   // ---- combat ----
@@ -173,7 +180,11 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
   // the service tunnel: scissors through the sheet, then a strip of tape laid over the hole (nothing when the page or run goes away)
   on('tunnel:opened', () => play('crumple'));
   // the menus stopped the music on screen:changed; the way back through the tunnel starts it again
-  on('tunnel:returned', () => startMusic(deps.getState));
+  on('tunnel:returned', () => {
+    startMusic(deps.getState);
+    const s = deps.getState();
+    if (s) musicTurn(s, s.pageIndex); // the base's music goes on, now with the held page's roll
+  });
   on('tunnel:closed', (e) => {
     if (e.reason === 'return' || e.reason === 'second' || e.reason === 'death') play('paperSlide');
   });

@@ -36,6 +36,14 @@ export function headerFor(s: RunState): PageHeader {
   };
 }
 
+/** The printed header of the base page: the form line and the clause (it appears once the ticket is accepted). */
+export function baseHeaderFor(s: RunState): PageHeader {
+  return {
+    top: t('screens.base.header', { number: s.ticket.number }),
+    clause: t(`laws.${s.ticket.lawId}.header`, { planet: s.ticket.planetLoc }),
+  };
+}
+
 // ---------- population ----------
 
 interface Wave {
@@ -91,10 +99,25 @@ export function populatePage(s: RunState, bus: Bus): void {
 
 // ---------- the turn ----------
 
-/** Move the run to page `index`: new page, player at the entry, everything else cleared. */
+/**
+ * The player walked out of the base through the unlocked exit: the run proper begins. The clock starts (at the bookmarked
+ * time when a ticket is being resumed, with the footnote that another consultant took it over), the base state goes away.
+ */
+export function beginRun(s: RunState, bus: Bus): void {
+  const resume = s.base?.resume ?? null;
+  s.phase = 'run';
+  delete s.base;
+  s.time = resume ? resume.clockS : 0;
+  s.edgeCooldown = 0;
+  bus.emit('run:started', { seed: s.seed });
+}
+
+/** Move the run to page `index`: new page, player at the entry, everything else cleared. From the base this also starts the run. */
 export function enterPage(s: RunState, bus: Bus, index: number): void {
   const page = s.pages[index];
   if (!page) return;
+  const resumed = s.phase === 'base' && s.base?.resume != null;
+  if (s.phase === 'base') beginRun(s, bus);
   s.pageIndex = index;
   s.page = page;
   s.enemies.length = 0;
@@ -114,11 +137,13 @@ export function enterPage(s: RunState, bus: Bus, index: number): void {
   s.spawnTimer = 10;
   onPageEntered(s, bus);
   bus.emit('page:entered', { index, count: s.pageCount });
+  // A resumed ticket is a new page from the seed handled by another consultant (DESIGN 4.1); said last, so it is the note that stays in view.
+  if (resumed) bus.emit('footnote', { text: t('ui.note.reassigned', { number: s.ticket.number }) });
 }
 
 /** Per step: populate a fresh page, watch the exit, the kiosk and the end of the run. */
 export function tickPageTurn(s: RunState, bus: Bus): void {
-  if (s.turning || s.modal) return;
+  if (s.turning || s.modal || s.phase === 'base') return; // the base page has its own watch (world/base.ts tickBase)
   if (s.populate) populatePage(s, bus);
 
   if (s.victoryAt !== null && s.victoryAt >= 0 && s.time >= s.victoryAt) {
@@ -180,6 +205,8 @@ export interface TurnDeps {
   camera: Camera;
   views: Views;
   getState(): RunState | null;
+  /** The camera's page bounds, kept in step with the page that is entered (the base page is smaller than the run's pages). */
+  bounds?: { w: number; h: number };
 }
 
 /** Plays the page-turn sweep on every `page:turn`. Returns the unbind function. */
@@ -204,6 +231,10 @@ export function bindPageTurn(bus: Bus, deps: TurnDeps): () => void {
 
     // 2. Move the run to the new page and draw it underneath.
     enterPage(s, bus, e.to);
+    if (deps.bounds) {
+      deps.bounds.w = s.page.w;
+      deps.bounds.h = s.page.h;
+    }
     views.clear();
     stage.world.replaceChildren();
     stage.fx.replaceChildren();

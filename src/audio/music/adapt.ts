@@ -28,6 +28,8 @@ export interface MusicFlags {
   suspended: boolean;
   dead: boolean;
   pageTurn: boolean;
+  /** The player is in the base page of the planet: the calm layer only, 6 dB down (DESIGN 4.1). Absent = false. */
+  base?: boolean;
 }
 
 export const CALM_FLAGS: MusicFlags = {
@@ -40,7 +42,11 @@ export const CALM_FLAGS: MusicFlags = {
   suspended: false,
   dead: false,
   pageTurn: false,
+  base: false,
 };
+
+/** The base page plays the calm layer at this level (-6 dB). */
+export const BASE_LEVEL = 0.5;
 
 /** More than this many enemies near brings in the second voice. */
 export const NEAR_COUNT = 2;
@@ -132,6 +138,7 @@ export function adaptTargets(f: MusicFlags, profile: ProfileId): Targets {
     t.door = 650;
   }
   if (f.pageTurn) t.level *= 0.35;
+  if (f.base) t.level *= BASE_LEVEL;
   if (f.dead) {
     t.tempo = 0;
     t.level = 0;
@@ -185,6 +192,7 @@ export function sameFlags(a: MusicFlags, b: MusicFlags): boolean {
     a.reversed === b.reversed &&
     a.suspended === b.suspended &&
     a.dead === b.dead &&
-    a.pageTurn === b.pageTurn
+    a.pageTurn === b.pageTurn &&
+    (a.base === true) === (b.base === true)
   );
 }

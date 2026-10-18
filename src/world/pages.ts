@@ -1,6 +1,7 @@
 import type { Side } from '../core/events';
 import type { Rng } from '../core/rng';
 import { dist, type Vec } from '../core/vec';
+import type { BasePageInfo, StationId } from './base';
 
 export const PAGE_W = 1200;
 export const PAGE_H = 1600;
@@ -26,6 +27,8 @@ export interface Obstacle {
   /** Seeds the hand-drawn irregularity (render only). */
   seed: number;
   colliders: Circle[];
+  /** Base page only: this obstacle is the collider of a station or a prop (world/base.ts); the page drawing skips it. */
+  station?: StationId | 'prop';
 }
 
 export type Corner = 'tl' | 'tr' | 'bl' | 'br';
@@ -60,6 +63,8 @@ export interface Page {
   exit: PageExit | null;
   /** True on the one page that carries the paczkomat. */
   hasKiosk: boolean;
+  /** Only the walkable base page of a planet has this (world/base.ts): layout, stations, props, the hole's place. */
+  base?: BasePageInfo;
 }
 
 /** What generatePage needs to know about the page's place in the run. */
@@ -76,7 +81,7 @@ export const EXIT_RADIUS = 100;
 export const FOLD = 70;
 export const CORNERS: readonly Corner[] = ['tl', 'tr', 'bl', 'br'];
 
-function colliders(o: Pick<Obstacle, 'kind' | 'x' | 'y' | 'size' | 'rot'>): Circle[] {
+export function colliders(o: Pick<Obstacle, 'kind' | 'x' | 'y' | 'size' | 'rot'>): Circle[] {
   switch (o.kind) {
     case 'blot':
       return [{ x: o.x, y: o.y, r: o.size * 0.85 }];

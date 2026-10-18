@@ -99,6 +99,20 @@ export interface GameHook {
   returnFromTunnel(): boolean;
   /** The saved character record (null before the first save). */
   character(): Character | null;
+  /**
+   * The base page of a planet (DESIGN 4.1) for `seed` (default: the next ticket's planet), as `go('baza')` shows it: a
+   * walkable page with the stations, no enemies, the exit locked. Returns the state.
+   */
+  startBase(seed?: number): RunState;
+  /** Walk up to a station and tap it: its sheet opens ('biurko' the desk, 'kiosk' the Sklep, 'tablica' the settings, 'paczkomat' a footnote). */
+  station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean;
+  /** "Akceptuję regulamin" without the sheet: the exit of the base opens. False outside the base. */
+  acceptTicket(): boolean;
+  /**
+   * Put the player into the exit of the base page and run one step: when the exit is open the page turn to the first page of
+   * the run starts (the run begins). Returns whether the turn started; a locked exit only answers with its note.
+   */
+  walkToExit(): boolean;
   /** Plain-data snapshot for assertions. */
   snapshot(): { screen: Screen; time: number; hp: number; enemies: number; pickups: number; kills: number; x: number; y: number } | null;
 }
@@ -125,6 +139,9 @@ export interface HookDeps {
   resumeTicket(): boolean;
   openTunnel(): boolean;
   returnFromTunnel(): boolean;
+  startBase(seed?: number): RunState;
+  station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean;
+  acceptTicket(): boolean;
 }
 
 const NEAR = 90;
@@ -192,7 +209,7 @@ export function installTestHook(deps: HookDeps): void {
     },
     hurtPlayer(amount) {
       const s = game.state;
-      if (s && s.status === 'running') applyDamage(s, deps.bus, s.player, amount, false);
+      if (s && s.status === 'running' && s.phase === 'run') applyDamage(s, deps.bus, s.player, amount, false);
     },
     placePlayer(x, y) {
       const s = game.state;
@@ -251,6 +268,19 @@ export function installTestHook(deps: HookDeps): void {
     },
     returnFromTunnel: () => deps.returnFromTunnel(),
     character: () => deps.getMeta().character ?? null,
+    startBase: (seed) => deps.startBase(seed),
+    station: (name) => deps.station(name),
+    acceptTicket: () => deps.acceptTicket(),
+    walkToExit() {
+      const s = game.state;
+      const exit = s?.page.exit;
+      if (!s || s.phase !== 'base' || !exit) return false;
+      s.player.x = exit.x + (exit.corner[1] === 'l' ? 45 : -45);
+      s.player.y = exit.y + (exit.corner[0] === 't' ? 45 : -45);
+      s.player.target = null;
+      game.update(1 / 60);
+      return s.turning;
+    },
     snapshot() {
       const s = game.state;
       if (!s) return null;

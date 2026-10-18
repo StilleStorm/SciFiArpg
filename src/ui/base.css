@@ -1,0 +1,176 @@
+/*
+ * The base page (DESIGN 4.1): the desk sheet (the old base form, now a sheet over the walkable page), the ticket sheet,
+ * and the margin-note labels of the stations. Paper, ink, no rounded cards. The sheets share ui/sheet.css; they scroll in
+ * their own area, so a page 390 px high (landscape) never loses a button.
+ */
+
+/* ---------- margin-note labels in the page layer ---------- */
+.base-label {
+  transition: opacity 160ms linear;
+}
+.base-label text {
+  paint-order: normal;
+}
+
+/* ---------- the desk of the Asystent ---------- */
+.desk {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.desk-col {
+  min-width: 0;
+}
+.desk-sheet .ps-sub {
+  font-family: var(--title);
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.desk-sheet .trow .link-btn {
+  margin: 0;
+  flex: none;
+  min-height: 44px;
+  padding: 0 4px;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: flex-end;
+  padding-bottom: 6px;
+}
+.desk-sheet .group {
+  margin-top: 14px;
+}
+.desk-sheet .resume-btn,
+.desk-sheet .tunnel-return {
+  min-height: 44px;
+}
+.desk-actions {
+  flex: none;
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+  margin-top: 6px;
+  border-top: 1px solid var(--ink);
+}
+.desk-actions .start {
+  margin-top: 0;
+  min-height: 44px;
+  font-size: 18px;
+  padding: 8px 14px 3px;
+}
+:root[data-orient='landscape'] .desk {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  column-gap: 26px;
+  align-items: start;
+}
+:root[data-orient='landscape'] .desk-sheet .hist-list {
+  columns: 1;
+}
+:root[data-orient='landscape'] .desk-sheet .group {
+  margin-top: 4px;
+}
+:root[data-orient='landscape'] .desk-sheet .ps-frame,
+:root[data-orient='landscape'] .ticket-sheet .ps-frame {
+  padding-top: 10px;
+  padding-bottom: 6px;
+}
+:root[data-orient='landscape'] .desk-sheet .ps-notes,
+:root[data-orient='landscape'] .ticket-sheet .ps-notes {
+  min-height: 0;
+  margin-top: 6px;
+}
+
+/* ---------- the ticket sheet ---------- */
+.ticket-sheet .ps-sub {
+  font-family: var(--title);
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ticket {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  text-align: left;
+}
+.ticket .tform {
+  width: 100%;
+}
+.ticket .clause {
+  font-size: 17px;
+}
+.tk-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.tk-side .ticket-art {
+  width: 220px;
+  height: 143px;
+  margin: 6px 0 0;
+}
+.tk-side .eta {
+  text-align: center;
+}
+.tk-side .declined {
+  min-height: 21px;
+  margin: 8px 0 0;
+}
+.tk-actions {
+  position: relative;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 0 4px;
+}
+.tk-actions .start {
+  margin-top: 0;
+  min-height: 44px;
+}
+.tk-actions .link-btn {
+  margin-top: 4px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.ticket-sheet .ticket-stamp {
+  bottom: auto;
+  top: -22px;
+  left: 50%;
+  margin-left: -160px;
+}
+:root[data-orient='landscape'] .ticket {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  column-gap: 24px;
+  align-items: start;
+}
+:root[data-orient='landscape'] .ticket .tk-actions {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  justify-content: center;
+  gap: 30px;
+}
+:root[data-orient='landscape'] .tk-side .ticket-art {
+  width: 170px;
+  height: 110px;
+}
+:root[data-orient='landscape'] .ticket .clause {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+:root[data-orient='landscape'] .ticket .trow {
+  margin-bottom: 7px;
+}
+
+/* ---------- the base page has no enemies: the skill pads are put away, the Załączniki pad stays ---------- */
+.pads.in-base .pad.s1,
+.pads.in-base .pad.s2,
+.pads.in-base .pad.s3 {
+  display: none;
+}

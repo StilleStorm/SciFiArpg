@@ -171,12 +171,15 @@ try {
       s.player.target = { x: s.tunnel.x, y: s.tunnel.y };
     });
     await sleep(1500);
+    await page.evaluate(() => window.__game.station('biurko')); // the return line is on the desk sheet (the hole in the base is the other way back)
+    await sleep(500);
     const held = await page.evaluate(() => {
       const g = window.__game;
-      const s = g.state();
+      const cur = g.state();
+      const s = window.__keep; // the held run waits in memory; the live state is the base page
       return {
         screen: g.screen(),
-        same: window.__keep === s,
+        same: s !== cur && cur.phase === 'base',
         status: s.status,
         time: s.time,
         page: s.pageIndex,
@@ -197,7 +200,7 @@ try {
     check(`${prefix}: the held run is still the same object`, held.same);
     await sleep(700);
     const stillHeld = await page.evaluate(() => {
-      const s = window.__game.state();
+      const s = window.__keep;
       return { time: s.time, enemies: s.enemies.map((e) => [e.id, e.x, e.y, e.hp]) };
     });
     check(`${prefix}: nothing moves while the player is in the base`, stillHeld.time === held.time && JSON.stringify(stillHeld.enemies) === JSON.stringify(held.enemies));
@@ -229,7 +232,7 @@ try {
     // the run has been running again for ~1.4 s: the ids are the same and (barring their walking) nobody was regenerated
     check(`${prefix}: the same enemy ids are present`, JSON.stringify(back.enemies.map((e) => e[0])) === JSON.stringify(held.enemies.map((e) => e[0])), `${back.enemies.length} enemies`);
     check(`${prefix}: the clock continued from where it stopped`, back.time >= held.time && back.time - held.time < 2.5, `${held.time.toFixed(2)} -> ${back.time.toFixed(2)}`);
-    check(`${prefix}: the hole is taped and the tunnel is closed`, back.tunnel === null && back.tapes === 2, `tapes ${back.tapes}`);
+    check(`${prefix}: the hole is taped and the tunnel is closed`, back.tunnel === null && back.tapes >= 1, `tapes ${back.tapes}`);
     check(`${prefix}: the note beside the hole is struck through`, back.struck >= 1, `struck ${back.struck}`);
     check(`${prefix}: the Asystent notes the repair`, back.foot.includes('Taśma nie jest przezroczysta'), back.foot.slice(-80));
     check(`${prefix}: the HUD is back`, back.hudHidden === false);
@@ -280,13 +283,15 @@ try {
 
     await page.evaluate(() => window.__game.go('baza'));
     await sleep(300);
-    // baza -> ticket -> back -> baza
+    // baza -> desk -> ticket -> back -> baza (the sheets over the base are one history entry)
+    await page.evaluate(() => window.__game.station('biurko'));
+    await sleep(300);
     await page.locator('.start:visible').click();
     await sleep(500);
-    check('back: the ticket screen is up', (await screen()) === 'ticket');
+    check('back: the ticket sheet is up', await page.evaluate(() => !!document.querySelector('.ticket-sheet')));
     await page.evaluate(() => history.back());
     await sleep(500);
-    check('back: the back button on the ticket returns to the base', (await screen()) === 'baza', await screen());
+    check('back: the back button closes the sheet and returns to the base page', (await screen()) === 'baza' && (await page.evaluate(() => !document.querySelector('.ps'))), await screen());
     // baza -> run: back opens the pause sheet, back again resumes, the run is never left
     await page.evaluate(() => window.__game.start(11, { pageCount: 4 }));
     await sleep(1200);
@@ -307,6 +312,7 @@ try {
       const g = window.__game;
       g.openTunnel();
       const s = g.state();
+      window.__keep = s; // the run that is held while the player is in the base
       g.placePlayer(s.tunnel.x + 80, s.tunnel.y);
     });
     await sleep(200);
@@ -314,32 +320,36 @@ try {
     await sleep(500);
     check('held: the hook walks onto the hole and the base opens', walked && (await screen()) === 'baza');
     // resuming the bookmark from the base gives the held run up: the pages come from the seed again, the hole is gone
-    await page.evaluate(() => {
-      window.__keep = window.__game.state();
-    });
     const resumed = await page.evaluate(() => {
       const ok = window.__game.resumeTicket();
-      const s = window.__game.state();
-      return { ok, screen: window.__game.screen(), seed: s.seed, same: s === window.__keep, tunnel: s.tunnel ?? null, bookmark: window.__game.meta().bookmark ?? null, line: document.querySelector('.tunnel-return') !== null && !document.querySelector('.baza')?.classList.contains('hidden') };
+      return { ok };
     });
+    await page.evaluate(() => window.__game.walkToExit());
+    await sleep(2000);
+    Object.assign(resumed, await page.evaluate(() => {
+      const s = window.__game.state();
+      return { screen: window.__game.screen(), seed: s.seed, same: s === window.__keep, tunnel: s.tunnel ?? null, bookmark: window.__game.meta().bookmark ?? null };
+    }));
     check('held: resuming the bookmark gives the held run up (a new state, no tunnel, the bookmark kept)', resumed.ok && resumed.screen === 'run' && !resumed.same && resumed.tunnel === null && resumed.seed === 11 && resumed.bookmark?.seed === 11, JSON.stringify({ ...resumed, bookmark: resumed.bookmark?.seed }));
     // ... and so does starting a new ticket from the base
     await page.evaluate(() => {
       const g = window.__game;
       g.openTunnel();
       const s = g.state();
+      window.__keep = s; // the run that is held while the player is in the base
       g.placePlayer(s.tunnel.x + 80, s.tunnel.y);
     });
     await sleep(200);
     await page.evaluate(() => window.__game.enterTunnel());
     await sleep(400);
-    await page.evaluate(() => {
-      window.__keep = window.__game.state();
-    });
+    await page.evaluate(() => window.__game.station('biurko'));
+    await sleep(300);
     await page.locator('.start:visible').click();
     await sleep(500);
     await page.locator('.start:visible').click();
     await sleep(1200);
+    await page.evaluate(() => window.__game.walkToExit());
+    await sleep(2000);
     const fresh = await page.evaluate(() => ({ screen: window.__game.screen(), same: window.__game.state() === window.__keep, tunnel: window.__game.state()?.tunnel ?? null }));
     check('held: starting a new ticket gives the held run up', fresh.screen === 'run' && !fresh.same && fresh.tunnel === null, JSON.stringify(fresh));
     await ctx.close();

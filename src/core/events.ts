@@ -70,6 +70,12 @@ export interface GameEvents {
   'tunnel:returned': undefined;
   /** The tunnel is gone. 'return' and 'second' and 'death' are repaired with tape, 'end' and 'page' are only rubbed out. */
   'tunnel:closed': { reason: TunnelCloseReason };
+  /** The player stands in the base page of a planet (world/base.ts): `layout` is one of lądowisko / wioska / miasteczko (ids ladowisko, wioska, miasteczko). */
+  'base:entered': { layout: 'ladowisko' | 'wioska' | 'miasteczko' };
+  /** The player tapped a station of the base and reached it: main.ts opens its sheet (biurko, kiosk, tablica, paczkomat). */
+  'station:opened': { station: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' };
+  /** "Akceptuję regulamin" (or "Wznów zgłoszenie") was pressed in the base: the exit of the base page is unlocked. */
+  'ticket:accepted': undefined;
 }
 
 type Args<K extends keyof GameEvents> = GameEvents[K] extends undefined ? [] : [GameEvents[K]];

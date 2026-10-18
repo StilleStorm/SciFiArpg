@@ -365,7 +365,7 @@ export function botReply(state: RunState): string | null {
 /** Time-based clauses. Called every step after `time` advanced. */
 export function tickLaw(state: RunState, bus: Bus, dt: number): void {
   const L = state.law;
-  if (!L.id) return;
+  if (!L.id || state.phase === 'base') return; // the clauses tick in the run proper only
   const p = state.player;
 
   if (L.hours) {

@@ -198,11 +198,19 @@ try {
     window.__game.go('baza');
   });
   await wait(900);
+  await shot('base-page');
+  // the desk sheet is the old base form: the history, rewritten on the first visit
+  await page.evaluate(() => window.__game.station('biurko'));
+  await wait(900);
   await shot('baza');
   await wait(3200);
   await shot('baza-rewritten');
 
-  await page.getByText('Ustawienia', { exact: true }).click();
+  await page.evaluate(() => {
+    document.querySelector('.ps-close').click();
+  });
+  await wait(300);
+  await page.evaluate(() => window.__game.station('tablica'));
   await wait(500);
   await shot('settings');
   await page.getByText('Leworęczny').click();
@@ -411,8 +419,15 @@ try {
     window.__game.go('baza');
   });
   await lwait(900);
+  await lshot('base-page');
+  await lp.evaluate(() => window.__game.station('biurko'));
+  await lwait(700);
   await lshot('baza');
-  await lp.getByText('Ustawienia', { exact: true }).click();
+  await lp.evaluate(() => {
+    document.querySelector('.ps-close').click();
+  });
+  await lwait(300);
+  await lp.evaluate(() => window.__game.station('tablica'));
   await lwait(500);
   await lshot('settings');
   await lp.getByText('Wróć', { exact: true }).click();

@@ -8,7 +8,8 @@
     "pause": "Pauza",
     "pauseLabel": "Wstrzymaj zgłoszenie",
     "tunnel": "Tunel",
-    "tunnelLabel": "Otwórz tunel serwisowy"
+    "tunnelLabel": "Otwórz tunel serwisowy",
+    "base": "Baza"
   },
   "title": {
     "agency": "Centrum Obsługi Planet",

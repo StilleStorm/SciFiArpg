@@ -5,11 +5,20 @@ import { el } from '../render/svg';
 import { tween } from '../render/tween';
 import type { TicketInfo } from '../world/ticket';
 import { h } from './dom';
+import { createSheet, type Sheet } from './sheet';
+import './base.css';
+
+export interface TicketHandlers {
+  /** "Akceptuję regulamin", after the stamp has landed. */
+  onAccept(): void;
+  /** "Zamknij": back to the base page without a ticket. */
+  onClose(): void;
+}
 
 export interface TicketScreen {
-  el: HTMLElement;
-  show(info: TicketInfo): void;
-  hide(): void;
+  open(info: TicketInfo): void;
+  close(): void;
+  isOpen(): boolean;
 }
 
 function row(label: string, value: string, extra = ''): HTMLElement {
@@ -20,22 +29,20 @@ function row(label: string, value: string, extra = ''): HTMLElement {
 }
 
 /**
- * The run start: the ticket header. Number, planet, the regulamin clause, the dominant family, an
- * estimate, one button. Declining shows the same form again with a note.
+ * The ticket header as a sheet over the base page: number, planet, the regulamin clause, the dominant family, an
+ * estimate, one button. Declining shows the same form again with a note. Accepting stamps the form and opens the exit of
+ * the base page (main.ts). The form scrolls in its own area, so it fits a page 390 px high.
  */
-export function createTicket(root: HTMLElement, onAccept: () => void): TicketScreen {
-  const screen = h('div', 'screen paper hidden');
-  const frame = h('div', 'frame ticket');
-  const stampSvg = el('svg', { class: 'ticket-stamp', viewBox: '0 0 320 90', 'aria-hidden': 'true' });
-  const stampLayer = el('g', {});
-  stampSvg.append(stampLayer);
-  screen.append(frame);
-  root.append(screen);
+export function createTicket(root: HTMLElement, handlers: TicketHandlers): TicketScreen {
+  let sheet: Sheet | null = null;
   let busy = false;
 
   function render(info: TicketInfo, declined: boolean): void {
-    frame.replaceChildren();
-    stampLayer.replaceChildren();
+    if (!sheet) return;
+    const body = h('div', 'ticket');
+    const stampSvg = el('svg', { class: 'ticket-stamp', viewBox: '0 0 320 90', 'aria-hidden': 'true' });
+    const stampLayer = el('g', {});
+    stampSvg.append(stampLayer);
     const accept = h('button', 'start', t('screens.ticket.accept'));
     accept.type = 'button';
     accept.addEventListener('click', () => {
@@ -46,7 +53,7 @@ export function createTicket(root: HTMLElement, onAccept: () => void): TicketScr
         delay: 700,
         done: () => {
           busy = false;
-          onAccept();
+          handlers.onAccept();
         },
       });
     });
@@ -66,32 +73,34 @@ export function createTicket(root: HTMLElement, onAccept: () => void): TicketScr
       row(t('screens.ticket.family'), t(`screens.family.${info.family}`)),
       row(t('screens.ticket.pages'), t('screens.ticket.pagesValue', { count: info.pageCount })),
     );
-    frame.append(
-      h('div', 'agency', t('ui.title.agency')),
-      h('h2', 'form-title tight', `${t('screens.ticket.title')} ${t('screens.ticket.number', { number: info.number })}`),
-      h('hr', 'rule'),
-      form,
-      art,
-      h('p', 'eta', t('screens.ticket.eta')),
-      declined ? h('p', 'declined', t('screens.ticket.declined')) : h('p', 'declined empty', ''),
-      stampSvg,
-      accept,
-      decline,
-    );
-    frame.classList.remove('redraw');
-    void frame.offsetWidth;
-    frame.classList.add('redraw');
+    const actions = h('div', 'tk-actions');
+    actions.append(accept, decline, stampSvg);
+    const side = h('div', 'tk-side');
+    side.append(art, h('p', 'eta', t('screens.ticket.eta')), declined ? h('p', 'declined', t('screens.ticket.declined')) : h('p', 'declined empty', ''));
+    body.append(form, side, actions);
+    sheet.scroll.replaceChildren(body);
+    body.classList.add('redraw');
   }
 
   return {
-    el: screen,
-    show(info) {
+    open(info) {
+      sheet?.remove();
       busy = false;
-      screen.classList.remove('hidden');
+      sheet = createSheet(root, {
+        title: `${t('screens.ticket.title')} ${t('screens.ticket.number', { number: info.number })}`,
+        sub: t('ui.title.agency'),
+        onClose: () => {
+          if (!busy) handlers.onClose();
+        },
+      });
+      sheet.el.classList.add('ticket-sheet');
       render(info, false);
     },
-    hide() {
-      screen.classList.add('hidden');
+    close() {
+      sheet?.remove();
+      sheet = null;
+      busy = false;
     },
+    isOpen: () => sheet !== null,
   };
 }

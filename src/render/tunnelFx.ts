@@ -86,11 +86,14 @@ export interface TunnelFxDeps {
   pageWidth(): number;
 }
 
+/** The unbind function, plus `show`: draw the hole of a tunnel that is already open (the base end, the return into a held run) without a cut. */
+export type TunnelFxHandle = (() => void) & { show(x: number, y: number, animate?: boolean): void };
+
 /** Draw the hole on `tunnel:opened`, repair or rub it out on `tunnel:closed`. Returns the unbind function. */
-export function bindTunnelFx(bus: Bus, deps: TunnelFxDeps): () => void {
+export function bindTunnelFx(bus: Bus, deps: TunnelFxDeps): TunnelFxHandle {
   let open: Drawn | null = null;
 
-  const cutHole = (x: number, y: number): void => {
+  const cutHole = (x: number, y: number, animate = true): void => {
     const seed = Math.floor(x * 31 + y * 17) >>> 0;
     const group = el('g', { class: 'tn-hole', transform: `translate(${n2(x)} ${n2(y)})` });
     const outline = holeOutline(createRng(seed));
@@ -131,8 +134,12 @@ export function bindTunnelFx(bus: Bus, deps: TunnelFxDeps): () => void {
     note.style.fontSize = '13px';
     group.append(lip, shade, edge, hatch, cuts, note);
     deps.page.append(group);
-    drawIn(group, 380);
-    tween(260, (p) => (note.style.opacity = String(p)), { delay: 300 });
+    if (animate) {
+      drawIn(group, 380);
+      tween(260, (p) => (note.style.opacity = String(p)), { delay: 300 });
+    } else {
+      note.style.opacity = '1';
+    }
     open = { x, y, group, note };
   };
 
@@ -191,7 +198,12 @@ export function bindTunnelFx(bus: Bus, deps: TunnelFxDeps): () => void {
       open = null;
     }),
   ];
-  return () => {
+  const unbind = (): void => {
     for (const off of offs) off();
   };
+  return Object.assign(unbind, {
+    show(x: number, y: number, animate = false): void {
+      cutHole(x, y, animate);
+    },
+  });
 }

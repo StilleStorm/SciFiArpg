@@ -129,13 +129,39 @@ try {
     await page.locator('button.choose').locator('visible=true').first().click();
     await sleep(600);
   }
-  await shot('02-baza');
+  await shot('02-base');
+  const baseSt = await page.evaluate(() => {
+    const s = window.__game.state();
+    return { screen: window.__game.screen(), phase: s.phase, enemies: s.enemies.length, time: s.time, locked: !s.base.accepted, layout: s.base.layout };
+  });
+  check('after the profile the walkable base page is up: no enemies, the clock still, the exit locked', baseSt.screen === 'baza' && baseSt.phase === 'base' && baseSt.enemies === 0 && baseSt.time === 0 && baseSt.locked, JSON.stringify(baseSt));
+  const lockedTurn = await page.evaluate(() => window.__game.walkToExit());
+  check('walking into the locked exit does not turn the page', lockedTurn === false && (await page.evaluate(() => window.__game.state().phase)) === 'base');
+  // a real tap on the desk: the player walks there and the desk sheet opens
+  await page.evaluate(() => window.__game.setSteering('tap'));
+  await page.evaluate(() => window.__game.startBase());
+  await sleep(900);
+  const desk = await page.evaluate(() => {
+    const s = window.__game.state();
+    const st = s.page.base.stations.find((x) => x.id === 'biurko');
+    const m = document.getElementById('stage').getScreenCTM();
+    return { x: m.a * st.x + m.e, y: m.d * st.y + m.f };
+  });
+  await page.touchscreen.tap(desk.x, desk.y);
+  await page.waitForFunction(() => document.querySelector('.desk-sheet') !== null, null, { timeout: 12000 }).catch(() => undefined);
+  check('tapping the desk walks there and opens its sheet', await page.evaluate(() => document.querySelector('.desk-sheet') !== null));
+  await sleep(500);
+  await shot('02b-desk');
   await clickText('Nowe zgłoszenie');
   await sleep(600);
   await shot('03-ticket');
   await clickText('Akceptuję regulamin');
   await sleep(1800);
-  check('reached the run through the real buttons', (await screen()) === 'run');
+  await shot('03b-base-unlocked');
+  check('accepting the ticket unlocks the exit and keeps the player in the base', (await screen()) === 'baza' && (await page.evaluate(() => window.__game.state().base.accepted)));
+  await page.evaluate(() => window.__game.walkToExit());
+  await sleep(1800);
+  check('reached the run through the real buttons and the exit of the base', (await screen()) === 'run' && (await page.evaluate(() => window.__game.state().phase)) === 'run');
   await shot('04-run-start');
   // sound: the real button clicks unlocked the context, the music started with the run (menus had none)
   const ctxState = await page.evaluate(() => window.__game.audio.contextState());
@@ -222,13 +248,18 @@ try {
   await page.locator('[data-pause=end]').click({ timeout: 3000 });
   await sleep(900);
   check("Zakończ goes to 'baza'", (await screen()) === 'baza', await screen());
+  await page.evaluate(() => window.__game.station('biurko'));
+  await sleep(500);
   const resumeLine = await page.locator('.resume-btn').textContent({ timeout: 3000 }).catch(() => null);
   check('the base offers "Wznów zgłoszenie nr ..." at the top', typeof resumeLine === 'string' && resumeLine.includes('Wznów zgłoszenie nr'), String(resumeLine));
   await shot('08c-baza-resume');
   const saved = await page.evaluate(() => ({ bookmark: window.__game.meta().bookmark ?? null, character: window.__game.character() }));
   check('the bookmark and the character were saved', saved.bookmark?.pageIndex === pzBefore?.page && saved.character !== null, JSON.stringify(saved.bookmark));
   await page.locator('.resume-btn').click({ timeout: 3000 });
-  await sleep(1800);
+  await sleep(600);
+  check('Wznów zgłoszenie unlocks the exit of the base, the run has not started yet', (await page.evaluate(() => ({ phase: window.__game.state().phase, acc: window.__game.state().base.accepted }))).phase === 'base');
+  await page.evaluate(() => window.__game.walkToExit());
+  await sleep(2000);
   await settle();
   const pzAfter = await page.evaluate(() => {
     const s = window.__game.state();
@@ -262,24 +293,28 @@ try {
   await sleep(400);
   const tnHeld = await page.evaluate(() => {
     const s = window.__game.state();
-    return { screen: window.__game.screen(), status: s?.status, same: window.__keep === s, line: document.querySelector('.tunnel-wait')?.textContent ?? '', time: s?.time };
+    return { screen: window.__game.screen(), phase: s?.phase, held: window.__keep.status, other: window.__keep !== s, hole: !!s.tunnel, time: window.__keep.time };
   });
-  check('walking onto the hole holds the run and opens the base', tnHeld.screen === 'baza' && tnHeld.status === 'paused' && tnHeld.same, JSON.stringify(tnHeld));
-  check('the base shows the return line', /czeka na stronie/.test(tnHeld.line) && (await page.locator('.tunnel-return').isVisible()), tnHeld.line);
+  check('walking onto the hole holds the run and opens the base with the hole in it', tnHeld.screen === 'baza' && tnHeld.phase === 'base' && tnHeld.held === 'paused' && tnHeld.other && tnHeld.hole, JSON.stringify(tnHeld));
   await shot('08f-tunnel-baza');
+  await page.evaluate(() => window.__game.station('biurko'));
   await sleep(500);
-  check('the clock stands still in the base', (await page.evaluate(() => window.__game.state().time)) === tnHeld.time);
+  const tnLine = await page.locator('.tunnel-wait').textContent().catch(() => '');
+  check('the desk shows the return line', /czeka na stronie/.test(tnLine ?? '') && (await page.locator('.tunnel-return').isVisible()), String(tnLine));
+  await page.evaluate(() => document.querySelector('.ps-close').click());
+  await sleep(700);
+  check('the held run stands still while the player is in the base', (await page.evaluate(() => window.__keep.time)) === tnHeld.time);
   // the return, read in the same task: nothing can have stepped between the two snapshots
   const exact = await page.evaluate(() => {
     const snap = () => {
-      const s = window.__game.state();
-      return JSON.stringify({ same: window.__keep === s, time: s.time, enemies: s.enemies.map((e) => [e.id, e.x, e.y, e.hp]), player: [s.player.x, s.player.y], pickups: s.pickups.map((k) => [k.id, k.x, k.y]) });
+      const s = window.__keep;
+      return JSON.stringify({ time: s.time, enemies: s.enemies.map((e) => [e.id, e.x, e.y, e.hp]), player: [s.player.x, s.player.y], pickups: s.pickups.map((k) => [k.id, k.x, k.y]) });
     };
     const before = snap();
     const ok = window.__game.returnFromTunnel();
-    return { ok, before, after: snap() };
+    return { ok, before, after: snap(), same: window.__keep === window.__game.state() };
   });
-  check('returning restores the same enemies, loot and clock, to the unit', exact.ok && exact.before === exact.after, exact.before === exact.after ? '' : `${exact.before} vs ${exact.after}`);
+  check('returning restores the same enemies, loot and clock, to the unit', exact.ok && exact.same && exact.before === exact.after, exact.before === exact.after ? '' : `${exact.before} vs ${exact.after}`);
   await sleep(900);
   const tnBack = await page.evaluate(() => {
     const s = window.__game.state();
@@ -329,10 +364,14 @@ try {
   await shot('11-baza-after-boss');
 
   // ---------- 6. a death form ----------
+  await page.evaluate(() => window.__game.station('biurko'));
+  await sleep(500);
   await clickText('Nowe zgłoszenie');
   await sleep(500);
   await clickText('Akceptuję regulamin');
   await sleep(1500);
+  await page.evaluate(() => window.__game.walkToExit());
+  await sleep(2000);
   await settle();
   await page.evaluate(() => {
     const s = window.__game.state();
