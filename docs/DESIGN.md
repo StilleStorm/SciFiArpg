@@ -459,6 +459,36 @@ crossed out). Each: 1 auto-attack type, 3 skills (typed, see §5.2), 1 passive q
 
 ---
 
+5. **Naleśnik** (idea: the player's daughter) — a flat, pancake-shaped asteroid that has applied
+   to the Komisja ds. Kulistości for dwarf-planet status. The application was received and set
+   aside. Pending a decision, it considers itself a dwarf planet. Hero id `nalesnik`. The first
+   time it is chosen the Asystent notes: "Postać zgłoszona przez osobę niepełnoletnią.
+   Zgłoszenie uznano." Identity: a roller and a gravity well. It walks by rolling on its edge
+   (the fastest hero; the figure rotates while moving, pores and the folded edge make the spin
+   readable) and attacks flat.
+   Auto: mechaniczny, close range: it flips onto its other side onto the enemy
+   ("przewrócenie na drugą stronę"), with an ink slap.
+   - *Orbita* (kierunek): rolls along the line, bouncing off obstacles, mechaniczny damage to
+     everything on the path; the first enemy hit becomes its satellite for 3 s (it circles the
+     pancake at 70 units and attacks nothing else; **przeczytane** on the pancake as source).
+   - *Grawitacja własna* (auto, area): for 2 s everything within 180 units falls toward it,
+     loot included; enemies reaching the rim take egzystencjalny damage (falling onto a planet
+     that is not one is hard to explain) and are slowed (**do weryfikacji**).
+   - *Wniosek o status* (wskazanie): plants a small flag at the point; within 120 units the
+     pancake is officially a planet: enemies entering are **zablokowany** 1 s ("oczekują na
+     decyzję Komisji") and take regulaminowy damage; the pancake regains 4 racja/s inside.
+     One flag at a time, 8 s.
+   - Quirk, *równowaga hydrostatyczna*: at full racja it is flat and projectiles skim off it
+     (−30% projectile damage taken); below one third it rounds up for 5 s (+20 upór, immune to
+     knockback, figure drawn rounder) and the Asystent notes that the application is being
+     reconsidered.
+   Drawing: a disc with pancake pores as craters, a folded edge, one small planted flag, a
+   dotted orbit ring with a pebble satellite. Paint hue: ochre. Profile line: "Naleśnik.
+   Planetoida spłaszczona. Wniosek o uznanie za planetę karłowatą przyjęto i odłożono.
+   W oczekiwaniu na decyzję uważa się za planetę karłowatą."
+
+---
+
 ## 11. i18n
 
 - `src/i18n/` holds `pl/*.json` (source language) split by domain: `ui.json`, `items.json`,
