@@ -53,6 +53,12 @@ joystick/tap steering (§2), editorial rules (§12.1).
   sheet; the notice board shows announcements + ticket history; Pauza double-toggle fixed
   (ghost click guard). Aiming shipped in the same push: hold a pad and drag to aim.
 
+- Second phone round (attack feel): Pralka lash longer and thicker; Petlowiec's remark flies as
+  handwriting and lands as a struck word; Konsultant whips with the headset cable (resolve
+  deferred 90 ms via an invisible projectile); tunnel opens 70 units ahead; "wymaga
+  zgloszenia" legible with an arrow, struck through on unlock. Other heroes' attacks may still
+  be refined once the player has ideas.
+
 ## Open feedback wanted from the player
 - Real-phone frame rate with a crowd; tap accuracy; joystick feel once it lands.
 - Sound levels: music is −12 dB under SFX by design; the sliders' comfortable values become

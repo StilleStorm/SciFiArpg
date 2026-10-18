@@ -4,9 +4,13 @@ import {
   ENEMY_RANGED_MS,
   HERO_ATTACK_MS,
   KICK,
+  LASH_BACK_MS,
+  LASH_OUT_MS,
   LUNGE,
   LURCH,
   THROW_DEG,
+  WHIP_AT_MS,
+  WHIP_HOLD_MS,
   WIND_UP,
   aimOf,
   attackAt,
@@ -14,10 +18,14 @@ import {
   enemyOffset,
   heroPose,
   keyframes,
+  lashPath,
   measureSegment,
   measureStart,
+  scribblePath,
   whipPath,
+  whipSplash,
 } from './attackFx';
+import { createRng } from '../core/rng';
 
 const fakeFigure = (): SVGGElement => ({}) as unknown as SVGGElement;
 
@@ -64,42 +72,63 @@ describe('enemy melee offset', () => {
 });
 
 describe('hero poses', () => {
-  it('Pralka lurches 10 over 180 ms, turns the drum 180 degrees and swings the door', () => {
-    expect(HERO_ATTACK_MS.pralka).toBeGreaterThanOrEqual(180);
+  it('Pralka lurches 16 over 320 ms, turns the drum a full 360 degrees and swings the door open to a sliver and back', () => {
+    expect(LURCH).toBe(16);
+    expect(HERO_ATTACK_MS.pralka).toBe(320);
     expect(heroPose('pralka', 0).lurch).toBe(0);
-    expect(heroPose('pralka', 90).lurch).toBeCloseTo(LURCH, 6);
-    expect(heroPose('pralka', 180).lurch).toBeCloseTo(0, 6);
-    expect(heroPose('pralka', 180).drum).toBeCloseTo(180, 6);
+    expect(heroPose('pralka', 130).lurch).toBeCloseTo(LURCH, 6);
+    expect(heroPose('pralka', 320).lurch).toBeCloseTo(0, 6);
+    expect(heroPose('pralka', 0).drum).toBe(0);
+    expect(heroPose('pralka', 160).drum).toBeCloseTo(180, 6);
+    expect(heroPose('pralka', 320).drum).toBeCloseTo(360, 6);
     expect(heroPose('pralka', 0).door).toBe(1);
-    expect(heroPose('pralka', 90).door).toBeLessThan(0.2);
-    expect(heroPose('pralka', 180).door).toBeCloseTo(1, 6);
+    expect(heroPose('pralka', 130).door).toBeCloseTo(0.05, 6);
+    expect(heroPose('pralka', 320).door).toBeCloseTo(1, 6);
   });
 
-  it('the whip appears on the peak of the swing and is visible for 120 ms', () => {
+  it('the whip is laid down as the body surges, stays fully drawn for 180 ms and is rubbed out by the end', () => {
+    const fully = (t: number): boolean => {
+      const p = heroPose('pralka', t);
+      return p.draw >= 1 && p.erase <= 0;
+    };
     const visible = (t: number): boolean => {
       const p = heroPose('pralka', t);
       return p.draw > 0 && p.erase < 1;
     };
-    expect(visible(89)).toBe(false);
-    expect(visible(91)).toBe(true);
-    expect(visible(209)).toBe(true);
-    expect(visible(210)).toBe(false);
-    let ms = 0;
-    for (let t = 0; t < HERO_ATTACK_MS.pralka; t++) if (visible(t + 0.5)) ms++;
-    expect(ms).toBe(120);
+    expect(visible(WHIP_AT_MS - 1)).toBe(false);
+    expect(visible(WHIP_AT_MS + 1)).toBe(true);
+    expect(visible(HERO_ATTACK_MS.pralka - 1)).toBe(true);
+    expect(heroPose('pralka', HERO_ATTACK_MS.pralka).erase).toBe(1);
+    let held = 0;
+    for (let t = 0; t < HERO_ATTACK_MS.pralka; t++) if (fully(t + 0.5)) held++;
+    expect(held).toBe(WHIP_HOLD_MS);
+    expect(WHIP_HOLD_MS).toBe(180);
   });
 
-  it('Konsultant throws with a 40 degree arm and the ticket leaves the hand', () => {
+  it('Konsultant throws with a 40 degree arm and the ticket leaves the hand until the cable is home', () => {
     let peak = 0;
     for (let t = 0; t <= 160; t++) peak = Math.min(peak, heroPose('konsultant', t).arm);
     expect(peak).toBeCloseTo(-THROW_DEG, 0);
     expect(heroPose('konsultant', 160).arm).toBeCloseTo(0, 6);
     expect(heroPose('konsultant', 0).ticketOut).toBe(false);
     expect(heroPose('konsultant', 80).ticketOut).toBe(true);
-    expect(heroPose('konsultant', 159).ticketOut).toBe(false);
+    expect(heroPose('konsultant', 205).ticketOut).toBe(false);
   });
 
-  it('Petlowiec dips the helmet and writes the remark, then rubs it out', () => {
+  it('the Konsultant cable reaches the target in 90 ms, snaps back in 120, and the card sits on the target at the hit', () => {
+    expect(LASH_OUT_MS + LASH_BACK_MS).toBeLessThan(HERO_ATTACK_MS.konsultant);
+    expect(heroPose('konsultant', 0).lash).toBe(0);
+    expect(heroPose('konsultant', 45).lash).toBeGreaterThan(0.5); // eases out: most of the way by the middle
+    expect(heroPose('konsultant', 45).lash).toBeLessThan(1);
+    expect(heroPose('konsultant', LASH_OUT_MS).lash).toBeCloseTo(1, 6);
+    expect(heroPose('konsultant', LASH_OUT_MS + 60).lash).toBeCloseTo(0.5, 1);
+    expect(heroPose('konsultant', LASH_OUT_MS + LASH_BACK_MS).lash).toBeCloseTo(0, 6);
+    expect(heroPose('konsultant', LASH_OUT_MS - 1).card).toBe(false);
+    expect(heroPose('konsultant', LASH_OUT_MS).card).toBe(true);
+    expect(heroPose('konsultant', LASH_OUT_MS + 150).card).toBe(false);
+  });
+
+  it('Petlowiec dips the helmet and writes the mark beside it, then rubs it out', () => {
     expect(heroPose('petlowiec', 0).dip).toBe(0);
     expect(heroPose('petlowiec', 100).dip).toBeGreaterThan(2);
     expect(heroPose('petlowiec', 200).dip).toBeCloseTo(0, 6);
@@ -137,7 +166,7 @@ describe('geometry', () => {
     expect(Math.hypot(z.ux, z.uy)).toBe(1);
   });
 
-  it('the whip is a curved stroke about 24 units long between the hero and the target', () => {
+  it('the whip is a curved stroke about 40 units long, starting clear of the cabinet, on the way to the target', () => {
     const a = aimOf(100, 100, 150, 100);
     const nums = (whipPath(a).match(/-?\d+(\.\d+)?/g) ?? []).map(Number);
     expect(nums).toHaveLength(6);
@@ -153,10 +182,10 @@ describe('geometry', () => {
       px = x;
       py = y;
     }
-    expect(len).toBeGreaterThan(23);
-    expect(len).toBeLessThan(26);
-    expect(Math.min(sx, ex)).toBeGreaterThan(100);
-    expect(Math.max(sx, ex)).toBeLessThan(150);
+    expect(len).toBeGreaterThan(40);
+    expect(len).toBeLessThan(45);
+    expect(Math.min(sx, ex)).toBeGreaterThanOrEqual(128);
+    expect(Math.max(sx, ex)).toBeLessThan(180);
     expect(Math.abs(cy - 100)).toBeGreaterThan(5); // it bows to one side
   });
 
@@ -165,6 +194,46 @@ describe('geometry', () => {
       const nums = (whipPath(aimOf(100, 100, tx, 100)).match(/-?\d+(\.\d+)?/g) ?? []).map(Number);
       expect(nums[3]).toBeLessThan(100);
     }
+  });
+
+  it('the whip throws two to three drops of ink off its tip, ahead of the target direction', () => {
+    const a = aimOf(100, 100, 156, 100);
+    const drops = whipSplash(a);
+    expect(drops.length).toBeGreaterThanOrEqual(2);
+    expect(drops.length).toBeLessThanOrEqual(3);
+    const [, , , , ex = 0, ey = 0] = (whipPath(a).match(/-?\d+(\.\d+)?/g) ?? []).map(Number);
+    for (const [x, y] of drops) expect(Math.hypot(x - ex, y - ey)).toBeLessThan(14);
+  });
+
+  it('the cable lash ends exactly on the target at full reach and is only the hand when it is home', () => {
+    const root = { x: 0, y: 0 };
+    const target = { x: 160, y: 40 };
+    const full = lashPath(root, target, 1, 0);
+    expect(full.tip).toEqual(target);
+    expect(full.d.startsWith('M0 0')).toBe(true);
+    const nums = (full.d.match(/-?\d+(\.\d+)?/g) ?? []).map(Number);
+    expect(nums.slice(-2)).toEqual([160, 40]);
+    expect(nums.length / 2).toBeGreaterThan(8); // a wavy line, not a straight one
+    const half = lashPath(root, target, 0.5, 20);
+    expect(half.tip).toEqual({ x: 80, y: 20 });
+    expect(lashPath(root, target, 0, 0).d).toBe('M0 0h.01');
+    // the wave is slight: no point strays more than 5 units from the straight line
+    const dirx = 160 / Math.hypot(160, 40);
+    const diry = 40 / Math.hypot(160, 40);
+    for (let i = 0; i + 1 < nums.length; i += 2) {
+      const dist = Math.abs((nums[i] ?? 0) * diry - (nums[i + 1] ?? 0) * dirx);
+      expect(dist).toBeLessThanOrEqual(5.01);
+    }
+  });
+
+  it('a scribble has the bumps asked for, is centred, and differs from seed to seed', () => {
+    for (const bumps of [5, 6, 7]) {
+      const d = scribblePath(createRng(bumps), bumps, 30, 6);
+      expect(d.match(/Q/g)).toHaveLength(bumps);
+      const nums = (d.match(/-?\d+(\.\d+)?/g) ?? []).map(Number);
+      expect(nums[0]).toBe(-15);
+    }
+    expect(scribblePath(createRng(1), 6, 30, 6)).not.toBe(scribblePath(createRng(2), 6, 30, 6));
   });
 
   it('the measurement runs from the pole to the target and is trimmed by draw and erase', () => {

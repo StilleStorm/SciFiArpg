@@ -6,6 +6,7 @@ import { serializeCharacter } from '../save/character';
 import { createRun, type RunState } from './run';
 import {
   ENTER_R,
+  HOLE_AHEAD,
   bindTunnel,
   carryPurse,
   closeFor,
@@ -13,9 +14,12 @@ import {
   closesOnPage,
   createRunHold,
   fateOfHeldRun,
+  holeFits,
+  holeSpot,
   isOnHole,
   openTunnel,
   planOpen,
+  playerHeading,
   repairedWithTape,
   stepTunnel,
   tickTunnel,
@@ -43,6 +47,65 @@ describe('opening and replacing', () => {
     const plan = planOpen(first, { x: 300, y: 200 }, 0);
     expect(plan.replaced).toBe(first);
     expect(plan.tunnel).toMatchObject({ x: 300, y: 200 });
+  });
+});
+
+describe('where the hole is cut', () => {
+  const page = (obstacles: { x: number; y: number; r: number }[] = []) => ({
+    w: 1200,
+    h: 1600,
+    inset: 18,
+    obstacles: obstacles.map((c) => ({ kind: 'blot' as const, x: c.x, y: c.y, size: c.r, rot: 0, seed: 1, colliders: [c] })),
+  });
+
+  it('is 70 units in front of the player, in the direction he is heading', () => {
+    expect(HOLE_AHEAD).toBe(70);
+    expect(holeSpot(page(), { x: 600, y: 800 }, { x: 1, y: 0 })).toEqual({ x: 670, y: 800 });
+    expect(holeSpot(page(), { x: 600, y: 800 }, { x: -1, y: 0 })).toEqual({ x: 530, y: 800 });
+    const diag = holeSpot(page(), { x: 600, y: 800 }, { x: 3, y: 4 });
+    expect(diag.x).toBeCloseTo(642, 5);
+    expect(diag.y).toBeCloseTo(856, 5);
+  });
+
+  it('is never under the player when there is room, so it is armed on the first step', () => {
+    const at = { x: 600, y: 800 };
+    const spot = holeSpot(page(), at, { x: 0, y: -1 });
+    expect(isOnHole({ ...spot }, at)).toBe(false);
+    expect(stepTunnel(planOpen(undefined, spot, 0).tunnel, at, 0).tunnel.armed).toBe(true);
+  });
+
+  it('turns toward the page centre when the spot is outside the page', () => {
+    const spot = holeSpot(page(), { x: 1120, y: 800 }, { x: 1, y: 0 });
+    expect(spot.x).toBeCloseTo(1050, 5);
+    expect(spot.y).toBeCloseTo(800, 5);
+    const corner = holeSpot(page(), { x: 80, y: 80 }, { x: -1, y: -1 });
+    expect(corner.x).toBeGreaterThan(80);
+    expect(corner.y).toBeGreaterThan(80);
+    expect(Math.hypot(corner.x - 80, corner.y - 80)).toBeCloseTo(HOLE_AHEAD, 5);
+  });
+
+  it('turns toward the page centre when the spot is inside an obstacle', () => {
+    const p = page([{ x: 670, y: 800, r: 40 }]);
+    expect(holeFits(p, 670, 800)).toBe(false);
+    const spot = holeSpot(p, { x: 600, y: 800 }, { x: 1, y: 0 });
+    expect(holeFits(p, spot.x, spot.y)).toBe(true);
+    expect(Math.hypot(spot.x - 600, spot.y - 800)).toBeCloseTo(HOLE_AHEAD, 5);
+  });
+
+  it('tries other directions when the centre is blocked too, and falls back to the feet when nothing fits', () => {
+    const blocked = page([{ x: 700, y: 800, r: 60 }, { x: 600, y: 874, r: 20 }]);
+    // heading right and the centre (below, at the page's middle line) both blocked: some other free direction
+    const spot = holeSpot(blocked, { x: 600, y: 800 }, { x: 1, y: 0 });
+    expect(holeFits(blocked, spot.x, spot.y)).toBe(true);
+    const boxed = page([{ x: 600, y: 800, r: 400 }]);
+    expect(holeSpot(boxed, { x: 600, y: 800 }, { x: 1, y: 0 })).toEqual({ x: 600, y: 800 });
+  });
+
+  it('the player heads where the stick or the tap points, or faces when standing', () => {
+    const base = { x: 100, y: 100, facing: -1 as const, moving: false, target: null, steer: undefined };
+    expect(playerHeading(base)).toEqual({ x: -1, y: 0 });
+    expect(playerHeading({ ...base, moving: true, target: { x: 100, y: 300 } })).toEqual({ x: 0, y: 200 });
+    expect(playerHeading({ ...base, steer: { dx: 0, dy: 1, mag: 0.5 } })).toEqual({ x: 0, y: 1 });
   });
 });
 
@@ -151,11 +214,14 @@ describe('on a run', () => {
     const s = createRun(3);
     s.player.x = 200;
     s.player.y = 250;
+    s.page.obstacles = [];
+    s.player.facing = 1;
+    s.player.moving = false;
     expect(openTunnel(s, bus)).toBe(true);
-    expect(s.tunnel).toEqual({ x: 200, y: 250, pageIndex: 0, armed: false });
+    expect(s.tunnel).toEqual({ x: 200 + HOLE_AHEAD, y: 250, pageIndex: 0, armed: false });
     s.player.x = 400;
     expect(openTunnel(s, bus)).toBe(true);
-    expect(s.tunnel?.x).toBe(400);
+    expect(s.tunnel?.x).toBe(400 + HOLE_AHEAD);
     expect(log.map((l) => l.name)).toEqual(['tunnel:opened', 'tunnel:closed', 'tunnel:opened']);
     expect(log[1]?.payload).toEqual({ reason: 'second' });
   });
@@ -174,15 +240,17 @@ describe('on a run', () => {
     const bus = createBus();
     const log = record(bus);
     const s = createRun(3);
+    s.page.obstacles = [];
     s.player.x = 300;
     s.player.y = 300;
+    s.player.facing = 1;
+    s.player.moving = false;
     openTunnel(s, bus);
-    tickTunnel(s, bus);
-    expect(log.filter((l) => l.name === 'tunnel:entered')).toHaveLength(0);
-    s.player.x = 360;
-    tickTunnel(s, bus);
+    expect(s.tunnel).toMatchObject({ x: 300 + HOLE_AHEAD, y: 300, armed: false });
+    tickTunnel(s, bus); // the hole is ahead, not under him: armed on the first step
     expect(s.tunnel?.armed).toBe(true);
-    s.player.x = 310;
+    expect(log.filter((l) => l.name === 'tunnel:entered')).toHaveLength(0);
+    s.player.x = 350; // he walks up to it
     tickTunnel(s, bus);
     expect(log.filter((l) => l.name === 'tunnel:entered')).toHaveLength(1);
   });

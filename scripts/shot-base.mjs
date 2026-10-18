@@ -102,6 +102,35 @@ try {
   console.log('layouts', JSON.stringify(layoutSeeds));
   check('three layouts are found among the first seeds', Object.keys(layoutSeeds).length === 3);
 
+  // the note beside the locked dog-ear: 13 px Garamond italic in full ink, and what happens to it when the exit unlocks
+  {
+    const { ctx, page } = await open({ width: 390, height: 844 });
+    await page.evaluate((sd) => window.__game.startBase(sd), layoutSeeds.ladowisko ?? 1);
+    await sleep(1500);
+    await page.evaluate(() => {
+      const e = window.__game.state().page.exit;
+      window.__game.placePlayer(e.x + (e.corner[1] === 'l' ? 200 : -200), e.y - 150);
+    });
+    await sleep(1400);
+    const note = await page.evaluate(() => {
+      const t = document.querySelector('#page .base-exit-note text');
+      if (!t) return null;
+      const cs = getComputedStyle(t);
+      const r = t.getBoundingClientRect();
+      return { text: t.textContent, family: cs.fontFamily, style: cs.fontStyle, px: parseFloat(cs.fontSize) * t.getScreenCTM().a, fill: cs.fill, opacity: cs.opacity, h: r.height, w: r.width };
+    });
+    check('exit note: the note is there, Garamond italic, about 13 px on the screen, full ink', note !== null && /garamond/i.test(note.family) && note.style === 'italic' && Math.abs(note.px - 13) < 0.8 && note.opacity === '1', JSON.stringify(note));
+    await page.screenshot({ path: `${SHOTS}/note-locked.png` });
+    await page.evaluate(() => window.__game.acceptTicket());
+    await sleep(330);
+    await page.screenshot({ path: `${SHOTS}/note-struck.png` });
+    await sleep(1600);
+    const after = await page.evaluate(() => ({ shown: getComputedStyle(document.querySelector('#page .base-exit-note')).display !== 'none', open: document.querySelector('#page .base-exit g:nth-child(2)')?.style.display === '' }));
+    check('exit note: after the unlock the note is gone and the dog-ear is open', !after.shown && after.open, JSON.stringify(after));
+    await page.screenshot({ path: `${SHOTS}/note-gone.png` });
+    await ctx.close();
+  }
+
   /** One orientation: every layout, a label, the sheets, the exit, the held hole. */
   async function leg(prefix, viewport, mobile = true) {
     const { ctx, page } = await open(viewport, mobile);

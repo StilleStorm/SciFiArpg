@@ -13,6 +13,7 @@ import type { Bus, TunnelCloseReason } from '../core/events';
 import { t } from '../i18n';
 import { recomputeStats } from '../items/stats';
 import { highestNumber, type Character } from '../save/character';
+import type { Page } from './pages';
 import type { RunState } from './run';
 
 /** The player is on the hole when closer than this (world units). */
@@ -26,8 +27,9 @@ export interface Tunnel {
   /** The page the hole is cut in (0-based). It cannot be reached from another page. */
   pageIndex: number;
   /**
-   * False from the moment the tunnel is cut at the player's feet until he has stepped out of the hole once; only an
-   * armed tunnel takes him in. Without it the tunnel would swallow the player the instant it opens.
+   * False from the moment the tunnel is cut until the player is off the hole; only an armed tunnel takes him in.
+   * The hole is cut ahead of the player (`holeSpot`), so this seldom matters; it still catches the case where there was
+   * no free spot and the hole had to be cut at his feet.
    */
   armed: boolean;
 }
@@ -38,6 +40,57 @@ export interface Point {
 }
 
 // ---------- open / replace ----------
+
+/** How far in front of the player the hole is cut. */
+export const HOLE_AHEAD = 70;
+/** A hole keeps this far from the page edge and this much clear of an obstacle's collider. */
+const HOLE_EDGE = 40;
+const HOLE_CLEAR = 24;
+
+/** Room for a hole at (x, y): inside the page walls and clear of every obstacle. */
+export function holeFits(page: Pick<Page, 'w' | 'h' | 'inset' | 'obstacles'>, x: number, y: number): boolean {
+  const lo = page.inset + HOLE_EDGE;
+  if (x < lo || y < lo || x > page.w - lo || y > page.h - lo) return false;
+  return page.obstacles.every((o) => o.colliders.every((c) => Math.hypot(x - c.x, y - c.y) >= c.r + HOLE_CLEAR));
+}
+
+/**
+ * Where the tunnel is cut: HOLE_AHEAD units from the player along `dir` (his walking or facing direction). If that spot
+ * is outside the page or inside an obstacle, toward the page centre; then, turning in steps of 45 degrees, the first
+ * direction that fits; at his feet only when nothing fits.
+ */
+export function holeSpot(page: Pick<Page, 'w' | 'h' | 'inset' | 'obstacles'>, p: Point, dir: Point): Point {
+  const at = (ux: number, uy: number): Point => ({ x: p.x + ux * HOLE_AHEAD, y: p.y + uy * HOLE_AHEAD });
+  const norm = (x: number, y: number): Point => {
+    const d = Math.hypot(x, y);
+    return d < 1e-6 ? { x: 1, y: 0 } : { x: x / d, y: y / d };
+  };
+  const ahead = norm(dir.x, dir.y);
+  const first = at(ahead.x, ahead.y);
+  if (holeFits(page, first.x, first.y)) return first;
+  const c = norm(page.w / 2 - p.x, page.h / 2 - p.y);
+  const centre = at(c.x, c.y);
+  if (holeFits(page, centre.x, centre.y)) return centre;
+  for (let k = 1; k <= 4; k++) {
+    for (const sgn of [1, -1]) {
+      const a = Math.atan2(c.y, c.x) + (sgn * k * Math.PI) / 4;
+      const q = at(Math.cos(a), Math.sin(a));
+      if (holeFits(page, q.x, q.y)) return q;
+    }
+  }
+  return { x: p.x, y: p.y };
+}
+
+/** The direction the player is going (joystick, then the tap target) or, standing, the way he faces. */
+export function playerHeading(p: Pick<RunState['player'], 'steer' | 'target' | 'moving' | 'facing' | 'x' | 'y'>): Point {
+  if (p.steer && p.steer.mag > 0) return { x: p.steer.dx, y: p.steer.dy };
+  if (p.moving && p.target) {
+    const dx = p.target.x - p.x;
+    const dy = p.target.y - p.y;
+    if (Math.hypot(dx, dy) > 1) return { x: dx, y: dy };
+  }
+  return { x: p.facing, y: 0 };
+}
 
 /** Cutting a tunnel at `at`: the new one, and the old one it replaces (closed by tape), if there was one. */
 export function planOpen(prev: Tunnel | undefined, at: Point, pageIndex: number): { tunnel: Tunnel; replaced: Tunnel | null } {
@@ -175,10 +228,10 @@ export function cutBaseHole(s: RunState): Tunnel | null {
   return tn;
 }
 
-/** Cut a tunnel at the player's feet. Replaces (and closes) an open one. False when nothing can be cut now (sheet, form, page turn, dead, the base). */
+/** Cut a tunnel HOLE_AHEAD units in front of the player. Replaces (and closes) an open one. False when nothing can be cut now (sheet, form, page turn, dead, the base). */
 export function openTunnel(s: RunState, bus: Bus): boolean {
   if (s.phase === 'base' || s.status !== 'running' || s.modal || s.turning || s.player.hp <= 0) return false;
-  const plan = planOpen(s.tunnel, s.player, s.pageIndex);
+  const plan = planOpen(s.tunnel, holeSpot(s.page, s.player, playerHeading(s.player)), s.pageIndex);
   if (plan.replaced) closeTunnel(s, bus, closeFor('open'));
   s.tunnel = plan.tunnel;
   bus.emit('tunnel:opened', { x: plan.tunnel.x, y: plan.tunnel.y, pageIndex: plan.tunnel.pageIndex });

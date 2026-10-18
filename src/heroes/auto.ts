@@ -5,6 +5,13 @@ import { nextId, type RunState } from '../world/run';
 import { heroDef } from './defs';
 
 const SPEED = 520;
+/**
+ * The Konsultant's auto-attack is a lash of his headset cable (render/attackFx.ts draws it: tip out in 90 ms). The hit is
+ * rolled when the tip arrives, so it flies as an invisible projectile that reaches the target's edge in exactly that time,
+ * with a wide hit circle so that even at this speed (up to ~30 units per step) it cannot pass through a small enemy.
+ */
+const LASH_S = 0.09;
+const LASH_R = 12;
 
 /** Returns true if a projectile was fired (the caller then skips the instant attack). */
 export function fireAuto(s: RunState, p: Player, target: Enemy, bus?: Bus): boolean {
@@ -12,15 +19,18 @@ export function fireAuto(s: RunState, p: Player, target: Enemy, bus?: Bus): bool
   if (!def.auto.projectile) return false;
   const d = Math.hypot(target.x - p.x, target.y - p.y) || 1;
   const reach = p.attackRange + 40;
+  const lash = p.heroId === 'konsultant';
+  // lash: the distance to where the hit circle touches the target, covered in LASH_S; then a few steps of grace
+  const speed = lash ? Math.max(40, d - LASH_R - target.r) / LASH_S : SPEED;
   s.projectiles.push({
     kind: 'projectile',
     id: nextId(s),
     x: p.x,
     y: p.y - 6,
-    r: 5,
-    vx: ((target.x - p.x) / d) * SPEED,
-    vy: ((target.y - p.y) / d) * SPEED,
-    ttl: reach / SPEED,
+    r: lash ? LASH_R : 5,
+    vx: ((target.x - p.x) / d) * speed,
+    vy: ((target.y - p.y) / d) * speed,
+    ttl: lash ? LASH_S + 0.06 : reach / SPEED,
     damage: 0,
     damageType: p.damageType,
     owner: 'player',

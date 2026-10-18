@@ -32,6 +32,11 @@ const stop = () => server.kill('SIGTERM');
 process.on('exit', stop);
 
 const problems = [];
+const checks = [];
+const check = (name, ok, detail = '') => {
+  checks.push({ name, ok });
+  console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}${ok || !detail ? '' : ` (${detail})`}`);
+};
 let browser;
 try {
   await waitForServer(BASE);
@@ -117,10 +122,12 @@ try {
         s.status = 'paused';
         await raf();
         await raf(); // the first frame that sees the attack starts its clock
-        if (ms > 0) {
+        // in steps of two frames, with a rendered frame between (a projectile has a picture only if a frame saw it)
+        for (let left = ms; left > 0; left -= 33) {
           s.status = 'running';
-          g.advance(ms / 1000);
+          g.advance(Math.min(33, left) / 1000);
           s.status = 'paused';
+          await raf();
         }
         await raf();
         await raf();
@@ -132,7 +139,9 @@ try {
   const snap = async (name) => page.screenshot({ path: `${SHOTS}/${name}.png`, clip: await clipAround() });
 
   // moments (ms into the animation) that show each hero's pose best
-  const MOMENTS = { pralka: [40, 90, 130, 165], konsultant: [25, 45, 65, 100], petlowiec: [40, 100, 160], kartograf: [20, 50, 90, 150] };
+  // (Pralka 320 ms: whip drawn 60-95, held to 275, rubbed out by 320; Konsultant: cable tip on the target at 90, home at 210;
+  // Petlowiec: remark in flight, "—!" beside the helmet until ~200; Kartograf as before)
+  const MOMENTS = { pralka: [40, 80, 130, 200, 260, 300], konsultant: [25, 45, 70, 90, 110, 130, 190], petlowiec: [20, 40, 100, 160], kartograf: [20, 50, 90, 150] };
   // how far the enemy stands: the melee hero in reach, the others at about the distance they shoot from
   const DIST = { pralka: 56, konsultant: 110, petlowiec: 90, kartograf: 130 };
   for (const hero of Object.keys(MOMENTS)) {
@@ -142,6 +151,14 @@ try {
       const r = await attackAt('player', ms, DIST[hero]);
       await snap(`atk-${hero}-${String(ms).padStart(3, '0')}`);
       console.log(hero, ms, JSON.stringify(r));
+      if (hero === 'pralka' && ms === 130) check('pralka: the whip is one fx stroke with its splash', r.fx >= 2, JSON.stringify(r));
+      if (hero === 'konsultant' && ms === 90) {
+        const cable = await page.evaluate(() => ({
+          part: document.querySelectorAll('#world g[data-kind="player"] [data-part="cable"]').length,
+          lash: document.querySelectorAll('#fx .attack-ink').length,
+        }));
+        check('konsultant: the cable is a sub-group data-part=cable and the lash is one fx stroke', cable.part === 1 && cable.lash === 1, JSON.stringify(cable));
+      }
     }
     // after its duration everything is back where it was
     await attackAt('player', 400, DIST[hero]);
@@ -162,8 +179,8 @@ try {
   await browser?.close();
   stop();
 }
-if (problems.length) {
-  console.error(problems.join('\n'));
+if (problems.length || checks.some((c) => !c.ok)) {
+  console.error([...problems, ...checks.filter((c) => !c.ok).map((c) => `check failed: ${c.name}`)].join('\n'));
   process.exit(1);
 }
 console.log(`attack shots in ${SHOTS}/`);

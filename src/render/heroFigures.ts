@@ -8,7 +8,7 @@ import { createRng } from '../core/rng';
 import type { Enemy, Player, Projectile, Summon } from '../entities/types';
 import type { HeroId } from '../heroes';
 import { t } from '../i18n';
-import { HERO_ATTACK_MS, attackAt, driveHeroStroke, heroPose, setStroke } from './attackFx';
+import { HERO_ATTACK_MS, attackAt, driveHeroStroke, driveLash, heroPose, scribblePath, setStroke, trackRemark } from './attackFx';
 import { el, n2 } from './svg';
 import type { Builder } from './view';
 import { HERO_HUE, washGroup } from './wash';
@@ -36,9 +36,11 @@ interface FigureDef {
   parts?: Partial<Record<PartName, PartDef>>;
 }
 
-type PartName = 'arm' | 'ticket' | 'drum' | 'door' | 'instrument' | 'head';
+type PartName = 'arm' | 'ticket' | 'drum' | 'door' | 'instrument' | 'head' | 'cable';
 interface PartDef {
   body?: readonly string[];
+  /** Strokes that go into a nested group `data-tail` (the loose end of the Konsultant's cable, hidden while it lashes). */
+  tail?: readonly string[];
   hatch?: readonly string[];
   hatchCircles?: readonly (readonly [number, number, number])[];
   circles?: readonly (readonly [number, number, number])[];
@@ -72,7 +74,11 @@ const FIGURES: Record<HeroId, FigureDef> = {
     ],
     parts: {
       // the drum turns in the attack (a sock and a button make the turning visible); the door swings on its hinge
-      drum: { hatchCircles: [[0, -2, 6]], body: ['M-3.5 1.5Q-1.5-2.5 2.5-1', 'M3.5 2.8h.01'] },
+      drum: {
+        hatchCircles: [[0, -2, 6]],
+        // a striped sock plastered to the drum, heel and toe, and a button
+        body: ['M-4.6-5.8L-1-6.8L-0.2-1.8Q0.6 0.9 3.8 1.5L3.4 4.4Q-2 4.6-3.6 0.8Z', 'M-4.2-4.2L-0.7-5M-3.9-2.2L-0.3-3', 'M4.6-3.4h.01'],
+      },
       door: { circles: [[0, -2, 8.5], [0, -2, 6.8]], body: ['M-3.5-4.5Q-1-6.5 2-5.5'] }, // porthole, glare on the glass
     },
     legs: [
@@ -93,7 +99,6 @@ const FIGURES: Record<HeroId, FigureDef> = {
       'M-8-16L0-7.5L8-16', // lapels
       'M0-16L-1.8-13L0-3L1.8-13Z', // tie
       'M8-15L13-8L12-1', // arm with cable
-      'M12-1Q22 3 15 9Q8 14 20 17M20 16h3v3h-3Z', // cable and plug
       'M-6.5-10H-2.5V-8H-6.5Z', // name plate
       'M-5-29Q0-32 5-29', // hair
     ],
@@ -106,6 +111,8 @@ const FIGURES: Record<HeroId, FigureDef> = {
       // the throwing arm, and the ticket in its hand (it leaves the hand in the throw)
       arm: { body: ['M-8-15L-14-8L-13-1'] },
       ticket: { body: ['M-20-6L-11-8L-9 4L-18 6Z', 'M-18-3L-12-4.5M-17.5 0L-11.5-1.5'] },
+      // the headset cable: from the boom down the chest to the hand, and its loose end with the plug (the lash in the attack)
+      cable: { body: ['M-2.5-17Q8-13 6-6Q5-1.5 12-1'], tail: ['M12-1Q22 3 15 9Q8 14 20 17M20 16h3v3h-3Z'] },
     },
     legs: [
       ['M-4.5 3L-5 12L-6.5 19H-2', 'M4.5 3L5.5 12L8 19H12'],
@@ -193,7 +200,9 @@ interface Parts {
   inner: SVGGElement;
   /** The sub-groups that move in an attack, found once at creation. */
   named: Partial<Record<PartName, SVGGElement>>;
-  /** Petlowiec: the ink "—!" next to the head, and its two strokes (pathLength 1). */
+  /** Konsultant: the loose end of the cable (hidden while the lash is out). */
+  tail: SVGGElement | null;
+  /** Petlowiec: the ink "—!" next to the head, and its strokes (pathLength 1). */
   speech: SVGGElement | null;
   speechPaths: SVGPathElement[];
   /** Offsets of `inner` (leg bob, attack lurch) and the last transform written to each moving node. */
@@ -217,8 +226,8 @@ const circlePath = (cx: number, cy: number, r: number): string => `M${n2(cx - r)
 
 /** Where each part turns, in figure units. */
 const PIVOT = { arm: [-8, -15], drum: [0, -2], door: [-8.5, -2], head: [0, -13] } as const;
-/** The Petlowiec's remark: a dash and an exclamation mark, drawn as strokes beside the helmet. */
-const SPEECH = ['M15-22H25', 'M29.5-27Q30-24 29.3-22.5M29.2-19.6h.01'] as const;
+/** The Petlowiec's remark: a scribbled dash and a scribbled exclamation mark (about 14 units high) beside the helmet. */
+const SPEECH = ['M13-22Q15.5-26 18-22.5Q20.5-19.5 23-22.5Q25.5-25.5 28-22', 'M33.6-35.5Q32-31.5 34-28Q34.8-25 33.6-22', 'M33.2-17.5h.01'] as const;
 
 function buildPart(name: PartName, def: PartDef): SVGGElement {
   const g = el('g', { 'data-part': name });
@@ -226,6 +235,7 @@ function buildPart(name: PartName, def: PartDef): SVGGElement {
   for (const [cx, cy, r] of def.hatchCircles ?? []) g.append(el('path', { d: circlePath(cx, cy, r), fill: 'url(#hatch)', stroke: 'none' }));
   for (const d of def.body ?? []) g.append(el('path', { d }));
   for (const [cx, cy, r] of def.circles ?? []) g.append(el('path', { d: circlePath(cx, cy, r) }));
+  if (def.tail) g.append(el('g', { 'data-tail': 1 }, def.tail.map((d) => el('path', { d }))));
   return g;
 }
 
@@ -292,7 +302,7 @@ export function buildHeroFigure(heroId: HeroId, opts: FigureOpts = {}): SVGGElem
   const speechPaths: SVGPathElement[] = [];
   if (heroId === 'petlowiec') {
     speech = el('g', { 'data-part': 'speech' });
-    for (const d of SPEECH) speechPaths.push(el('path', { d, pathLength: 1 }));
+    SPEECH.forEach((d, i) => speechPaths.push(el('path', { d, pathLength: 1, 'stroke-width': i === 2 ? 3.4 : 1.9 })));
     speech.append(...speechPaths);
     speech.style.display = 'none';
     inner.append(speech);
@@ -306,11 +316,15 @@ export function buildHeroFigure(heroId: HeroId, opts: FigureOpts = {}): SVGGElem
     caption = el('text', { class: 't-caption', x: 0, y: Math.round(36 * (opts.size ?? 1)) }, [opts.caption]);
     g.append(caption);
   }
-  parts.set(g, { inner, named, speech, speechPaths, bob: 0, lx: 0, ly: 0, sig: {}, posed: false, legs, foam, caption, wash, heroId, scale: sc });
+  const tail = named.cable?.querySelector<SVGGElement>('[data-tail]') ?? null;
+  parts.set(g, { inner, named, tail, speech, speechPaths, bob: 0, lx: 0, ly: 0, sig: {}, posed: false, legs, foam, caption, wash, heroId, scale: sc });
   return g;
 }
 
 interface Walker {
+  /** Where the figure stands (the Konsultant's lash starts at his hand, which moves with him). */
+  x?: number;
+  y?: number;
   moving: boolean;
   facing?: 1 | -1;
   shield?: number;
@@ -353,6 +367,7 @@ function patchAttack(e: Walker, g: SVGGElement, p: Parts, timeMs: number): void 
     for (const name of ['arm', 'ticket', 'drum', 'door', 'instrument', 'head'] as const) setPart(p, name, p.named[name], '');
     const ticket = p.named.ticket;
     if (ticket) hide(ticket, false);
+    if (p.tail) hide(p.tail, false);
     if (p.speech) {
       hide(p.speech, true);
       setPart(p, 'speech', p.speech, '');
@@ -379,6 +394,11 @@ function patchAttack(e: Walker, g: SVGGElement, p: Parts, timeMs: number): void 
       setPart(p, 'ticket', p.named.ticket, tf);
       const ticket = p.named.ticket;
       if (ticket) hide(ticket, pose.ticketOut);
+      // the loose end of the cable is the lash while it is out
+      if (p.tail) hide(p.tail, pose.lash > 0);
+      // the hand: (12, -1) in the figure's frame, mirrored with the way it faces
+      const hand = { x: (e.x ?? a.x) + (e.facing ?? 1) * 12 * p.scale, y: (e.y ?? a.y) - p.scale };
+      driveLash(a, pose, t, hand);
       break;
     }
     case 'petlowiec': {
@@ -388,9 +408,9 @@ function patchAttack(e: Walker, g: SVGGElement, p: Parts, timeMs: number): void 
         const shown = pose.draw > 0 && pose.erase < 1;
         hide(speech, !shown);
         setPart(p, 'speech', speech, side < 0 ? 'scale(-1 1)' : '');
-        // the dash first, then the mark
         if (shown) {
-          p.speechPaths.forEach((path, i) => setStroke(path, i === 0 ? Math.min(1, pose.draw * 2) : Math.max(0, pose.draw * 2 - 1), pose.erase));
+          // the dash first, then the mark, then its dot
+          p.speechPaths.forEach((path, i) => setStroke(path, Math.max(0, Math.min(1, pose.draw * 3 - i)), pose.erase));
         }
       }
       break;
@@ -452,22 +472,22 @@ export const summonBuilder: Builder<Summon> = {
   drawInMs: 260,
 };
 
-/** The Petlowiec's remark in flight: a thin line from where it left the hand to the tip, growing and fading. */
+/** The Petlowiec's remark in flight: a scribble of handwriting that is drawn in as it leaves the hand. */
 interface Remark {
   line: SVGPathElement;
-  dx: number;
-  dy: number;
-  x0: number;
-  y0: number;
   ttl0: number;
+  drawn: boolean;
 }
 const remarks = new WeakMap<SVGGElement, Remark>();
-const REMARK_MAX = 90;
+/** The scribble draws itself in over this long, in seconds of flight. */
+const REMARK_DRAW_S = 0.06;
 
 /**
- * A short dash with a nub, pointing along the velocity (set once at creation). Regulaminowy is a ticket card
- * turned along the flight (mirrored when it flies left, so its lines stay readable); the Petlowiec's own remark
- * is a thin line that stretches toward the target and fades; other egzystencjalny shots are a question mark.
+ * A short dash with a nub, pointing along the velocity (set once at creation). Regulaminowy is a ticket card turned along
+ * the flight (mirrored when it flies left, so its lines stay readable); the Konsultant's own auto-attack (`roll`) is not drawn
+ * here at all, because its cable lash is (render/attackFx.ts) and the projectile is only the hit arriving with the tip. The
+ * Petlowiec's own remark is a line of handwriting, 5 to 7 bumps like an illegible "mmm", along the flight, upright; other
+ * egzystencjalny shots are a question mark.
  */
 export const projectileBuilder: Builder<Projectile> = {
   create: (e) => {
@@ -475,16 +495,20 @@ export const projectileBuilder: Builder<Projectile> = {
     const angle = (Math.atan2(e.vy, e.vx) * 180) / Math.PI;
     const inner = el('g', { transform: `rotate(${n2(angle)})` });
     const long = (e.pierce ?? 0) > 3;
-    if (e.damageType === 'regulaminowy') {
+    if (e.damageType === 'regulaminowy' && e.roll === true) {
+      // nothing: the lash is the picture
+    } else if (e.damageType === 'regulaminowy') {
       const sheet = el('g', { transform: `rotate(${n2(angle)})${e.vx < 0 ? ' scale(1 -1)' : ''}` });
       sheet.append(el('path', { d: 'M-4.5-3.5H2.5L5 -1V3.5H-4.5Z' }), el('path', { d: 'M2.5-3.5V-1H5M-2.5 0H2M-2.5 2H1' }));
       g.append(sheet);
     } else if (e.damageType === 'egzystencjalny' && e.roll === true) {
-      const line = el('path', { d: 'M0 0h.01', 'stroke-width': 1.1 });
-      g.append(line);
-      const speed = Math.hypot(e.vx, e.vy) || 1;
-      // one fixed step back: it was fired a step or two before the first frame that shows it
-      remarks.set(g, { line, dx: e.vx / speed, dy: e.vy / speed, x0: e.x - e.vx / 60, y0: e.y - e.vy / 60, ttl0: e.ttl + 1 / 60 });
+      const rng = createRng(Math.imul(e.id, 977) + 13);
+      const line = el('path', { d: scribblePath(rng, rng.int(5, 7), 30, 6), 'stroke-width': 1.7, pathLength: 1 });
+      // along the flight, but never upside down: a leftward flight is the same line turned the other way up
+      const deg = angle > 90 ? angle - 180 : angle < -90 ? angle + 180 : angle;
+      g.append(el('g', { transform: `rotate(${n2(deg)})` }, [line]));
+      remarks.set(g, { line, ttl0: e.ttl + 1 / 60, drawn: false });
+      trackRemark(g, e.x, e.y);
     } else if (e.damageType === 'egzystencjalny') {
       const mark = el('g', { transform: `rotate(${n2(-angle)})` });
       mark.append(el('path', { d: 'M-3.5-2.5Q-3.5-6 0-6Q3.5-6 3.5-2.8Q3.5-0.5 0 0.8V2.2M0 5h.01' }));
@@ -501,9 +525,14 @@ export const projectileBuilder: Builder<Projectile> = {
   patch(e, g) {
     const r = remarks.get(g);
     if (!r) return;
-    const len = Math.min(REMARK_MAX, Math.hypot(e.x - r.x0, e.y - r.y0));
-    r.line.setAttribute('d', `M${n2(-r.dx * len)} ${n2(-r.dy * len)}L0 0`);
-    g.style.opacity = n2(0.25 + 0.75 * Math.max(0, Math.min(1, e.ttl / r.ttl0)));
+    trackRemark(g, e.x, e.y);
+    if (r.drawn) return;
+    const p = (r.ttl0 - e.ttl) / REMARK_DRAW_S;
+    if (p >= 1) {
+      r.drawn = true;
+      r.line.removeAttribute('stroke-dasharray');
+      r.line.removeAttribute('stroke-dashoffset');
+    } else setStroke(r.line, Math.max(0.05, p), 0);
   },
   drawInMs: 0,
 };

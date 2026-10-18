@@ -111,7 +111,7 @@ try {
       const s = window.__game.state();
       return { tunnel: s.tunnel ? { x: s.tunnel.x, y: s.tunnel.y, page: s.tunnel.pageIndex } : null, hole: document.querySelectorAll('#page .tn-hole').length, note: document.querySelector('#page .tn-hole text')?.textContent ?? '', foot: window.__game.notes().map((n) => n.text).join(' ') };
     });
-    check(`${prefix}: tapping Tunel cuts a hole at the player's feet`, opened.tunnel !== null && Math.hypot(opened.tunnel.x - before.x, opened.tunnel.y - before.y) < 6 && opened.hole === 1, JSON.stringify(opened.tunnel));
+    check(`${prefix}: tapping Tunel cuts a hole a step ahead of the player`, opened.tunnel !== null && Math.hypot(opened.tunnel.x - before.x, opened.tunnel.y - before.y) >= 20 && Math.hypot(opened.tunnel.x - before.x, opened.tunnel.y - before.y) <= 80 && opened.hole === 1, JSON.stringify(opened.tunnel));
     check(`${prefix}: the hole carries the note "c.d. na stronie __"`, opened.note === 'c.d. na stronie __', opened.note);
     check(`${prefix}: the Asystent notes the cut`, opened.foot.includes('Stronę przecięto'), opened.foot.slice(0, 60));
     // he does not fall in while standing on it
