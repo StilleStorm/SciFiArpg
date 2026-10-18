@@ -12,7 +12,7 @@ import { trickleSpawn, updateEnemies } from './enemies';
 import { movePlayer } from './movement';
 import { collectPickups } from './pickups';
 import { updateLoot } from './loot';
-import { heroStep } from '../heroes/system';
+import { heroBaseStep, heroStep } from '../heroes/system';
 
 /** The fixed update. Order matters: move, ai, combat, loot. One grid is rebuilt each step. */
 export function createSim(bus: Bus) {
@@ -22,8 +22,10 @@ export function createSim(bus: Bus) {
       if (s.status !== 'running') return;
       if (s.modal || s.turning) return; // a sheet waits for an answer, or the page is turning
       if (s.phase === 'base') {
-        // The base page: the player walks, the stations and the exit are watched. No clock, no laws, no spawns, no fights.
+        // The base page: the player walks, the stations and the exit are watched, the pads cool down and a queued update
+        // opens from the HUD line. No clock, no laws, no spawns, no fights.
         movePlayer(s, bus, dt);
+        heroBaseStep(s, bus, dt);
         tickBase(s, bus, dt);
         tickTunnel(s, bus);
         return;

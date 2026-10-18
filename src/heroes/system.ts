@@ -43,6 +43,18 @@ export function heroStep(s: RunState, bus: Bus, dt: number): void {
   if (tickUpdateQueue(s, dt) && canOpenUpdate(s, false)) bus.emit('update:ready');
 }
 
+/**
+ * The hero on the base page (no enemies, no clock): the skill cooldowns run out, and a queued update opens when the player
+ * asks for it from the HUD line (`hero.updateRequested`). The quiet of the base never opens it by itself, and skills are not
+ * cast here (`castSkill` ignores the pads in the base).
+ */
+export function heroBaseStep(s: RunState, bus: Bus, dt: number): void {
+  const h = s.hero;
+  for (let i = 0; i < 3; i++) h.cd[i] = Math.max(0, (h.cd[i] ?? 0) - dt);
+  if (h.pendingLevels <= 0) h.updateRequested = false;
+  else if (h.updateRequested && canOpenUpdate(s, false)) bus.emit('update:ready');
+}
+
 function stepDash(s: RunState, bus: Bus, dt: number): void {
   const d = s.hero.dash;
   if (!d) return;

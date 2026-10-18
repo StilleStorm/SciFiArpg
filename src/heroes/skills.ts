@@ -270,7 +270,7 @@ export function removeSummon(s: RunState, bus: Bus, id: number): void {
  * does not start one (Pralka's blad programu). Returns true if the skill did something.
  */
 export function castSkill(s: RunState, bus: Bus, slot: 0 | 1 | 2, free = false): boolean {
-  if (s.status !== 'running') return false;
+  if (s.status !== 'running' || s.phase === 'base') return false; // the base has nobody to argue with: a pad tap there does nothing
   const p = s.player;
   const def = heroDef(p.heroId);
   const sk = def.skills[slot];

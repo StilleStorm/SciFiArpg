@@ -140,3 +140,24 @@ describe('knockback', () => {
     expect(e.x).toBeGreaterThan(x0 + 11);
   });
 });
+
+describe('the hero on the base page', () => {
+  it('the pads cool down, a tap on one does nothing, and the queued update opens only when the HUD line asks', async () => {
+    const { createSim } = await import('../systems/step');
+    const s = createRun(5, { phase: 'base' });
+    const bus = createBus();
+    let ready = 0;
+    bus.on('update:ready', () => ready++);
+    const sim = createSim(bus);
+    s.hero.cd[0] = 2;
+    s.hero.pendingLevels = 1;
+    for (let i = 0; i < 130; i++) sim.step(s, 1 / 60);
+    expect(s.hero.cd[0]).toBe(0);
+    expect(ready).toBe(0); // the quiet of the base does not open the form by itself
+    expect(castSkill(s, bus, 0)).toBe(false);
+    expect(s.hero.cd[0]).toBe(0); // and spends no cooldown
+    s.hero.updateRequested = true;
+    sim.step(s, 1 / 60);
+    expect(ready).toBe(1);
+  });
+});
