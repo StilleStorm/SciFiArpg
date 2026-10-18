@@ -137,6 +137,45 @@ try {
   check('after the profile the walkable base page is up: no enemies, the clock still, the exit locked', baseSt.screen === 'baza' && baseSt.phase === 'base' && baseSt.enemies === 0 && baseSt.time === 0 && baseSt.locked, JSON.stringify(baseSt));
   const lockedTurn = await page.evaluate(() => window.__game.walkToExit());
   check('walking into the locked exit does not turn the page', lockedTurn === false && (await page.evaluate(() => window.__game.state().phase)) === 'base');
+  const place = await page.evaluate(() => {
+    const v = document.querySelector('.hud .field.place .val');
+    const b = v?.parentElement;
+    return { label: v?.closest('.field')?.querySelector('label')?.textContent ?? '', text: v?.textContent ?? '', fits: !!b && b.scrollWidth <= b.clientWidth + 1 };
+  });
+  check('the HUD names the base and the kind of place, and the word fits its blank', place.label === 'Baza' && /^(lądowisko|wioska|miasteczko)$/.test(place.text) && place.fits, JSON.stringify(place));
+  // the wall of the base page: the "margines" note is written inside the base page (900 x 700), beside the player
+  await page.evaluate(() => {
+    const g = window.__game;
+    const s = g.state();
+    g.placePlayer(s.page.w - s.page.inset - 40, s.page.h / 2);
+    s.player.target = { x: s.page.w + 300, y: s.page.h / 2 };
+  });
+  await sleep(700);
+  const edgeNote = await page.evaluate(() => {
+    const s = window.__game.state();
+    const xs = [...document.querySelectorAll('#fx text.t-note')].map((n) => Number(n.getAttribute('x')));
+    return { xs, w: s.page.w, inset: s.page.inset };
+  });
+  check('the base page\'s wall writes the margin note inside the base page', edgeNote.xs.some((x) => x > edgeNote.w / 2 && x < edgeNote.w - edgeNote.inset), JSON.stringify(edgeNote));
+  // a queued update opens from the HUD line in the base, and the pads cool down there (skills are not cast in the base)
+  await page.evaluate(() => {
+    const s = window.__game.state();
+    s.hero.pendingLevels = 1;
+    s.hero.cd[0] = 0.8;
+  });
+  await sleep(300);
+  await page.locator('.hud .upd').click({ timeout: 3000 }).catch(() => undefined);
+  const baseUpd = await page.locator('.sheet:not(.hidden) .entry').first().waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false);
+  check('in the base a queued update opens from the HUD line', baseUpd);
+  await shot('02a-base-update');
+  await settle();
+  await sleep(900);
+  const baseHero = await page.evaluate(() => {
+    const s = window.__game.state();
+    window.__game.hero.cast(1);
+    return { pending: s.hero.pendingLevels, cd0: s.hero.cd[0], cd1: s.hero.cd[1], status: s.status, phase: s.phase };
+  });
+  check('the update installs in the base, the pads cool down and a pad does nothing there', baseHero.pending === 0 && baseHero.cd0 === 0 && baseHero.cd1 === 0 && baseHero.status === 'running' && baseHero.phase === 'base', JSON.stringify(baseHero));
   // a real tap on the desk: the player walks there and the desk sheet opens
   await page.evaluate(() => window.__game.setSteering('tap'));
   await page.evaluate(() => window.__game.startBase());
@@ -159,10 +198,29 @@ try {
   await sleep(1800);
   await shot('03b-base-unlocked');
   check('accepting the ticket unlocks the exit and keeps the player in the base', (await screen()) === 'baza' && (await page.evaluate(() => window.__game.state().base.accepted)));
+  const headerFits = (sel) =>
+    page.evaluate((q) => {
+      const lines = [...document.querySelectorAll(q)];
+      const out = lines.filter((n) => {
+        const r = n.getBoundingClientRect();
+        return r.left < -1 || r.right > window.innerWidth + 1;
+      });
+      return { lines: lines.length, outside: out.length };
+    }, sel);
+  const bh = await headerFits('#page .base-header text.t-head');
+  check('portrait: the clause header of the base is set inside the screen, two lines at most', bh.lines >= 1 && bh.lines <= 2 && bh.outside === 0, JSON.stringify(bh));
+  const notesInBase = await page.evaluate(() => window.__game.notes());
   await page.evaluate(() => window.__game.walkToExit());
   await sleep(1800);
   check('reached the run through the real buttons and the exit of the base', (await screen()) === 'run' && (await page.evaluate(() => window.__game.state().phase)) === 'run');
   await shot('04-run-start');
+  const rh = await headerFits('#page text.t-head');
+  check('portrait: the clause header of the first page is set inside the screen, two lines at most', rh.lines >= 1 && rh.lines <= 2 && rh.outside === 0, JSON.stringify(rh));
+  const notesInRun = await page.evaluate(() => window.__game.notes());
+  const lastBase = notesInBase.at(-1);
+  const kept = lastBase !== undefined && notesInRun.some((n) => n.n === lastBase.n && n.text === lastBase.text);
+  const ascending = notesInRun.every((n, i) => i === 0 || n.n === notesInRun[i - 1].n + 1);
+  check('the footnotes run on from the base into the run (one numbering per ticket)', kept && ascending && notesInRun.length > notesInBase.length, `base ${notesInBase.length} notes, run ${notesInRun.length}, last ${notesInRun.at(-1)?.n}`);
   // sound: the real button clicks unlocked the context, the music started with the run (menus had none)
   const ctxState = await page.evaluate(() => window.__game.audio.contextState());
   check('the audio context was unlocked by the real clicks', ctxState === 'running', ctxState);
@@ -263,7 +321,7 @@ try {
   await settle();
   const pzAfter = await page.evaluate(() => {
     const s = window.__game.state();
-    return s && { screen: window.__game.screen(), page: s.pageIndex, hp: s.player.hp, hpMax: s.player.hpMax, note: document.querySelector('.foot')?.textContent ?? '' };
+    return s && { screen: window.__game.screen(), page: s.pageIndex, hp: s.player.hp, hpMax: s.player.hpMax, note: window.__game.notes().map((n) => n.text).join(' ') };
   });
   check('resuming lands on the same page index with full racja', pzAfter?.screen === 'run' && pzAfter.page === pzBefore?.page && pzAfter.hp === pzAfter.hpMax, JSON.stringify({ page: pzAfter?.page, hp: pzAfter?.hp }));
   check('a footnote says the ticket was reassigned', (pzAfter?.note ?? '').includes('innemu konsultantowi'));
@@ -281,6 +339,16 @@ try {
   await sleep(600);
   const tn1 = await page.evaluate(() => ({ open: !!window.__game.state().tunnel, holes: document.querySelectorAll('#page .tn-hole').length }));
   check('Tunel cuts a hole at the player\'s feet', tn1.open && tn1.holes === 1, JSON.stringify(tn1));
+  // a second tunnel a little further on closes the first with tape
+  await page.evaluate(() => {
+    const g = window.__game;
+    const s = g.state();
+    g.placePlayer(s.tunnel.x - 130, s.tunnel.y);
+  });
+  await page.locator('.hud .tunnel-btn').click({ timeout: 3000 });
+  await sleep(700);
+  const tn2 = await page.evaluate(() => ({ holes: document.querySelectorAll('#page .tn-hole').length, tapes: document.querySelectorAll('#page .tn-tape').length }));
+  check('a second tunnel tapes the first', tn2.holes === 2 && tn2.tapes === 1, JSON.stringify(tn2));
   await shot('08e-tunnel-open');
   // step off the hole, then walk back onto it with the real step (a target, the loop's own steps)
   await page.evaluate(() => {
@@ -312,16 +380,19 @@ try {
     };
     const before = snap();
     const ok = window.__game.returnFromTunnel();
-    return { ok, before, after: snap(), same: window.__keep === window.__game.state() };
+    // the figures were on the page all along: none of them is being drawn in again
+    const redrawn = [...document.querySelectorAll('#world > g[data-kind] path')].filter((p) => p.style.strokeDasharray !== '').length;
+    return { ok, before, after: snap(), same: window.__keep === window.__game.state(), redrawn };
   });
   check('returning restores the same enemies, loot and clock, to the unit', exact.ok && exact.same && exact.before === exact.after, exact.before === exact.after ? '' : `${exact.before} vs ${exact.after}`);
+  check('on the return the figures stand where they were, not drawn in again', exact.redrawn === 0, `${exact.redrawn} strokes drawing in`);
   await sleep(900);
   const tnBack = await page.evaluate(() => {
     const s = window.__game.state();
     return { screen: window.__game.screen(), status: s.status, same: window.__keep === s, time: s.time, tunnel: s.tunnel ?? null, tapes: document.querySelectorAll('#page .tn-tape').length };
   });
   check('the run continues from the clock where it stopped', tnBack.screen === 'run' && tnBack.status === 'running' && tnBack.same && tnBack.time > tnHeld.time && tnBack.time - tnHeld.time < 3, `${tnHeld.time.toFixed(2)} -> ${tnBack.time.toFixed(2)}`);
-  check('the hole is taped and the tunnel is closed', tnBack.tunnel === null && tnBack.tapes === 1, JSON.stringify({ tapes: tnBack.tapes }));
+  check('the hole is taped, the earlier tape is back on the page and the tunnel is closed', tnBack.tunnel === null && tnBack.tapes === 2, JSON.stringify({ tapes: tnBack.tapes }));
   await shot('08g-tunnel-taped');
 
   // ---------- 5. the boss ----------
@@ -507,6 +578,24 @@ try {
   const fought = (p3.enemies[0]?.hp ?? 1) < (p3.enemies[0]?.hpMax ?? 1);
   check('an attack landed on the dummy', fought, `hp ${p3.enemies[0]?.hp}/${p3.enemies[0]?.hpMax}`);
   await lp.screenshot({ path: `${SHOTS}/16-landscape-after.png` });
+  // the footnote slip lies over the steering half: a thumb that lands on it steers, a quick tap on it opens the history
+  const slip = await lp.locator('.foot').boundingBox();
+  const onSlip = { x: Math.min(slip.x + 40, 844 / 2 - 30), y: slip.y + slip.height / 2, id: 3 };
+  await touch('touchStart', [onSlip]);
+  await sleep(80);
+  await touch('touchMove', [{ ...onSlip, y: onSlip.y - 30 }]);
+  await sleep(200);
+  const slipSteer = await lp.evaluate(() => ({ joy: !document.querySelector('.joy').classList.contains('hidden'), history: !!document.querySelector('.pop-history') }));
+  await touch('touchEnd', [{ ...onSlip, y: onSlip.y - 30 }]);
+  await sleep(150);
+  check('joystick mode: a thumb landing on the footnote slip steers', slipSteer.joy && !slipSteer.history, JSON.stringify(slipSteer));
+  await touch('touchStart', [onSlip]);
+  await sleep(50);
+  await touch('touchEnd', [onSlip]);
+  await sleep(300);
+  const slipTap = await lp.evaluate(() => !!document.querySelector('.pop-history'));
+  check('joystick mode: a quick tap on the footnote slip opens the history', slipTap);
+  await lp.screenshot({ path: `${SHOTS}/17-landscape-footnote-history.png` });
   await lctx.close();
 
   // ---------- 7. frame time with 40 enemies ----------

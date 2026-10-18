@@ -109,7 +109,7 @@ try {
     await sleep(900);
     const opened = await page.evaluate(() => {
       const s = window.__game.state();
-      return { tunnel: s.tunnel ? { x: s.tunnel.x, y: s.tunnel.y, page: s.tunnel.pageIndex } : null, hole: document.querySelectorAll('#page .tn-hole').length, note: document.querySelector('#page .tn-hole text')?.textContent ?? '', foot: document.querySelector('.foot')?.textContent ?? '' };
+      return { tunnel: s.tunnel ? { x: s.tunnel.x, y: s.tunnel.y, page: s.tunnel.pageIndex } : null, hole: document.querySelectorAll('#page .tn-hole').length, note: document.querySelector('#page .tn-hole text')?.textContent ?? '', foot: window.__game.notes().map((n) => n.text).join(' ') };
     });
     check(`${prefix}: tapping Tunel cuts a hole at the player's feet`, opened.tunnel !== null && Math.hypot(opened.tunnel.x - before.x, opened.tunnel.y - before.y) < 6 && opened.hole === 1, JSON.stringify(opened.tunnel));
     check(`${prefix}: the hole carries the note "c.d. na stronie __"`, opened.note === 'c.d. na stronie __', opened.note);
@@ -223,7 +223,7 @@ try {
         tunnel: s.tunnel ?? null,
         tapes: document.querySelectorAll('#page .tn-tape').length,
         struck: [...document.querySelectorAll('#page .tn-hole')].filter((h) => h.querySelector('path[style*="accent"]')).length,
-        foot: document.querySelector('.foot')?.textContent ?? '',
+        foot: window.__game.notes().map((n) => n.text).join(' '),
         hudHidden: document.querySelector('.hud')?.classList.contains('hidden') ?? null,
       };
     });

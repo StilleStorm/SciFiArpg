@@ -340,7 +340,9 @@ try {
   await lp.evaluate(() => document.querySelector('.pop-buttons .form-btn').click());
   await lp.evaluate(() => window.__game.footnote('Przypis kontrolny.'));
   await lwait(300);
-  await lp.locator('.foot').click();
+  // joystick mode: the slip lets the thumb through to the stage, and a quick tap on it opens the history
+  const slipBox = await lp.locator('.foot').boundingBox();
+  await lp.touchscreen.tap(slipBox.x + slipBox.width / 2, slipBox.y + slipBox.height / 2);
   await lwait(400);
   await lshot('footnote-history');
   await lp.locator('.pop-wrap').click();

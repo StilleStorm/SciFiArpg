@@ -126,7 +126,7 @@ try {
       const st = await state();
       check(`${prefix}: ${layout}: the base is up, no enemies, the clock stands, the exit is locked`, st.screen === 'baza' && st.phase === 'base' && st.enemies === 0 && st.time === 0 && st.locked === true, JSON.stringify(st));
       const hud = await page.evaluate(() => ({ label: document.querySelector('.hud-row + .hud-row .field:last-child label')?.textContent, value: document.querySelector('.hud-row + .hud-row .field:last-child .val')?.textContent, tunnelHidden: document.querySelector('.tunnel-btn')?.classList.contains('hidden'), padsHidden: ['s1', 's2', 's3'].every((c) => getComputedStyle(document.querySelector(`.pad.${c}`)).display === 'none'), inv: getComputedStyle(document.querySelector('.pad.inv')).display !== 'none' }));
-      check(`${prefix}: ${layout}: the HUD says Baza, the Tunel note and the skill pads are put away`, hud.label === 'Baza' && hud.value === '' && hud.tunnelHidden && hud.padsHidden && hud.inv, JSON.stringify(hud));
+      check(`${prefix}: ${layout}: the HUD says Baza and the kind of place, the Tunel note and the skill pads are put away`, hud.label === 'Baza' && hud.value === { ladowisko: 'lądowisko', wioska: 'wioska', miasteczko: 'miasteczko' }[layout] && hud.tunnelHidden && hud.padsHidden && hud.inv, JSON.stringify(hud));
       await shot(layout);
     }
 
@@ -216,10 +216,12 @@ try {
     await sleep(300);
     check(`${prefix}: walking into the locked exit does not turn the page`, lockedTurn === false && (await state()).phase === 'base');
     await shot('exit-locked-note');
+    // the ticket is accepted at the desk, as in play: the clause header is printed where the player is looking (portrait)
     await page.evaluate(() => {
-      const e = window.__game.state().page.exit;
-      window.__game.placePlayer(e.x + (e.corner[1] === 'l' ? 170 : -170), e.y - 120);
+      const st = window.__game.state().page.base.stations.find((x) => x.id === 'biurko');
+      window.__game.placePlayer(st.x + 40, st.y + 90);
     });
+    await sleep(700);
     await page.evaluate(() => window.__game.station('biurko'));
     await sleep(300);
     await page.getByText('Nowe zgłoszenie', { exact: false }).locator('visible=true').first().click();
@@ -230,10 +232,13 @@ try {
     await sleep(1900);
     const acc = await page.evaluate(() => ({ sheet: document.querySelector('.ps') !== null, accepted: window.__game.state().base.accepted, header: document.querySelector('#page .base-header')?.textContent ?? '', solid: document.querySelector('#page .base-exit g:nth-child(2)')?.style.display ?? 'x' }));
     check(`${prefix}: accepting stamps, opens the exit and prints the clause header on the base page`, !acc.sheet && acc.accepted && acc.header.includes('Zgłoszenie nr') && acc.solid === '', JSON.stringify(acc));
-    await shot('exit-open');
-    await page.evaluate(() => window.__game.placePlayer(500, 380));
-    await sleep(900);
     await shot('header');
+    await page.evaluate(() => {
+      const e = window.__game.state().page.exit;
+      window.__game.placePlayer(e.x + (e.corner[1] === 'l' ? 170 : -170), e.y - 120);
+    });
+    await sleep(900);
+    await shot('exit-open');
 
     // ---- through the exit: the run proper begins ----
     const turned = await page.evaluate(() => window.__game.walkToExit());
@@ -308,10 +313,10 @@ try {
     await page.getByText('Wróć', { exact: true }).click();
     await sleep(300);
     check(`${prefix}: Wróć closes the settings and gives the base back`, (await state()).status === 'running');
-    const before = await page.evaluate(() => document.querySelector('#ui .foot')?.textContent ?? '');
+    const before = await page.evaluate(() => window.__game.notes().map((n) => n.text).join(' '));
     await page.evaluate(() => window.__game.station('paczkomat'));
     await sleep(500);
-    const after = await page.evaluate(() => document.querySelector('#ui .foot')?.textContent ?? '');
+    const after = await page.evaluate(() => window.__game.notes().map((n) => n.text).join(' '));
     check(`${prefix}: the paczkomat answers with a footnote`, after.replace(/\u00a0/g, ' ').includes('Paczkomat nieczynny. Przesyłki w drodze.') && after !== before, after.slice(-80));
     await shot('paczkomat');
 

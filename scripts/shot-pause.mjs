@@ -170,7 +170,7 @@ try {
     await sleep(2200);
     const after = await page.evaluate(() => {
       const s = window.__game.state();
-      return { screen: window.__game.screen(), page: s.pageIndex, hp: s.player.hp, hpMax: s.player.hpMax, time: s.time, level: s.player.level, enemies: s.enemies.length, pickups: s.pickups.length, bookmark: window.__game.meta().bookmark ?? null, note: document.querySelector('.foot')?.textContent ?? '' };
+      return { screen: window.__game.screen(), page: s.pageIndex, hp: s.player.hp, hpMax: s.player.hpMax, time: s.time, level: s.player.level, enemies: s.enemies.length, pickups: s.pickups.length, bookmark: window.__game.meta().bookmark ?? null, note: window.__game.notes().map((n) => n.text).join(' ') };
     });
     check(`${prefix}: resuming lands on the same page index`, after.screen === 'run' && after.page === before.page, `page ${after.page}`);
     check(`${prefix}: racja is full, enemies are back, the floor is clean`, after.hp === after.hpMax && after.enemies > 0 && after.pickups === 0, `hp ${after.hp}/${after.hpMax}, enemies ${after.enemies}`);
