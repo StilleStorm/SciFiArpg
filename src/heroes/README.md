@@ -1,1 +1,1 @@
-Four hero definitions, twelve skills, quirks, the per-step hero system (cooldowns, summons, zones, player projectiles) and the layer that ties them to the update and death forms (layer.ts). Run state: state.ts.
+Five hero definitions, fifteen skills, quirks, the per-step hero system (cooldowns, summons, zones, player projectiles) and the layer that ties them to the update and death forms (layer.ts). Run state: state.ts.

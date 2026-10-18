@@ -19,8 +19,16 @@ import {
   heroPose,
   keyframes,
   lashPath,
-  measureSegment,
-  measureStart,
+  CRIT_GAP,
+  FLIP_MS,
+  HOP,
+  LABEL_FADE_MS,
+  LASER_ERASE_MS,
+  LASER_HOLD_MS,
+  TICK_EVERY,
+  laserLabel,
+  laserPaths,
+  slapPath,
   scribblePath,
   whipPath,
   whipSplash,
@@ -137,19 +145,32 @@ describe('hero poses', () => {
     expect(heroPose('petlowiec', 200).erase).toBe(1);
   });
 
-  it('Kartograf kicks the instrument back 6, draws the line in 80 ms and erases it in 120', () => {
+  it('Kartograf kicks the instrument back 6 and draws nothing in the pose (the laser is its own line)', () => {
     expect(heroPose('kartograf', 25).kick).toBeCloseTo(KICK, 6);
     expect(heroPose('kartograf', 0).kick).toBe(0);
     expect(heroPose('kartograf', 150).kick).toBe(0);
-    expect(heroPose('kartograf', 40).draw).toBeCloseTo(0.5, 6);
-    expect(heroPose('kartograf', 80).draw).toBe(1);
-    expect(heroPose('kartograf', 80).erase).toBe(0);
-    expect(heroPose('kartograf', 140).erase).toBeCloseTo(0.5, 6);
-    expect(heroPose('kartograf', 200).erase).toBe(1);
+    expect(heroPose('kartograf', 40).draw).toBe(0);
+    expect(heroPose('kartograf', 40).erase).toBe(0);
+  });
+
+  it('Nalesnik turns over (vertical scale -1 to 1 in 220 ms), hops 12 toward the enemy and lands its slap', () => {
+    expect(FLIP_MS).toBe(220);
+    expect(heroPose('nalesnik', 0).flip).toBeCloseTo(-1, 6);
+    expect(heroPose('nalesnik', 110).flip).toBeCloseTo(0, 6);
+    expect(heroPose('nalesnik', 220).flip).toBeCloseTo(1, 6);
+    expect(heroPose('nalesnik', 60).flip).toBeLessThan(heroPose('nalesnik', 160).flip);
+    const peak = Math.max(...[0, 20, 40, 60, 80, 99, 110, 130, 160, 200].map((t) => heroPose('nalesnik', t).lurch));
+    expect(peak).toBeGreaterThan(HOP * 0.9);
+    expect(peak).toBeLessThanOrEqual(HOP + 1e-9);
+    expect(heroPose('nalesnik', 220).lurch).toBeCloseTo(0, 6);
+    expect(heroPose('nalesnik', 80).draw).toBe(0);
+    expect(heroPose('nalesnik', 125).draw).toBe(1);
+    expect(heroPose('nalesnik', 125).erase).toBe(0);
+    expect(heroPose('nalesnik', 220).erase).toBe(1);
   });
 
   it('every pose is neutral after its animation ends', () => {
-    for (const id of ['pralka', 'konsultant', 'petlowiec', 'kartograf'] as const) {
+    for (const id of ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'] as const) {
       const p = heroPose(id, HERO_ATTACK_MS[id]);
       expect(Math.abs(p.lurch) + Math.abs(p.arm) + Math.abs(p.kick) + Math.abs(p.dip), id).toBeLessThan(1e-6);
       expect(p.ticketOut, id).toBe(false);
@@ -236,20 +257,53 @@ describe('geometry', () => {
     expect(scribblePath(createRng(1), 6, 30, 6)).not.toBe(scribblePath(createRng(2), 6, 30, 6));
   });
 
-  it('the measurement runs from the pole to the target and is trimmed by draw and erase', () => {
-    const a = aimOf(0, 0, 200, 0);
-    const s = measureStart(a, 1.4);
-    expect(s.x).toBeCloseTo(21, 6);
-    expect(s.y).toBeCloseTo(-30.8, 6);
-    const full = measureSegment(a, 1.4, 1, 0);
-    expect(full.d.startsWith('M21 -30.8L200 0')).toBe(true);
-    const part = measureSegment(a, 1.4, 0.5, 0);
-    expect(part.d).toBe('M21 -30.8L110.5 -15.4');
-    const rubbed = measureSegment(a, 1.4, 1, 0.5);
-    expect(rubbed.d.startsWith('M110.5 -15.4L200 0')).toBe(true);
-    expect(rubbed.offset).toBeCloseTo(-0.5 * rubbed.len, 6);
-    // pole on the far side when the target is behind
-    expect(measureStart(aimOf(0, 0, -200, 0), 1.4).x).toBeCloseTo(-21, 6);
+  it('the laser is one ruled line from the instrument to the target, ticks every 40 units, rubbed out from the instrument end', () => {
+    const l = { sx: 20, sy: -30, ex: 220, ey: -30, crit: false };
+    const whole = laserPaths(l, 220, -30, 0);
+    expect(whole.lines).toEqual(['M20 -30L220 -30']);
+    // 200 units long: ticks at 40, 80, 120, 160 from the instrument (none within 4 units of the end)
+    expect(whole.ticks.match(/M/g)).toHaveLength(4);
+    expect(whole.ticks.startsWith('M60 -33.5L60 -26.5')).toBe(true);
+    expect(whole.cross).toContain('M214 -30H226');
+    const half = laserPaths(l, 220, -30, 0.5);
+    expect(half.lines).toEqual(['M120 -30L220 -30']);
+    expect(half.ticks.match(/M/g)).toHaveLength(2); // the ticks at 40 and 80 went with the part that was rubbed out
+    const gone = laserPaths(l, 220, -30, 1);
+    expect(gone.lines).toEqual([]);
+    expect(gone.ticks).toBe('');
+    expect(gone.cross).toBe('');
+    expect(TICK_EVERY).toBe(40);
+  });
+
+  it('a crit doubles the line: two parallel lines 2 units apart', () => {
+    const l = { sx: 0, sy: 0, ex: 100, ey: 0, crit: true };
+    const { lines } = laserPaths(l, 100, 0, 0);
+    expect(lines).toEqual(['M0 -1L100 -1', 'M0 1L100 1']);
+    expect(CRIT_GAP).toBe(2);
+    // along a slope the pair stays parallel and 2 apart
+    const d = laserPaths({ sx: 0, sy: 0, ex: 60, ey: 80, crit: true }, 60, 80, 0).lines;
+    const nums = d.map((x) => (x.match(/-?\d+(\.\d+)?/g) ?? []).map(Number));
+    const [a = [], b = []] = nums;
+    expect(Math.hypot((a[0] ?? 0) - (b[0] ?? 0), (a[1] ?? 0) - (b[1] ?? 0))).toBeCloseTo(2, 5);
+    expect(Math.hypot((a[2] ?? 0) - (b[2] ?? 0), (a[3] ?? 0) - (b[3] ?? 0))).toBeCloseTo(2, 5);
+  });
+
+  it('the label is the distance over ten, one decimal, a comma, a unit', () => {
+    expect(laserLabel(12.4)).toBe('12,4\u00a0m');
+    expect(laserLabel(5)).toBe('5,0\u00a0m');
+    expect(laserLabel(12.449)).toBe('12,4\u00a0m');
+    expect(laserLabel(0.05)).toBe('0,1\u00a0m');
+    expect(LASER_HOLD_MS + LASER_ERASE_MS).toBeLessThan(LASER_HOLD_MS + LABEL_FADE_MS);
+    expect(LASER_ERASE_MS).toBe(160);
+    expect(LABEL_FADE_MS).toBe(300);
+  });
+
+  it('the slap is one bow with two ticks, on the near side of the enemy', () => {
+    const d = slapPath(aimOf(0, 0, 60, 0));
+    expect(d.match(/M/g)).toHaveLength(3);
+    const nums = (d.match(/-?\d+(\.\d+)?/g) ?? []).map(Number);
+    expect(nums[0]).toBeCloseTo(44 - 2, 5); // 60 - 16 = 44 from the attacker, the bow starts 2 back
+    expect(Math.abs(nums[1] ?? 0)).toBeCloseTo(17, 5);
   });
 });
 

@@ -148,7 +148,7 @@ export function migrate(raw: unknown): MetaState {
   const bookmark = toBookmark(raw['bookmark']);
   if (bookmark) out.bookmark = bookmark;
   const hero = raw['heroId'];
-  if (hero === 'pralka' || hero === 'konsultant' || hero === 'petlowiec' || hero === 'kartograf') out.heroId = hero;
+  if (hero === 'pralka' || hero === 'konsultant' || hero === 'petlowiec' || hero === 'kartograf' || hero === 'nalesnik') out.heroId = hero;
   return out;
 }
 

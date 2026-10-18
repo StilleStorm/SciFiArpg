@@ -12,7 +12,7 @@ import type { RunState } from '../world/run';
 
 export const CHARACTER_VERSION = 1;
 
-export const HERO_IDS: readonly HeroId[] = ['pralka', 'konsultant', 'petlowiec', 'kartograf'];
+export const HERO_IDS: readonly HeroId[] = ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'];
 
 export interface Character extends ProgressData {
   version: number;

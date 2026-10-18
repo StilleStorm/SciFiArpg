@@ -38,7 +38,7 @@ function attackOnce(s: RunState, bus = createBus()): { hits: number; misses: num
 
 describe('auto-attack while moving (DESIGN 2)', () => {
   it('a ranged hero fires at the nearest enemy in range while steering', () => {
-    for (const hero of ['konsultant', 'petlowiec', 'kartograf'] as const) {
+    for (const hero of ['konsultant', 'petlowiec'] as const) {
       const s = run(hero);
       const near = addEnemy(s, s.player.attackRange * 0.6, 20);
       addEnemy(s, -s.player.attackRange * 0.9);

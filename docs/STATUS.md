@@ -62,6 +62,13 @@ joystick/tap steering (§2), editorial rules (§12.1).
   zgloszenia" legible with an arrow, struck through on unlock. Other heroes' attacks may still
   be refined once the player has ideas.
 
+- Third round: base-page figures now animate (render clock), Kartograf's auto is one measuring
+  laser (hitscan, ticks, distance label, crit pierces), Naleśnik shipped (rolling walk, flip
+  auto, Orbita/Grawitacja/Wniosek, hydrostatic quirk, profile, pool, four sounds, ochre wash).
+  Builder's note: standing still it reads a bit like a moon; the folded edge could be stronger.
+- Next session first: `/pickup`, then the voice pass on heroes.json + forms.json, then the
+  fourth and fifth skills per hero (5b).
+
 ## Open feedback wanted from the player
 - Real-phone frame rate with a crowd; tap accuracy; joystick feel once it lands.
 - Sound levels: music is −12 dB under SFX by design; the sliders' comfortable values become

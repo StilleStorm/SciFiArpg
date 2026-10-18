@@ -55,7 +55,7 @@ describe('attack:started', () => {
   });
 
   it('a ranged hero emits it when the shot leaves the hand, not when it lands', () => {
-    for (const hero of ['konsultant', 'petlowiec', 'kartograf'] as const) {
+    for (const hero of ['konsultant', 'petlowiec'] as const) {
       const s = run(hero);
       const target = addEnemy(s, 60, 0);
       const w = watch();

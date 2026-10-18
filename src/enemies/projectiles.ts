@@ -6,6 +6,7 @@ import { applyDamage } from '../systems/combat';
 import { nextId, type RunState } from '../world/run';
 import type { RangedSpec } from './partsBase';
 import { enemyOutgoing } from './hooks';
+import { projectileDamageMul } from '../heroes/shield';
 
 /** Fire `count` shots from enemy e toward (tx, ty), fanned out by `spread` radians. */
 export function fireShot(s: RunState, e: Enemy, tx: number, ty: number, spec: RangedSpec, count = 1, spread = 0.22): void {
@@ -52,7 +53,7 @@ export function updateEnemyProjectiles(s: RunState, bus: Bus, dt: number): void 
       }
     }
     if (!done && pr.damage > 0 && !p.suspended && !s.law.botTime && s.status === 'running' && Math.hypot(p.x - pr.x, p.y - pr.y) < p.r + pr.r) {
-      applyDamage(s, bus, p, pr.damage, false, pr.damageType);
+      applyDamage(s, bus, p, Math.max(1, Math.round(pr.damage * projectileDamageMul(p))), false, pr.damageType);
       done = true;
     }
     if (done) list.splice(i, 1);

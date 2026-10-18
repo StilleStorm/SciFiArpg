@@ -55,7 +55,7 @@ try {
   await page.evaluate(() => document.fonts.ready);
   const shot = (name) => page.screenshot({ path: `${SHOTS}/${name}.png` });
   const wait = (ms) => page.waitForTimeout(ms);
-  const heroes = ['pralka', 'konsultant', 'petlowiec', 'kartograf'];
+  const heroes = ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'];
 
   // ---- each hero alone, large (4x) ----
   const big = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 4, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
@@ -74,6 +74,27 @@ try {
     if (id === 'pralka') await bp.screenshot({ path: `${SHOTS}/solo-full.png` });
     await bp.screenshot({ path: `${SHOTS}/hero-solo-${id}.png`, clip: { x: 125, y: 535, width: 140, height: 140 } });
   }
+  // Nalesnik walking (edge-on, craters turned) and standing (the full disc), and rounded up by its quirk
+  await bp.evaluate(() => window.__game.start(11, { heroId: 'nalesnik' }));
+  await bp.waitForTimeout(1300);
+  await bp.evaluate(() => {
+    const s = window.__game.state();
+    s.enemies.length = 0;
+    s.player.hp = s.player.hpMax = 1e9;
+  });
+  await bp.waitForTimeout(500);
+  await bp.evaluate(() => {
+    const s = window.__game.state();
+    s.player.target = { x: s.player.x + 400, y: s.player.y };
+  });
+  await bp.waitForTimeout(260);
+  await bp.screenshot({ path: `${SHOTS}/hero-solo-nalesnik-rolling.png`, clip: { x: 125, y: 535, width: 140, height: 140 } });
+  await bp.evaluate(() => (window.__game.state().player.target = null));
+  await bp.waitForTimeout(600);
+  await bp.screenshot({ path: `${SHOTS}/hero-solo-nalesnik-flat.png`, clip: { x: 125, y: 535, width: 140, height: 140 } });
+  await bp.evaluate(() => (window.__game.state().player.round = true));
+  await bp.waitForTimeout(200);
+  await bp.screenshot({ path: `${SHOTS}/hero-solo-nalesnik-round.png`, clip: { x: 125, y: 535, width: 140, height: 140 } });
   await big.close();
 
   // ---- profile screens ----
@@ -120,6 +141,45 @@ try {
       await wait(400);
     }
   }
+
+  // ---- Nalesnik, each skill mid-effect ----
+  await page.evaluate(() => window.__game.start(13, { heroId: 'nalesnik' }));
+  await wait(1400);
+  await page.evaluate(() => window.__game.placePlayer(600, 800));
+  const nal = async (name, fn, ms) => {
+    await page.evaluate(() => {
+      const g = window.__game;
+      const s = g.state();
+      g.enemies.clear();
+      s.zones.length = 0;
+      s.page.obstacles.length = 0; // nothing for the roll to bounce off
+      s.hero.roll = null;
+      s.hero.orbit = null;
+      s.hero.gravity = null;
+      s.hero.cd = [0, 0, 0];
+      s.player.hp = s.player.hpMax = 1e9;
+      g.placePlayer(600, 800);
+      const ids = g.enemies.spawnFamily('urzadzenia', 6);
+      ids.forEach((id, i) => {
+        const e = s.enemies.find((x) => x.id === id);
+        e.x = 700 + (i % 3) * 52 - 30;
+        e.y = 800 + ((i % 5) - 2) * 38;
+        e.home = { x: e.x, y: e.y };
+        e.mode = 'wander';
+        e.wanderTimer = 99;
+        e.hp = e.hpMax = 9999;
+        e.attackTimer = 99;
+      });
+    });
+    await wait(800);
+    await page.evaluate(fn);
+    await wait(ms);
+    await shot(name);
+  };
+  await nal('nalesnik-orbita-roll', () => window.__game.aimCast(1, { kind: 'kierunek', dx: 1, dy: 0 }), 200);
+  await nal('nalesnik-orbita-satellite', () => window.__game.aimCast(1, { kind: 'kierunek', dx: 1, dy: 0 }), 1100);
+  await nal('nalesnik-gravity', () => window.__game.hero.cast(2), 700);
+  await nal('nalesnik-flag', () => window.__game.aimCast(3, { kind: 'wskazanie', x: 720, y: 800 }), 900);
 
   // ---- update form ----
   await page.evaluate(() => window.__game.start(21, { heroId: 'konsultant' }));

@@ -77,6 +77,37 @@ export interface Dash {
   rank: number;
 }
 
+/** Nalesnik's Orbita: the roll along a line (the player is moved by heroes/system.ts). */
+export interface Roll {
+  dx: number;
+  dy: number;
+  /** Seconds left. */
+  left: number;
+  speed: number;
+  /** Ids of the enemies already struck by this roll. */
+  hit: number[];
+  rank: number;
+}
+
+/** The enemy that circles Nalesnik after an Orbita: it eases onto the circle, then goes round at a fixed rate. */
+export interface Orbit {
+  id: number;
+  angle: number;
+  /** Distance when it was caught, and seconds since. */
+  r0: number;
+  age: number;
+  /** Seconds left. */
+  left: number;
+}
+
+/** Nalesnik's Grawitacja: everything within reach falls toward him while `left` lasts. */
+export interface Gravity {
+  left: number;
+  radius: number;
+  /** Ids of the enemies that reached the rim (each takes the rim damage once). */
+  rim: number[];
+}
+
 export interface Redirect {
   id: number;
   until: number;
@@ -134,6 +165,14 @@ export interface HeroRun {
   buffCrit: number;
   dash: Dash | null;
   redirects: Redirect[];
+  /** Nalesnik: the roll (Orbita), the satellite it caught, the pull (Grawitacja). */
+  roll: Roll | null;
+  orbit: Orbit | null;
+  gravity: Gravity | null;
+  /** Nalesnik's quirk: run time until which it is rounded, and from which it may round up again; upor added meanwhile. */
+  roundUntil: number;
+  roundReadyAt: number;
+  roundUpor: number;
   /** Update form state. */
   rerollUsed: boolean;
   offer: UpdateOffer | null;
@@ -175,6 +214,12 @@ export function createHeroRun(heroId: HeroId): HeroRun {
     buffCrit: 0,
     dash: null,
     redirects: [],
+    roll: null,
+    orbit: null,
+    gravity: null,
+    roundUntil: 0,
+    roundReadyAt: 0,
+    roundUpor: 0,
     rerollUsed: false,
     offer: null,
     pendingLevels: 0,

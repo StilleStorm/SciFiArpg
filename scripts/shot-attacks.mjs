@@ -131,7 +131,11 @@ try {
         }
         await raf();
         await raf();
-        return { projectiles: s.projectiles.length, fx: document.querySelectorAll('#fx .attack-ink').length };
+        return {
+          projectiles: s.projectiles.length,
+          fx: document.querySelectorAll('#fx .attack-ink').length,
+          labels: [...document.querySelectorAll('#fx text.t-note')].map((n) => n.textContent).join('|'),
+        };
       },
       { who, ms, dist },
     );
@@ -141,9 +145,17 @@ try {
   // moments (ms into the animation) that show each hero's pose best
   // (Pralka 320 ms: whip drawn 60-95, held to 275, rubbed out by 320; Konsultant: cable tip on the target at 90, home at 210;
   // Petlowiec: remark in flight, "—!" beside the helmet until ~200; Kartograf as before)
-  const MOMENTS = { pralka: [40, 80, 130, 200, 260, 300], konsultant: [25, 45, 70, 90, 110, 130, 190], petlowiec: [20, 40, 100, 160], kartograf: [20, 50, 90, 150] };
+  // Kartograf: the ruled line is there at once, held 80 ms, rubbed out from the instrument over 160 ms; the label fades over 300
+  // Nalesnik 220 ms: the disc turns over (scale -1 -> 1) hopping 12 toward the enemy, the slap is inked from 90 to 220
+  const MOMENTS = {
+    pralka: [40, 80, 130, 200, 260, 300],
+    konsultant: [25, 45, 70, 90, 110, 130, 190],
+    petlowiec: [20, 40, 100, 160],
+    kartograf: [20, 60, 100, 160, 240, 340],
+    nalesnik: [20, 50, 90, 120, 150, 200],
+  };
   // how far the enemy stands: the melee hero in reach, the others at about the distance they shoot from
-  const DIST = { pralka: 56, konsultant: 110, petlowiec: 90, kartograf: 130 };
+  const DIST = { pralka: 56, konsultant: 110, petlowiec: 90, kartograf: 130, nalesnik: 48 };
   for (const hero of Object.keys(MOMENTS)) {
     await setup(hero, 'urzadzenia', DIST[hero]);
     await snap(`atk-${hero}-0-idle`);
@@ -152,6 +164,8 @@ try {
       await snap(`atk-${hero}-${String(ms).padStart(3, '0')}`);
       console.log(hero, ms, JSON.stringify(r));
       if (hero === 'pralka' && ms === 130) check('pralka: the whip is one fx stroke with its splash', r.fx >= 2, JSON.stringify(r));
+      if (hero === 'kartograf' && ms === 20) check('kartograf: a ruled line, ticks and crosshair (3 ink strokes) and a label like "13,0 m"', r.fx >= 3 && r.labels.split('|').some((x) => /^\d+,\d\sm$/.test(x)), JSON.stringify(r));
+      if (hero === 'nalesnik' && ms === 150) check('nalesnik: the ink slap is one fx stroke', r.fx >= 1, JSON.stringify(r));
       if (hero === 'konsultant' && ms === 90) {
         const cable = await page.evaluate(() => ({
           part: document.querySelectorAll('#world g[data-kind="player"] [data-part="cable"]').length,
@@ -163,6 +177,75 @@ try {
     // after its duration everything is back where it was
     await attackAt('player', 400, DIST[hero]);
     await snap(`atk-${hero}-9-after`);
+  }
+
+  // Kartograf on a crit: the line doubles, the label is underlined, the line runs on past the target through the next two
+  {
+    await setup('kartograf', 'urzadzenia', 120);
+    const placed = await page.evaluate(async () => {
+      const g = window.__game;
+      const s = g.state();
+      s.player.stats.critChance = 1;
+      s.player.stats.pewnoscSiebie = 1e6;
+      // the next two stand on the ruled line from the instrument (21.6 right of and 31.6 above the hero) through the first enemy
+      const first = s.enemies[0];
+      const sx = 600 + 21.6;
+      const sy = 800 - 31.6;
+      const d1 = Math.hypot(first.x - sx, first.y - sy);
+      const ux = (first.x - sx) / d1;
+      const uy = (first.y - sy) / d1;
+      const ids = g.enemies.spawnFamily('urzadzenia', 2);
+      ids.forEach((id, i) => {
+        const e = s.enemies.find((x) => x.id === id);
+        e.x = sx + ux * (d1 + 60 + i * 60);
+        e.y = sy + uy * (d1 + 60 + i * 60);
+        e.home = { x: e.x, y: e.y };
+        e.mode = 'wander';
+        e.wanderTimer = 99;
+        e.hp = e.hpMax = 1e9;
+        e.attackTimer = 99;
+      });
+      await new Promise((r) => setTimeout(r, 900));
+      return s.enemies.length;
+    });
+    let crit = null;
+    for (const ms of [20, 70, 130, 200]) {
+      // every shot is a crit unless the 5 percent miss comes up; the frame is only kept when the line is doubled
+      for (let tries = 0; tries < 6; tries++) {
+        const r = await page.evaluate(
+          async ({ ms }) => {
+            const g = window.__game;
+            const s = g.state();
+            const raf = () => new Promise((rr) => requestAnimationFrame(() => rr(null)));
+            s.status = 'running';
+            s.player.x = 600;
+            s.player.y = 800;
+            s.player.facing = 1;
+            s.player.attackTimer = 0;
+            document.querySelectorAll('#fx > g').forEach((n) => n.remove());
+            g.attack('player');
+            s.status = 'paused';
+            await raf();
+            await raf();
+            for (let left = ms; left > 0; left -= 33) {
+              s.status = 'running';
+              g.advance(Math.min(33, left) / 1000);
+              s.status = 'paused';
+              await raf();
+            }
+            const lines = [...document.querySelectorAll('#fx path.attack-ink')].filter((p) => (p.getAttribute('d') ?? '').startsWith('M') && (p.getAttribute('stroke-width') ?? '') === '1.4').length;
+            return { lines, hp: s.enemies.map((e) => Math.round(1e9 - e.hp)) };
+          },
+          { ms },
+        );
+        if (r.lines >= 2 || ms > 130) {
+          crit = r;
+          break;
+        }
+      }
+      await snap(`atk-kartograf-crit-${String(ms).padStart(3, '0')}`);
+    }
+    check('kartograf: a crit draws two parallel lines and strikes all three enemies on the line', placed === 3 && crit !== null && crit.hp.filter((h) => h > 0).length === 3, JSON.stringify({ placed, crit }));
   }
 
   for (const family of ['urzadzenia', 'powiadomienia', 'wygenerowane']) {

@@ -251,6 +251,27 @@ try {
     return { label: v?.closest('.field')?.querySelector('label')?.textContent ?? '', text: v?.textContent ?? '', fits: !!b && b.scrollWidth <= b.clientWidth + 1 };
   });
   check('the HUD names the base and the kind of place, and the word fits its blank', place.label === 'Baza' && /^(lądowisko|wioska|miasteczko)$/.test(place.text) && place.fits, JSON.stringify(place));
+  // the walk cycle runs on the base page too (the base has no clock: the figures animate on the render clock)
+  const baseWalk = await page.evaluate(async () => {
+    const g = window.__game;
+    const s = g.state();
+    g.placePlayer(s.page.w / 2, s.page.h / 2);
+    s.player.target = { x: s.page.w / 2 + 320, y: s.page.h / 2 };
+    const phases = new Set();
+    const legs = new Set();
+    let moving = false;
+    const t0 = performance.now();
+    while (performance.now() - t0 < 1000) {
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+      const f = document.querySelector('#world > g[data-kind="player"]');
+      if (!f) continue;
+      phases.add(f.dataset.phase);
+      legs.add([...f.querySelectorAll('[data-leg]')].map((l) => l.getAttribute('d')).join('|'));
+      moving = moving || s.player.moving;
+    }
+    return { phases: [...phases], legs: legs.size, moving, time: s.time };
+  });
+  check('base: the walk cycle runs while the player walks (legs alternate, the base clock stays at 0)', baseWalk.moving && baseWalk.phases.length === 2 && baseWalk.legs >= 2 && baseWalk.time === 0, JSON.stringify(baseWalk));
   // the wall of the base page: the "margines" note is written inside the base page (900 x 700), beside the player
   await page.evaluate(() => {
     const g = window.__game;
@@ -813,6 +834,117 @@ try {
   check('joystick mode: a quick tap on the footnote slip opens the history', slipTap);
   await lp.screenshot({ path: `${SHOTS}/17-landscape-footnote-history.png` });
   await lctx.close();
+
+  // ---------- 6d. the Kartograf's laser and Nalesnik (DESIGN 10) ----------
+  await page.evaluate(() => window.__game.start(11, { heroId: 'kartograf' }));
+  await sleep(1400);
+  const laser = await page.evaluate(async () => {
+    const g = window.__game;
+    const s = g.state();
+    g.enemies.clear();
+    g.placePlayer(600, 800);
+    s.player.hp = s.player.hpMax = 1e9;
+    const [id] = g.enemies.spawnFamily('urzadzenia', 1);
+    const e = s.enemies.find((x) => x.id === id);
+    e.x = 790;
+    e.y = 796;
+    e.home = { x: e.x, y: e.y };
+    e.hp = e.hpMax = 1e9;
+    e.attackTimer = 99;
+    await new Promise((r) => setTimeout(r, 700));
+    s.projectiles.length = 0;
+    g.attack('player');
+    await new Promise((r) => requestAnimationFrame(() => r(null)));
+    await new Promise((r) => requestAnimationFrame(() => r(null)));
+    const label = [...document.querySelectorAll('#fx text.t-note')].map((n) => n.textContent).find((x) => /^\d+,\d\sm$/.test(x ?? '')) ?? null;
+    const lines = document.querySelectorAll('#fx path.attack-ink').length;
+    return { projectiles: s.projectiles.length, label, lines };
+  });
+  check('kartograf: the auto-attack is a hitscan laser: no projectile, a ruled line and a distance label in the fx layer', laser.projectiles === 0 && laser.label !== null && laser.lines >= 1, JSON.stringify(laser));
+  await shot('15-kartograf-laser');
+
+  await page.evaluate(() => window.__game.start(12, { heroId: 'nalesnik' }));
+  await sleep(1400);
+  await settle(); // the regulamin sheet of a fresh run holds the clock until it is accepted
+  const nal = await page.evaluate(async () => {
+    const g = window.__game;
+    const s = g.state();
+    const raf = () => new Promise((r) => requestAnimationFrame(() => r(null)));
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const disc = () => document.querySelector('#world > g[data-kind="player"] [data-part="disc"]');
+    const pores = () => document.querySelector('#world > g[data-kind="player"] [data-part="pores"]');
+    g.enemies.clear();
+    g.placePlayer(600, 800);
+    s.player.hp = s.player.hpMax = 1e9;
+    await sleep(300);
+    const standing = disc()?.getAttribute('transform') ?? null;
+    // walk: edge-on, the craters turn
+    s.player.target = { x: 1000, y: 800 };
+    const tfs = new Set();
+    const rolls = new Set();
+    for (let i = 0; i < 40; i++) {
+      await raf();
+      tfs.add(disc()?.getAttribute('transform'));
+      rolls.add(pores()?.getAttribute('transform'));
+    }
+    const walking = disc()?.getAttribute('transform') ?? null;
+    s.player.target = null;
+    await sleep(500);
+    const flat = disc()?.getAttribute('transform') ?? null;
+    // the flip of the auto-attack
+    const [id] = g.enemies.spawnFamily('urzadzenia', 1);
+    const e = s.enemies.find((x) => x.id === id);
+    e.x = s.player.x + 44;
+    e.y = s.player.y;
+    e.home = { x: e.x, y: e.y };
+    e.hp = e.hpMax = 1e9;
+    e.attackTimer = 99;
+    await sleep(700);
+    const flips = [];
+    let slap = 0;
+    g.attack('player');
+    const t0 = performance.now();
+    while (performance.now() - t0 < 300) {
+      await raf();
+      const m = /scale\(([-\d.]+) ([-\d.]+)\)/.exec(disc()?.getAttribute('transform') ?? '');
+      if (m) flips.push(Number(m[2]));
+      slap = Math.max(slap, document.querySelectorAll('#fx .attack-ink').length);
+    }
+    return { standing, walking, flat, tfs: tfs.size, rolls: rolls.size, minFlip: Math.min(...flips), maxFlip: Math.max(...flips), slap };
+  });
+  check('nalesnik: standing it lies flat, the full disc', nal.standing === 'scale(1 1)' && nal.flat === 'scale(1 1)', JSON.stringify(nal));
+  check('nalesnik: walking it is edge-on (0.35) and the craters turn', /^scale\(0\.35 1\)$/.test(nal.walking ?? '') && nal.rolls > 5, JSON.stringify(nal));
+  check('nalesnik: the auto-attack turns the disc over (vertical scale passes through negative to 1) with an ink slap', nal.minFlip < -0.5 && nal.maxFlip > 0.9 && nal.slap >= 1, JSON.stringify(nal));
+  const skills = await page.evaluate(async () => {
+    const g = window.__game;
+    const s = g.state();
+    const raf = () => new Promise((r) => requestAnimationFrame(() => r(null)));
+    g.enemies.clear();
+    s.page.obstacles.length = 0; // nothing for the roll to bounce off
+    g.placePlayer(600, 800);
+    const ids = g.enemies.spawnFamily('urzadzenia', 3);
+    ids.forEach((id, i) => {
+      const e = s.enemies.find((x) => x.id === id);
+      e.x = 680 + i * 40;
+      e.y = 800 + (i - 1) * 14;
+      e.home = { x: e.x, y: e.y };
+      e.hp = e.hpMax = 1e9;
+    });
+    await new Promise((r) => setTimeout(r, 600));
+    const out = {};
+    out.orbita = g.aimCast(1, { kind: 'kierunek', dx: 1, dy: 0 });
+    await new Promise((r) => setTimeout(r, 700));
+    out.satellite = s.hero.orbit !== null;
+    out.gravity = g.hero.cast(2) && s.hero.gravity !== null;
+    await new Promise((r) => setTimeout(r, 300));
+    out.flag = g.aimCast(3, { kind: 'wskazanie', x: s.player.x + 100, y: s.player.y }) && s.zones.some((z) => z.variant === 'wniosek');
+    await raf();
+    await raf();
+    out.flagDrawn = document.querySelectorAll('#world .zone-wniosek').length;
+    return out;
+  });
+  check('nalesnik: Orbita rolls and catches a satellite, Grawitacja pulls, Wniosek plants one flag that is drawn', skills.orbita && skills.satellite && skills.gravity && skills.flag && skills.flagDrawn === 1, JSON.stringify(skills));
+  await shot('16-nalesnik-skills');
 
   // ---------- 7. frame time with 40 enemies ----------
   // a fresh run: the death slip of the step above may still hold the old one

@@ -135,6 +135,32 @@
           "name": "Odczyt niezależny",
           "desc": "Szansa na argument nie do odparcia wyższa o 6 punktów, obrażenia o 10%."
         }
+      },
+      "nalesnik": {
+        "1": {
+          "name": "Szybszy obieg",
+          "desc": "Odnowienie umiejętności krótsze o 8%."
+        },
+        "2": {
+          "name": "Większa masa",
+          "desc": "Umiejętności zadają o 10% więcej obrażeń."
+        },
+        "3": {
+          "name": "Poszerzona strefa wpływów",
+          "desc": "Obszar umiejętności większy o 12%."
+        },
+        "4": {
+          "name": "Przypływ",
+          "desc": "Odzyskuje 0,6 racji na sekundę."
+        },
+        "5": {
+          "name": "Przedłużone rozpatrywanie",
+          "desc": "Czas działania dłuższy o 20%."
+        },
+        "6": {
+          "name": "Decyzja Komisji",
+          "desc": "Chód szybszy o 8%, odnowienie umiejętności krótsze o 5%."
+        }
       }
     },
     "stat": {

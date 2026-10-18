@@ -86,7 +86,7 @@ describe('palette', () => {
 
   it('maps every hero, family and tier to a hue; stains never take star yellow or stamp red', () => {
     for (const hue of [...Object.values(HERO_HUE), ...Object.values(FAMILY_HUE), ...Object.values(TIER_HUE)]) expect(WASH_HUES).toContain(hue);
-    expect(Object.keys(HERO_HUE)).toHaveLength(4);
+    expect(Object.keys(HERO_HUE)).toHaveLength(5);
     expect(Object.keys(FAMILY_HUE)).toHaveLength(3);
     expect(Object.keys(TIER_HUE)).toHaveLength(4);
     expect(STAIN_HUES).not.toContain('yellow');

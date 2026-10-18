@@ -315,6 +315,38 @@ export const RECIPES = {
     thump(110, 0.1, 0.85, { delay: 0.03 }),
   ], 0.2, 7),
 
+  /** Nalesnik: the auto-attack, the disc slapped down on the other side. */
+  nalesSlap: combat([
+    click(2600, 0.5),
+    noise(1500, 0.05, 0.5, { q: 1.1 }),
+    thump(96, 0.12, 0.9, { pitchDrop: 0.3 }),
+    noise(3800, 0.05, 0.3, { q: 1.2, delay: 0.03, role: 'tail' }),
+  ], 0.1, 5),
+  /** Nalesnik: Orbita, a rolling rumble with body, a few revolutions going by. */
+  nalesOrbita: combat([
+    click(1900, 0.4),
+    thump(88, 0.14, 0.85),
+    noise(100, 0.55, 0.7, { q: 2.2, attack: 0.04, role: 'body' }),
+    { ...thump(74, 0.09, 0.5, { pitchDrop: 0.15, delay: 0.06 }), repeat: 7, spread: 0.42 },
+    noise(1100, 0.45, 0.18, { q: 0.8, attack: 0.08, role: 'tail' }),
+  ], 0.25, 7),
+  /** Nalesnik: Grawitacja, a slow noise swell falling inward and landing on a sub thud. */
+  nalesGravity: combat([
+    click(1200, 0.3),
+    noise(2400, 0.9, 0.35, { q: 0.8, attack: 0.6, pitchDrop: 0.8, role: 'tail' }),
+    noise(110, 0.9, 0.5, { q: 3, attack: 0.6, role: 'body' }),
+    thump(62, 0.2, 0.95, { delay: 0.72, pitchDrop: 0.2 }),
+    thump(46, 0.4, 0.6, { delay: 0.72, pitchDrop: 0.1, role: 'sub' }),
+  ], 0.3, 7),
+  /** Nalesnik: Wniosek o status, a flag planted with a thud, paper fluttering after it. */
+  nalesFlag: combat([
+    click(2200, 0.5),
+    thump(92, 0.16, 1.0, { pitchDrop: 0.3 }),
+    thump(52, 0.2, 0.6, { delay: 0.004, pitchDrop: 0.1, role: 'sub' }),
+    noise(1800, 0.25, 0.3, { q: 0.7, attack: 0.04, delay: 0.05, role: 'tail' }),
+    { ...noise(3600, 0.012, 0.3, { q: 1.2, role: 'tail' }), repeat: 14, spread: 0.3, delay: 0.06 },
+  ], 0.25, 7),
+
   // ---------- flavours: laid over hit / crit / kill by the enemy family ----------
   /** Devices clank: inharmonic metal. */
   flavDevice: light([
@@ -350,6 +382,7 @@ export const HERO_SKILL_SOUNDS: Record<HeroId, readonly [SfxName, SfxName, SfxNa
   konsultant: ['konsBeep', 'konsRedirect', 'konsHeadset'],
   petlowiec: ['petlRemarks', 'petlSplice', 'petlRewind'],
   kartograf: ['kartoClick', 'kartoHum', 'kartoPin'],
+  nalesnik: ['nalesOrbita', 'nalesGravity', 'nalesFlag'],
 };
 
 export const FAMILY_FLAVOUR = {

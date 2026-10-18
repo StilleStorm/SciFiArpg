@@ -77,6 +77,8 @@ export interface Player extends Fighter {
   suspended: boolean;
   /** Permission tokens (a family id such as 'urzadzenia') that unlock gated updates. */
   permissions: string[];
+  /** Nalesnik's quirk: rounded up for a few seconds (heroes/quirks.ts sets it; the figure is drawn rounder). */
+  round?: boolean;
 }
 
 export interface Enemy extends Fighter {
@@ -166,11 +168,13 @@ export interface Summon extends Base {
 /** A marked patch of paper: Teren nieistniejacy, or an hourglass drawn over a blocked enemy. */
 export interface Zone extends Base {
   kind: 'zone';
-  variant: 'teren' | 'hourglass';
+  variant: 'teren' | 'hourglass' | 'wniosek';
   /** Seconds left. */
   ttl: number;
   /** Id of the enemy the zone follows (hourglass). */
   follow?: number;
+  /** Wniosek: ids of the enemies that have entered already (the entry effects fire once per entry). */
+  inside?: number[];
 }
 
 export type Entity = Player | Enemy | Projectile | Pickup | Summon | Zone;

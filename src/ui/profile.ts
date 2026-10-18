@@ -1,6 +1,7 @@
 /** PROFIL UZYTKOWNIKA: one printed profile per hero. The photo is a drawing, the verification is crossed out. */
 import { createRng } from '../core/rng';
 import { HEROES, heroDef, type HeroDef, type HeroId } from '../heroes';
+import { noteChosen } from '../heroes/chosen';
 import { t } from '../i18n';
 import { drawIn } from '../render/ink';
 import { buildHeroFigure } from '../render/heroFigures';
@@ -149,7 +150,9 @@ function buildProfile(root: HTMLElement, onChosen: (heroId: HeroId) => void): Pr
   choose.addEventListener('click', () => {
     const def = heroes[index];
     if (!def) return;
-    saveMeta({ ...loadMeta(), heroId: def.id });
+    const before = loadMeta();
+    if (def.id === 'nalesnik' && before.character?.heroId !== 'nalesnik') noteChosen(def.id); // the Asystent notes the first choice
+    saveMeta({ ...before, heroId: def.id });
     profile.destroy();
     onChosen(def.id);
   });

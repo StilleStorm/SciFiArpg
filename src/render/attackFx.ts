@@ -4,8 +4,8 @@
  * `attackAt` once per frame and moves its cached sub-groups by the pose computed here. Everything is a pure
  * function of the milliseconds since the first drawn frame, on the same clock as the views (game time), so
  * a paused game freezes the picture and nothing here needs a timer.
- * The only DOM made here is one ink stroke in the fx layer (the Pralka's whip, the Kartograf's measurement, the
- * Konsultant's cable lash with its ticket card) and, when a Petlowiec remark lands, a tiny struck-out word;
+ * The only DOM made here is one ink stroke in the fx layer (the Pralka's whip, the Nalesnik's slap, the Kartograf's ruled
+ * laser line with its label, the Konsultant's cable lash with its ticket card) and, when a Petlowiec remark lands, a tiny struck-out word;
  * the stroke is changed by attributes only and removed when the animation ends.
  * Ink only: no particles, no glow, a few units of motion.
  */
@@ -13,13 +13,14 @@ import type { Bus } from '../core/events';
 import { createRng, type Rng } from '../core/rng';
 import type { Vec } from '../core/vec';
 import type { HeroId } from '../heroes';
+import { t } from '../i18n';
 import { el, n2 } from './svg';
 import { easeOut, tween } from './tween';
 import type { Views } from './view';
 
 // ---------- timing (pure) ----------
 
-export const HERO_ATTACK_MS: Record<HeroId, number> = { pralka: 320, konsultant: 230, petlowiec: 200, kartograf: 200 };
+export const HERO_ATTACK_MS: Record<HeroId, number> = { pralka: 320, konsultant: 230, petlowiec: 200, kartograf: 380, nalesnik: 220 };
 /** The Konsultant's cable: the tip reaches the target in 90 ms and snaps back in 120. The hit resolves when it arrives (heroes/auto.ts). */
 export const LASH_OUT_MS = 90;
 export const LASH_BACK_MS = 120;
@@ -37,6 +38,13 @@ export const WIND_UP = 6;
 export const LUNGE = 12;
 export const RECOIL = 4;
 export const KICK = 6;
+/** The Nalesnik's flip: it turns over in 220 ms, hopping 12 units toward the enemy; the ink slap is drawn as it lands. */
+export const FLIP_MS = 220;
+export const HOP = 12;
+export const SLAP_AT_MS = 90;
+export const SLAP_DRAW_MS = 35;
+export const SLAP_HOLD_MS = 25;
+export const SLAP_ERASE_MS = 70;
 /** Rotation of the Konsultant's throwing arm, degrees. */
 export const THROW_DEG = 40;
 /** The whole lunging body of an enemy tilts this many degrees at the full lunge. */
@@ -87,6 +95,8 @@ export interface HeroPose {
   door: number;
   /** Instrument pushed away from the target, units. */
   kick: number;
+  /** Nalesnik's disc: vertical scale of the flip, -1 .. 1 (1 = lying as usual). */
+  flip: number;
   /** Helmet dip, units down, and tilt, degrees toward the target. */
   dip: number;
   tilt: number;
@@ -102,7 +112,7 @@ export interface HeroPose {
 }
 
 export function neutralPose(): HeroPose {
-  return { lurch: 0, arm: 0, drum: 0, door: 1, kick: 0, dip: 0, tilt: 0, ticketOut: false, lash: 0, card: false, draw: 0, erase: 0 };
+  return { lurch: 0, arm: 0, drum: 0, door: 1, kick: 0, flip: 1, dip: 0, tilt: 0, ticketOut: false, lash: 0, card: false, draw: 0, erase: 0 };
 }
 
 export function heroPose(id: HeroId, t: number): HeroPose {
@@ -137,9 +147,17 @@ export function heroPose(id: HeroId, t: number): HeroPose {
       break;
     }
     case 'kartograf': {
+      // the instrument kicks back 6 units; the ruled line is not part of the pose (drawLaser, below)
       pose.kick = t < 25 ? (KICK * t) / 25 : KICK * (1 - clamp01((t - 25) / 115)) ** 2;
-      pose.draw = clamp01(t / 80);
-      pose.erase = clamp01((t - 80) / 120);
+      break;
+    }
+    case 'nalesnik': {
+      // the disc turns over about its horizontal axis (vertical scale -1 -> 1) while it hops 12 units toward the enemy
+      const p = clamp01(t / FLIP_MS);
+      pose.flip = -Math.cos(Math.PI * p);
+      pose.lurch = HOP * keyframes(p, [[0, 0], [0.45, 1], [1, 0]]);
+      pose.draw = clamp01((t - SLAP_AT_MS) / SLAP_DRAW_MS);
+      pose.erase = clamp01((t - SLAP_AT_MS - SLAP_DRAW_MS - SLAP_HOLD_MS) / SLAP_ERASE_MS);
       break;
     }
   }
@@ -250,23 +268,87 @@ export function scribblePath(rng: Rng, bumps: number, width: number, height: num
   return d;
 }
 
-/** Where the range pole's sight is on the page, for a Kartograf drawn at `scale`, aiming at (tx, ty). */
-export function measureStart(a: Aim, scale: number): { x: number; y: number } {
-  const side = a.ux < 0 ? -1 : 1;
-  return { x: a.x + side * 15 * scale, y: a.y - 22 * scale };
+// ---------- the Kartograf's measuring laser (pure) ----------
+
+/** Survey ticks along the ruled line, in units. */
+export const TICK_EVERY = 40;
+/** The doubled line of a crit: the two lines are this far apart. */
+export const CRIT_GAP = 2;
+
+export interface LaserLine {
+  sx: number;
+  sy: number;
+  ex: number;
+  ey: number;
+  crit: boolean;
 }
 
-/** The kind of dotted measurement line: from the pole to the target, visible between `erase` and `draw`. */
-export function measureSegment(a: Aim, scale: number, draw: number, erase: number): { d: string; offset: number; len: number } {
-  const s = measureStart(a, scale);
-  const dx = a.tx - s.x;
-  const dy = a.ty - s.y;
-  const len = Math.hypot(dx, dy);
-  const x0 = s.x + dx * erase;
-  const y0 = s.y + dy * erase;
-  const x1 = s.x + dx * draw;
-  const y1 = s.y + dy * draw;
-  return { d: `M${n2(x0)} ${n2(y0)}L${n2(x1)} ${n2(y1)}`, offset: -erase * len, len };
+export interface LaserPaths {
+  /** One ruled line, or two parallel ones `CRIT_GAP` apart on a crit. */
+  lines: string[];
+  /** The survey ticks, one stroke each, as one path (empty when the rubbed-out line has passed them all). */
+  ticks: string;
+  /** The tiny crosshair at the target. */
+  cross: string;
+}
+
+/**
+ * The ruled line from the instrument (sx, sy) to (ex, ey), rubbed out from the instrument end: `erase` is the share of the
+ * length already gone (0 = whole, 1 = nothing). Ticks sit every TICK_EVERY units from the instrument and go with the part of
+ * the line they stood on. The crosshair is at (cx, cy), the target.
+ */
+export function laserPaths(l: LaserLine, cx: number, cy: number, erase = 0): LaserPaths {
+  const dx = l.ex - l.sx;
+  const dy = l.ey - l.sy;
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const nx = -uy;
+  const ny = ux;
+  const from = len * Math.min(1, Math.max(0, erase));
+  const lines: string[] = [];
+  if (from < len) {
+    const offs = l.crit ? [-CRIT_GAP / 2, CRIT_GAP / 2] : [0];
+    for (const o of offs) {
+      lines.push(`M${n2(l.sx + ux * from + nx * o)} ${n2(l.sy + uy * from + ny * o)}L${n2(l.ex + nx * o)} ${n2(l.ey + ny * o)}`);
+    }
+  }
+  let ticks = '';
+  const half = l.crit ? CRIT_GAP / 2 + 3 : 3.5;
+  for (let along = TICK_EVERY; along < len - 4; along += TICK_EVERY) {
+    if (along < from) continue;
+    const x = l.sx + ux * along;
+    const y = l.sy + uy * along;
+    ticks += `M${n2(x - nx * half)} ${n2(y - ny * half)}L${n2(x + nx * half)} ${n2(y + ny * half)}`;
+  }
+  const c = 6;
+  const cross = erase >= 1 ? '' : `M${n2(cx - c)} ${n2(cy)}H${n2(cx + c)}M${n2(cx)} ${n2(cy - c)}V${n2(cy + c)}${circleMark(cx, cy, 3)}`;
+  return { lines, ticks, cross };
+}
+
+const circleMark = (cx: number, cy: number, r: number): string => `M${n2(cx - r)} ${n2(cy)}a${n2(r)} ${n2(r)} 0 1 0 ${n2(2 * r)} 0a${n2(r)} ${n2(r)} 0 1 0 ${n2(-2 * r)} 0`;
+
+/** "12,4 m": the distance in world units over ten, one decimal, a comma. */
+export function laserLabel(metres: number): string {
+  return t('heroes.kartograf.distance', { value: (Math.round(metres * 10) / 10).toFixed(1).replace('.', ',') });
+}
+
+/** Time the line stays whole, then the time it takes to rub it out from the instrument end, and the label's fade after the hold. */
+export const LASER_HOLD_MS = 80;
+export const LASER_ERASE_MS = 160;
+export const LABEL_FADE_MS = 300;
+
+// ---------- the Nalesnik's slap (pure) ----------
+
+/** The ink slap where the flipped disc lands: a bow across the enemy's near side with two ticks thrown off its ends. */
+export function slapPath(a: Aim): string {
+  const gap = Math.max(18, Math.min(60, a.dist - 16));
+  const cx = a.x + a.ux * gap;
+  const cy = a.y + a.uy * gap;
+  const nx = -a.uy;
+  const ny = a.ux;
+  const at = (along: number, across: number): string => `${n2(cx + a.ux * along + nx * across)} ${n2(cy + a.uy * along + ny * across)}`;
+  return `M${at(-2, -17)}Q${at(9, 0)} ${at(-2, 17)}M${at(5, -22)}L${at(13, -26)}M${at(5, 22)}L${at(13, 26)}`;
 }
 
 // ---------- the record on a figure ----------
@@ -283,6 +365,8 @@ export interface AttackAnim extends Aim {
   splashOn: boolean;
   /** The Konsultant's ticket card at the tip of the cable. */
   card: SVGGElement | null;
+  /** The Kartograf's laser of this attack (drawn by `driveLaser`). */
+  laser: LaserSpec | null;
 }
 
 const active = new WeakMap<SVGGElement, AttackAnim>();
@@ -305,10 +389,10 @@ function finish(g: SVGGElement, a: AttackAnim): void {
 }
 
 /** Start (or restart) the animation of the figure `g`. */
-export function beginAttack(g: SVGGElement, x: number, y: number, tx: number, ty: number, ranged: boolean): void {
+export function beginAttack(g: SVGGElement, x: number, y: number, tx: number, ty: number, ranged: boolean, laser: LaserSpec | null = null): void {
   const old = active.get(g);
   if (old) finish(g, old);
-  active.set(g, { ...aimOf(x, y, tx, ty), ranged, t0: null, fx: null, ink: [], splash: null, splashOn: false, card: null });
+  active.set(g, { ...aimOf(x, y, tx, ty), ranged, t0: null, fx: null, ink: [], splash: null, splashOn: false, card: null, laser });
 }
 
 const scratch: { a: AttackAnim | null; t: number } = { a: null, t: 0 };
@@ -339,8 +423,8 @@ export function setStroke(node: Element, draw: number, erase: number): void {
 }
 
 /** The one-stroke ink marks that belong to a hero's attack, drawn in the fx layer. */
-export function driveHeroStroke(a: AttackAnim, id: HeroId, scale: number, draw: number, erase: number): void {
-  if (id !== 'pralka' && id !== 'kartograf') return;
+export function driveHeroStroke(a: AttackAnim, id: HeroId, draw: number, erase: number): void {
+  if (id !== 'pralka' && id !== 'nalesnik') return;
   if (draw <= 0 || erase >= 1) {
     a.fx?.remove();
     a.fx = null;
@@ -367,26 +451,26 @@ export function driveHeroStroke(a: AttackAnim, id: HeroId, scale: number, draw: 
       a.splash = splash;
       a.splashOn = false;
     } else {
-      const dots = el('path', { 'stroke-dasharray': '1.5 4', 'stroke-width': 1.3, class: 'attack-ink' });
-      root = dots;
-      a.ink = [dots];
+      // the slap: the same two strokes (paper under, ink over), one path with the ticks
+      const d = slapPath(a);
+      const back = el('path', { d, pathLength: 1, 'stroke-width': 6.4, class: 'attack-ink-back' });
+      back.style.stroke = 'var(--paper)';
+      const front = el('path', { d, pathLength: 1, 'stroke-width': 3, class: 'attack-ink' });
+      root = el('g', {}, [back, front]);
+      a.ink = [back, front];
     }
     layer.append(root);
     a.fx = root;
     // a figure that vanishes mid-attack never calls finish: this removes the stroke anyway
     tween(1, () => undefined, { delay: 700, done: () => root.remove() });
   }
+  for (const path of a.ink) setStroke(path, draw, erase);
   if (id === 'pralka') {
-    for (const path of a.ink) setStroke(path, draw, erase);
     const on = draw >= 1 && erase < 0.5;
     if (a.splash && on !== a.splashOn) {
       a.splashOn = on;
       a.splash.style.display = on ? '' : 'none';
     }
-  } else {
-    const seg = measureSegment(a, scale, draw, erase);
-    a.ink[0]?.setAttribute('d', seg.d);
-    a.ink[0]?.setAttribute('stroke-dashoffset', n2(seg.offset));
   }
 }
 
@@ -490,6 +574,76 @@ function struckWord(x: number, y: number, seed: number): void {
   tween(380, (p) => (g.style.opacity = String(1 - p)), { delay: 520, done: () => g.remove() });
 }
 
+// ---------- the Kartograf's laser on the page ----------
+
+/** What the laser needs to be drawn: the line, the target, the distance in metres. */
+export interface LaserSpec extends LaserLine {
+  tx: number;
+  ty: number;
+  metres: number;
+}
+
+interface LaserNodes {
+  lines: SVGPathElement[];
+  ticks: SVGPathElement;
+  cross: SVGPathElement;
+  text: SVGTextElement;
+  underline: SVGPathElement | null;
+}
+
+const laserNodes = new WeakMap<AttackAnim, LaserNodes>();
+
+/** How long the whole thing lives: the hold, then the longer of the rub-out and the label's fade. */
+export const LASER_TOTAL_MS = LASER_HOLD_MS + Math.max(LASER_ERASE_MS, LABEL_FADE_MS);
+
+/**
+ * The Kartograf's laser, `t` ms into the attack (game time, like the pose): one straight ruled ink line from the instrument to
+ * the target, there at once, 1.4 px, survey ticks every 40 units, a tiny crosshair at the target and a handwritten distance
+ * beside it. After the hold the line is rubbed out from the instrument end over 160 ms and the label fades over 300. A crit
+ * doubles the line and underlines the label. Attributes only; the group lives in the fx layer until the attack record ends.
+ */
+export function driveLaser(a: AttackAnim, t: number): void {
+  const laser = a.laser;
+  if (!laser) return;
+  let n = laserNodes.get(a);
+  if (!n) {
+    const layer = fxLayer();
+    if (!layer) return;
+    const first = laserPaths(laser, laser.tx, laser.ty, 0);
+    const lines = first.lines.map((d) => el('path', { d, 'stroke-width': 1.4, class: 'attack-ink' }));
+    const ticks = el('path', { d: first.ticks, 'stroke-width': 1.1, class: 'attack-ink' });
+    const cross = el('path', { d: first.cross, 'stroke-width': 1.1, class: 'attack-ink' });
+    const left = laser.ex < laser.sx;
+    const label = laserLabel(laser.metres);
+    // beside the far end of the measured distance: past the target, clear of its drawing, a little above the line
+    const reach = 30;
+    const dl = Math.hypot(laser.ex - laser.sx, laser.ey - laser.sy) || 1;
+    const lx = laser.tx + ((laser.ex - laser.sx) / dl) * reach;
+    const ly = laser.ty + ((laser.ey - laser.sy) / dl) * reach - 9;
+    const text = el('text', { class: 't-note', x: n2(lx), y: n2(ly), 'text-anchor': left ? 'end' : 'start', transform: `rotate(-4 ${n2(lx)} ${n2(ly)})` }, [label]);
+    text.style.fontSize = '13px';
+    let underline: SVGPathElement | null = null;
+    if (laser.crit) {
+      const w = label.length * 5.6;
+      const x0 = left ? lx - w : lx;
+      underline = el('path', { d: `M${n2(x0)} ${n2(ly + 2.5)}Q${n2(x0 + w / 2)} ${n2(ly + 4)} ${n2(x0 + w)} ${n2(ly + 2)}`, 'stroke-width': 1.1, class: 'attack-ink' });
+    }
+    const root = el('g', {}, [...lines, ticks, cross, text, ...(underline ? [underline] : [])]);
+    layer.append(root);
+    a.fx = root;
+    n = { lines, ticks, cross, text, underline };
+    laserNodes.set(a, n);
+  }
+  const erase = clamp01((t - LASER_HOLD_MS) / LASER_ERASE_MS);
+  const now = laserPaths(laser, laser.tx, laser.ty, erase);
+  n.lines.forEach((ln, i) => ln.setAttribute('d', now.lines[i] ?? ''));
+  n.ticks.setAttribute('d', now.ticks);
+  n.cross.setAttribute('d', now.cross);
+  const fade = String(1 - clamp01((t - LASER_HOLD_MS) / LABEL_FADE_MS));
+  n.text.style.opacity = fade;
+  if (n.underline) n.underline.style.opacity = fade;
+}
+
 // ---------- the bus ----------
 
 /** `attack:started` -> the attacker's figure starts moving. The one place this event becomes a picture. */
@@ -497,7 +651,7 @@ export function bindAttackFx(bus: Bus, views: Views): () => void {
   const offs = [
     bus.on('attack:started', (ev) => {
       const g = views.get(ev.attackerId);
-      if (g) beginAttack(g, ev.x, ev.y, ev.tx, ev.ty, ev.ranged);
+      if (g) beginAttack(g, ev.x, ev.y, ev.tx, ev.ty, ev.ranged, ev.laser ? { ...ev.laser, tx: ev.tx, ty: ev.ty } : null);
     }),
     // the Petlowiec's remark lands: the scribble becomes a struck-out word on the enemy
     bus.on('enemy:hit', (ev) => void landRemark(ev.x, ev.y)),

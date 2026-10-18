@@ -1,4 +1,4 @@
-/** The four heroes (DESIGN section 10): numbers, auto-attack, three typed skills, one quirk. Data only. */
+/** The five heroes (DESIGN section 10): numbers, auto-attack, three typed skills, one quirk. Data only. */
 import type { DamageType, Stats } from '../combat/damage';
 import type { HeroId } from './index';
 
@@ -40,6 +40,12 @@ export interface HeroDef {
     projectile: boolean;
     /** Projectile only: gains a pierce on a critical hit. */
     pierceOnCrit?: boolean;
+    /**
+     * The shot lands at once as a ruled line (heroes/auto.ts): no projectile flies. `projectile` stays true for such a hero so
+     * that systems/combat.ts `attack()` leaves the announcing to `fireAuto`; `pierceOnCrit` then lets the line run on through
+     * everything up to the range limit.
+     */
+    hitscan?: boolean;
   };
   skills: readonly [SkillDef, SkillDef, SkillDef];
 }
@@ -111,11 +117,25 @@ export const HEROES: readonly HeroDef[] = [
     speed: 134,
     r: 13,
     baseStats: { pewnoscSiebie: 110, upor: 32, dmgMin: 5, dmgMax: 10, critChance: 0.12, resist: {} },
-    auto: { type: 'mechaniczny', range: 260, cooldown: 1.05, projectile: true, pierceOnCrit: true },
+    auto: { type: 'mechaniczny', range: 260, cooldown: 1.05, projectile: true, hitscan: true, pierceOnCrit: true },
     skills: [
       skill('kartograf', 1, 'triangulacja', 'mechaniczny', 6, 'kierunek'),
       skill('kartograf', 2, 'teren', 'egzystencjalny', 14, 'wskazanie'),
       skill('kartograf', 3, 'korekta', 'regulaminowy', 10, 'wskazanie'),
+    ],
+  }),
+  // a flat asteroid that applied for dwarf-planet status: the tanky one, the fastest (DESIGN 10, item 5)
+  hero('nalesnik', {
+    racja: 100,
+    racjaPerLevel: 10,
+    speed: 146,
+    r: 16,
+    baseStats: { pewnoscSiebie: 100, upor: 58, dmgMin: 5, dmgMax: 10, critChance: 0.08, resist: { mechaniczny: 8 } },
+    auto: { type: 'mechaniczny', range: 54, cooldown: 0.85, projectile: false },
+    skills: [
+      skill('nalesnik', 1, 'orbita', 'mechaniczny', 9, 'kierunek'),
+      skill('nalesnik', 2, 'grawitacja', 'egzystencjalny', 14, 'auto'),
+      skill('nalesnik', 3, 'wniosek', 'regulaminowy', 16, 'wskazanie'),
     ],
   }),
 ];

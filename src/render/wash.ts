@@ -37,6 +37,7 @@ export const HERO_HUE: Record<HeroId, WashHue> = {
   konsultant: 'ochre',
   petlowiec: 'violet',
   kartograf: 'green',
+  nalesnik: 'ochre',
 };
 
 export const FAMILY_HUE: Record<FamilyId, WashHue> = {

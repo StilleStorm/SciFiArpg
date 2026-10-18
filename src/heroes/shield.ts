@@ -15,3 +15,12 @@ export function absorbShield(p: Pick<Player, 'shield'>, amount: number): number 
   p.shield -= soaked;
   return amount - soaked;
 }
+
+/** Nalesnik, rownowaga hydrostatyczna: at full racja it lies flat and projectiles skim off it (-30%). Everything else: 1. */
+export const SKIM = 0.7;
+/** The disc counts as flat (projectiles skim off) from this share of racja; a standing trait, not a first-hit bonus. */
+export const SKIM_FROM = 0.9;
+
+export function projectileDamageMul(p: Pick<Player, 'heroId' | 'hp' | 'hpMax'>): number {
+  return p.heroId === 'nalesnik' && p.hp >= p.hpMax * SKIM_FROM ? SKIM : 1;
+}

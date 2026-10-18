@@ -74,6 +74,14 @@ const PASSIVES: Record<HeroId, { mods: Partial<Mods>; requires?: Family }[]> = {
     { mods: { duration: 0.2 } },
     { mods: { crit: 0.06, dmg: 0.1 }, requires: 'urzadzenia' },
   ],
+  nalesnik: [
+    { mods: { cooldown: -0.08 } },
+    { mods: { dmg: 0.1 } },
+    { mods: { area: 0.12 } },
+    { mods: { regen: 0.6 } },
+    { mods: { duration: 0.2 } },
+    { mods: { speed: 0.08, cooldown: -0.05 }, requires: 'powiadomienia' },
+  ],
 };
 
 const STATS: UpgradeDef[] = [

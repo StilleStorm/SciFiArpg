@@ -25,7 +25,7 @@ const { RECIPES, HERO_SKILL_SOUNDS } = await import('./sfx');
 
 const names = (): string[] => played.map((p) => p.name);
 
-function setup(heroId: 'pralka' | 'konsultant' | 'petlowiec' | 'kartograf' = 'pralka') {
+function setup(heroId: 'pralka' | 'konsultant' | 'petlowiec' | 'kartograf' | 'nalesnik' = 'pralka') {
   const bus = createBus();
   const s: RunState = createRun(3, { heroId });
   const freeze = vi.fn();
@@ -95,11 +95,21 @@ describe('audio bindings', () => {
   });
 
   it('every hero maps slots 0..2 to its own three sounds', () => {
-    for (const hero of ['pralka', 'konsultant', 'petlowiec', 'kartograf'] as const) {
+    for (const hero of ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'] as const) {
       played.length = 0;
       const { bus } = setup(hero);
       for (const slot of [0, 1, 2] as const) bus.emit('skill:cast', { slot, free: false });
       expect(names()).toEqual([...HERO_SKILL_SOUNDS[hero]]);
+    }
+  });
+
+  it('the Nalesnik slaps when it flips; no other hero does', () => {
+    for (const hero of ['pralka', 'nalesnik'] as const) {
+      played.length = 0;
+      const { bus } = setup(hero);
+      bus.emit('attack:started', { attackerId: 1, attacker: 'player', x: 0, y: 0, tx: 20, ty: 0, ranged: false });
+      bus.emit('attack:started', { attackerId: 2, attacker: 'enemy', x: 0, y: 0, tx: 20, ty: 0, ranged: false });
+      expect(names()).toEqual(hero === 'nalesnik' ? ['nalesSlap'] : []);
     }
   });
 

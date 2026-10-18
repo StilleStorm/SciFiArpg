@@ -91,6 +91,25 @@ export const zoneBuilder: Builder<Zone> = {
       g.append(el('path', { d: HOURGLASS }));
       return g;
     }
+    if (z.variant === 'wniosek') {
+      // Wniosek o status: a planted flag with a stamped pennant at the centre, a dotted boundary, a few ticks of the surveyed edge
+      const rng = createRng(z.id * 6151);
+      const edge = smoothClosed(blobPoints(rng, 0, 0, z.r, 18, 0.03));
+      let ticks = '';
+      for (let i = 0; i < 24; i++) {
+        const a = (i / 24) * Math.PI * 2;
+        ticks += `M${n2(Math.cos(a) * (z.r - 5))} ${n2(Math.sin(a) * (z.r - 5))}L${n2(Math.cos(a) * z.r)} ${n2(Math.sin(a) * z.r)}`;
+      }
+      g.append(
+        el('path', { d: edge, 'stroke-dasharray': '1.6 5' }),
+        el('path', { d: ticks, 'stroke-width': 0.9 }),
+        el('path', { d: 'M0 4V-24' }),
+        el('path', { d: 'M0-24L13-20L0-16Z' }),
+        el('path', { d: 'M0-23L11-20L0-17Z', fill: 'url(#hatch)', stroke: 'none' }),
+        el('path', { d: 'M-5 4Q0 6.5 5 4M-3 6.5H3', 'stroke-width': 1.1 }),
+      );
+      return g;
+    }
     const rng = createRng(z.id * 7919);
     const outline = smoothClosed(blobPoints(rng, 0, 0, z.r, 16, 0.05));
     g.append(

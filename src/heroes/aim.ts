@@ -39,6 +39,10 @@ export const LINE_TTL = 0.62;
 /** The circle drawn round the enemy Proszę czekać would take: its radius plus this (the figure is drawn wider than its radius). */
 export const TARGET_RING = 26;
 
+/** Nalesnik: how far Orbita rolls (units), and the radius of the flag's zone before ranks (heroes/skills.ts uses both). */
+export const ORBITA_LENGTH = 230;
+export const WNIOSEK_RADIUS = 120;
+
 interface Geometry {
   /** How far a target may be for the auto cast. */
   autoRange(s: RunState): number;
@@ -58,6 +62,8 @@ const GEOMETRY: Record<string, Geometry> = {
   prosze: { autoRange: (s) => 300 * areaOf(s, 0), reach: (s) => 300 * areaOf(s, 0), radius: () => 14 },
   teren: { autoRange: () => 300, reach: () => 300, radius: (s) => 85 * areaOf(s, 1) },
   korekta: { autoRange: () => 260, reach: (s) => 150 * areaOf(s, 2), radius: () => 14 },
+  orbita: { autoRange: () => DEFAULT_RANGE, reach: (s) => ORBITA_LENGTH * areaOf(s, 0), radius: () => 0 },
+  wniosek: { autoRange: () => 260, reach: () => 260, radius: (s) => WNIOSEK_RADIUS * areaOf(s, 2) },
 };
 
 /** The arrow length (kierunek) or the farthest point (wskazanie) of a skill; 0 for an auto skill. */
@@ -175,7 +181,7 @@ export function pickTarget(s: RunState, skill: SkillDef, aim: Aim): Enemy | null
   return autoTarget(s, skill);
 }
 
-/** Teren nieistniejący: the centre of the marked area. A tap marks the auto target's place, else a point ahead. */
+/** Teren nieistniejący and Wniosek o status: the centre of the marked area. A tap marks the auto target's place, else a point ahead. */
 export function terenCentre(s: RunState, skill: SkillDef, aim: Aim): Point {
   const a = fitAim(skill, aim);
   const p = s.player;
@@ -224,7 +230,7 @@ export function previewOf(s: RunState, skill: SkillDef, aim: Aim): AimPreview | 
     const a = fitAim(skill, aim);
     return a.kind === 'wskazanie' ? { kind: 'circle', x: a.x, y: a.y, r } : null;
   }
-  if (skill.id === 'teren') {
+  if (skill.id === 'teren' || skill.id === 'wniosek') {
     const c = terenCentre(s, skill, aim);
     return { kind: 'circle', x: c.x, y: c.y, r };
   }

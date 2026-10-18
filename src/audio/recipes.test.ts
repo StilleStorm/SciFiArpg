@@ -56,8 +56,8 @@ describe('recipes follow DESIGN 14', () => {
     expect(hiss?.gain).toBeLessThan(0.12);
   });
 
-  it('every hero has three distinct skill sounds, all combat recipes, twelve in all', () => {
-    const heroes: HeroId[] = ['pralka', 'konsultant', 'petlowiec', 'kartograf'];
+  it('every hero has three distinct skill sounds, all combat recipes, fifteen in all', () => {
+    const heroes: HeroId[] = ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'];
     const all = new Set<string>();
     for (const h of heroes) {
       const trio = HERO_SKILL_SOUNDS[h];
@@ -67,7 +67,7 @@ describe('recipes follow DESIGN 14', () => {
         all.add(n);
       }
     }
-    expect(all.size).toBe(12);
+    expect(all.size).toBe(15);
   });
 
   it('every family has its own flavour; the three differ', () => {

@@ -30,8 +30,8 @@ function tick(s: RunState, bus: ReturnType<typeof createBus>, seconds: number): 
 }
 
 describe('hero definitions', () => {
-  it('has four heroes with three typed skills each and no mana', () => {
-    expect(HEROES.map((h) => h.id)).toEqual(['pralka', 'konsultant', 'petlowiec', 'kartograf']);
+  it('has five heroes with three typed skills each and no mana', () => {
+    expect(HEROES.map((h) => h.id)).toEqual(['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik']);
     for (const h of HEROES) {
       expect(h.skills).toHaveLength(3);
       for (const sk of h.skills) {

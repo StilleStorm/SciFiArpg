@@ -75,6 +75,8 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
   };
   let state: RunState | null = null;
   let pausedByGame = false;
+  /** Render clock for the base page (ms): the base does not advance `RunState.time`, which drives the figures' walk cycle in the run. */
+  let animMs = 0;
   /** The drawn base page, while the state is in the base (labels, the exit, the header). */
   let baseView: BaseView | null = null;
   /** The camera's page bounds follow the page that is shown (the base page is smaller than the run's pages). */
@@ -181,6 +183,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
     render(dtSec) {
       const s = state;
       if (!s) return;
+      animMs += dtSec * 1000; // the base has no clock (s.time stays 0 there), so its figures animate on this one
       collect(s);
       hero.frame(s);
       if (s.phase === 'base') baseView?.frame(s);
@@ -189,7 +192,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
         exits.frame(s);
         updateBubbleFocus(s.enemies, s.player);
       }
-      views.sync(ents, s.time * 1000);
+      views.sync(ents, s.phase === 'base' ? animMs : s.time * 1000);
       camera.follow(s.player.x, s.player.y, dtSec);
       camera.apply();
     },

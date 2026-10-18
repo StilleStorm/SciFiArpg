@@ -183,7 +183,7 @@ try {
     const name = sp.label ?? r.name;
     const { file, x } = save({ ...r, name }, 'sfx');
     const a = analyse(x, r.sampleRate);
-    const combat = sp.names.some((n) => COMBAT_NAMES.has(n) || /^(pralka|kons|petl|karto)/.test(n) || n === 'bossHum');
+    const combat = sp.names.some((n) => COMBAT_NAMES.has(n) || /^(pralka|kons|petl|karto|nales)/.test(n) || n === 'bossHum');
     rows.push({ kind: 'sfx', name, file, combat, ...a });
   }
 } catch (e) {

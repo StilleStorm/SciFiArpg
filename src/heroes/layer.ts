@@ -15,6 +15,7 @@ import { createDeathForms, type DeathForms } from '../ui/deathForms';
 import { updatePadCooldowns, setPadHero } from '../ui/pads';
 import { createUpdateForm, type UpdateForm } from '../ui/update';
 import { nextId, type RunState } from '../world/run';
+import { takeChosenNote } from './chosen';
 import { onPlayerHit } from './quirks';
 import { castSkill } from './skills';
 
@@ -193,6 +194,8 @@ export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
       death.clearHudStamp();
       forced = null;
       setPadHero(s.player.heroId);
+      // the Asystent's remark on a hero chosen for the first time (Nalesnik: filed by the profile screen)
+      if (takeChosenNote() === 'nalesnik') bus.emit('footnote', { text: t('heroes.nalesnik.chosen') });
     },
     frame(s) {
       updatePadCooldowns(s.hero.cd, s.hero.cdTotal);

@@ -1,4 +1,4 @@
-/** The twelve skills as functions on the run state. Cooldowns only, no mana. Returning false = nothing happened, no cooldown. */
+/** The fifteen skills as functions on the run state. Cooldowns only, no mana. Returning false = nothing happened, no cooldown. */
 import { applyStatus, isSilenced, isStunned } from '../combat/status';
 import type { Bus } from '../core/events';
 import { createSummon, createZone } from '../entities/factory';
@@ -7,8 +7,9 @@ import { recomputeStats } from '../items/stats';
 import { resolveMove } from '../world/pages';
 import { nextId, type RunState } from '../world/run';
 import { heroDef, type HeroDef } from './defs';
-import { AUTO_AIM, blinkOf, fitAim, LINE_SPEED, LINE_TTL, pickTarget, reachOf, resolveAim, resolveDirection, takeQueuedAim, terenCentre, type Aim } from './aim';
+import { AUTO_AIM, blinkOf, fitAim, LINE_SPEED, LINE_TTL, pickTarget, radiusOf, reachOf, resolveAim, resolveDirection, takeQueuedAim, terenCentre, type Aim } from './aim';
 import { areaOf, cooldownOf, durationOf, enemiesWithin, power, skillDamage } from './helpers';
+import { FLAG_S, GRAVITY_R, GRAVITY_S, ORBITA_TIME } from './nalesnik';
 import { pushRing, ringBack } from './state';
 
 /** `aim` is what the player aimed (heroes/aim.ts); a skill of the auto mode ignores it. */
@@ -230,6 +231,36 @@ const korekta: SkillFn = (s, bus, hero, aim) => {
   for (const e of enemiesWithin(s, from.x, from.y, 190)) applyStatus(e, 'przeczytane', secs, decoy.id);
 };
 
+// ---------- Nalesnik ----------
+
+/** Orbita: a roll along the line (heroes/nalesnik.ts steps it); the first enemy hit that survives becomes a satellite for 3 s. */
+const orbita: SkillFn = (s, bus, hero, aim) => {
+  const p = s.player;
+  const a = resolveDirection(s, hero.skills[0], aim);
+  const len = reachOf(s, hero.skills[0]);
+  s.hero.roll = { dx: a.dx, dy: a.dy, left: ORBITA_TIME, speed: len / ORBITA_TIME, hit: [], rank: s.hero.ranks[0] };
+  p.target = null;
+  if (Math.abs(a.dx) > 0.2) p.facing = a.dx > 0 ? 1 : -1;
+  fx(bus, 'dash', p.x, p.y, 0, p.x + a.dx * len, p.y + a.dy * len);
+};
+
+/** Grawitacja wlasna: for 2 s everything within 180 units, loot included, falls toward the hero (heroes/nalesnik.ts). */
+const grawitacja: SkillFn = (s, bus) => {
+  const p = s.player;
+  const radius = GRAVITY_R * areaOf(s, 1);
+  s.hero.gravity = { left: GRAVITY_S * durationOf(s, 1), radius, rim: [] };
+  fx(bus, 'swirl', p.x, p.y, radius);
+};
+
+/** Wniosek o status: a flag at the point, one at a time; within its zone the pancake is officially a planet. */
+const wniosek: SkillFn = (s, bus, hero, aim) => {
+  const { x, y } = terenCentre(s, hero.skills[2], aim);
+  for (let i = s.zones.length - 1; i >= 0; i--) if (s.zones[i]?.variant === 'wniosek') s.zones.splice(i, 1);
+  const r = radiusOf(s, hero.skills[2]);
+  s.zones.push(createZone(nextId(s), x, y, { variant: 'wniosek', r, ttl: FLAG_S * durationOf(s, 2), inside: [] }));
+  fx(bus, 'ring', x, y, r);
+};
+
 export const SKILLS: Record<string, SkillFn> = {
   wirowanie,
   pranieWstepne,
@@ -243,6 +274,9 @@ export const SKILLS: Record<string, SkillFn> = {
   triangulacja,
   teren,
   korekta,
+  orbita,
+  grawitacja,
+  wniosek,
 };
 
 export function removeSummon(s: RunState, bus: Bus, id: number): void {

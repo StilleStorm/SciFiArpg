@@ -12,6 +12,8 @@ import { trackRun } from './aim';
 import { durationOf, enemiesWithin, nearestEnemy, power, setExistence, skillDamage, touchStatus } from './helpers';
 import { FOAM_RADIUS } from './skills';
 import { heroDef } from './defs';
+import { stepFlag, stepGravity, stepOrbit, stepRoll } from './nalesnik';
+import { tickRound } from './quirks';
 import { pushRing, RING_STEP } from './state';
 
 export function heroStep(s: RunState, bus: Bus, dt: number): void {
@@ -38,9 +40,13 @@ export function heroStep(s: RunState, bus: Bus, dt: number): void {
   }
 
   stepDash(s, bus, dt);
+  stepRoll(s, bus, dt);
+  stepOrbit(s, dt);
+  stepGravity(s, bus, dt);
+  tickRound(s, bus);
   stepRedirects(s, bus, dt);
   stepSummons(s, bus, dt);
-  stepZones(s, dt);
+  stepZones(s, bus, dt);
   stepProjectiles(s, bus, dt);
   if (tickUpdateQueue(s, dt) && canOpenUpdate(s, false)) bus.emit('update:ready');
 }
@@ -191,7 +197,7 @@ function fireFrom(s: RunState, m: Summon, target: Enemy): void {
   });
 }
 
-function stepZones(s: RunState, dt: number): void {
+function stepZones(s: RunState, bus: Bus, dt: number): void {
   for (let i = s.zones.length - 1; i >= 0; i--) {
     const z = s.zones[i];
     if (!z) continue;
@@ -208,6 +214,10 @@ function stepZones(s: RunState, dt: number): void {
     }
     if (z.ttl <= 0) {
       s.zones.splice(i, 1);
+      continue;
+    }
+    if (z.variant === 'wniosek') {
+      stepFlag(s, bus, z, dt);
       continue;
     }
     for (const e of enemiesWithin(s, z.x, z.y, z.r)) {

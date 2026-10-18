@@ -40,7 +40,7 @@ export interface GameHook {
   go(screen: Screen): void;
   /**
    * One attack at the nearest enemy, as the step would do it (pulled into view if far): by the player's auto-attack
-   * (a thrown shot for the ranged heroes) or, with 'enemy', that enemy's blow at the player. Emits attack:started.
+   * (a thrown shot for the ranged heroes, the Kartograf's laser at once) or, with 'enemy', that enemy's blow at the player. Emits attack:started.
    */
   attack(who?: 'player' | 'enemy'): boolean;
   /** Wound the nearest enemy without killing it (moves it near the player first if far away). */

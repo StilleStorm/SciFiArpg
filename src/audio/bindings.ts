@@ -111,6 +111,10 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
   });
 
   // ---- combat ----
+  // the Nalesnik's auto-attack is a flip with a slap (its hit sound follows when it lands)
+  on('attack:started', (e) => {
+    if (e.attacker === 'player' && deps.getState()?.player.heroId === 'nalesnik') play('nalesSlap');
+  });
   on('enemy:hit', (e) => {
     const en = enemyOf(e.id);
     const lethal = en !== undefined && en.hp <= 0;
