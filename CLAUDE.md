@@ -1,6 +1,9 @@
 # Zgłoszenie — rules for agents working in this repo
 
-Read `docs/DESIGN.md` first, whole. It is the source of truth for mechanics, look, and voice.
+Start of a session: read `docs/STATUS.md` (short, the handoff), then only the `docs/DESIGN.md`
+sections the task needs (it has a table of contents; it is the source of truth for mechanics,
+look and voice) and the `docs/ARCHITECTURE.md` sections for the code you will touch. Do not
+read the whole brief or whole screenshots folders at start; context is a budget.
 This file is about how we build.
 
 ## Stack (fixed)

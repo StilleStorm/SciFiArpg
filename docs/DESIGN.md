@@ -14,6 +14,48 @@ Language of code, comments and docs: English. Language of the game: Polish, thro
 
 ---
 
+## Contents (read only the sections your task names)
+- 1. Pillars
+- 2. Platform and controls
+- 3. Visual anchor and the ban list
+  - 3.1 Anchor
+  - 3.2 Rules (hard)
+  - 3.3 Ban list (if you are about to do one of these, stop)
+  - 3.4 Paint (farba)
+  - 3.5 How the look is verified
+- 4. World: the run
+  - 4.1 The base, the tunnel, pause and save (the Diablo structure)
+- 5. Combat
+  - 5.1 Base numbers (now)
+  - 5.2 Claims and rebuttals (now)
+  - 5.3 Status effects as internet behaviour (now)
+  - 5.4 Spór (bosses, planned for the first boss patch; design now, build later)
+  - 5.5 Existence coefficient (family *Wygenerowane*, §6)
+  - 5.6 Aiming (celowanie)
+- 6. Enemies
+- 7. Loot and items
+- 8. Progression
+- 9. Death, economy, narration
+  - 9.1 Death: one of three outcomes, chosen at random when you lose all racja
+  - 9.2 Economy (base screen between runs)
+  - 9.3 Narration
+- 10. Heroes
+- 11. i18n
+- 12. Voice guide for Polish text
+- 13. Scope for the first playable (tonight) and backlog
+  - First playable, in build order (each step leaves the game runnable)
+  - Planned next (decided 2026-10-18, in this order)
+  - Backlog
+- 14. Sound (phase after the first playable; design is final, build later)
+  - 14.1 Where each source is used
+  - 14.2 Ban list
+  - 14.3 SFX (all synthesized in Web Audio from noise, clicks and short plucks; no samples)
+  - 14.4 Music profiles (one per planet, chosen from the seed and the family mix)
+  - 14.5 Implementation notes
+  - 12.1 Editorial rules added after the first voice pass
+
+---
+
 ## 1. Pillars
 
 1. **Diablo loop, honestly.** Kill, loot, compare, equip, level, bigger numbers, boss. It must be

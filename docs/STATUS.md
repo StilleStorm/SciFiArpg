@@ -1,7 +1,10 @@
 # Status and handoff
 
-Read this first in a new session, then CLAUDE.md, docs/WORKFLOW.md, docs/DESIGN.md, docs/ARCHITECTURE.md.
-Keep this file current: it replaces chat memory.
+Read this first in a new session. Then CLAUDE.md (auto-loaded) and only the DESIGN.md and
+ARCHITECTURE.md sections the next task needs; WORKFLOW.md when you spawn agents. Keep this file
+current: it replaces chat memory. Context note: the project's own files cost ~1k tokens at start
+(CLAUDE.md); a large first-command context comes from the harness (tool definitions, skills,
+plugins, connectors), which the player trims in Claude settings, not in the repo.
 
 ## Where things are (2026-10-18)
 - Branch: `claude/scifi-arpg-concept-6vqk36`. Deploys to https://stillestorm.github.io/SciFiArpg/
