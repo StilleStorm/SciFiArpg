@@ -116,18 +116,23 @@ between a pickup and a clear. Order:
 Later: heavy-metal music profile, more laws/uniques/parts, English, Cloudflare + Play Store.
 Far future: endgame beyond "zgłoszenia dodatkowe", multiplayer.
 
-**Storyline (2026-10-18):** proposed in docs/STORY.md at full Diablo length (the player asked
-to skip the MVP cut): five acts, sixteen planets, three new families (Formularze, Opinie,
-Aktualizacje), thirteen new bosses, nine new clauses, a quest layer (czynności: five primitives
-on the ticket header), the Kartoteka frame for the roster screen, ten open questions (STORY
-§12). Not yet seen by the player; nothing from it is built. Slice order consequences (STORY
-§10): a campaign table slice, a czynności slice, three family slices and seven boss slices
-join the order above around slice 7; the game stays playable after every one.
+**Storyline (2026-10-18):** proposed in docs/STORY.md at Diablo length and shape, after three
+rounds with the player (no MVP cut; Diablo hours; a cosmic horror and Diablo variety). Five acts,
+sixteen planets; each planet is an act's worth of play: four pisma (quest runs on five target
+primitives), two pisma dodatkowe, a boss run, załącznik page chains; 16–20 h mandatory, 22–26 h
+with side tickets. Plot: the personal ticket meets the Zjawisko (sygn. 1), a phenomenon that
+replaces the galaxy with its probable version; the hero's file is too improbable to average, so
+the Komisja sends them as courier; the hero stops it 11 months before the law would have banned
+it; the Komisja is displeased (paperwork void, no legal basis) and opens case 48214 against the
+hero, which frames the endgame tickets. Variety: five document worlds, six zone types, six
+families with about thirty species (new: Formularze, Opinie, Uśrednione), nine new clauses,
+thirteen new bosses. Twelve open questions (STORY §14). Nothing from it is built.
 
-**Next pickup:** read the player's answers to STORY §12 (or ask them if none), record the
+**Next pickup:** read the player's answers to STORY §14 (or ask them if none), record the
 decisions in STORY as a "Decisions" section, fold the accepted parts into DESIGN as §4.2
-"Campaign" (families into §6, clauses into §4, the Kartoteka into §10's hero-select paragraph),
-re-cut the slice order in PLAN §5 and here; then start slice 1.
+"Campaign" (families and species into §6, clauses into §4, worlds and zones into §3/§4, the
+Kartoteka into §10's hero-select paragraph), re-cut the slice order in PLAN §5 and here (the
+pismo system, worlds, species and boss slices join around slice 7); then start slice 1.
 
 ## Known limits
 - iOS ignores orientation locks; the setting only picks the layout there.

@@ -78,9 +78,10 @@ Existing numbers are kept until the balance pass.
 
 ### 3.1 The case file: acts as planets
 One ticket number the Komisja keeps reassigning. The campaign is a **sequence of planets**
-(proposed: five acts, sixteen planets, docs/STORY.md; no MVP cut), each: a base layout, a
-clause, a family mix, 4–8 pages, two or three czynności, a boss, a story chapter. The final
-ticket closes the case. After the campaign
+(proposed: five acts, sixteen planets, docs/STORY.md; no MVP cut), each an act's worth of
+play: a base, a clause, a document world, a family mix, four pisma (quest runs), two side
+tickets, a boss run, a story chapter. The final ticket closes the case; the Komisja then opens
+case 48214 against the hero, which frames the Zgłoszenia dodatkowe. After the campaign
 the desk offers "Zgłoszenia dodatkowe": random planets with random clauses, the replayable loop.
 
 ### 3.2 Priorytet zgłoszenia (difficulty)
