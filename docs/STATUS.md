@@ -105,6 +105,13 @@ between a pickup and a clear. Order:
    paragraphs (e); Reklamacja, Archiwum, sinks (f).
 9. `npm run new-hero` + template + checklist (PLAN 8).
 10. Przesyłka/paczkomat deliveries; tap an item on the ground to see its card.
+10a. Recovery: potwierdzenia drops, vacuum, held stack of 5 with a button, auto-use below 15%,
+     out-of-combat regen (PLAN §8). Should come early: it changes balance; place it right after
+     slice 2 if play says runs are too punishing.
+10b. Elite packs and named elites (PLAN §8).
+10c. Karta osobowa; save persist + export/import; damage numbers setting; bug button; text size
+     (PLAN §8; small, can ride along with other slices).
+10d. Page content: teczki, pieczęcie, zdarzenia (PLAN §8; zdarzenia after the story plan).
 10a. Review additions (PLAN §8): potwierdzenia recovery with the pocket button and auto-use;
     teczki, pieczęcie and page events; elite packs and named elites; Karta osobowa; persistent
     storage + save export/import; damage numbers setting; bug button; text size. Potwierdzenia

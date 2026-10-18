@@ -168,3 +168,33 @@ Endgame systems beyond "Zgłoszenia dodatkowe", multiplayer, English, store rele
   clipboard.
 - **Text size** setting for footnotes and cards.
 - **Desktop controls** (WASD, mouse aim): later, not MVP.
+
+## 8. Systems added after the review (player, 2026-10-18)
+- **Recovery of racja, Diablo 3 style.** Enemies drop **potwierdzenia**, stamped slips. Walking
+  near one pulls it in (vacuum radius about 90 units). If racja is not full it restores a share
+  at once (about 25% of max, scaled by tier); if racja is full it is **kept**, up to 5 per
+  character, shown as a stack on the HUD with a button "Potwierdzenie" (a fourth margin note next
+  to Pauza/Tunel in a run). Tapping uses one. **Auto-use**: when a hit would drop racja below
+  15% and a slip is held, one is used automatically (the Asystent notes it). Slow regeneration
+  out of combat, "zmiana zdania", about 2% per second after 4 s without damage. No potions to buy.
+- **Elite packs and named elites.** Elite packs: a leader with its affix and 2–4 minions of its
+  family sharing the aura. **Named elites** (Diablo 2 unique monsters) with two or three affixes
+  and an absurd name the Asystent records ("Monit Zbiorczy, nieodebrany od 2019"), one per
+  two pages at most, guaranteed nietypowy+ drop.
+- **Karta osobowa** (character sheet): a form at the desk and from the HUD's Reputacja line:
+  racja, pewność siebie, upór, damage per type, resists, crit, speed, the Argument meter, active
+  buffs and statuses as stamps, held potwierdzenia, permissions.
+- **Page content**: **teczki** (folders tapped open for loot, 0–2 per page), **pieczęcie**
+  (office seals on the page that stamp a timed buff on the player, the shrine equivalent, 0–1
+  per page, pool of 6: +speed, +crit, +meter gain, +loot tier, free paragraphs for 30 s, racja
+  regen), and one **zdarzenie** per page from a pool (a form to fill under fire, a lost
+  delivery, an audit) later with the story plan.
+- **Save safety**: request `navigator.storage.persist()` on install; **export/import** of the
+  whole save as a file from the desk ("Archiwum eksportowe"); cloud sync later with Cloudflare
+  (Workers + KV/D1) before the Play Store.
+- **Damage numbers**: off by default; a setting shows them as small handwritten digits in the
+  margin beside the hit.
+- **Bug button**: "Zgłoś problem z grą" in the pause sheet copies a short state dump (version,
+  hero, planet, page, last 10 events, settings, device) to the clipboard.
+- **Text size** setting for footnotes, cards and forms (three steps).
+- **Desktop** (later): WASD and a mouse-aim mode; the game already runs with click-to-move.
