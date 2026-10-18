@@ -1,9 +1,11 @@
+import { createRng } from '../core/rng';
 import { t } from '../i18n';
 import { xpToNext } from '../progression/xp';
+import { el as svgEl, n2, wobblyCircle } from '../render/svg';
 import type { RunState } from '../world/run';
 import { h } from './dom';
-import { el as svgEl, n2 } from '../render/svg';
 import { createPauseButton } from './pause';
+import './tunnel.css';
 
 export interface Hud {
   el: HTMLElement;
@@ -13,6 +15,34 @@ export interface Hud {
 }
 
 const LINE_Y = 6;
+
+/** A click this soon after a pointerdown on the note is the tail of that press. */
+const CLICK_AFTER_PRESS_MS = 700;
+
+/**
+ * The Tunel note: a circled word, 44 x 44, hanging beside "Pauza" (ui/tunnel.css). Same pattern as the Pauza note: it
+ * answers the finger going down, so it works with another thumb already on the joystick; a lone click still opens it.
+ */
+export function createTunnelButton(onTunnel: () => void): HTMLButtonElement {
+  const btn = h('button', 'tunnel-btn');
+  btn.type = 'button';
+  btn.setAttribute('aria-label', t('ui.hud.tunnelLabel'));
+  const rng = createRng(137);
+  const svg = svgEl('svg', { viewBox: '-22 -22 44 44', 'aria-hidden': 'true' });
+  svg.append(svgEl('path', { d: wobblyCircle(rng, 0, 0, 20.5, 11, 0.03) }), svgEl('path', { d: wobblyCircle(rng, 0.5, -0.4, 19, 9, 0.035), 'stroke-width': 0.9 }));
+  btn.append(svg, h('span', 'word', t('ui.hud.tunnel')));
+  let pressedAt = -Infinity;
+  btn.addEventListener('pointerdown', (ev) => {
+    if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+    pressedAt = performance.now();
+    onTunnel();
+  });
+  btn.addEventListener('click', () => {
+    if (performance.now() - pressedAt < CLICK_AFTER_PRESS_MS) return;
+    onTunnel();
+  });
+  return btn;
+}
 
 /** Racja as a hand-drawn line: red up to the ratio, the lost part thin and struck through. */
 function racjaPaths(width: number, ratio: number): { left: string; lost: string; whole: string } {
@@ -48,8 +78,13 @@ export function reputacjaText(s: RunState): string {
   return `${p.level} \u00b7 ${progress}`;
 }
 
-/** `onUpdateTap` is called when the player taps the "aktualizacja dostepna" line under Reputacja, `onPause` when the margin note "Pauza" is tapped. */
-export function createHud(root: HTMLElement, onUpdateTap: () => void = () => undefined, onPause: () => void = () => undefined): Hud {
+/** `onUpdateTap` is called when the player taps the "aktualizacja dostepna" line under Reputacja, `onPause` when the margin note "Pauza" is tapped, `onTunnel` for "Tunel". */
+export function createHud(
+  root: HTMLElement,
+  onUpdateTap: () => void = () => undefined,
+  onPause: () => void = () => undefined,
+  onTunnel: () => void = () => undefined,
+): Hud {
   const el = h('div', 'hud paper');
   const racja = field('ui.hud.racja', 'racja');
   const reputacja = field('ui.hud.reputacja');
@@ -64,7 +99,7 @@ export function createHud(root: HTMLElement, onUpdateTap: () => void = () => und
   const upd = h('button', 'upd hidden', t('forms.update.availableLine'));
   upd.type = 'button';
   upd.addEventListener('click', onUpdateTap);
-  el.append(row1, row2, upd, createPauseButton(onPause));
+  el.append(row1, row2, upd, createPauseButton(onPause), createTunnelButton(onTunnel));
   root.append(el);
 
   const svg = svgEl('svg', { 'aria-hidden': 'true' });

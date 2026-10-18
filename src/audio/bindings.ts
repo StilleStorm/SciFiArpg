@@ -170,6 +170,13 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
     const s = deps.getState();
     if (s) musicTurn(s, e.to);
   });
+  // the service tunnel: scissors through the sheet, then a strip of tape laid over the hole (nothing when the page or run goes away)
+  on('tunnel:opened', () => play('crumple'));
+  // the menus stopped the music on screen:changed; the way back through the tunnel starts it again
+  on('tunnel:returned', () => startMusic(deps.getState));
+  on('tunnel:closed', (e) => {
+    if (e.reason === 'return' || e.reason === 'second' || e.reason === 'death') play('paperSlide');
+  });
   on('update:ready', () => play('paperSlide'));
   on('law:ask', () => play('paperSlide'));
   on('law:trigger', (e) => {

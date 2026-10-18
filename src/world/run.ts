@@ -4,6 +4,7 @@ import { applyHero, createHeroRun, heroDef, type HeroId, type HeroRun } from '..
 import { createPlayer } from '../entities/factory';
 import { generateRunPages, type Page } from './pages';
 import { applyLaw, neutralLaw, type LawFlags, type LawId } from './laws';
+import type { Tunnel } from './tunnel';
 import { ticketForSeed, type TicketInfo } from './ticket';
 
 import type { MissionMix } from '../enemies/families';
@@ -57,6 +58,8 @@ export interface RunState {
   summons: Summon[];
   /** Marked areas and hourglasses drawn on the page. */
   zones: Zone[];
+  /** The open service tunnel, if any (world/tunnel.ts). Never saved: it lives inside one session. */
+  tunnel?: Tunnel;
 }
 
 /** Optional overrides for tests and screenshots; everything else comes from the seed. */

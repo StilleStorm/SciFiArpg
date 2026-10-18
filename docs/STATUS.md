@@ -23,6 +23,8 @@ Keep this file current: it replaces chat memory.
 - Paint is live and approved by the player (DESIGN §3.4, render/wash.ts).
 - Pause and save are live: Pauza note on the HUD, sheet with Wznów/Ustawienia/Zakończ, character
   persists between runs (level, upgrades, gear, bag, purse), bookmark resume from baza.
+- Tunel serwisowy is live (hole, hold the exact run, return, tape); its base end is the baza form
+  until the walkable base replaces it. Known: landscape baza overflows with the resume box.
 - Attack animations are live: attack:started event, hero poses per hero, enemy wind-up and
   lunge, projectiles turn along velocity (render/attackFx.ts, scripts/shot-attacks.mjs).
 
@@ -46,7 +48,7 @@ joystick/tap steering (§2), editorial rules (§12.1).
 ## Backlog, in order (decided with the player 2026-10-18; DESIGN §13 "Planned next")
 1. (done) Paint approved; attack animations shipped.
 2. (done) Pause sheet, hold music on pause, character save between runs, bookmark resume.
-3. Tunel serwisowy with exact-state return (§4.1).
+3. (done) Tunel serwisowy with exact-state return; Android back button opens the pause sheet.
 4. Walkable base page per planet (§4.1).
 5. Aiming: tap / hold-and-drag, three modes, smart target by claim (§5.6). Then more skills.
 6. Spór for bosses (DESIGN §5.4).

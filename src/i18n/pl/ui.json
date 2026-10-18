@@ -6,7 +6,9 @@
     "strona": "Strona",
     "pages": "{page}/{total}",
     "pause": "Pauza",
-    "pauseLabel": "Wstrzymaj zgłoszenie"
+    "pauseLabel": "Wstrzymaj zgłoszenie",
+    "tunnel": "Tunel",
+    "tunnelLabel": "Otwórz tunel serwisowy"
   },
   "title": {
     "agency": "Centrum Obsługi Planet",
@@ -36,12 +38,17 @@
     "start": "Zgłoszenie przyjęto. Planu rozpatrzenia nie załączono.",
     "firstKill": "Urządzenie nr {n} skreślono jako pierwsze. Kolejność skreśleń nie ma znaczenia.",
     "pickup": "Przedmiot nr {n} dodano do załączników.",
-    "reassigned": "Zgłoszenie nr {number} zostało przekazane innemu konsultantowi. Dotychczasowych ustaleń nie przekazano."
+    "reassigned": "Zgłoszenie nr {number} zostało przekazane innemu konsultantowi. Dotychczasowych ustaleń nie przekazano.",
+    "tunnelOpened": "Stronę przecięto. Koszt naprawy zostanie doliczony.",
+    "tunnelClosed": "Stronę naprawiono taśmą. Taśma nie jest przezroczysta."
   },
   "notes": {
     "history": "Przypisy"
   },
   "exit": {
     "next": "dalej"
+  },
+  "tunnel": {
+    "note": "c.d. na stronie __"
   }
 }

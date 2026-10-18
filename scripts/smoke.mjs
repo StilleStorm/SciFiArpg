@@ -238,6 +238,57 @@ try {
   check('a footnote says the ticket was reassigned', (pzAfter?.note ?? '').includes('innemu konsultantowi'));
   await shot('08d-resumed');
 
+  // ---------- 4c. the service tunnel: open, walk in, the base, return into the same run, the tape (DESIGN 4.1) ----------
+  await settle();
+  await page.evaluate(() => {
+    const g = window.__game;
+    g.enemies.clear();
+    g.enemies.spawnFamily('urzadzenia', 3);
+    window.__keep = g.state();
+  });
+  await page.locator('.hud .tunnel-btn').click({ timeout: 3000 });
+  await sleep(600);
+  const tn1 = await page.evaluate(() => ({ open: !!window.__game.state().tunnel, holes: document.querySelectorAll('#page .tn-hole').length }));
+  check('Tunel cuts a hole at the player\'s feet', tn1.open && tn1.holes === 1, JSON.stringify(tn1));
+  await shot('08e-tunnel-open');
+  // step off the hole, then walk back onto it with the real step (a target, the loop's own steps)
+  await page.evaluate(() => {
+    const g = window.__game;
+    const s = g.state();
+    g.placePlayer(s.tunnel.x + 90, s.tunnel.y);
+    s.player.target = { x: s.tunnel.x, y: s.tunnel.y };
+  });
+  await page.waitForFunction(() => window.__game.screen() === 'baza', null, { timeout: 8000 }).catch(() => undefined);
+  await sleep(400);
+  const tnHeld = await page.evaluate(() => {
+    const s = window.__game.state();
+    return { screen: window.__game.screen(), status: s?.status, same: window.__keep === s, line: document.querySelector('.tunnel-wait')?.textContent ?? '', time: s?.time };
+  });
+  check('walking onto the hole holds the run and opens the base', tnHeld.screen === 'baza' && tnHeld.status === 'paused' && tnHeld.same, JSON.stringify(tnHeld));
+  check('the base shows the return line', /czeka na stronie/.test(tnHeld.line) && (await page.locator('.tunnel-return').isVisible()), tnHeld.line);
+  await shot('08f-tunnel-baza');
+  await sleep(500);
+  check('the clock stands still in the base', (await page.evaluate(() => window.__game.state().time)) === tnHeld.time);
+  // the return, read in the same task: nothing can have stepped between the two snapshots
+  const exact = await page.evaluate(() => {
+    const snap = () => {
+      const s = window.__game.state();
+      return JSON.stringify({ same: window.__keep === s, time: s.time, enemies: s.enemies.map((e) => [e.id, e.x, e.y, e.hp]), player: [s.player.x, s.player.y], pickups: s.pickups.map((k) => [k.id, k.x, k.y]) });
+    };
+    const before = snap();
+    const ok = window.__game.returnFromTunnel();
+    return { ok, before, after: snap() };
+  });
+  check('returning restores the same enemies, loot and clock, to the unit', exact.ok && exact.before === exact.after, exact.before === exact.after ? '' : `${exact.before} vs ${exact.after}`);
+  await sleep(900);
+  const tnBack = await page.evaluate(() => {
+    const s = window.__game.state();
+    return { screen: window.__game.screen(), status: s.status, same: window.__keep === s, time: s.time, tunnel: s.tunnel ?? null, tapes: document.querySelectorAll('#page .tn-tape').length };
+  });
+  check('the run continues from the clock where it stopped', tnBack.screen === 'run' && tnBack.status === 'running' && tnBack.same && tnBack.time > tnHeld.time && tnBack.time - tnHeld.time < 3, `${tnHeld.time.toFixed(2)} -> ${tnBack.time.toFixed(2)}`);
+  check('the hole is taped and the tunnel is closed', tnBack.tunnel === null && tnBack.tapes === 1, JSON.stringify({ tapes: tnBack.tapes }));
+  await shot('08g-tunnel-taped');
+
   // ---------- 5. the boss ----------
   await settle();
   const pages = (await runState())?.pages ?? 1;

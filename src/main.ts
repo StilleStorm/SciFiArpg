@@ -1,5 +1,6 @@
 import './style.css';
 import { createAudio, setVolumes, unlockAudio } from './audio';
+import { startMusic } from './audio/music';
 import { setOfficeOpen } from './economy/hours';
 import { createBus, type Screen } from './core/events';
 import { createLoop } from './core/loop';
@@ -7,12 +8,13 @@ import { createGame } from './game';
 import { createInput } from './input';
 import { bindAsystent } from './narration';
 import { bindFx } from './render/bindings';
+import { bindTunnelFx } from './render/tunnelFx';
 import { createCamera } from './render/camera';
 import { initInk } from './render/ink';
 import { installPaper } from './render/paper';
 import { createWobble, getStage, setTheme } from './render/stage';
 import { tickTweens } from './render/tween';
-import { bindAutosave, settleRun } from './save/autosave';
+import { bindAutosave, settleRun, withBookmark, withCharacter } from './save/autosave';
 import { emptyCharacter } from './save/character';
 import { markRewritten } from './save/history';
 import { loadMeta, saveMeta, type Settings } from './save/save';
@@ -33,7 +35,8 @@ import { createTitle } from './ui/title';
 import { bindLaws, lawHooks } from './world/laws';
 import { PAGE_H, PAGE_W } from './world/pages';
 import { bindPageTurn, bindRunEvents } from './world/pageTurn';
-import type { RunOptions } from './world/run';
+import type { RunOptions, RunState } from './world/run';
+import { bindTunnel, carryPurse, closeFor, closeTunnel, createRunHold, fateOfHeldRun, openTunnel, type LeaveAction } from './world/tunnel';
 import { TICKET_BASE, ticketForSeed, type TicketInfo } from './world/ticket';
 
 const stage = getStage();
@@ -46,6 +49,10 @@ camera.resize();
 const wobble = createWobble(stage);
 let meta = loadMeta();
 let screen: Screen = 'title';
+/** The run that waits while the player is in the base through the service tunnel (DESIGN 4.1): the same object, in memory only. */
+const hold = createRunHold<RunState>();
+/** The next `go('run')` is the return through the tunnel: it does not start a run. */
+let returning = false;
 
 /** Day / night / by device, the left-handed mirror, steering and the orientation lock. */
 let lockedFor: string | null = null;
@@ -74,7 +81,7 @@ const input = createInput(stage.svg, (x, y, walk) => game.onTap(x, y, walk), cre
 initLayout(() => applySettings(meta.settings)); // data-orient on <html> follows the window; steering follows it until the player chooses
 applySettings(meta.settings);
 const game = createGame(stage, bus, camera, input);
-const hud = createHud(stage.ui, () => game.hero.requestUpdate(), () => pauseRun());
+const hud = createHud(stage.ui, () => game.hero.requestUpdate(), () => pauseRun(), () => openTunnelNow());
 const footnotes = createFootnotes(stage.ui);
 const pads = createPads(stage.ui, bus);
 const title = createTitle(stage.ui, () => go(meta.heroId ? 'baza' : 'profile'));
@@ -82,7 +89,11 @@ let shop: SklepHandle | null = null;
 const baza = createBaza(stage.ui, {
   onNewTicket: () => go('ticket'),
   onSettings: () => go('settings'),
-  onChangeHero: () => go('profile'),
+  onChangeHero: () => {
+    leave('changeHero'); // another hero cannot walk back into this run
+    go('profile');
+  },
+  onReturn: () => returnFromTunnel(),
   onRewritten: (indices) => save(markRewritten(meta, indices)),
   onResume: () => resumeTicket(),
   onShop: () => {
@@ -119,6 +130,7 @@ const ticket = createTicket(stage.ui, () => {
 const freshSeed = (): number => (Date.now() ^ Math.floor(Math.random() * 0x100000000)) >>> 0;
 
 function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): void {
+  syncHistory(screen, next);
   screen = next;
   const running = next === 'run';
   hud.el.classList.toggle('hidden', !running);
@@ -156,6 +168,13 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
       settings.show(meta.settings);
       break;
     case 'run': {
+      if (returning) {
+        // Back through the tunnel: the held run continues, nothing is started, the footnotes and the page stay as they were.
+        returning = false;
+        hud.invalidate();
+        break;
+      }
+      leave(opts.resume ? 'resumeBookmark' : 'newTicket'); // a run held in the tunnel is given up before another starts
       footnotes.reset();
       setOfficeOpen(null);
       // A resumed ticket keeps its number; the saved character (gear, purse, level, updates) is applied before the stats.
@@ -172,6 +191,10 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
 bindFx(bus, game.views);
 bindPageTurn(bus, { stage, camera, views: game.views, getState: () => game.state });
 bindRunEvents(bus, () => game.state);
+// The tunnel closes itself on death, the end of the run and a page turn; both must hear `run:ended` before the handler below drops the state.
+bindTunnel(bus, () => game.state);
+bindTunnelFx(bus, { page: stage.page, pageWidth: () => game.state?.page.w ?? PAGE_W });
+bus.on('tunnel:entered', () => void holdRun());
 bindLaws(bus, () => game.state);
 bindLawSheets(stage.ui, bus, () => game.state);
 /** Print a footnote and tell the bus (the typewriter key and the carriage return are heard from `footnote:added`). */
@@ -244,13 +267,14 @@ function closePauseSettings(): void {
 function clearPause(): void {
   pauseSettings.hide();
   pauseSheet.close();
-  loop.resume();
+  if (!hold.held) loop.resume(); // a run held in the tunnel stays held while the player moves between base screens
 }
 
 /** Zakończ zgłoszenie: the character and a bookmark are saved, the run is dropped, back to the base. */
 function endTicket(): void {
   if (screen !== 'run' || !game.state) return;
   autosave.save();
+  closeTunnel(game.state, bus, closeFor('abandon'));
   game.stop();
   go('baza');
 }
@@ -262,6 +286,115 @@ function resumeTicket(): boolean {
   go('run', b.seed, { resume: b });
   return true;
 }
+
+// ---------- the service tunnel (DESIGN 4.1) ----------
+/** Tunel on the HUD: cut a hole at the player's feet (a second one closes the first). Free, no confirmation. */
+function openTunnelNow(): boolean {
+  const s = game.state;
+  return screen === 'run' && s !== null && openTunnel(s, bus);
+}
+
+/**
+ * The player walked onto the hole. The run is held: the very same RunState object stays in memory (enemies, racja,
+ * floor loot, statuses, clock), the pause path stops the loop and the input and writes the character and the bookmark
+ * (`game:paused`, so the save happens on every tunnel use), and the router goes to the base with the return line.
+ */
+function holdRun(): boolean {
+  const s = game.state;
+  if (screen !== 'run' || !s?.tunnel || hold.held || !game.pause()) return false;
+  hold.hold(s);
+  baza.setTunnel({ number: s.ticket.number, page: s.tunnel.pageIndex + 1 });
+  go('baza');
+  loop.pause(); // go() leaves the loop alone while a run is held, this keeps its timers still too
+  return true;
+}
+
+/** "Wróć do zgłoszenia": the held run continues exactly as it was; the tunnel closes behind the player (a strip of tape). */
+function returnFromTunnel(): boolean {
+  const s = hold.peek();
+  if (screen !== 'baza' || !s || game.state !== s || fateOfHeldRun(true, 'return') !== 'continue') return false;
+  hold.take();
+  carryPurse(s, meta.character); // what the base shop did to the purse goes along
+  baza.setTunnel(null);
+  returning = true;
+  go('run');
+  loop.resume();
+  game.resume();
+  bus.emit('tunnel:returned');
+  closeTunnel(s, bus, closeFor('return'));
+  autosave.save(); // the tunnel use is saved on the way back too
+  return true;
+}
+
+/**
+ * What becomes of a held run when the player does something else in the base. The decision is `fateOfHeldRun` (tested):
+ * 'settle' means the run is given up the way Zakończ gives it up. The character (with the base shop's changes) and the
+ * bookmark are written, so the desk offers "Wznów zgłoszenie nr ..." (the pages are regenerated from the seed), and the
+ * held state is dropped. Starting a new ticket, resuming the bookmark or changing the hero settle; settings only look.
+ */
+function leave(action: LeaveAction): void {
+  if (fateOfHeldRun(hold.held, action) !== 'settle') return;
+  const s = hold.take();
+  if (!s) return;
+  carryPurse(s, meta.character);
+  save(withBookmark(withCharacter(meta, s), s));
+  closeTunnel(s, bus, closeFor('abandon'));
+  baza.setTunnel(null);
+  loop.resume();
+  if (game.state === s) game.stop();
+}
+
+// ---------- the back button (Android) ----------
+/**
+ * The run screen and the screens that hang off the base (ticket, profile, settings) are one history entry above the base;
+ * the base and the title are the root. Opening one of them pushes an entry, leaving it by a button takes it back, so the
+ * system back button walks baza <- ticket / profile / settings. During a run the button never leaves: it opens the pause
+ * sheet, and while the run is paused it resumes (the entry the press consumed is pushed again). At the root it leaves.
+ */
+const HISTORY_LEVEL: Record<Screen, 0 | 1> = { title: 0, baza: 0, death: 0, profile: 1, ticket: 1, settings: 1, run: 1 };
+let pushed = 0;
+let backsWeAsked = 0;
+let poppedByUser = false;
+function pushEntry(replace: boolean, tag: Screen): void {
+  try {
+    if (replace) history.replaceState({ screen: tag }, '');
+    else {
+      history.pushState({ screen: tag }, '');
+      pushed++;
+    }
+  } catch {
+    /* a sandboxed frame: the back button then behaves as the browser's own */
+  }
+}
+function syncHistory(from: Screen, to: Screen): void {
+  const a = HISTORY_LEVEL[from];
+  const b = HISTORY_LEVEL[to];
+  if (b > a) pushEntry(false, to);
+  else if (b === a && b === 1) pushEntry(true, to);
+  else if (b < a && !poppedByUser && pushed > 0) {
+    pushed--;
+    backsWeAsked++;
+    history.back();
+  }
+}
+window.addEventListener('popstate', () => {
+  if (backsWeAsked > 0) {
+    backsWeAsked--; // the echo of our own history.back()
+    return;
+  }
+  if (pushed > 0) pushed--;
+  if (screen === 'run') {
+    pushEntry(false, 'run');
+    if (pauseSheet.isOpen()) resumeRun();
+    else pauseRun();
+    return;
+  }
+  if (HISTORY_LEVEL[screen] === 1) {
+    poppedByUser = true;
+    go(screen === 'profile' && !meta.heroId ? 'title' : 'baza');
+    poppedByUser = false;
+  }
+});
 
 // The app goes to the background (tab switch, lock screen, home button): hold the run, so the player returns to the sheet.
 document.addEventListener('visibilitychange', () => {
@@ -283,6 +416,8 @@ installTestHook({
   setMeta: (m) => (meta = m),
   pause: pauseRun,
   resume: resumeRun,
+  openTunnel: openTunnelNow,
+  returnFromTunnel,
   endTicket,
   resumeTicket,
   changeSettings: (patch) => {

@@ -15,12 +15,23 @@ export interface BazaHandlers {
   onResume(bookmark: Bookmark): void;
   /** Called with the history indices whose corrected version was just shown (the caller saves them). */
   onRewritten(indices: number[]): void;
+  /** "Wróć do zgłoszenia": back through the service tunnel into the held run (only offered while a run is held). */
+  onReturn?(): void;
+}
+
+/** The ticket that waits on its page while the player is in the base (world/tunnel.ts, main.ts). */
+export interface TunnelWait {
+  number: number;
+  /** 1-based page number. */
+  page: number;
 }
 
 export interface Baza {
   el: HTMLElement;
   show(meta: MetaState): void;
   hide(): void;
+  /** While a run is held the base opens with the return line and does not offer the bookmark (it is the same ticket); null clears it. */
+  setTunnel(wait: TunnelWait | null): void;
 }
 
 function outcomeText(o: TicketEntry['outcome']): string {
@@ -93,12 +104,14 @@ export function createBaza(root: HTMLElement, handlers: BazaHandlers): Baza {
   const frame = h('div', 'frame baza');
   screen.append(frame);
   root.append(screen);
+  let waiting: TunnelWait | null = null;
 
   return {
     el: screen,
     show(meta) {
       screen.classList.remove('hidden');
       frame.replaceChildren();
+      frame.classList.toggle('waiting', waiting !== null);
       const heroName = meta.heroId ? t(`screens.profile.${meta.heroId}`) : t('screens.baza.noHero');
 
       const change = h('button', 'link-btn', t('screens.baza.changeHero'));
@@ -131,7 +144,15 @@ export function createBaza(root: HTMLElement, handlers: BazaHandlers): Baza {
       settings.addEventListener('click', handlers.onSettings);
 
       const scroll = h('div', 'scroll');
-      const mark = meta.bookmark;
+      const mark = waiting ? undefined : meta.bookmark;
+      if (waiting) {
+        const back = h('button', 'resume-btn tunnel-return', t('screens.baza.tunnelReturn'));
+        back.type = 'button';
+        back.addEventListener('click', () => handlers.onReturn?.());
+        const block = h('div', 'resume-line tunnel-line');
+        block.append(h('p', 'tunnel-wait', t('screens.baza.tunnelWaiting', { number: waiting.number, page: waiting.page })), back, h('p', 'resume-note', t('screens.baza.tunnelNote')));
+        scroll.append(block);
+      }
       if (mark) {
         const resume = h('button', 'resume-btn', t('screens.baza.resume', { number: mark.ticketNumber }));
         resume.type = 'button';
@@ -153,6 +174,9 @@ export function createBaza(root: HTMLElement, handlers: BazaHandlers): Baza {
     },
     hide() {
       screen.classList.add('hidden');
+    },
+    setTunnel(wait) {
+      waiting = wait;
     },
   };
 }

@@ -49,7 +49,10 @@
     "openShop": "Otwórz",
     "shopNote": "aplikacje i przedmioty użytkowe",
     "resume": "Wznów zgłoszenie nr {number}",
-    "resumeNote": "{planet}, strona {page}. Zgłoszenie zostanie przekazane innemu konsultantowi."
+    "resumeNote": "{planet}, strona {page}. Zgłoszenie zostanie przekazane innemu konsultantowi.",
+    "tunnelWaiting": "Zgłoszenie nr {number} czeka na stronie {page}.",
+    "tunnelNote": "Stronę pozostawiono w stanie, w jakim ją opuszczono. Wrogów również.",
+    "tunnelReturn": "Wróć do zgłoszenia"
   },
   "history": {
     "line": "Nr {number} · {planet}",

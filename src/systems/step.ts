@@ -4,6 +4,7 @@ import { createGrid, type Enemy } from '../entities';
 import { trackEnemies } from '../world/enemyInfo';
 import { lawPre, tickLaw } from '../world/laws';
 import { tickPageTurn } from '../world/pageTurn';
+import { tickTunnel } from '../world/tunnel';
 import type { RunState } from '../world/run';
 import { enemiesAttack, playerAttacks } from './combat';
 import { trickleSpawn, updateEnemies } from './enemies';
@@ -42,6 +43,7 @@ export function createSim(bus: Bus) {
       undoLaw();
       tickLaw(s, bus, dt);
       tickPageTurn(s, bus);
+      tickTunnel(s, bus);
     },
   };
 }

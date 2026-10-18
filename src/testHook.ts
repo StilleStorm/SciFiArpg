@@ -88,6 +88,15 @@ export interface GameHook {
   endTicket(): void;
   /** "Wznów zgłoszenie nr ..." on the base; false when there is no bookmark. */
   resumeTicket(): boolean;
+  /** The Tunel note on the HUD: cut a hole at the player's feet. False when nothing can be cut now. */
+  openTunnel(): boolean;
+  /**
+   * Walk onto the open hole: the hole is armed, the player is put on it and one step runs, so the real rule takes him in
+   * (the run is held, the screen is 'baza'). False when no tunnel is open or the screen did not change.
+   */
+  enterTunnel(): boolean;
+  /** "Wróć do zgłoszenia" on the base: the held run continues. False when none is held. */
+  returnFromTunnel(): boolean;
   /** The saved character record (null before the first save). */
   character(): Character | null;
   /** Plain-data snapshot for assertions. */
@@ -114,6 +123,8 @@ export interface HookDeps {
   resume(): void;
   endTicket(): void;
   resumeTicket(): boolean;
+  openTunnel(): boolean;
+  returnFromTunnel(): boolean;
 }
 
 const NEAR = 90;
@@ -227,6 +238,18 @@ export function installTestHook(deps: HookDeps): void {
     resume: () => deps.resume(),
     endTicket: () => deps.endTicket(),
     resumeTicket: () => deps.resumeTicket(),
+    openTunnel: () => deps.openTunnel(),
+    enterTunnel() {
+      const s = game.state;
+      if (!s?.tunnel) return false;
+      s.tunnel.armed = true;
+      s.player.x = s.tunnel.x;
+      s.player.y = s.tunnel.y;
+      s.player.target = null;
+      game.update(1 / 60);
+      return deps.getScreen() === 'baza';
+    },
+    returnFromTunnel: () => deps.returnFromTunnel(),
     character: () => deps.getMeta().character ?? null,
     snapshot() {
       const s = game.state;

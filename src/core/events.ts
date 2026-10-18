@@ -1,4 +1,6 @@
 export type Side = 'l' | 'r' | 't' | 'b';
+/** Why a service tunnel closed (world/tunnel.ts): the player came back, a second one was cut, he died, the run ended, or the page turned. */
+export type TunnelCloseReason = 'return' | 'second' | 'death' | 'end' | 'page';
 export type Screen = 'title' | 'run' | 'death' | 'baza' | 'ticket' | 'settings' | 'profile';
 
 /** Every event on the bus and its payload. `undefined` payload = no argument. */
@@ -60,6 +62,14 @@ export interface GameEvents {
   'boss:phase': { id: number; family: 'urzadzenia' | 'powiadomienia' | 'wygenerowane'; x: number; y: number };
   /** A boss fell (also reported through enemy:died). */
   'boss:died': { id: number; family: 'urzadzenia' | 'powiadomienia' | 'wygenerowane'; x: number; y: number };
+  /** A service tunnel was cut at world x, y of page `pageIndex` (world/tunnel.ts); render/tunnelFx.ts draws the hole. */
+  'tunnel:opened': { x: number; y: number; pageIndex: number };
+  /** The player walked onto an armed hole: main.ts holds the run and goes to the base. */
+  'tunnel:entered': undefined;
+  /** The player came back from the base into the held run; the tunnel closes right after (`tunnel:closed {reason: 'return'}`). */
+  'tunnel:returned': undefined;
+  /** The tunnel is gone. 'return' and 'second' and 'death' are repaired with tape, 'end' and 'page' are only rubbed out. */
+  'tunnel:closed': { reason: TunnelCloseReason };
 }
 
 type Args<K extends keyof GameEvents> = GameEvents[K] extends undefined ? [] : [GameEvents[K]];
