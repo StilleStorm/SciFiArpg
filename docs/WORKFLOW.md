@@ -3,7 +3,9 @@
 Lead (Fable, the planning model) writes the brief and the phase plan, decides scope, and reviews.
 Builders (Sonnet) build bounded pieces in parallel. The integrator (Opus) owns the seams. The
 voice editor (Opus) owns the Polish. The look reviewer (Sonnet) judges screenshots. Agents are
-defined in `.claude/agents/` and picked by name.
+defined in `.claude/agents/` and picked by name. The `story` agent (Fable) plans storyline,
+chapters, characters and plan decisions when the lead is absent; its benchmark is "did the
+Diablo games have it?".
 
 ## Phases of any feature batch
 1. **Plan** (lead): update DESIGN.md first; the brief is the source of truth, not the chat.
