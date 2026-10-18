@@ -146,6 +146,10 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
   });
   on('enemy:escalated', () => play('escalate'));
   on('enemy:rebutted', () => play('strikeThrough', { when: 0.08 }));
+  // Spor (DESIGN 5.4): the comment is typed in like a footnote; a right reply is struck through (the stamp sound comes from the
+  // 'stamp' event); a wrong one is a crumpled sheet, quietly (the racja it costs sounds through 'player:hit')
+  on('spor:posted', () => play('footnote'));
+  on('spor:answered', (e) => (e.right ? play('strikeThrough') : play('crumple', { gain: 0.5 })));
   on('player:died', () => {
     // no sting: the mechanism slows to a stop (the music reads the dead state), the boss hum runs down
     hum?.stop(2.5);

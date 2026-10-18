@@ -74,6 +74,12 @@ export interface GameEvents {
   'boss:phase': { id: number; family: 'urzadzenia' | 'powiadomienia' | 'wygenerowane'; x: number; y: number };
   /** A boss fell (also reported through enemy:died). */
   'boss:died': { id: number; family: 'urzadzenia' | 'powiadomienia' | 'wygenerowane'; x: number; y: number };
+  /** A boss posted a comment (DESIGN 5.4, combat/spor.ts): `commentKey` and the three reply keys (the types are in `RunState.spor.prompt`). */
+  'spor:posted': { id: number; phase: 1 | 2; commentKey: string; replies: string[] };
+  /** The player picked reply `index` of the prompt; `right` = it matched the comment. */
+  'spor:answered': { id: number; index: number; right: boolean };
+  /** The prompt is gone: answered (right or wrong), run out of time (also when a later phase replaced it), or the boss fell. */
+  'spor:closed': { id: number; reason: 'answered' | 'expired' | 'died' };
   /** A service tunnel was cut at world x, y of page `pageIndex` (world/tunnel.ts); render/tunnelFx.ts draws the hole. */
   'tunnel:opened': { x: number; y: number; pageIndex: number };
   /** The player walked onto an armed hole: main.ts holds the run and goes to the base. */

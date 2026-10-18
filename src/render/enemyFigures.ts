@@ -15,8 +15,8 @@ import { rtOf } from '../enemies/runtime';
 import { t } from '../i18n';
 import { ENEMY_MELEE_MS, LEAN_DEG, LUNGE, attackAt, enemyOffset } from './attackFx';
 import { bubbleShown } from './bubbleFocus';
-import { viewZoom } from './camera';
-import { drawIn, marginNote, stamp } from './ink';
+import { currentViewSize, viewZoom } from './camera';
+import { drawIn, eraseOut, marginNote, stamp } from './ink';
 import { syncStatusMarkers } from './statusMarkers';
 import { el, n2, wobblyCircle } from './svg';
 import { easeOut, tween } from './tween';
@@ -47,6 +47,11 @@ interface FigState {
   bubbleOn: boolean;
   /** The zoom transform the bubble carries (see bubbleTransform). */
   bubbleTf: string;
+  /** The Spor comment bubble over the claim bubble (bosses), its key, whether it is struck, and whether it is being rubbed out. */
+  comment: SVGGElement | null;
+  commentKey: string;
+  commentStruck: boolean;
+  commentLeaving: boolean;
   phase: number;
   flip: number;
   spinning: boolean;
@@ -127,23 +132,47 @@ function bubbleTransform(top: number): string {
 }
 
 function buildBubble(e: Enemy, top: number): SVGGElement {
-  const g = el('g', { class: 'bubble' });
-  if (!e.claim) return g;
-  const lines = wrapClaim(t(e.claim.textKey));
+  if (!e.claim) return el('g', { class: 'bubble' });
+  return bubbleOf(e, top, top, t(e.claim.textKey), e.claim.textKey, 15, 'bubble');
+}
+
+/** The boss's Spor comment: a second bubble stacked above the claim's, two lines at most (DESIGN 5.4). */
+const COMMENT_MAX = 26;
+const COMMENT_MAX_LANDSCAPE = 20;
+function buildComment(e: Enemy, bubbleTop: number, key: string): SVGGElement {
+  const claim = e.claim ? bubbleBox(wrapClaim(t(e.claim.textKey))) : { w: 0, h: 0 };
+  if (currentViewSize().w > currentViewSize().h) {
+    // landscape shows only ~520 units of height: a stack of two bubbles would run off the top of the screen, so the comment
+    // stands beside the claim at the same height, on the side away from the HUD form (right; left when left-handed, the form moves to the right), narrower
+    const text = t(key);
+    const w = bubbleBox(wrapClaim(text, COMMENT_MAX_LANDSCAPE)).w;
+    const side = document.querySelector('.lefty') ? -1 : 1;
+    return bubbleOf(e, bubbleTop, bubbleTop, text, key, COMMENT_MAX_LANDSCAPE, 'bubble comment', side * (claim.w / 2 + 8 + w / 2));
+  }
+  // the claim bubble's top edge, then 10 units for the comment's tail; both scale about the same tail point
+  return bubbleOf(e, bubbleTop - 10 - claim.h, bubbleTop, t(key), key, COMMENT_MAX, 'bubble comment');
+}
+
+/** One speech bubble: a patch of clean paper with a tail at `top`, italic Garamond, scaled about `pivot` when the camera zooms out. */
+function bubbleOf(e: Enemy, top: number, pivot: number, text: string, key: string, max: number, cls: string, dx = 0): SVGGElement {
+  const g = el('g', { class: cls });
+  const lines = wrapClaim(text, max);
   const { w, h } = bubbleBox(lines);
-  const rng = createRng(e.seed ^ 0xb0b).fork(e.claim.textKey);
+  const rng = createRng(e.seed ^ 0xb0b).fork(key);
   const j = (): number => rng.range(-0.9, 0.9);
   const yb = top - 10;
   const yt = yb - h;
-  const x0 = -w / 2;
-  const x1 = w / 2;
+  const x0 = dx - w / 2;
+  const x1 = dx + w / 2;
   const r = 5;
-  const tl = -4;
-  const tr = 3;
+  // the tail points at x = 0 (the figure's axis); a bubble set to one side keeps it on its nearest stretch of edge
+  const ta = Math.min(Math.max(0, x0 + r + 6), x1 - r - 6);
+  const tl = ta - 4;
+  const tr = ta + 3;
   const d =
     `M${n2(x0 + r)} ${n2(yt + j())}L${n2(x1 - r)} ${n2(yt + j())}Q${n2(x1 + j())} ${n2(yt)} ${n2(x1)} ${n2(yt + r)}` +
     `L${n2(x1 + j())} ${n2(yb - r)}Q${n2(x1)} ${n2(yb)} ${n2(x1 - r)} ${n2(yb + j() * 0.5)}` +
-    `L${tr} ${n2(yb)}L${n2(1.5 + j())} ${n2(yb + 8)}L${tl} ${n2(yb)}` +
+    `L${n2(tr)} ${n2(yb)}L${n2(ta + 1.5 + j())} ${n2(yb + 8)}L${n2(tl)} ${n2(yb)}` +
     `L${n2(x0 + r)} ${n2(yb + j() * 0.5)}Q${n2(x0)} ${n2(yb)} ${n2(x0)} ${n2(yb - r)}L${n2(x0 + j())} ${n2(yt + r)}Q${n2(x0)} ${n2(yt)} ${n2(x0 + r)} ${n2(yt)}Z`;
   // the bubble is a patch of clean paper: another figure's strokes never cross the words
   g.append(el('path', { d, 'stroke-width': 1.3, fill: 'var(--paper)' }));
@@ -151,7 +180,7 @@ function buildBubble(e: Enemy, top: number): SVGGElement {
     const text = el(
       'text',
       {
-        x: 0,
+        x: n2(dx),
         y: n2(yt + BUBBLE_LINE - 0.5 + i * BUBBLE_LINE),
         'text-anchor': 'middle',
         'font-size': BUBBLE_FONT,
@@ -162,7 +191,7 @@ function buildBubble(e: Enemy, top: number): SVGGElement {
     g.append(text);
   });
   g.dataset['box'] = `${n2(x0)} ${n2(yt)} ${n2(w)} ${n2(h)}`;
-  const tf = bubbleTransform(top);
+  const tf = bubbleTransform(pivot);
   if (tf) g.setAttribute('transform', tf);
   return g;
 }
@@ -283,6 +312,10 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
     claimSig: claimSig(e),
     bubbleOn: true,
     bubbleTf: bubbleTransform(bubbleTop),
+    comment: null,
+    commentKey: '',
+    commentStruck: false,
+    commentLeaving: false,
     phase: 0,
     flip: 1,
     spinning: false,
@@ -297,6 +330,67 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   if (e.claim?.struck) strikeBubble(bubble, false);
   states.set(g, st);
   return st;
+}
+
+// ---------- the Spor comment (DESIGN 5.4) ----------
+
+/** What the bus said about each boss's comment; the figure's patch turns it into a bubble (bindEnemyFx fills it). */
+interface CommentCmd {
+  key: string;
+  struck: boolean;
+  closed: 'answered' | 'expired' | 'died' | null;
+}
+const comments = new Map<number, CommentCmd>();
+/** A comment that was answered stays this long, struck through, before it is rubbed out (the reply strip stays as long). */
+const ANSWERED_HOLD_MS = 600;
+const ERASE_MS = 260;
+
+function syncComment(e: Enemy, st: FigState): void {
+  const c = comments.get(e.id);
+  if (!c) {
+    if (st.comment) {
+      st.comment.remove();
+      st.comment = null;
+      st.commentLeaving = false;
+    }
+    return;
+  }
+  if (st.comment && st.commentKey !== c.key) {
+    // a later comment replaces the one still up
+    st.comment.remove();
+    st.comment = null;
+    st.commentLeaving = false;
+  }
+  if (!st.comment) {
+    if (c.closed) {
+      comments.delete(e.id);
+      return;
+    }
+    st.comment = buildComment(e, st.bubbleTop, c.key);
+    st.commentKey = c.key;
+    st.commentStruck = false;
+    st.commentLeaving = false;
+    st.over.append(st.comment);
+    drawIn(st.comment, 240);
+  }
+  if (c.struck && !st.commentStruck) {
+    st.commentStruck = true;
+    strikeBubble(st.comment, true);
+  }
+  if (c.closed && !st.commentLeaving) {
+    st.commentLeaving = true;
+    const node = st.comment;
+    const finish = (): void => {
+      node.remove();
+      if (st.comment === node) {
+        st.comment = null;
+        st.commentLeaving = false;
+      }
+      if (comments.get(e.id) === c) comments.delete(e.id);
+    };
+    if (c.closed === 'died') finish();
+    else eraseOut(node, ERASE_MS, c.closed === 'answered' ? ANSWERED_HOLD_MS : 0, finish);
+  }
 }
 
 const claimSig = (e: Enemy): string => `${e.claim?.textKey ?? ''}|${e.claim?.struck ? 1 : 0}`;
@@ -474,7 +568,12 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
     st.bubbleTf = tf;
     if (tf) st.bubble.setAttribute('transform', tf);
     else st.bubble.removeAttribute('transform');
+    if (st.comment) {
+      if (tf) st.comment.setAttribute('transform', tf);
+      else st.comment.removeAttribute('transform');
+    }
   }
+  if (e.boss) syncComment(e, st);
 
   const on = bubbleShown(e);
   if (on !== st.bubbleOn) {
@@ -504,6 +603,17 @@ export function bindEnemyFx(bus: Bus): () => void {
   const rng = createRng(0xe4e);
   const offs = [
     bus.on('enemy:offTopic', (ev) => marginNote(t('combat.offTopic'), ev.x + 6, ev.y - 34, rng.range(-6, 4), 1100)),
+    bus.on('spor:posted', (ev) => comments.set(ev.id, { key: ev.commentKey, struck: false, closed: null })),
+    bus.on('spor:answered', (ev) => {
+      const c = comments.get(ev.id);
+      if (c && ev.right) c.struck = true;
+    }),
+    bus.on('spor:closed', (ev) => {
+      const c = comments.get(ev.id);
+      if (c) c.closed = ev.reason;
+    }),
+    bus.on('run:started', () => comments.clear()),
+    bus.on('base:entered', () => comments.clear()),
     bus.on('enemy:escalated', (ev) => {
       stamp(t('combat.escalation'), ev.x, ev.y - 30, { fontSize: 10, ttl: 800, rotation: rng.range(-8, 8) });
     }),

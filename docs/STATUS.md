@@ -86,8 +86,11 @@ joystick/tap steering (§2), editorial rules (§12.1).
 3. (done) Tunel serwisowy with exact-state return; Android back button opens the pause sheet.
 4. (done) Walkable base page per planet (§4.1).
 5. (done) Aiming; the fourth and fifth skills (§10.1).
-6. **Next:** Spór for bosses (DESIGN §5.4). Own sound recipes for the ten new skills (they borrow a
-   sibling's recipe, audio/recipes.ts HERO_SKILL_SOUNDS).
+6. (done) Spór for bosses (two comments per boss, margin replies, 5 s window) and own sound recipes
+   for the ten newer skills. Spór strings still need the voice pass.
+6a. **Next:** the full-game plan is proposed in docs/PLAN.md and docs/SKILLS.md and awaits the
+   player's answers to the open questions; then it moves into DESIGN and the slices start
+   (slice 1: hero folder refactor + registry + primitives, no behaviour change).
 7. Przesyłka / paczkomat deliveries (§7), tap an item on the ground to see its card first (§2).
 7a. MVP shape (decided 2026-10-18): a planet sequence of 5–6 tickets on one case file with the
     boss family and clause mix changing and a final ticket that closes the case; difficulty

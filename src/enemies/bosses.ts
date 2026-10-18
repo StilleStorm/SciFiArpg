@@ -5,6 +5,7 @@
  * total blocks it for 3 s. The grid is a 3x3 of hatched squares drawn around it (render/enemyFigures.ts).
  * Hipoteza: e = 0.3 until the player stands inside its outline for 3 s; then e = 1 and attacks come 1.5x faster.
  */
+import { SPOR_FIRST_S, postSpor } from '../combat/spor';
 import { applyStatus, isSilenced, isStunned } from '../combat/status';
 import type { Bus } from '../core/events';
 import type { Enemy } from '../entities/types';
@@ -105,6 +106,7 @@ export function makeBoss(id: number, x: number, y: number, seed: number, family:
 /** Put a boss at (x, y) without any placement checks (tests, screenshots). */
 export function placeBoss(s: RunState, family: FamilyId, x: number, y: number): Enemy {
   const e = makeBoss(nextId(s), x, y, s.rngs.spawn.int(1, 1e6), family, s.rngs.spawn);
+  rtOf(e).sporAt = s.time + SPOR_FIRST_S;
   s.enemies.push(e);
   return e;
 }
@@ -123,6 +125,7 @@ export function spawnBoss(s: RunState, family: FamilyId | string): Enemy | null 
     resolveMove(s.page, e, e.r + 80);
     if (Math.hypot(e.x - before.x, e.y - before.y) > 1) continue;
     e.home = { x, y };
+    rtOf(e).sporAt = s.time + SPOR_FIRST_S;
     s.enemies.push(e);
     return e;
   }
@@ -134,6 +137,11 @@ export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
   const rt = rtOf(e);
   const p = s.player;
   const boss = BOSS_OF[e.family];
+  // the first comment (DESIGN 5.4): 1.5 s after the boss is on the page, even if it is stunned
+  if (rt.sporAt !== undefined && s.time >= rt.sporAt) {
+    rt.sporAt = undefined;
+    postSpor(s, bus, e, 1);
+  }
   if (isStunned(e)) return;
   if (boss === 'prototyp') {
     if (rt.phase === 1 && e.hp <= e.hpMax / 2) {
@@ -141,6 +149,7 @@ export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
       rt.speedMul = 1.45;
       bus.emit('footnote', { text: t('enemies.boss.prototyp.half') });
       bus.emit('boss:phase', { id: e.id, family: e.family, x: e.x, y: e.y });
+      postSpor(s, bus, e, 2);
     }
   } else if (boss === 'weryfikacja') {
     const g = rt.grid;
@@ -155,6 +164,7 @@ export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
         applyStatus(e, 'zablokowany', GRID_BLOCK_S, p.id);
         bus.emit('footnote', { text: t('enemies.boss.weryfikacja.solved') });
         bus.emit('boss:phase', { id: e.id, family: e.family, x: e.x, y: e.y });
+        postSpor(s, bus, e, 2);
       }
     }
     if (!isSilenced(e) && !s.law.botTime) {
@@ -181,6 +191,7 @@ export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
         bus.emit('footnote', { text: t('enemies.boss.hipoteza.confirmed') });
         bus.emit('stamp', { text: t('combat.verified'), x: e.x, y: e.y - 70 });
         bus.emit('boss:phase', { id: e.id, family: e.family, x: e.x, y: e.y });
+        postSpor(s, bus, e, 2);
       }
     } else e.existence = 1;
   }

@@ -131,18 +131,66 @@
     "prototyp": {
       "name": "Prototyp",
       "meet": "Napotkano Prototyp. Urządzenie zawiera wszystkie części, także te, które w serii usunięto.",
-      "half": "Prototyp utracił nogę. Producent nie przewidział tej funkcji."
+      "half": "Prototyp utracił nogę. Producent nie przewidział tej funkcji.",
+      "spor1": {
+        "comment": "Mam wszystkie części. Nic nie może mnie zepsuć.",
+        "reply": {
+          "mechaniczny": "Każda część ma miejsce, w które można uderzyć.",
+          "regulaminowy": "Części prototypu są wyłączone z gwarancji.",
+          "egzystencjalny": "Zbiór wszystkich części nie jest urządzeniem."
+        }
+      },
+      "spor2": {
+        "comment": "Jestem wersją ostateczną. Zmian nie przyjmuję.",
+        "reply": {
+          "mechaniczny": "Zmianę można wprowadzić młotkiem.",
+          "regulaminowy": "Wersja ostateczna wymaga podpisu. Podpisu brak.",
+          "egzystencjalny": "Ostateczne jest tylko to, czego już nie ma."
+        }
+      }
     },
     "weryfikacja": {
       "name": "Weryfikacja",
       "meet": "Napotkano Weryfikację. Pyta, czy użytkownik jest robotem. Odpowiedzi „tak” nie przewidziano.",
       "hint": "Zaznacz wszystkie kratki z hydrantami.",
-      "solved": "Wszystkie hydranty zaznaczono. Weryfikację wstrzymano."
+      "solved": "Wszystkie hydranty zaznaczono. Weryfikację wstrzymano.",
+      "spor1": {
+        "comment": "Potwierdź, że nie jesteś robotem. Pole obowiązkowe.",
+        "reply": {
+          "mechaniczny": "Kratki są z papieru i można je przebić.",
+          "regulaminowy": "Pole obowiązkowe wymaga podstawy w regulaminie.",
+          "egzystencjalny": "Nie wiem, czy jestem. Zaznaczam kratkę."
+        }
+      },
+      "spor2": {
+        "comment": "Weryfikacja zakończona. Wynik niejednoznaczny.",
+        "reply": {
+          "mechaniczny": "Wynik poprawia się uderzeniem w obudowę czytnika.",
+          "regulaminowy": "Od niejednoznacznego wyniku przysługuje odwołanie.",
+          "egzystencjalny": "Niejasny wynik dowodzi, że weryfikacji nie było."
+        }
+      }
     },
     "hipoteza": {
       "name": "Hipoteza",
       "meet": "Napotkano Hipotezę. Istnieje w stopniu 0,3. Aby ją potwierdzić, należy stanąć w jej obrysie.",
-      "confirmed": "Hipotezę potwierdzono. Nie jest to dobra wiadomość."
+      "confirmed": "Hipotezę potwierdzono. Nie jest to dobra wiadomość.",
+      "spor1": {
+        "comment": "Istnieję według 87% użytkowników. To większość.",
+        "reply": {
+          "mechaniczny": "Masa zależy od budowy, nie od liczby głosów.",
+          "regulaminowy": "Istnienie większościowe nie figuruje w regulaminie.",
+          "egzystencjalny": "Pozostałe 13% widzi w tym miejscu pusty obrys."
+        }
+      },
+      "spor2": {
+        "comment": "Mam dwanaście palców. Tak mnie wygenerowano.",
+        "reply": {
+          "mechaniczny": "Dwanaście palców to dwanaście miejsc do trafienia.",
+          "regulaminowy": "Liczba palców nie jest uregulowana w standardach.",
+          "egzystencjalny": "Liczba palców zależy od tego, kto je liczy."
+        }
+      }
     }
   },
   "summon": {

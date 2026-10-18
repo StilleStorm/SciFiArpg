@@ -61,6 +61,8 @@ export interface EnemyRt {
   /** Hipoteza: seconds the player has stood in the outline, and whether it is confirmed. */
   confirm: number;
   confirmed: boolean;
+  /** Boss: run time at which the first Spor comment is posted (DESIGN 5.4); absent once posted. */
+  sporAt?: number;
 }
 
 export function newRt(): EnemyRt {

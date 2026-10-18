@@ -27,6 +27,7 @@ import { applySteering, currentOrient, effectiveSteering, initLayout, lockOrient
 import { bindLawSheets } from './ui/lawSheets';
 import { openLoadout, type LoadoutSheet } from './ui/loadout';
 import { createPads } from './ui/pads';
+import { createSpor } from './ui/spor';
 import { createPauseSheet } from './ui/pause';
 import { mountProfile } from './ui/profile';
 import { createSettings } from './ui/settings';
@@ -99,6 +100,7 @@ const game = createGame(stage, bus, camera, input, bounds);
 const hud = createHud(stage.ui, () => game.hero.requestUpdate(), () => pauseRun(), () => openTunnelNow());
 const footnotes = createFootnotes(stage.ui);
 const pads = createPads(stage.ui, bus);
+const sporStrip = createSpor(stage.ui, bus, () => game.state); // the reply strip of a boss argument (hidden with the footnotes)
 const title = createTitle(stage.ui, () => go(meta.heroId ? 'baza' : 'profile'));
 const freshSeed = (): number => (Date.now() ^ Math.floor(Math.random() * 0x100000000)) >>> 0;
 /** The planet of the next ticket: chosen when the previous ticket ended (a bookmark or a held run overrides it). */
@@ -160,6 +162,7 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
   hud.el.classList.toggle('hidden', !walkable);
   footnotes.el.classList.toggle('hidden', !walkable);
   pads.classList.toggle('hidden', !walkable);
+  sporStrip.el.classList.toggle('hidden', !walkable);
   pads.classList.toggle('in-base', next === 'baza');
   footnotes.closeHistory(); // the history sheet belongs to the screen it was opened on (the notes themselves may run on)
   if (next !== 'title') title.hide();

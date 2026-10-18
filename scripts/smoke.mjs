@@ -660,6 +660,69 @@ try {
     return b ? { id: b.id, family: b.family } : null;
   });
   check('the boss spawns on the last page', boss !== null, boss ? boss.family : 'none');
+
+  // ---------- 5a. Spór: the boss argues (DESIGN 5.4) ----------
+  if (boss) {
+    const sporOpen = async (phase, tries = 60) => {
+      for (let i = 0; i < tries; i++) {
+        const info = await page.evaluate(() => window.__game.spor.info());
+        if (info?.open && info.phase === phase) return info;
+        if (phase === 2) {
+          // Weryfikacja: stand on a hydrant square; Hipoteza: stand in the outline; Prototyp: knock it below half racja
+          await page.evaluate((id) => {
+            const s = window.__game.state();
+            const b = s?.enemies.find((e) => e.id === id);
+            if (!s || !b) return;
+            s.player.hp = s.player.hpMax;
+            const grid = b.rt?.grid;
+            if (grid) {
+              const c = grid.cells[0];
+              window.__game.placePlayer(grid.cx + ((c % 3) - 1) * 52, grid.cy + (Math.floor(c / 3) - 1) * 52);
+            } else if (b.family === 'wygenerowane') window.__game.placePlayer(b.x + 10, b.y + 10);
+            else if (b.hp > b.hpMax / 2 + 1) window.__game.enemies.hit(id, 'regulaminowy', 30);
+          }, boss.id);
+        }
+        await sleep(200);
+      }
+      return null;
+    };
+    const first = await sporOpen(1, 40);
+    check('the boss posts its first comment', first !== null && first.replies.length === 3, first ? first.commentKey : 'none');
+    const dom1 = await page.evaluate(() => ({ buttons: document.querySelectorAll('.spor-reply').length, bubble: document.querySelectorAll('.bubble.comment').length }));
+    check('three reply buttons and a comment bubble are on the page', dom1.buttons === 3 && dom1.bubble === 1, JSON.stringify(dom1));
+    await shot('09a-spor-prompt');
+    if (first) {
+      const wrong = [0, 1, 2].find((i) => i !== first.correct);
+      const hp0 = await page.evaluate(() => {
+        const s = window.__game.state();
+        s.player.hp = s.player.hpMax;
+        return s.player.hpMax;
+      });
+      await page.click(`.spor-reply[data-reply="${wrong}"]`);
+      await sleep(150);
+      const after = await page.evaluate(() => ({ hp: window.__game.state().player.hp, open: window.__game.spor.info()?.open, notes: window.__game.notes().map((n) => n.text), struck: document.querySelectorAll('.spor-reply.wrong').length }));
+      check('a wrong reply costs racja, closes the prompt and prints the footnote', after.hp < hp0 && after.open === false && after.notes.some((n) => n.includes('nie na temat')), `${hp0} -> ${after.hp}`);
+      check('the wrong reply costs 10% of the racja maximum', hp0 - after.hp === Math.round(hp0 * 0.1), `${hp0} -> ${after.hp}`);
+      check('the wrong reply is struck where it stands', after.struck === 1);
+      await shot('09b-spor-wrong');
+      await sleep(1100);
+      const gone = await page.evaluate(() => document.querySelectorAll('.spor-reply').length);
+      check('the strip is removed after the answer', gone === 0, String(gone));
+    }
+    const second = await sporOpen(2, 60);
+    check('the second comment comes with the boss phase', second !== null, second ? second.commentKey : 'none');
+    if (second) {
+      await page.evaluate(() => (window.__game.state().player.hp = window.__game.state().player.hpMax));
+      await page.click(`.spor-reply[data-reply="${second.correct}"]`);
+      await sleep(250);
+      const won = await page.evaluate(() => window.__game.spor.info());
+      const struck = await page.evaluate(() => document.querySelectorAll('.bubble.comment .strike').length);
+      check('the right reply opens the x2 window', won !== null && won.window > 0 && won.open === false, won ? won.window.toFixed(2) : 'none');
+      check('the right reply strikes the comment through', struck === 1, String(struck));
+      await shot('09c-spor-right');
+      await sleep(900);
+    }
+  }
   let bossDead = false;
   for (let i = 0; i < 60 && boss; i++) {
     const alive = await page.evaluate((id) => {

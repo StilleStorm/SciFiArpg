@@ -1,4 +1,5 @@
 /** Test-hook functions for enemies (window.__game.enemies): shots and tests put families, bosses and statuses on the page. */
+import { answerSpor } from '../combat/spor';
 import { applyStatus, type StatusKind } from '../combat/status';
 import type { Bus } from '../core/events';
 import type { Enemy } from '../entities/types';
@@ -83,3 +84,42 @@ export function createEnemyHook(getState: () => RunState | null, bus: Bus): Enem
   };
 }
 
+/** The boss argument (combat/spor.ts) for the test hook: `window.__game.spor`. */
+export interface SporHook {
+  /** Pick reply `index` as the strip's button would. */
+  answer(index: 0 | 1 | 2): 'right' | 'wrong' | 'none';
+  /** The prompt and the window, or null before any boss posted. `open` = a comment is up; `window` = seconds of x2 left. */
+  info(): {
+    open: boolean;
+    boss: number;
+    phase: 1 | 2;
+    ttl: number;
+    window: number;
+    correct: 0 | 1 | 2 | null;
+    commentKey: string | null;
+    replies: { textKey: string; type: DamageType }[];
+  } | null;
+}
+
+export function createSporHook(getState: () => RunState | null, bus: Bus): SporHook {
+  return {
+    answer(index) {
+      const s = getState();
+      return s ? answerSpor(s, bus, index) : 'none';
+    },
+    info() {
+      const sp = getState()?.spor;
+      if (!sp) return null;
+      return {
+        open: sp.prompt !== null,
+        boss: sp.bossId,
+        phase: sp.phase,
+        ttl: sp.ttl,
+        window: sp.window,
+        correct: sp.prompt?.correct ?? null,
+        commentKey: sp.prompt?.commentKey ?? null,
+        replies: sp.prompt ? sp.prompt.replies.map((r) => ({ textKey: r.textKey, type: r.type })) : [],
+      };
+    },
+  };
+}

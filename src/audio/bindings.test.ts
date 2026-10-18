@@ -103,6 +103,15 @@ describe('audio bindings', () => {
     }
   });
 
+  it('a boss comment is typed in like a footnote; a right reply is struck through and stamped, a wrong one is a quiet crumple', () => {
+    const { bus } = setup();
+    bus.emit('spor:posted', { id: 1, phase: 1, commentKey: 'k', replies: ['a', 'b', 'c'] });
+    bus.emit('spor:answered', { id: 1, index: 0, right: true });
+    bus.emit('stamp', { text: 'x', x: 0, y: 0 });
+    bus.emit('spor:answered', { id: 1, index: 1, right: false });
+    expect(names()).toEqual(['footnote', 'strikeThrough', 'stamp', 'crumple']);
+  });
+
   it('the Nalesnik slaps when it flips; no other hero does', () => {
     for (const hero of ['pralka', 'nalesnik'] as const) {
       played.length = 0;

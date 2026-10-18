@@ -12,7 +12,7 @@ describe('recipes follow DESIGN 14', () => {
 
   it('every combat recipe has a body layer: a 60-140 Hz thump or low pluck of 80-200 ms', () => {
     const combat = SFX_NAMES.filter((n) => recipes[n]?.combat);
-    expect(combat.length).toBeGreaterThanOrEqual(19);
+    expect(combat.length).toBeGreaterThanOrEqual(29);
     for (const name of combat) {
       const bodies = bodyLayers(recipes[name] as Recipe);
       expect(bodies.length, name).toBeGreaterThan(0);
@@ -56,18 +56,37 @@ describe('recipes follow DESIGN 14', () => {
     expect(hiss?.gain).toBeLessThan(0.12);
   });
 
-  it('every hero has three distinct skill sounds, all combat recipes, fifteen in all', () => {
+  it('every hero has five distinct skill sounds, all combat recipes, twenty-five in all', () => {
     const heroes: HeroId[] = ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'];
     const all = new Set<string>();
     for (const h of heroes) {
-      const trio = HERO_SKILL_SOUNDS[h];
-      expect(new Set(trio).size).toBe(3);
-      for (const n of trio) {
+      const five = HERO_SKILL_SOUNDS[h];
+      expect(five).toHaveLength(5);
+      expect(new Set(five).size, h).toBe(5);
+      for (const n of five) {
         expect(recipes[n]?.combat, n).toBe(true);
+        expect(validateRecipe(n, recipes[n] as Recipe), n).toEqual([]);
         all.add(n);
       }
     }
-    expect(all.size).toBe(15);
+    expect(all.size).toBe(25);
+  });
+
+  it('the fourth and fifth skills each have their own recipe, with a body and no raw tone', () => {
+    const own = [
+      'pralkaDrum', 'pralkaPersona', 'konsCase', 'konsHangup', 'petlDejaVu', 'petlLaunch', 'kartoScale', 'kartoLegend', 'nalesTide', 'nalesMoon',
+    ];
+    const heroes: HeroId[] = ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'];
+    heroes.forEach((h, i) => {
+      expect(HERO_SKILL_SOUNDS[h][3]).toBe(own[i * 2]);
+      expect(HERO_SKILL_SOUNDS[h][4]).toBe(own[i * 2 + 1]);
+    });
+    for (const n of own) {
+      const r = recipes[n] as Recipe;
+      expect(bodyLayers(r).length, n).toBeGreaterThan(0);
+      expect(r.layers.some((l) => l.kind === 'sine'), n).toBe(false);
+      expect(recipeLength(r), n).toBeLessThan(1);
+    }
   });
 
   it('every family has its own flavour; the three differ', () => {

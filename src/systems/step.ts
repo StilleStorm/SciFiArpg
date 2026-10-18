@@ -1,3 +1,4 @@
+import { tickSpor } from '../combat/spor';
 import { tickStatuses } from '../combat/status';
 import type { Bus } from '../core/events';
 import { createGrid, type Enemy } from '../entities';
@@ -35,6 +36,7 @@ export function createSim(bus: Bus) {
       const undoLaw = lawPre(s);
       tickStatuses(s.player, dt);
       for (const e of s.enemies) tickStatuses(e, dt);
+      tickSpor(s, bus, dt);
       movePlayer(s, bus, dt);
       grid.clear();
       for (const e of s.enemies) grid.insert(e);

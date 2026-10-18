@@ -215,7 +215,7 @@ export const RECIPES = {
     pluck(1480, 0.08, 0.3, { delay: 0.02, bright: 7000 }),
   ], 0.15, 4),
 
-  // ---------- hero skills (three each, from the same recipe) ----------
+  // ---------- hero skills (five each; the first three in DESIGN 14.3, the fourth and fifth of DESIGN 10.1) ----------
   /** Pralka: drum spin. */
   pralkaSpin: combat([
     click(3000, 0.4),
@@ -241,6 +241,24 @@ export const RECIPES = {
     thump(105, 0.05, 0.3, { delay: 0.16, role: 'tail' }),
     noise(900, 0.28, 0.2, { q: 1, delay: 0.04, role: 'tail' }),
   ], 0.2, 7),
+  /** Pralka: Otwarcie bębna, a latch click, a hollow thump from the drum, wet laundry sloshing out. */
+  pralkaDrum: combat([
+    click(2800, 0.5),
+    click(1900, 0.4, { delay: 0.03 }),
+    thump(84, 0.16, 0.9, { delay: 0.03, pitchDrop: 0.3 }),
+    noise(320, 0.12, 0.35, { q: 5, delay: 0.03, role: 'tail' }),
+    noise(700, 0.45, 0.3, { q: 0.8, attack: 0.07, pitchDrop: 0.6, delay: 0.08, role: 'tail' }),
+    { ...click(1500, 0.22, { q: 2, decay: 0.012, role: 'tail' }), repeat: 9, spread: 0.45, delay: 0.14 },
+  ], 0.25, 7),
+  /** Pralka: Wniosek o osobowość, the form stamped, a short paper slide, a pencil section sign. */
+  pralkaPersona: combat([
+    click(3000, 0.4),
+    thump(72, 0.13, 0.85, { pitchDrop: 0.35 }),
+    noise(650, 0.05, 0.34, { q: 1 }),
+    noise(2600, 0.2, 0.22, { q: 0.8, attack: 0.05, pitchDrop: 0.45, delay: 0.1, role: 'tail' }),
+    noise(4300, 0.03, 0.22, { q: 2.2, delay: 0.3, role: 'tail' }),
+    noise(4600, 0.03, 0.2, { q: 2.2, delay: 0.35, role: 'tail' }),
+  ], 0.25, 7),
   /** Konsultant: a hold-beep stab. */
   konsBeep: combat([
     click(2200, 0.4),
@@ -261,6 +279,24 @@ export const RECIPES = {
     pluck(120, 0.12, 0.9, { role: 'body', bright: 700 }),
     thump(100, 0.1, 0.5, { delay: 0.045 }),
     noise(1400, 0.1, 0.18, { q: 1, delay: 0.05, role: 'tail' }),
+  ], 0.2, 7),
+  /** Konsultant: Numer sprawy, two handset key chirps, then the case dropped into a drawer. */
+  konsCase: combat([
+    click(2400, 0.4),
+    pluck(1650, 0.07, 0.3, { delay: 0.005, bright: 7000 }),
+    pluck(2090, 0.07, 0.28, { delay: 0.08, bright: 7000 }),
+    thump(78, 0.15, 0.95, { delay: 0.17, pitchDrop: 0.3 }),
+    noise(500, 0.06, 0.35, { q: 1, delay: 0.17 }),
+    noise(2400, 0.16, 0.2, { q: 0.8, attack: 0.03, pitchDrop: 0.4, delay: 0.2, role: 'tail' }),
+  ], 0.2, 7),
+  /** Konsultant: Rozłączenie, a short tone cut dead, the receiver dropped and bouncing once. */
+  konsHangup: combat([
+    pluck(1040, 0.09, 0.3, { bright: 4000, role: 'transient' }),
+    click(3200, 0.6, { delay: 0.1 }),
+    thump(110, 0.12, 0.9, { delay: 0.12, pitchDrop: 0.2 }),
+    { ...noise(1800, 0.012, 0.28, { q: 3, role: 'tail' }), repeat: 6, spread: 0.16, delay: 0.12 },
+    thump(130, 0.05, 0.3, { delay: 0.26, role: 'tail' }),
+    click(2200, 0.3, { delay: 0.26 }),
   ], 0.2, 7),
   /** Petlowiec: two overlapping remarks. */
   petlRemarks: combat([
@@ -288,6 +324,25 @@ export const RECIPES = {
     thump(70, 0.18, 1.0, { delay: 0.32, pitchDrop: 0.3 }),
     thump(48, 0.25, 0.55, { delay: 0.325, pitchDrop: 0.1, role: 'sub' }),
   ], 0.25, 7),
+  /** Petlowiec: Już to było, a tape rewind grain climbing, a splice click, the same thump said twice. */
+  petlDejaVu: combat([
+    noise(1400, 0.3, 0.35, { q: 2, attack: 0.01, pitchDrop: -1.4 }),
+    { ...click(3600, 0.3, { decay: 0.006, role: 'tail' }), repeat: 16, spread: 0.28 },
+    click(2200, 0.6, { delay: 0.3 }),
+    noise(1500, 0.02, 0.35, { q: 1.5, delay: 0.3 }),
+    thump(88, 0.14, 0.9, { delay: 0.32 }),
+    thump(88, 0.1, 0.45, { delay: 0.45, role: 'tail' }),
+    noise(2400, 0.1, 0.22, { q: 1.2, pitchDrop: 0.7, delay: 0.45, role: 'tail' }),
+  ], 0.25, 7),
+  /** Petlowiec: Odłożony start, a timer ticking faster, then a soft landing. */
+  petlLaunch: combat([
+    { ...click(2600, 0.3, { q: 2, decay: 0.006 }), repeat: 5, spread: 0.4 },
+    { ...click(2900, 0.32, { q: 2, decay: 0.006 }), repeat: 6, spread: 0.18, delay: 0.42 },
+    thump(66, 0.19, 0.95, { delay: 0.64, attack: 0.012, pitchDrop: 0.2 }),
+    thump(46, 0.3, 0.5, { delay: 0.645, attack: 0.012, pitchDrop: 0.1, role: 'sub' }),
+    noise(300, 0.2, 0.3, { q: 1, delay: 0.64, role: 'tail' }),
+    { ...noise(2000, 0.012, 0.2, { q: 0.8, role: 'tail' }), repeat: 6, spread: 0.15, delay: 0.68 },
+  ], 0.3, 7),
   /** Kartograf: theodolite click-shot. */
   kartoClick: combat([
     click(3200, 0.7),
@@ -315,6 +370,24 @@ export const RECIPES = {
     thump(110, 0.1, 0.85, { delay: 0.03 }),
   ], 0.2, 7),
 
+  /** Kartograf: Skala 1:1, a ruler snap, then a long steady filtered hiss of the survey line. */
+  kartoScale: combat([
+    click(3400, 0.7),
+    click(1800, 0.45, { delay: 0.012 }),
+    thump(100, 0.12, 0.9, { delay: 0.012 }),
+    noise(2800, 0.6, 0.3, { q: 8, attack: 0.03, delay: 0.03, role: 'tail' }),
+    noise(5400, 0.5, 0.12, { q: 6, attack: 0.05, delay: 0.05, role: 'tail' }),
+    { ...click(3000, 0.22, { decay: 0.006, role: 'tail' }), repeat: 20, spread: 0.5, delay: 0.06 },
+  ], 0.3, 7),
+  /** Kartograf: Legenda, a pencil scribble filling in the legend, then the pin. */
+  kartoLegend: combat([
+    click(2000, 0.35),
+    { ...noise(4300, 0.014, 0.3, { q: 2.2, role: 'tail' }), repeat: 14, spread: 0.4, delay: 0.03 },
+    click(3000, 0.5, { delay: 0.44 }),
+    pluck(2600, 0.2, 0.22, { delay: 0.445, bright: 9000 }),
+    thump(108, 0.1, 0.85, { delay: 0.45 }),
+    noise(3800, 0.07, 0.35, { q: 1.2, pitchDrop: 0.5, delay: 0.45, role: 'tail' }),
+  ], 0.25, 7),
   /** Nalesnik: the auto-attack, the disc slapped down on the other side. */
   nalesSlap: combat([
     click(2600, 0.5),
@@ -347,6 +420,24 @@ export const RECIPES = {
     { ...noise(3600, 0.012, 0.3, { q: 1.2, role: 'tail' }), repeat: 14, spread: 0.3, delay: 0.06 },
   ], 0.25, 7),
 
+  /** Nalesnik: Pływy, a slow water swell with a low body, the ring runs out, the water draws back. */
+  nalesTide: combat([
+    click(1400, 0.3),
+    noise(500, 0.45, 0.35, { q: 0.7, attack: 0.3, pitchDrop: -1, role: 'tail' }),
+    noise(110, 0.6, 0.45, { q: 3, attack: 0.3, role: 'body' }),
+    thump(70, 0.18, 0.95, { delay: 0.32, pitchDrop: 0.25 }),
+    noise(1400, 0.4, 0.28, { q: 0.8, attack: 0.02, pitchDrop: 0.6, delay: 0.38, role: 'tail' }),
+    { ...click(1700, 0.2, { q: 2, decay: 0.012, role: 'tail' }), repeat: 8, spread: 0.3, delay: 0.4 },
+  ], 0.3, 7),
+  /** Nalesnik: Księżyc, a low pluck with a long ring, a faint high click. */
+  nalesMoon: combat([
+    click(5200, 0.2),
+    pluck(90, 0.2, 0.9, { role: 'body', bright: 600 }),
+    thump(78, 0.12, 0.6, { pitchDrop: 0.2 }),
+    pluck(180, 0.9, 0.35, { delay: 0.005, bright: 900, role: 'tail' }),
+    pluck(270, 0.6, 0.15, { delay: 0.01, bright: 1200, role: 'tail' }),
+  ], 0.3, 7),
+
   // ---------- flavours: laid over hit / crit / kill by the enemy family ----------
   /** Devices clank: inharmonic metal. */
   flavDevice: light([
@@ -376,14 +467,13 @@ for (const [name, trim] of Object.entries(TRIMS)) {
 export type SfxName = keyof typeof RECIPES;
 export const SFX_NAMES = Object.keys(RECIPES) as SfxName[];
 
-/** Which three sounds each hero's skills make, by slot. */
-/** One sound per skill, indexed by SkillIndex (DESIGN 10.1); the 4th and 5th borrow a sibling's recipe until their own is written. */
+/** One sound per skill, indexed by SkillIndex (DESIGN 10.1); five distinct combat recipes per hero. */
 export const HERO_SKILL_SOUNDS: Record<HeroId, readonly [SfxName, SfxName, SfxName, SfxName, SfxName]> = {
-  pralka: ['pralkaSpin', 'pralkaFoam', 'pralkaDrag', 'pralkaDrag', 'pralkaFoam'],
-  konsultant: ['konsBeep', 'konsRedirect', 'konsHeadset', 'konsBeep', 'konsHeadset'],
-  petlowiec: ['petlRemarks', 'petlSplice', 'petlRewind', 'petlRewind', 'petlSplice'],
-  kartograf: ['kartoClick', 'kartoHum', 'kartoPin', 'kartoHum', 'kartoPin'],
-  nalesnik: ['nalesOrbita', 'nalesGravity', 'nalesFlag', 'nalesGravity', 'nalesOrbita'],
+  pralka: ['pralkaSpin', 'pralkaFoam', 'pralkaDrag', 'pralkaDrum', 'pralkaPersona'],
+  konsultant: ['konsBeep', 'konsRedirect', 'konsHeadset', 'konsCase', 'konsHangup'],
+  petlowiec: ['petlRemarks', 'petlSplice', 'petlRewind', 'petlDejaVu', 'petlLaunch'],
+  kartograf: ['kartoClick', 'kartoHum', 'kartoPin', 'kartoScale', 'kartoLegend'],
+  nalesnik: ['nalesOrbita', 'nalesGravity', 'nalesFlag', 'nalesTide', 'nalesMoon'],
 };
 
 export const FAMILY_FLAVOUR = {

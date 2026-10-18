@@ -14,5 +14,10 @@
     "przeczytane": "przeczytane, bez odpowiedzi",
     "do_weryfikacji": "do weryfikacji"
   },
-  "mark": "!"
+  "mark": "!",
+  "spor": {
+    "offTopic": "Odpowiedź nie na temat.",
+    "stamp": "odpowiedziano",
+    "label": "Odpowiedzi na komentarz"
+  }
 }

@@ -205,3 +205,5 @@ bubble) on `spor:posted`, strikes it through on a right answer and erases it on 
 `spor:posted` -> `footnote` key click, right -> `strikeThrough` + `stamp`, wrong -> `paperTear` light.
 Hook (`enemies/hook.ts` or `heroes/hook.ts`): `spor.answer(index)`, `spor.info()` -> the live prompt or null. Smoke: on the boss page
 a prompt is posted; a wrong answer costs racja; the right one opens the window (hp loss of the boss doubles).
+
+Spór layout: in portrait the boss's comment bubble stacks above its claim bubble; in landscape it stands beside it at the same height (right, or left when left-handed), chosen when the bubble is built. Reply strip: `ui/spor.ts`, boxed form buttons, 12 s TTL.

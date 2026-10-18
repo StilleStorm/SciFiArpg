@@ -251,3 +251,99 @@
   font-size: 10px;
   letter-spacing: -0.02em;
 }
+
+/* ---------- Spór: the reply strip of a boss argument (ui/spor.ts). Portrait: a row of three boxes above the skill pads (which keep
+   working underneath: the strip lets pointers through between the boxes) and below the hero, who stands at the middle of the
+   screen, so the boss and its two bubbles above him stay clear. ---------- */
+.spor {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom) + 156px);
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+  pointer-events: none;
+}
+.spor:empty {
+  display: none;
+}
+.spor-reply {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 6px 7px 5px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background-color: var(--paper);
+  background-image: var(--paper-noise, none);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.25;
+  text-align: left;
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+}
+.spor-reply .sp-text {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.spor-reply .sp-type {
+  display: block;
+  font-size: 9.5px;
+  line-height: 1.2;
+  font-style: italic;
+  padding-top: 3px;
+  border-top: 1px dotted var(--ink);
+}
+.spor-reply:active {
+  border-width: 2px;
+  padding: 5px 6px 4px;
+}
+.spor-reply:disabled {
+  color: var(--ink);
+  opacity: 1;
+}
+.spor-reply.picked {
+  border-width: 2px;
+  padding: 5px 6px 4px;
+}
+/* a wrong reply is struck in red where it stands: the pen goes across the whole box, a little uphill */
+.spor-reply.wrong {
+  border-color: var(--accent);
+}
+.spor-reply.wrong::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: 50%;
+  border-top: 2px solid var(--accent);
+  transform: rotate(-3deg);
+  transform-origin: left center;
+  animation: spor-strike 160ms ease-out both;
+}
+@keyframes spor-strike {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+/* the strip stays 600 ms after an answer, then ui/spor.ts removes it on animationend */
+.spor.closing {
+  animation: spor-hold 600ms linear both;
+}
+@keyframes spor-hold {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
+}

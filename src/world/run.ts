@@ -1,3 +1,4 @@
+import type { SporState } from '../combat/spor';
 import { createRng, type Rng } from '../core/rng';
 import type { Enemy, Pickup, Player, Projectile, Summon, Zone } from '../entities';
 import { applyHero, createHeroRun, heroDef, type HeroId, type HeroRun } from '../heroes';
@@ -68,6 +69,8 @@ export interface RunState {
   phase: 'base' | 'run';
   /** The state of the base page; present only while `phase` is 'base'. */
   base?: BaseState;
+  /** The boss argument (DESIGN 5.4, combat/spor.ts): the comment that is up, the x2 window; absent until a boss posts. */
+  spor?: SporState;
 }
 
 /** Optional overrides for tests and screenshots; everything else comes from the seed. */

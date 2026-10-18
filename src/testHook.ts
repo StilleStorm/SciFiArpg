@@ -22,7 +22,7 @@ import { createHeroHook, type HeroHook } from './heroes/hook';
 import type { Aim } from './heroes/aim';
 import { castSkill } from './heroes/skills';
 import { holdPad, releasePad } from './ui/pads';
-import { createEnemyHook, type EnemyHook } from './enemies/hook';
+import { createEnemyHook, createSporHook, type EnemyHook, type SporHook } from './enemies/hook';
 import { createAudioHook, type AudioHook } from './audio/hook';
 
 export interface GameHook {
@@ -79,6 +79,8 @@ export interface GameHook {
   releasePad(slot: 1 | 2 | 3): boolean;
   /** Families, bosses and statuses on demand (enemies/hook.ts). */
   enemies: EnemyHook;
+  /** The boss argument: answer a reply, read the prompt and the x2 window (enemies/hook.ts). */
+  spor: SporHook;
   /** Offline audio renders and the live context state (audio/hook.ts). */
   audio: AudioHook;
   /**
@@ -196,6 +198,7 @@ export function installTestHook(deps: HookDeps): void {
     holdPad,
     releasePad,
     enemies: createEnemyHook(() => game.state, deps.bus),
+    spor: createSporHook(() => game.state, deps.bus),
     audio: createAudioHook(),
     turnTo(index) {
       const s = game.state;

@@ -8,6 +8,7 @@ import { applyStatus, getStatus, isSilenced, isStunned, statusDamageTakenMul } f
 import type { Bus } from '../core/events';
 import type { Enemy, Player } from '../entities/types';
 import { resolveMove } from '../world/pages';
+import { sporMul } from '../combat/spor';
 import type { RunState } from '../world/run';
 import { rtOf } from './runtime';
 
@@ -31,6 +32,7 @@ export function modifyDamage(
   amount: number,
   crit: boolean,
   type: DamageType | undefined,
+  s?: Pick<RunState, 'spor'>,
 ): { amount: number; crit: boolean } {
   if (amount <= 0) return { amount, crit };
   let a = amount;
@@ -53,6 +55,7 @@ export function modifyDamage(
         }
       }
     }
+    if (s) a *= sporMul(s, defender.id); // the window of a won argument: x2 against that boss, on top of a rebuttal crit
     a *= existenceOf(defender);
   }
   a *= statusDamageTakenMul(defender);
