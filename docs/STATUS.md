@@ -20,9 +20,9 @@ Keep this file current: it replaces chat memory.
   setting with lock, floating joystick (default in landscape) or tap, auto-attack while moving,
   manifest fullscreen (Android hides the bars), one-letter-word typography rule in t().
 - Voice passes done on every i18n file. Unused keys to wire or drop: ui.note.firstKill/start/pickup.
-- Paint sample is built (DESIGN §3.4, render/wash.ts): washes under heroes, enemies by family,
-  gwiazdki halos, cards by tier, coffee rings, page stains; day and night. Waiting for the
-  player's verdict on the look; then pause/save (backlog 2).
+- Paint is live and approved by the player (DESIGN §3.4, render/wash.ts).
+- Attack animations are live: attack:started event, hero poses per hero, enemy wind-up and
+  lunge, projectiles turn along velocity (render/attackFx.ts, scripts/shot-attacks.mjs).
 
 ## Gates and commands
 `npm run check` (typecheck, tests, lint:rules, build) · `npm run shot` · `npm run smoke`
@@ -42,7 +42,7 @@ joystick/tap steering (§2), editorial rules (§12.1).
 - Whether bubbles/figures are readable at phone size.
 
 ## Backlog, in order (decided with the player 2026-10-18; DESIGN §13 "Planned next")
-1. Paint sample (§3.4): built, awaiting the player's verdict; tune, then the rule is final.
+1. (done) Paint approved; attack animations shipped.
 2. Pause + pause sheet with settings + save like Diablo 3 (§4.1). Today there is no way out of a run.
 3. Tunel serwisowy with exact-state return (§4.1).
 4. Walkable base page per planet (§4.1).
