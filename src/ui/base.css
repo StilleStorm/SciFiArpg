@@ -174,3 +174,12 @@
 .pads.in-base .pad.s3 {
   display: none;
 }
+
+/* ---------- the HUD in the base: the page field reads "Baza" and the kind of place, in a smaller type ---------- */
+.hud .field.place {
+  flex: 1.5;
+}
+.hud .field.place .blank {
+  font-size: 10px;
+  letter-spacing: -0.02em;
+}

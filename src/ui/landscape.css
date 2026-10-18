@@ -142,6 +142,11 @@
 :root[data-orient='landscape'] .foot .fn {
   margin: 0;
 }
+/* joystick mode: the slip lies over the steering half, so it lets the thumb through to the stage. A quick tap on it still
+   opens the history (input.ts reports the quick tap, main.ts asks `footnotes.hits`); a thumb that lands on it steers. */
+:root[data-steer='joystick'] .foot {
+  pointer-events: none;
+}
 
 /* ============ landscape: pages and forms laid out in two columns where there is room (390 px of height) ============ */
 
@@ -327,58 +332,6 @@
   font-size: 16px;
 }
 
-/* base: the profile rows on the left, the history on the right */
-:root[data-orient='landscape'] .frame.baza {
-  display: grid;
-  grid-template-columns: 1fr 1.1fr;
-  grid-template-rows: auto auto auto auto auto auto auto 1fr;
-  column-gap: 28px;
-  align-items: start;
-  padding-bottom: 8px;
-}
-:root[data-orient='landscape'] .frame.baza > .agency,
-:root[data-orient='landscape'] .frame.baza > .form-title,
-:root[data-orient='landscape'] .frame.baza > .rule {
-  grid-column: 1 / -1;
-  text-align: center;
-}
-:root[data-orient='landscape'] .frame.baza > .scroll {
-  display: contents;
-}
-:root[data-orient='landscape'] .frame.baza .trow {
-  grid-column: 1;
-  width: 100%;
-  margin-bottom: 6px;
-}
-:root[data-orient='landscape'] .frame.baza .group {
-  grid-column: 2;
-  grid-row: 4;
-  margin: 0 0 4px;
-}
-:root[data-orient='landscape'] .frame.baza .hist-list {
-  grid-column: 2;
-  grid-row: 5 / -1;
-  align-self: stretch;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
-  scrollbar-width: none;
-  text-align: left;
-}
-:root[data-orient='landscape'] .frame.baza > .start {
-  grid-column: 1;
-  grid-row: 7;
-  justify-self: center;
-  margin-top: 6px;
-}
-:root[data-orient='landscape'] .frame.baza > .link-btn {
-  grid-column: 1;
-  grid-row: 8;
-  justify-self: center;
-  align-self: start;
-  margin-top: 0;
-}
 
 /* settings: two columns of groups, options side by side */
 :root[data-orient='landscape'] .set-grid {

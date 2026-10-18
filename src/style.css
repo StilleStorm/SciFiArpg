@@ -298,6 +298,14 @@ button {
   width: 64px;
   border-top: 1px solid var(--ink);
 }
+.fn-list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+}
 .fn {
   margin: 0 0 2px;
   /* two lines; a note keeps its height, so the older ones are pushed out of the top, never squeezed */
@@ -793,33 +801,6 @@ pattern line {
   margin-top: 6px;
 }
 
-/* ---------- Base screen (panel uzytkownika) ---------- */
-.baza {
-  padding-bottom: 16px;
-}
-.baza .scroll {
-  flex: 1;
-  width: 100%;
-  min-height: 0;
-  overflow-y: auto;
-  touch-action: pan-y;
-  text-align: left;
-  scrollbar-width: none;
-}
-.baza .scroll::-webkit-scrollbar {
-  display: none;
-}
-.baza .trow .link-btn {
-  margin: 0;
-  flex: none;
-  font-size: 10px;
-}
-.baza .start {
-  margin-top: 12px;
-}
-.baza .link-btn {
-  margin-top: 10px;
-}
 .sklep-slot {
   margin: 4px 0 0;
 }
@@ -1001,7 +982,6 @@ s.struck-out.fresh::after {
 }
 /* A very long sheet scrolls inside its own area and never drags the page. */
 .ps-scroll,
-.sheet-scroll,
-.baza .scroll {
+.sheet-scroll {
   overscroll-behavior: contain;
 }

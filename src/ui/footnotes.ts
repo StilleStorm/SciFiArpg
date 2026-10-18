@@ -4,6 +4,8 @@ import { openPopup, type Popup } from './popup';
 
 const VISIBLE = 3;
 const HISTORY = 10;
+/** A click this soon after the history opened is the tail of the tap that opened it. */
+const OPEN_GUARD_MS = 350;
 
 export interface Footnotes {
   el: HTMLElement;
@@ -12,6 +14,10 @@ export interface Footnotes {
   reset(): void;
   /** Close the history sheet if it is open. */
   closeHistory(): void;
+  /** Open the last ten notes as a sheet (a tap on the slip). False when there is nothing to show. */
+  openHistory(): boolean;
+  /** The slip is on screen and covers client point (x, y): joystick mode routes its quick taps here (the slip lets pointers through). */
+  hits(clientX: number, clientY: number): boolean;
   /** The most recent notes, oldest first. */
   recent(n?: number): { n: number; text: string }[];
   readonly count: number;
@@ -21,10 +27,15 @@ let instance: Footnotes | null = null;
 
 /**
  * The bottom of the page: numbered notes, newest at the bottom, at most three visible, older ones slide off.
- * Tapping the area opens the last ten as a sheet.
+ * Tapping the area opens the last ten as a sheet. In joystick mode the slip lets pointers through to the stage (a thumb
+ * that lands on it steers) and the quick tap reaches `openHistory` through the input instead (ui/landscape.css, main.ts).
  */
 export function createFootnotes(root: HTMLElement): Footnotes {
   const el = h('div', 'foot paper');
+  // the notes sit in their own box under the slip's short rule, so an older note pushed out of the top is clipped below the
+  // rule and never shows through it (a line through a note would read as struck out)
+  const list = h('div', 'fn-list');
+  el.append(list);
   const log: { n: number; text: string }[] = [];
   let count = 0;
   let sheet: Popup | null = null;
@@ -35,6 +46,26 @@ export function createFootnotes(root: HTMLElement): Footnotes {
     return p;
   };
 
+  /**
+   * Only whole notes stay on the slip: an older one that no longer fits is taken off, never shown cut in half (the list is
+   * bottom-aligned, so an overflowing note sticks out of its top edge). Measured once on the next frame, when the new
+   * note is laid out; never per frame.
+   */
+  let pruneQueued = false;
+  const prune = (): void => {
+    pruneQueued = false;
+    const top = list.getBoundingClientRect().top;
+    while (list.children.length > 1 && (list.firstElementChild?.getBoundingClientRect().top ?? top) < top - 1) list.firstElementChild?.remove();
+  };
+  const queuePrune = (): void => {
+    if (pruneQueued) return;
+    pruneQueued = true;
+    requestAnimationFrame(prune);
+  };
+  // a note can grow after it was printed: the serif arrives late on the first notes, a rotation narrows the slip
+  document.fonts.addEventListener('loadingdone', queuePrune);
+  window.addEventListener('resize', queuePrune);
+
   const fn: Footnotes = {
     el,
     add(text) {
@@ -43,18 +74,42 @@ export function createFootnotes(root: HTMLElement): Footnotes {
       if (log.length > 60) log.shift();
       const p = line(count, text);
       p.classList.add('fresh');
-      el.append(p);
-      while (el.children.length > VISIBLE) el.firstElementChild?.remove();
+      p.addEventListener('animationend', queuePrune, { once: true }); // measured again once the note has settled
+      list.append(p);
+      while (list.children.length > VISIBLE) list.firstElementChild?.remove();
+      queuePrune();
       return count;
     },
     reset() {
       count = 0;
       log.length = 0;
-      el.replaceChildren();
+      list.replaceChildren();
       sheet?.close();
     },
     closeHistory() {
       sheet?.close();
+    },
+    openHistory() {
+      if (log.length === 0) return false;
+      sheet?.close();
+      const body = h('div', 'fn-history');
+      for (const e of fn.recent()) body.append(line(e.n, e.text));
+      sheet = openPopup(root, { title: t('ui.notes.history'), className: 'pop-history', body: [body], tapToClose: true, onClose: () => (sheet = null) });
+      // opened by a quick tap through the stage (joystick mode), the same tap's click lands on the sheet: it must not close it
+      const openedAt = performance.now();
+      sheet.el.addEventListener(
+        'click',
+        (ev) => {
+          if (performance.now() - openedAt < OPEN_GUARD_MS) ev.stopImmediatePropagation();
+        },
+        { capture: true },
+      );
+      return true;
+    },
+    hits(x, y) {
+      if (el.classList.contains('hidden') || log.length === 0) return false;
+      const r = el.getBoundingClientRect();
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
     },
     recent(n = HISTORY) {
       return log.slice(-n);
@@ -64,13 +119,7 @@ export function createFootnotes(root: HTMLElement): Footnotes {
     },
   };
 
-  el.addEventListener('click', () => {
-    if (log.length === 0) return;
-    sheet?.close();
-    const body = h('div', 'fn-history');
-    for (const e of fn.recent()) body.append(line(e.n, e.text));
-    sheet = openPopup(root, { title: t('ui.notes.history'), className: 'pop-history', body: [body], tapToClose: true, onClose: () => (sheet = null) });
-  });
+  el.addEventListener('click', () => void fn.openHistory());
 
   root.append(el);
   instance = fn;

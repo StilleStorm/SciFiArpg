@@ -128,14 +128,16 @@ export function createHud(
       setText(racja.value, 'racja', `${Math.max(0, Math.ceil(p.hp))}/${p.hpMax}`);
       setText(reputacja.value, 'reputacja', reputacjaText(s));
       setText(gwiazdki.value, 'gwiazdki', String(p.gwiazdki));
-      // In the base the page field is the typed blank "Baza", and the Tunel note is put away (the hole is the way back).
+      // In the base the page field reads "Baza" with the kind of place typed in (a smaller type: "miasteczko" is long), and
+      // the Tunel note is put away (the hole is the way back).
       if (cache.phase !== s.phase) {
         cache.phase = s.phase;
         if (stronaLabel) stronaLabel.textContent = t(s.phase === 'base' ? 'ui.hud.base' : 'ui.hud.strona');
+        strona.root.classList.toggle('place', s.phase === 'base');
         tunnelBtn.classList.toggle('hidden', s.phase === 'base');
         cache.strona = '\u0000'; // forces the value to be written again
       }
-      setText(strona.value, 'strona', s.phase === 'base' ? '' : t('ui.hud.pages', { page: s.pageIndex + 1, total: s.pageCount }));
+      setText(strona.value, 'strona', s.phase === 'base' ? (s.base ? t(`world.layout.${s.base.layout}`) : '') : t('ui.hud.pages', { page: s.pageIndex + 1, total: s.pageCount }));
       const waiting = s.hero.pendingLevels > 0 && s.victoryAt === null; // after the boss no form opens any more
       if (waiting !== cache.upd) {
         cache.upd = waiting;
