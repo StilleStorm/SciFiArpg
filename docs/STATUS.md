@@ -80,36 +80,40 @@ joystick/tap steering (§2), editorial rules (§12.1).
   the new defaults.
 - Whether bubbles/figures are readable at phone size.
 
-## Backlog, in order (decided with the player 2026-10-18; DESIGN §13 "Planned next")
-1. (done) Paint approved; attack animations shipped.
-2. (done) Pause sheet, hold music on pause, character save between runs, bookmark resume.
-3. (done) Tunel serwisowy with exact-state return; Android back button opens the pause sheet.
-4. (done) Walkable base page per planet (§4.1).
-5. (done) Aiming; the fourth and fifth skills (§10.1).
-6. (done) Spór for bosses (two comments per boss, margin replies, 5 s window) and own sound recipes
-   for the ten newer skills. Spór strings still need the voice pass.
-6a. **Next:** the full-game plan is proposed in docs/PLAN.md and docs/SKILLS.md and awaits the
-   player's answers to the open questions; then it moves into DESIGN and the slices start
-   (slice 1: hero folder refactor + registry + primitives, no behaviour change).
-7. Przesyłka / paczkomat deliveries (§7), tap an item on the ground to see its card first (§2).
-7a. MVP shape (decided 2026-10-18): a planet sequence of 5–6 tickets on one case file with the
-    boss family and clause mix changing and a final ticket that closes the case; difficulty
-    that climbs by planet (enemy tiers, loot level); a first-run on-ramp (3–4 Asystent
-    footnotes on the first ticket: walk, attack, rebut, update); a balance pass from real play
-    (racja, cooldowns, drops, prices). Write the sequence into DESIGN §4 before building.
-7b. After MVP: the absurd storyline as six chapters on the case file (one ticket number the
-    Komisja keeps reassigning across planets; each base, clause and boss is a chapter), written
-    with the player in DESIGN before any builder. Endgame and multiplayer are far future.
-8. Act on phone feedback (feel of joystick, scale, sound levels, frame rate).
-9. Landscape 40-enemy perf measurement; the base clause header in landscape sits under the HUD
-   or above the view (portrait is fixed; landscape wants it top centre per §2); Odwirowanie knockback distance; appeal-form pickup drawing; Ciasteczka empty paper behind the
-   banner; Wygenerowane drawings are the busiest (simplify); "Muzyka na czekanie, utwór nr N"
-   shown somewhere; sounds for enemy:miss / offTopic / gwiazdki pickup; stereo panning.
-10. Heavy-metal music profile (own anchor and ban list to be written first).
-11. More fidget animation, more laws/uniques/parts, quests as ticket correspondence, English.
-12. When the game is fuller: move hosting to the player's Cloudflare (custom domain), then Google
-   Play via Trusted Web Activity (PWABuilder/Bubblewrap; needs /.well-known/assetlinks.json at
-   the origin root, a privacy policy URL, the 12-tester closed test; developer account exists).
+## Game plan (accepted 2026-10-18) and the slice order
+The plan lives in docs/PLAN.md (game shape, skill system, slices), docs/SKILLS.md (per-hero
+skills, paragraphs, ultimates, passives, loadouts), docs/ITEMS.md (bases, affix pool, sets,
+legendary paragraphs, item level, drops, economy, stash, drawing marks); the accepted skill
+system is DESIGN §10.2–10.3. Items open questions (ITEMS §11) still await the player; the
+lead's picks stand until then. Each slice = one builder brief + integrator + voice + push,
+between a pickup and a clear. Order:
+1. Hero folder refactor + registry + primitives extracted from current skills; no behaviour
+   change; the contract test (PLAN slice 1).
+2. Paragraph system on existing skills + unlock schedule + the aktualizacja form offering
+   them (PLAN 2).
+3. Argument meter + ultimate pad (stamp pad above the three in portrait) + one ultimate per
+   hero (PLAN 3).
+4. Loadout form "Konfiguracja" at the desk and in the pause sheet; categories shown; the Karta
+   uprawnień chart with three specializations and capstones (PLAN 4, DESIGN §10.3).
+5. Items: affix pool, tiers I–V, name grammar (ITEMS slice a); bases to 40 with drawings (b).
+6. Per-hero skill fill-in to 10–11 + 3 ultimates, one hero per slice, from SKILLS.md (PLAN 5,
+   five slices).
+7. Priorytet zgłoszenia + planet sequence + final ticket + climbing difficulty (PLAN 6; the
+   story plan supplies the texts).
+8. Items: item level, drops, Sklep stock (ITEMS c); drawing marks (d); sets + legendary
+   paragraphs (e); Reklamacja, Archiwum, sinks (f).
+9. `npm run new-hero` + template + checklist (PLAN 8).
+10. Przesyłka/paczkomat deliveries; tap an item on the ground to see its card.
+11. Balance pass from play; the first-run on-ramp footnotes; phone-feedback bucket; the polish
+    bucket (landscape clause header, Odwirowanie knockback, appeal-form drawing, cookie-banner
+    paper, simpler Wygenerowane, "utwór nr N", three missing sounds, stereo panning, Spór and
+    other text voice passes).
+Later: heavy-metal music profile, more laws/uniques/parts, English, Cloudflare + Play Store.
+Far future: endgame beyond "zgłoszenia dodatkowe", multiplayer.
+
+**Next pickup:** planning the storyline with the player (the case file across the planet
+sequence, six chapters; see STATUS "7b" rationale now folded into PLAN §3.1). Write it into
+DESIGN as a new section before any builder; then start slice 1.
 
 ## Known limits
 - iOS ignores orientation locks; the setting only picks the layout there.
