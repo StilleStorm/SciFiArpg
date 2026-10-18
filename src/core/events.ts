@@ -13,6 +13,8 @@ export interface GameEvents {
   'player:died': { x: number; y: number };
   'enemy:hit': { id: number; x: number; y: number; amount: number; crit: boolean };
   'enemy:miss': { id: number };
+  /** An attack was started (hit or miss): once per attempt. A ranged attack reports the moment of firing, not of landing. render/attackFx.ts draws it. */
+  'attack:started': { attackerId: number; attacker: 'player' | 'enemy' | 'summon'; x: number; y: number; tx: number; ty: number; ranged: boolean };
   'enemy:died': { id: number; x: number; y: number; tier?: 'common' | 'elite' | 'boss'; family?: 'urzadzenia' | 'powiadomienia' | 'wygenerowane' };
   'pickup:taken': { id: number; number: number };
   'page:edge': { x: number; y: number; side: Side };

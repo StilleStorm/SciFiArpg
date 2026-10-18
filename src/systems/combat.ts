@@ -8,6 +8,7 @@ import { isStunned } from '../combat/status';
 import { resolveMove } from '../world/pages';
 import { type RunState } from '../world/run';
 import { fireAuto } from '../heroes/auto';
+import { heroDef } from '../heroes/defs';
 import { absorbShield, playerDamageMul } from '../heroes/shield';
 
 type Fighter = Player | Enemy;
@@ -32,6 +33,10 @@ export function attack(s: RunState, bus: Bus, attacker: Fighter, defender: Fight
   const dir = defender.x - attacker.x;
   // a walking player keeps facing where he walks (movement sets it every step); a turn here would flicker one frame
   if (Math.abs(dir) > 1 && !(attacker.kind === 'player' && attacker.moving)) attacker.facing = dir > 0 ? 1 : -1;
+  // a ranged hero's shot announced itself when it left the hand (heroes/auto.ts); this call is only its landing
+  if (!(attacker.kind === 'player' && heroDef(attacker.heroId).auto.projectile)) {
+    bus.emit('attack:started', { attackerId: attacker.id, attacker: attacker.kind, x: attacker.x, y: attacker.y, tx: defender.x, ty: defender.y, ranged: false });
+  }
   if (!res.hit) {
     if (defender.kind === 'enemy') bus.emit('enemy:miss', { id: defender.id });
     return false;
@@ -96,7 +101,7 @@ export function playerAttacks(s: RunState, grid: Grid<Enemy>, bus: Bus, dt: numb
       nearest = e;
     }
   }
-  if (nearest && !fireAuto(s, p, nearest)) attack(s, bus, p, nearest);
+  if (nearest && !fireAuto(s, p, nearest, bus)) attack(s, bus, p, nearest);
 }
 
 export function enemiesAttack(s: RunState, bus: Bus, dt: number): void {

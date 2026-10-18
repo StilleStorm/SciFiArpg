@@ -152,6 +152,7 @@ function stepSummons(s: RunState, bus: Bus, dt: number): void {
     if (target && m.attackTimer <= 0 && !s.law.botTime && Math.hypot(target.x - m.x, target.y - m.y) <= m.attackRange) {
       m.attackTimer = m.attackCooldown;
       fireFrom(s, m, target);
+      bus.emit('attack:started', { attackerId: m.id, attacker: 'summon', x: m.x, y: m.y, tx: target.x, ty: target.y, ranged: true });
     }
   }
 }

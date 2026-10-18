@@ -178,3 +178,6 @@ hues are CSS variables `--wash-<hue>` with `--wash-alpha` dimming them at night.
 washes: heroFigures (hero, summon, copy), enemyFigures (family hue, elite second blob, boss
 bonus), pickupCard (star halo, card by tier, permission), obstacles (coffee rings, 2–3 page
 stains). `ink.ts` skips wash paths in draw-in/erase (it fades them by opacity instead).
+
+## Attack animations
+`attack:started {attackerId, attacker: 'player'|'enemy'|'summon', x, y, tx, ty, ranged}` is emitted once per attack attempt (hit or miss) from `systems/combat.ts attack()`, `heroes/auto.ts fireAuto`, the enemy shot in `enemies/ai.ts` and summon shots in `heroes/system.ts`. `render/attackFx.ts` turns it into a short transform-only pose on the attacker's figure (sub-groups marked `data-part`) plus one fx stroke for Pralka (whip) and Kartograf (measurement). `window.__game.attack('player'|'enemy')` triggers one for screenshots (`scripts/shot-attacks.mjs`).

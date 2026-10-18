@@ -13,6 +13,7 @@ import { BOSS_OF, ELITE_SCALE, eliteWord } from '../enemies/families';
 import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsBase';
 import { rtOf } from '../enemies/runtime';
 import { t } from '../i18n';
+import { ENEMY_MELEE_MS, LEAN_DEG, LUNGE, attackAt, enemyOffset } from './attackFx';
 import { bubbleShown } from './bubbleFocus';
 import { viewZoom } from './camera';
 import { drawIn, marginNote, stamp } from './ink';
@@ -49,6 +50,10 @@ interface FigState {
   phase: number;
   flip: number;
   spinning: boolean;
+  /** The body's attack offset and tilt as last written to `fig` (units, degrees). */
+  atkX: number;
+  atkY: number;
+  atkRot: number;
   dashSig: string;
   opacitySig: string;
   progressSig: string;
@@ -226,6 +231,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   const hw = Math.max((asm.width / 2) * sc, 14);
 
   const under = el('g', { 'data-part': 'under' });
+  // data-part "fig" is the body: the attack tell and strike move it, the stain and the bubble stay
   const fig = el('g', { 'data-part': 'fig', transform: `translate(0 ${feet}) scale(${n2(sc)})` });
   const over = el('g', { 'data-part': 'over' });
   const legsG = el('g', { transform: layout.legTf });
@@ -280,6 +286,9 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
     phase: 0,
     flip: 1,
     spinning: false,
+    atkX: 0,
+    atkY: 0,
+    atkRot: 0,
     dashSig: '',
     opacitySig: '',
     progressSig: '',
@@ -399,15 +408,30 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
     if (last) last.style.display = missing ? 'none' : '';
   }
 
+  // attack: lean back 6 and lunge 12 toward the target (ranged: a small recoil); the stain and the bubble stay put
+  let ax = 0;
+  let ay = 0;
+  let arot = 0;
+  const live = attackAt(g, timeMs, ENEMY_MELEE_MS);
+  if (live) {
+    const off = enemyOffset(live.t, live.a.ranged);
+    ax = live.a.ux * st.flip * off;
+    ay = live.a.uy * off;
+    arot = (off > 0 ? off / LUNGE : off / (LUNGE * 2)) * LEAN_DEG * live.a.ux * st.flip;
+  }
+
   // spin (defect)
   if (rt.spin > 0) {
     st.spinning = true;
     const a = (rt.spinDir * 360 * (1 - rt.spin / SPIN_S)).toFixed(0);
     const mid = -(st.feet - st.top) * 0.5 + st.feet;
-    st.fig.setAttribute('transform', `translate(0 ${n2(mid)}) rotate(${a}) translate(0 ${n2(st.feet - mid)}) scale(${n2(st.sc)})`);
-  } else if (st.spinning) {
+    st.fig.setAttribute('transform', `translate(${n2(ax)} ${n2(ay + mid)}) rotate(${a}) translate(0 ${n2(st.feet - mid)}) scale(${n2(st.sc)})`);
+  } else if (st.spinning || ax !== st.atkX || ay !== st.atkY || arot !== st.atkRot) {
     st.spinning = false;
-    st.fig.setAttribute('transform', `translate(0 ${st.feet}) scale(${n2(st.sc)})`);
+    st.atkX = ax;
+    st.atkY = ay;
+    st.atkRot = arot;
+    st.fig.setAttribute('transform', `translate(${n2(ax)} ${n2(st.feet + ay)})${arot ? ` rotate(${n2(arot)})` : ''} scale(${n2(st.sc)})`);
   }
 
   // existence: opacity and dash pattern follow e

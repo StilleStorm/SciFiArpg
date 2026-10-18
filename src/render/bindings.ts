@@ -2,6 +2,7 @@ import { createRng } from '../core/rng';
 import type { Bus, Side } from '../core/events';
 import { t } from '../i18n';
 import { PAGE_H, PAGE_INSET, PAGE_W } from '../world/pages';
+import { bindAttackFx } from './attackFx';
 import { blot, marginNote, stamp, strike } from './ink';
 import type { Views } from './view';
 
@@ -26,6 +27,7 @@ export function bindFx(bus: Bus, views: Views): void {
   const hitBlot = (x: number, y: number, crit: boolean): void => {
     blot(x + jitter.range(-6, 6), y + jitter.range(-6, 6), crit ? jitter.range(9, 12) : jitter.range(3.5, 6), crit);
   };
+  bindAttackFx(bus, views);
   bus.on('enemy:hit', (e) => hitBlot(e.x, e.y, e.crit));
   bus.on('player:hit', (e) => hitBlot(e.x, e.y, e.crit));
   bus.on('enemy:died', (e) => {

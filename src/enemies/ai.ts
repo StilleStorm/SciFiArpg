@@ -373,6 +373,7 @@ function tickEnemy(s: RunState, e: Enemy, grid: Grid<Enemy>, near: Enemy[], bus:
   if (ranged && chasing && tg && dp <= ranged.range && rt.shootT <= 0 && !isSilenced(e) && !s.law.botTime) {
     const count = e.boss ? (rt.phase >= 2 ? 5 : 3) : 1;
     fireShot(s, e, tg.x, tg.y, ranged, count);
+    bus.emit('attack:started', { attackerId: e.id, attacker: 'enemy', x: e.x, y: e.y, tx: tg.x, ty: tg.y, ranged: true });
     rt.shootT = (ranged.cooldown / (rt.atkSpeed * (rt.heatPhase === 'hot' ? 2 : 1))) * ai.range(0.85, 1.2);
   }
 

@@ -6,6 +6,8 @@ import { addFootnote } from './ui/footnotes';
 import type { Enemy } from './entities';
 import type { Bus } from './core/events';
 import { applyDamage } from './systems/combat';
+import { attack as attackWith } from './systems/combat';
+import { fireAuto } from './heroes/auto';
 import type { Input } from './input';
 import type { MetaState, Settings } from './save/save';
 import { steerVector } from './ui/joystick';
@@ -32,6 +34,11 @@ export interface GameHook {
   setMeta(meta: MetaState): void;
   screen(): Screen;
   go(screen: Screen): void;
+  /**
+   * One attack at the nearest enemy, as the step would do it (pulled into view if far): by the player's auto-attack
+   * (a thrown shot for the ranged heroes) or, with 'enemy', that enemy's blow at the player. Emits attack:started.
+   */
+  attack(who?: 'player' | 'enemy'): boolean;
   /** Wound the nearest enemy without killing it (moves it near the player first if far away). */
   hitEnemy(): boolean;
   /** Kill the nearest enemy through the normal path (blot, strike, pickup, footnote). */
@@ -135,6 +142,14 @@ export function installTestHook(deps: HookDeps): void {
     setMeta: (m) => deps.setMeta(m),
     screen: () => deps.getScreen(),
     go: (screen) => deps.go(screen),
+    attack(who = 'player') {
+      const e = nearest();
+      const s = game.state;
+      if (!e || !s) return false;
+      if (who === 'enemy') attackWith(s, deps.bus, e, s.player);
+      else if (!fireAuto(s, s.player, e, deps.bus)) attackWith(s, deps.bus, s.player, e);
+      return true;
+    },
     hitEnemy() {
       const e = nearest();
       const s = game.state;
