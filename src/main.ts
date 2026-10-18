@@ -1,6 +1,5 @@
 import './style.css';
 import { createAudio, setVolumes, unlockAudio } from './audio';
-import { startMusic } from './audio/music';
 import { setOfficeOpen } from './economy/hours';
 import { createBus, type Screen } from './core/events';
 import { createLoop } from './core/loop';
