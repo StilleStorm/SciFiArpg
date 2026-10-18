@@ -116,14 +116,18 @@ between a pickup and a clear. Order:
 Later: heavy-metal music profile, more laws/uniques/parts, English, Cloudflare + Play Store.
 Far future: endgame beyond "zgłoszenia dodatkowe", multiplayer.
 
-**Storyline (2026-10-18):** proposed in docs/STORY.md: six chapters on ticket 48213 passed
-between units (planets), the per-hero subject line as the only hero text, three new bosses
-(Kolejka, Awizo, Komisja), the Kartoteka frame for the roster screen, eight open questions
-(STORY §9). Not yet seen by the player; nothing from it is built.
+**Storyline (2026-10-18):** proposed in docs/STORY.md at full Diablo length (the player asked
+to skip the MVP cut): five acts, sixteen planets, three new families (Formularze, Opinie,
+Aktualizacje), thirteen new bosses, nine new clauses, a quest layer (czynności: five primitives
+on the ticket header), the Kartoteka frame for the roster screen, ten open questions (STORY
+§12). Not yet seen by the player; nothing from it is built. Slice order consequences (STORY
+§10): a campaign table slice, a czynności slice, three family slices and seven boss slices
+join the order above around slice 7; the game stays playable after every one.
 
-**Next pickup:** read the player's answers to STORY §9 (or ask them if none), record the
+**Next pickup:** read the player's answers to STORY §12 (or ask them if none), record the
 decisions in STORY as a "Decisions" section, fold the accepted parts into DESIGN as §4.2
-"Campaign" (and the Kartoteka into §10's hero-select paragraph); then start slice 1.
+"Campaign" (families into §6, clauses into §4, the Kartoteka into §10's hero-select paragraph),
+re-cut the slice order in PLAN §5 and here; then start slice 1.
 
 ## Known limits
 - iOS ignores orientation locks; the setting only picks the layout there.
