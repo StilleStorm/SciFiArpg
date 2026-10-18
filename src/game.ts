@@ -8,8 +8,8 @@ import { createViews, type Views } from './render/view';
 import { groundBuilders } from './render/figures';
 import { drawPage } from './render/obstacles';
 import { drawBase, type BaseView } from './render/stations';
-import { viewZoom } from './render/camera';
-import { arrivalKey, tapStation } from './world/base';
+import { portraitSpan, viewZoom } from './render/camera';
+import { tapStation } from './world/base';
 import { onPageEntered } from './world/laws';
 import { baseHeaderFor, headerFor, tapKiosk } from './world/pageTurn';
 import { tapMark } from './render/ink';
@@ -62,6 +62,17 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
   const sim = createSim(bus);
   installItems(stage.ui, bus, () => state);
   const ents: Entity[] = [];
+  /** Every entity of the run, in the order the views are layered. */
+  const collect = (s: RunState): Entity[] => {
+    ents.length = 0;
+    ents.push(s.player);
+    for (const e of s.enemies) ents.push(e);
+    for (const k of s.pickups) ents.push(k);
+    for (const p of s.projectiles) ents.push(p);
+    for (const m of s.summons) ents.push(m);
+    for (const z of s.zones) ents.push(z);
+    return ents;
+  };
   let state: RunState | null = null;
   let pausedByGame = false;
   /** The drawn base page, while the state is in the base (labels, the exit, the header). */
@@ -73,7 +84,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
     bounds.h = page.h;
   };
   bus.on('ticket:accepted', () => {
-    if (state?.phase === 'base') baseView?.unlock(baseHeaderFor(state));
+    if (state?.phase === 'base') baseView?.unlock(baseHeaderFor(state, portraitSpan(camera)));
   });
 
   const game: Game = {
@@ -112,9 +123,10 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       stage.world.replaceChildren();
       stage.fx.replaceChildren();
       fitBounds(s.page);
-      drawPage(stage.page, s.page, headerFor(s));
       camera.snap(s.player.x, s.player.y);
       camera.apply();
+      drawPage(stage.page, s.page, headerFor(s, portraitSpan(camera)));
+      views.sync(collect(s), s.time * 1000, { drawIn: false }); // they were on the page all along: no drawing in again
     },
     start(seed, opts) {
       const s = createRun(seed, opts);
@@ -130,14 +142,13 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
         camera.snap(s.player.x, s.player.y);
         camera.apply();
         input.setEnabled(true);
-        bus.emit('base:entered', { layout: s.base.layout });
-        bus.emit('footnote', { text: t(arrivalKey(seed, s.base.layout)) });
+        bus.emit('base:entered', { layout: s.base.layout, seed, number: s.ticket.number }); // the Asystent writes the arrival note
         return s;
       }
       baseView = null;
-      drawPage(stage.page, s.page, headerFor(s));
       camera.snap(s.player.x, s.player.y);
       camera.apply();
+      drawPage(stage.page, s.page, headerFor(s, portraitSpan(camera)));
       input.setEnabled(true);
       bus.emit('run:started', { seed });
       bus.emit('stamp', { text: t('ui.run.stamp'), x: s.player.x, y: s.player.y - 120 });
@@ -170,13 +181,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
     render(dtSec) {
       const s = state;
       if (!s) return;
-      ents.length = 0;
-      ents.push(s.player);
-      for (const e of s.enemies) ents.push(e);
-      for (const k of s.pickups) ents.push(k);
-      for (const p of s.projectiles) ents.push(p);
-      for (const m of s.summons) ents.push(m);
-      for (const z of s.zones) ents.push(z);
+      collect(s);
       hero.frame(s);
       if (s.phase === 'base') baseView?.frame(s);
       else {

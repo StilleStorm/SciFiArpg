@@ -104,6 +104,19 @@
       "Przepraszam za nieścisłość w przypisie {ref}. Było to 40 sekund. Pozostałe 360 doliczono z ostrożności."
     ]
   },
+  "idle_base": {
+    "ok": [
+      "Zgłaszający przebywa w bazie. Czas pobytu wliczono do czasu obsługi zgłoszenia.",
+      "W bazie nic się nie dzieje. Stan ten uznano za zgodny z regulaminem bazy.",
+      "Brak aktywności w bazie. Biurko pozostaje czynne w godzinach, których nie podano."
+    ],
+    "bad": [
+      "Zgłaszający przebywa w bazie od 400 sekund."
+    ],
+    "fix": [
+      "Przepraszam za nieścisłość w przypisie {ref}. Pobyt trwa 40 sekund. Różnicę zaliczono na poczet oczekiwania."
+    ]
+  },
   "levelup": {
     "ok": [
       "Reputacja zgłaszającego wzrosła do poziomu {level}. Zmiany nie są widoczne.",

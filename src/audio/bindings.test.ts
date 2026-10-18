@@ -176,7 +176,7 @@ describe('audio bindings', () => {
 
   it('the base page keeps the planet music: entering it restarts the profile, the screen change does not stop it', () => {
     const { bus } = setup();
-    bus.emit('base:entered', { layout: 'wioska' });
+    bus.emit('base:entered', { layout: 'wioska', seed: 1, number: 48213 });
     expect(music.startMusic).toHaveBeenCalledTimes(1);
     const stops = vi.mocked(music.stopMusic).mock.calls.length;
     bus.emit('screen:changed', { screen: 'baza' });

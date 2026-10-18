@@ -51,6 +51,8 @@ export interface GameHook {
   setTheme(theme: Theme): void;
   theme(): 'day' | 'night';
   footnote(text: string): void;
+  /** The printed footnotes, oldest first (the last 60): their numbers run on through one ticket, base page and run. */
+  notes(): { n: number; text: string }[];
   /** Put a rolled item of `tier` (default zwykly) into the inventory; returns it, or null when there is no run or no room. */
   giveItem(tier?: ItemTier | 'unikatowy', slot?: Slot): Item | null;
   /** Replace the inventory with six fixed items (two worn, one niekompatybilny, a unique, a free version). */
@@ -142,6 +144,8 @@ export interface HookDeps {
   startBase(seed?: number): RunState;
   station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean;
   acceptTicket(): boolean;
+  /** The footnotes as printed (ui/footnotes.ts `recent`). */
+  notes(): { n: number; text: string }[];
 }
 
 const NEAR = 90;
@@ -221,6 +225,7 @@ export function installTestHook(deps: HookDeps): void {
     setTheme,
     theme: currentTheme,
     footnote: addFootnote,
+    notes: () => deps.notes(),
     giveItem(tier = 'zwykly', slot) {
       const st = game.state;
       if (!st) return null;

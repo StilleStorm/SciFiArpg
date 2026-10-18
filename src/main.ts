@@ -53,6 +53,8 @@ let meta = loadMeta();
 let screen: Screen = 'title';
 /** The run that waits while the player is in the base through the service tunnel (DESIGN 4.1): the same object, in memory only. */
 const hold = createRunHold<RunState>();
+/** The ticket (seed and number) the printed footnotes belong to: the numbering runs on from its base page through its run. */
+let notesFor = '';
 
 /** Day / night / by device, the left-handed mirror, steering and the orientation lock. */
 let lockedFor: string | null = null;
@@ -78,7 +80,15 @@ const save = (next: typeof meta): void => {
 
 // Router: title -> profile (only without a hero) -> the base page of the planet (screen 'baza', walkable) -> the exit ->
 // the run (screen 'run') -> back to a base. The desk, the ticket, the Sklep and the settings are sheets over the base page.
-const input = createInput(stage.svg, (x, y, walk) => game.onTap(x, y, walk), createJoystick(stage.ui));
+// In joystick mode the footnote slip lets the thumb through (a thumb landing on it steers); its quick tap opens the history.
+const input = createInput(
+  stage.svg,
+  (x, y, walk) => {
+    if (!walk && footnotes.hits(x, y)) footnotes.openHistory();
+    else game.onTap(x, y, walk);
+  },
+  createJoystick(stage.ui),
+);
 initLayout(() => applySettings(meta.settings)); // data-orient on <html> follows the window; steering follows it until the player chooses
 applySettings(meta.settings);
 const game = createGame(stage, bus, camera, input, bounds);
@@ -143,7 +153,7 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
   footnotes.el.classList.toggle('hidden', !walkable);
   pads.classList.toggle('hidden', !walkable);
   pads.classList.toggle('in-base', next === 'baza');
-  if (!walkable) footnotes.closeHistory();
+  footnotes.closeHistory(); // the history sheet belongs to the screen it was opened on (the notes themselves may run on)
   if (next !== 'title') title.hide();
   if (next !== 'run') clearPause();
   if (!walkable) input.setEnabled(false);
@@ -166,7 +176,8 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
       footnotes.reset();
       setOfficeOpen(null);
       // A resumed ticket keeps its number; the saved character (gear, purse, level, updates) is applied before the stats.
-      game.start(seed, { ...(opts.resume ? {} : { ticketNumber: TICKET_BASE + meta.history.length }), heroId: meta.heroId, character: meta.character, ...opts });
+      const s = game.start(seed, { ...(opts.resume ? {} : { ticketNumber: TICKET_BASE + meta.history.length }), heroId: meta.heroId, character: meta.character, ...opts });
+      notesFor = `${s.seed}:${s.ticket.number}`;
       hud.invalidate();
       break;
     }
@@ -179,7 +190,8 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
 /**
  * The base page of a planet. Its planet is the held run's while a tunnel holds one, else the bookmarked one, else the next
  * ticket's (chosen when the previous ticket ended). A bookmark makes the desk offer "Wznów zgłoszenie"; a held run puts the
- * open hole near the landing spot. A new planet clears the footnotes; the tunnel's base keeps them.
+ * open hole near the landing spot. Another ticket clears the footnotes; the same ticket (the tunnel's base, the base after
+ * Zakończ) keeps them and their numbering, like the Asystent (narration/asystent.ts).
  */
 function enterBase(over: { seed?: number; number?: number } = {}): RunState {
   const held = hold.peek();
@@ -187,7 +199,10 @@ function enterBase(over: { seed?: number; number?: number } = {}): RunState {
   const seed = over.seed ?? (held ? held.seed : b ? b.seed : nextSeed);
   const number = over.number ?? (held ? held.ticket.number : b && !over.seed ? b.ticketNumber : TICKET_BASE + meta.history.length);
   if (game.state && game.state !== held) game.stop();
-  if (!held) footnotes.reset();
+  if (`${seed}:${number}` !== notesFor) {
+    footnotes.reset();
+    notesFor = `${seed}:${number}`;
+  }
   setOfficeOpen(null);
   const resume = b && !held && b.seed === seed ? b : undefined;
   const state = game.start(seed, {
@@ -305,7 +320,7 @@ function openStation(id: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean 
 }
 bus.on('station:opened', (e) => void openStation(e.station));
 
-bindFx(bus, game.views);
+bindFx(bus, game.views, () => game.state?.page ?? null);
 bindPageTurn(bus, { stage, camera, views: game.views, getState: () => game.state, bounds });
 bindRunEvents(bus, () => game.state);
 // The tunnel closes itself on death, the end of the run and a page turn; both must hear `run:ended` before the handler below drops the state.
@@ -351,7 +366,8 @@ const loop = createLoop({
   update: (dt) => {
     game.update(dt);
     const s = game.state;
-    if (screen === 'run' && s && s.status === 'running' && !s.modal && !s.turning) asystent.tick(dt);
+    // the Asystent's clock: corrections and the idle note, in the run and on the base page (not under a sheet or a form)
+    if (live() && s && s.status === 'running' && !s.modal && !s.turning) asystent.tick(dt);
   },
   render: (dt) => {
     tickTweens(dt * 1000);
@@ -459,7 +475,8 @@ function returnFromTunnel(): boolean {
   baza.setTunnel(null);
   delete here.tunnel;
   game.adopt(held);
-  if (held.tunnel) tunnelFx.show(held.tunnel.x, held.tunnel.y); // the hole is drawn again so the tape can lie across it
+  tunnelFx.restore(held.pageIndex); // the page was drawn anew: the tape of an earlier hole on it goes back where it was
+  if (held.tunnel) tunnelFx.show(held.tunnel.x, held.tunnel.y, false, held.tunnel.pageIndex); // the hole is drawn again so the tape can lie across it
   syncHistory('baza', 'run');
   screen = 'run';
   pads.classList.remove('in-base');
@@ -594,6 +611,7 @@ installTestHook({
   },
   station: openStation,
   acceptTicket: acceptNow,
+  notes: () => footnotes.recent(60),
   changeSettings: (patch) => {
     const next = { ...meta.settings, ...patch };
     save({ ...meta, settings: next });

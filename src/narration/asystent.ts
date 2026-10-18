@@ -10,6 +10,7 @@ import type { Bus } from '../core/events';
 import { createRng, type Rng } from '../core/rng';
 import { t, type Params } from '../i18n';
 import narrationJson from '../i18n/pl/narration.json';
+import { arrivalKey } from '../world/base';
 import { enemyInfo } from '../world/enemyInfo';
 import type { RunState } from '../world/run';
 
@@ -111,25 +112,57 @@ export interface AsystentDeps {
 }
 
 export interface Asystent {
-  /** Advance by simulated seconds while a run is going. */
+  /** Advance by simulated seconds while the base page or a run is going (not while a sheet or a form holds it). */
   tick(dt: number): void;
 }
 
-/** Wire the Asystent to the bus. A fresh narrator (seeded from the run) starts on every `run:started`. */
+/** The ticket the notes belong to: one numbering and one narrator per ticket, from its base page to its end. */
+const ticketKey = (seed: number, number: number): string => `${seed}:${number}`;
+
+/**
+ * Wire the Asystent to the bus. One narrator (seeded from the planet) per ticket: it starts on `base:entered` for a ticket
+ * it has not narrated yet, and goes on through the exit into the run, so the footnote numbers and the pending corrections
+ * carry over. The base of a held run (the tunnel) and the base after Zakończ belong to the same ticket and keep it. A run
+ * that starts without a base page (`run:started` with no base before it, the test hook) gets a fresh narrator.
+ * The arrival note of the place (`screens.base.arrival.*`) is written once per ticket, on its first base page.
+ * In the base the idle note is the base's own (`idle_base`): nothing there is waiting to be crossed out.
+ */
 export function bindAsystent(bus: Bus, deps: AsystentDeps): Asystent {
   let narrator = createNarrator(createRng(1), deps.say);
+  let key = '';
+  let fromBase = false;
   let idle = 0;
   const families = new Set<string>();
 
-  bus.on('run:started', (e) => {
-    narrator = createNarrator(createRng(e.seed).fork('narration'), deps.say);
+  const fresh = (seed: number, k: string): void => {
+    narrator = createNarrator(createRng(seed).fork('narration'), deps.say);
+    key = k;
     idle = 0;
     families.clear();
+  };
+
+  bus.on('base:entered', (e) => {
+    const k = ticketKey(e.seed, e.number);
+    fromBase = true;
+    idle = 0;
+    if (k === key) return; // the same ticket again (the tunnel's base, the base after Zakończ): the notes run on
+    fresh(e.seed, k);
+    deps.say(t(arrivalKey(e.seed, e.layout)));
+  });
+  bus.on('run:started', (e) => {
     const s = deps.getState();
+    const k = ticketKey(e.seed, s?.ticket.number ?? 0);
+    if (!fromBase || k !== key) fresh(e.seed, k);
+    fromBase = false;
+    idle = 0;
+    families.clear();
     narrator.note('start', { number: s?.ticket.number ?? 0 });
     if (s) {
       narrator.note('clause', { name: t(`laws.${s.ticket.lawId}.name`), short: t(`laws.${s.ticket.lawId}.short`) });
     }
+  });
+  bus.on('station:opened', () => {
+    idle = 0;
   });
   bus.on('enemy:died', (e) => {
     idle = 0;
@@ -155,7 +188,7 @@ export function bindAsystent(bus: Bus, deps: AsystentDeps): Asystent {
       idle += dt;
       if (idle >= IDLE_S) {
         idle = -IDLE_S; // then at most one idle note per 80 s
-        narrator.note('idle');
+        narrator.note(deps.getState()?.phase === 'base' ? 'idle_base' : 'idle');
       }
     },
   };

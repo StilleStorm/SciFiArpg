@@ -11,7 +11,7 @@ function rigged(seed: number, yes: boolean): Rng {
 
 const keys = [
   'start', 'clause', 'kill_urzadzenia', 'kill_powiadomienia', 'kill_wygenerowane', 'kill_other', 'pickup', 'page', 'edge', 'idle',
-  'levelup', 'death', 'law_hours_bot', 'law_hours_consultant', 'law_reverse_start', 'law_noise',
+  'idle_base', 'levelup', 'death', 'law_hours_bot', 'law_hours_consultant', 'law_reverse_start', 'law_noise',
 ];
 
 describe('templates', () => {
@@ -131,4 +131,54 @@ describe('bindAsystent', () => {
     bus.emit('player:died', { x: 0, y: 0 });
     expect(said.length).toBe(base + 4);
   });
+
+  it('keeps one narrator per ticket from the base page through the run, and starts again for another ticket', () => {
+    const bus = createBus();
+    const said: string[] = [];
+    let phase: 'base' | 'run' = 'base';
+    const state = { phase, ticket: { number: 48213, lawId: 'parzystosc' } };
+    const a = bindAsystent(bus, { say: (t) => (said.push(t), said.length), getState: () => ({ ...state, phase }) as never });
+    bus.emit('base:entered', { layout: 'wioska', seed: 9, number: 48213 });
+    expect(said).toHaveLength(1);
+    expect(said[0]).toMatch(/^Wioska/); // the arrival note of the place
+    // in the base the idle note is the base's own: never the "40 s without a kill" line
+    for (let i = 0; i < IDLE_S + 1; i++) a.tick(1);
+    expect(said).toHaveLength(2);
+    expect(said[1]).not.toMatch(/skreślono/);
+    // the exit is walked through: the same narrator goes on (its rng is not re-seeded, so a repeat of the whole sequence differs)
+    phase = 'run';
+    bus.emit('run:started', { seed: 9 });
+    const inRun = said.length;
+    expect(inRun).toBeGreaterThanOrEqual(2);
+    // the base of the held run (the tunnel) is the same ticket: nothing is said, not even the arrival, nothing starts again
+    bus.emit('base:entered', { layout: 'wioska', seed: 9, number: 48213 });
+    expect(said).toHaveLength(inRun);
+    // another ticket: a fresh narrator with its arrival note, and the base idle line again after 40 s
+    phase = 'base';
+    bus.emit('base:entered', { layout: 'ladowisko', seed: 10, number: 48214 });
+    expect(said[inRun]).toMatch(/^Lądowisko/);
+    for (let i = 0; i < IDLE_S + 1; i++) a.tick(1);
+    expect(said.length).toBe(inRun + 2);
+    expect(said[inRun + 1]).not.toMatch(/skreślono/);
+  });
+
+  it('the same planet narrates the same way from a fresh base, whatever came before', () => {
+    const run = (before: boolean): string[] => {
+      const bus = createBus();
+      const said: string[] = [];
+      const a = bindAsystent(bus, { say: (t) => (said.push(t), said.length), getState: () => ({ phase: 'run', ticket: { number: 2, lawId: 'parzystosc' } }) as never });
+      if (before) {
+        bus.emit('base:entered', { layout: 'wioska', seed: 3, number: 1 });
+        bus.emit('run:started', { seed: 3 });
+        for (let i = 0; i < 200; i++) a.tick(1);
+      }
+      bus.emit('base:entered', { layout: 'wioska', seed: 4, number: 2 });
+      const from = said.length;
+      bus.emit('run:started', { seed: 4 });
+      for (let i = 0; i < 200; i++) a.tick(1);
+      return said.slice(from);
+    };
+    expect(run(true)).toEqual(run(false));
+  });
 });
+
