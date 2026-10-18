@@ -1,6 +1,7 @@
 # Plan: from a small concept to a full game
 
-Status: PROPOSAL for discussion with the player (2026-10-18). When accepted, its sections move
+Status: ACCEPTED by the player (2026-10-18) with the decisions in §7; SKILLS.md and ITEMS.md
+are accepted with their own decision sections. When accepted, its sections move
 into DESIGN.md and the backlog in STATUS.md is re-cut into slices. Each slice must fit between a
 pickup and a clear: one builder brief, one integrator pass, one push.
 
@@ -126,3 +127,18 @@ Endgame systems beyond "Zgłoszenia dodatkowe", multiplayer, English, store rele
 - Should paragraphs be chosen in a run (at the aktualizacja form) or only at the desk?
   My pick: unlocked in a run, switched at the desk and the pause sheet.
 - Priority names: keep the ticket vocabulary (Niski/Normalny/Wysoki/Krytyczny) or Lem-ify them?
+
+## 7. Decisions (player, 2026-10-18)
+- Ultimates on the Argument meter. The ultimate pad is a stamp pad above the three in portrait.
+  Paragraphs switch at the desk and in the pause sheet. The rule passive is always on and free.
+  The three new primitives stay. One page-wide ultimate per hero, through a status. Gated skills
+  need the permission for the first rank only. Priority names stay ticket vocabulary.
+- **Campaign replay and free travel (Diablo):** after the case is closed, every earlier planet is
+  reachable from the desk at the character's current level, drops scale to it, there are no new
+  tickets there; the same planets are the ground for later endgame. Replaying a planet at max
+  level is how max-level sets are farmed.
+- **Character roster screen (Diablo):** a screen to create and pick a character replaces "Zmień
+  profil". Each character has its own campaign progress, bag and personal archive; one shared
+  Archiwum passes items between characters. Hero choice happens at creation. Goes into the next
+  design talk (storyline) as the frame of the first screen, then into the slice order (before
+  slice 7).

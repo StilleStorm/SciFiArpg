@@ -476,3 +476,13 @@ Each slice ends with `npm run check`, shots of the touched screens and a voice p
    pick from at a higher price?
 5. Lie magnitude growing with tier (rzadki liars at +35%) or flat 20% everywhere, simpler to
    read on the card?
+
+## 12. Decisions (player, 2026-10-18)
+1. **Sets:** one set per planet; replaying a planet farms it.
+2. **Uniques, Diablo 2 style:** a unique gives +1 or +2 ranks to its skill; ranks from items may
+   exceed the cap; wearing it unlocks that skill even with no own ranks; it also carries the
+   paragraph. "Użyczenie" is therefore the rule, not the exception.
+3. **Archiwum:** one shared Archiwum across characters (transfers), plus each character's own
+   bag and personal archive. Depends on the character roster (below).
+4. **Reklamacja:** one result, struck and retyped. No pick of two.
+5. **Lies grow with tier:** +15 / +25 / +35% overclaim for zwykły / nietypowy / rzadki.

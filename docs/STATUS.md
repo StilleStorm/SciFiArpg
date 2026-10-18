@@ -84,8 +84,7 @@ joystick/tap steering (§2), editorial rules (§12.1).
 The plan lives in docs/PLAN.md (game shape, skill system, slices), docs/SKILLS.md (per-hero
 skills, paragraphs, ultimates, passives, loadouts), docs/ITEMS.md (bases, affix pool, sets,
 legendary paragraphs, item level, drops, economy, stash, drawing marks); the accepted skill
-system is DESIGN §10.2–10.3. Items open questions (ITEMS §11) still await the player; the
-lead's picks stand until then. Each slice = one builder brief + integrator + voice + push,
+system is DESIGN §10.2–10.3. All open questions are answered (PLAN §7, ITEMS §12). Each slice = one builder brief + integrator + voice + push,
 between a pickup and a clear. Order:
 1. Hero folder refactor + registry + primitives extracted from current skills; no behaviour
    change; the contract test (PLAN slice 1).
@@ -98,8 +97,10 @@ between a pickup and a clear. Order:
 5. Items: affix pool, tiers I–V, name grammar (ITEMS slice a); bases to 40 with drawings (b).
 6. Per-hero skill fill-in to 10–11 + 3 ultimates, one hero per slice, from SKILLS.md (PLAN 5,
    five slices).
-7. Priorytet zgłoszenia + planet sequence + final ticket + climbing difficulty (PLAN 6; the
-   story plan supplies the texts).
+6a. Character roster screen: create/pick a character, per-character progress, bag and archive,
+    one shared Archiwum (PLAN §7). Replaces "Zmień profil".
+7. Priorytet zgłoszenia + planet sequence + final ticket + climbing difficulty + free travel
+   back to closed planets from the desk (PLAN 6, §7; the story plan supplies the texts).
 8. Items: item level, drops, Sklep stock (ITEMS c); drawing marks (d); sets + legendary
    paragraphs (e); Reklamacja, Archiwum, sinks (f).
 9. `npm run new-hero` + template + checklist (PLAN 8).
