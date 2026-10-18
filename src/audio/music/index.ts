@@ -35,6 +35,7 @@ export function deriveFlags(s: RunState): MusicFlags {
     elite,
     boss,
     botTime: s.law.botTime,
+    paused: false, // the pause sheet is not in the run state (inventory and forms also pause it): `setMusicPaused` sets it
     reversed: s.law.reversed,
     suspended: p.suspended,
     dead: s.status === 'dead' || p.hp <= 0,
@@ -47,6 +48,7 @@ let getStateFn: (() => RunState | null) | null = null;
 let override: Partial<MusicFlags> | null = null;
 let applied: MusicFlags = CALM_FLAGS;
 let seed = 0;
+let pausedFlag = false;
 
 export function currentProfile(): ProfileParams | null {
   return engine?.params ?? null;
@@ -65,7 +67,7 @@ function ensure(): void {
   const rng = s.rng.fork('music');
   const params = rollProfile(profileForFamily(s.ticket.family), rng);
   seed = s.seed;
-  applied = { ...deriveFlags(s), ...override };
+  applied = { ...deriveFlags(s), paused: pausedFlag, ...override };
   engine = createMusicEngine({ ctx, out: mix.music, clock: { now: () => ctx.currentTime }, params, rng: rng.fork('voices'), page: s.page, flags: applied });
 }
 
@@ -82,6 +84,7 @@ export function stopMusic(fadeS = 1.5): void {
   engine = null;
   getStateFn = null;
   applied = CALM_FLAGS;
+  pausedFlag = false;
 }
 
 /** Called every frame. Cheap: the engine gates itself to one run per 25 ms. */
@@ -90,7 +93,7 @@ export function tickMusic(): void {
   if (!engine || !getStateFn) return;
   const s = getStateFn();
   if (s && s.seed === seed) {
-    const next = { ...deriveFlags(s), ...override };
+    const next = { ...deriveFlags(s), paused: pausedFlag, ...override };
     if (!sameFlags(applied, next)) {
       applied = next;
       engine.setFlags(next);
@@ -106,6 +109,16 @@ export function setMusicState(flags: Partial<MusicFlags> | null): void {
     applied = { ...applied, ...flags };
     engine.setFlags(applied);
   }
+}
+
+/** The pause sheet holds the run (`game:paused`): the music goes to the telephone band with the hold beep, as in bot hours. */
+export function setMusicPaused(paused: boolean): void {
+  pausedFlag = paused;
+}
+
+/** Whether the music is on hold because the run is paused. */
+export function musicPaused(): boolean {
+  return pausedFlag;
 }
 
 /** The new page's roll takes over (page turn). */

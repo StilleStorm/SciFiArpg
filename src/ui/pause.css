@@ -1,0 +1,139 @@
+/*
+ * Pause (DESIGN 2, 4.1): the margin note "Pauza" on the HUD and the pause sheet. The sheet shares ui/sheet.css with the
+ * inventory (a printed page over the game); only the three form lines are new. Paper, ink, no rounded cards.
+ */
+
+/* ---------- the margin note: a circled word, 44 x 44, hanging under the HUD on the right ---------- */
+.pause-btn {
+  position: absolute;
+  right: 12px;
+  top: calc(100% + 6px);
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  pointer-events: auto;
+  color: var(--ink);
+}
+.pause-btn svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.pause-btn .word {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: italic;
+  font-size: 10px;
+  line-height: 1;
+  pointer-events: none;
+}
+.pause-btn:active svg {
+  stroke-width: 2.4;
+}
+/* portrait + joystick: the Załączniki pad takes the top right, so the note hangs under it */
+:root[data-orient='portrait'][data-steer='joystick'] .pause-btn {
+  top: calc(100% + 80px);
+  right: 24px;
+}
+:root[data-orient='portrait'][data-steer='joystick'] .lefty .pause-btn {
+  top: calc(100% + 6px);
+  right: 12px;
+}
+/* landscape: top right, under the Załączniki pad (the update line hangs beside it); mirrored when left-handed */
+:root[data-orient='landscape'] .pause-btn {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 76px);
+  right: calc(env(safe-area-inset-right) + 30px);
+}
+:root[data-orient='landscape'] .lefty .pause-btn {
+  right: auto;
+  left: calc(env(safe-area-inset-left) + 30px);
+}
+
+/* ---------- the sheet: three typed lines ---------- */
+.pz-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 10px 2px 4px;
+}
+.pz-line {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pz-btn {
+  align-self: stretch;
+  min-height: 48px;
+  padding: 10px 14px 8px;
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: left;
+  border: 1.5px solid var(--ink);
+  outline: 1px solid var(--ink);
+  outline-offset: 3px;
+  margin: 3px;
+}
+.pz-btn:active {
+  border-width: 3px;
+  padding: 8.5px 12.5px 6.5px;
+}
+.pz-note {
+  margin: 0 4px;
+  font-style: italic;
+  font-size: 14.5px;
+  line-height: 1.3;
+}
+/* landscape (a page 390 px high): the three lines stand side by side */
+:root[data-orient='landscape'] .pz-lines {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 22px;
+  padding-top: 14px;
+}
+:root[data-orient='landscape'] .pz-line {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- the base: the unfinished ticket, first thing on the page ---------- */
+.resume-line {
+  margin: 0 0 14px;
+  padding: 10px 12px 9px;
+  border: 1.5px solid var(--ink);
+  outline: 1px solid var(--ink);
+  outline-offset: 3px;
+  text-align: left;
+}
+.resume-btn {
+  display: block;
+  min-height: 44px;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 5px;
+}
+.resume-note {
+  margin: 2px 0 0;
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.3;
+}

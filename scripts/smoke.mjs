@@ -190,6 +190,54 @@ try {
   await page.locator('.ps-close').click({ timeout: 2000 }).catch(() => undefined);
   await sleep(300);
 
+  // ---------- 4b. pause, resume, Zakończ and the bookmark (DESIGN 4.1) ----------
+  await settle();
+  await page.evaluate(() => {
+    window.__keep = window.__game.state();
+  });
+  const pz0 = await page.evaluate(() => window.__game.state().time);
+  await page.locator('.hud .pause-btn').click({ timeout: 3000 });
+  await sleep(500);
+  const pz1 = await page.evaluate(() => ({ status: window.__game.state().status, time: window.__game.state().time, sheet: !!document.querySelector('.pause-sheet') }));
+  check('Pauza holds the run and opens the pause sheet', pz1.status === 'paused' && pz1.sheet && pz1.time >= pz0, JSON.stringify(pz1));
+  await shot('08b-pause-sheet');
+  await sleep(600);
+  check('the clock stands still while the sheet is open', (await page.evaluate(() => window.__game.state().time)) === pz1.time);
+  await page.locator('[data-pause=resume]').click({ timeout: 3000 });
+  await sleep(500);
+  const pz2 = await page.evaluate(() => ({ same: window.__keep === window.__game.state(), status: window.__game.state().status, time: window.__game.state().time }));
+  check('Wznów continues the same state object', pz2.same && pz2.status === 'running' && pz2.time > pz1.time, JSON.stringify(pz2));
+  // on to page 2, a wound, then Zakończ zgłoszenie
+  await page.evaluate(() => window.__game.turnTo(1));
+  await sleep(1500);
+  await settle();
+  await page.evaluate(() => {
+    const g = window.__game;
+    g.enemies.clear();
+    g.hurtPlayer(12);
+  });
+  const pzBefore = await runState();
+  await page.locator('.hud .pause-btn').click({ timeout: 3000 });
+  await sleep(400);
+  await page.locator('[data-pause=end]').click({ timeout: 3000 });
+  await sleep(900);
+  check("Zakończ goes to 'baza'", (await screen()) === 'baza', await screen());
+  const resumeLine = await page.locator('.resume-btn').textContent({ timeout: 3000 }).catch(() => null);
+  check('the base offers "Wznów zgłoszenie nr ..." at the top', typeof resumeLine === 'string' && resumeLine.includes('Wznów zgłoszenie nr'), String(resumeLine));
+  await shot('08c-baza-resume');
+  const saved = await page.evaluate(() => ({ bookmark: window.__game.meta().bookmark ?? null, character: window.__game.character() }));
+  check('the bookmark and the character were saved', saved.bookmark?.pageIndex === pzBefore?.page && saved.character !== null, JSON.stringify(saved.bookmark));
+  await page.locator('.resume-btn').click({ timeout: 3000 });
+  await sleep(1800);
+  await settle();
+  const pzAfter = await page.evaluate(() => {
+    const s = window.__game.state();
+    return s && { screen: window.__game.screen(), page: s.pageIndex, hp: s.player.hp, hpMax: s.player.hpMax, note: document.querySelector('.foot')?.textContent ?? '' };
+  });
+  check('resuming lands on the same page index with full racja', pzAfter?.screen === 'run' && pzAfter.page === pzBefore?.page && pzAfter.hp === pzAfter.hpMax, JSON.stringify({ page: pzAfter?.page, hp: pzAfter?.hp }));
+  check('a footnote says the ticket was reassigned', (pzAfter?.note ?? '').includes('innemu konsultantowi'));
+  await shot('08d-resumed');
+
   // ---------- 5. the boss ----------
   await settle();
   const pages = (await runState())?.pages ?? 1;

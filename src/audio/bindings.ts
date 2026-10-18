@@ -6,7 +6,7 @@ import type { Bus, GameEvents } from '../core/events';
 import type { Enemy } from '../entities';
 import type { RunState } from '../world/run';
 import { getMix } from './context';
-import { musicPhase, musicTurn, startMusic, stopMusic, tickMusic } from './music';
+import { musicPhase, musicTurn, setMusicPaused, startMusic, stopMusic, tickMusic } from './music';
 import { FAMILY_FLAVOUR, HERO_SKILL_SOUNDS, play, startHum, type Hum, type PlayOpts, type SfxName } from './sfx';
 
 export interface AudioDeps {
@@ -87,6 +87,11 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
     hum?.stop(1);
     hum = null;
     stopMusic(1.5);
+  });
+  // The pause sheet: the line is put on hold (the music flag acts like bot hours) and the sheet is laid down or lifted.
+  on('game:paused', (e) => {
+    setMusicPaused(e.paused);
+    play(e.paused ? 'inventoryOpen' : 'inventoryClose');
   });
   on('screen:changed', (e) => {
     invOpen = false;

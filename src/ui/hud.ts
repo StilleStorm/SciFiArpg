@@ -3,6 +3,7 @@ import { xpToNext } from '../progression/xp';
 import type { RunState } from '../world/run';
 import { h } from './dom';
 import { el as svgEl, n2 } from '../render/svg';
+import { createPauseButton } from './pause';
 
 export interface Hud {
   el: HTMLElement;
@@ -47,8 +48,8 @@ export function reputacjaText(s: RunState): string {
   return `${p.level} \u00b7 ${progress}`;
 }
 
-/** `onUpdateTap` is called when the player taps the "aktualizacja dostepna" line under Reputacja. */
-export function createHud(root: HTMLElement, onUpdateTap: () => void = () => undefined): Hud {
+/** `onUpdateTap` is called when the player taps the "aktualizacja dostepna" line under Reputacja, `onPause` when the margin note "Pauza" is tapped. */
+export function createHud(root: HTMLElement, onUpdateTap: () => void = () => undefined, onPause: () => void = () => undefined): Hud {
   const el = h('div', 'hud paper');
   const racja = field('ui.hud.racja', 'racja');
   const reputacja = field('ui.hud.reputacja');
@@ -63,7 +64,7 @@ export function createHud(root: HTMLElement, onUpdateTap: () => void = () => und
   const upd = h('button', 'upd hidden', t('forms.update.availableLine'));
   upd.type = 'button';
   upd.addEventListener('click', onUpdateTap);
-  el.append(row1, row2, upd);
+  el.append(row1, row2, upd, createPauseButton(onPause));
   root.append(el);
 
   const svg = svgEl('svg', { 'aria-hidden': 'true' });

@@ -10,15 +10,13 @@ const run = (n: number, outcome: 'zgloszenie' | 'ukonczono' = 'zgloszenie') => (
   kills: 10,
   pages: 2,
   total: 5,
-  gwiazdki: 7,
 });
 
 describe('Historia zgloszen', () => {
-  it('records a run: history, count and banked gwiazdki', () => {
+  it('records a run: history and count', () => {
     const m = recordRun(defaultMeta(), run(48213));
     expect(m.history).toHaveLength(1);
     expect(m.runsCompleted).toBe(1);
-    expect(m.gwiazdki).toBe(7);
     expect(m.history[0]).toMatchObject({ number: 48213, outcome: 'zgloszenie', pages: 2, total: 5 });
     expect(m.history[0]?.rewritten).toBeUndefined();
   });

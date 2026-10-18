@@ -1,10 +1,12 @@
 import type { HeroId } from '../heroes';
-import type { Item, Slot } from '../items/types';
 import type { Theme } from '../render/stage';
 import type { LawId } from '../world/laws';
+import { toBookmark, type Bookmark } from './bookmark';
+import { characterFromOldSave, toCharacter, type Character } from './character';
 
 export const SAVE_KEY = 'zgloszenie.meta';
-export const SAVE_VERSION = 1;
+/** 2: the character record replaced the stash and the top-level gwiazdki; the bookmark was added. */
+export const SAVE_VERSION = 2;
 
 export type RunOutcome = 'zgloszenie' | 'petla' | 'zawieszenie' | 'ukonczono';
 
@@ -47,24 +49,18 @@ export function toVolume(v: unknown, fallback: number): number {
   return typeof v === 'number' && Number.isFinite(v) ? Math.min(100, Math.max(0, Math.round(v))) : fallback;
 }
 
-/** What the player carries between runs (the Sklep at the base spends gwiazdki and fills it). */
-export interface Stash {
-  inventory: Item[];
-  equipment: Partial<Record<Slot, Item>>;
-}
-
 export interface MetaState {
   version: number;
   heroId?: HeroId;
   stamps: number;
   /** Tickets closed (runs that ended, won or lost). */
   runsCompleted: number;
-  /** Total gwiazdki carried back from runs (the Sklep spends them). */
-  gwiazdki: number;
   /** Past runs, oldest first. */
   history: TicketEntry[];
-  /** Items carried between runs; absent until the first run ends. */
-  stash?: Stash;
+  /** What the hero keeps between runs: level, updates, gear, bag, purse (save/character.ts). Absent until the first save. */
+  character?: Character;
+  /** The ticket in progress, if one was left unfinished (save/bookmark.ts); cleared when the ticket ends. */
+  bookmark?: Bookmark;
   settings: Settings;
   /** Fields added by other domains are kept as they are. */
   [extra: string]: unknown;
@@ -78,7 +74,6 @@ export function defaultMeta(): MetaState {
     version: SAVE_VERSION,
     stamps: 0,
     runsCompleted: 0,
-    gwiazdki: 0,
     history: [],
     settings: { theme: 'auto', leftHanded: false, musicVolume: DEFAULT_MUSIC_VOLUME, sfxVolume: DEFAULT_SFX_VOLUME },
   };
@@ -131,7 +126,6 @@ export function migrate(raw: unknown): MetaState {
     version: SAVE_VERSION,
     stamps: typeof raw['stamps'] === 'number' ? raw['stamps'] : base.stamps,
     runsCompleted: typeof raw['runsCompleted'] === 'number' ? raw['runsCompleted'] : base.runsCompleted,
-    gwiazdki: typeof raw['gwiazdki'] === 'number' ? raw['gwiazdki'] : base.gwiazdki,
     history: history.slice(-HISTORY_MAX),
     settings: {
       theme: theme === 'day' || theme === 'night' || theme === 'auto' ? theme : base.settings.theme,
@@ -145,15 +139,14 @@ export function migrate(raw: unknown): MetaState {
   };
   delete out.heroId;
   delete out.stash;
-  const rawStash = raw['stash'];
-  if (isRecord(rawStash) && !Array.isArray(rawStash)) {
-    const inv = rawStash['inventory'];
-    const eq = rawStash['equipment'];
-    out.stash = {
-      inventory: Array.isArray(inv) ? (inv.filter(isRecord) as unknown as Item[]) : [],
-      equipment: isRecord(eq) && !Array.isArray(eq) ? (eq as Partial<Record<Slot, Item>>) : {},
-    };
-  }
+  delete out.gwiazdki;
+  delete out.character;
+  delete out.bookmark;
+  // The character: the new record, or the one an older save implies (its stash and its top-level gwiazdki).
+  const character = toCharacter(raw['character']) ?? characterFromOldSave(raw);
+  if (character) out.character = character;
+  const bookmark = toBookmark(raw['bookmark']);
+  if (bookmark) out.bookmark = bookmark;
   const hero = raw['heroId'];
   if (hero === 'pralka' || hero === 'konsultant' || hero === 'petlowiec' || hero === 'kartograf') out.heroId = hero;
   return out;

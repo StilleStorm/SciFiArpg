@@ -9,6 +9,10 @@ export interface GameEvents {
   inventory: undefined;
   'screen:changed': { screen: Screen };
   'run:started': { seed: number };
+  /** The run was paused (pause button, the app went to the background) or resumed; the music turns to hold music while paused. */
+  'game:paused': { paused: boolean };
+  /** A bookmark of the run was written to the save (page turn, pause, Zakończ, the app hidden). */
+  'run:bookmarked': { pageIndex: number };
   'player:hit': { x: number; y: number; amount: number; crit: boolean };
   'player:died': { x: number; y: number };
   'enemy:hit': { id: number; x: number; y: number; amount: number; crit: boolean };

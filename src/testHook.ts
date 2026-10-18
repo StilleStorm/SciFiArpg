@@ -9,6 +9,7 @@ import { applyDamage } from './systems/combat';
 import { attack as attackWith } from './systems/combat';
 import { fireAuto } from './heroes/auto';
 import type { Input } from './input';
+import type { Character } from './save/character';
 import type { MetaState, Settings } from './save/save';
 import { steerVector } from './ui/joystick';
 import { currentOrient, effectiveSteering, type Orient, type Steering } from './ui/layout';
@@ -79,6 +80,16 @@ export interface GameHook {
   controls(): { orient: Orient; steering: Steering };
   /** Hold the stick at a finger offset of (dx, dy) css px from its centre (null lets go). Needs joystick mode. */
   joystick(dx: number, dy: number): void;
+  /** The pause button: hold the run and open the pause sheet. False when a form or the sheet already holds it. */
+  pause(): boolean;
+  /** Wznów on the pause sheet. */
+  resume(): void;
+  /** Zakończ zgłoszenie on the pause sheet: character and bookmark saved, back to the base. */
+  endTicket(): void;
+  /** "Wznów zgłoszenie nr ..." on the base; false when there is no bookmark. */
+  resumeTicket(): boolean;
+  /** The saved character record (null before the first save). */
+  character(): Character | null;
   /** Plain-data snapshot for assertions. */
   snapshot(): { screen: Screen; time: number; hp: number; enemies: number; pickups: number; kills: number; x: number; y: number } | null;
 }
@@ -99,6 +110,10 @@ export interface HookDeps {
   input: Input;
   /** Merge into the saved settings and apply them (main.ts). */
   changeSettings(patch: Partial<Settings>): void;
+  pause(): boolean;
+  resume(): void;
+  endTicket(): void;
+  resumeTicket(): boolean;
 }
 
 const NEAR = 90;
@@ -208,6 +223,11 @@ export function installTestHook(deps: HookDeps): void {
     joystick(dx, dy) {
       deps.input.inject(dx === 0 && dy === 0 ? null : steerVector(dx, dy));
     },
+    pause: () => deps.pause(),
+    resume: () => deps.resume(),
+    endTicket: () => deps.endTicket(),
+    resumeTicket: () => deps.resumeTicket(),
+    character: () => deps.getMeta().character ?? null,
     snapshot() {
       const s = game.state;
       if (!s) return null;

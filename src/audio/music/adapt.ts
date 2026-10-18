@@ -8,6 +8,7 @@
  *   elite       splices begin, a reversed fragment every 8 bars
  *   boss        tempo x1.25, hiss up, splices often; every boss phase is a hard cut (an event)
  *   bot hours   telephone band only (300-3400 Hz) and a hold beep every 4 s
+ *   paused      the same: the pause sheet is the line on hold ("muzyka na czekanie"), driven by `game:paused`
  *   reversed    the loop runs backwards (Czas wsteczny)
  *   suspended   ducked 12 dB and low-passed, as if behind a door (Zawieszenie)
  *   death       the mechanism slows to a stop, no sting
@@ -21,6 +22,8 @@ export interface MusicFlags {
   elite: boolean;
   boss: boolean;
   botTime: boolean;
+  /** The pause sheet holds the run: treated exactly like botTime (telephone band, hold beep). */
+  paused: boolean;
   reversed: boolean;
   suspended: boolean;
   dead: boolean;
@@ -32,6 +35,7 @@ export const CALM_FLAGS: MusicFlags = {
   elite: false,
   boss: false,
   botTime: false,
+  paused: false,
   reversed: false,
   suspended: false,
   dead: false,
@@ -111,7 +115,7 @@ export function adaptTargets(f: MusicFlags, profile: ProfileId): Targets {
     t.hiss = 2;
     t.splice = 1.6;
   }
-  if (f.botTime) {
+  if (f.botTime || f.paused) {
     t.band = PHONE_BAND;
     t.main = 0.85;
     t.second = 0;
@@ -140,13 +144,14 @@ export function adaptTargets(f: MusicFlags, profile: ProfileId): Targets {
   return t;
 }
 
-export type MusicState = 'calm' | 'near' | 'elite' | 'boss' | 'botTime' | 'reversed' | 'suspended' | 'death' | 'pageTurn';
+export type MusicState = 'calm' | 'near' | 'elite' | 'boss' | 'botTime' | 'paused' | 'reversed' | 'suspended' | 'death' | 'pageTurn';
 
 /** The dominant state, for logs and the render script. */
 export function describeState(f: MusicFlags): MusicState {
   if (f.dead) return 'death';
   if (f.suspended) return 'suspended';
   if (f.botTime) return 'botTime';
+  if (f.paused) return 'paused';
   if (f.pageTurn) return 'pageTurn';
   if (f.boss) return 'boss';
   if (f.elite) return 'elite';
@@ -176,6 +181,7 @@ export function sameFlags(a: MusicFlags, b: MusicFlags): boolean {
     a.elite === b.elite &&
     a.boss === b.boss &&
     a.botTime === b.botTime &&
+    a.paused === b.paused &&
     a.reversed === b.reversed &&
     a.suspended === b.suspended &&
     a.dead === b.dead &&

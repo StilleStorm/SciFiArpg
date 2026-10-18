@@ -28,6 +28,11 @@ export interface Game {
   start(seed: number, opts?: RunOptions): RunState;
   /** Leave the run: the views and the page are cleared and input is off. */
   stop(): void;
+  /** The pause sheet holds the run: status 'paused', input off, `game:paused {paused: true}`. False when a sheet or a form already holds it. */
+  pause(): boolean;
+  /** Take the run back exactly as it was (the same state object). False when this game did not pause it. */
+  resume(): boolean;
+  readonly paused: boolean;
   update(dt: number): void;
   render(dtSec: number): void;
   /** A tap on the page. `walk` false (joystick mode): do not walk there, only the kiosk and the bot hear it. */
@@ -50,6 +55,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
   installItems(stage.ui, bus, () => state);
   const ents: Entity[] = [];
   let state: RunState | null = null;
+  let pausedByGame = false;
 
   const game: Game = {
     get state() {
@@ -57,8 +63,30 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
     },
     views,
     hero,
+    get paused() {
+      return pausedByGame;
+    },
+    pause() {
+      const s = state;
+      if (!s || pausedByGame || s.status !== 'running' || s.modal) return false;
+      s.status = 'paused';
+      pausedByGame = true;
+      input.setEnabled(false);
+      bus.emit('game:paused', { paused: true });
+      return true;
+    },
+    resume() {
+      const s = state;
+      if (!s || !pausedByGame) return false;
+      pausedByGame = false;
+      if (s.status === 'paused') s.status = 'running';
+      input.setEnabled(true);
+      bus.emit('game:paused', { paused: false });
+      return true;
+    },
     start(seed, opts) {
       const s = createRun(seed, opts);
+      pausedByGame = false;
       state = s;
       hero.onStart(s);
       views.clear();
@@ -70,10 +98,13 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input)
       bus.emit('run:started', { seed });
       bus.emit('stamp', { text: t('ui.run.stamp'), x: s.player.x, y: s.player.y - 120 });
       onPageEntered(s, bus);
-      bus.emit('page:entered', { index: 0, count: s.pageCount });
+      bus.emit('page:entered', { index: s.pageIndex, count: s.pageCount });
+      // A resumed ticket is a new page from the seed handled by another consultant (DESIGN 4.1).
+      if (opts?.resume) bus.emit('footnote', { text: t('ui.note.reassigned', { number: s.ticket.number }) });
       return s;
     },
     stop() {
+      pausedByGame = false;
       input.setEnabled(false);
       views.clear();
       stage.world.replaceChildren();

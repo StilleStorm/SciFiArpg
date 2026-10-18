@@ -13,11 +13,9 @@ export interface RunRecord {
   kills: number;
   pages: number;
   total: number;
-  /** Gwiazdki the player carried back. */
-  gwiazdki: number;
 }
 
-/** Close a ticket: append it to the history, count it, bank the gwiazdki. Pure. */
+/** Close a ticket: append it to the history and count it. Pure. (The gwiazdki live in the character record, save/character.ts.) */
 export function recordRun(meta: MetaState, run: RunRecord): MetaState {
   const entry: TicketEntry = {
     number: run.number,
@@ -31,7 +29,6 @@ export function recordRun(meta: MetaState, run: RunRecord): MetaState {
   return {
     ...meta,
     runsCompleted: meta.runsCompleted + 1,
-    gwiazdki: meta.gwiazdki + Math.max(0, run.gwiazdki),
     history: [...meta.history, entry].slice(-HISTORY_MAX),
   };
 }

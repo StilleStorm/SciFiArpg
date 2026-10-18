@@ -1,5 +1,6 @@
 import { t } from '../i18n';
 import { isLost, pendingRewrites, rewriteIndex } from '../save/history';
+import type { Bookmark } from '../save/bookmark';
 import type { MetaState, TicketEntry } from '../save/save';
 import { tween } from '../render/tween';
 import { h } from './dom';
@@ -10,6 +11,8 @@ export interface BazaHandlers {
   onChangeHero(): void;
   /** Open the Sklep sheet (economy/sklep UI) over the base. */
   onShop(): void;
+  /** Take up the ticket that was left unfinished (Zakończ, or the app was closed during a run). */
+  onResume(bookmark: Bookmark): void;
   /** Called with the history indices whose corrected version was just shown (the caller saves them). */
   onRewritten(indices: number[]): void;
 }
@@ -104,7 +107,7 @@ export function createBaza(root: HTMLElement, handlers: BazaHandlers): Baza {
       const profile = h('div', 'trow');
       profile.append(h('label', '', t('screens.baza.hero')), h('span', 'tval', heroName), change);
       const stars = h('div', 'trow');
-      stars.append(h('label', '', t('screens.baza.gwiazdki')), h('span', 'tval', String(meta.gwiazdki)));
+      stars.append(h('label', '', t('screens.baza.gwiazdki')), h('span', 'tval', String(meta.character?.gwiazdki ?? 0)));
 
       const open = h('button', 'link-btn', t('screens.baza.openShop'));
       open.type = 'button';
@@ -128,6 +131,15 @@ export function createBaza(root: HTMLElement, handlers: BazaHandlers): Baza {
       settings.addEventListener('click', handlers.onSettings);
 
       const scroll = h('div', 'scroll');
+      const mark = meta.bookmark;
+      if (mark) {
+        const resume = h('button', 'resume-btn', t('screens.baza.resume', { number: mark.ticketNumber }));
+        resume.type = 'button';
+        resume.addEventListener('click', () => handlers.onResume(mark));
+        const block = h('div', 'resume-line');
+        block.append(resume, h('p', 'resume-note', t('screens.baza.resumeNote', { planet: mark.planetName, page: mark.pageIndex + 1 })));
+        scroll.append(block);
+      }
       scroll.append(profile, stars, shop, h('h3', 'group', t('screens.baza.history')), list);
       frame.append(
         h('div', 'agency', t('screens.baza.agency')),

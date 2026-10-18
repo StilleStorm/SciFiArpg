@@ -95,6 +95,10 @@ export interface Loop {
   stop(): void;
   readonly running: boolean;
   after(seconds: number, fn: () => void): () => void;
+  /** The simulation and its timers hold (the pause sheet); frames keep rendering. Nothing is replayed on resume. */
+  pause(): void;
+  resume(): void;
+  readonly paused: boolean;
   /** Hit-stop: the simulation holds for `ms` (at most FREEZE_MAX_MS) while frames keep rendering. */
   freeze(ms: number): void;
 }
@@ -106,14 +110,15 @@ export function createLoop(h: LoopHandlers): Loop {
   let last = 0;
   let running = false;
   const freezer = createFreezer();
+  let held = false;
 
   const frame = (now: number): void => {
     raf = requestAnimationFrame(frame);
     const dt = Math.min((now - last) / 1000, MAX_FRAME);
     last = now;
     // Hit-stop: no simulation while frozen; the accumulator keeps what it had so nothing is lost or replayed.
-    const held = freezer.frame(dt * 1000);
-    const alpha = stepper.advance(held ? 0 : dt, (s) => {
+    const frozen = freezer.frame(dt * 1000);
+    const alpha = stepper.advance(frozen || held ? 0 : dt, (s) => {
       timers.update(s);
       h.update(s);
     });
@@ -149,6 +154,15 @@ export function createLoop(h: LoopHandlers): Loop {
       return running;
     },
     after: timers.after,
+    pause() {
+      held = true;
+    },
+    resume() {
+      held = false;
+    },
+    get paused() {
+      return held;
+    },
     freeze(ms) {
       freezer.request(ms);
     },

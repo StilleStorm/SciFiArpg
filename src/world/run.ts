@@ -7,6 +7,8 @@ import { applyLaw, neutralLaw, type LawFlags, type LawId } from './laws';
 import { ticketForSeed, type TicketInfo } from './ticket';
 
 import type { MissionMix } from '../enemies/families';
+import { applyBookmark, type Bookmark } from '../save/bookmark';
+import { applyCharacter, type Character } from '../save/character';
 
 export interface RunState {
   seed: number;
@@ -65,13 +67,19 @@ export interface RunOptions {
   pageCount?: number;
   /** Which hero to play; default Pralka. */
   heroId?: HeroId;
+  /** Resume a bookmarked ticket: same seed, clause and page count, the page at that index, the clock restored (save/bookmark.ts). */
+  resume?: Bookmark;
+  /** The saved character to play: gear, purse, level, updates (save/character.ts), applied before the stats are computed. */
+  character?: Character;
 }
 
 export function createRun(seed: number, opts: RunOptions = {}): RunState {
   const rng = createRng(seed);
-  const ticket = ticketForSeed(seed, opts.ticketNumber);
-  if (opts.lawId) ticket.lawId = opts.lawId;
-  if (opts.pageCount) ticket.pageCount = opts.pageCount;
+  const ticket = ticketForSeed(seed, opts.ticketNumber ?? opts.resume?.ticketNumber);
+  const lawId = opts.lawId ?? opts.resume?.lawId;
+  const pageCount = opts.pageCount ?? opts.resume?.pageCount;
+  if (lawId) ticket.lawId = lawId;
+  if (pageCount) ticket.pageCount = pageCount;
   const pages = generateRunPages(rng, ticket.pageCount);
   const page = pages[0] ?? generateRunPages(rng, 1)[0];
   if (!page) throw new Error('no page');
@@ -108,6 +116,8 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
   };
   applyHero(state.player, heroDef(opts.heroId ?? 'pralka'));
   applyLaw(state, ticket.lawId);
+  if (opts.character) applyCharacter(state, opts.character);
+  if (opts.resume) applyBookmark(state, opts.resume);
   return state;
 }
 

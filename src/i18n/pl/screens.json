@@ -47,7 +47,9 @@
     "changeHero": "Zmień profil",
     "shop": "Sklep",
     "openShop": "Otwórz",
-    "shopNote": "aplikacje i przedmioty użytkowe"
+    "shopNote": "aplikacje i przedmioty użytkowe",
+    "resume": "Wznów zgłoszenie nr {number}",
+    "resumeNote": "{planet}, strona {page}. Zgłoszenie zostanie przekazane innemu konsultantowi."
   },
   "history": {
     "line": "Nr {number} · {planet}",
@@ -94,5 +96,16 @@
   },
   "pageStamp": "Strona {page}",
   "victoryStamp": "Rozpatrzono",
-  "noBoss": "Przeciwnika ostatniej strony nie przydzielono. Strona zostaje zamknięta bez niego."
+  "noBoss": "Przeciwnika ostatniej strony nie przydzielono. Strona zostaje zamknięta bez niego.",
+  "pause": {
+    "title": "Zgłoszenie wstrzymane",
+    "sub": "Zgłoszenie nr {number}. {planet}, strona {page} z {total}.",
+    "resume": "Wznów",
+    "resumeNote": "Zgłoszenie wraca do rozpatrywania w stanie, w jakim je wstrzymano.",
+    "settings": "Ustawienia",
+    "settingsNote": "Wydanie, układ przycisków, sterowanie, dźwięk.",
+    "end": "Zakończ zgłoszenie",
+    "endNote": "Zgłoszenie zostanie przekazane innemu konsultantowi, który nie zna jego dotychczasowego przebiegu. Postać i jej wyposażenie zostaną zapisane. Strona zostanie wydrukowana od nowa.",
+    "hold": "Prosimy czekać. Rozmowa jest nagrywana."
+  }
 }

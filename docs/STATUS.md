@@ -21,6 +21,8 @@ Keep this file current: it replaces chat memory.
   manifest fullscreen (Android hides the bars), one-letter-word typography rule in t().
 - Voice passes done on every i18n file. Unused keys to wire or drop: ui.note.firstKill/start/pickup.
 - Paint is live and approved by the player (DESIGN §3.4, render/wash.ts).
+- Pause and save are live: Pauza note on the HUD, sheet with Wznów/Ustawienia/Zakończ, character
+  persists between runs (level, upgrades, gear, bag, purse), bookmark resume from baza.
 - Attack animations are live: attack:started event, hero poses per hero, enemy wind-up and
   lunge, projectiles turn along velocity (render/attackFx.ts, scripts/shot-attacks.mjs).
 
@@ -43,7 +45,7 @@ joystick/tap steering (§2), editorial rules (§12.1).
 
 ## Backlog, in order (decided with the player 2026-10-18; DESIGN §13 "Planned next")
 1. (done) Paint approved; attack animations shipped.
-2. Pause + pause sheet with settings + save like Diablo 3 (§4.1). Today there is no way out of a run.
+2. (done) Pause sheet, hold music on pause, character save between runs, bookmark resume.
 3. Tunel serwisowy with exact-state return (§4.1).
 4. Walkable base page per planet (§4.1).
 5. Aiming: tap / hold-and-drag, three modes, smart target by claim (§5.6). Then more skills.

@@ -12,9 +12,10 @@ import { initInk } from './render/ink';
 import { installPaper } from './render/paper';
 import { createWobble, getStage, setTheme } from './render/stage';
 import { tickTweens } from './render/tween';
-import { markRewritten, recordRun } from './save/history';
+import { bindAutosave, settleRun } from './save/autosave';
+import { emptyCharacter } from './save/character';
+import { markRewritten } from './save/history';
 import { loadMeta, saveMeta, type Settings } from './save/save';
-import { giveStash, takeStash } from './save/stash';
 import { installTestHook } from './testHook';
 import { createBaza } from './ui/baza';
 import { createFootnotes } from './ui/footnotes';
@@ -23,6 +24,7 @@ import { createJoystick } from './ui/joystick';
 import { applySteering, currentOrient, effectiveSteering, initLayout, lockOrientation, orientationSetting } from './ui/layout';
 import { bindLawSheets } from './ui/lawSheets';
 import { createPads } from './ui/pads';
+import { createPauseSheet } from './ui/pause';
 import { mountProfile } from './ui/profile';
 import { createSettings } from './ui/settings';
 import { mountSklep, type SklepHandle } from './ui/sklep';
@@ -72,7 +74,7 @@ const input = createInput(stage.svg, (x, y, walk) => game.onTap(x, y, walk), cre
 initLayout(() => applySettings(meta.settings)); // data-orient on <html> follows the window; steering follows it until the player chooses
 applySettings(meta.settings);
 const game = createGame(stage, bus, camera, input);
-const hud = createHud(stage.ui, () => game.hero.requestUpdate());
+const hud = createHud(stage.ui, () => game.hero.requestUpdate(), () => pauseRun());
 const footnotes = createFootnotes(stage.ui);
 const pads = createPads(stage.ui, bus);
 const title = createTitle(stage.ui, () => go(meta.heroId ? 'baza' : 'profile'));
@@ -82,31 +84,32 @@ const baza = createBaza(stage.ui, {
   onSettings: () => go('settings'),
   onChangeHero: () => go('profile'),
   onRewritten: (indices) => save(markRewritten(meta, indices)),
+  onResume: () => resumeTicket(),
   onShop: () => {
-    // The base Sklep spends the gwiazdki and fills the stash that the next run starts with.
+    // The base Sklep spends the gwiazdki and fills the bag and gear that the next run starts with (the character record).
     shop?.unmount();
-    const stash = meta.stash ?? { inventory: [], equipment: {} };
-    const purse = { gwiazdki: meta.gwiazdki, inventory: stash.inventory, equipment: stash.equipment, level: 1 };
+    const character = meta.character ?? emptyCharacter(meta.heroId);
+    const purse = { gwiazdki: character.gwiazdki, inventory: [...character.inventory], equipment: { ...character.equipment }, level: 1 };
     shop = mountSklep(stage.ui, { runsCompleted: meta.runsCompleted }, purse, {
       onClose: () => {
         shop = null;
-        save({ ...meta, gwiazdki: purse.gwiazdki, stash: { inventory: purse.inventory, equipment: purse.equipment } });
+        save({ ...meta, character: { ...character, gwiazdki: purse.gwiazdki, inventory: purse.inventory, equipment: purse.equipment } });
         if (screen === 'baza') baza.show(meta);
       },
     });
   },
 });
-const settings = createSettings(
-  stage.ui,
-  (next) => {
-    save({ ...meta, settings: next });
-    applySettings(next);
-  },
-  () => go('baza'),
-  (which) => {
-    if (which === 'sfx') audio.preview();
-  },
-);
+const onSettingsChange = (next: Settings): void => {
+  save({ ...meta, settings: next });
+  applySettings(next);
+};
+const onVolumeSet = (which: 'music' | 'sfx'): void => {
+  if (which === 'sfx') audio.preview();
+};
+const settings = createSettings(stage.ui, onSettingsChange, () => go('baza'), onVolumeSet);
+// The same form, opened in place from the pause sheet: Wróć returns to the sheet, not to the base.
+const pauseSettings = createSettings(stage.ui, onSettingsChange, () => closePauseSettings(), onVolumeSet);
+const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onEnd: () => endTicket() });
 let pendingTicket: { seed: number; info: TicketInfo } | null = null;
 const ticket = createTicket(stage.ui, () => {
   unlockAudio(); // the accept button is the natural unlock (DESIGN 14.5); any first tap also unlocks
@@ -126,6 +129,7 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
   if (next !== 'baza') baza.hide();
   if (next !== 'ticket') ticket.hide();
   if (next !== 'settings') settings.hide();
+  if (next !== 'run') clearPause();
   if (next !== 'run') input.setEnabled(false);
   switch (next) {
     case 'title':
@@ -154,8 +158,8 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
     case 'run': {
       footnotes.reset();
       setOfficeOpen(null);
-      const state = game.start(seed, { ticketNumber: TICKET_BASE + meta.history.length, heroId: meta.heroId, ...opts });
-      if (meta.stash) state.nextItemNumber = giveStash(state.player, meta.stash);
+      // A resumed ticket keeps its number; the saved character (gear, purse, level, updates) is applied before the stats.
+      game.start(seed, { ...(opts.resume ? {} : { ticketNumber: TICKET_BASE + meta.history.length }), heroId: meta.heroId, character: meta.character, ...opts });
       hud.invalidate();
       break;
     }
@@ -183,23 +187,11 @@ const audio = createAudio(bus, { getState: () => game.state, freeze: (ms) => loo
 // The kiosk's office hours are decided by the clause (economy/hours.ts keeps the decision).
 lawHooks.officeReset = () => setOfficeOpen(null);
 
-/** The ticket is closed (won, or lost for good): file it in the Historia, bank the gwiazdki and the items, back to the base. */
+/** The ticket is closed (won, or lost for good): file it in the Historia, keep the character as it ended, tear up the bookmark, back to the base. */
 bus.on('run:ended', (e) => {
   const s = game.state;
   if (!s || screen !== 'run') return;
-  save({
-    ...recordRun(meta, {
-      number: s.ticket.number,
-      planet: s.ticket.planet,
-      clause: s.ticket.lawId,
-      outcome: e.outcome,
-      kills: s.kills,
-      pages: s.pageIndex + 1,
-      total: s.pageCount,
-      gwiazdki: s.player.gwiazdki,
-    }),
-    stash: takeStash(s.player),
-  });
+  save(settleRun(meta, s, e.outcome)); // Historia entry, the character as it ended, the bookmark torn up
   game.stop();
   go('baza');
 });
@@ -219,6 +211,63 @@ const loop = createLoop({
   },
 });
 
+// ---------- pause, Zakończ, resume (DESIGN 4.1) ----------
+/** The character and the bookmark are written at every page turn, on pause, on Zakończ and when the app is hidden. */
+const autosave = bindAutosave({ bus, getState: () => game.state, getMeta: () => meta, commit: save, inRun: () => screen === 'run' });
+
+/** Hold the run and put the pause sheet on the page. False when a form or the pause sheet already holds it. */
+function pauseRun(): boolean {
+  const s = game.state;
+  if (screen !== 'run' || !s || !game.pause()) return false;
+  loop.pause();
+  pauseSheet.open({ number: s.ticket.number, planet: s.ticket.planet, page: s.pageIndex + 1, total: s.pageCount });
+  return true;
+}
+
+/** Wznów: the same state object continues exactly where it stopped. */
+function resumeRun(): void {
+  clearPause();
+  game.resume();
+}
+
+function openPauseSettings(): void {
+  pauseSheet.setHidden(true);
+  pauseSettings.show(meta.settings);
+}
+
+function closePauseSettings(): void {
+  pauseSettings.hide();
+  pauseSheet.setHidden(false);
+}
+
+/** Take the pause sheet and its settings off the page and let the loop run (used by resume, Zakończ and every screen change). */
+function clearPause(): void {
+  pauseSettings.hide();
+  pauseSheet.close();
+  loop.resume();
+}
+
+/** Zakończ zgłoszenie: the character and a bookmark are saved, the run is dropped, back to the base. */
+function endTicket(): void {
+  if (screen !== 'run' || !game.state) return;
+  autosave.save();
+  game.stop();
+  go('baza');
+}
+
+/** Wznów zgłoszenie: the pages are regenerated from the bookmarked seed, the player stands on the bookmarked page. */
+function resumeTicket(): boolean {
+  const b = meta.bookmark;
+  if (!b || screen === 'run') return false;
+  go('run', b.seed, { resume: b });
+  return true;
+}
+
+// The app goes to the background (tab switch, lock screen, home button): hold the run, so the player returns to the sheet.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) pauseRun();
+});
+
 window.addEventListener('resize', () => {
   camera.resize();
   hud.invalidate();
@@ -232,6 +281,10 @@ installTestHook({
   go,
   getMeta: () => meta,
   setMeta: (m) => (meta = m),
+  pause: pauseRun,
+  resume: resumeRun,
+  endTicket,
+  resumeTicket,
   changeSettings: (patch) => {
     const next = { ...meta.settings, ...patch };
     save({ ...meta, settings: next });
