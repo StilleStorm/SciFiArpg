@@ -139,25 +139,25 @@
     "name": "Naleśnik",
     "desc1": "Planetoida spłaszczona.",
     "desc2": "Wniosek o uznanie za planetę karłowatą przyjęto i odłożono.",
-    "desc3": "W oczekiwaniu na decyzję uważa się za planetę karłowatą.",
-    "quirk": "Przy pełnej racji leży płasko i pociski się po nim ślizgają: obrażenia od pocisków niższe o 30%. Poniżej jednej trzeciej racji zaokrągla się na 5 sekund: upór wyższy o 20, nie da się go odepchnąć. Odnowienie 20 sekund.",
-    "quirkNote": "Wniosek Naleśnika jest ponownie rozpatrywany. Do czasu decyzji Naleśnik przyjmuje kształt kulisty.",
+    "desc3": "Do czasu decyzji Komisji ds. Kulistości uważa się za planetę karłowatą.",
+    "quirk": "Od 90% racji leży płasko i pociski ześlizgują się po nim: obrażenia od pocisków niższe o 30%. Poniżej jednej trzeciej racji na 5 sekund osiąga równowagę hydrostatyczną: upór wyższy o 20, nie da się go odepchnąć. Raz na 20 sekund.",
+    "quirkNote": "Naleśnik przyjął kształt kulisty. Wniosek skierowano do ponownego rozpatrzenia.",
     "chosen": "Postać zgłoszona przez osobę niepełnoletnią. Zgłoszenie uznano.",
     "auto": "Przewrócenie na drugą stronę. Mechaniczne, krótki zasięg.",
     "skill1": {
       "name": "Orbita",
       "pad": "Orbita",
-      "desc": "Toczy się po wskazanej linii i odbija od przeszkód. Pierwszy trafiony przeciwnik krąży wokół niego przez 3 sekundy, bez odpowiedzi."
+      "desc": "Przetoczenie po wskazanej linii, z odbiciem od przeszkód. Pierwszy trafiony przeciwnik zostaje satelitą na 3 sekundy i zajmuje się tylko Naleśnikiem."
     },
     "skill2": {
       "name": "Grawitacja własna",
       "pad": "Grawitacja",
-      "desc": "Przez 2 sekundy wszystko w promieniu 180 jednostek spada na niego, przedmioty także. Kto dotrze do krawędzi, ponosi uszczerbek na istnieniu i czeka na weryfikację."
+      "desc": "Przez 2 sekundy wszystko w promieniu 180 jednostek spada na Naleśnika, przedmioty także. Upadek na planetę o nieustalonym statusie powoduje obrażenia egzystencjalne. Upadli czekają na weryfikację."
     },
     "skill3": {
       "name": "Wniosek o status",
       "pad": "Wniosek",
-      "desc": "Flaga na 8 sekund we wskazanym miejscu. W promieniu 120 jednostek Naleśnik jest planetą: wchodzący przeciwnik jest zablokowany na sekundę i płaci opłatę regulaminową, a Naleśnik odzyskuje 4 punkty racji na sekundę."
+      "desc": "Flaga we wskazanym miejscu na 8 sekund. W promieniu 120 jednostek Naleśnik jest planetą w rozumieniu przepisów. Wchodzący przeciwnik jest zablokowany do decyzji Komisji (1 sekunda) i wnosi opłatę regulaminową. Naleśnik odzyskuje tam 4 punkty racji na sekundę."
     }
   }
 }

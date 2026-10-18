@@ -138,7 +138,7 @@
       },
       "nalesnik": {
         "1": {
-          "name": "Szybszy obieg",
+          "name": "Krótszy okres obiegu",
           "desc": "Odnowienie umiejętności krótsze o 8%."
         },
         "2": {
@@ -158,8 +158,8 @@
           "desc": "Czas działania dłuższy o 20%."
         },
         "6": {
-          "name": "Decyzja Komisji",
-          "desc": "Chód szybszy o 8%, odnowienie umiejętności krótsze o 5%."
+          "name": "Ponaglenie",
+          "desc": "Toczenie szybsze o 8%, odnowienie umiejętności krótsze o 5%."
         }
       }
     },

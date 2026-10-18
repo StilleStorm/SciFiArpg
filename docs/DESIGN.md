@@ -520,7 +520,7 @@ crossed out). Each: 1 auto-attack type, 3 skills (typed, see §5.2), 1 passive q
      pancake is officially a planet: enemies entering are **zablokowany** 1 s ("oczekują na
      decyzję Komisji") and take regulaminowy damage; the pancake regains 4 racja/s inside.
      One flag at a time, 8 s.
-   - Quirk, *równowaga hydrostatyczna*: at full racja it is flat and projectiles skim off it
+   - Quirk, *równowaga hydrostatyczna*: from 90% racja it is flat and projectiles skim off it
      (−30% projectile damage taken); below one third it rounds up for 5 s (+20 upór, immune to
      knockback, figure drawn rounder) and the Asystent notes that the application is being
      reconsidered.
