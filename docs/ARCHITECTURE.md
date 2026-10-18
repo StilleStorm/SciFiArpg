@@ -145,3 +145,26 @@ Stations open on a tap anywhere on their drawing or label (`Game.onTap` emits `s
 
 ## Fifth hero and the laser (2026-10-18)
 Heroes: pralka, konsultant, petlowiec, kartograf, nalesnik (`HERO_IDS` in save/character.ts and the save check list it too). Naleśnik logic in `heroes/nalesnik.ts` (orbit roll with a satellite, gravity pull, the `Zone` variant `'wniosek'` with `inside`), quirk in `heroes/shield.ts` (`projectileDamageMul`: skim from 90% racja; `Player.round` while rounded). Kartograf's auto is a hitscan laser: `fireAuto` → `fireLaser` → shared `attack()`; `attack:started` carries `laser {sx, sy, ex, ey, crit, metres}`; crit pierces along the line. The base page animates on a render clock `animMs` in game.ts because `RunState.time` does not advance in phase 'base'. Sounds: `nalesSlap`, `nalesOrbita`, `nalesGravity`, `nalesFlag`.
+
+## Fourth and fifth skills (DESIGN 10.1)
+Types (`heroes/defs.ts`): `SkillIndex = 0 | 1 | 2 | 3 | 4` (a skill of the hero), `PadSlot = 0 | 1 | 2` (a pad). `HeroDef.skills` is a
+five-tuple; `SkillDef` gains `requires?: FamilyId` (type-only import from `enemies/ids`; the permission the first rank of skills 3 and 4 wants;
+`progression/update.ts Family` is the same union). `HeroRun.cd`, `cdTotal`, `ranks` are keyed by **SkillIndex**
+(length 5); `HeroRun.pads: [SkillIndex, SkillIndex, SkillIndex]` (default `[0, 1, 2]`) says which skill each pad fires.
+`heroes/loadout.ts` (heroes agent): `isInstalled(s, i)` (0..2 always; 3 and 4 when `ranks[i] > 0`), `installedSkills(s): SkillIndex[]`,
+`padSkill(s, slot): SkillDef`, `assignPad(s, slot, skill): boolean` (refuses a not-installed skill; a skill already on another
+pad swaps with the one on `slot`; after it the three pads always hold three different installed skills), `fixPads(s)` (after a
+load: any pad holding a not-installed or duplicate skill falls back so the invariant holds). `castSkill(s, bus, slot: PadSlot, free, aim)`
+casts `pads[slot]`; the free cast (Pralka's quirk) draws from `installedSkills`. `skill:cast` carries `{slot, skill: SkillIndex, free, aim}`;
+`skill:aim` keeps `slot`. `HERO_SKILL_SOUNDS[hero]` has five entries (index = SkillIndex). `helpers.ts power/areaOf/durationOf/cooldownOf`
+take a SkillIndex. Pads (`ui/pads.ts`): `syncPads(s)` every frame redraws a pad's word and glyph when `s.hero.pads` changed
+(`SKILL_DRAWINGS[hero]` has five glyphs), `updatePadCooldowns` reads `cd[pads[i]]`, a press resolves the skill through `padSkill`.
+Progression (`progression/update.ts`): pool entries `skill1..skill5` (`slot` is a SkillIndex), `requirementOf`: skills 0..2 gate rank 3 by
+`SKILL_FAMILY[slot]`, skills 3..4 gate rank 1 by `SkillDef.requires`; `entryView` of a skill's rank 1 for index 3..4 reads
+"Nowa umiejętność: <name>" with the skill's own desc. `applyUpgrade` sets `ranks[slot]`; the form (`ui/update.ts`) follows the
+install of such a rank 1 with the step "Przypisz do przycisku" (three pad buttons with their current words, "Później"), which
+calls `assignPad`. `ui/loadout.ts` is the sheet the pause line "Umiejętności" opens (run and base): five rows, pad numbers,
+`assignPad` on tap. Save: `ProgressData.pads` (`progression/persist.ts`), `applyProgress` sets it then `fixPads`; `save/character.ts`
+reads it leniently (missing -> `[0, 1, 2]`). New entity variants: `Summon.variant 'moon'` (Nalesnik's Księżyc; `orbit?: {angle, r}`),
+`Zone.variant 'legenda' | 'start' | 'numer'` (Kartograf's legend box, Pętlowiec's landing countdown with `follow` unused, Konsultant's case number following its target).
+Smoke: `.pad.s1` still fires skill 0 on a fresh character.

@@ -58,10 +58,11 @@ function tick(s: RunState, bus: ReturnType<typeof createBus>, seconds: number): 
 describe('the skills declare an aim mode', () => {
   it('as DESIGN 5.6 lists them', () => {
     const modes = (id: HeroId): string[] => heroDef(id).skills.map((sk) => sk.aim);
-    expect(modes('pralka')).toEqual(['auto', 'auto', 'kierunek']);
-    expect(modes('konsultant')).toEqual(['wskazanie', 'kierunek', 'auto']);
-    expect(modes('petlowiec')).toEqual(['auto', 'auto', 'auto']);
-    expect(modes('kartograf')).toEqual(['kierunek', 'wskazanie', 'wskazanie']);
+    expect(modes('pralka')).toEqual(['auto', 'auto', 'kierunek', 'kierunek', 'auto']);
+    expect(modes('konsultant')).toEqual(['wskazanie', 'kierunek', 'auto', 'wskazanie', 'kierunek']);
+    expect(modes('petlowiec')).toEqual(['auto', 'auto', 'auto', 'auto', 'wskazanie']);
+    expect(modes('kartograf')).toEqual(['kierunek', 'wskazanie', 'wskazanie', 'auto', 'wskazanie']);
+    expect(modes('nalesnik')).toEqual(['kierunek', 'auto', 'wskazanie', 'auto', 'kierunek']);
   });
 });
 

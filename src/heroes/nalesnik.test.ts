@@ -64,17 +64,19 @@ describe('Nalesnik, the definition', () => {
     expect(def.auto.range).toBeLessThan(80);
   });
 
-  it('has the three skills with the aim modes of the spec', () => {
+  it('has the five skills with the aim modes of the spec', () => {
     expect(def.skills.map((k) => [k.id, k.aim, k.type])).toEqual([
       ['orbita', 'kierunek', 'mechaniczny'],
       ['grawitacja', 'auto', 'egzystencjalny'],
       ['wniosek', 'wskazanie', 'regulaminowy'],
+      ['plywy', 'auto', 'mechaniczny'],
+      ['ksiezyc', 'kierunek', 'egzystencjalny'],
     ]);
   });
 
-  it('has an upgrade pool of 3 skills x 3 ranks and 6 passives', () => {
+  it('has an upgrade pool of 5 skills x 3 ranks and 6 passives', () => {
     const pool = poolFor('nalesnik');
-    expect(pool.filter((u) => u.kind === 'skill')).toHaveLength(3);
+    expect(pool.filter((u) => u.kind === 'skill')).toHaveLength(5);
     expect(pool.filter((u) => u.kind === 'skill').every((u) => u.maxRank === 3)).toBe(true);
     expect(pool.filter((u) => u.kind === 'passive')).toHaveLength(6);
   });

@@ -98,7 +98,7 @@ describe('audio bindings', () => {
     for (const hero of ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'] as const) {
       played.length = 0;
       const { bus } = setup(hero);
-      for (const slot of [0, 1, 2] as const) bus.emit('skill:cast', { slot, free: false });
+      for (const skill of [0, 1, 2, 3, 4] as const) bus.emit('skill:cast', { slot: 0, skill, free: false });
       expect(names()).toEqual([...HERO_SKILL_SOUNDS[hero]]);
     }
   });

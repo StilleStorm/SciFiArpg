@@ -377,12 +377,13 @@ export type SfxName = keyof typeof RECIPES;
 export const SFX_NAMES = Object.keys(RECIPES) as SfxName[];
 
 /** Which three sounds each hero's skills make, by slot. */
-export const HERO_SKILL_SOUNDS: Record<HeroId, readonly [SfxName, SfxName, SfxName]> = {
-  pralka: ['pralkaSpin', 'pralkaFoam', 'pralkaDrag'],
-  konsultant: ['konsBeep', 'konsRedirect', 'konsHeadset'],
-  petlowiec: ['petlRemarks', 'petlSplice', 'petlRewind'],
-  kartograf: ['kartoClick', 'kartoHum', 'kartoPin'],
-  nalesnik: ['nalesOrbita', 'nalesGravity', 'nalesFlag'],
+/** One sound per skill, indexed by SkillIndex (DESIGN 10.1); the 4th and 5th borrow a sibling's recipe until their own is written. */
+export const HERO_SKILL_SOUNDS: Record<HeroId, readonly [SfxName, SfxName, SfxName, SfxName, SfxName]> = {
+  pralka: ['pralkaSpin', 'pralkaFoam', 'pralkaDrag', 'pralkaDrag', 'pralkaFoam'],
+  konsultant: ['konsBeep', 'konsRedirect', 'konsHeadset', 'konsBeep', 'konsHeadset'],
+  petlowiec: ['petlRemarks', 'petlSplice', 'petlRewind', 'petlRewind', 'petlSplice'],
+  kartograf: ['kartoClick', 'kartoHum', 'kartoPin', 'kartoHum', 'kartoPin'],
+  nalesnik: ['nalesOrbita', 'nalesGravity', 'nalesFlag', 'nalesGravity', 'nalesOrbita'],
 };
 
 export const FAMILY_FLAVOUR = {

@@ -166,7 +166,7 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
     if (!hero) return;
     const gain = (e.free ? 0.85 : 1) * (1 + Math.min(0.2, fxRadius / 500));
     fxRadius = 0;
-    play(HERO_SKILL_SOUNDS[hero][e.slot], { gain });
+    play(HERO_SKILL_SOUNDS[hero][e.skill], { gain });
   });
 
   // ---- paper, forms, the document ----

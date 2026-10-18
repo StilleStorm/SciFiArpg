@@ -40,10 +40,10 @@ describe('level curve', () => {
 });
 
 describe('the upgrade pool', () => {
-  it.each(['pralka', 'konsultant', 'petlowiec', 'kartograf'] as const)('%s: 3 skills x 3 ranks, 6 passives and stat upgrades', (id) => {
+  it.each(['pralka', 'konsultant', 'petlowiec', 'kartograf'] as const)('%s: 5 skills x 3 ranks, 6 passives and stat upgrades', (id) => {
     const pool = poolFor(id);
     const skills = pool.filter((u) => u.kind === 'skill');
-    expect(skills).toHaveLength(3);
+    expect(skills).toHaveLength(5);
     expect(skills.every((u) => u.maxRank === 3)).toBe(true);
     expect(pool.filter((u) => u.kind === 'passive')).toHaveLength(6);
     expect(pool.filter((u) => u.kind === 'stat').length).toBeGreaterThanOrEqual(6);

@@ -40,6 +40,7 @@ Language of code, comments and docs: English. Language of the game: Polish, thro
   - 9.2 Economy (base screen between runs)
   - 9.3 Narration
 - 10. Heroes
+  - 10.1 The fourth and fifth skills (through permissions; three of five on the pads)
 - 11. i18n
 - 12. Voice guide for Polish text
 - 13. Scope for the first playable (tonight) and backlog
@@ -335,7 +336,7 @@ cancel. A skill without an aim mode ignores the drag and casts on release like a
 - *wskazanie*: a point within range. Drag moves it; a tap uses the auto target's position.
   Drawn while held as a dotted ink circle of the skill's area at the point. Proszę czekać (a
   target), Teren nieistniejący, Korekta.
-Later: a 4th and 5th skill per hero unlock through permissions (§8), three of five on the pads.
+A 4th and 5th skill per hero unlock through permissions (§8), three of five on the pads: §10.1.
 
 ---
 
@@ -419,7 +420,8 @@ Slots: **broń**, **nakrycie głowy**, **odzież**, **przyrząd** (instrument/tr
 - Some entries **wymagają uprawnień**: an item (permission) that drops from a specific family.
   Without it the entry is visible but greyed and stamped "BRAK UPRAWNIEŃ".
 - Once per run you may **zgłosić problem z aktualizacją**: reroll the three entries.
-- Skill upgrades per hero are a short list (3 skills × 3 ranks + 6 passives). Stat upgrades:
+- Skill upgrades per hero are a short list (5 skills × 3 ranks, the 4th and 5th skill's first rank
+  gated by a permission, §10.1; + 6 passives). Stat upgrades:
   +racja, +pewność siebie, +upór, +resist to a type, +trial speed, +gwiazdki per kill.
 
 ---
@@ -469,7 +471,7 @@ Slots: **broń**, **nakrycie głowy**, **odzież**, **przyrząd** (instrument/tr
 
 Four, all available from the start on a hero-select screen styled as a profile printout
 ("PROFIL UŻYTKOWNIKA", with a hand-drawn avatar frame and a "zweryfikowany" tick that is
-crossed out). Each: 1 auto-attack type, 3 skills (typed, see §5.2), 1 passive quirk.
+crossed out). Each: 1 auto-attack type, 3 skills (typed, see §5.2) plus two more installed later (§10.1), 1 passive quirk.
 
 1. **Pralka Emancypowana** — a washing machine whose firmware update gave it opinions; it filed
    for personhood (application pending). Melee tank. Auto: mechaniczny, short, slow.
@@ -530,6 +532,82 @@ crossed out). Each: 1 auto-attack type, 3 skills (typed, see §5.2), 1 passive q
    W oczekiwaniu na decyzję uważa się za planetę karłowatą."
 
 ---
+
+### 10.1 The fourth and fifth skills (through permissions; three of five on the pads)
+
+Every hero has five skills. Skills 1–3 are on the pads from the start. Skills 4 and 5 are
+**zainstalowane przez aktualizację**: they appear in the AKTUALIZACJA as entries "Nowa
+umiejętność: <name>" and their first rank **wymaga uprawnień** of one enemy family (the card
+that family drops, §8); ranks II and III of them are free, like any skill's. The pads hold three
+skills at a time. When a new skill is installed the form asks "Przypisz do przycisku" and shows
+the three pads with the words they carry; picking one puts the new skill there, the displaced one
+goes off the pads; "Później" leaves the pads as they are. The pause sheet (run and base) has a line
+"Umiejętności" that opens the loadout: five rows (name, type, rank in roman numerals, the one-line
+description; not-yet-installed skills greyed with "nie zainstalowano"), each with the pad numbers
+1 2 3; tapping a number moves that skill onto that pad (if it was on another pad, the two swap).
+Always exactly three different installed skills on the pads. Cooldowns belong to the skill, not the
+pad: a skill taken off a pad keeps cooling. Pralka's *błąd programu* fires a random installed skill,
+on the pads or not. Saved with the character (§4.1): ranks and the pad assignment.
+
+| Hero | 4th (uprawnienia) | 5th (uprawnienia) |
+|---|---|---|
+| Pralka | *Otwarcie bębna* (urządzenia) | *Wniosek o osobowość* (wygenerowane) |
+| Konsultant | *Numer sprawy* (powiadomienia) | *Rozłączenie* (urządzenia) |
+| Pętlowiec | *Już to było* (wygenerowane) | *Odłożony start* (powiadomienia) |
+| Kartograf | *Skala 1:1* (powiadomienia) | *Legenda* (wygenerowane) |
+| Naleśnik | *Pływy* (urządzenia) | *Księżyc* (powiadomienia) |
+
+1. **Pralka Emancypowana**
+   - *Otwarcie bębna* (kierunek, mechaniczny, 11 s): she opens the drum mid-cycle and the wet load
+     flies out in a cone (reach 150, half-angle 35°): 1.3× damage, knockback 40 along the cone, the
+     hit are **do weryfikacji** for 3 s (wet laundry has to be checked). Drawn: the cone sketch and a
+     few wet strokes that land on the enemies and dry out.
+   - *Wniosek o osobowość* (auto, egzystencjalny, 22 s): for 6 s she reads her application aloud.
+     Enemies within 140 take 0.35× egzystencjalny damage per second and, if *Wygenerowane*, their
+     existence coefficient falls to 0.5 (she has filed; they have not). She gets +20 upór for the
+     reading. A ring that follows her, a pencil "§" on it. Footnote on the first cast: the
+     application number.
+2. **Konsultant Infolinii**
+   - *Numer sprawy* (wskazanie, regulaminowy, 13 s): stamps a case number on the target: for 6 s it
+     takes +35% damage from everything (a case with a number gets attention), 0.5× damage on the
+     stamp. When it dies with time left the number is reassigned to the nearest enemy within 160
+     with the remaining time (at most 3 handovers). Drawn: a small stamped number above the figure
+     that follows it, like the hourglass.
+   - *Rozłączenie* (kierunek, mechaniczny, 18 s): "Rozmowa została zakończona." A line (reach 220):
+     the first enemy on it is cut off: thrown 180 units further along the line (stopped by
+     obstacles) and **zablokowany** 2 s, 1.0× damage. If it is below 25% racja the call simply drops:
+     it dies (normal death, normal drops). Drawn: a dotted line to the hit, cut by a short stroke, a
+     struck "połączenie" word.
+3. **Pętlowiec**
+   - *Już to było* (auto, egzystencjalny, 14 s): casts again, for free, the last skill he cast
+     other than this one (with its last aim); every live copy also casts it at its own position.
+     With nothing to repeat: three pointed remarks fly at once (the auto, triple). The footnote
+     insists it already said this.
+   - *Odłożony start* (wskazanie, mechaniczny, 12 s): the capsule he arrived in finally leaves, and
+     lands at the point 0.8 s later (a dotted circle counts down, then the capsule is drawn in
+     falling): 2.0× mechaniczny within 90, knockback 60, the hit are **przeczytane, bez odpowiedzi**
+     toward the Pętlowiec for 2 s. Obstacles do not stop it (it comes from above).
+4. **Kartograf Planet Nieistniejących**
+   - *Skala 1:1* (auto, regulaminowy, 16 s): for 5 s the map is at full scale: auto range +60%, every
+     survey line pierces as if it had crit, and every enemy it crosses is **do weryfikacji** 1.5 s.
+     Drawn: the measuring laser doubles its ticks; a "1:1" note on the HUD line.
+   - *Legenda* (wskazanie, egzystencjalny, 15 s): a legend box at the point (radius 130, 4 s). Every
+     enemy inside is given a wrong name by the legend (one margin label per enemy, from a short
+     list) and, named wrongly, is **przeczytane, bez odpowiedzi** toward the Kartograf and takes
+     0.35× egzystencjalny per second. Drawn: a ruled box with three legend lines at the point.
+5. **Naleśnik**
+   - *Pływy* (auto, mechaniczny, 12 s): its gravity raises a tide: a ring runs out from the rim to
+     160 units over 0.4 s, pushing enemies out 70 and dealing 1.2× mechaniczny; loot inside is pulled
+     in instead. The opposite of Grawitacja; the two chain. Drawn: the ring sketch, wider strokes.
+   - *Księżyc* (kierunek, egzystencjalny, 20 s): launches a pebble moon in the direction; it settles
+     on an orbit at 90 units and circles the pancake for 8 s (a summon, variant `moon`, 1.4 rad/s),
+     striking every enemy it passes for 0.5× egzystencjalny (each enemy at most once per 0.6 s). A
+     body with a moon is a planet in its own opinion: +10 upór while it lasts. One moon at a time.
+     Drawn: the pebble on a dotted orbit, like the satellite but smaller and on its own ring.
+
+Aim modes follow §5.6. Numbers scale with ranks like the first three (helpers.ts). Pad words are
+one word where possible (Bęben, Wniosek, Numer, Rozłącz, Już było, Start, Skala, Legenda, Pływy,
+Księżyc); the voice editor decides the final words.
 
 ## 11. i18n
 
@@ -612,7 +690,7 @@ and is funny precisely because the Asystent reads it out flatly.
 3. Tunel serwisowy with the exact-state return (§4.1).
 4. The walkable base page per planet with stations (§4.1).
 5. Aiming: tap or hold and drag, three aim modes, smart target by claim (§5.6).
-6. More skills: a 4th and 5th per hero through permissions, three of five on the pads.
+6. More skills: a 4th and 5th per hero through permissions, three of five on the pads (§10.1).
 7. Spór for bosses (§5.4). Przesyłka/paczkomat deliveries.
 
 ### Backlog

@@ -52,6 +52,16 @@
       "name": "Odwirowanie",
       "pad": "Odwirowanie",
       "desc": "Przejazd z jednym przeciwnikiem. Na końcu przeciwnik jest zablokowany."
+    },
+    "skill4": {
+      "name": "Otwarcie bębna",
+      "pad": "Bęben",
+      "desc": "Bęben otwarty w trakcie cyklu. Mokre pranie leci stożkiem, trafieni czekają na weryfikację."
+    },
+    "skill5": {
+      "name": "Wniosek o osobowość",
+      "pad": "Wniosek",
+      "desc": "Przez 6 sekund czyta wniosek na głos. Słuchający tracą rację; wygenerowani tracą pewność, że istnieją."
     }
   },
   "konsultant": {
@@ -75,6 +85,16 @@
       "name": "Czy mogę jeszcze w czymś pomóc",
       "pad": "Pomoc",
       "desc": "Częstsze argumenty nie do odparcia. Każde skreślenie przynosi gwiazdkę."
+    },
+    "skill4": {
+      "name": "Numer sprawy",
+      "pad": "Numer",
+      "desc": "Sprawa dostaje numer. Przez 6 sekund obrywa bardziej od wszystkich. Po śmierci numer przechodzi dalej."
+    },
+    "skill5": {
+      "name": "Rozłączenie",
+      "pad": "Rozłącz",
+      "desc": "Rozmowa zakończona. Pierwszy na linii odrzucony daleko i zablokowany; poniżej jednej czwartej racji połączenie przerwane."
     }
   },
   "petlowiec": {
@@ -106,11 +126,26 @@
       "4": "Kopia zauważa, że w jej wersji wydarzeń przeciwnik został już skreślony.",
       "5": "Kopia prosi o wskazanie, która z wersji pozostaje w mocy.",
       "6": "Kopia odnotowuje rozbieżność. Rozbieżności nie opisuje."
+    },
+    "skill4": {
+      "name": "Już to było",
+      "pad": "Już było",
+      "desc": "Powtarza ostatnią umiejętność bez odnowienia. Kopie też. Bez niczego do powtórzenia: trzy uwagi naraz."
+    },
+    "skill5": {
+      "name": "Odłożony start",
+      "pad": "Start",
+      "desc": "Kapsuła wreszcie odlatuje i ląduje we wskazanym punkcie po 0,8 sekundy. Odrzuca i zostawia przeczytanych."
     }
   },
   "kartograf": {
     "exit": "Kartograf zaznacza wyjście: w {corner} rogu strony. Terenu nie sprawdzano.",
-    "corner": { "tl": "lewym górnym", "tr": "prawym górnym", "bl": "lewym dolnym", "br": "prawym dolnym" },
+    "corner": {
+      "tl": "lewym górnym",
+      "tr": "prawym górnym",
+      "bl": "lewym dolnym",
+      "br": "prawym dolnym"
+    },
     "name": "Kartograf Planet Nieistniejących",
     "desc1": "Sporządza mapy planet, których istnienie potwierdza wyłącznie nawigacja.",
     "desc2": "Mapy są dokładne. Terenu nie sprawdzano.",
@@ -133,7 +168,17 @@
       "pad": "Korekta",
       "desc": "Krótki skok. W miejscu startu zostaje błąd pomiaru."
     },
-    "distance": "{value} m"
+    "distance": "{value} m",
+    "skill4": {
+      "name": "Skala 1:1",
+      "pad": "Skala",
+      "desc": "Przez 5 sekund mapa w skali 1:1. Zasięg większy, każdy pomiar przebija, zmierzeni czekają na weryfikację."
+    },
+    "skill5": {
+      "name": "Legenda",
+      "pad": "Legenda",
+      "desc": "Ramka legendy w punkcie. Każdy w środku dostaje złą nazwę, jest przeczytany bez odpowiedzi i traci rację."
+    }
   },
   "nalesnik": {
     "name": "Naleśnik",
@@ -158,6 +203,16 @@
       "name": "Wniosek o status",
       "pad": "Wniosek",
       "desc": "Flaga we wskazanym miejscu na 8 sekund. W promieniu 120 jednostek Naleśnik jest planetą w rozumieniu przepisów. Wchodzący przeciwnik jest zablokowany do decyzji Komisji (1 sekunda) i wnosi opłatę regulaminową. Naleśnik odzyskuje tam 4 punkty racji na sekundę."
+    },
+    "skill4": {
+      "name": "Pływy",
+      "pad": "Pływy",
+      "desc": "Przypływ od krawędzi. Przeciwnicy wypchnięci, łup przyciągnięty."
+    },
+    "skill5": {
+      "name": "Księżyc",
+      "pad": "Księżyc",
+      "desc": "Kamyk wystrzelony na orbitę krąży 8 sekund i trafia, kogo minie. Ciało z księżycem to planeta. Plus upór."
     }
   }
 }

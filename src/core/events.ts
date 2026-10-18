@@ -54,8 +54,8 @@ export interface GameEvents {
   'law:ask': { kind: 'cookies' | 'update' | 'code' };
   /** The player tapped the page at world x, y. */
   'player:tap': { x: number; y: number };
-  /** A hero skill fired (slot 0..2); free = fired by the Pralka quirk without cooldown. */
-  'skill:cast': { slot: 0 | 1 | 2; free: boolean; aim?: { kind: 'auto' | 'kierunek' | 'wskazanie'; dx: number; dy: number; x: number; y: number } };
+  /** A hero skill fired: `slot` is the pad (0..2), `skill` the hero's skill index (0..4, DESIGN 10.1); free = fired by the Pralka quirk without cooldown. */
+  'skill:cast': { slot: 0 | 1 | 2; skill: 0 | 1 | 2 | 3 | 4; free: boolean; aim?: { kind: 'auto' | 'kierunek' | 'wskazanie'; dx: number; dy: number; x: number; y: number } };
   /** A pad is held and dragged (DESIGN 5.6): the aim as it would fire now (direction and point both filled); pads.ts emits it on every change. */
   'skill:aim': { slot: 0 | 1 | 2; mode: 'auto' | 'kierunek' | 'wskazanie'; x: number; y: number; dx: number; dy: number };
   /** A summon ran out of time or was replaced; its drawing is rubbed out. */

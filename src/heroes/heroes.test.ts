@@ -30,10 +30,12 @@ function tick(s: RunState, bus: ReturnType<typeof createBus>, seconds: number): 
 }
 
 describe('hero definitions', () => {
-  it('has five heroes with three typed skills each and no mana', () => {
+  it('has five heroes with five typed skills each (the 4th and 5th gated by a permission) and no mana', () => {
     expect(HEROES.map((h) => h.id)).toEqual(['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik']);
     for (const h of HEROES) {
-      expect(h.skills).toHaveLength(3);
+      expect(h.skills).toHaveLength(5);
+      expect(h.skills.slice(0, 3).every((sk) => sk.requires === undefined)).toBe(true);
+      expect(h.skills.slice(3).every((sk) => sk.requires !== undefined)).toBe(true);
       for (const sk of h.skills) {
         expect(sk.cooldown).toBeGreaterThan(0);
         expect(['mechaniczny', 'regulaminowy', 'egzystencjalny']).toContain(sk.type);
@@ -84,7 +86,7 @@ describe('Petla ring buffer', () => {
     const p = s.player;
     p.hp = p.hpMax - 30;
     const hpWas = s.hero.ring[0]?.hp ?? p.hpMax;
-    s.hero.cd = [0, 0, 0];
+    s.hero.cd = [0, 0, 0, 0, 0];
     expect(castSkill(s, bus, 2)).toBe(true);
     expect(Math.hypot(p.x - 100, p.y - 100)).toBeLessThan(5); // three seconds ago the hero stood at 100, 100
     expect(p.hp).toBeGreaterThanOrEqual(hpWas - 0.01);
@@ -343,12 +345,12 @@ describe('suspended and shielded', () => {
     addEnemy(s, 40);
     const casts: boolean[] = [];
     bus.on('skill:cast', (e) => casts.push(e.free));
-    s.hero.cd = [3, 3, 3];
+    s.hero.cd = [3, 3, 3, 3, 3];
     for (let i = 1; i <= 9; i++) expect(onPlayerHit(s, bus)).toBe(false);
     expect(casts).toHaveLength(0);
     onPlayerHit(s, bus);
     expect(casts).toEqual([true]);
-    expect(s.hero.cd).toEqual([3, 3, 3]);
+    expect(s.hero.cd).toEqual([3, 3, 3, 3, 3]);
     for (let i = 1; i <= 10; i++) onPlayerHit(s, bus);
     expect(casts).toHaveLength(2);
     const k = run('konsultant');

@@ -5,6 +5,7 @@ import type { Bus } from '../core/events';
 import type { Enemy } from '../entities/types';
 import { applyDamage } from '../systems/combat';
 import type { RunState } from '../world/run';
+import type { SkillIndex } from './defs';
 import { playerDamageMul } from './shield';
 
 export const RANK_DAMAGE = 0.25;
@@ -12,11 +13,11 @@ export const RANK_AREA = 0.12;
 export const RANK_DURATION = 0.15;
 export const RANK_COOLDOWN = 0.07;
 
-/** Damage multiplier of a skill slot: ranks and passives. */
-export const power = (s: RunState, slot: 0 | 1 | 2): number => (1 + RANK_DAMAGE * s.hero.ranks[slot]) * s.hero.mods.dmg;
-export const areaOf = (s: RunState, slot: 0 | 1 | 2): number => (1 + RANK_AREA * s.hero.ranks[slot]) * s.hero.mods.area;
-export const durationOf = (s: RunState, slot: 0 | 1 | 2): number => (1 + RANK_DURATION * s.hero.ranks[slot]) * s.hero.mods.duration;
-export const cooldownOf = (s: RunState, slot: 0 | 1 | 2, base: number): number =>
+/** Damage multiplier of a skill (by SkillIndex, not pad): ranks and passives. */
+export const power = (s: RunState, slot: SkillIndex): number => (1 + RANK_DAMAGE * s.hero.ranks[slot]) * s.hero.mods.dmg;
+export const areaOf = (s: RunState, slot: SkillIndex): number => (1 + RANK_AREA * s.hero.ranks[slot]) * s.hero.mods.area;
+export const durationOf = (s: RunState, slot: SkillIndex): number => (1 + RANK_DURATION * s.hero.ranks[slot]) * s.hero.mods.duration;
+export const cooldownOf = (s: RunState, slot: SkillIndex, base: number): number =>
   Math.max(1, base * s.hero.mods.cooldown * (1 - RANK_COOLDOWN * s.hero.ranks[slot]));
 
 export function avgDamage(s: RunState): number {

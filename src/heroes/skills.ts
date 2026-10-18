@@ -6,7 +6,7 @@ import { t } from '../i18n';
 import { recomputeStats } from '../items/stats';
 import { resolveMove } from '../world/pages';
 import { nextId, type RunState } from '../world/run';
-import { heroDef, type HeroDef } from './defs';
+import { heroDef, type HeroDef, type PadSlot } from './defs';
 import { AUTO_AIM, blinkOf, fitAim, LINE_SPEED, LINE_TTL, pickTarget, radiusOf, reachOf, resolveAim, resolveDirection, takeQueuedAim, terenCentre, type Aim } from './aim';
 import { areaOf, cooldownOf, durationOf, enemiesWithin, power, skillDamage } from './helpers';
 import { FLAG_S, GRAVITY_R, GRAVITY_S, ORBITA_TIME } from './nalesnik';
@@ -287,18 +287,19 @@ export function removeSummon(s: RunState, bus: Bus, id: number): void {
 }
 
 /**
- * Fire skill `slot` (0..2) if it is ready and the hero is not wyciszony. `free` skips the cooldown check and
+ * Fire the skill on pad `slot` (0..2) if it is ready and the hero is not wyciszony. `free` skips the cooldown check and
  * does not start one (Pralka's blad programu). `aim` is the player's aim (heroes/aim.ts); left out it is the auto cast. Returns
- * true if the skill did something.
+ * true if the skill did something. Cooldowns are kept per skill (`s.hero.pads[slot]`), not per pad (DESIGN 10.1).
  */
-export function castSkill(s: RunState, bus: Bus, slot: 0 | 1 | 2, free = false, aim?: Aim): boolean {
+export function castSkill(s: RunState, bus: Bus, slot: PadSlot, free = false, aim?: Aim): boolean {
   if (s.status !== 'running' || s.phase === 'base') return false; // the base has nobody to argue with: a pad tap there does nothing
   const p = s.player;
   const def = heroDef(p.heroId);
-  const sk = def.skills[slot];
+  const skill = s.hero.pads[slot];
+  const sk = def.skills[skill];
   if (s.law.botTime || isStunned(p)) return false; // the bot hours: skills do nothing, no cooldown is spent
   if (!free) {
-    if (s.hero.cd[slot] > 0) return false;
+    if (s.hero.cd[skill] > 0) return false;
     if (isSilenced(p)) {
       if (s.time - s.hero.silenceNoteAt > 1.5) {
         s.hero.silenceNoteAt = s.time;
@@ -314,10 +315,10 @@ export function castSkill(s: RunState, bus: Bus, slot: 0 | 1 | 2, free = false, 
   const resolved = resolveAim(s, sk, aimed);
   if (fn(s, bus, def, aimed) === false) return false;
   if (!free) {
-    const total = cooldownOf(s, slot, sk.cooldown);
-    s.hero.cd[slot] = total;
-    s.hero.cdTotal[slot] = total;
+    const total = cooldownOf(s, skill, sk.cooldown);
+    s.hero.cd[skill] = total;
+    s.hero.cdTotal[skill] = total;
   }
-  bus.emit('skill:cast', { slot, free, aim: resolved });
+  bus.emit('skill:cast', { slot, skill, free, aim: resolved });
   return true;
 }

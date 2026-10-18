@@ -3,7 +3,7 @@ import type { DamageType, Stats } from '../combat/damage';
 import type { Item } from '../items';
 import { recomputeStats } from '../items/stats';
 import type { Player } from '../entities/types';
-import { heroDef, type HeroDef } from './defs';
+import { heroDef, type HeroDef, type SkillIndex } from './defs';
 import type { HeroId } from './index';
 
 /** Multipliers and additions that passives and ranks feed into the skills. 1 = neutral for multipliers. */
@@ -145,11 +145,13 @@ export interface UpdateOffer {
 
 export interface HeroRun {
   heroId: HeroId;
-  /** Seconds left per skill slot, and the length of the cooldown just started. */
-  cd: [number, number, number];
-  cdTotal: [number, number, number];
-  /** Skill ranks 0..3 (from updates). */
-  ranks: [number, number, number];
+  /** Seconds left per skill (keyed by SkillIndex, not by pad), and the length of the cooldown just started. */
+  cd: [number, number, number, number, number];
+  cdTotal: [number, number, number, number, number];
+  /** Skill ranks 0..3 (from updates); skills 3 and 4 are installed once their rank is above 0. */
+  ranks: [number, number, number, number, number];
+  /** Which skill each of the three pads fires (DESIGN 10.1; heroes/loadout.ts keeps them three different installed skills). */
+  pads: [SkillIndex, SkillIndex, SkillIndex];
   /** Every taken update entry id -> rank. */
   upgrades: Record<string, number>;
   mods: Mods;
@@ -200,9 +202,10 @@ export interface HeroRun {
 export function createHeroRun(heroId: HeroId): HeroRun {
   return {
     heroId,
-    cd: [0, 0, 0],
-    cdTotal: [1, 1, 1],
-    ranks: [0, 0, 0],
+    cd: [0, 0, 0, 0, 0],
+    cdTotal: [1, 1, 1, 1, 1],
+    ranks: [0, 0, 0, 0, 0],
+    pads: [0, 1, 2],
     upgrades: {},
     mods: neutralMods(),
     bonus: emptyBonus(),

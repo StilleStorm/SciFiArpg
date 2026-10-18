@@ -3,7 +3,7 @@
  * one may "wymagac uprawnien", one problem report per run rerolls the three.
  */
 import { DAMAGE_TYPES, type DamageType } from '../combat/damage';
-import { heroDef } from '../heroes/defs';
+import { heroDef, type SkillIndex } from '../heroes/defs';
 import type { HeroId } from '../heroes';
 import { neutralMods, type Mods, type OfferEntry, type UpdateOffer } from '../heroes/state';
 import { recomputeStats } from '../items/stats';
@@ -17,7 +17,8 @@ export const FAMILIES: readonly Family[] = ['urzadzenia', 'powiadomienia', 'wyge
 export interface UpgradeDef {
   id: string;
   kind: 'skill' | 'passive' | 'stat';
-  slot?: 0 | 1 | 2;
+  /** Skills: the hero's skill index (0..4), not a pad. */
+  slot?: SkillIndex;
   /** How many times it can be taken (skills: 3 ranks). */
   maxRank: number;
   /** Permission family needed ("wymaga uprawnien"). */
@@ -33,12 +34,12 @@ export interface UpgradeDef {
 const SKILL_FAMILY: readonly Family[] = ['urzadzenia', 'powiadomienia', 'wygenerowane'];
 
 const skillEntries = (): UpgradeDef[] =>
-  ([0, 1, 2] as const).map((slot) => ({
+  ([0, 1, 2, 3, 4] as const).map((slot) => ({
     id: `skill${slot + 1}`,
     kind: 'skill' as const,
     slot,
     maxRank: 3,
-    // the third rank is the one that wants a permission
+    // skills 1..3: the third rank is the one that wants a permission; skills 4..5: the first (requirementOf)
   }));
 
 const PASSIVES: Record<HeroId, { mods: Partial<Mods>; requires?: Family }[]> = {
@@ -93,7 +94,7 @@ const STATS: UpgradeDef[] = [
   { id: 'gwiazdki', kind: 'stat', maxRank: 3, mods: { gwiazdki: 1 } },
 ];
 
-/** Every entry the hero can ever be offered: 3 skills x 3 ranks, 6 passives, the stat upgrades. */
+/** Every entry the hero can ever be offered: 5 skills x 3 ranks, 6 passives, the stat upgrades. */
 export function poolFor(heroId: HeroId): UpgradeDef[] {
   const passives = PASSIVES[heroId].map((p, i): UpgradeDef => {
     const def: UpgradeDef = { id: `passive${i + 1}`, kind: 'passive', maxRank: 1, mods: p.mods, n: i + 1 };
@@ -109,9 +110,13 @@ export function upgradeById(heroId: HeroId, id: string): UpgradeDef | undefined 
 
 const WEIGHT = { skill: 3, passive: 2, stat: 2 } as const;
 
-/** The family a given entry at a given rank needs, if any. Skill rank 3 and each hero's last passive are gated. */
-export function requirementOf(def: UpgradeDef, rank: number): Family | undefined {
-  if (def.kind === 'skill') return rank >= 3 ? SKILL_FAMILY[def.slot ?? 0] : undefined;
+/** The family a given entry at a given rank needs, if any. Skill rank 3 and each hero's last passive are gated. The 4th and 5th skill's first rank wants the family in its SkillDef (DESIGN 10.1). */
+export function requirementOf(def: UpgradeDef, rank: number, heroId?: HeroId): Family | undefined {
+  if (def.kind === 'skill') {
+    const slot = def.slot ?? 0;
+    if (slot >= 3) return rank <= 1 && heroId ? heroDef(heroId).skills[slot].requires : undefined;
+    return rank >= 3 ? SKILL_FAMILY[slot] : undefined;
+  }
   return def.requires;
 }
 
@@ -129,7 +134,7 @@ export function availableEntries(s: RunState): OfferEntry[] {
   for (const def of poolFor(s.player.heroId)) {
     const rank = takenRank(s, def.id) + 1;
     if (rank > def.maxRank) continue;
-    out.push({ id: def.id, rank, locked: !hasPermission(s, requirementOf(def, rank)) });
+    out.push({ id: def.id, rank, locked: !hasPermission(s, requirementOf(def, rank, s.player.heroId)) });
   }
   return out;
 }
@@ -141,7 +146,7 @@ function weightOf(heroId: HeroId, e: OfferEntry): number {
 
 function isGated(heroId: HeroId, e: OfferEntry): boolean {
   const def = upgradeById(heroId, e.id);
-  return def ? requirementOf(def, e.rank) !== undefined : false;
+  return def ? requirementOf(def, e.rank, heroId) !== undefined : false;
 }
 
 /** Draw `count` entries, weighted, without repeats, at most one of them gated ("wymaga uprawnien"). */
@@ -213,7 +218,7 @@ export function applyUpgrade(s: RunState, id: string): boolean {
   const def = upgradeById(p.heroId, id);
   if (!def) return false;
   const rank = takenRank(s, id) + 1;
-  if (rank > def.maxRank || !hasPermission(s, requirementOf(def, rank))) return false;
+  if (rank > def.maxRank || !hasPermission(s, requirementOf(def, rank, p.heroId))) return false;
   s.hero.upgrades[id] = rank;
   const h = s.hero;
   if (def.kind === 'skill' && def.slot !== undefined) h.ranks[def.slot] = rank;
@@ -269,16 +274,17 @@ const ROMAN = ['', 'I', 'II', 'III'] as const;
 export function entryView(s: RunState, entry: OfferEntry): EntryView {
   const heroId = s.player.heroId;
   const def = upgradeById(heroId, entry.id);
-  const fam = def ? requirementOf(def, entry.rank) : undefined;
+  const fam = def ? requirementOf(def, entry.rank, heroId) : undefined;
   const requires = fam ? t('forms.update.requires', { family: t(`forms.update.family.${fam}`) }) : null;
   const base = { id: entry.id, locked: !hasPermission(s, fam), requires };
   if (!def) return { ...base, title: entry.id, desc: '', tag: '' };
   if (def.kind === 'skill' && def.slot !== undefined) {
     const sk = heroDef(heroId).skills[def.slot];
+    const fresh = def.slot >= 3 && entry.rank <= 1; // a new skill: its own name and description (DESIGN 10.1)
     return {
       ...base,
-      title: t('forms.update.skillRank', { skill: t(sk.nameKey), rank: ROMAN[entry.rank] ?? String(entry.rank) }),
-      desc: t('forms.update.skillRankDesc'),
+      title: fresh ? t('forms.update.newSkill', { skill: t(sk.nameKey) }) : t('forms.update.skillRank', { skill: t(sk.nameKey), rank: ROMAN[entry.rank] ?? String(entry.rank) }),
+      desc: fresh ? t(sk.descKey) : t('forms.update.skillRankDesc'),
       tag: t('forms.update.tag.skill', { type: t(`heroes.types.${sk.type}`) }),
     };
   }

@@ -3,6 +3,7 @@ import type { Bus } from '../core/events';
 import { t } from '../i18n';
 import type { RunState } from '../world/run';
 import { recomputeStats } from '../items/stats';
+import { installedSkills, padOf } from './loadout';
 import { castSkill } from './skills';
 
 /** Every 10th hit on a Pralka is a "blad programu": a random skill fires for free. Returns true if it fired. */
@@ -13,8 +14,16 @@ export function onPlayerHit(s: RunState, bus: Bus): boolean {
   s.hero.hitsTaken++;
   if (s.hero.hitsTaken % HITS_PER_ERROR !== 0) return false;
   bus.emit('footnote', { text: t('heroes.pralka.quirkNote') });
-  const slot = s.rngs.combat.int(0, 2) as 0 | 1 | 2;
-  return castSkill(s, bus, slot, true);
+  // a random installed skill, on the pads or not: it is cast through its pad, so the pads are shuffled for the one cast and put back
+  const installed = installedSkills(s);
+  const skill = installed[s.rngs.combat.int(0, installed.length - 1)] ?? 0;
+  const slot = padOf(s, skill);
+  if (slot !== null) return castSkill(s, bus, slot, true);
+  const saved = s.hero.pads[0];
+  s.hero.pads[0] = skill;
+  const fired = castSkill(s, bus, 0, true);
+  s.hero.pads[0] = saved;
+  return fired;
 }
 
 /** Nalesnik, rownowaga hydrostatyczna: below this share of racja it rounds up (DESIGN 10, item 5). */

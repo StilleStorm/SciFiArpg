@@ -196,7 +196,8 @@
         "name": "Wyższa ocena",
         "desc": "Każde skreślenie przynosi o jedną gwiazdkę więcej."
       }
-    }
+    },
+    "newSkill": "Nowa umiejętność: {skill}"
   },
   "death": {
     "zgloszenie": {

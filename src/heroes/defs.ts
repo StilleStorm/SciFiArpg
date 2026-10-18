@@ -1,6 +1,13 @@
-/** The five heroes (DESIGN section 10): numbers, auto-attack, three typed skills, one quirk. Data only. */
+/** The five heroes (DESIGN section 10, 10.1): numbers, auto-attack, five typed skills (the 4th and 5th installed through permissions), one quirk. Data only. */
 import type { DamageType, Stats } from '../combat/damage';
+import type { FamilyId } from '../enemies/ids';
 import type { HeroId } from './index';
+
+/** A skill of the hero (0..4) and a pad (0..2); `HeroRun.pads` says which skill each pad fires (DESIGN 10.1). */
+export type SkillIndex = 0 | 1 | 2 | 3 | 4;
+export type PadSlot = 0 | 1 | 2;
+export const PAD_SLOTS: readonly PadSlot[] = [0, 1, 2];
+export const SKILL_INDICES: readonly SkillIndex[] = [0, 1, 2, 3, 4];
 
 /** How a skill is aimed (DESIGN 5.6): by itself, by a direction, or by a point. */
 export type AimMode = 'auto' | 'kierunek' | 'wskazanie';
@@ -17,6 +24,8 @@ export interface SkillDef {
   cooldown: number;
   /** What a drag on the pad sets (heroes/aim.ts); a tap is always the auto cast. */
   aim: AimMode;
+  /** Skills 4 and 5 only: the permission (enemy family) their first rank needs in the update form (DESIGN 10.1). */
+  requires?: FamilyId;
 }
 
 export interface HeroDef {
@@ -47,18 +56,22 @@ export interface HeroDef {
      */
     hitscan?: boolean;
   };
-  skills: readonly [SkillDef, SkillDef, SkillDef];
+  skills: readonly [SkillDef, SkillDef, SkillDef, SkillDef, SkillDef];
 }
 
-const skill = (hero: HeroId, n: 1 | 2 | 3, id: string, type: DamageType, cooldown: number, aim: AimMode): SkillDef => ({
-  id,
-  nameKey: `heroes.${hero}.skill${n}.name`,
-  padKey: `heroes.${hero}.skill${n}.pad`,
-  descKey: `heroes.${hero}.skill${n}.desc`,
-  type,
-  cooldown,
-  aim,
-});
+const skill = (hero: HeroId, n: 1 | 2 | 3 | 4 | 5, id: string, type: DamageType, cooldown: number, aim: AimMode, requires?: FamilyId): SkillDef => {
+  const def: SkillDef = {
+    id,
+    nameKey: `heroes.${hero}.skill${n}.name`,
+    padKey: `heroes.${hero}.skill${n}.pad`,
+    descKey: `heroes.${hero}.skill${n}.desc`,
+    type,
+    cooldown,
+    aim,
+  };
+  if (requires) def.requires = requires;
+  return def;
+};
 
 const hero = (
   id: HeroId,
@@ -83,6 +96,8 @@ export const HEROES: readonly HeroDef[] = [
       skill('pralka', 1, 'wirowanie', 'mechaniczny', 7, 'auto'),
       skill('pralka', 2, 'pranieWstepne', 'regulaminowy', 10, 'auto'),
       skill('pralka', 3, 'odwirowanie', 'mechaniczny', 9, 'kierunek'),
+      skill('pralka', 4, 'beben', 'mechaniczny', 11, 'kierunek', 'urzadzenia'),
+      skill('pralka', 5, 'osobowosc', 'egzystencjalny', 22, 'auto', 'wygenerowane'),
     ],
   }),
   hero('konsultant', {
@@ -96,6 +111,8 @@ export const HEROES: readonly HeroDef[] = [
       skill('konsultant', 1, 'prosze', 'regulaminowy', 8, 'wskazanie'),
       skill('konsultant', 2, 'przekierowuje', 'egzystencjalny', 12, 'kierunek'),
       skill('konsultant', 3, 'pomoc', 'regulaminowy', 20, 'auto'),
+      skill('konsultant', 4, 'numer', 'regulaminowy', 13, 'wskazanie', 'powiadomienia'),
+      skill('konsultant', 5, 'rozlaczenie', 'mechaniczny', 18, 'kierunek', 'urzadzenia'),
     ],
   }),
   hero('petlowiec', {
@@ -109,6 +126,8 @@ export const HEROES: readonly HeroDef[] = [
       skill('petlowiec', 1, 'przybycie', 'regulaminowy', 9, 'auto'),
       skill('petlowiec', 2, 'spor', 'egzystencjalny', 11, 'auto'),
       skill('petlowiec', 3, 'petla', 'mechaniczny', 16, 'auto'),
+      skill('petlowiec', 4, 'juzBylo', 'egzystencjalny', 14, 'auto', 'wygenerowane'),
+      skill('petlowiec', 5, 'start', 'mechaniczny', 12, 'wskazanie', 'powiadomienia'),
     ],
   }),
   hero('kartograf', {
@@ -122,6 +141,8 @@ export const HEROES: readonly HeroDef[] = [
       skill('kartograf', 1, 'triangulacja', 'mechaniczny', 6, 'kierunek'),
       skill('kartograf', 2, 'teren', 'egzystencjalny', 14, 'wskazanie'),
       skill('kartograf', 3, 'korekta', 'regulaminowy', 10, 'wskazanie'),
+      skill('kartograf', 4, 'skala', 'regulaminowy', 16, 'auto', 'powiadomienia'),
+      skill('kartograf', 5, 'legenda', 'egzystencjalny', 15, 'wskazanie', 'wygenerowane'),
     ],
   }),
   // a flat asteroid that applied for dwarf-planet status: the tanky one, the fastest (DESIGN 10, item 5)
@@ -136,6 +157,8 @@ export const HEROES: readonly HeroDef[] = [
       skill('nalesnik', 1, 'orbita', 'mechaniczny', 9, 'kierunek'),
       skill('nalesnik', 2, 'grawitacja', 'egzystencjalny', 14, 'auto'),
       skill('nalesnik', 3, 'wniosek', 'regulaminowy', 16, 'wskazanie'),
+      skill('nalesnik', 4, 'plywy', 'mechaniczny', 12, 'auto', 'urzadzenia'),
+      skill('nalesnik', 5, 'ksiezyc', 'egzystencjalny', 20, 'kierunek', 'powiadomienia'),
     ],
   }),
 ];
