@@ -29,7 +29,7 @@ Language of code, comments and docs: English. Language of the game: Polish, thro
   - 5.1 Base numbers (now)
   - 5.2 Claims and rebuttals (now)
   - 5.3 Status effects as internet behaviour (now)
-  - 5.4 Spór (bosses, planned for the first boss patch; design now, build later)
+  - 5.4 Spór (bosses; two comments per boss, three replies in the margin, 5 s window)
   - 5.5 Existence coefficient (family *Wygenerowane*, §6)
   - 5.6 Aiming (celowanie)
 - 6. Enemies
@@ -309,12 +309,26 @@ Death is **utrata racji**. Dodge is **unik od tematu**.
 - Each is a plain data record `{kind, remaining, source}` in `combat/status.ts`, with a single
   renderer that adds/removes one marker `<g>` per status.
 
-### 5.4 Spór (bosses, planned for the first boss patch; design now, build later)
+### 5.4 Spór (bosses; built 2026-10-18)
 - At each boss phase the boss posts a **comment** (a bubble with a 1–2 line claim). Three
   **replies** appear as buttons in the margin, each with a type; one matches. A wrong reply
   costs 10% racja and a footnote "Odpowiedź nie na temat". The right reply opens a 5 s window of
-  ×2 damage and strikes the comment through. Only bosses, once per phase, skippable by just
-  fighting. Interfaces for this are to be left in `combat/spor.ts` as typed stubs.
+  ×2 damage against the boss and strikes the comment through. Only bosses, once per phase,
+  skippable by just fighting.
+- Phases: the first comment is posted 1.5 s after the boss is on the page (phase 1), the second
+  on the boss's phase change (`boss:phase`: Prototyp at half racja, Weryfikacja when its grid is
+  solved, Hipoteza when confirmed). Two comments per boss, six in all, each with three replies
+  in a per-boss list; the matching reply is placed at random (seeded).
+- A comment stays up 12 s, then is erased without penalty; the boss's death erases it. The
+  reply buttons sit in the margin next to the footnote slip, typed in Space Mono as boxed form
+  buttons with the reply's type in small type under the text. A reply once chosen closes the
+  prompt: the wrong one is struck in red where it stands, the right one stamps ODPOWIEDZIANO
+  on the comment and the bubble is struck through.
+- The comment is the boss's own voice: a user comment under a post, sober, 1–2 lines, no
+  exclamation marks (DESIGN §12). Replies are short clerical sentences in the hero's register,
+  one per damage type, and the wrong two must be plausible, never jokes that explain themselves.
+- The window multiplies the player's damage against that boss only (not summons' targets other
+  than the boss, not other enemies). It stacks with a rebuttal crit.
 
 ### 5.5 Existence coefficient (family *Wygenerowane*, §6)
 An enemy exists at `e ∈ [0.3, 1]`, changing every few seconds (flicker: stroke opacity and

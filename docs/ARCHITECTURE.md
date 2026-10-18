@@ -180,3 +180,28 @@ step at once), `assignPad(pad 1..3, index)`, `info().pads`. Smoke 3b: skill 4 fr
 hook's assign step on pad 1, a tap casting skill 4 with its ring, the loadout from the pause sheet (swap, Wróć, words after Wznów), Później
 for skill 5. Shots: `scripts/shot-skills.mjs` (port 4197, `shots-skills/`: each new skill mid-effect), `scripts/shot-loadout.mjs` (port 4198,
 `shots-loadout/`: assign step, pads, loadout run/base, the glyph strips).
+
+## Spór (DESIGN 5.4)
+State: `RunState.spor?: SporState` (`combat/spor.ts`): `{ prompt: SporPrompt | null; bossId: number; phase: 1 | 2; ttl: number;
+window: number; answered: Record<number, 1 | 2> }` (`answered[bossId]` = the last phase that already posted, so each boss posts
+once per phase; `window` = seconds left of the x2 against `bossId`). Pure logic in `combat/spor.ts`: `SPOR_TTL_S = 12`,
+`SPOR_WINDOW_S = 5`, `SPOR_WRONG_COST = 0.1`, `promptFor(boss: BossId, phase: 1 | 2, rng): SporPrompt` (shuffles the three
+replies with the seeded rng, sets `correct`), `answerSpor(s, bus, index: 0 | 1 | 2): 'right' | 'wrong' | 'none'`, `tickSpor(s, bus, dt)`
+(ttl, window, erases on boss death), `sporMul(s, defenderId): 1 | 2`. The prompt data: `SPOR_PROMPTS[boss]` is two entries
+(phase 1, 2) each `{ commentKey, replies: [reply per type] }`; keys `enemies.boss.<boss>.spor<1|2>.comment` and
+`.reply.<mechaniczny|regulaminowy|egzystencjalny>` in `src/i18n/pl/enemies.json`.
+Trigger: `enemies/bosses.ts` sets `rt.sporAt = s.time + 1.5` in `spawnBoss`; `tickBoss` posts phase 1 when `s.time >= rt.sporAt`
+and phase 2 on the same branch that emits `boss:phase`, both through `postSpor(s, bus, e, phase)` (combat/spor.ts), which emits
+`spor:posted {id, phase, commentKey, replies: textKey[]}`. Answers emit `spor:answered {id, index, right}`; the end of a prompt emits
+`spor:closed {id, reason: 'answered' | 'expired' | 'died'}`. Wrong: `player.hp -= 10% of hpMax` (through `applyDamage` with
+`type` undefined and a `footnote` 'combat.spor.offTopic'); right: `window = 5`, `stamp` 'combat.spor.stamp' over the boss.
+Damage: `enemies/hooks.ts modifyDamage` multiplies by `sporMul(s, defender.id)` for an enemy defender; `applyDamage` passes `s`.
+UI: `ui/spor.ts createSpor(root, bus, s): { el }`: three `.spor-reply[data-reply]` buttons (Space Mono, boxed, the type in small
+type) in a `.spor` strip next to the footnote slip (portrait: above the slip; landscape: the right margin above the pads; `ui/base.css`,
+`ui/landscape.css`), built on `spor:posted`, struck in red on a wrong answer, removed on `spor:closed` after 600 ms. Input while a
+prompt is up is unchanged: the pads, joystick and tunnel still work; a tap on a reply does not steer.
+Render: `render/enemyFigures.ts` gives the boss a second bubble (`.bubble.comment`, two lines, Garamond italic, above the claim
+bubble) on `spor:posted`, strikes it through on a right answer and erases it on `spor:closed`. Audio (`audio/bindings.ts`):
+`spor:posted` -> `footnote` key click, right -> `strikeThrough` + `stamp`, wrong -> `paperTear` light.
+Hook (`enemies/hook.ts` or `heroes/hook.ts`): `spor.answer(index)`, `spor.info()` -> the live prompt or null. Smoke: on the boss page
+a prompt is posted; a wrong answer costs racja; the right one opens the window (hp loss of the boss doubles).
