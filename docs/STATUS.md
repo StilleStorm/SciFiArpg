@@ -39,17 +39,22 @@ joystick/tap steering (§2), editorial rules (§12.1).
   the new defaults.
 - Whether bubbles/figures are readable at phone size.
 
-## Backlog, in order
-1. Act on phone feedback (feel of joystick, scale, sound levels, frame rate).
-2. Spór for bosses (DESIGN §5.4).
-3. Przesyłka / paczkomat deliveries (§7), tap an item on the ground to see its card first (§2).
-4. Joystick mode: the tappable footnote slip sits in the steering half (move the tap target or
+## Backlog, in order (decided with the player 2026-10-18; DESIGN §13 "Planned next")
+1. Paint sample (§3.4), judged on screenshots, then the rule is final.
+2. Pause + pause sheet with settings + save like Diablo 3 (§4.1). Today there is no way out of a run.
+3. Tunel serwisowy with exact-state return (§4.1).
+4. Walkable base page per planet (§4.1).
+5. Aiming: tap / hold-and-drag, three modes, smart target by claim (§5.6). Then more skills.
+6. Spór for bosses (DESIGN §5.4).
+7. Przesyłka / paczkomat deliveries (§7), tap an item on the ground to see its card first (§2).
+8. Act on phone feedback (feel of joystick, scale, sound levels, frame rate).
+9. Joystick mode: the tappable footnote slip sits in the steering half (move the tap target or
    ignore steering-half taps on it); landscape 40-enemy perf measurement; Odwirowanie knockback distance; appeal-form pickup drawing; Ciasteczka empty paper behind the
    banner; Wygenerowane drawings are the busiest (simplify); "Muzyka na czekanie, utwór nr N"
    shown somewhere; sounds for enemy:miss / offTopic / gwiazdki pickup; stereo panning.
-5. Heavy-metal music profile (own anchor and ban list to be written first).
-6. More fidget animation, more laws/uniques/parts, quests as ticket correspondence, English.
-7. When the game is fuller: move hosting to the player's Cloudflare (custom domain), then Google
+10. Heavy-metal music profile (own anchor and ban list to be written first).
+11. More fidget animation, more laws/uniques/parts, quests as ticket correspondence, English.
+12. When the game is fuller: move hosting to the player's Cloudflare (custom domain), then Google
    Play via Trusted Web Activity (PWABuilder/Bubblewrap; needs /.well-known/assetlinks.json at
    the origin root, a privacy policy URL, the 12-tester closed test; developer account exists).
 

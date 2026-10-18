@@ -57,6 +57,13 @@ Language of code, comments and docs: English. Language of the game: Polish, thro
 - The camera shows at least 700 units of height in portrait and 520 in landscape (844 x 390
   shows about 1125 x 520, so the page fills the width and figures read a third larger);
   enemy entry waves are placed in the actual view rect.
+- **Two margin buttons on the HUD form**, on its top edge where no thumb rests: *Wstrzymaj*
+  (pause) and *Tunel* (the service tunnel, §4.1). Pause stops the loop and opens a sheet styled
+  as a form: Wznów, Ustawienia (orientation, steering, volumes, night edition, left-handed),
+  Zakończ zgłoszenie. The Android back button opens the same sheet; it never leaves the app.
+  Tunel opens the tunnel with one tap, no confirmation.
+- **A pad is tapped or held.** Tap = auto cast. Hold and drag = aimed cast (§5.6), release to
+  fire. A skill without an aim mode casts on release like a tap.
 - No pinch. No double-tap. No long menus mid-run. Walking over loot picks it up. Tapping an
   item on the ground shows its card first (not built yet).
 - Must run at 60 fps on a mid-range phone with ~60 moving SVG elements. Entities are `<g>` with
@@ -79,8 +86,8 @@ walks across its pages. Modern things drawn in a 1965 hand is the look nobody el
   darker edges). Night edition: dark sepia paper (`#2a2420` family), pale ink. Never pure black,
   never pure white, never neon.
 - **Ink only.** Everything on the page is stroked line art: black ink (`#1b1711`), stroke widths
-  1.25–2.5 px at 1× scale. Fills only as hatching (pattern) or solid ink blots. No gradients,
-  no glow, no drop shadows, no translucent fills.
+  1.25–2.5 px at 1× scale. Fills only as hatching (pattern), solid ink blots, or **paint**
+  (§3.4). No gradients, no glow, no drop shadows.
 - **One accent: stamp red** (`#b3261e`). Used for stamps, "skreślono", the player's own Racja
   ink, and nothing else. No second accent color.
 - **Hand-drawn wobble.** One `feTurbulence` + `feDisplacementMap` filter on the world group.
@@ -122,7 +129,28 @@ walks across its pages. Modern things drawn in a 1965 hand is the look nobody el
 - Any text written by an AI that sounds like an AI, unless it is the Asystent speaking in
   character (§9.3), and even then in Lem's sober register, never in marketing tone.
 
-### 3.4 How the look is verified
+### 3.4 Paint (farba)
+Someone at the desk touched the printout with a wet brush. Watercolour and alcohol-ink washes
+sit **under** the ink strokes and do not respect them: a wash is offset from its figure by a few
+units, a little larger or smaller than the contour, with a ragged edge, as if it had soaked in
+and spread. The line and the stain live separate lives. Few, pale, alive.
+- A wash is one or two closed blob paths (`blobPoints` + `smoothClosed`, seeded from the
+  entity) with a flat translucent fill (0.2–0.4), no stroke, prepended under the strokes. The
+  wobble filter on the world group bends it with everything else. No extra filter, no blur, no
+  gradient: pooling comes from two overlapping blobs of the same colour, never from a gradient.
+- Palette (day): indigo `#3f5f8f`, brick `#b5572e`, violet `#7a5a9c`, bottle green `#4f7a52`,
+  ochre `#c89a2a`, star yellow `#e8c43a`. All watered down by opacity, never saturated. Night
+  edition: same hues, opacity ×0.7, the wash reads as a dim stain on dark paper. Stamp red
+  stays the only strong colour and is never a wash.
+- Where: the hero (one wash, a hue per hero), every enemy (one pale wash, a hue per family:
+  Urządzenia indigo, Powiadomienia brick, Wygenerowane violet; elites a second smaller wash,
+  bosses two larger washes 0.1 more opaque), gwiazdki (a yellow halo wash under the star and a
+  yellow fill inside it, so they read at a glance), item cards (a wash in the rarity's hue),
+  coffee rings (ochre or brick), two or three loose stains per page beside the obstacles.
+  Nothing else: not the HUD, not the forms, not the footnotes, not the stamps.
+- The ban list holds: no gradients, no blur, no glow, no neon. A wash is a stain, not a light.
+
+### 3.5 How the look is verified
 Every agent that touches rendering or UI runs `npm run shot` (Playwright, bundled Chromium) and
 inspects the PNGs in `shots/`. The lead rejects any screenshot that violates §3.2 or §3.3.
 "It works" is not done. "It looks like the annotated printout" is done.
@@ -175,6 +203,34 @@ inspects the PNGs in `shots/`. The lead rejects any screenshot that violates §3
 
 ---
 
+### 4.1 The base, the tunnel, pause and save (the Diablo structure)
+- **Every planet has a base**: a small walkable page (about one screen) where the ticket is
+  processed on the ground: a landing spot, a village or a town depending on the planet, with its
+  own slice of the absurd story. Fixed stations drawn as objects: the Sklep (a kiosk), the
+  Asystent's desk (history, profile, resume or open a ticket), the paczkomat (deliveries,
+  later), the settings as a notice board, and the base end of the tunnel. Walk up to a station
+  and tap it to open its form. No enemies. The base page is generated from the planet seed like
+  any other page, with its own obstacles; the run's pages follow it. The current base screen
+  becomes the form that opens from the desk.
+- **Tunel serwisowy** (town portal). The margin button on the HUD (§2) opens a tunnel on the
+  page: a hole cut in the paper with the handwritten note "c.d. na stronie __". Walking into it
+  takes you to the base; the other end stays open there. Walking back puts you on the same page,
+  at the same spot, with the page **exactly as you left it**: enemies, their racja, loot on the
+  ground, statuses, the clock. The tunnel then closes behind you (the hole is repaired, a strip
+  of tape drawn over it). Free, no cooldown, no scrolls: a simple game, a simple design. Opening
+  a second tunnel closes the first. Dying closes it.
+- **Pause** stops the loop (music switches to "muzyka na czekanie"). The pause sheet: Wznów,
+  Ustawienia, Zakończ zgłoszenie (back to the base with the run bookmarked, see below; the desk
+  then offers "Wznów zgłoszenie nr …").
+- **Save like Diablo 3.** The character (level, ranks, gear, bag, gwiazdki) is saved at every
+  page turn, every tunnel use, on pause, on Zakończ and on `visibilitychange`. The world is
+  saved as a bookmark only: planet seed, page index, clause, clock. Resuming after a close or a
+  Zakończ regenerates the page from the seed: enemies back, floor loot gone, racja full, and a
+  footnote says the ticket was reassigned to another consultant. The exact-state return belongs
+  to the tunnel within one session only.
+
+---
+
 ## 5. Combat
 
 Every fight is an argument. HP is **Racja** ("being right"). Damage is an **argument**. A crit
@@ -221,6 +277,23 @@ Death is **utrata racji**. Dodge is **unik od tematu**.
 An enemy exists at `e ∈ [0.3, 1]`, changing every few seconds (flicker: stroke opacity and
 dasharray follow `e`). Damage dealt to it ×e; damage it deals ×e. A hero skill or item can
 "potwierdzić istnienie", setting e=1 for 4 s.
+
+---
+
+### 5.6 Aiming (celowanie)
+Every skill declares an aim mode in its hero definition; the pad behaves the same for all:
+**tap = auto cast**, **hold and drag = aimed cast**, release to fire, drag back onto the pad to
+cancel. A skill without an aim mode ignores the drag and casts on release like a tap.
+- *auto*: the best target in range: an enemy whose claim type matches the skill's type (a
+  rebuttal) before the nearest one. Wirowanie, Pranie wstępne, Przybycie przed wyjazdem, Spór,
+  Czy mogę jeszcze w czymś pomóc, Pętla.
+- *kierunek*: a direction. Drag sets it; a tap uses the joystick direction, or the direction to
+  the auto target. Drawn while held as a dotted ink arrow from the hero. Odwirowanie,
+  Przekierowuję, Triangulacja.
+- *wskazanie*: a point within range. Drag moves it; a tap uses the auto target's position.
+  Drawn while held as a dotted ink circle of the skill's area at the point. Proszę czekać (a
+  target), Teren nieistniejący, Korekta.
+Later: a 4th and 5th skill per hero unlock through permissions (§8), three of five on the pads.
 
 ---
 
@@ -459,10 +532,16 @@ and is funny precisely because the Asystent reads it out flatly.
    Asystent footnotes with wrong notes and corrections.
 8. Save (localStorage), PWA, deploy to GitHub Pages, night edition toggle.
 
-### Planned next (design is final, build after the first playable)
-- Spór for bosses (§5.4).
-- Przesyłka/paczkomat deliveries if not done.
-- Ciasteczka and Weryfikacja dwuetapowa clauses if not in the first 6.
+### Planned next (decided 2026-10-18, in this order)
+1. Paint (§3.4): a sample on the current build first (hero, enemies per family, gwiazdki,
+   cards, page stains, day and night), judged on screenshots; then the rule is final and the
+   rest is built with it.
+2. Pause, the pause sheet with settings, save like Diablo 3 (§4.1).
+3. Tunel serwisowy with the exact-state return (§4.1).
+4. The walkable base page per planet with stations (§4.1).
+5. Aiming: tap or hold and drag, three aim modes, smart target by claim (§5.6).
+6. More skills: a 4th and 5th per hero through permissions, three of five on the pads.
+7. Spór for bosses (§5.4). Przesyłka/paczkomat deliveries.
 
 ### Backlog
 - Branching pages with side załącznik pages.
