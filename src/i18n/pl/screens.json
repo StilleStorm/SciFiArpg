@@ -47,7 +47,7 @@
     "resume": "Wznów zgłoszenie nr {number}",
     "resumeNote": "{planet}, strona {page}. Zgłoszenie zostanie przekazane innemu konsultantowi.",
     "tunnelWaiting": "Zgłoszenie nr {number} czeka na stronie {page}.",
-    "tunnelNote": "Stronę pozostawiono w stanie, w jakim ją opuszczono. Wrogów również.",
+    "tunnelNote": "Stronę pozostawiono w stanie, w jakim ją opuszczono. Przeciwników również.",
     "tunnelReturn": "Wróć do zgłoszenia"
   },
   "history": {
@@ -104,7 +104,7 @@
     "settings": "Ustawienia",
     "settingsNote": "Wydanie, układ przycisków, sterowanie, dźwięk.",
     "end": "Zakończ zgłoszenie",
-    "endNote": "Zgłoszenie zostanie przekazane innemu konsultantowi, który nie zna jego dotychczasowego przebiegu. Postać i jej wyposażenie zostaną zapisane. Strona zostanie wydrukowana od nowa.",
+    "endNote": "Zgłoszenie zostanie przekazane innemu konsultantowi. Dotychczasowych ustaleń nie przekazuje się. Postać i wyposażenie zostaną zapisane. Strona zostanie wydrukowana od nowa, przeciwnicy również.",
     "hold": "Prosimy czekać. Rozmowa jest nagrywana.",
     "subBase": "Zgłoszenie nr {number}. {planet}, baza."
   },
@@ -114,7 +114,7 @@
     "deskNote": "Biurko czynne w godzinach pracy Asystenta. Godzin nie podano.",
     "exitNote": "wymaga zgłoszenia",
     "exitLocked": "Przejście wymaga zgłoszenia. Zgłoszenia przyjmuje biurko.",
-    "paczkomatClosed": "Paczkomat nieczynny. Przesyłki w drodze.",
+    "paczkomatClosed": "Paczkomat nieczynny. Przesyłki w drodze. Kod odbioru zostanie wysłany po odbiorze.",
     "station": {
       "biurko": "Biurko",
       "kiosk": "Kiosk",
@@ -128,18 +128,18 @@
     "arrival": {
       "ladowisko": {
         "0": "Lądowisko. Flagę wbito, nie ustalono czyją.",
-        "1": "Lądowisko. Podwozie osiadło. Grunt zgłosił zastrzeżenia co do ciężaru, nie podając którego.",
+        "1": "Lądowisko. Grunt złożył reklamację na lądowanie i otrzymał numer zgłoszenia.",
         "2": "Lądowisko oznaczono okręgiem. Okrąg jest starszy niż lądowanie."
       },
       "wioska": {
-        "0": "Wioska. Mieszkańców nie stwierdzono. Z kominów idzie dym, co uznano za wystarczające potwierdzenie.",
-        "1": "Wioska liczy cztery chaty i jedną tablicę. Chaty nie zostały zgłoszone. Tablica tak.",
-        "2": "Wioska. Drogę wskazano, lecz nie podano dokąd. Zaleca się iść drogą."
+        "0": "Wioska. Z kominów idzie dym, co uznano za wystarczający dowód istnienia mieszkańców.",
+        "1": "Wioska liczy cztery chaty i paczkomat. Najstarszy jest paczkomat.",
+        "2": "Wioska. Drogowskaz przy wjeździe wskazuje drogę do wioski."
       },
       "miasteczko": {
-        "0": "Miasteczko. Na rynku stoi tablica ogłoszeń. Ogłoszenia dotyczą przede wszystkim tablicy.",
-        "1": "Miasteczko posiada rynek, biurko i opinię. Opinia jest niepotwierdzona.",
-        "2": "Miasteczko. Okna domów wychodzą na rynek, aby nic nie uszło uwadze zgłaszającego. Nic nie uszło."
+        "0": "Miasteczko z tablicą ogłoszeń na rynku. Ogłoszenia dotyczą przede wszystkim tablicy.",
+        "1": "Miasteczko posiada rynek, biurko i ocenę 4,9. Ocenę wystawili mieszkańcy.",
+        "2": "Miasteczko, w którym wszystkie okna wychodzą na rynek. Przybycie zgłaszającego odnotowano w czterdziestu egzemplarzach."
       }
     }
   }

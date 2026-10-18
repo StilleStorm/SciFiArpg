@@ -39,7 +39,7 @@
     "start": "Zgłoszenie przyjęto. Planu rozpatrzenia nie załączono.",
     "firstKill": "Urządzenie nr {n} skreślono jako pierwsze. Kolejność skreśleń nie ma znaczenia.",
     "pickup": "Przedmiot nr {n} dodano do załączników.",
-    "reassigned": "Zgłoszenie nr {number} zostało przekazane innemu konsultantowi. Dotychczasowych ustaleń nie przekazano.",
+    "reassigned": "Zgłoszenie nr {number} przekazano innemu konsultantowi. Dotychczasowych ustaleń nie przekazano.",
     "tunnelOpened": "Stronę przecięto. Koszt naprawy zostanie doliczony.",
     "tunnelClosed": "Stronę naprawiono taśmą. Taśma nie jest przezroczysta."
   },
