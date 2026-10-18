@@ -9,7 +9,7 @@ cookie banner, a community-standards shadowban. Lem's register applied to 2026 l
 From the "space fantasy" tradition we take two things: classes with a hard identity, and hard
 tech plus one inexplicable weird thing. Nothing else is borrowed. No clones.
 
-This document is the source of truth for every agent working on the game. Read it whole.
+This document is the source of truth for every agent working on the game. Read the sections your task names (see Contents below); builders get their sections in the brief.
 Language of code, comments and docs: English. Language of the game: Polish, through i18n.
 
 ---
