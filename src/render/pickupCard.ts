@@ -1,7 +1,9 @@
+import { createRng } from '../core/rng';
 import type { Pickup } from '../entities';
 import { t } from '../i18n';
 import { buildDrawing, starPath } from './itemDrawings';
 import { el } from './svg';
+import { TIER_HUE, washGroup } from './wash';
 
 /** Cards on the ground are drawn this much larger than the 34 x 24 sketch below. */
 export const CARD_SCALE = 1.3;
@@ -9,6 +11,7 @@ export const CARD_SCALE = 1.3;
 /** A permission: a checkbox with a tick in it and the family word under it. */
 function permissionCard(e: Pickup): SVGGElement {
   const g = el('g', { class: 'pickup permission' });
+  g.append(washGroup(createRng(e.id).fork('wash'), 'indigo', 34, { opacity: 0.25 }));
   const plate = el('g', { transform: `scale(${CARD_SCALE}) rotate(-2)` });
   const family = e.permission ?? 'urzadzenia';
   plate.append(
@@ -27,9 +30,18 @@ export function buildPickupCard(e: Pickup): SVGGElement {
   const g = el('g', { class: 'pickup' });
   const item = e.item;
   if (!item) {
-    g.append(el('path', { d: starPath(9.5), class: 'star', transform: 'scale(1.2)' }), el('path', { d: 'M-5 12Q0 14 5 12', 'stroke-width': 0.9, transform: 'scale(1.2)' }));
+    // DESIGN 3.4: a wet yellow stain about 2.2 star radii wide, and the star filled with the same yellow, so a
+    // gwiazdka reads at a glance; the stain is offset, the ink stays on top
+    g.append(
+      washGroup(createRng(e.id).fork('wash'), 'yellow', 9.5 * 1.2 * 2.4, { opacity: 0.36 }),
+      el('path', { d: starPath(9.5), class: 'star', transform: 'scale(1.2)', fill: 'var(--wash-yellow)', 'fill-opacity': 0.7 }),
+      el('path', { d: 'M-5 12Q0 14 5 12', 'stroke-width': 0.9, transform: 'scale(1.2)' }),
+    );
     return g;
   }
+  // a stain under the plate in the rarity's hue; a wariant or a free version is brick
+  const hue = item.variant || item.freeVersion ? 'brick' : TIER_HUE[item.tier];
+  g.append(washGroup(createRng(item.uid).fork('wash'), hue, 25, { opacity: 0.25 }));
   const tilt = (e.number % 5) - 2;
   const plate = el('g', { transform: `scale(${CARD_SCALE}) rotate(${tilt})` });
   plate.append(el('rect', { x: -17, y: -12, width: 34, height: 24 }));

@@ -3,6 +3,7 @@ import { type Vec } from '../core/vec';
 import { FOLD, type Obstacle, type Page, type PageExit } from '../world/pages';
 import { t } from '../i18n';
 import { blobPoints, dotPath, el, n2, polyline, smoothClosed, wobblyCircle } from './svg';
+import { STAIN_HUES, washGroup } from './wash';
 
 const solid = (node: SVGElement, fill: string): void => {
   node.style.fill = fill;
@@ -24,6 +25,9 @@ function drawBlot(o: Obstacle, r: Rng): SVGGElement {
 
 function drawRing(o: Obstacle, r: Rng): SVGGElement {
   const g = el('g', { transform: `translate(${n2(o.x)} ${n2(o.y)})` });
+  // DESIGN 3.4: the coffee soaked the paper inside the ring and a little past it; ochre or brick, seeded
+  const wr = createRng(o.seed).fork('wash');
+  g.append(washGroup(wr, wr.pick(['ochre', 'brick'] as const), o.size * 0.82, { opacity: 0.26 }));
   const outer = el('path', { d: wobblyCircle(r, 0, 0, o.size, 14, 0.035) });
   const inner = el('path', { d: wobblyCircle(r, 0, 0, o.size * 0.88, 12, 0.04) });
   inner.setAttribute('stroke-width', '1');
@@ -262,6 +266,40 @@ function drawHeader(page: Page, header: PageHeader): SVGGElement {
   return g;
 }
 
+/**
+ * Two or three loose stains per page (DESIGN 3.4): someone put a wet brush down. Pale, away from the edges, the header
+ * and the entry and exit, beside the obstacles rather than on them. Seeded from the page, so a page always has them.
+ */
+function drawStains(page: Page): SVGGElement {
+  const g = el('g', { class: 'stains' });
+  const rng = createRng(page.obstacles.reduce((a, o) => (a ^ o.seed) >>> 0, 0x57a1 + page.index * 131)).fork('stains');
+  const n = rng.int(2, 3);
+  const keep = Math.max(page.inset + 150, 190);
+  const placed: { x: number; y: number; r: number }[] = [];
+  for (let i = 0; i < n; i++) {
+    const r = rng.range(20, 46);
+    for (let tries = 0; tries < 40; tries++) {
+      const x = rng.range(keep, page.w - keep);
+      const y = rng.range(Math.max(keep, 200), page.h - keep);
+      const clear = (c: { x: number; y: number; r: number }, gap: number): boolean => Math.hypot(c.x - x, c.y - y) > c.r + r * 0.6 + gap;
+      const free =
+        page.obstacles.every((o) => o.colliders.every((c) => clear(c, 6))) &&
+        placed.every((p) => clear(p, 40)) &&
+        clear({ ...page.entry, r: 220 }, 0) &&
+        (!page.exit || clear({ x: page.exit.x, y: page.exit.y, r: 160 }, 0));
+      if (!free && tries < 39) continue;
+      if (!free) break;
+      placed.push({ x, y, r });
+      const hue = rng.pick(STAIN_HUES);
+      const wash = washGroup(rng.fork(`s${i}`), hue, r, { opacity: rng.range(0.18, 0.22) });
+      wash.setAttribute('transform', `translate(${n2(x)} ${n2(y)})`);
+      g.append(wash);
+      break;
+    }
+  }
+  return g;
+}
+
 /** Fill the #page layer: the margin, the frame, the hatched edge and every obstacle. */
 export function drawPage(layer: SVGGElement, page: Page, header?: PageHeader): SVGGElement {
   layer.replaceChildren();
@@ -292,7 +330,7 @@ export function drawPage(layer: SVGGElement, page: Page, header?: PageHeader): S
     'stroke-width': 0.8,
   });
   const ink = el('g', {});
-  layer.append(beyond, grain, ink);
+  layer.append(beyond, grain, drawStains(page), ink);
   ink.append(strip, frame2, frame);
 
   for (const o of page.obstacles) {

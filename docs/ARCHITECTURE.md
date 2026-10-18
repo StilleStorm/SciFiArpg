@@ -170,3 +170,11 @@ inventory, boss on the last page, `baza` after it, a death form, a landscape leg
 second finger taps a skill pad while the thumb steers, auto-attack while steering, stop within one step of the release),
 then 5 s of `requestAnimationFrame` deltas with 40 enemies; pictures in `shots-smoke/`, exit code 1 on a page error or a failed check (`SMOKE_UNCAPPED=1` lifts the 60 Hz
 limit, `PERF_MAX_MS` fails above a bound); it also checks that the real clicks unlock the audio context and that music plays. Everything must pass `npm run check`.
+
+## Paint (render/wash.ts)
+A wash (DESIGN §3.4) is a `<g class="wash">` of two flat translucent blobs, built once in a
+builder's `create` and never patched. `washGroup(rng, hue, r, opts)` is the only entry point;
+hues are CSS variables `--wash-<hue>` with `--wash-alpha` dimming them at night. Owners of
+washes: heroFigures (hero, summon, copy), enemyFigures (family hue, elite second blob, boss
+bonus), pickupCard (star halo, card by tier, permission), obstacles (coffee rings, 2–3 page
+stains). `ink.ts` skips wash paths in draw-in/erase (it fades them by opacity instead).

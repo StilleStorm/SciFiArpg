@@ -337,6 +337,56 @@ try {
   await lshot('footnote-history');
   await lp.locator('.pop-wrap').click();
 
+  // paint sample (DESIGN 3.4): the hero, six enemies of mixed families with an elite, a boss, gwiazdki and item cards,
+  // in day and in night. The simulation is frozen once everything is drawn in, so the layout stays as placed.
+  await lp.evaluate(() => {
+    window.__game.setLeftHanded(false);
+    window.__game.start(7, { pageCount: 5 });
+  });
+  await lwait(1200);
+  await lp.evaluate(() => {
+    const g = window.__game;
+    const s = g.state();
+    g.enemies.clear();
+    s.pickups.length = 0;
+    g.placePlayer(600, 800);
+    const at = (id, dx, dy) => {
+      const e = s.enemies.find((x) => x.id === id);
+      e.x = 600 + dx;
+      e.y = 800 + dy;
+      e.home = { x: e.x, y: e.y };
+    };
+    const put = (ids, spots) => ids.forEach((id, i) => at(id, spots[i][0], spots[i][1]));
+    put(g.enemies.spawnFamily('urzadzenia', 2), [[-430, -150], [-200, 150]]);
+    put(g.enemies.spawnFamily('powiadomienia', 1), [[-250, -120]]);
+    put(g.enemies.spawnFamily('powiadomienia', 1, { elite: 'sponsorowany' }), [[130, 140]]);
+    put(g.enemies.spawnFamily('wygenerowane', 2), [[-60, -150], [-450, 130]]);
+    const bossId = g.enemies.spawnBoss('urzadzenia');
+    at(bossId, 330, -90);
+    const card = (tier, dx, dy, number) => {
+      const item = g.giveItem(tier);
+      s.player.inventory = s.player.inventory.filter((x) => x !== item);
+      s.pickups.push({ kind: 'pickup', id: s.nextId++, x: 600 + dx, y: 800 + dy, r: 26, number, item });
+    };
+    card('zwykly', -330, 40, 3);
+    card('rzadki', 250, 150, 4);
+    card('unikatowy', 40, -170, 5);
+    [[-130, 70], [-30, 160], [80, 60], [190, 200]].forEach(([dx, dy], i) => {
+      s.pickups.push({ kind: 'pickup', id: s.nextId++, x: 600 + dx, y: 800 + dy, r: 14, number: 0, gwiazdki: 1 + i });
+    });
+  });
+  await lwait(1100);
+  await lp.evaluate(() => (window.__game.state().status = 'paused'));
+  await lwait(300);
+  await lshot('wash-sample');
+  await lp.evaluate(() => window.__game.setTheme('night'));
+  await lwait(400);
+  await lshot('wash-sample-night');
+  await lp.evaluate(() => {
+    window.__game.setTheme('day');
+    window.__game.state().status = 'running';
+  });
+
   // left-handed: halves and pads swap, the stick answers on the right half
   await lp.evaluate(() => {
     window.__game.setLeftHanded(true);

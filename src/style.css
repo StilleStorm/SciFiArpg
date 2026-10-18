@@ -61,6 +61,14 @@
   --serif: 'EB Garamond', Georgia, serif;
   --band-top: 62px;
   --band-bottom: 106px;
+  /* Paint (DESIGN 3.4): watercolour hues under the ink, watered down by opacity in render/wash.ts */
+  --wash-indigo: #3f5f8f;
+  --wash-brick: #b5572e;
+  --wash-violet: #7a5a9c;
+  --wash-green: #4f7a52;
+  --wash-ochre: #c89a2a;
+  --wash-yellow: #e8c43a;
+  --wash-alpha: 1;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -71,6 +79,10 @@
     --ink-wet: #9a8f78;
     --accent: #c9493f;
     --accent-dry: #b4463d;
+    --wash-alpha: 0.7;
+    --wash-indigo: #5b83bd;
+    --wash-violet: #9a78c4;
+    --wash-green: #6a9a6e;
     color-scheme: dark;
   }
 }
@@ -81,7 +93,19 @@
   --ink-wet: #9a8f78;
   --accent: #c9493f;
   --accent-dry: #b4463d;
+  --wash-alpha: 0.7;
+  /* the same hues, lifted a little so a stain still shows on dark paper */
+  --wash-indigo: #5b83bd;
+  --wash-violet: #9a78c4;
+  --wash-green: #6a9a6e;
   color-scheme: dark;
+}
+/* A wash: the night edition dims the stain, a summon's stain is half of that */
+.wash {
+  opacity: var(--wash-alpha);
+}
+.wash.wash-faint {
+  opacity: calc(var(--wash-alpha) * 0.5);
 }
 
 *,

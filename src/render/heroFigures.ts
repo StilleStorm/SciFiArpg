@@ -10,6 +10,7 @@ import type { HeroId } from '../heroes';
 import { t } from '../i18n';
 import { el, n2 } from './svg';
 import type { Builder } from './view';
+import { HERO_HUE, washGroup } from './wash';
 import '../ui/forms.css';
 
 const LEG_PERIOD_MS = 150;
@@ -160,11 +161,21 @@ const FIGURES: Record<HeroId, FigureDef> = {
   },
 };
 
+/** Where each hero's stain sits (figure units: centre and radius, about 0.9 of the body) and its fixed seed. */
+const WASH_AT: Record<HeroId, { cx: number; cy: number; r: number; seed: number }> = {
+  pralka: { cx: 0, cy: -4, r: 21, seed: 0x4801 },
+  konsultant: { cx: 0, cy: -7, r: 20, seed: 0x4802 },
+  petlowiec: { cx: 0, cy: -10, r: 21, seed: 0x4803 },
+  kartograf: { cx: -1, cy: -7, r: 20, seed: 0x4804 },
+};
+
 interface Parts {
   inner: SVGGElement;
   legs: SVGPathElement[];
   foam: SVGGElement | null;
   caption: SVGTextElement | null;
+  /** The stain; it is counter-mirrored when the figure faces left, so it does not jump sideways on a turn. */
+  wash: SVGGElement | null;
   heroId: HeroId;
   scale: number;
 }
@@ -196,6 +207,10 @@ export interface FigureOpts {
   caption?: string;
   /** Extra size factor (HERO_SCALE on the page). */
   size?: number;
+  /** Paint a wash under the strokes (on the page only; the profile card stays plain). */
+  wash?: boolean;
+  /** Half-strength stain (copies and decoys of the hero). */
+  faint?: boolean;
 }
 
 /** One hero figure as a `<g>`. Its legs are `data-leg` paths; `patchFigure` swaps them. */
@@ -205,6 +220,13 @@ export function buildHeroFigure(heroId: HeroId, opts: FigureOpts = {}): SVGGElem
   const sc = def.scale * (opts.size ?? 1);
   const inner = el('g', { class: 'fig', transform: `scale(${n2(sc)})` });
   g.append(inner);
+  let wash: SVGGElement | null = null;
+  if (opts.wash) {
+    // DESIGN 3.4: a stain in the hero's hue, offset from the figure, under every stroke and scaling with it
+    const at = WASH_AT[heroId];
+    wash = washGroup(createRng(at.seed).fork('wash'), HERO_HUE[heroId], at.r, { cx: at.cx, cy: at.cy, faint: opts.faint === true });
+    inner.append(wash);
+  }
   for (const [cx, cy, r] of def.echo ?? []) {
     const echo = el('path', { d: circlePath(cx, cy, r), 'stroke-dasharray': '1.5 2.5' });
     inner.append(echo);
@@ -222,7 +244,7 @@ export function buildHeroFigure(heroId: HeroId, opts: FigureOpts = {}): SVGGElem
     caption = el('text', { class: 't-caption', x: 0, y: Math.round(36 * (opts.size ?? 1)) }, [opts.caption]);
     g.append(caption);
   }
-  parts.set(g, { inner, legs, foam, caption, heroId, scale: sc });
+  parts.set(g, { inner, legs, foam, caption, wash, heroId, scale: sc });
   return g;
 }
 
@@ -256,23 +278,24 @@ export function patchFigure(e: Walker, g: SVGGElement, timeMs: number): void {
     g.dataset['sus'] = String(sus);
     g.classList.toggle('suspended', sus);
   }
-  if (p.caption && e.facing !== undefined && g.dataset['face'] !== String(e.facing)) {
+  if ((p.caption || p.wash) && e.facing !== undefined && g.dataset['face'] !== String(e.facing)) {
     g.dataset['face'] = String(e.facing);
-    p.caption.setAttribute('transform', e.facing < 0 ? 'scale(-1 1)' : '');
+    p.caption?.setAttribute('transform', e.facing < 0 ? 'scale(-1 1)' : '');
+    p.wash?.setAttribute('transform', e.facing < 0 ? 'scale(-1 1)' : '');
   }
 }
 
 // ---------- builders ----------
 
 export const playerBuilder: Builder<Player> = {
-  create: (e) => buildHeroFigure(e.heroId, { foam: e.heroId === 'pralka', size: HERO_SCALE }),
+  create: (e) => buildHeroFigure(e.heroId, { foam: e.heroId === 'pralka', size: HERO_SCALE, wash: true }),
   patch: patchFigure,
   drawInMs: 0,
 };
 
 export const summonBuilder: Builder<Summon> = {
   create: (e) => {
-    const opts: FigureOpts = { dotted: true, size: HERO_SCALE };
+    const opts: FigureOpts = { dotted: true, size: HERO_SCALE, wash: true, faint: true };
     if (e.variant === 'decoy') opts.caption = t('heroes.kartograf.decoy');
     return buildHeroFigure(e.heroId, opts);
   },
@@ -315,7 +338,7 @@ export function wrapEnemyBuilder(base: Builder<Enemy>): Builder<Enemy> {
   const wrapped: Builder<Enemy> = {
     create(e) {
       if (!e.copyOf) return base.create(e);
-      const g = buildHeroFigure(e.copyOf.heroId, { caption: t('heroes.copy.caption'), size: HERO_SCALE });
+      const g = buildHeroFigure(e.copyOf.heroId, { caption: t('heroes.copy.caption'), size: HERO_SCALE, wash: true, faint: true });
       g.dataset['copy'] = '1';
       return g;
     },

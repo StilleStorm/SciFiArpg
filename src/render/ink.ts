@@ -8,6 +8,7 @@ import { must } from '../core/util';
 import { t } from '../i18n';
 import { blobPoints, dotPath, el, n2, smoothClosed, wobblyLine } from './svg';
 import { easeIn, easeOut, tween } from './tween';
+import { isWashPath } from './wash';
 
 let fxLayer: SVGGElement | null = null;
 const fx = (): SVGGElement => must(fxLayer, 'ink layer (call initInk first)');
@@ -27,6 +28,8 @@ interface Part {
   node: SVGGeometryElement;
   len: number;
   stroked: boolean;
+  /** Paint, not a stroke: it fades with opacity instead of popping in or out (render/wash.ts). */
+  wash: boolean;
 }
 
 function collect(root: Element): Part[] {
@@ -44,7 +47,7 @@ function collect(root: Element): Part[] {
         len = 100;
       }
     }
-    out.push({ node, len, stroked });
+    out.push({ node, len, stroked, wash: isWashPath(node) });
   });
   return out;
 }
@@ -61,7 +64,8 @@ function dashAnim(parts: Part[], ms: number, reverse: boolean, delay: number, do
     const { node, len } = part;
     const set = (p: number): void => {
       const shown = reverse ? 1 - p : p;
-      if (part.stroked) node.style.strokeDashoffset = String(len * (1 - shown));
+      if (part.wash) node.style.opacity = String(shown);
+      else if (part.stroked) node.style.strokeDashoffset = String(len * (1 - shown));
       else node.style.visibility = shown > 0.6 ? 'visible' : 'hidden';
     };
     if (part.stroked) node.style.strokeDasharray = String(len);
@@ -77,6 +81,7 @@ function dashAnim(parts: Part[], ms: number, reverse: boolean, delay: number, do
           node.style.strokeDasharray = '';
           node.style.strokeDashoffset = '';
           node.style.visibility = '';
+          node.style.opacity = '';
         }
       },
     });

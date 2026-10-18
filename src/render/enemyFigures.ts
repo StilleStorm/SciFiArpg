@@ -20,6 +20,7 @@ import { syncStatusMarkers } from './statusMarkers';
 import { el, n2, wobblyCircle } from './svg';
 import { easeOut, tween } from './tween';
 import type { Builder } from './view';
+import { FAMILY_HUE, washGroup } from './wash';
 
 const LEG_PERIOD_MS = 150;
 const SPIN_S = 0.55;
@@ -194,6 +195,24 @@ function restack(g: SVGGElement, speaking: boolean): void {
   if (firstSpeaking && firstSpeaking !== g) layer.insertBefore(g, firstSpeaking);
 }
 
+// ---------- paint ----------
+
+/**
+ * DESIGN 3.4: one pale wash in the family's hue, offset from the contour, under every stroke (the first child of
+ * `under`, which is not mirrored, so the stain does not jump when the enemy turns). Elites get a second, smaller
+ * wash somewhere else; bosses two larger ones, 0.1 more opaque. Seeded from the enemy, so it is always the same stain.
+ */
+function addWash(under: SVGGElement, e: Enemy, hw: number, H: number, feet: number): void {
+  const rng = createRng(e.seed).fork('wash');
+  const hue = FAMILY_HUE[e.family];
+  const r = 0.8 * ((hw + H / 2) / 2) * (e.boss ? 1.3 : 1);
+  const bonus = e.boss ? 0.1 : 0;
+  const cy = feet - H * 0.5;
+  const list = [washGroup(rng, hue, r, { cy, bonus })];
+  if (e.elite !== undefined || e.boss === true) list.push(washGroup(rng, hue, r * 0.5, { cy, bonus, offset: [r * 0.3, r * 0.5] }));
+  under.prepend(...list);
+}
+
 // ---------- the figure ----------
 
 function buildFigure(e: Enemy, g: SVGGElement): FigState {
@@ -221,6 +240,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   }
 
   const boss = e.boss ? BOSS_OF[e.family] : null;
+  addWash(under, e, hw, H, feet);
   if (boss === 'weryfikacja') buildGrid(under, e);
   if (boss === 'hipoteza') buildRing(under, e);
 
