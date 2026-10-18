@@ -142,3 +142,27 @@ Endgame systems beyond "Zgłoszenia dodatkowe", multiplayer, English, store rele
   Archiwum passes items between characters. Hero choice happens at creation. Goes into the next
   design talk (storyline) as the frame of the first screen, then into the slice order (before
   slice 7).
+
+## 8. Systems added after the review (player, 2026-10-18)
+- **Potwierdzenia (racja recovery, Diablo 3 style).** Enemies drop small stamped slips. If racja
+  is below max, walking near one restores a share (sucked in from a reasonable radius, ~110
+  units). If racja is full, the slip is pocketed: up to 5 on a character, shown as a small
+  counter on a new pad/button; tapping uses one. Auto-use: when a hit would take racja below
+  15%, one pocketed slip is used automatically. Slow out-of-combat regeneration, "zmiana
+  zdania". Persisted with the character.
+- **Page contents.** Teczki (folders tapped open for loot), pieczęcie (office seals that stamp a
+  temporary buff, the shrine), one zdarzenie per page from a pool (a form under fire, a lost
+  delivery, an audit). (Accepted by default; the player did not object.)
+- **Elite packs and named elites.** Packs with a leader and minions; named elites with two or
+  three affixes and an absurd name the Asystent records; elite affix pool to 10.
+- **Karta osobowa.** A character sheet form at the desk and from the HUD: all stats, damage per
+  type, resists, the Argument meter, active buffs as stamps.
+- **Save safety.** Request persistent storage (`navigator.storage.persist()`); export and import
+  of the whole save as a file from the desk ("Archiwum eksportowe"). Cloud saves (Workers + KV
+  or D1, sign-in) later, with the Play Store stage.
+- **Damage numbers.** Off by default; a setting shows them as small handwritten digits in the
+  margin.
+- **Bug button.** "Zgłoś problem z grą" in the pause sheet copies a short state dump to the
+  clipboard.
+- **Text size** setting for footnotes and cards.
+- **Desktop controls** (WASD, mouse aim): later, not MVP.

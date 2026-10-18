@@ -105,6 +105,10 @@ between a pickup and a clear. Order:
    paragraphs (e); Reklamacja, Archiwum, sinks (f).
 9. `npm run new-hero` + template + checklist (PLAN 8).
 10. Przesyłka/paczkomat deliveries; tap an item on the ground to see its card.
+10a. Review additions (PLAN §8): potwierdzenia recovery with the pocket button and auto-use;
+    teczki, pieczęcie and page events; elite packs and named elites; Karta osobowa; persistent
+    storage + save export/import; damage numbers setting; bug button; text size. Potwierdzenia
+    and the Karta osobowa go early (right after slice 3), the rest with their nearest slice.
 11. Balance pass from play; the first-run on-ramp footnotes; phone-feedback bucket; the polish
     bucket (landscape clause header, Odwirowanie knockback, appeal-form drawing, cookie-banner
     paper, simpler Wygenerowane, "utwór nr N", three missing sounds, stereo panning, Spór and
