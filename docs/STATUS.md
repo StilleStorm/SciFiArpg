@@ -3,7 +3,7 @@
 Read this first in a new session, then CLAUDE.md, docs/WORKFLOW.md, docs/DESIGN.md, docs/ARCHITECTURE.md.
 Keep this file current: it replaces chat memory.
 
-## Where things are (2026-10-17, late evening)
+## Where things are (2026-10-18)
 - Branch: `claude/scifi-arpg-concept-6vqk36`. Deploys to https://stillestorm.github.io/SciFiArpg/
   on every push (GitHub Actions; repo public; github-pages environment allows `claude/*`).
 - Playable first version is live: four heroes, three enemy families with claims/rebuttals,
@@ -23,8 +23,16 @@ Keep this file current: it replaces chat memory.
 - Paint is live and approved by the player (DESIGN §3.4, render/wash.ts).
 - Pause and save are live: Pauza note on the HUD, sheet with Wznów/Ustawienia/Zakończ, character
   persists between runs (level, upgrades, gear, bag, purse), bookmark resume from baza.
-- Tunel serwisowy is live (hole, hold the exact run, return, tape); its base end is the baza form
-  until the walkable base replaces it. Known: landscape baza overflows with the resume box.
+- Tunel serwisowy is live (hole, hold the exact run, return, tape; earlier tapes on the page are
+  redrawn on the return and the figures are not drawn in again).
+- The walkable base page is live (DESIGN 4.1): one of three layouts per planet (lądowisko, wioska,
+  miasteczko), stations (desk = ticket, history, resume; kiosk = Sklep; notice board = settings;
+  paczkomat = a note), the exit locked until the ticket is accepted, the tunnel's base end. RunState
+  has `phase: 'base' | 'run'`; the same object walks out of the exit into the run. The Asystent and
+  the footnote numbering run per ticket from the base into the run; the base has its own idle notes.
+  In the base the pads cool down, the queued update opens from the HUD line, skills are not cast.
+- Portrait: the clause header is set inside the visible span, two lines, cut after a whole sentence.
+- Joystick mode: a thumb landing on the footnote slip steers; a quick tap opens the history.
 - Attack animations are live: attack:started event, hero poses per hero, enemy wind-up and
   lunge, projectiles turn along velocity (render/attackFx.ts, scripts/shot-attacks.mjs).
 
@@ -49,13 +57,13 @@ joystick/tap steering (§2), editorial rules (§12.1).
 1. (done) Paint approved; attack animations shipped.
 2. (done) Pause sheet, hold music on pause, character save between runs, bookmark resume.
 3. (done) Tunel serwisowy with exact-state return; Android back button opens the pause sheet.
-4. Walkable base page per planet (§4.1).
-5. Aiming: tap / hold-and-drag, three modes, smart target by claim (§5.6). Then more skills.
+4. (done) Walkable base page per planet (§4.1).
+5. **Next:** aiming: tap / hold-and-drag, three modes, smart target by claim (§5.6). Then more skills.
 6. Spór for bosses (DESIGN §5.4).
 7. Przesyłka / paczkomat deliveries (§7), tap an item on the ground to see its card first (§2).
 8. Act on phone feedback (feel of joystick, scale, sound levels, frame rate).
-9. Joystick mode: the tappable footnote slip sits in the steering half (move the tap target or
-   ignore steering-half taps on it); landscape 40-enemy perf measurement; Odwirowanie knockback distance; appeal-form pickup drawing; Ciasteczka empty paper behind the
+9. Landscape 40-enemy perf measurement; the base clause header in landscape sits under the HUD
+   or above the view (portrait is fixed; landscape wants it top centre per §2); Odwirowanie knockback distance; appeal-form pickup drawing; Ciasteczka empty paper behind the
    banner; Wygenerowane drawings are the busiest (simplify); "Muzyka na czekanie, utwór nr N"
    shown somewhere; sounds for enemy:miss / offTopic / gwiazdki pickup; stereo panning.
 10. Heavy-metal music profile (own anchor and ban list to be written first).
