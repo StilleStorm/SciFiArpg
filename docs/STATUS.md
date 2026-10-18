@@ -69,7 +69,10 @@ joystick/tap steering (§2), editorial rules (§12.1).
 - Fourth round: the fourth and fifth skills (DESIGN 10.1) are built: ten skills, installed through
   the update form (first rank wants a family permission), three of five on the pads, the pad step
   after the install, the loadout sheet from the pause line Umiejętności, pads saved with the
-  character. Not yet heard from the player: whether the ten read well on the pads and the sheet.
+  character. Look pass done (red case-number stamp, three glyphs redrawn, landscape loadout fits five
+  rows). Not yet heard from the player: whether the ten read well on the pads and the sheet. Legenda's
+  wrong-name labels are margin notes at the global 11 px; a bigger size would need a size field on
+  margin:note (render/ink.ts).
 
 ## Open feedback wanted from the player
 - Real-phone frame rate with a crowd; tap accuracy; joystick feel once it lands.

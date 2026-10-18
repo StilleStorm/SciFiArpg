@@ -40,16 +40,16 @@ const SKILL_DRAWINGS: Record<HeroId, readonly (readonly string[])[]> = {
     ['M-3-9H12V5H-3Z', 'M-3-9L2-13H12M12-9L17-13V1L12 5', 'M-17-2H-8M-19 3H-8M-17 8H-8', 'M-14 13H17'],
     // an open drum with its flap and three strokes of wet load flying out
     ['M-10-4V10Q0 15 10 10V-4', 'M-10-4A10 4 0 1 0 10-4A10 4 0 1 0-10-4', 'M10-4L16-11L9-14', 'M-5-8L-8-15', 'M0-8L0-17', 'M5-8L8-15'],
-    // a section sign with a rule under it
-    ['M6-12C0-17-8-12-6-7C-4-3 5-1 6 4C7 9-1 13-7 9', 'M-6-7C-4-5 2-4 5-1', 'M-12 16H12'],
+    // a section sign: two stacked S-curves joined at the waist
+    ['M8-12C5-19-9-18-8-11C-7-5 7-6 7 0', 'M-8 12C-5 19 9 18 8 11C7 5-7 6-7 0', 'M-7 0C-7-3 7-3 7 0'],
   ],
   // an hourglass, a redirect arrow, a headset
   konsultant: [
     ['M-8-13H8M-8 13H8M-7-13C-7-4-1-2 0 0C-1 2-7 4-7 13M7-13C7-4 1-2 0 0C1 2 7 4 7 13', 'M-3.5 11H3.5M0 3V9'],
     ['M-13 12V0Q-13-11-2-11H11', 'M6-17L12-11L6-5', 'M-13 12H-6'],
     ['M-11 3A11 11 0 0 1 11 3', 'M-14 0H-10V9H-14Z', 'M10 0H14V9H10Z', 'M-12 9Q-10 15 0 15', circ(1, 15, 1.6)],
-    // a stamped box with the letters "No" and a rule under it
-    ['M-14-8H14V8H-14Z', 'M-9 4V-4L-5 4V-4', circ(3, 0, 3.4), 'M-16 14H16'],
+    // a ticket with three digit-like strokes, its stub torn off along a perforated edge
+    ['M11-10H-16V10H11', 'M-12-4L-9-6V6', 'M-5-6H0L-3 6', 'M3-6H6.5L4.5-1Q8-1 7.5 2.5Q7 6 3 6', '~M11-10V10', 'M11-10H17V10H11'],
     // a line cut by a short bar, a handset at one end
     ['M-17-5H-12V5H-17Z', 'M-12 0H-4', '~M4 0H17', 'M-3 8L3-8'],
   ],
@@ -58,8 +58,8 @@ const SKILL_DRAWINGS: Record<HeroId, readonly (readonly string[])[]> = {
     [circ(-8, -6, 5.5), 'M-13-3H-3L-4 9H-12Z', 'M-11 9V15M-5 9V15', '~' + circ(8, -4, 5.5), '~M3 -1H13L12 11H4Z', '~M5 11V17M11 11V17'],
     ['M-15-14H3V-1H-8L-12 4V-1H-15Z', 'M-4-3H15V10H9L6 15V10H-4Z', 'M-11-9H-1M0 2H11M0 6H8'],
     ['M-12 0C-12-12-2-12 0 0C2 12 12 12 12 0C12-12 2-12 0 0C-2 12-12 12-12 0', 'M7 8L12 2L16 8'],
-    // a loop arrow closing on itself
-    ['M9-9A12 12 0 1 0 12 2', 'M3-11L9-9L8-3', circ(0, 0, 3.5)],
+    // the same thing said twice: two identical speech strokes, an equals sign beneath
+    ['M-16-15H-2V-3H-9L-12 1V-3H-16Z', 'M-12-9H-6', 'M2-15H16V-3H9L6 1V-3H2Z', 'M6-9H12', 'M-8 8H8M-8 14H8'],
     // a capsule above a dotted fall line and the ground
     ['M-6-15Q0-21 6-15V0Q0 6-6 0Z', circ(0, -9, 2.2), '~M0 6V14', 'M-12 16H12'],
   ],

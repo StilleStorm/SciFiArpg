@@ -39,7 +39,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const SCENES = [
   { name: 'ksiezyc', hero: 'nalesnik', skill: 4, aim: { kind: 'kierunek', dx: 1, dy: -0.3 }, at: [[110, -10], [-100, 60], [30, 120]], waits: [250, 1500] },
   { name: 'plywy', hero: 'nalesnik', skill: 3, aim: null, at: [[60, -20], [-90, 40], [20, 110], [130, -80]], waits: [120, 700] },
-  { name: 'legenda', hero: 'kartograf', skill: 4, aim: { kind: 'wskazanie', x: 760, y: 790 }, at: [[150, -20], [190, 30], [120, 50]], waits: [700] },
+  { name: 'legenda', hero: 'kartograf', skill: 4, aim: { kind: 'wskazanie', x: 700, y: 800 }, at: [[90, -75], [150, 80], [45, 90]], waits: [700] },
   { name: 'skala', hero: 'kartograf', skill: 3, aim: null, at: [[110, 0], [170, 30], [230, 60]], waits: [150, 600] },
   { name: 'start', h: 560, up: 110, hero: 'petlowiec', skill: 4, aim: { kind: 'wskazanie', x: 760, y: 790 }, at: [[150, -20], [190, 30], [120, 50]], waits: [300, 560, 840] },
   { name: 'juz-bylo', hero: 'petlowiec', skill: 3, aim: null, at: [[110, -10], [150, 40], [90, 60]], waits: [250] },

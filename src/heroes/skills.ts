@@ -361,6 +361,7 @@ export function removeSummon(s: RunState, bus: Bus, id: number): void {
  */
 export function castSkill(s: RunState, bus: Bus, slot: PadSlot, free = false, aim?: Aim): boolean {
   if (s.status !== 'running' || s.phase === 'base') return false; // the base has nobody to argue with: a pad tap there does nothing
+  if (s.modal) return false; // a sheet or banner holds the clock: no skill is cast under it
   const p = s.player;
   const skill = s.hero.pads[slot];
   if (s.law.botTime || isStunned(p)) return false; // the bot hours: skills do nothing, no cooldown is spent

@@ -237,19 +237,27 @@ export const zoneBuilder: Builder<Zone> = {
 
 // ---------- the fourth and fifth skills' zones and the moon ----------
 
-/** Numer sprawy: a small rubber-stamped number in a double frame above the figure (red: it is a stamp), slightly crooked. */
+/**
+ * Numer sprawy: a slammed rubber stamp above the figure (red, it is a stamp): the number in Michroma at 13 px, a heavy double frame,
+ * a few degrees crooked. The zone sits at the enemy's rim (heroes/system.ts), so the stamp is raised another 26 units, clear of the wash.
+ */
 function buildCaseNumber(g: SVGGElement, z: Zone): SVGGElement {
   const label = String(z.number ?? z.follow ?? z.id);
-  const w = label.length * 7.2 + 12;
-  const stamp = el('g', { transform: 'rotate(-5)' });
-  for (const [inset, sw] of [[0, 1.7], [2.4, 0.8]] as const) {
-    const r = el('rect', { x: n2(-w / 2 + inset), y: n2(-8 + inset), width: n2(w - inset * 2), height: n2(16 - inset * 2) });
+  const size = 13;
+  const w = label.length * (size * 1.06 + 1.5) + 16;
+  const h = size + 14;
+  const stamp = el('g', { transform: `translate(0 -26) rotate(${-3 - (z.id % 4)})` });
+  for (const [inset, sw] of [[0, 2.6], [3.4, 1.1]] as const) {
+    const r = el('rect', { x: n2(-w / 2 + inset), y: n2(-h / 2 + inset), width: n2(w - inset * 2), height: n2(h - inset * 2) });
     r.style.stroke = 'var(--accent)';
     r.style.strokeWidth = String(sw);
     r.style.fill = 'none';
     stamp.append(r);
   }
-  stamp.append(el('text', { class: 't-stamp', x: 0, y: 3.2, 'font-size': 9, 'letter-spacing': 0.6 }, [label]));
+  const text = el('text', { class: 't-stamp', x: 0, y: n2(size * 0.36), 'font-size': size, 'letter-spacing': 1.5 }, [label]);
+  text.style.stroke = 'var(--accent)';
+  text.style.strokeWidth = '0.5';
+  stamp.append(text);
   g.append(stamp);
   return g;
 }
@@ -265,7 +273,7 @@ function buildLegend(g: SVGGElement, z: Zone): SVGGElement {
     el('path', { d: `M${-w / 2 + 3} ${-h / 2 + 3}H${w / 2 - 3}V${h / 2 - 3}H${-w / 2 + 3}Z`, 'stroke-width': 0.8 }),
     el('path', { d: `M${-w / 2} ${-h / 2 + 19}H${w / 2}`, 'stroke-width': 1 }),
   );
-  g.append(el('text', { class: 't-note', x: -w / 2 + 9, y: -h / 2 + 14, 'font-size': 11 }, [t('heroes.kartograf.legendaTitle')]));
+  g.append(el('text', { class: 't-note', x: -w / 2 + 9, y: -h / 2 + 14, 'font-size': 13 }, [t('heroes.kartograf.legendaTitle')]));
   for (let i = 0; i < 3; i++) {
     const y = -h / 2 + 28 + i * 16;
     g.append(

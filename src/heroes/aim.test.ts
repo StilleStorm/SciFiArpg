@@ -231,6 +231,12 @@ describe('each aimed skill honours its aim', () => {
     expect(shot?.vy ?? 0).toBeGreaterThan(600);
   });
 
+  it('no skill is cast while a sheet holds the clock', () => {
+    const s = run('kartograf');
+    s.modal = 'cookies';
+    expect(castSkill(s, createBus(), 0, false, { kind: 'kierunek', dx: 0, dy: 1 })).toBe(false);
+  });
+
   it('Triangulacja reports a line as long as the shot flies', () => {
     const s = run('kartograf');
     const bus = createBus();

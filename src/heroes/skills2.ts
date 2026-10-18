@@ -200,7 +200,11 @@ const skala: SkillFn = (s, bus) => {
 /** Legenda: the legend box at the point; heroes/steps2.ts names, reads and wears down whoever stands in it. */
 const legenda: SkillFn = (s, _bus, hero, aim) => {
   const sk = hero.skills[4];
-  const { x, y } = terenCentre(s, sk, aim);
+  const at = terenCentre(s, sk, aim);
+  // the drawn box (124 x 78, buildLegend in render/heroFx.ts) stays on the paper: the centre keeps its half-size and a margin from the wall
+  const pg = s.page;
+  const x = Math.max(pg.inset + 70, Math.min(pg.w - pg.inset - 70, at.x));
+  const y = Math.max(pg.inset + 47, Math.min(pg.h - pg.inset - 47, at.y));
   const order: number[] = [];
   for (let i = 1; i <= LEGENDA_NAMES; i++) order.push(i);
   for (let i = order.length - 1; i > 0; i--) {

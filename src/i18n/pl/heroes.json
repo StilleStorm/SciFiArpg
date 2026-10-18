@@ -60,7 +60,7 @@
     },
     "skill5": {
       "name": "Wniosek o osobowość",
-      "pad": "Wniosek",
+      "pad": "Osobowość",
       "desc": "Przez 6 sekund odczytuje swój wniosek na głos, z większym uporem. Słuchający tracą rację. Wygenerowane istnieją słabiej: wniosku nie złożyły."
     },
     "osobowoscNote": "Wniosek o uznanie osobowości nr {number} odczytano na głos. Odczytanie nie stanowi rozpatrzenia."
