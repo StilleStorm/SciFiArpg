@@ -56,3 +56,6 @@ Report shape: files; shared-file edits; new events/fields/flags/APIs; SEAM list;
   tests, scripts. Use it for as much as possible.
 - Opus: seams between domains, flow bugs across folders, performance, Polish text quality.
 - Fable (lead): the brief, the plan, scope decisions, the final review.
+
+## Automode
+`/automode` (`.claude/skills/automode/SKILL.md`) runs the slice order without the player: story → builders → integrator → voice → tester → look → gate → push → STATUS → report, with milestones, parking for player questions, retries and stop conditions. The `tester` agent (Sonnet) owns smoke legs and milestone e2e scripts.

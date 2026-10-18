@@ -80,6 +80,27 @@ joystick/tap steering (§2), editorial rules (§12.1).
   the new defaults.
 - Whether bubbles/figures are readable at phone size.
 
+## Milestones (for /automode)
+- **M1 Systems core**: slices 1–4 (hero folders + primitives, paragraphs, Argument meter +
+  ultimates, loadout form + Karta uprawnień). Milestone e2e: a full run with a loadout and an
+  ultimate on every hero.
+- **M2 Items**: slices 5 and 8 (affix pool, bases to 40, item level, drops, Sklep, drawing
+  marks, sets, legendary paragraphs, Reklamacja, Archiwum). Milestone e2e: loot across tiers,
+  a set bonus, a reclamation, a stash transfer.
+- **M3 Heroes filled**: slice 6 (five hero slices from SKILLS.md) and 10a–10c (recovery, elite
+  packs, character sheet, save safety, settings). Milestone e2e: every skill and paragraph of
+  every hero against a fixed scene; recovery and auto-use.
+- **M4 Campaign frame**: slices 6a and 7 (roster screen, priority, planet sequence, final ticket,
+  free travel) and 10d (page content). Milestone e2e: a whole campaign skeleton at low priority
+  with placeholder chapter cards.
+- **M5 Akt I + finale (MVP)**: story content for planets 1–3 and the Anomalia frame from
+  STORY.md §8 (story agent plans, voice writes, builders code), chapter cards, opening page,
+  clerks, side tickets, hero lines. Milestone e2e: Akt I start to finish, skipping all cards.
+- **M6 Polish and balance**: slice 11, the on-ramp, phone feedback. Then Akt II and III as M7, M8.
+
+## Needs the player
+(none)
+
 ## Game plan (accepted 2026-10-18) and the slice order
 The plan lives in docs/PLAN.md (game shape, skill system, slices), docs/SKILLS.md (per-hero
 skills, paragraphs, ultimates, passives, loadouts), docs/ITEMS.md (bases, affix pool, sets,
