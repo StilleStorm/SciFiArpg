@@ -5,7 +5,9 @@
  * strokes, a thin inner edge for the thickness of the sheet and the handwritten note "c.d. na stronie __" beside it.
  * It lives in #page, so a page turn sweeps it away with the sheet. On `tunnel:closed` it is repaired: an opaque strip
  * of tape (two parallel ink lines, hatching between them, a slight turn) is drawn over the hole and the note is
- * struck through in red. Tape is not transparent. Nothing here owns state: it only draws what the events report.
+ * struck through in red. Tape is not transparent. Nothing here owns game state: it only draws what the events report, and
+ * remembers where it put tape on the page that is shown, so `restore` can draw it again when that page is rebuilt (the
+ * return from the base draws the held run's page anew).
  */
 import type { Bus, TunnelCloseReason } from '../core/events';
 import { createRng, type Rng } from '../core/rng';
@@ -75,9 +77,21 @@ export function tapeOutline(rng: Rng): Pt[] {
 interface Drawn {
   x: number;
   y: number;
+  /** The run page the hole is cut in (-1: the base page). */
+  page: number;
   group: SVGGElement;
   note: SVGTextElement;
 }
+
+/** A repaired hole: where the tape lies, on which run page. */
+export interface TapeMark {
+  x: number;
+  y: number;
+  page: number;
+}
+
+/** The tapes that stay on page `index` once the run turns to it: only those of that page (a turned page is never seen again). */
+export const tapesOnPage = (tapes: readonly TapeMark[], index: number): TapeMark[] => tapes.filter((m) => m.page === index);
 
 export interface TunnelFxDeps {
   /** #page: the sheet the hole is cut in. */
@@ -86,14 +100,23 @@ export interface TunnelFxDeps {
   pageWidth(): number;
 }
 
-/** The unbind function, plus `show`: draw the hole of a tunnel that is already open (the base end, the return into a held run) without a cut. */
-export type TunnelFxHandle = (() => void) & { show(x: number, y: number, animate?: boolean): void };
+/**
+ * The unbind function, plus `show`: draw the hole of a tunnel that is already open (the base end, the return into a held run)
+ * without a cut, and `restore`: draw again, at once, the tape of every hole repaired earlier on run page `page` (call it after
+ * the page is rebuilt). `tapes()` lists what is remembered.
+ */
+export type TunnelFxHandle = (() => void) & {
+  show(x: number, y: number, animate?: boolean, page?: number): void;
+  restore(page: number): void;
+  tapes(): readonly TapeMark[];
+};
 
 /** Draw the hole on `tunnel:opened`, repair or rub it out on `tunnel:closed`. Returns the unbind function. */
 export function bindTunnelFx(bus: Bus, deps: TunnelFxDeps): TunnelFxHandle {
   let open: Drawn | null = null;
+  let tapes: TapeMark[] = [];
 
-  const cutHole = (x: number, y: number, animate = true): void => {
+  const cutHole = (x: number, y: number, animate = true, page = -1): Drawn => {
     const seed = Math.floor(x * 31 + y * 17) >>> 0;
     const group = el('g', { class: 'tn-hole', transform: `translate(${n2(x)} ${n2(y)})` });
     const outline = holeOutline(createRng(seed));
@@ -140,11 +163,11 @@ export function bindTunnelFx(bus: Bus, deps: TunnelFxDeps): TunnelFxHandle {
     } else {
       note.style.opacity = '1';
     }
-    open = { x, y, group, note };
+    return { x, y, page, group, note };
   };
 
-  /** A strip of tape across the hole and a red line through the note. */
-  const repair = (d: Drawn): void => {
+  /** A strip of tape across the hole and a red line through the note; `animate` false draws it as it lies (a rebuilt page). */
+  const repair = (d: Drawn, animate = true): void => {
     const rng = createRng(Math.floor(d.x * 5 + d.y * 11) >>> 0);
     const tape = el('g', { class: 'tn-tape', transform: `translate(${n2(d.x + rng.range(-2, 2))} ${n2(d.y + rng.range(-1, 1))}) rotate(${n2(TAPE_TURN + rng.range(-3, 3))})` });
     const d0 = polyline(tapeOutline(rng), true);
@@ -153,9 +176,11 @@ export function bindTunnelFx(bus: Bus, deps: TunnelFxDeps): TunnelFxHandle {
     const hatching = el('path', { d: d0, fill: 'url(#hatch-wide)', stroke: 'none' });
     tape.append(body, hatching);
     deps.page.append(tape);
-    tape.style.opacity = '0';
-    tween(160, (p) => (tape.style.opacity = String(p)));
-    drawIn(tape, 320);
+    if (animate) {
+      tape.style.opacity = '0';
+      tween(160, (p) => (tape.style.opacity = String(p)));
+      drawIn(tape, 320);
+    }
 
     // the note is struck through by the same hand: one red stroke across the text
     let w = 96;
@@ -175,6 +200,7 @@ export function bindTunnelFx(bus: Bus, deps: TunnelFxDeps): TunnelFxHandle {
     line.style.stroke = 'var(--accent)';
     line.setAttribute('transform', d.note.getAttribute('transform') ?? '');
     d.group.append(line);
+    if (!animate) return;
     const len = line.getTotalLength();
     line.style.strokeDasharray = String(len);
     line.style.strokeDashoffset = String(len);
@@ -185,25 +211,35 @@ export function bindTunnelFx(bus: Bus, deps: TunnelFxDeps): TunnelFxHandle {
     const d = open;
     open = null;
     if (!d) return;
-    if (repairedWithTape(reason)) repair(d);
-    else if (reason === 'page') d.group.remove(); // the sheet is being swept away with it
+    if (repairedWithTape(reason)) {
+      repair(d);
+      if (d.page >= 0) tapes.push({ x: d.x, y: d.y, page: d.page });
+    } else if (reason === 'page') d.group.remove(); // the sheet is being swept away with it
     else eraseOut(d.group, 300, 0, () => d.group.remove());
   };
 
   const offs = [
-    bus.on('tunnel:opened', (e) => cutHole(e.x, e.y)),
+    bus.on('tunnel:opened', (e) => void (open = cutHole(e.x, e.y, true, e.pageIndex))),
     bus.on('tunnel:closed', (e) => close(e.reason)),
     // a new run draws a fresh page; whatever was cut in the old one is gone with it
     bus.on('run:started', () => {
       open = null;
+      tapes = [];
+    }),
+    bus.on('page:entered', (e) => {
+      tapes = tapesOnPage(tapes, e.index);
     }),
   ];
   const unbind = (): void => {
     for (const off of offs) off();
   };
   return Object.assign(unbind, {
-    show(x: number, y: number, animate = false): void {
-      cutHole(x, y, animate);
+    show(x: number, y: number, animate = false, page = -1): void {
+      open = cutHole(x, y, animate, page);
     },
+    restore(page: number): void {
+      for (const m of tapesOnPage(tapes, page)) repair(cutHole(m.x, m.y, false, m.page), false);
+    },
+    tapes: () => tapes,
   });
 }

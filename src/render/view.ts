@@ -15,8 +15,11 @@ export interface Builder<E extends Entity> {
 export type Builders = { [K in EntityKind]: Builder<Extract<Entity, { kind: K }>> };
 
 export interface Views {
-  /** Create views for new entities, patch existing ones, remove views of vanished ones. */
-  sync(entities: Iterable<Entity>, timeMs: number): void;
+  /**
+   * Create views for new entities, patch existing ones, remove views of vanished ones. New views are drawn in, unless
+   * `opts.drawIn` is false: the entities already existed and their page is only being drawn again (the return from the base).
+   */
+  sync(entities: Iterable<Entity>, timeMs: number, opts?: { drawIn?: boolean }): void;
   get(id: number): SVGGElement | undefined;
   /** Forget the view but leave its node in the DOM, so a death animation can finish and remove it. */
   detach(id: number): SVGGElement | undefined;
@@ -81,8 +84,9 @@ export function createViews(layer: SVGGElement, builders: Builders): Views {
   }
 
   return {
-    sync(entities, timeMs) {
+    sync(entities, timeMs, opts) {
       pass++;
+      const animate = opts?.drawIn !== false;
       for (const e of entities) {
         let slot = slots.get(e.id);
         if (!slot) {
@@ -94,7 +98,8 @@ export function createViews(layer: SVGGElement, builders: Builders): Views {
           slot = { g, transform: '', seen: pass };
           slots.set(e.id, slot);
           const ms = pending.get(g);
-          if (ms) drawIn(g, ms);
+          pending.delete(g);
+          if (ms && animate) drawIn(g, ms);
         }
         slot.seen = pass;
         const flip = e.kind === 'player' || e.kind === 'enemy' || e.kind === 'summon' ? e.facing : 1;
