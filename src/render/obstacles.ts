@@ -233,6 +233,11 @@ export interface PageHeader {
   top: string;
   /** The regulamin clause as printed. */
   clause: string;
+  /**
+   * The span of the page the camera shows when the header is printed, in portrait only (`portraitSpan` in render/camera.ts):
+   * the header is then set inside it, at most two lines, so a 390-unit view never cuts it off. Absent: the whole page width.
+   */
+  view?: { x0: number; x1: number };
 }
 
 /** Break a text into lines of at most `max` characters. */
@@ -249,20 +254,88 @@ export function wrapText(text: string, max: number): string[] {
   return lines;
 }
 
+/**
+ * Wrap to `max` characters and keep at most `maxLines` lines. A text that does not fit is cut after its last whole sentence
+ * that does (a clause reads as printed, only shorter); when not even the first sentence fits, the last line ends with an ellipsis.
+ */
+export function wrapLines(text: string, max: number, maxLines: number): string[] {
+  const all = wrapText(text, max);
+  if (all.length <= maxLines) return all;
+  const sentences = text.match(/[^.!?]+[.!?]+(\s+|$)/g) ?? [];
+  for (let n = sentences.length - 1; n > 0; n--) {
+    const lines = wrapText(sentences.slice(0, n).join('').trim(), max);
+    if (lines.length <= maxLines) return lines;
+  }
+  const kept = all.slice(0, maxLines);
+  const words = (kept[maxLines - 1] ?? '').split(' ');
+  while (words.length > 1 && words.join(' ').length + 1 > max) words.pop();
+  kept[maxLines - 1] = `${words.join(' ').replace(/[,.;:\u2013-]+$/, '')}\u2026`;
+  return kept;
+}
+
+/** Where the header is set and how: left and right edge, the first baseline, the clause's size and wrap. */
+export interface HeaderBox {
+  x0: number;
+  x1: number;
+  /** Baseline of the form line; the clause follows 22 units lower. */
+  y: number;
+  /** Font size of the clause in units. */
+  size: number;
+  maxChars: number;
+  maxLines: number;
+}
+
+/** Average advance of an EB Garamond italic letter, as a share of the font size. */
+const SERIF_ADVANCE = 0.435;
+const HEADER_SIZE = 17;
+const HEADER_SIZE_NARROW = 14;
+const HEADER_Y = 52;
+/** How far a header that cannot avoid a torn top corner is set below it. */
+const BELOW_CORNER = 72;
+
+/**
+ * The header's box on `page`. On the whole page width it keeps clear of a torn (or, `avoidExit`, folded) top corner and
+ * takes up to three lines. In a portrait view (`view` given) it is set inside the visible span with a 24-unit margin,
+ * a smaller italic and two lines at most; when a top corner leaves too little room there, it goes below the corner.
+ */
+export function headerBox(page: Pick<Page, 'w' | 'torn' | 'exit'>, view?: { x0: number; x1: number }, avoidExit = true): HeaderBox {
+  const topLeft = page.torn === 'tl' || (avoidExit && page.exit?.corner === 'tl');
+  const topRight = page.torn === 'tr' || (avoidExit && page.exit?.corner === 'tr');
+  let x0 = topLeft ? 180 : 52;
+  let x1 = topRight ? page.w - 180 : page.w - 52;
+  let y = HEADER_Y;
+  let size = HEADER_SIZE;
+  let maxLines = 3;
+  if (view) {
+    size = HEADER_SIZE_NARROW;
+    maxLines = 2;
+    const v0 = Math.max(52, view.x0 + 24);
+    const v1 = Math.min(page.w - 52, view.x1 - 24);
+    x0 = Math.max(x0, v0);
+    x1 = Math.min(x1, v1);
+    if (x1 - x0 < 240) {
+      x0 = v0;
+      x1 = v1;
+      y = HEADER_Y + BELOW_CORNER;
+    }
+  }
+  return { x0, x1, y, size, maxChars: Math.max(12, Math.floor((x1 - x0) / (size * SERIF_ADVANCE))), maxLines };
+}
+
 /** The page header: one printed form with the HUD above it. Mono form line, then the clause in italic. */
-function drawHeader(page: Page, header: PageHeader): SVGGElement {
-  const g = el('g', {});
-  const topLeft = page.torn === 'tl' || page.exit?.corner === 'tl';
-  const topRight = page.torn === 'tr' || page.exit?.corner === 'tr';
-  const x0 = topLeft ? 180 : 52;
-  const x1 = topRight ? page.w - 180 : page.w - 52;
-  const maxChars = Math.floor((x1 - x0) / 7.4);
-  const top = el('text', { class: 't-head-top', x: x0, y: 52 }, [header.top]);
-  g.append(top);
-  const lines = wrapText(header.clause, maxChars).slice(0, 3);
-  lines.forEach((line, i) => g.append(el('text', { class: 't-head', x: x0, y: 74 + i * 20 }, [line])));
-  const ruleY = 74 + lines.length * 20 - 6;
-  g.append(el('path', { d: `M${x0} ${ruleY}H${n2(Math.min(x1, x0 + 300))}`, 'stroke-width': 0.9 }));
+export function drawHeader(page: Page, header: PageHeader, opts: { cls?: string; avoidExit?: boolean } = {}): SVGGElement {
+  const g = el('g', opts.cls ? { class: opts.cls } : {});
+  const box = headerBox(page, header.view, opts.avoidExit ?? true);
+  g.append(el('text', { class: 't-head-top', x: box.x0, y: box.y }, [header.top]));
+  const lines = wrapLines(header.clause, box.maxChars, box.maxLines);
+  const step = Math.round(box.size * 1.18);
+  lines.forEach((line, i) => {
+    const text = el('text', { class: 't-head', x: box.x0, y: box.y + 22 + i * step }, [line]);
+    if (box.size !== HEADER_SIZE) text.style.fontSize = `${box.size}px`;
+    g.append(text);
+  });
+  const ruleY = box.y + 22 + lines.length * step - 6;
+  g.append(el('path', { d: `M${box.x0} ${ruleY}H${n2(Math.min(box.x1, box.x0 + 300))}`, 'stroke-width': 0.9 }));
   return g;
 }
 

@@ -12,7 +12,7 @@ import { t } from '../i18n';
 import { openKiosk } from '../economy/kiosk';
 import { spawnBoss } from '../enemies/bosses';
 import { spawnEntryWave, spawnWave } from '../enemies/spawn';
-import { currentViewSize, viewRect, type Camera } from '../render/camera';
+import { currentViewSize, portraitSpan, viewRect, type Camera } from '../render/camera';
 import { drawIn, stamp } from '../render/ink';
 import { drawPage, type PageHeader } from '../render/obstacles';
 import type { Stage } from '../render/stage';
@@ -29,18 +29,21 @@ const KIOSK_TAP = 80;
 
 // ---------- header ----------
 
-export function headerFor(s: RunState): PageHeader {
+/** The printed header of a run page. `view`: the visible span in a portrait view (`portraitSpan`), so the header fits on screen. */
+export function headerFor(s: RunState, view?: { x0: number; x1: number }): PageHeader {
   return {
     top: t('screens.header.top', { number: s.ticket.number, page: s.pageIndex + 1, total: s.pageCount }),
     clause: t(`laws.${s.ticket.lawId}.header`, { planet: s.ticket.planetLoc }),
+    ...(view ? { view } : {}),
   };
 }
 
 /** The printed header of the base page: the form line and the clause (it appears once the ticket is accepted). */
-export function baseHeaderFor(s: RunState): PageHeader {
+export function baseHeaderFor(s: RunState, view?: { x0: number; x1: number }): PageHeader {
   return {
     top: t('screens.base.header', { number: s.ticket.number }),
     clause: t(`laws.${s.ticket.lawId}.header`, { planet: s.ticket.planetLoc }),
+    ...(view ? { view } : {}),
   };
 }
 
@@ -238,9 +241,9 @@ export function bindPageTurn(bus: Bus, deps: TurnDeps): () => void {
     views.clear();
     stage.world.replaceChildren();
     stage.fx.replaceChildren();
-    const ink = drawPage(stage.page, s.page, headerFor(s));
     camera.snap(s.player.x, s.player.y);
     camera.apply();
+    const ink = drawPage(stage.page, s.page, headerFor(s, portraitSpan(camera)));
     const [nx = 0, ny = 0] = (stage.svg.getAttribute('viewBox') ?? '0 0 0 0').split(' ').map(Number);
     stage.svg.insertBefore(sheet, stage.fx.nextSibling);
 

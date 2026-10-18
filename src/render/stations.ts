@@ -14,7 +14,7 @@ import { FOLD, type Page } from '../world/pages';
 import { LABEL_RANGE, type BaseProp, type Station, type TappableStation } from '../world/base';
 import type { RunState } from '../world/run';
 import { drawIn } from './ink';
-import { drawPage, wrapText, type PageHeader } from './obstacles';
+import { drawHeader, drawPage, type PageHeader } from './obstacles';
 import { dotPath, el, n2, polyline, wobblyCircle, wobblyLine } from './svg';
 import { tween } from './tween';
 import { washGroup, type WashHue } from './wash';
@@ -376,20 +376,7 @@ function exitShapes(page: Page, seed: number): { locked: SVGGElement; open: SVGG
 // ---------- the header ----------
 
 /** The printed header of the base page: the form line and the clause; it appears once the ticket is accepted. */
-function drawHeader(page: Page, header: PageHeader): SVGGElement {
-  const g = el('g', { class: 'base-header' });
-  const topLeft = page.torn === 'tl';
-  const topRight = page.torn === 'tr';
-  const x0 = topLeft ? 180 : 52;
-  const x1 = topRight ? page.w - 180 : page.w - 52;
-  const maxChars = Math.floor((x1 - x0) / 7.4);
-  g.append(el('text', { class: 't-head-top', x: x0, y: 52 }, [header.top]));
-  const lines = wrapText(header.clause, maxChars).slice(0, 3);
-  lines.forEach((line, i) => g.append(el('text', { class: 't-head', x: x0, y: 74 + i * 20 }, [line])));
-  const ruleY = 74 + lines.length * 20 - 6;
-  g.append(el('path', { d: `M${x0} ${ruleY}H${n2(Math.min(x1, x0 + 300))}`, 'stroke-width': 0.9 }));
-  return g;
-}
+const drawBaseHeader = (page: Page, header: PageHeader): SVGGElement => drawHeader(page, header, { cls: 'base-header', avoidExit: false });
 
 // ---------- the view ----------
 
@@ -474,7 +461,7 @@ export function drawBase(layer: SVGGElement, page: Page, opts: { accepted: boole
 
   const showHeader = (header: PageHeader, animate: boolean): void => {
     headerG?.remove();
-    headerG = drawHeader(page, header);
+    headerG = drawBaseHeader(page, header);
     ink.append(headerG);
     if (animate) drawIn(headerG, 600);
   };

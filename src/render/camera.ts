@@ -124,6 +124,16 @@ export function createCamera(
   return cam;
 }
 
+/**
+ * The horizontal span of the page the camera shows now, when the view is portrait (taller than wide); undefined in landscape,
+ * where the whole page width is on screen. Text printed on the page in portrait (the clause header) is set inside it.
+ */
+export function portraitSpan(cam: Pick<Camera, 'w' | 'h' | 'viewRect'>): { x0: number; x1: number } | undefined {
+  if (cam.h <= cam.w) return undefined;
+  const r = cam.viewRect();
+  return { x0: r.x0, x1: r.x1 };
+}
+
 /** The rectangle the camera shows when it is centred on (cx, cy), clamped like `apply()` does. */
 export function viewRect(cx: number, cy: number, w: number, h: number, bounds: { w: number; h: number }): { x0: number; y0: number; x1: number; y1: number } {
   const x0 = axis(cx, w, bounds.w);
