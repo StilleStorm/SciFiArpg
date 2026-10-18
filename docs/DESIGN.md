@@ -623,6 +623,51 @@ Aim modes follow §5.6. Numbers scale with ranks like the first three (helpers.t
 one word where possible (Bęben, Wniosek, Numer, Rozłącz, Już było, Start, Skala, Legenda, Pływy,
 Księżyc); the voice editor decides the final words.
 
+## 10.2 Skill system (accepted 2026-10-18; the full proposal and rationale are in docs/PLAN.md §2)
+- **Slots:** three skill pads plus a fourth **ultimate pad** drawn as a stamp pad, placed above
+  the three in portrait and in the pad arc in landscape, plus the auto-attack. Loadout is set at
+  the desk ("Konfiguracja" form) and at the pause sheet; paragraphs switch in the same places.
+- **Categories:** podstawowa, ofensywna, obronna, użytkowa, ostateczna. 10–11 skills per hero
+  (2 / 2–3 / 2 / 2–3) and 3 ultimates at levels 12 / 24 / 36. The desk form shows the
+  categories; the rule of three (one per category on the pads) is recommended, not enforced.
+- **Paragraphs (runes):** every skill and ultimate has § 1, § 2, § 3, one active. § 1 is the base,
+  § 2 reshapes (shape, aim, count, duration), § 3 retypes or adds a status with a cost; a
+  paragraph patches at most four fields. Unlock: § 2 at skill level + 6, § 3 at + 14, or by a
+  family permission for the rare ones. The permission-gated fourth and fifth skills need the
+  permission for their first rank only.
+- **Ultimates: argument ostateczny.** No mana; skills run on cooldowns. The **Argument meter**
+  fills from rebuttals (matching the claim's type), from kills more slowly, from a correct Spór
+  reply by half, and drains slowly out of combat. Full meter = one ultimate. Each ultimate: at
+  most 8 s, one stamp, one page reaction, radius at most 220 or the hero's own path; at most one
+  ultimate per hero acts page-wide and only through a status.
+- **Passives (cechy):** 10 per hero; the seventh is the hero's absurd rule, always on and outside
+  the slots; four slots unlock at levels 10 / 20 / 30 / 40.
+- **Progression:** levels 1–40 (MVP 1–30). Skills unlock by category on a schedule (level 1: one
+  podstawowa and one obronna; one mobility and one obronna that works alone by level 3; one
+  skill of each damage type by level 7). The aktualizacja form stays the level-up moment and
+  offers the newly unlocked skill or paragraph plus two stat/passive entries.
+- **Primitives:** skill effects are composed from a library (dash, aoe, cone, line, projectile,
+  zone, summon, pull/push, status apply, buff, heal, teleport, decoy, hitscan, plus the three
+  accepted additions: cooldown reset, deferred damage, echo). A skill is data plus primitives;
+  a paragraph is a patch on that data. Hero code lives in one folder per hero with a registry;
+  no code outside it names a hero id. `npm run new-hero <id>` scaffolds the folder.
+- **Per-hero content:** docs/SKILLS.md is the accepted roster (names, categories, types, aim
+  modes, unlock levels, paragraphs, ultimates, passives, loadouts, synergies, cross-hero rules).
+
+## 10.3 Skill chart and specializations (Karta uprawnień)
+There is no locking tree: any unlocked skill can be equipped. What gives the Diablo 2 feeling
+of a tree is a **printed chart per hero**, the "Karta uprawnień", opened at the desk and from
+the profile: skills, paragraphs and passives drawn as boxes on a form, connected by dotted lines
+in unlock order, stamped ZATWIERDZONO when unlocked, greyed with BRAK UPRAWNIEŃ when gated.
+On top of it, **three specializations per hero** (the three sample loadouts in docs/SKILLS.md
+become their names, e.g. Pralka: Pralnia, Osoba, Serwis): a specialization is a column on the
+chart; equipping at least two skills from one column grants its **capstone** (a small named
+bonus printed at the column's foot, e.g. "Pralnia: Wirowanie pulls 20% wider"). Capstones are
+the only exclusive choice: one column's capstone at a time. This keeps freedom and still makes
+a build readable at a glance on the form.
+
+---
+
 ## 11. i18n
 
 - `src/i18n/` holds `pl/*.json` (source language) split by domain: `ui.json`, `items.json`,
