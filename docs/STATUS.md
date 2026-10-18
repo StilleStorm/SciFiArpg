@@ -98,6 +98,21 @@ joystick/tap steering (§2), editorial rules (§12.1).
   clerks, side tickets, hero lines. Milestone e2e: Akt I start to finish, skipping all cards.
 - **M6 Polish and balance**: slice 11, the on-ramp, phone feedback. Then Akt II and III as M7, M8.
 
+## Paused mid-planning (2026-10-18, player's session tokens ran out)
+A Workflow was producing docs/PRODUCTION.md: the verified milestone/slice plan with a
+paste-ready builder brief per slice (3 Fable planners with lenses → 3 Opus judges →
+Fable synthesis → one Sonnet skeptic per slice → Fable repair → Opus writes the doc).
+- Run id `wf_36478bca-d7f`; script saved in the repo at docs/workflows/production-plan.js.
+- Resume in the SAME container: Workflow({scriptPath: "docs/workflows/production-plan.js",
+  resumeFromRunId: "wf_36478bca-d7f"}) returns cached agents instantly and finishes the rest.
+- Fresh container: run Workflow({scriptPath: "docs/workflows/production-plan.js"}) from the
+  start (costs ~3–5M tokens; needs a session with a token budget) OR the cheap fallback: run the
+  `story` agent (Fable) with the CONSTRAINTS block from that script and the doc list, asking it
+  to write docs/PRODUCTION.md directly in the format the script's Write phase describes; then one
+  `integrator`-style read of PRODUCTION.md for dependency sanity.
+- When PRODUCTION.md exists: STATUS's "slice order" is replaced by a pointer to it, /automode
+  reads slices from PRODUCTION.md, and the first /automode action is its first slice.
+
 ## Needs the player
 (none)
 
