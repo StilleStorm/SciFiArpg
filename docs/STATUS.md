@@ -98,84 +98,16 @@ joystick/tap steering (§2), editorial rules (§12.1).
   clerks, side tickets, hero lines. Milestone e2e: Akt I start to finish, skipping all cards.
 - **M6 Polish and balance**: slice 11, the on-ramp, phone feedback. Then Akt II and III as M7, M8.
 
-## Paused mid-planning (2026-10-18, player's session tokens ran out)
-A Workflow was producing docs/PRODUCTION.md: the verified milestone/slice plan with a
-paste-ready builder brief per slice (3 Fable planners with lenses → 3 Opus judges →
-Fable synthesis → one Sonnet skeptic per slice → Fable repair → Opus writes the doc).
-- Run id `wf_36478bca-d7f`; script saved in the repo at docs/workflows/production-plan.js.
-- Resume in the SAME container: Workflow({scriptPath: "docs/workflows/production-plan.js",
-  resumeFromRunId: "wf_36478bca-d7f"}) returns cached agents instantly and finishes the rest.
-- Fresh container: run Workflow({scriptPath: "docs/workflows/production-plan.js"}) from the
-  start (costs ~3–5M tokens; needs a session with a token budget) OR the cheap fallback: run the
-  `story` agent (Fable) with the CONSTRAINTS block from that script and the doc list, asking it
-  to write docs/PRODUCTION.md directly in the format the script's Write phase describes; then one
-  `integrator`-style read of PRODUCTION.md for dependency sanity.
-- When PRODUCTION.md exists: STATUS's "slice order" is replaced by a pointer to it, /automode
-  reads slices from PRODUCTION.md, and the first /automode action is its first slice.
-
 ## Needs the player
 (none)
 
-## Game plan (accepted 2026-10-18) and the slice order
-The plan lives in docs/PLAN.md (game shape, skill system, slices), docs/SKILLS.md (per-hero
-skills, paragraphs, ultimates, passives, loadouts), docs/ITEMS.md (bases, affix pool, sets,
-legendary paragraphs, item level, drops, economy, stash, drawing marks); the accepted skill
-system is DESIGN §10.2–10.3. All open questions are answered (PLAN §7, ITEMS §12). Each slice = one builder brief + integrator + voice + push,
-between a pickup and a clear. Order:
-1. Hero folder refactor + registry + primitives extracted from current skills; no behaviour
-   change; the contract test (PLAN slice 1).
-2. Paragraph system on existing skills + unlock schedule + the aktualizacja form offering
-   them (PLAN 2).
-3. Argument meter + ultimate pad (stamp pad above the three in portrait) + one ultimate per
-   hero (PLAN 3).
-4. Loadout form "Konfiguracja" at the desk and in the pause sheet; categories shown; the Karta
-   uprawnień chart with three specializations and capstones (PLAN 4, DESIGN §10.3).
-5. Items: affix pool, tiers I–V, name grammar (ITEMS slice a); bases to 40 with drawings (b).
-6. Per-hero skill fill-in to 10–11 + 3 ultimates, one hero per slice, from SKILLS.md (PLAN 5,
-   five slices).
-6a. Character roster screen: create/pick a character, per-character progress, bag and archive,
-    one shared Archiwum (PLAN §7). Replaces "Zmień profil".
-7. Priorytet zgłoszenia + planet sequence + final ticket + climbing difficulty + free travel
-   back to closed planets from the desk (PLAN 6, §7; the story plan supplies the texts).
-8. Items: item level, drops, Sklep stock (ITEMS c); drawing marks (d); sets + legendary
-   paragraphs (e); Reklamacja, Archiwum, sinks (f).
-9. `npm run new-hero` + template + checklist (PLAN 8).
-10. Przesyłka/paczkomat deliveries; tap an item on the ground to see its card.
-10a. Recovery: potwierdzenia drops, vacuum, held stack of 5 with a button, auto-use below 15%,
-     out-of-combat regen (PLAN §8). Should come early: it changes balance; place it right after
-     slice 2 if play says runs are too punishing.
-10b. Elite packs and named elites (PLAN §8).
-10c. Karta osobowa; save persist + export/import; damage numbers setting; bug button; text size
-     (PLAN §8; small, can ride along with other slices).
-10d. Page content: teczki, pieczęcie, zdarzenia (PLAN §8; zdarzenia after the story plan).
-10a. Review additions (PLAN §8): potwierdzenia recovery with the pocket button and auto-use;
-    teczki, pieczęcie and page events; elite packs and named elites; Karta osobowa; persistent
-    storage + save export/import; damage numbers setting; bug button; text size. Potwierdzenia
-    and the Karta osobowa go early (right after slice 3), the rest with their nearest slice.
-11. Balance pass from play; the first-run on-ramp footnotes; phone-feedback bucket; the polish
-    bucket (landscape clause header, Odwirowanie knockback, appeal-form drawing, cookie-banner
-    paper, simpler Wygenerowane, "utwór nr N", three missing sounds, stereo panning, Spór and
-    other text voice passes).
-Later: heavy-metal music profile, more laws/uniques/parts, English, Cloudflare + Play Store.
-Far future: endgame beyond "zgłoszenia dodatkowe", multiplayer.
+## Game plan and the slice order
+The plan is docs/PRODUCTION.md: 7 milestones, 30 slices, each with a paste-ready builder brief.
+Design docs: PLAN.md (+§7, §8), SKILLS.md, ITEMS.md (+§12), STORY.md, DESIGN §10.2–10.3.
+Progress is recorded here, one line per slice:
+- (none yet)
 
-**Storyline (2026-10-18):** proposed in docs/STORY.md at Diablo length and shape, after three
-rounds with the player (no MVP cut; Diablo hours; a cosmic horror and Diablo variety). Five acts,
-sixteen planets; each planet is an act's worth of play: four pisma (quest runs on five target
-primitives), two pisma dodatkowe, a boss run, załącznik page chains; 16–20 h mandatory, 22–26 h
-with side tickets. Plot: the personal ticket meets the Zjawisko (sygn. 1), a phenomenon that
-replaces the galaxy with its probable version; the hero's file is too improbable to average, so
-the Komisja sends them as courier; the hero stops it 11 months before the law would have banned
-it; the Komisja is displeased (paperwork void, no legal basis) and opens case 48214 against the
-hero, which frames the endgame tickets. Variety: five document worlds, six zone types, six
-families with about thirty species (new: Formularze, Opinie, Uśrednione), nine new clauses,
-thirteen new bosses. Twelve open questions (STORY §14). Nothing from it is built.
-
-**Next pickup:** read the player's answers to STORY §14 (or ask them if none), record the
-decisions in STORY as a "Decisions" section, fold the accepted parts into DESIGN as §4.2
-"Campaign" (families and species into §6, clauses into §4, worlds and zones into §3/§4, the
-Kartoteka into §10's hero-select paragraph), re-cut the slice order in PLAN §5 and here (the
-pismo system, worlds, species and boss slices join around slice 7); then start slice 1.
+**Next pickup:** `/pickup` then `/automode`; the first slice is PRODUCTION.md S1.
 
 ## Known limits
 - iOS ignores orientation locks; the setting only picks the layout there.

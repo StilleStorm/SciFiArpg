@@ -129,10 +129,15 @@ const LENSES = [
 ]
 
 phase('Draft')
-const drafts = (await parallel(LENSES.map((l) => () => agent(
+// Pre-computed drafts may be passed as args.drafts (array of {lens, ...plan}); their lenses are skipped.
+const pre = (args && Array.isArray(args.drafts)) ? args.drafts.filter((d) => d && d.milestones) : []
+const preLenses = new Set(pre.map((d) => d.lens))
+const todo = LENSES.filter((l) => !preLenses.has(l.key) && ![...preLenses].some((k) => String(k).includes(l.key)))
+log(`${pre.length} drafts supplied, ${todo.length} to draft`)
+const drafts = pre.concat((await parallel(todo.map((l) => () => agent(
   `You are a production planner for the game Zgłoszenie. ${DOCS}\n\n${CONSTRAINTS}\n\n${l.prompt}\n\nProduce the complete milestone/slice plan to a finished game (MVP = Akt I + finale frame; then Akt II, Akt III, polish), as the schema. Every slice must carry builder entries with owned folders (paths under src/, scripts/, docs/, src/i18n/pl/), allowed additive edits, forbidden files, numbered deliverables with counts, contracts in/out, tests, and the tester leg. Mark story_gap with the exact STORY.md section the story agent must fill before the slice, or an empty string. Keep names in English; game text names in Polish.`,
   { label: `draft:${l.key}`, phase: 'Draft', schema: PLAN_SCHEMA, model: 'fable' }
-)))).filter(Boolean)
+)))).filter(Boolean))
 log(`${drafts.length} plan drafts`)
 
 phase('Judge')

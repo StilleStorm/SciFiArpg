@@ -11,7 +11,8 @@ logs, agent transcripts or the whole brief. Do not summarise the history; there 
    feedback and what was done, the ordered backlog, known limits, the gates.
 2. `git status --short && git log --oneline -8 && git fetch -q origin && git status -sb | head -1`.
    The tree must be clean and level with the remote; if not, read the diff before anything else.
-3. The next backlog item in STATUS.md names its DESIGN sections. Open `docs/DESIGN.md` only at
+3. The next slice is the first in docs/PRODUCTION.md not marked done in STATUS.md; read that slice
+   entry only (its Reads line names the DESIGN/PLAN/SKILLS/ITEMS/STORY sections). Open `docs/DESIGN.md` only at
    those section headings (use the Contents list at the top; `grep -n "^## \|^### " docs/DESIGN.md`
    gives line numbers, then read that range). Always also §3.2–§3.3 if the task touches rendering
    or UI, §12 if it touches Polish text.

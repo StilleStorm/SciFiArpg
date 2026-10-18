@@ -4,8 +4,9 @@ description: Run production of Zgłoszenie autonomously, slice by slice, with th
 ---
 # Automode: the production loop
 
-The lead (this session) runs this loop. It plans nothing itself: the plan is in docs
-(STATUS.md slice order and milestones, PLAN.md, SKILLS.md, ITEMS.md, STORY.md, DESIGN.md).
+The lead (this session) runs this loop. It plans nothing itself: the plan is docs/PRODUCTION.md
+(milestones, slices, briefs); the design is PLAN.md, SKILLS.md, ITEMS.md, STORY.md, DESIGN.md.
+Never use the Workflow tool; never read docs/workflows/ or agent transcripts.
 Agents do the work: `story` (Fable) for plan and story decisions, `builder` (Sonnet) for code,
 `integrator` (Opus) for seams and gates, `voice` (Opus) for Polish, `tester` (Sonnet) for
 end-to-end checks, `look` (Sonnet) for screenshots. The lead briefs, waits, gates by exit code,
@@ -17,7 +18,9 @@ commits, pushes, updates STATUS.md, reports, and continues.
    below fires. Never ask the player a question inside the loop; park it instead (see Parking).
 
 ## One slice, in order
-1. **Read** the next slice entry in STATUS.md "slice order" and only the sections it names.
+1. **Read** the next slice entry in docs/PRODUCTION.md (the first not marked done in STATUS.md
+   progress) and only the doc sections its Reads line names. Paste its builder briefs under the
+   "Standard builder header" from PRODUCTION.md.
    Budget: under 10k tokens of reading per slice.
 2. **Plan gap?** If the slice needs content or decisions not yet written in the docs (per-planet
    content, NPC lines, a rule the brief would have to invent), run `story` with a brief naming
