@@ -4,12 +4,16 @@
  * their own area, so a page 390 px high (landscape) never loses a button.
  */
 
-/* ---------- margin-note labels in the page layer ---------- */
+/* ---------- margin-note labels in the page layer: always shown, Space Mono 12 px capitals, a hand-drawn underline ---------- */
 .base-label {
-  transition: opacity 160ms linear;
+  pointer-events: none;
 }
-.base-label text {
-  paint-order: normal;
+.base-label .t-label {
+  fill: var(--ink);
+  stroke: none;
+  font-family: var(--mono);
+  font-weight: 400;
+  text-transform: uppercase;
 }
 
 /* ---------- the desk of the Asystent ---------- */
@@ -59,14 +63,11 @@
   font-size: 18px;
   padding: 8px 14px 3px;
 }
-:root[data-orient='landscape'] .desk {
+:root[data-orient='landscape'] .desk.two {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   column-gap: 26px;
   align-items: start;
-}
-:root[data-orient='landscape'] .desk-sheet .hist-list {
-  columns: 1;
 }
 :root[data-orient='landscape'] .desk-sheet .group {
   margin-top: 4px;
@@ -78,6 +79,73 @@
 }
 :root[data-orient='landscape'] .desk-sheet .ps-notes,
 :root[data-orient='landscape'] .ticket-sheet .ps-notes {
+  min-height: 0;
+  margin-top: 6px;
+}
+
+/* ---------- the notice board: announcements over the ticket history ---------- */
+.board {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.board-notices {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  counter-reset: notice;
+}
+.board-notice {
+  margin: 0 0 8px;
+  padding: 7px 10px 6px;
+  border: 1px solid var(--ink);
+  font-size: 14.5px;
+  line-height: 1.3;
+}
+.board-notice b {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.board-notice p {
+  margin: 2px 0 0;
+}
+.board .group {
+  margin-top: 6px;
+}
+.board-sheet .ps-sub {
+  font-family: var(--title);
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+:root[data-orient='landscape'] .board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 26px;
+  align-items: start;
+}
+:root[data-orient='landscape'] .board .group {
+  margin-top: 0;
+}
+:root[data-orient='landscape'] .board-notice {
+  margin-bottom: 6px;
+  padding: 4px 8px 3px;
+  font-size: 13.5px;
+  line-height: 1.25;
+}
+:root[data-orient='landscape'] .board-notice b {
+  font-size: 10.5px;
+}
+:root[data-orient='landscape'] .board-sheet .ps-frame {
+  padding-top: 10px;
+  padding-bottom: 6px;
+}
+:root[data-orient='landscape'] .board-sheet .ps-notes {
   min-height: 0;
   margin-top: 6px;
 }

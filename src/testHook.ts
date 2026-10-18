@@ -19,6 +19,9 @@ import { fillDemoInventory, giveRandomItem } from './items/demo';
 import type { Item, ItemTier, Slot } from './items';
 import { mountSklep, type SklepHandle } from './ui/sklep';
 import { createHeroHook, type HeroHook } from './heroes/hook';
+import type { Aim } from './heroes/aim';
+import { castSkill } from './heroes/skills';
+import { holdPad, releasePad } from './ui/pads';
 import { createEnemyHook, type EnemyHook } from './enemies/hook';
 import { createAudioHook, type AudioHook } from './audio/hook';
 
@@ -65,6 +68,15 @@ export interface GameHook {
   openKiosk(): string;
   /** Hero skills, updates, permissions and deaths (heroes/hook.ts). */
   hero: HeroHook;
+  /**
+   * Fire skill 1, 2 or 3 with an aim now: `{kind:'kierunek', dx, dy}`, `{kind:'wskazanie', x, y}` (world units) or
+   * `{kind:'auto'}` (heroes/aim.ts). False on cooldown or if nothing happened.
+   */
+  aimCast(slot: 1 | 2 | 3, aim: Aim): boolean;
+  /** Hold skill pad 1..3 with the finger (dx, dy) css px from the pad's centre (0, 0 = back on the pad); the preview is drawn. */
+  holdPad(slot: 1 | 2 | 3, dx: number, dy: number): void;
+  /** Lift the finger held by `holdPad`: the skill fires with that aim, or nothing if the finger is back on the pad. True when a cast was asked for. */
+  releasePad(slot: 1 | 2 | 3): boolean;
   /** Families, bosses and statuses on demand (enemies/hook.ts). */
   enemies: EnemyHook;
   /** Offline audio renders and the live context state (audio/hook.ts). */
@@ -177,6 +189,12 @@ export function installTestHook(deps: HookDeps): void {
     },
     state: () => game.state,
     hero: createHeroHook(game, deps.bus),
+    aimCast(slot, aim) {
+      const st = game.state;
+      return st ? castSkill(st, deps.bus, (slot - 1) as 0 | 1 | 2, false, aim) : false;
+    },
+    holdPad,
+    releasePad,
     enemies: createEnemyHook(() => game.state, deps.bus),
     audio: createAudioHook(),
     turnTo(index) {

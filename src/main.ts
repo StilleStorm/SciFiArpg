@@ -19,6 +19,7 @@ import { markRewritten } from './save/history';
 import { loadMeta, saveMeta, type Settings } from './save/save';
 import { installTestHook } from './testHook';
 import { createBaza } from './ui/baza';
+import { createBoard } from './ui/board';
 import { createFootnotes } from './ui/footnotes';
 import { createHud } from './ui/hud';
 import { createJoystick } from './ui/joystick';
@@ -28,6 +29,7 @@ import { createPads } from './ui/pads';
 import { createPauseSheet } from './ui/pause';
 import { mountProfile } from './ui/profile';
 import { createSettings } from './ui/settings';
+import { guardGhostClicks } from './ui/sheet';
 import { mountSklep, type SklepHandle } from './ui/sklep';
 import { createTicket } from './ui/ticket';
 import { createTitle } from './ui/title';
@@ -40,6 +42,7 @@ import { bindTunnel, carryPurse, closeFor, closeTunnel, createRunHold, cutBaseHo
 import { TICKET_BASE } from './world/ticket';
 
 const stage = getStage();
+guardGhostClicks(); // a tap that opens a sheet on pointerdown must not click the sheet's button under the finger
 installPaper();
 initInk(stage.fx);
 
@@ -114,8 +117,12 @@ const baza = createBaza(stage.ui, {
     go('profile');
   },
   onReturn: () => returnFromTunnel(),
-  onRewritten: (indices) => save(markRewritten(meta, indices)),
   onResume: () => resumeTicket(),
+  onClose: () => closeSheet(),
+});
+// The notice board: the announcements and the Historia zgłoszeń (a lost ticket is rewritten on the first visit).
+const board = createBoard(stage.ui, {
+  onRewritten: (indices) => save(markRewritten(meta, indices)),
   onClose: () => closeSheet(),
 });
 const onSettingsChange = (next: Settings): void => {
@@ -125,8 +132,7 @@ const onSettingsChange = (next: Settings): void => {
 const onVolumeSet = (which: 'music' | 'sfx'): void => {
   if (which === 'sfx') audio.preview();
 };
-const settings = createSettings(stage.ui, onSettingsChange, () => closeSheet(), onVolumeSet);
-// The same form, opened in place from the pause sheet: Wróć returns to the sheet, not to the base.
+// The settings live in the pause sheet only: Wróć returns to the sheet.
 const pauseSettings = createSettings(stage.ui, onSettingsChange, () => closePauseSettings(), onVolumeSet);
 const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onEnd: () => endTicket() });
 const ticket = createTicket(stage.ui, {
@@ -139,9 +145,10 @@ const live = (): boolean => screen === 'run' || screen === 'baza';
 
 function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): void {
   if (next === 'ticket' || next === 'settings') {
-    // These are sheets of the base now; the test hook still reaches them by name.
+    // The ticket is a sheet of the base; the settings are the pause sheet's (the test hook still reaches both by name).
     if (screen !== 'baza') go('baza');
-    openSheet(next === 'ticket' ? 'ticket' : 'tablica');
+    if (next === 'ticket') openSheet('ticket');
+    else if (pauseRun()) openPauseSettings();
     return;
   }
   // A sheet over the base is one history entry; leaving the base for another screen replaces it instead of popping and pushing.
@@ -224,7 +231,10 @@ function enterBase(over: { seed?: number; number?: number } = {}): RunState {
 }
 
 // ---------- the sheets over the base page ----------
-/** Hold the base while a sheet is up: nothing walks, nothing opens. */
+/**
+ * Hold the base while a sheet is up: nothing walks, nothing opens, the stick and the finger are let go. The sheet may be
+ * opened by a tap (`station:opened` from `Game.onTap`), so the input is switched off here, not by the step.
+ */
 function holdBase(): void {
   const s = game.state;
   if (!s || s.status !== 'running') return;
@@ -232,19 +242,24 @@ function holdBase(): void {
   sheetHolds = true;
   s.player.target = null;
   delete s.player.steer;
+  input.setEnabled(false);
 }
 
+/** Give the base back. The input goes on again with the state: a sheet that stops the base must always start it (a hung stick was this). */
 function releaseBase(): void {
   const s = game.state;
-  if (sheetHolds && s && s.status === 'paused' && !game.paused) s.status = 'running';
+  if (sheetHolds && s && s.status === 'paused' && !game.paused) {
+    s.status = 'running';
+    input.setEnabled(true);
+  }
   sheetHolds = false;
 }
 
 /** Take every sheet off the page without touching the history (the caller does that). */
 function dropSheets(): void {
   baza.close();
+  board.close();
   ticket.close();
-  settings.hide();
   shop?.unmount();
   shop = null;
   if (sheetKind !== null) {
@@ -253,14 +268,14 @@ function dropSheets(): void {
   }
 }
 
-/** Put a sheet over the base page: the desk, the ticket form, the Sklep or the settings. */
+/** Put a sheet over the base page: the desk, the ticket form, the Sklep or the notice board. */
 function openSheet(kind: SheetKind): void {
   const s = game.state;
   if (screen !== 'baza' || !s || s.phase !== 'base') return;
   const wasUp = sheetKind !== null;
   baza.close();
+  board.close();
   ticket.close();
-  settings.hide();
   shop?.unmount();
   shop = null;
   if (!wasUp) {
@@ -276,7 +291,7 @@ function openSheet(kind: SheetKind): void {
       ticket.open(s.ticket);
       break;
     case 'tablica':
-      settings.show(meta.settings);
+      board.open(meta);
       break;
     case 'kiosk':
       // The base Sklep spends the gwiazdki of the live player and fills the bag and gear the run starts with.
@@ -311,7 +326,7 @@ function acceptNow(): boolean {
   return true;
 }
 
-/** Open the sheet (or the footnote) of a station, as if the player had walked up to it and tapped. */
+/** Open the sheet (or the footnote) of a station (a tap on it, `Game.onTap` -> `station:opened`). */
 function openStation(id: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean {
   if (screen !== 'baza' || game.state?.phase !== 'base') return false;
   if (id === 'paczkomat') bus.emit('footnote', { text: t('screens.base.paczkomatClosed') });
@@ -512,7 +527,7 @@ function leave(action: LeaveAction): void {
 
 // ---------- the back button (Android) ----------
 /**
- * The run screen, the profile screen and a sheet over the base page (the desk, the ticket, the Sklep, the settings; counted
+ * The run screen, the profile screen and a sheet over the base page (the desk, the ticket, the Sklep, the notice board; counted
  * as 'ticket') are one history entry above the base; the base page and the title are the root. Opening one of them pushes an
  * entry, leaving it by a button takes it back, so the system back button walks baza <- sheet / profile. During a run the button
  * never leaves: it opens the pause sheet, and while the run is paused it resumes (the entry the press consumed is pushed

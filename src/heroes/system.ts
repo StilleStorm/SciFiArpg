@@ -8,12 +8,14 @@ import { attack, applyDamage } from '../systems/combat';
 import { canOpenUpdate, tickUpdateQueue } from '../progression/queue';
 import { PAGE_H, PAGE_W, resolveMove } from '../world/pages';
 import type { RunState } from '../world/run';
+import { trackRun } from './aim';
 import { durationOf, enemiesWithin, nearestEnemy, power, setExistence, skillDamage, touchStatus } from './helpers';
 import { FOAM_RADIUS } from './skills';
 import { heroDef } from './defs';
 import { pushRing, RING_STEP } from './state';
 
 export function heroStep(s: RunState, bus: Bus, dt: number): void {
+  trackRun(s); // the pad reads the live run to draw a held aim (heroes/aim.ts)
   const h = s.hero;
   const p = s.player;
   for (let i = 0; i < 3; i++) h.cd[i] = Math.max(0, (h.cd[i] ?? 0) - dt);
@@ -49,6 +51,7 @@ export function heroStep(s: RunState, bus: Bus, dt: number): void {
  * cast here (`castSkill` ignores the pads in the base).
  */
 export function heroBaseStep(s: RunState, bus: Bus, dt: number): void {
+  trackRun(s);
   const h = s.hero;
   for (let i = 0; i < 3; i++) h.cd[i] = Math.max(0, (h.cd[i] ?? 0) - dt);
   if (h.pendingLevels <= 0) h.updateRequested = false;

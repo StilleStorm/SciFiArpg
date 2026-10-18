@@ -47,6 +47,12 @@ Modern absurdity mapping (§0–§10), fonts (Michroma/Space Mono/EB Garamond), 
 and c (Spór) next (§5), sound anchors and per-planet profiles (§14), landscape default +
 joystick/tap steering (§2), editorial rules (§12.1).
 
+## Latest player feedback (2026-10-18, phone, landscape, joystick) and what was done
+- Base: controls hung after closing a station sheet (fixed: input re-enabled on release); stations
+  now open on a tap from anywhere; labels permanent and readable; settings only in the pause
+  sheet; the notice board shows announcements + ticket history; Pauza double-toggle fixed
+  (ghost click guard). Aiming shipped in the same push: hold a pad and drag to aim.
+
 ## Open feedback wanted from the player
 - Real-phone frame rate with a crowd; tap accuracy; joystick feel once it lands.
 - Sound levels: music is −12 dB under SFX by design; the sliders' comfortable values become

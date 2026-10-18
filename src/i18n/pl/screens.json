@@ -112,6 +112,26 @@
     "header": "Zgłoszenie nr {number} · baza",
     "deskTitle": "Biurko Asystenta",
     "deskNote": "Biurko czynne w godzinach pracy Asystenta. Godzin nie podano.",
+    "board": {
+      "title": "Tablica ogłoszeń",
+      "announcements": "Ogłoszenia",
+      "history": "Historia zgłoszeń",
+      "note": "Tablica czynna całą dobę. Ogłoszenia aktualne do odwołania.",
+      "notices": {
+        "hours": {
+          "title": "Godziny konsultanta",
+          "text": "Konsultant jest dostępny w godzinach pracy konsultanta. Godziny pracy konsultanta są dostępne u konsultanta."
+        },
+        "lost": {
+          "title": "Rzeczy znalezione",
+          "text": "Znaleziono parasol, kolor nieustalony. Odbiór za okazaniem paragonu na parasol. Paragonu nie znaleziono."
+        },
+        "board": {
+          "title": "Ogłoszenie o tablicy",
+          "text": "Ogłoszenia wywiesza się na tablicy ogłoszeń. To ogłoszenie dotyczy tablicy i wisi na niej od początku jej istnienia. Zdejmowanie wymaga zgody tablicy."
+        }
+      }
+    },
     "exitNote": "wymaga zgłoszenia",
     "exitLocked": "Przejście wymaga zgłoszenia. Zgłoszenia przyjmuje biurko.",
     "paczkomatClosed": "Paczkomat nieczynny. Przesyłki w drodze. Kod odbioru zostanie wysłany po odbiorze.",

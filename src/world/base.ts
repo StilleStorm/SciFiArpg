@@ -21,10 +21,12 @@ import type { RunState } from './run';
 /** The base page is smaller than the run pages: about one screen. */
 export const BASE_W = 900;
 export const BASE_H = 700;
-/** A station's margin-note label appears, and a tapped station opens, when the player is this close (world units). */
+/** Every station must be reachable on foot to within this many world units (the reachability checks; walking up opens nothing). */
 export const LABEL_RANGE = 90;
-/** The tap target of a station is at least this many css pixels across. */
+/** The tap target of a station is at least this many css pixels across and high. */
 export const TAP_PX = 44;
+/** The station labels are set in this type size on the screen, whatever the zoom (css px). */
+export const LABEL_PX = 12;
 /** Collision radius used for the reachability checks (the player's). */
 export const WALK_R = 13;
 
@@ -39,9 +41,29 @@ export interface Station {
   id: TappableStation;
   x: number;
   y: number;
-  /** Tap radius in world units (at least 22 css px, see `tapRadius`). */
-  hit: number;
 }
+
+/** A rectangle relative to a station's centre, in world units. */
+export interface Box {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+/** The drawn object of each station (the extent of `render/stations.ts`), relative to its centre: the tap target. */
+export const STATION_BOX: Record<TappableStation, Box> = {
+  biurko: { x0: -68, y0: -52, x1: 68, y1: 52 },
+  kiosk: { x0: -60, y0: -46, x1: 60, y1: 42 },
+  tablica: { x0: -60, y0: -58, x1: 60, y1: 26 },
+  paczkomat: { x0: -26, y0: -76, x1: 26, y1: 54 },
+};
+
+/** Where the margin-note label hangs: this far under the station's centre (world units), centred on it. */
+export const LABEL_DY: Record<TappableStation, number> = { biurko: 60, kiosk: 50, tablica: 32, paczkomat: 60 };
+/** The label takes this many css px per character (Space Mono at `LABEL_PX`) and is this high (text and underline). */
+export const LABEL_CHAR_PX = 7.2;
+export const LABEL_H_PX = 20;
 
 export type PropKind = 'leg' | 'flag' | 'scorch' | 'hut' | 'square' | 'house';
 
@@ -71,8 +93,6 @@ export interface BaseState {
   accepted: boolean;
   /** A bookmarked ticket the exit leads back into: the page index is `RunState.pageIndex`, the clock is restored on entry. */
   resume: Bookmark | null;
-  /** A station the player tapped and is walking to. */
-  pending: TappableStation | null;
   /** Seconds until the next "wymaga zgłoszenia" note may be written. */
   noteCooldown: number;
 }
@@ -189,8 +209,28 @@ function propBody(kind: PropKind): Circle[] {
 
 const cornerOf = (c: Corner, w: number, h: number): Vec => ({ x: c[1] === 'l' ? PAGE_INSET : w - PAGE_INSET, y: c[0] === 't' ? PAGE_INSET : h - PAGE_INSET });
 
-/** Half the width of a tap target in world units for a view that shows `zoom` css px per unit. */
-export const tapRadius = (st: Pick<Station, 'hit'>, zoom: number): number => Math.max(st.hit, TAP_PX / 2 / Math.max(0.2, zoom));
+/** A rectangle grown (never shrunk) to at least `TAP_PX` css pixels each way for a view that shows `zoom` css px per unit. */
+function grown(b: Box, zoom: number): Box {
+  const need = TAP_PX / Math.max(0.2, zoom);
+  const gx = Math.max(0, (need - (b.x1 - b.x0)) / 2);
+  const gy = Math.max(0, (need - (b.y1 - b.y0)) / 2);
+  return { x0: b.x0 - gx, y0: b.y0 - gy, x1: b.x1 + gx, y1: b.y1 + gy };
+}
+
+/** The label of a station as printed (upper case, as the HUD labels are). */
+export const labelText = (id: TappableStation): string => t(`screens.base.station.${id}`).toLocaleUpperCase('pl-PL');
+
+/** The label's rectangle relative to the station's centre, for a view that shows `zoom` css px per unit. */
+export function labelBox(id: TappableStation, zoom: number): Box {
+  const z = Math.max(0.2, zoom);
+  const half = (labelText(id).length * LABEL_CHAR_PX + 10) / 2 / z;
+  return { x0: -half, y0: LABEL_DY[id], x1: half, y1: LABEL_DY[id] + LABEL_H_PX / z };
+}
+
+/** The tap target of the drawn object of a station (at least 44 x 44 css px), relative to its centre. */
+export const stationBox = (st: Pick<Station, 'id'>, zoom: number): Box => grown(STATION_BOX[st.id], zoom);
+/** The tap target of its label (the same size rule). */
+export const stationLabelBox = (st: Pick<Station, 'id'>, zoom: number): Box => grown(labelBox(st.id, zoom), zoom);
 
 // ---------- reachability (also used by the tests) ----------
 
@@ -224,7 +264,7 @@ export function reachableCells(page: Page, from: Vec, step = 10, r = WALK_R): Ve
   return out;
 }
 
-/** What a base page must offer a player who stands at its spawn: every station within label range, the exit, the hole. */
+/** What a base page must offer a player who stands at its spawn: every station within walking range, the exit, the hole. */
 export function unreachableGoals(page: Page): string[] {
   const info = page.base;
   if (!info) return ['no base'];
@@ -272,7 +312,7 @@ export function generateBase(seed: number): Page {
 
   const stations: Station[] = STATIONS.map((id) => {
     const p = move(spec.stations[id], 14);
-    return { id, x: p.x, y: p.y, hit: id === 'tablica' ? 52 : 48 };
+    return { id, x: p.x, y: p.y };
   });
   for (const st of stations) {
     add({
@@ -302,6 +342,8 @@ export function generateBase(seed: number): Page {
     { p: spawn, r: 150 },
     { p: hole, r: 120 },
     { p: exitPt, r: 210 },
+    // the margin-note labels of the stations hang under them (they stay clear of the decor)
+    ...stations.map((st) => ({ p: { x: st.x, y: st.y + LABEL_DY[st.id] + 12 }, r: 48 })),
   ];
   const decor: Obstacle[] = [];
   const want = decorRng.int(3, 5);
@@ -358,7 +400,7 @@ export function generateBase(seed: number): Page {
 // ---------- the state of the base ----------
 
 export function createBaseState(layout: BaseLayout, resume: Bookmark | null): BaseState {
-  return { layout, accepted: false, resume, pending: null, noteCooldown: 0 };
+  return { layout, accepted: false, resume, noteCooldown: 0 };
 }
 
 /** The exit of the base page is locked until a ticket is accepted. */
@@ -374,7 +416,6 @@ export function acceptTicket(s: RunState, resume: Bookmark | null = null): boole
   if (s.phase !== 'base' || !b || b.accepted) return false;
   b.accepted = true;
   b.resume = resume;
-  b.pending = null;
   s.pageIndex = resume ? Math.min(s.pages.length - 1, Math.max(0, resume.pageIndex)) : 0;
   return true;
 }
@@ -384,13 +425,19 @@ export const bookmarkAllowed = (s: RunState): boolean => s.phase === 'run';
 
 // ---------- the stations ----------
 
-/** The station whose tap target holds the world point (x, y), if any. `zoom` is css px per world unit. */
+const within = (b: Box, st: Pick<Station, 'x' | 'y'>, x: number, y: number): boolean => x >= st.x + b.x0 && x <= st.x + b.x1 && y >= st.y + b.y0 && y <= st.y + b.y1;
+
+/**
+ * The station tapped at the world point (x, y), if any: its drawn object or its label, each grown to at least 44 x 44 css px.
+ * `zoom` is css px per world unit. A tap anywhere on the screen opens it at once; walking into one is harmless.
+ */
 export function stationAt(page: Page, x: number, y: number, zoom = 1): Station | null {
   let best: Station | null = null;
   let bestD = Infinity;
   for (const st of page.base?.stations ?? []) {
+    if (!within(stationBox(st, zoom), st, x, y) && !within(stationLabelBox(st, zoom), st, x, y)) continue;
     const d = Math.hypot(x - st.x, y - st.y);
-    if (d <= tapRadius(st, zoom) && d < bestD) {
+    if (d < bestD) {
       best = st;
       bestD = d;
     }
@@ -398,50 +445,11 @@ export function stationAt(page: Page, x: number, y: number, zoom = 1): Station |
   return best;
 }
 
-/** The station nearest to `p` within the label range, if any. */
-export function stationNear(page: Page, p: Vec): Station | null {
-  let best: Station | null = null;
-  let bestD = LABEL_RANGE;
-  for (const st of page.base?.stations ?? []) {
-    const d = dist(st, p);
-    if (d <= bestD) {
-      best = st;
-      bestD = d;
-    }
-  }
-  return best;
-}
-
-/** A tap at (x, y): remember the station for the walk there, or forget the old one on a tap elsewhere (`keep` leaves it alone). */
-export function tapStation(s: RunState, x: number, y: number, zoom: number, keep = false): TappableStation | null {
-  const b = s.base;
-  if (s.phase !== 'base' || !b) return null;
-  const hit = stationAt(s.page, x, y, zoom);
-  if (hit || !keep) b.pending = hit ? hit.id : null;
-  return hit ? hit.id : null;
-}
-
-/** The tapped station once the player stands within range of it (clears the pending tap); null otherwise. */
-export function stationReached(s: RunState): TappableStation | null {
-  const b = s.base;
-  if (!b?.pending) return null;
-  const st = s.page.base?.stations.find((q) => q.id === b.pending);
-  if (!st || dist(st, s.player) > LABEL_RANGE) return null;
-  b.pending = null;
-  s.player.target = null;
-  return st.id;
-}
-
-/** Per step in the base: open a reached station, watch the exit. No clock, no laws, no spawns. */
+/** Per step in the base: watch the exit. No clock, no laws, no spawns. */
 export function tickBase(s: RunState, bus: Bus, dt: number): void {
   const b = s.base;
   if (s.phase !== 'base' || !b || s.turning) return;
   b.noteCooldown = Math.max(0, b.noteCooldown - dt);
-  const reached = stationReached(s);
-  if (reached) {
-    bus.emit('station:opened', { station: reached });
-    return;
-  }
   const page = s.page;
   if (!page.exit || !atExit(page, s.player)) return;
   if (b.accepted) {

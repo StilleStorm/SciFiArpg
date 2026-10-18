@@ -1,5 +1,6 @@
 // The walkable base page (DESIGN 4.1): the three layouts in both orientations (and a wide overview), a station label on
-// approach, the desk, the ticket, the Sklep and the settings as sheets, the locked and the open dog-ear, the held run's hole
+// permanently under each station, the desk, the ticket, the Sklep and the notice board as sheets (tapping a station opens it
+// at once, in both steering modes), the locked and the open dog-ear, the held run's hole
 // on the base, the walk through the exit into the run and the way back through the tunnel; plus the checks that go with them.
 // Usage: SHOT_PORT=4189 SHOT_OUT=dist-base SHOT_DIR=shots-base vite build --outDir dist-base && node scripts/shot-base.mjs
 import { spawn } from 'node:child_process';
@@ -130,44 +131,70 @@ try {
       await shot(layout);
     }
 
-    // ---- a station label on approach ----
+    // ---- the labels are always there: Space Mono capitals, 12 px on the screen, an underline, clear of each other ----
     const seed0 = layoutSeeds.wioska ?? 1;
     await page.evaluate((sd) => window.__game.startBase(sd), seed0);
     await sleep(1400);
     const labels = await page.evaluate(() => {
       const s = window.__game.state();
-      const st = s.page.base.stations.find((x) => x.id === 'biurko');
-      const far = [...document.querySelectorAll('.base-label')].map((n) => Number(n.style.opacity || 0));
-      window.__game.placePlayer(st.x - 70, st.y + 40);
-      return { far };
+      return [...document.querySelectorAll('.base-label')]
+        .filter((g) => g.dataset.label !== 'tunel')
+        .map((g) => {
+          const text = g.querySelector('text');
+          const r = text.getBoundingClientRect();
+          const u = g.querySelector('path').getBoundingClientRect();
+          const scale = g.getScreenCTM().a;
+          return { id: g.dataset.label, shown: getComputedStyle(g).display !== 'none' && Number(g.style.opacity || 1) === 1, text: text.textContent, family: getComputedStyle(text).fontFamily, px: Number(text.getAttribute('font-size')) * scale, upper: text.textContent === text.textContent.toLocaleUpperCase('pl-PL'), r: { l: r.left, t: r.top, rr: r.right, b: r.bottom }, under: u.top >= r.bottom - 6 && u.width > 20, px0: s.player.x };
+        });
     });
-    check(`${prefix}: no label shows far from a station`, labels.far.every((o) => o === 0));
-    await sleep(1300);
-    const near = await page.evaluate(() => [...document.querySelectorAll('.base-label')].map((n) => `${n.dataset.label}:${n.style.opacity}`));
-    check(`${prefix}: the label of the desk shows within 90 units, the others stay down`, near.includes('biurko:1') && near.filter((n) => n.endsWith(':1')).length === 1, near.join(' '));
+    check(`${prefix}: all four labels are shown at once, in Space Mono capitals at 12 px, each with an underline`, labels.length === 4 && labels.every((l) => l.shown && /Space Mono/i.test(l.family) && Math.abs(l.px - 12) < 0.6 && l.upper && l.under), JSON.stringify(labels.map((l) => [l.id, l.text, l.px])));
+    const overlap = labels.some((a, i) => labels.some((b, j) => i < j && a.r.l < b.r.rr && b.r.l < a.r.rr && a.r.t < b.r.b && b.r.t < a.r.b));
+    check(`${prefix}: the labels do not overlap each other`, !overlap);
     await shot('label');
 
-    // ---- a real tap on a station: walk there, the desk opens (tap steering: the joystick only remembers the tap) ----
-    await page.evaluate(() => window.__game.setSteering('tap'));
-    await page.evaluate((sd) => window.__game.startBase(sd), seed0);
-    await sleep(900);
-    const tapAt = await page.evaluate(() => {
+    // ---- a real tap on a station opens it at once, wherever the player stands; in both steering modes; walking into one is harmless ----
+    const seed1 = seed0;
+    for (const mode of ['tap', 'joystick']) {
+      await page.evaluate((m) => window.__game.setSteering(m), mode);
+      await page.evaluate((sd) => window.__game.startBase(sd), seed1);
+      await sleep(900);
+      const tapAt = await page.evaluate(() => {
+        const s = window.__game.state();
+        const st = s.page.base.stations.find((x) => x.id === 'biurko');
+        const svg = document.getElementById('stage');
+        const m = svg.getScreenCTM();
+        return { x: m.a * st.x + m.e, y: m.d * st.y + m.f, px: s.player.x, py: s.player.y };
+      });
+      if (mobile) await page.touchscreen.tap(tapAt.x, tapAt.y);
+      else await page.mouse.click(tapAt.x, tapAt.y);
+      await sleep(400);
+      const deskOpened = await page.evaluate(() => document.querySelector('.desk-sheet') !== null);
+      const stood = await state();
+      check(`${prefix}: ${mode}: tapping the desk from afar opens its sheet at once, the player stays where he stood`, deskOpened && Math.hypot(stood.x - tapAt.px, stood.y - tapAt.py) < 1, JSON.stringify({ deskOpened, dx: stood.x - tapAt.px }));
+      if (mode === 'tap') {
+        await sleep(300);
+        const frozen = await state();
+        await sleep(300);
+        const frozen2 = await state();
+        check(`${prefix}: the base holds still under the sheet`, frozen.status === 'paused' && frozen2.x === frozen.x && frozen2.y === frozen.y, frozen.status);
+      }
+      await page.evaluate(() => document.querySelector('.ps-close').click());
+      await sleep(300);
+      const back = await state();
+      check(`${prefix}: ${mode}: closing the sheet gives the base back (running)`, back.status === 'running' && (await page.evaluate(() => document.querySelector('.ps') === null)));
+    }
+    // walking into a station opens nothing
+    await page.evaluate(() => {
       const s = window.__game.state();
-      const st = s.page.base.stations.find((x) => x.id === 'biurko');
-      const svg = document.getElementById('stage');
-      const m = svg.getScreenCTM();
-      return { x: m.a * st.x + m.e, y: m.d * st.y + m.f, px: s.player.x, py: s.player.y };
+      const st = s.page.base.stations.find((x) => x.id === 'kiosk');
+      window.__game.placePlayer(st.x, st.y + 90);
+      s.player.target = { x: st.x, y: st.y };
     });
-    if (mobile) await page.touchscreen.tap(tapAt.x, tapAt.y);
-    else await page.mouse.click(tapAt.x, tapAt.y);
-    await page.waitForFunction(() => document.querySelector('.desk-sheet') !== null, null, { timeout: 12000 }).catch(() => undefined);
-    const deskOpened = await page.evaluate(() => document.querySelector('.desk-sheet') !== null);
-    check(`${prefix}: tapping the desk walks there and opens its sheet`, deskOpened);
-    await sleep(500);
-    const frozen = await state();
-    await sleep(300);
-    const frozen2 = await state();
-    check(`${prefix}: the base holds still under the sheet`, frozen.status === 'paused' && frozen2.x === frozen.x && frozen2.y === frozen.y, frozen.status);
+    await sleep(1500);
+    check(`${prefix}: walking into a station is harmless: nothing opens`, (await page.evaluate(() => document.querySelector('.ps') === null)) && (await state()).status === 'running');
+    await page.evaluate(() => window.__game.setSteering('tap'));
+
+    // ---- the desk: no history any more ----
     await page.evaluate(() => {
       const m = window.__game.meta();
       window.__game.setMeta({ ...m, bookmark: { version: 1, ticketNumber: 48217, seed: 4, pageIndex: 2, lawId: 'ciasteczka', clockS: 61.5, planetName: 'Planeta Piąta (Wstępna)', pageCount: 5 } });
@@ -175,6 +202,11 @@ try {
     await page.evaluate(() => window.__game.station('biurko'));
     await sleep(500);
     await shot('desk');
+    check(`${prefix}: the desk offers Nowe zgłoszenie, Wznów zgłoszenie and Zmień profil, and carries no history`, await page.evaluate(() => {
+      const d = document.querySelector('.desk-sheet');
+      const txt = d?.textContent ?? '';
+      return !!d && txt.includes('Nowe zgłoszenie') && txt.includes('Wznów zgłoszenie') && txt.includes('Zmień profil') && d.querySelector('.hist-entry') === null && !txt.includes('Historia zgłoszeń');
+    }));
     const ov = await overflow();
     check(`${prefix}: the desk sheet fits the screen, its buttons are on the page and at least 44 px tall`, ov && ov.bottom <= ov.h + 1 && ov.right <= ov.w + 1 && ov.buttons.every((b) => b.bottom <= ov.h && b.top >= 0 && b.h >= 43), JSON.stringify(ov));
     const scrolls = await page.evaluate(() => {
@@ -182,7 +214,6 @@ try {
       return sc ? { client: sc.clientHeight, scroll: sc.scrollHeight, over: getComputedStyle(sc).overflowY } : null;
     });
     check(`${prefix}: the desk scrolls in its own area`, scrolls && scrolls.over === 'auto');
-    await page.evaluate(() => window.__game.meta()); // (keeps the page alive between steps)
     await page.evaluate(() => document.querySelector('.ps-close').click());
     await sleep(300);
     const closed = await state();
@@ -279,8 +310,13 @@ try {
       window.__game.placePlayer(s.tunnel.x - 60, s.tunnel.y + 25);
     });
     await sleep(1300);
-    const holeLabel = await page.evaluate(() => document.querySelector('.base-label[data-label="tunel"]')?.style.opacity);
-    check(`${prefix}: the hole has its label on approach`, holeLabel === '1', String(holeLabel));
+    const holeLabel = await page.evaluate(() => {
+      const g = document.querySelector('.base-label[data-label="tunel"]');
+      const s = window.__game.state();
+      const m = g.getAttribute('transform') ?? '';
+      return { shown: getComputedStyle(g).display !== 'none', text: g.textContent, at: m, hole: [Math.round(s.tunnel.x), Math.round(s.tunnel.y)] };
+    });
+    check(`${prefix}: the open hole has its label under it`, holeLabel.shown && holeLabel.text === 'TUNEL' && Math.abs(Number(/translate\(([-\d.]+)/.exec(holeLabel.at)?.[1]) - holeLabel.hole[0]) < 1, JSON.stringify(holeLabel));
     await shot('hole-label');
     const t0 = await page.evaluate(() => window.__keep.time);
     await page.evaluate(() => {
@@ -296,7 +332,7 @@ try {
     check(`${prefix}: walking into the base's hole returns to the same run, enemies and clock as they were, the hole taped`, back.screen === 'run' && back.same && back.phase === 'run' && back.status === 'running' && back.timeOk && back.enemies === 3 && back.tapes === 1, JSON.stringify(back));
     await shot('returned');
 
-    // ---- the Sklep and the settings as sheets of the base ----
+    // ---- the Sklep and the notice board as sheets of the base ----
     await page.evaluate((sd) => window.__game.startBase(sd), layoutSeeds.miasteczko ?? 1);
     await sleep(900);
     await page.evaluate(() => window.__game.station('kiosk'));
@@ -308,11 +344,14 @@ try {
     await sleep(300);
     await page.evaluate(() => window.__game.station('tablica'));
     await sleep(600);
-    await shot('settings');
-    check(`${prefix}: the notice board opens the settings`, await page.evaluate(() => document.querySelector('.set-grid') !== null));
-    await page.getByText('Wróć', { exact: true }).click();
+    await shot('board');
+    const boardInfo = await page.evaluate(() => ({ sheet: !!document.querySelector('.board-sheet'), notices: document.querySelectorAll('.board-notice').length, history: document.querySelectorAll('.board .hist-entry').length, heading: [...document.querySelectorAll('.board .group')].map((n) => n.textContent), settings: document.querySelector('.set-grid') !== null }));
+    check(`${prefix}: the notice board opens three announcements over the Historia zgłoszeń, and no settings`, boardInfo.sheet && boardInfo.notices === 3 && boardInfo.history === HISTORY.length && boardInfo.heading.includes('Historia zgłoszeń') && !boardInfo.settings, JSON.stringify(boardInfo));
+    const ovb = await overflow();
+    check(`${prefix}: the notice board sheet fits the screen`, ovb && ovb.bottom <= ovb.h + 1 && ovb.right <= ovb.w + 1, JSON.stringify(ovb));
+    await page.evaluate(() => document.querySelector('.ps-close').click());
     await sleep(300);
-    check(`${prefix}: Wróć closes the settings and gives the base back`, (await state()).status === 'running');
+    check(`${prefix}: Zamknij closes the notice board and gives the base back`, (await state()).status === 'running' && (await page.evaluate(() => document.querySelector('.ps') === null)));
     const before = await page.evaluate(() => window.__game.notes().map((n) => n.text).join(' '));
     await page.evaluate(() => window.__game.station('paczkomat'));
     await sleep(500);

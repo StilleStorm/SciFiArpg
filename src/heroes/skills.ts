@@ -7,10 +7,12 @@ import { recomputeStats } from '../items/stats';
 import { resolveMove } from '../world/pages';
 import { nextId, type RunState } from '../world/run';
 import { heroDef, type HeroDef } from './defs';
-import { aim, areaOf, cooldownOf, durationOf, enemiesWithin, nearestEnemy, power, skillDamage } from './helpers';
+import { AUTO_AIM, blinkOf, fitAim, LINE_SPEED, LINE_TTL, pickTarget, reachOf, resolveAim, resolveDirection, takeQueuedAim, terenCentre, type Aim } from './aim';
+import { areaOf, cooldownOf, durationOf, enemiesWithin, power, skillDamage } from './helpers';
 import { pushRing, ringBack } from './state';
 
-export type SkillFn = (s: RunState, bus: Bus, hero: HeroDef) => void | false;
+/** `aim` is what the player aimed (heroes/aim.ts); a skill of the auto mode ignores it. */
+export type SkillFn = (s: RunState, bus: Bus, hero: HeroDef, aim: Aim) => void | false;
 
 const DISAGREE_LINES = 6;
 const MAX_COPIES = 2;
@@ -49,10 +51,10 @@ const pranieWstepne: SkillFn = (s, bus) => {
 };
 
 /** Odwirowanie: a dash that drags one enemy along and drops it zablokowany. */
-const odwirowanie: SkillFn = (s, bus) => {
+const odwirowanie: SkillFn = (s, bus, hero, aim) => {
   const p = s.player;
-  const a = aim(s, 240);
-  const len = 150 * areaOf(s, 2);
+  const a = resolveDirection(s, hero.skills[2], aim);
+  const len = reachOf(s, hero.skills[2]);
   const time = 0.22;
   s.hero.dash = { dx: a.dx, dy: a.dy, left: time, speed: len / time, drag: a.target ? a.target.id : null, rank: s.hero.ranks[2] };
   fx(bus, 'dash', p.x, p.y, 0, p.x + a.dx * len, p.y + a.dy * len);
@@ -61,9 +63,9 @@ const odwirowanie: SkillFn = (s, bus) => {
 // ---------- Konsultant Infolinii ----------
 
 /** Prosze czekac: the target is zablokowany for 1.5 s, an hourglass drawn over it. */
-const prosze: SkillFn = (s, bus, hero) => {
+const prosze: SkillFn = (s, bus, hero, aim) => {
   const p = s.player;
-  const target = nearestEnemy(s, p.x, p.y, 300 * areaOf(s, 0));
+  const target = pickTarget(s, hero.skills[0], aim);
   if (!target) return false;
   const secs = 1.5 * durationOf(s, 0);
   applyStatus(target, 'zablokowany', secs, p.id);
@@ -72,10 +74,10 @@ const prosze: SkillFn = (s, bus, hero) => {
 };
 
 /** Przekierowuje: a cone; enemies in it become zgloszony and hit each other for 3 s. */
-const przekierowuje: SkillFn = (s, bus) => {
+const przekierowuje: SkillFn = (s, bus, hero, aim) => {
   const p = s.player;
-  const a = aim(s, 240);
-  const range = 150 * areaOf(s, 1);
+  const a = resolveDirection(s, hero.skills[1], aim);
+  const range = reachOf(s, hero.skills[1]);
   const half = (40 * Math.PI) / 180;
   const base = Math.atan2(a.dy, a.dx);
   fx(bus, 'cone', p.x, p.y, range, p.x + a.dx * range, p.y + a.dy * range);
@@ -169,10 +171,10 @@ const petla: SkillFn = (s, bus) => {
 // ---------- Kartograf Planet Nieistniejacych ----------
 
 /** Triangulacja: a line shot through everything; damage grows with every enemy passed. */
-const triangulacja: SkillFn = (s, bus, hero) => {
+const triangulacja: SkillFn = (s, bus, hero, aim) => {
   const p = s.player;
-  const a = aim(s, 340);
-  const speed = 680;
+  const a = resolveDirection(s, hero.skills[0], aim);
+  const speed = LINE_SPEED;
   s.projectiles.push({
     kind: 'projectile',
     id: nextId(s),
@@ -181,7 +183,7 @@ const triangulacja: SkillFn = (s, bus, hero) => {
     r: 7,
     vx: a.dx * speed,
     vy: a.dy * speed,
-    ttl: 0.62 * areaOf(s, 0),
+    ttl: LINE_TTL * areaOf(s, 0),
     damage: power(s, 0),
     damageType: hero.skills[0].type,
     owner: 'player',
@@ -189,15 +191,13 @@ const triangulacja: SkillFn = (s, bus, hero) => {
     bonusPerPass: 0.35,
     passed: [],
   });
-  fx(bus, 'line', p.x, p.y, 0, p.x + a.dx * speed * 0.62, p.y + a.dy * speed * 0.62);
+  const length = reachOf(s, hero.skills[0]);
+  fx(bus, 'line', p.x, p.y, 0, p.x + a.dx * length, p.y + a.dy * length);
 };
 
 /** Teren nieistniejacy: a marked area. Inside, enemies are do_weryfikacji and Wygenerowane exist at 0.3 (systems/hero.ts). */
-const teren: SkillFn = (s) => {
-  const p = s.player;
-  const target = nearestEnemy(s, p.x, p.y, 300);
-  const x = target ? target.x : p.x + p.facing * 110;
-  const y = target ? target.y : p.y;
+const teren: SkillFn = (s, _bus, hero, aim) => {
+  const { x, y } = terenCentre(s, hero.skills[1], aim);
   const marks = s.zones.filter((z) => z.variant === 'teren');
   while (marks.length >= MAX_ZONES) {
     const old = marks.shift();
@@ -206,23 +206,10 @@ const teren: SkillFn = (s) => {
   s.zones.push(createZone(nextId(s), x, y, { variant: 'teren', r: 85 * areaOf(s, 1), ttl: 6 * durationOf(s, 1) }));
 };
 
-/** Korekta: a short blink toward the tapped point; a "blad pomiaru" decoy stays and draws the attention. */
-const korekta: SkillFn = (s, bus) => {
+/** Korekta: a short blink toward the aimed point (a tap: where the hero walks, else ahead); a "blad pomiaru" decoy stays and draws the attention. */
+const korekta: SkillFn = (s, bus, hero, aim) => {
   const p = s.player;
-  const reach = 150 * areaOf(s, 2);
-  let dx = p.facing;
-  let dy = 0;
-  let len = reach * 0.9;
-  if (p.target) {
-    const tx = p.target.x - p.x;
-    const ty = p.target.y - p.y;
-    const d = Math.hypot(tx, ty);
-    if (d > 4) {
-      dx = tx / d;
-      dy = ty / d;
-      len = Math.min(d, reach);
-    }
-  }
+  const { dx, dy, len } = blinkOf(s, hero.skills[2], aim);
   const from = { x: p.x, y: p.y };
   const secs = 5 * durationOf(s, 2);
   const decoy = createSummon(nextId(s), from.x, from.y, {
@@ -267,9 +254,10 @@ export function removeSummon(s: RunState, bus: Bus, id: number): void {
 
 /**
  * Fire skill `slot` (0..2) if it is ready and the hero is not wyciszony. `free` skips the cooldown check and
- * does not start one (Pralka's blad programu). Returns true if the skill did something.
+ * does not start one (Pralka's blad programu). `aim` is the player's aim (heroes/aim.ts); left out it is the auto cast. Returns
+ * true if the skill did something.
  */
-export function castSkill(s: RunState, bus: Bus, slot: 0 | 1 | 2, free = false): boolean {
+export function castSkill(s: RunState, bus: Bus, slot: 0 | 1 | 2, free = false, aim?: Aim): boolean {
   if (s.status !== 'running' || s.phase === 'base') return false; // the base has nobody to argue with: a pad tap there does nothing
   const p = s.player;
   const def = heroDef(p.heroId);
@@ -286,12 +274,16 @@ export function castSkill(s: RunState, bus: Bus, slot: 0 | 1 | 2, free = false):
     }
   }
   const fn = SKILLS[sk.id];
-  if (!fn || fn(s, bus, def) === false) return false;
+  if (!fn) return false;
+  // the pad hands the aim over through the queue (the `skill:N` events carry no payload); a free cast is always the auto one
+  const aimed = fitAim(sk, free ? AUTO_AIM : (aim ?? takeQueuedAim(slot) ?? AUTO_AIM));
+  const resolved = resolveAim(s, sk, aimed);
+  if (fn(s, bus, def, aimed) === false) return false;
   if (!free) {
     const total = cooldownOf(s, slot, sk.cooldown);
     s.hero.cd[slot] = total;
     s.hero.cdTotal[slot] = total;
   }
-  bus.emit('skill:cast', { slot, free });
+  bus.emit('skill:cast', { slot, free, aim: resolved });
   return true;
 }

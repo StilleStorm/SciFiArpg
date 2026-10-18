@@ -1,18 +1,19 @@
 /**
  * The base page (DESIGN 4.1): the stations of the ticket system drawn as ink objects, the layout's props, the locked and
- * the open exit, the clause header that appears once the ticket is accepted, and the margin-note labels that come up
- * when the player stands near a station.
+ * the open exit, the clause header that appears once the ticket is accepted, and the margin-note label under each
+ * station (always shown: Space Mono, 12 px on the screen, upper case, a hand-drawn underline like the HUD labels).
  *
  * Everything lives in the #page layer (no wobble filter), like the obstacles of the run's pages. Paint (DESIGN 3.4) sits
- * under the drawings as a few pale washes. Nothing here owns state: `drawBase` draws once, `view.frame(s)` only toggles
- * the opacity of the labels, `view.unlock(header)` swaps the exit.
+ * under the drawings as a few pale washes. Nothing here owns state: `drawBase` draws once, `view.frame(s)` keeps the
+ * labels at 12 px when the zoom changes and puts the Tunel label under the hole, `view.unlock(header)` swaps the exit.
  */
 import { createRng, type Rng } from '../core/rng';
-import { dist, type Vec } from '../core/vec';
+import { type Vec } from '../core/vec';
 import { t } from '../i18n';
 import { FOLD, type Page } from '../world/pages';
-import { LABEL_RANGE, type BaseProp, type Station, type TappableStation } from '../world/base';
+import { LABEL_DY, LABEL_H_PX, LABEL_PX, labelText, type BaseProp, type Station, type TappableStation } from '../world/base';
 import type { RunState } from '../world/run';
+import { viewZoom } from './camera';
 import { drawIn } from './ink';
 import { drawHeader, drawPage, type PageHeader } from './obstacles';
 import { dotPath, el, n2, polyline, wobblyCircle, wobblyLine } from './svg';
@@ -290,7 +291,7 @@ function drawSquare(r: Rng): SVGGElement {
 }
 
 function drawStation(st: Station): SVGGElement {
-  const r = createRng(st.hit * 977 + Math.round(st.x) * 31 + Math.round(st.y)).fork(st.id);
+  const r = createRng(977 + Math.round(st.x) * 31 + Math.round(st.y)).fork(st.id);
   const seed = Math.round(st.x * 13 + st.y * 7);
   const body = ((): SVGGElement => {
     switch (st.id) {
@@ -392,22 +393,33 @@ export interface BaseView {
 interface Label {
   id: StationId2;
   g: SVGGElement;
+  /** Where the label hangs now (world units; the Tunel label follows the hole). */
   x: number;
   y: number;
   shown: boolean;
 }
 type StationId2 = TappableStation | 'tunel';
 
+/** Under the hole of the service tunnel (the note "c.d. na stronie" hangs above it). */
+const TUNEL_DY = 24;
+
+/**
+ * A margin-note label: the word in Space Mono capitals, `LABEL_PX` on the screen, with a hand-drawn underline. The group is
+ * drawn in screen pixels and scaled by 1 / zoom, so the type keeps its size when the camera zoom changes.
+ */
 function makeLabel(id: StationId2, x: number, y: number, text: string): Label {
   const g = el('g', { class: 'base-label', 'data-label': id });
   const rng = createRng(Math.round(x * 7 + y * 3));
-  const note = el('text', { class: 't-note', x: n2(x), y: n2(y), 'text-anchor': 'middle', 'font-size': 17, transform: `rotate(${n2(rng.range(-3, 3))} ${n2(x)} ${n2(y)})` }, [text]);
-  const w = text.length * 7.4 + 10;
-  const under = el('path', { d: wobblyLine(rng, x - w / 2, y + 4, x + w / 2, y + 3, 4, 0.9), 'stroke-width': 1.1 });
-  g.append(under, note);
-  g.style.opacity = '0';
-  return { id, g, x, y, shown: false };
+  const w = text.length * 7.2 + 8;
+  const word = el('text', { class: 't-label', x: 0, y: 11, 'text-anchor': 'middle', 'font-size': LABEL_PX }, [text]);
+  const under = el('path', { d: wobblyLine(rng, -w / 2, LABEL_H_PX - 4, w / 2, LABEL_H_PX - 5, 4, 0.8), 'stroke-width': 1.1 });
+  g.append(under, word);
+  return { id, g, x, y, shown: true };
 }
+
+const placeLabel = (l: Label, zoom: number): void => {
+  l.g.setAttribute('transform', `translate(${n2(l.x)} ${n2(l.y)}) scale(${n2(1 / Math.max(0.2, zoom))})`);
+};
 
 /**
  * Draw the base page into the #page layer: paper, frame, the decor, then the props and stations, the exit (dashed while
@@ -453,11 +465,22 @@ export function drawBase(layer: SVGGElement, page: Page, opts: { accepted: boole
   lock();
   if (opts.accepted) unlockNow(false);
 
-  const labels: Label[] = info.stations.map((st) => makeLabel(st.id, st.x, st.y - 66, t(`screens.base.station.${st.id}`)));
-  labels.push(makeLabel('tunel', info.hole.x, info.hole.y - 34, t('screens.base.station.tunel')));
+  const labels: Label[] = info.stations.map((st) => makeLabel(st.id, st.x, st.y + LABEL_DY[st.id], labelText(st.id)));
+  const tunel = makeLabel('tunel', info.hole.x, info.hole.y + TUNEL_DY, t('screens.base.station.tunel').toLocaleUpperCase('pl-PL'));
+  tunel.shown = false;
+  tunel.g.style.display = 'none';
+  labels.push(tunel);
   const labelLayer = el('g', { class: 'base-labels' });
   for (const l of labels) labelLayer.append(l.g);
   ink.append(labelLayer);
+  let lastZoom = -1;
+  const place = (): void => {
+    const z = viewZoom();
+    if (z === lastZoom) return;
+    lastZoom = z;
+    for (const l of labels) placeLabel(l, z);
+  };
+  place();
 
   const showHeader = (header: PageHeader, animate: boolean): void => {
     headerG?.remove();
@@ -474,12 +497,19 @@ export function drawBase(layer: SVGGElement, page: Page, opts: { accepted: boole
   return {
     ink,
     frame(s) {
-      const p = s.player;
-      for (const l of labels) {
-        const target = l.id === 'tunel' ? s.tunnel !== undefined && s.phase === 'base' && dist(p, { x: s.tunnel?.x ?? 0, y: s.tunnel?.y ?? 0 }) <= LABEL_RANGE : dist(p, stationPos(info.stations, l.id)) <= LABEL_RANGE;
-        if (target === l.shown) continue;
-        l.shown = target;
-        l.g.style.opacity = target ? '1' : '0';
+      place();
+      // the Tunel label hangs under the hole while one is open on the base (the way back into the held run)
+      const hole = s.phase === 'base' ? s.tunnel : undefined;
+      if (hole) {
+        if (tunel.x !== hole.x || tunel.y !== hole.y + TUNEL_DY) {
+          tunel.x = hole.x;
+          tunel.y = hole.y + TUNEL_DY;
+          placeLabel(tunel, lastZoom);
+        }
+      }
+      if ((hole !== undefined) !== tunel.shown) {
+        tunel.shown = hole !== undefined;
+        tunel.g.style.display = tunel.shown ? '' : 'none';
       }
     },
     unlock(header) {
@@ -488,9 +518,4 @@ export function drawBase(layer: SVGGElement, page: Page, opts: { accepted: boole
       showHeader(header, true);
     },
   };
-}
-
-function stationPos(list: readonly Station[], id: StationId2): Vec {
-  const st = list.find((s) => s.id === id);
-  return st ? { x: st.x, y: st.y } : { x: -1e6, y: -1e6 };
 }

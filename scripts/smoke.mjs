@@ -87,6 +87,114 @@ try {
     await el.click({ timeout: 5000 });
   };
 
+  /**
+   * The hung-controls bug: a sheet opened from a station (desk, notice board, Sklep, ticket) left the input off after it closed,
+   * so no tap walked and the joystick never showed. For each steering mode and each sheet: open it with a real touch on the
+   * station, close it with the real button, then a synthesized touch on the steering half must show the stick (joystick) or
+   * walk there (tap), and the player must move.
+   */
+  async function controlsAfterSheets(p, pc, label) {
+    const cd = await pc.newCDPSession(p);
+    const tch = (type, x, y) => cd.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+    const vp = p.viewportSize();
+    const stationScreen = (id) =>
+      p.evaluate((sid) => {
+        const st = window.__game.state().page.base.stations.find((x) => x.id === sid);
+        const m = document.getElementById('stage').getScreenCTM();
+        return { x: m.a * st.x + m.e, y: m.d * st.y + m.f };
+      }, id);
+    const standBy = async (id) => {
+      await p.evaluate((sid) => {
+        const g = window.__game;
+        const st = g.state().page.base.stations.find((x) => x.id === sid);
+        g.placePlayer(st.x, st.y + 110);
+      }, id);
+      await sleep(1300); // the camera follows
+    };
+    const tapStation = async (id) => {
+      await standBy(id);
+      const q = await stationScreen(id);
+      await p.touchscreen.tap(q.x, q.y);
+      await p.locator('.ps').first().waitFor({ state: 'visible', timeout: 3000 });
+    };
+    const openers = {
+      biurko: () => tapStation('biurko'),
+      tablica: () => tapStation('tablica'),
+      kiosk: () => tapStation('kiosk'),
+      ticket: async () => {
+        await tapStation('biurko');
+        await p.locator('#ui').getByText('Nowe zgłoszenie', { exact: false }).locator('visible=true').first().click({ timeout: 3000 });
+        await p.locator('.ticket-sheet').waitFor({ state: 'visible', timeout: 3000 });
+      },
+    };
+    const closeAll = async () => {
+      for (let k = 0; k < 4 && (await p.locator('.ps').count()) > 0; k++) {
+        await p.locator('.ps .ps-close').locator('visible=true').first().click({ timeout: 3000 });
+        await sleep(250);
+      }
+    };
+    const probe = async (mode) => {
+      const st = await p.evaluate(() => {
+        const s = window.__game.state();
+        const m = document.getElementById('stage').getScreenCTM();
+        return { x: s.player.x, y: s.player.y, sx: m.a * s.player.x + m.e, sy: m.d * s.player.y + m.f, status: s.status };
+      });
+      let joy = null;
+      if (mode === 'joystick') {
+        const sx = Math.round(vp.width * 0.2);
+        const sy = Math.round(vp.height * 0.55);
+        await tch('touchStart', sx, sy);
+        await sleep(80);
+        for (let i = 1; i <= 4; i++) {
+          await tch('touchMove', sx + i * 10, sy + i * 8);
+          await sleep(50);
+        }
+        joy = await p.evaluate(() => !document.querySelector('.joy').classList.contains('hidden'));
+        await sleep(500);
+        await tch('touchEnd', 0, 0);
+      } else {
+        await p.touchscreen.tap(st.sx, st.sy + 80);
+        await sleep(900);
+      }
+      const after = await p.evaluate(() => {
+        const s = window.__game.state();
+        return { x: s.player.x, y: s.player.y, status: s.status };
+      });
+      return { joy, moved: Math.hypot(after.x - st.x, after.y - st.y), status: after.status };
+    };
+    for (const mode of ['tap', 'joystick']) {
+      await p.evaluate((m) => window.__game.setSteering(m), mode);
+      for (const kind of ['biurko', 'tablica', 'kiosk', 'ticket']) {
+        await p.evaluate(() => window.__game.startBase());
+        await sleep(600);
+        let r = { error: '' };
+        try {
+          await openers[kind]();
+          await closeAll();
+          await sleep(300);
+          r = await probe(mode);
+        } catch (e) {
+          r = { error: String(e).slice(0, 120) };
+        }
+        check(`${label}: ${mode}: after the ${kind} sheet closes the controls answer (${mode === 'joystick' ? 'the stick shows, ' : ''}the player moves)`, !r.error && r.status === 'running' && r.moved > 8 && (mode !== 'joystick' || r.joy === true), JSON.stringify(r));
+      }
+    }
+  }
+
+  /** One quick tap on the Pauza note opens the pause sheet and it stays open; the next tap (Wznów) closes it (no ghost click on the sheet). */
+  async function pauseTap(p, label) {
+    const box = await p.locator('.hud .pause-btn').boundingBox();
+    await p.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    await sleep(600);
+    const open = await p.evaluate(() => ({ sheet: !!document.querySelector('.pause-sheet:not(.hidden)'), settings: !!document.querySelector('.set-grid'), status: window.__game.state().status }));
+    check(`${label}: one quick tap on Pauza opens the pause sheet and it stays open`, open.sheet && !open.settings && open.status === 'paused', JSON.stringify(open));
+    const rb = await p.locator('[data-pause=resume]').boundingBox();
+    await p.touchscreen.tap(rb.x + rb.width / 2, rb.y + rb.height / 2);
+    await sleep(500);
+    const shut = await p.evaluate(() => ({ sheet: !!document.querySelector('.pause-sheet'), status: window.__game.state().status }));
+    check(`${label}: the next tap (Wznów) closes it and the game runs on`, !shut.sheet && shut.status === 'running', JSON.stringify(shut));
+  }
+
   /** Take whatever holds the run: a law sheet, the update form (opened from the HUD line). Returns how many things it closed. */
   async function settle() {
     let closed = 0;
@@ -176,7 +284,12 @@ try {
     return { pending: s.hero.pendingLevels, cd0: s.hero.cd[0], cd1: s.hero.cd[1], status: s.status, phase: s.phase };
   });
   check('the update installs in the base, the pads cool down and a pad does nothing there', baseHero.pending === 0 && baseHero.cd0 === 0 && baseHero.cd1 === 0 && baseHero.status === 'running' && baseHero.phase === 'base', JSON.stringify(baseHero));
-  // a real tap on the desk: the player walks there and the desk sheet opens
+  // the base page: controls after every sheet of a station, and a single quick tap on Pauza (portrait)
+  await page.evaluate(() => window.__game.startBase());
+  await sleep(600);
+  await pauseTap(page, 'portrait base');
+  await controlsAfterSheets(page, ctx, 'portrait base');
+  // a real tap on the desk: the desk sheet opens at once
   await page.evaluate(() => window.__game.setSteering('tap'));
   await page.evaluate(() => window.__game.startBase());
   await sleep(900);
@@ -188,7 +301,7 @@ try {
   });
   await page.touchscreen.tap(desk.x, desk.y);
   await page.waitForFunction(() => document.querySelector('.desk-sheet') !== null, null, { timeout: 12000 }).catch(() => undefined);
-  check('tapping the desk walks there and opens its sheet', await page.evaluate(() => document.querySelector('.desk-sheet') !== null));
+  check('tapping the desk opens its sheet at once', await page.evaluate(() => document.querySelector('.desk-sheet') !== null));
   await sleep(500);
   await shot('02b-desk');
   await clickText('Nowe zgłoszenie');
@@ -291,6 +404,7 @@ try {
   await sleep(500);
   const pz2 = await page.evaluate(() => ({ same: window.__keep === window.__game.state(), status: window.__game.state().status, time: window.__game.state().time }));
   check('Wznów continues the same state object', pz2.same && pz2.status === 'running' && pz2.time > pz1.time, JSON.stringify(pz2));
+  await pauseTap(page, 'portrait run');
   // on to page 2, a wound, then Zakończ zgłoszenie
   await page.evaluate(() => window.__game.turnTo(1));
   await sleep(1500);
@@ -489,6 +603,12 @@ try {
     return s && { x: s.player.x, y: s.player.y, enemies: s.enemies.map((e) => ({ hp: e.hp, hpMax: e.hpMax })) };
   });
 
+  // the base in landscape first: a single quick tap on Pauza, and the controls after every sheet of a station (both modes)
+  await lp.evaluate(() => window.__game.startBase()); // (the hero stays the default one: the aiming leg below depends on it)
+  await sleep(900);
+  await pauseTap(lp, 'landscape base');
+  await controlsAfterSheets(lp, lctx, 'landscape base');
+  await lp.evaluate(() => window.__game.setSteering('joystick'));
   await lp.evaluate(() => window.__game.start(31, { pageCount: 3, lawId: 'grawitacja' }));
   await sleep(1500);
   const ctl = await lp.evaluate(() => ({ ...window.__game.controls(), attr: document.documentElement.dataset.orient, steer: document.documentElement.dataset.steer }));
@@ -578,6 +698,102 @@ try {
   const fought = (p3.enemies[0]?.hp ?? 1) < (p3.enemies[0]?.hpMax ?? 1);
   check('an attack landed on the dummy', fought, `hp ${p3.enemies[0]?.hp}/${p3.enemies[0]?.hpMax}`);
   await lp.screenshot({ path: `${SHOTS}/16-landscape-after.png` });
+  // ---------- 6c. aiming (DESIGN 5.6): hold a pad, drag, see the arrow, release; drag back onto the pad cancels ----------
+  // The hero is Pralka (skill 3, Odwirowanie, is aimed by direction). One thumb steers on the left half while the other
+  // aims on the pad: two pointer ids that must not disturb each other.
+  await lp.evaluate(() => {
+    const s = window.__game.state();
+    s.hero.cd[2] = 0;
+    window.__aimSeen = { dash: null };
+    const watch = () => {
+      const st = window.__game.state();
+      if (st && st.hero.dash && !window.__aimSeen.dash) window.__aimSeen.dash = { dx: st.hero.dash.dx, dy: st.hero.dash.dy };
+      requestAnimationFrame(watch);
+    };
+    requestAnimationFrame(watch);
+  });
+  const aimPad = await lp.locator('.pad.s3').boundingBox();
+  const aimCentre = { x: aimPad.x + aimPad.width / 2, y: aimPad.y + 26 };
+  const aimPoint = { x: aimCentre.x - 70, y: aimCentre.y - 50, id: 5 };
+  const aimHeld = { x: 160, y: 270, id: 4 };
+  await touch('touchStart', [aimHeld]);
+  await sleep(80);
+  await touch('touchMove', [{ x: 160, y: 250, id: 4 }]);
+  await sleep(60);
+  await touch('touchStart', [{ x: 160, y: 250, id: 4 }, { ...aimCentre, id: 5 }]);
+  await sleep(60);
+  const aimBefore = await lstate();
+  for (let i = 1; i <= 5; i++) {
+    await touch('touchMove', [{ x: 160, y: 250 - i * 3, id: 4 }, { x: aimCentre.x + ((aimPoint.x - aimCentre.x) * i) / 5, y: aimCentre.y + ((aimPoint.y - aimCentre.y) * i) / 5, id: 5 }]);
+    await sleep(70);
+  }
+  await sleep(150);
+  const aimDuring = await lp.evaluate(() => {
+    const g = document.querySelector('#aim-fx');
+    const shaft = g?.querySelector('path');
+    const s = window.__game.state();
+    return {
+      shown: !!g && g.style.opacity === '1',
+      arrow: !!shaft && (shaft.getAttribute('d') ?? '').startsWith('M') && shaft.getAttribute('display') !== 'none',
+      thick: document.querySelectorAll('.pad.s3 path[stroke-width="2.8"]').length,
+      joy: !document.querySelector('.joy').classList.contains('hidden'),
+      cd: s.hero.cd[2],
+      x: s.player.x,
+      y: s.player.y,
+    };
+  });
+  await lp.screenshot({ path: `${SHOTS}/18-landscape-aiming.png` });
+  await touch('touchEnd', [{ x: aimPoint.x, y: aimPoint.y, id: 5 }]);
+  await sleep(120);
+  const aimAfter = await lp.evaluate(() => {
+    const s = window.__game.state();
+    return { seen: window.__aimSeen.dash, cd: s.hero.cd[2], shown: document.querySelector('#aim-fx').style.opacity === '1' };
+  });
+  await touch('touchEnd', [{ x: 160, y: 235, id: 4 }]);
+  await sleep(150);
+  const want = { dx: aimPoint.x - aimCentre.x, dy: aimPoint.y - aimCentre.y };
+  const wantLen = Math.hypot(want.dx, want.dy);
+  const dot = aimAfter.seen ? (aimAfter.seen.dx * want.dx + aimAfter.seen.dy * want.dy) / wantLen : -1;
+  check('aiming: a held pad draws the dotted arrow and its circle goes thicker', aimDuring.shown && aimDuring.arrow && aimDuring.thick > 0, JSON.stringify(aimDuring));
+  check('aiming: the cooldown is not spent while held', aimDuring.cd === 0, `cd ${aimDuring.cd}`);
+  check('aiming: the other thumb keeps steering during the hold', aimDuring.joy && Math.hypot(aimDuring.x - aimBefore.x, aimDuring.y - aimBefore.y) > 3, `joystick ${aimDuring.joy}, moved ${Math.hypot(aimDuring.x - aimBefore.x, aimDuring.y - aimBefore.y).toFixed(1)}`);
+  check('aiming: release fires Odwirowanie in the dragged direction', aimAfter.seen !== null && dot > 0.99, `dash ${JSON.stringify(aimAfter.seen)}, want ${(want.dx / wantLen).toFixed(2)},${(want.dy / wantLen).toFixed(2)}, dot ${dot.toFixed(3)}`);
+  check('aiming: the cooldown starts and the arrow is rubbed out', aimAfter.cd > 0 && !aimAfter.shown, JSON.stringify(aimAfter));
+  // dragged out, then back onto the pad: nothing fires and no cooldown is spent
+  await lp.evaluate(() => {
+    const s = window.__game.state();
+    s.hero.cd[2] = 0;
+    s.hero.dash = null;
+    window.__aimSeen.dash = null;
+  });
+  await touch('touchStart', [{ ...aimCentre, id: 6 }]);
+  await sleep(60);
+  await touch('touchMove', [{ x: aimCentre.x - 60, y: aimCentre.y - 40, id: 6 }]);
+  await sleep(150);
+  const outShown = await lp.evaluate(() => document.querySelector('#aim-fx').style.opacity === '1');
+  await touch('touchMove', [{ x: aimCentre.x + 2, y: aimCentre.y + 1, id: 6 }]);
+  await sleep(100);
+  await touch('touchEnd', [{ x: aimCentre.x + 2, y: aimCentre.y + 1, id: 6 }]);
+  await sleep(200);
+  const cancelled = await lp.evaluate(() => {
+    const s = window.__game.state();
+    return { cd: s.hero.cd[2], dash: window.__aimSeen.dash, shown: document.querySelector('#aim-fx').style.opacity === '1' };
+  });
+  check('aiming: dragged back onto the pad cancels, no cooldown, the arrow goes', outShown && cancelled.cd === 0 && cancelled.dash === null && !cancelled.shown, `shown while out ${outShown}, ${JSON.stringify(cancelled)}`);
+  // a quick tap is still the auto cast
+  await touch('touchStart', [{ ...aimCentre, id: 7 }]);
+  await sleep(50);
+  await touch('touchEnd', [{ ...aimCentre, id: 7 }]);
+  await sleep(150);
+  const tapped = await lp.evaluate(() => window.__game.state().hero.cd[2]);
+  check('aiming: a quick tap on the pad is the auto cast', tapped > 0, `cd ${tapped}`);
+  await lp.evaluate(() => {
+    const s = window.__game.state();
+    s.hero.cd[2] = 0;
+    s.hero.dash = null;
+  });
+  await sleep(300);
+
   // the footnote slip lies over the steering half: a thumb that lands on it steers, a quick tap on it opens the history
   const slip = await lp.locator('.foot').boundingBox();
   const onSlip = { x: Math.min(slip.x + 40, 844 / 2 - 30), y: slip.y + slip.height / 2, id: 3 };

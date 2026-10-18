@@ -9,7 +9,7 @@ import { groundBuilders } from './render/figures';
 import { drawPage } from './render/obstacles';
 import { drawBase, type BaseView } from './render/stations';
 import { portraitSpan, viewZoom } from './render/camera';
-import { tapStation } from './world/base';
+import { stationAt } from './world/base';
 import { onPageEntered } from './world/laws';
 import { baseHeaderFor, headerFor, tapKiosk } from './world/pageTurn';
 import { tapMark } from './render/ink';
@@ -198,12 +198,14 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       if (!s || s.status !== 'running' || s.modal || s.turning) return;
       const w = camera.screenToWorld(clientX, clientY);
       if (s.phase === 'base') {
-        // A station is tapped, then walked to; it opens when the player is within its label range (world/base.ts tickBase).
-        const hit = tapStation(s, w.x, w.y, viewZoom(), !walk);
-        if (!walk) {
-          if (hit) bus.emit('player:tap', { x: w.x, y: w.y });
+        // A tap on a station (its drawn object or its label, at least 44 px) opens it at once, wherever the player stands, in
+        // both steering modes. Walking into a station is harmless. A tap elsewhere walks there (tap mode only).
+        const hit = stationAt(s.page, w.x, w.y, viewZoom());
+        if (hit) {
+          bus.emit('station:opened', { station: hit.id });
           return;
         }
+        if (!walk) return;
         s.player.target = w;
         tapMark(w.x, w.y);
         bus.emit('player:tap', { x: w.x, y: w.y });

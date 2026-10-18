@@ -11,8 +11,10 @@ import {
   BASE_H,
   BASE_LAYOUTS,
   BASE_W,
+  LABEL_DY,
   LABEL_RANGE,
   STATIONS,
+  STATION_BOX,
   TAP_PX,
   WALK_R,
   acceptTicket,
@@ -22,11 +24,10 @@ import {
   generateBase,
   layoutForSeed,
   reachableCells,
+  labelBox,
   stationAt,
-  stationNear,
-  stationReached,
-  tapRadius,
-  tapStation,
+  stationBox,
+  stationLabelBox,
   tickBase,
   unreachableGoals,
   walkableAt,
@@ -123,50 +124,80 @@ describe('the base page of a planet', () => {
     }
   });
 
-  it('gives every station a tap target of at least 44 css pixels at any zoom the camera uses', () => {
+  it('gives every station a tap target (object and label) of at least 44 x 44 css pixels at any zoom the camera uses', () => {
     const page = generateBase(3);
     for (const st of page.base?.stations ?? []) {
-      for (const zoom of [0.6, 0.75, 1, 1.4]) expect(tapRadius(st, zoom) * zoom * 2).toBeGreaterThanOrEqual(TAP_PX);
+      for (const zoom of [0.6, 0.75, 1, 1.4]) {
+        for (const b of [stationBox(st, zoom), stationLabelBox(st, zoom)]) {
+          expect((b.x1 - b.x0) * zoom).toBeGreaterThanOrEqual(TAP_PX - 1e-6);
+          expect((b.y1 - b.y0) * zoom).toBeGreaterThanOrEqual(TAP_PX - 1e-6);
+        }
+      }
+    }
+  });
+
+  it('keeps the labels clear of each other, of every station drawing and of the decor', () => {
+    for (const seed of seeds(60)) {
+      const page = generateBase(seed);
+      const stations = page.base?.stations ?? [];
+      for (const zoom of [0.75, 1]) {
+        const rects = stations.map((st) => {
+          const b = labelBox(st.id, zoom);
+          return { id: st.id, x0: st.x + b.x0, x1: st.x + b.x1, y0: st.y + b.y0, y1: st.y + b.y1 };
+        });
+        for (const a of rects) {
+          for (const b of rects) if (a.id !== b.id) expect(a.x1 < b.x0 || b.x1 < a.x0 || a.y1 < b.y0 || b.y1 < a.y0, `${seed} ${a.id}/${b.id}`).toBe(true);
+          for (const st of stations) {
+            const d = STATION_BOX[st.id];
+            const clear = a.x1 < st.x + d.x0 || a.x0 > st.x + d.x1 || a.y1 < st.y + d.y0 || a.y0 > st.y + d.y1;
+            expect(clear, `${seed} label ${a.id} over ${st.id}`).toBe(true);
+          }
+          for (const o of page.obstacles.filter((q) => q.station === undefined && q.kind !== 'torn')) {
+            for (const c of o.colliders) {
+              const nx = Math.max(a.x0, Math.min(c.x, a.x1));
+              const ny = Math.max(a.y0, Math.min(c.y, a.y1));
+              expect(Math.hypot(c.x - nx, c.y - ny), `${seed} label ${a.id} over decor`).toBeGreaterThan(c.r);
+            }
+          }
+        }
+      }
     }
   });
 });
 
-describe('stations: tap, walk, open', () => {
-  it('finds the station under a tap and the station within label range', () => {
+describe('stations: a tap opens them, walking into them does not', () => {
+  it('finds the station under a tap on its object or its label, and none elsewhere', () => {
     const s = base();
     const biurko = s.page.base?.stations.find((x) => x.id === 'biurko');
     expect(biurko).toBeDefined();
     if (!biurko) return;
     expect(stationAt(s.page, biurko.x + 10, biurko.y - 5)?.id).toBe('biurko');
+    expect(stationAt(s.page, biurko.x + 60, biurko.y + 40)?.id).toBe('biurko');
+    expect(stationAt(s.page, biurko.x, biurko.y + LABEL_DY.biurko + 6)?.id).toBe('biurko');
     expect(stationAt(s.page, biurko.x + 300, biurko.y + 300)).toBeNull();
-    expect(stationNear(s.page, { x: biurko.x + LABEL_RANGE - 5, y: biurko.y })?.id).toBe('biurko');
-    expect(stationNear(s.page, { x: biurko.x + LABEL_RANGE + 40, y: biurko.y })).toBeNull();
+    expect(stationAt(s.page, 5, 5)).toBeNull();
   });
 
-  it('remembers a tapped station, forgets it on a tap elsewhere, and opens it once the player is within range', () => {
+  it('grows a small object to a 44 px target: the paczkomat is hit a little outside its drawing at a small zoom', () => {
+    const s = base();
+    const p = s.page.base?.stations.find((x) => x.id === 'paczkomat');
+    if (!p) throw new Error('no paczkomat');
+    const edge = STATION_BOX.paczkomat.x1;
+    expect(stationAt(s.page, p.x + edge + 2, p.y, 1)).toBeNull();
+    expect(stationAt(s.page, p.x + edge + 2, p.y, 0.75)?.id).toBe('paczkomat');
+  });
+
+  it('never opens a station by standing at it: the step only watches the exit', () => {
     const s = base();
     const bus = createBus();
     const log = record(bus, ['station:opened']);
-    const st = s.page.base?.stations.find((x) => x.id === 'kiosk');
-    if (!st) throw new Error('no kiosk');
-    expect(tapStation(s, st.x, st.y, 1)).toBe('kiosk');
-    expect(s.base?.pending).toBe('kiosk');
-    tickBase(s, bus, 1 / 60); // far away: nothing
+    for (const st of s.page.base?.stations ?? []) {
+      s.player.x = st.x;
+      s.player.y = st.y + 70;
+      tickBase(s, bus, 1 / 60);
+      tickBase(s, bus, 1 / 60);
+    }
     expect(log).toHaveLength(0);
-    expect(tapStation(s, 5, 5, 1)).toBeNull();
-    expect(s.base?.pending).toBeNull();
-    // joystick mode keeps a pending tap on a tap elsewhere
-    tapStation(s, st.x, st.y, 1);
-    tapStation(s, 5, 5, 1, true);
-    expect(s.base?.pending).toBe('kiosk');
-    s.player.x = st.x + 70;
-    s.player.y = st.y + 20;
-    expect(stationReached(s)).toBe('kiosk');
-    expect(s.base?.pending).toBeNull();
-    tapStation(s, st.x, st.y, 1);
-    tickBase(s, bus, 1 / 60);
-    tickBase(s, bus, 1 / 60);
-    expect(log).toEqual([{ name: 'station:opened', payload: { station: 'kiosk' } }]);
   });
 });
 

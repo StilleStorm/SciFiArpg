@@ -199,8 +199,8 @@ try {
   });
   await wait(900);
   await shot('base-page');
-  // the desk sheet is the old base form: the history, rewritten on the first visit
-  await page.evaluate(() => window.__game.station('biurko'));
+  // the notice board carries the history, rewritten on the first visit
+  await page.evaluate(() => window.__game.station('tablica'));
   await wait(900);
   await shot('baza');
   await wait(3200);
@@ -210,7 +210,17 @@ try {
     document.querySelector('.ps-close').click();
   });
   await wait(300);
-  await page.evaluate(() => window.__game.station('tablica'));
+  await page.evaluate(() => window.__game.station('biurko'));
+  await wait(500);
+  await shot('desk');
+  await page.evaluate(() => {
+    document.querySelector('.ps-close').click();
+  });
+  await wait(300);
+  // the settings are the pause sheet's
+  await page.evaluate(() => window.__game.pause());
+  await wait(300);
+  await page.locator('[data-pause=settings]').click();
   await wait(500);
   await shot('settings');
   await page.getByText('Leworęczny').click();
@@ -422,18 +432,22 @@ try {
   });
   await lwait(900);
   await lshot('base-page');
-  await lp.evaluate(() => window.__game.station('biurko'));
+  await lp.evaluate(() => window.__game.station('tablica'));
   await lwait(700);
   await lshot('baza');
   await lp.evaluate(() => {
     document.querySelector('.ps-close').click();
   });
   await lwait(300);
-  await lp.evaluate(() => window.__game.station('tablica'));
+  await lp.evaluate(() => window.__game.pause());
+  await lwait(300);
+  await lp.locator('[data-pause=settings]').click();
   await lwait(500);
   await lshot('settings');
   await lp.getByText('Wróć', { exact: true }).click();
   await lwait(300);
+  await lp.evaluate(() => window.__game.resume());
+  await lwait(200);
   await lp.evaluate(() => window.__game.go('profile'));
   await lwait(900);
   await lshot('profile');

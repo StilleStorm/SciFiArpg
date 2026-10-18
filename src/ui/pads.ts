@@ -1,7 +1,23 @@
 import type { Bus } from '../core/events';
 import { createRng } from '../core/rng';
 import { heroDef, type HeroId } from '../heroes';
+import {
+  AUTO_AIM,
+  clearQueuedAim,
+  DRAG_START_PX,
+  dragToAim,
+  isCancel,
+  previewOf,
+  queueAim,
+  reachOf,
+  resolveAim,
+  TAP_MS,
+  trackedRun,
+  type Aim,
+  type Point,
+} from '../heroes/aim';
 import { t } from '../i18n';
+import { hideAim, showAim } from '../render/aimFx';
 import { el, wobblyCircle } from '../render/svg';
 import { h } from './dom';
 import './forms.css';
@@ -55,15 +71,38 @@ const EVENT: Record<PadId, 'skill:1' | 'skill:2' | 'skill:3' | 'inventory'> = {
   inventory: 'inventory',
 };
 
+/** A finger on a skill pad: where it landed, where it is, and whether it has dragged far enough to aim. */
+interface Press {
+  id: number;
+  sx: number;
+  sy: number;
+  x: number;
+  y: number;
+  t0: number;
+  aiming: boolean;
+}
+
 interface PadNode {
   btn: HTMLButtonElement;
+  svg: SVGSVGElement;
   glyph: SVGGElement;
   word: HTMLElement;
   ring: SVGPathElement;
+  /** The two circle strokes; drawn thicker while the pad is aiming. */
+  circles: SVGPathElement[];
+  thick: boolean;
   last: number;
+  press: Press | null;
+  /** Removes the window listeners of a real pointer press. */
+  release: (() => void) | null;
+  pressedAt: number;
 }
 const nodes: PadNode[] = [];
 let currentHero: HeroId | null = null;
+let busRef: Bus | null = null;
+/** The pad whose preview is on the page (the last aimed pad pressed). */
+let drawer: number | null = null;
+let frame = 0;
 
 function drawGlyph(g: SVGGElement, strokes: readonly string[]): void {
   g.replaceChildren(
@@ -104,12 +143,157 @@ export function updatePadCooldowns(cd: readonly number[], total: readonly number
   }
 }
 
+// ---------- hold, drag, release (DESIGN 5.6) ----------
+
+const skillOf = (slot: number) => (currentHero ? heroDef(currentHero).skills[slot as 0 | 1 | 2] : undefined);
+
+/** The pad's circle centre in client px. */
+function centreOf(n: PadNode): Point {
+  const r = n.svg.getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}
+
+/** The pad's circle is drawn thicker while it aims (attributes only, nothing is rebuilt). */
+function setThick(n: PadNode, on: boolean): void {
+  if (n.thick === on) return;
+  n.thick = on;
+  n.circles.forEach((c, i) => {
+    if (on) c.setAttribute('stroke-width', i === 0 ? '2.8' : '1.8');
+    else if (i === 0) c.removeAttribute('stroke-width');
+    else c.setAttribute('stroke-width', '0.9');
+  });
+}
+
+/** The aim a release at the pointer would fire; null = the pointer is back over the pad: cancel. */
+function aimAt(slot: number, n: PadNode, x: number, y: number): Aim | null {
+  const sk = skillOf(slot);
+  const pad = centreOf(n);
+  const pointer = { x, y };
+  if (isCancel(pointer, pad)) return null;
+  const s = trackedRun();
+  if (!sk || !s || sk.aim === 'auto') return AUTO_AIM;
+  return dragToAim(sk.aim, pad, pointer, s.player, reachOf(s, sk));
+}
+
+/** Put the preview of pad `slot` on the page, or take it away. Only the pad that was pressed last draws. */
+function show(slot: number, n: PadNode, emit: boolean): void {
+  const pr = n.press;
+  const sk = skillOf(slot);
+  const s = trackedRun();
+  if (drawer !== slot) return;
+  if (!pr || !sk || !s || sk.aim === 'auto' || s.status !== 'running' || s.phase !== 'run' || (s.hero.cd[slot] ?? 0) > 0) {
+    hideAim();
+    setThick(n, false);
+    return;
+  }
+  let aim: Aim | null = null;
+  if (pr.aiming) aim = aimAt(slot, n, pr.x, pr.y);
+  else if (performance.now() - pr.t0 >= TAP_MS) aim = AUTO_AIM; // held still: show what a tap would do
+  setThick(n, pr.aiming && aim !== null);
+  showAim(aim ? previewOf(s, sk, aim) : null);
+  if (emit && aim) {
+    const r = resolveAim(s, sk, aim);
+    busRef?.emit('skill:aim', { slot: slot as 0 | 1 | 2, mode: r.kind, x: r.x, y: r.y, dx: r.dx, dy: r.dy });
+  }
+}
+
+/** While a pad is held the preview follows the hero (the other thumb may be steering). */
+function tick(): void {
+  frame = 0;
+  let any = false;
+  nodes.forEach((n, i) => {
+    if (!n.press) return;
+    any = true;
+    show(i, n, false);
+  });
+  if (any) frame = requestAnimationFrame(tick);
+}
+
+/** A finger landed on skill pad `slot`. False when the pad is not a skill pad or already held. */
+function press(slot: number, id: number, x: number, y: number): boolean {
+  const n = nodes[slot];
+  if (!n || slot > 2 || n.press) return false;
+  n.press = { id, sx: x, sy: y, x, y, t0: performance.now(), aiming: false };
+  n.pressedAt = performance.now();
+  if (skillOf(slot)?.aim !== 'auto') {
+    if (drawer !== null && drawer !== slot) hideAim();
+    drawer = slot;
+  }
+  if (frame === 0) frame = requestAnimationFrame(tick);
+  return true;
+}
+
+/** The finger moved. Beyond DRAG_START_PX a skill with an aim mode starts aiming; an auto skill ignores the drag. */
+function drag(slot: number, x: number, y: number): void {
+  const n = nodes[slot];
+  const pr = n?.press;
+  if (!n || !pr) return;
+  pr.x = x;
+  pr.y = y;
+  if (!pr.aiming && skillOf(slot)?.aim !== 'auto' && Math.hypot(x - pr.sx, y - pr.sy) > DRAG_START_PX) pr.aiming = true;
+  if (pr.aiming) show(slot, n, true);
+}
+
+/** Emit the cast with its aim (the pad's event carries none: aim.ts hands it over). */
+function fire(slot: number, aim: Aim): void {
+  const ev = EVENT[PADS[slot] ?? 'skill1'];
+  queueAim(slot, aim);
+  try {
+    busRef?.emit(ev);
+  } finally {
+    clearQueuedAim();
+  }
+}
+
+/** The finger lifted (commit) or the press was broken off. Returns true when a cast was asked for. */
+function release(slot: number, x: number, y: number, commit: boolean): boolean {
+  const n = nodes[slot];
+  const pr = n?.press;
+  if (!n || !pr) return false;
+  n.press = null;
+  n.pressedAt = performance.now();
+  if (drawer === slot) {
+    hideAim();
+    drawer = null;
+  }
+  setThick(n, false);
+  if (!commit) return false;
+  let aim: Aim = AUTO_AIM;
+  if (pr.aiming) {
+    const a = aimAt(slot, n, x, y);
+    if (!a) return false; // dragged back onto the pad: cancelled, no cooldown is spent
+    aim = a;
+  }
+  fire(slot, aim);
+  return true;
+}
+
+/** Test hook: hold skill pad `slot` (1..3) with the finger dragged (dx, dy) css px from the pad's centre. (0, 0) is back on the pad. */
+export function holdPad(slot: 1 | 2 | 3, dx: number, dy: number): void {
+  const i = slot - 1;
+  const n = nodes[i];
+  if (!n) return;
+  const c = centreOf(n);
+  if (!n.press) press(i, -1, c.x, c.y);
+  drag(i, c.x + dx, c.y + dy);
+}
+
+/** Test hook: lift the finger held by `holdPad`. True when the release asked for a cast (false: cancelled or nothing held). */
+export function releasePad(slot: 1 | 2 | 3): boolean {
+  const n = nodes[slot - 1];
+  const pr = n?.press;
+  if (!n || !pr) return false;
+  return release(slot - 1, pr.x, pr.y, true);
+}
+
 /** Three skill buttons and the inventory button: circled margin notes with a word label. */
 export function createPads(root: HTMLElement, bus: Bus): HTMLElement {
   const wrap = h('div', 'pads');
   const rng = createRng(77);
   nodes.length = 0;
   currentHero = null;
+  busRef = bus;
+  drawer = null;
   PADS.forEach((id) => {
     const btn = h('button', `pad ${SLOT_CLASS[id]}`);
     btn.type = 'button';
@@ -127,25 +311,57 @@ export function createPads(root: HTMLElement, bus: Bus): HTMLElement {
     svg.append(base, glyph, ring);
     btn.append(svg, word);
     if (id === 'inventory') btn.setAttribute('aria-label', t('ui.pads.inventory'));
+    const slot = PADS.indexOf(id);
     if (id === 'inventory') {
       btn.addEventListener('click', () => bus.emit(EVENT[id]));
     } else {
-      // A skill answers the finger going down: with another thumb already on the joystick the browser sends
-      // no `click` for a second touch. A click that follows the press is swallowed; one that comes alone
-      // (keyboard, assistive tech, a script) still casts.
-      let pressedAt = -Infinity;
+      // A tap casts on release: the press may turn into an aimed cast (hold and drag, DESIGN 5.6). The pad follows its own
+      // pointer id, so a second thumb on the joystick or on another pad is not disturbed. A `click` that follows a press is
+      // swallowed; one that comes alone (keyboard, assistive tech, a script) still casts, as a tap.
+      btn.style.touchAction = 'none';
       btn.addEventListener('pointerdown', (ev) => {
         if (ev.pointerType === 'mouse' && ev.button !== 0) return;
-        pressedAt = performance.now();
-        bus.emit(EVENT[id]);
+        if (!press(slot, ev.pointerId, ev.clientX, ev.clientY)) return;
+        const n = nodes[slot];
+        if (!n) return;
+        try {
+          btn.setPointerCapture(ev.pointerId);
+        } catch {
+          // capture is a nicety; the window listeners below hear the pointer anyway
+        }
+        const done = (commit: boolean) => (e: PointerEvent): void => {
+          if (e.pointerId !== ev.pointerId) return;
+          n.release?.();
+          release(slot, e.clientX, e.clientY, commit);
+        };
+        const onMove = (e: PointerEvent): void => {
+          if (e.pointerId === ev.pointerId) drag(slot, e.clientX, e.clientY);
+        };
+        const onUp = done(true);
+        const onCancel = done(false);
+        const onBlur = (): void => {
+          n.release?.();
+          release(slot, ev.clientX, ev.clientY, false);
+        };
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        window.addEventListener('pointercancel', onCancel);
+        window.addEventListener('blur', onBlur);
+        n.release = () => {
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', onUp);
+          window.removeEventListener('pointercancel', onCancel);
+          window.removeEventListener('blur', onBlur);
+          n.release = null;
+        };
       });
       btn.addEventListener('click', () => {
-        if (performance.now() - pressedAt < CLICK_AFTER_PRESS_MS) return;
-        bus.emit(EVENT[id]);
+        if (performance.now() - (nodes[slot]?.pressedAt ?? -Infinity) < CLICK_AFTER_PRESS_MS) return;
+        fire(slot, AUTO_AIM);
       });
     }
     wrap.append(btn);
-    nodes.push({ btn, glyph, word, ring, last: -2 });
+    nodes.push({ btn, svg, glyph, word, ring, circles: [...base.querySelectorAll('path')], thick: false, last: -2, press: null, release: null, pressedAt: -Infinity });
   });
   root.append(wrap);
   setPadHero('pralka');
