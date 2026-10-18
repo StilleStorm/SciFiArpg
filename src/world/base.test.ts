@@ -256,7 +256,7 @@ describe('phase guards', () => {
     }
   });
 
-  it('the walls of the base page hold the player in, and its edge writes no margin note', () => {
+  it('the walls of the base page hold the player in, and its edge writes the margin note like any page', () => {
     const s = base();
     const bus = createBus();
     const log = record(bus, ['page:edge']);
@@ -264,7 +264,7 @@ describe('phase guards', () => {
     s.player.target = { x: -500, y: s.player.y };
     for (let i = 0; i < 600; i++) sim.step(s, 1 / 60);
     expect(s.player.x).toBeGreaterThanOrEqual(s.page.inset);
-    expect(log).toEqual([]);
+    expect(log).toHaveLength(1); // render/bindings.ts places it inside the base page (marginSpot with the page shown)
   });
 
   it('the run proper starts with the clock, the laws and the first wave of the page', () => {

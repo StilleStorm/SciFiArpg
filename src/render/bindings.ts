@@ -8,22 +8,31 @@ import type { Views } from './view';
 
 const jitter = createRng(0xb107);
 
-/** Where the "margines" note goes for each wall: just inside the frame, beside the player. */
-function marginSpot(side: Side, x: number, y: number): { x: number; y: number } {
+/** The size of the sheet the player walks on: a run page is 1200 x 1600, the base page of a planet is smaller. */
+export interface PageBox {
+  w: number;
+  h: number;
+  inset: number;
+}
+
+const RUN_PAGE: PageBox = { w: PAGE_W, h: PAGE_H, inset: PAGE_INSET };
+
+/** Where the "margines" note goes for each wall of `page`: just inside the frame, beside the player. */
+export function marginSpot(side: Side, x: number, y: number, page: PageBox = RUN_PAGE): { x: number; y: number } {
   switch (side) {
     case 'l':
-      return { x: PAGE_INSET + 44, y: y - 30 };
+      return { x: page.inset + 44, y: y - 30 };
     case 'r':
-      return { x: PAGE_W - PAGE_INSET - 44, y: y - 30 };
+      return { x: page.w - page.inset - 44, y: y - 30 };
     case 't':
-      return { x, y: PAGE_INSET + 48 };
+      return { x, y: page.inset + 48 };
     case 'b':
-      return { x, y: PAGE_H - PAGE_INSET - 38 };
+      return { x, y: page.h - page.inset - 38 };
   }
 }
 
-/** Bus events -> ink on the page. The only place gameplay events become pictures. */
-export function bindFx(bus: Bus, views: Views): void {
+/** Bus events -> ink on the page. The only place gameplay events become pictures. `page` is the sheet shown now (the run's page or the base page). */
+export function bindFx(bus: Bus, views: Views, page: () => PageBox | null = () => null): void {
   const hitBlot = (x: number, y: number, crit: boolean): void => {
     blot(x + jitter.range(-6, 6), y + jitter.range(-6, 6), crit ? jitter.range(9, 12) : jitter.range(3.5, 6), crit);
   };
@@ -35,7 +44,7 @@ export function bindFx(bus: Bus, views: Views): void {
     if (g) strike(g);
   });
   bus.on('page:edge', (e) => {
-    const m = marginSpot(e.side, e.x, e.y);
+    const m = marginSpot(e.side, e.x, e.y, page() ?? RUN_PAGE);
     marginNote(t('ui.ink.margin'), m.x, m.y, -4);
   });
   bus.on('stamp', (e) => stamp(e.text, e.x, e.y));

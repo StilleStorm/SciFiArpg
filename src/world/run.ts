@@ -115,7 +115,7 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
     nextId: 2,
     nextItemNumber: 1,
     kills: 0,
-    edgeCooldown: phase === 'base' ? 1e9 : 0, // the base page's edge is a plain wall: no "margines" note outside the 1200-unit page
+    edgeCooldown: 0,
     spawnTimer: 10,
     pages,
     ticket,
