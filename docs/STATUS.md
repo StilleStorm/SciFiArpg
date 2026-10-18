@@ -89,6 +89,14 @@ joystick/tap steering (§2), editorial rules (§12.1).
 6. **Next:** Spór for bosses (DESIGN §5.4). Own sound recipes for the ten new skills (they borrow a
    sibling's recipe, audio/recipes.ts HERO_SKILL_SOUNDS).
 7. Przesyłka / paczkomat deliveries (§7), tap an item on the ground to see its card first (§2).
+7a. MVP shape (decided 2026-10-18): a planet sequence of 5–6 tickets on one case file with the
+    boss family and clause mix changing and a final ticket that closes the case; difficulty
+    that climbs by planet (enemy tiers, loot level); a first-run on-ramp (3–4 Asystent
+    footnotes on the first ticket: walk, attack, rebut, update); a balance pass from real play
+    (racja, cooldowns, drops, prices). Write the sequence into DESIGN §4 before building.
+7b. After MVP: the absurd storyline as six chapters on the case file (one ticket number the
+    Komisja keeps reassigning across planets; each base, clause and boss is a chapter), written
+    with the player in DESIGN before any builder. Endgame and multiplayer are far future.
 8. Act on phone feedback (feel of joystick, scale, sound levels, frame rate).
 9. Landscape 40-enemy perf measurement; the base clause header in landscape sits under the HUD
    or above the view (portrait is fixed; landscape wants it top centre per §2); Odwirowanie knockback distance; appeal-form pickup drawing; Ciasteczka empty paper behind the
