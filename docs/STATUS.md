@@ -116,9 +116,14 @@ between a pickup and a clear. Order:
 Later: heavy-metal music profile, more laws/uniques/parts, English, Cloudflare + Play Store.
 Far future: endgame beyond "zgłoszenia dodatkowe", multiplayer.
 
-**Next pickup:** planning the storyline with the player (the case file across the planet
-sequence, six chapters; see STATUS "7b" rationale now folded into PLAN §3.1). Write it into
-DESIGN as a new section before any builder; then start slice 1.
+**Storyline (2026-10-18):** proposed in docs/STORY.md: six chapters on ticket 48213 passed
+between units (planets), the per-hero subject line as the only hero text, three new bosses
+(Kolejka, Awizo, Komisja), the Kartoteka frame for the roster screen, eight open questions
+(STORY §9). Not yet seen by the player; nothing from it is built.
+
+**Next pickup:** read the player's answers to STORY §9 (or ask them if none), record the
+decisions in STORY as a "Decisions" section, fold the accepted parts into DESIGN as §4.2
+"Campaign" (and the Kartoteka into §10's hero-select paragraph); then start slice 1.
 
 ## Known limits
 - iOS ignores orientation locks; the setting only picks the layout there.

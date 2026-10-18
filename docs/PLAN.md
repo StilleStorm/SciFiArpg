@@ -79,7 +79,7 @@ Existing numbers are kept until the balance pass.
 ### 3.1 The case file: acts as planets
 One ticket number the Komisja keeps reassigning. The campaign is a **sequence of planets**
 (MVP 5, full 8–10), each: a base layout, a clause, a dominant family, 4–6 pages, a boss, a story
-chapter (written in the story plan, later). The final ticket closes the case. After the campaign
+chapter (proposed in docs/STORY.md). The final ticket closes the case. After the campaign
 the desk offers "Zgłoszenia dodatkowe": random planets with random clauses, the replayable loop.
 
 ### 3.2 Priorytet zgłoszenia (difficulty)
