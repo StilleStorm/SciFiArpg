@@ -734,10 +734,23 @@ try {
   await settle();
 
   // ---------- 4. inventory sheet ----------
-  await page.evaluate(() => window.__game.demoInventory());
+  await page.evaluate(() => {
+    window.__game.demoInventory();
+    // S8 marks: the "ewentualny" bag item first (opened by default) and at magnitude tier III
+    const bag = window.__game.state().player.inventory;
+    const i = bag.findIndex((it) => it.affixes.includes('ewentualny'));
+    if (i > 0) bag.unshift(...bag.splice(i, 1));
+    if (bag[0]) bag[0].modTier = 3;
+  });
   await page.locator('.pad.inv').click({ timeout: 2000 }).catch(() => undefined);
   await sleep(600);
   await shot('08-inventory');
+  const marks = await page.evaluate(() => ({
+    wornTier: document.querySelectorAll('.inv-worn .tier-mark').length,
+    numeral: document.querySelector('.inv-plate.open .inv-title')?.textContent?.includes('(III)') ?? false,
+    approx: [...document.querySelectorAll('.inv-plate.open .ttab td')].some((td) => /^ok\. /.test(td.textContent ?? '')),
+  }));
+  check('item marks: tier marks on the worn strip, the tier numeral after the name, "ok." on an ewentualny pewność', marks.wornTier >= 2 && marks.numeral && marks.approx, JSON.stringify(marks));
   await page.locator('.ps-close').click({ timeout: 2000 }).catch(() => undefined);
   await sleep(300);
 

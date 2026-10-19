@@ -159,12 +159,12 @@ words are bound to the next with U+00A0 by `t()`. No user-facing strings in `.ts
 `ultimateInfo() {meter, ready, active, paragraph}`, `setSpecialization(id|null)`, `loadoutInfo() {pads, categories, specialization, capstone, advice}`, `hero.{cast, installSkill, openAssign, assignPad, setParagraph, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
 `enemies.{spawnFamily, spawnBoss, hit, clear, list}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
 `npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot` (390x844 @2x and 844x390 into `shots/`);
-per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3,s4,s5,s6,recovery}.mjs` (each with its own
+per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3,s4,s5,s6,s7,s8,recovery}.mjs` (each with its own
 SHOT_PORT/SHOT_OUT/SHOT_DIR, usage in the header). `npm run smoke` plays a ticket with real buttons: creation form, base
 (HUD, margin note, update from the HUD line), desk, ticket, exit, run (header clear of the note row, no bubble under a pad or note,
 the update line clear in tap/joystick x both hands), fight, update, inventory, pause, Zakończ,
 the Argument meter and an ultimate (3d), bookmark resume, two tunnels and the return, boss, death, a landscape joystick leg (two touches, the footnote slip), the S4 leg (6f: desk loadout -> run -> reload, the chart), the S5 leg (6g: damage numbers, text size, drop ->
-heal, full -> held, tap use, auto-use, the pause bug line, export -> import equality), the S6 leg (6h: roster over a held run
+heal, full -> held, tap use, auto-use, the pause bug line, export -> import equality), item marks on the sheet (S8), the S6 leg (6h: roster over a held run
 settles it, a second file at level 1, the first file's level and bookmark back, an archive move),
 then 5 s of frame times with 40 enemies (`PERF_MAX_MS`, `SMOKE_UNCAPPED`); exit 1 on any failed check or page error.
 
@@ -396,3 +396,20 @@ removes it (`.card-layer[data-card]`). Hooks: `setCampaignView(v|null)` (view on
 planet 1 once and shows planet 2's chapter card, nine travel rows, travel → rewritten card). Shots: `shot-s7.mjs` (4187,
 `dist-s7`, `shots-s7/`). Open: `ilvlBase(planet)` waits for the S9 item level; `PlanetDef.baseLayouts` (base still by
 seed), planet mix in `pageTurn.planWaves` (only the trickle uses it) and boss scaling are data only.
+
+## Items: affix pool, 40 bases, marks (S8, ITEMS 2/3/9)
+StatBlock adds percentages `zasieg`, `tempo` (negative = faster), `gwiazdki`, `proba` (−% trial kills, applied at build to
+`trialTarget`); a base's `odd` (tempoPct, gwiazdkiPct, trialSpeedPct) enters them unscaled via `bases.oddStats`.
+`recomputeStats` reads them: range × (1+zasieg%), cooldown × max(0.5, 1+tempo%), `Player.starBonus = gwiazdki`; pickups pay
+through `economy/stars.earnStars` (fraction kept in `Player.starCarry`). Item adds `modTier?` (I–V, `tiers.modTierMark`
+"(III)" after the name in `ui/itemView.displayName`), `plain?`, `absurd?`. `items/absurd.ts`: `pageEntryAll(player, loot rng)`
+is called by `world/pageTurn.enterPage` after `page:entered` (recompute on `changed`, `notes` as footnotes);
+`stats.wearerDefence(p, combat rng)` is the defender block of every hit on the player (`systems/combat.attack`,
+`enemies/projectiles.fireShot`), taking a worn domniemany item's upor/resists off one hit in five (no roll without one);
+`disposalRefusal(item, 'sell'|'bin'|'reklamacja'|'drop')` is the one guard any way of getting rid of an item calls
+(wycofany: drop only; sell → the Sklep footnote). `RollOptions.shop` (the Sklep passes it): grade 3 halves, wycofany
+never stocked. Marks: `render/itemMarks.ts` (`AFFIX_MARK` keyed by `Affix.absurd`, `affixMarks`, `groundMark`,
+`buildTierMark`), `drawingSvg(id, item)` on cards, the worn strip and the Sklep; `itemView.itemRowText` ("ok. 16" on an
+ewentualny pewność), `declaredHead` ("(wg relacji)" for rzekomy, which shows "Próba 0 z 0"), `isStruck` (wycofany
+number struck, class `.struck`). Hook `itemGallery(mode)`; shots `shot-s8.mjs`. Open: sell, bin and reklamacja are not built
+(S9+ must call `disposalRefusal`); sets (zestaw, paperclip) wait for S10.
