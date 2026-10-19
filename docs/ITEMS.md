@@ -419,7 +419,7 @@ reads on the ground (tiny) and on the card (large). No gradients, no glow, red o
 | Reads as | Mark | Where | Ink |
 |---|---|---|---|
 | nietypowy | a small round stamp mark with a tick | top-right corner | black |
-| rzadki | one red thread tied around the drawing, a knot and two loose ends | around | **red** (the one accent) |
+| rzadki | one thread tied around the drawing, a knot and two loose ends | around | black (ruled S8: DESIGN §3 keeps red for stamps, strikes, Racja, corrections) |
 | zestaw | a paperclip on the top edge | top-left | black |
 | unikatowy | a wax seal: a filled black circle with a hatched impress and a short ribbon | bottom-right | black, a single red dot in the centre |
 | zwykły | none | – | – |

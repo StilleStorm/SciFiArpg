@@ -63,7 +63,7 @@ export function tierMarkKind(item: Pick<MarkSubject, 'tier' | 'set'>): TierMarkK
   return { zwykly: null, nietypowy: 'stamp', rzadki: 'thread', unikatowy: 'seal' }[item.tier] as TierMarkKind | null;
 }
 
-/** The tier mark: a stamp (nietypowy), a red thread (rzadki), a wax seal (unikatowy), a paperclip (zestaw). */
+/** The tier mark: a stamp (nietypowy), a thread (rzadki), a wax seal (unikatowy), a paperclip (zestaw). */
 export function buildTierMark(item: MarkSubject, sw = 1.5): SVGGElement | null {
   const g = el('g', { class: 'item-mark tier-mark', 'stroke-width': sw });
   if (item.set) {
@@ -81,10 +81,11 @@ export function buildTierMark(item: MarkSubject, sw = 1.5): SVGGElement | null {
       );
       return g;
     case 'rzadki':
+      // Black ink: DESIGN §3 keeps red for stamps, strikes, Racja and handwritten corrections; a thread is none of them.
       g.append(
-        el('path', { d: THREAD, style: 'stroke:var(--accent)', fill: 'none' }),
-        el('path', { d: THREAD_ENDS, style: 'stroke:var(--accent)', fill: 'none' }),
-        el('circle', { cx: -15, cy: 17, r: 1.9, style: 'stroke:var(--accent)', fill: 'var(--paper)' }),
+        el('path', { d: THREAD, fill: 'none' }),
+        el('path', { d: THREAD_ENDS, fill: 'none' }),
+        el('circle', { cx: -15, cy: 17, r: 1.9, fill: 'var(--paper)' }),
       );
       return g;
     case 'unikatowy':
@@ -135,7 +136,12 @@ export function buildAffixMarks(kinds: readonly AffixMarkKind[], sw = 1.5): SVGG
         );
         break;
       case 'nowosc':
-        g.append(el('path', { d: 'M-10-23H10V-17.5L0-19.5L-10-17.5Z', fill: 'var(--paper)' }), stripText(0, -19.6, 3.9, t('items.mark.nowosc')));
+        // A price tag hung from a string inside the frame; the text is sized to read at 11 px on a 76 px card figure.
+        g.append(
+          el('path', { d: 'M0-22.2L-2-17.5M0-22.2L2-17.5', 'stroke-width': sw * 0.6 }),
+          el('path', { d: 'M-14-17.5H14V-8.5H-14Z', fill: 'var(--paper)', 'stroke-width': sw * 0.7 }),
+          stripText(0, -10.8, 6.8, t('items.mark.nowosc')),
+        );
         break;
       default:
         continue;
