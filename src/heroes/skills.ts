@@ -6,6 +6,7 @@
 import { isSilenced, isStunned } from '../combat/status';
 import type { Bus } from '../core/events';
 import { t } from '../i18n';
+import { paragraphsFree, waivePrice } from '../world/contentKinds';
 import type { RunState } from '../world/run';
 import { AUTO_AIM, fitAim, resolveAim, takeQueuedAim, type Aim, type ResolvedAim } from './aim';
 import { heroDef, type PadSlot, type SkillIndex } from './defs';
@@ -53,7 +54,8 @@ export function castSkill(s: RunState, bus: Bus, slot: PadSlot, free = false, ai
  * `skill:cast` event, and the note of what was cast for Juz to bylo. A free cast takes the aim it is given (auto by default).
  */
 export function fire(s: RunState, bus: Bus, skill: SkillIndex, slot: PadSlot, free: boolean, aim: Aim | undefined): boolean {
-  return withCapstone(s, skill, (patch) => cast(s, bus, skill, slot, free, aim, patch));
+  // a zwolnienie stamp (world/content seals) waives the paragraph's price: no racja cost, no added cooldown
+  return withCapstone(s, skill, (patch) => cast(s, bus, skill, slot, free, aim, patch && paragraphsFree(s.buffs) ? waivePrice(patch) : patch));
 }
 
 /** The body of `fire`, with the patch of the skill as it is cast (the paragraph, and the capstone if it belongs to this skill). */

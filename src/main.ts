@@ -21,7 +21,7 @@ import { bugDump, copyText, deviceInfo, requestPersistence } from './save/export
 import { loadMeta, saveMeta, type Settings } from './save/save';
 import { installTestHook } from './testHook';
 import { createBaza } from './ui/baza';
-import { createBoard } from './ui/board';
+import { createBoard, type BoardQuests } from './ui/board';
 import { createFootnotes } from './ui/footnotes';
 import { createHud } from './ui/hud';
 import { watchLayout } from './ui/keepOut';
@@ -31,6 +31,8 @@ import { applySteering, currentOrient, effectiveSteering, initLayout, lockOrient
 import { bindLawSheets } from './ui/lawSheets';
 import { openLoadout, type LoadoutSheet } from './ui/loadout';
 import { addKartaDeskLine, kartaInputFromRun, openKarta, type KartaSheet } from './ui/karta';
+import { addOsobowaDeskLine, openKartaOsobowa, osobowaInputFromRun, type OsobowaSheet } from './ui/karta-osobowa';
+import { openNpcSheet, type NpcSheet } from './ui/npcSheet';
 import { addDeskLine, openKonfiguracja, type KonfiguracjaSheet } from './ui/konfiguracja';
 import { createPads } from './ui/pads';
 import { createSpor } from './ui/spor';
@@ -48,6 +50,9 @@ import { campaignViewOf, cardToShow, markShown, type CampaignView } from './ui/t
 import { bindCampaign, clampPriority, cloneCampaign, defaultPlan, DEFAULT_PRIORITY, extraPlan, newCampaign, noCardsSeen, toCampaign, travelPlan, type CampaignState, type PriorityId, type TicketPlan } from './world/campaign';
 import { createTitle } from './ui/title';
 import { acceptTicket } from './world/base';
+import { npcAt } from './world/npc';
+import { bindContent } from './world/content';
+import { bindQuests, cloneQuests, completeQuest, dropQuest, questPlanet, questsOf, takeQuest, visitClerk, questById } from './world/quests';
 import { bindLaws, lawHooks } from './world/laws';
 import { PAGE_H, PAGE_W } from './world/pages';
 import { bindPageTurn, bindRunEvents } from './world/pageTurn';
@@ -112,7 +117,7 @@ const input = createInput(
 initLayout(() => applySettings(meta.settings)); // data-orient on <html> follows the window; steering follows it until the player chooses
 applySettings(meta.settings);
 const game = createGame(stage, bus, camera, input, bounds);
-const hud = createHud(stage.ui, () => game.hero.requestUpdate(), () => pauseRun(), () => openTunnelNow(), () => void (game.state && useHeld(game.state, bus)));
+const hud = createHud(stage.ui, () => game.hero.requestUpdate(), () => pauseRun(), () => openTunnelNow(), () => void (game.state && useHeld(game.state, bus)), () => openOsobowaFromHud());
 const footnotes = createFootnotes(stage.ui);
 const pads = createPads(stage.ui, bus);
 watchLayout(stage.ui); // what the HUD, pads and notes cover: bubbles, stamps and the page header keep out from under it
@@ -127,7 +132,7 @@ const freshSeed = (): number => (Date.now() ^ Math.floor(Math.random() * 0x10000
 let nextSeed = freshSeed();
 
 /** The sheets over the base page. At most one is up; the base holds still while it is. */
-type SheetKind = 'biurko' | 'ticket' | 'kiosk' | 'tablica';
+type SheetKind = 'biurko' | 'ticket' | 'kiosk' | 'tablica' | 'urzednik';
 let sheetKind: SheetKind | null = null;
 /** The base was running and a sheet paused it (the sheet gives it back). */
 let sheetHolds = false;
@@ -401,6 +406,10 @@ function dropSheets(): void {
   archiveUi = null;
   karta?.close();
   karta = null;
+  osobowa?.close();
+  osobowa = null;
+  npcUi?.close();
+  npcUi = null;
   konfig?.close();
   konfig = null;
   baza.close();
@@ -422,6 +431,8 @@ function openSheet(kind: SheetKind): void {
   baza.close();
   board.close();
   ticket.close();
+  npcUi?.close();
+  npcUi = null;
   shop?.unmount();
   shop = null;
   if (!wasUp) {
@@ -434,14 +445,25 @@ function openSheet(kind: SheetKind): void {
       baza.open(meta);
       addDeskLine(stage.ui, () => openKonfig('desk'));
       addKartaDeskLine(stage.ui, () => openKartaSheet());
+      addOsobowaDeskLine(stage.ui, () => openOsobowaSheet());
       addArchiveDeskLine(stage.ui, () => openArchiveSheet());
       break;
     case 'ticket':
       ticket.open(s.ticket, { level: s.player.level, view: campaignView() });
       break;
     case 'tablica':
-      board.open(meta);
+      board.open(meta, boardQuests(s));
       break;
+    case 'urzednik': {
+      // the clerk: his lines, and a parcel carried out of the base is handed over by opening the sheet
+      const handed = visitClerk(s, bus).flatMap((id) => {
+        const def = questById(id);
+        return def ? [t(def.titleKey)] : [];
+      });
+      if (handed.length > 0) save(withCharacter(meta, s));
+      npcUi = openNpcSheet(stage.ui, npcAt(questPlanet(s)), handed, { onClose: () => closeSheet() });
+      break;
+    }
     case 'kiosk':
       // The base Sklep spends the gwiazdki of the live player and fills the bag and gear the run starts with.
       shop = mountSklep(stage.ui, { runsCompleted: meta.runsCompleted }, s.player, {
@@ -478,7 +500,7 @@ function acceptNow(priority?: PriorityId): boolean {
 }
 
 /** Open the sheet (or the footnote) of a station (a tap on it, `Game.onTap` -> `station:opened`). */
-function openStation(id: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean {
+function openStation(id: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik'): boolean {
   if (screen !== 'baza' || game.state?.phase !== 'base') return false;
   if (id === 'paczkomat') bus.emit('footnote', { text: t('screens.base.paczkomatClosed') });
   else openSheet(id);
@@ -500,6 +522,9 @@ bindRunEvents(bus, () => game.state);
 bindTunnel(bus, () => game.state);
 // A completed ticket closes its planet in the character's campaign before the handler below saves the character.
 bindCampaign(bus, () => game.state);
+// Side tickets count kills, finds and pages of the run proper (world/quests.ts).
+bindQuests(bus, () => game.state);
+bindContent(bus, () => game.state); // teczka taps and page-content redraws (world/content.ts)
 const tunnelFx = bindTunnelFx(bus, { page: stage.page, pageWidth: () => game.state?.page.w ?? PAGE_W });
 // The hole in the run takes the player to the base (holding the run); the hole in the base takes him back.
 bus.on('tunnel:entered', () => void (game.state?.phase === 'base' ? returnFromTunnel() : holdRun()));
@@ -642,8 +667,61 @@ function closeKartaSheet(): void {
   stage.ui.querySelector('.desk-sheet')?.classList.remove('hidden');
 }
 
+/**
+ * The Karta osobowa (PLAN 8) opens from the desk like the Karta uprawnień, and from the HUD's Reputacja line in the base and in a run:
+ * there the game is held as the pause sheet holds it (the sheet itself stays hidden under the card) and Wróć lets it go again.
+ */
+let osobowa: OsobowaSheet | null = null;
+let osobowaFrom: 'desk' | 'hud' = 'desk';
+function openOsobowaSheet(): void {
+  const s = game.state;
+  if (!s || osobowa) return;
+  osobowaFrom = 'desk';
+  stage.ui.querySelector('.desk-sheet')?.classList.add('hidden');
+  osobowa = openKartaOsobowa(stage.ui, osobowaInputFromRun(s), () => closeOsobowa());
+}
+
+function openOsobowaFromHud(): void {
+  const s = game.state;
+  if (!s || osobowa || !live() || sheetKind !== null || !pauseRun()) return;
+  osobowaFrom = 'hud';
+  pauseSheet.setHidden(true);
+  osobowa = openKartaOsobowa(stage.ui, osobowaInputFromRun(s), () => closeOsobowa());
+}
+
+function closeOsobowa(): void {
+  osobowa?.close();
+  osobowa = null;
+  if (osobowaFrom === 'desk') stage.ui.querySelector('.desk-sheet')?.classList.remove('hidden');
+  else resumeRun();
+}
+
+/** The side tickets of the notice board, on the live base: every change is written into the character at once. */
+function boardQuests(s: RunState): BoardQuests {
+  const persist = (): void => save(withCharacter(meta, s));
+  return {
+    planet: () => questPlanet(s),
+    state: () => questsOf(s),
+    accept: (id) => {
+      const res = takeQuest(s, bus, id);
+      if (res === 'ok') persist();
+      return res;
+    },
+    drop: (id) => {
+      if (dropQuest(s, bus, id)) persist();
+    },
+    report: (id) => {
+      const ok = completeQuest(s, bus, id);
+      if (ok) persist();
+      return ok;
+    },
+  };
+}
+
 /** The Archiwum (ITEMS 8) stands over the desk the same way: the bag of the live base, the personal archive, the shared one. */
 let archiveUi: ArchiveSheet | null = null;
+/** The sheet of a person in the base (the clerk). */
+let npcUi: NpcSheet | null = null;
 function openArchiveSheet(): void {
   const s = game.state;
   if (!s || archiveUi || s.phase !== 'base') return;
@@ -680,6 +758,8 @@ function closeArchiveSheet(): void {
 function clearPause(): void {
   karta?.close();
   karta = null;
+  osobowa?.close();
+  osobowa = null;
   konfig?.close();
   konfig = null;
   loadout?.close();
@@ -747,6 +827,7 @@ function returnFromTunnel(): boolean {
   closeSheet(); // the desk's "Wróć do zgłoszenia" is a button on a sheet
   hold.take();
   carryPurse(held, meta.character); // ... and goes along into the held run
+  if (here.quests) held.quests = cloneQuests(here.quests); // tickets taken or reported in the base go along too
   baza.setTunnel(null);
   delete here.tunnel;
   game.adopt(held);

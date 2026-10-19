@@ -1,0 +1,42 @@
+/* The sheet of a person in the base: a few typed lines on paper, a stamped slip when a parcel was handed over. */
+.npc-body {
+  display: flex;
+  flex-direction: column;
+  row-gap: 14px;
+  padding: 6px 2px 0;
+  max-width: 560px;
+}
+.npc-sheet .ps-sub {
+  font-family: var(--mono);
+  font-style: italic;
+  font-size: 12px;
+}
+.npc-line {
+  margin: 0 0 8px;
+  padding-left: 10px;
+  border-left: 1.5px solid var(--ink);
+  font-size: 16px;
+  line-height: 1.35;
+}
+.npc-slip {
+  position: relative;
+  padding: 8px 120px 8px 10px;
+  border: 1.5px dashed var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.35;
+}
+.npc-slip p {
+  margin: 0;
+}
+.npc-slip .os-stamp {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.npc-back {
+  display: block;
+  width: calc(100% - 6px);
+  margin: 10px 3px 8px;
+}

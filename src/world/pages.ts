@@ -2,6 +2,7 @@ import type { Side } from '../core/events';
 import type { Rng } from '../core/rng';
 import { dist, type Vec } from '../core/vec';
 import type { BasePageInfo, StationId } from './base';
+import { CONTENT, EVENT_IDS, SEAL_IDS, type EventId, type PageContent } from './contentKinds';
 
 export const PAGE_W = 1200;
 export const PAGE_H = 1600;
@@ -65,6 +66,8 @@ export interface Page {
   hasKiosk: boolean;
   /** Only the walkable base page of a planet has this (world/base.ts): layout, stations, props, the hole's place. */
   base?: BasePageInfo;
+  /** Teczki, pieczęcie and the event of this page (world/contentKinds.ts); placed from the seed, mutated by world/content.ts. Absent on the base page. */
+  content?: PageContent[];
 }
 
 /** What generatePage needs to know about the page's place in the run. */
@@ -246,6 +249,7 @@ export function generatePage(rng: Rng, plan: PagePlan = DEFAULT_PLAN): Page {
       n++;
     }
   }
+  const content = placeContent(r.fork('content'), { index: plan.index, last, obstacles, entry, exit });
   return {
     w: PAGE_W,
     h: PAGE_H,
@@ -259,7 +263,88 @@ export function generatePage(rng: Rng, plan: PagePlan = DEFAULT_PLAN): Page {
     torn,
     exit,
     hasKiosk,
+    content,
   };
+}
+
+// ---------- page content (world/contentKinds.ts) ----------
+
+/** Chance of 0 / 1 / 2 teczki on a page. */
+export const TECZKI_ODDS: readonly [number, number, number] = [0.3, 0.5, 0.2];
+/** Chance of a seal on a page. */
+export const PIECZEC_CHANCE = 0.35;
+/** Chance of an event on a page that is neither the first nor the boss page. */
+export const EVENT_CHANCE = 0.3;
+/** Keep content this far from the entry and the exit. */
+const CONTENT_KEEP = 260;
+/** Edge of the paper content keeps off (also clear of the header). */
+const CONTENT_EDGE = 150;
+
+interface ContentSite {
+  index: number;
+  last: boolean;
+  obstacles: Obstacle[];
+  entry: Vec;
+  exit: PageExit | null;
+}
+
+/**
+ * Teczki (0-2), a seal (0-1) and an event (0-1) for one page, from its own stream so that the obstacles do not move.
+ * Every object stands clear of the obstacles' colliders, of the entry and exit and of the others; the lost delivery's
+ * addressee stands at least 600 units from the parcel. No event on the first page or on the boss page.
+ */
+export function placeContent(r: Rng, site: ContentSite): PageContent[] {
+  const out: PageContent[] = [];
+  const spots: Circle[] = [];
+  const free = (x: number, y: number, rad: number): boolean =>
+    site.obstacles.every((o) => o.colliders.every((c) => dist(c, { x, y }) > c.r + rad + 24)) &&
+    dist({ x, y }, site.entry) > CONTENT_KEEP + rad &&
+    (!site.exit || dist({ x, y }, site.exit) > CONTENT_KEEP + rad) &&
+    spots.every((c) => dist(c, { x, y }) > c.r + rad + 50);
+  const find = (rad: number, near?: { x: number; y: number; min: number }): Vec | null => {
+    for (let tries = 0; tries < 160; tries++) {
+      const x = r.range(CONTENT_EDGE, PAGE_W - CONTENT_EDGE);
+      const y = r.range(CONTENT_EDGE + 40, PAGE_H - CONTENT_EDGE);
+      if (near && dist({ x, y }, near) < near.min) continue;
+      if (free(x, y, rad)) return { x, y };
+    }
+    return null;
+  };
+  let n = 0;
+  const nextId = (): number => site.index * 100 + ++n;
+
+  const roll = r.next();
+  const teczki = roll < TECZKI_ODDS[0] ? 0 : roll < TECZKI_ODDS[0] + TECZKI_ODDS[1] ? 1 : 2;
+  for (let i = 0; i < teczki; i++) {
+    const at = find(CONTENT.teczkaR);
+    if (!at) break;
+    spots.push({ ...at, r: CONTENT.teczkaR });
+    out.push({ kind: 'teczka', id: nextId(), x: at.x, y: at.y, seed: r.int(1, 1e6), opened: false });
+  }
+  if (r.chance(PIECZEC_CHANCE)) {
+    const at = find(CONTENT.pieczecR);
+    if (at) {
+      spots.push({ ...at, r: CONTENT.pieczecR });
+      out.push({ kind: 'pieczec', id: nextId(), x: at.x, y: at.y, seed: r.int(1, 1e6), seal: r.pick(SEAL_IDS), used: false });
+    }
+  }
+  if (site.index >= 1 && !site.last && r.chance(EVENT_CHANCE)) {
+    const event: EventId = r.pick(EVENT_IDS);
+    const rad = event === 'formularz' ? CONTENT.formR * 0.6 : event === 'audyt' ? 80 : 50;
+    const at = find(rad);
+    if (at) {
+      const z: PageContent = { kind: 'zdarzenie', id: nextId(), x: at.x, y: at.y, seed: r.int(1, 1e6), event, phase: 'idle', progress: 0 };
+      if (event === 'przesylka') {
+        spots.push({ ...at, r: rad });
+        const to = find(CONTENT.addresseeR * 0.7, { ...at, min: 600 });
+        if (to) {
+          z.to = to;
+          out.push(z);
+        }
+      } else out.push(z);
+    }
+  }
+  return out;
 }
 
 /** All pages of a run, linked: page i+1 is entered through the corner opposite to page i's exit. */

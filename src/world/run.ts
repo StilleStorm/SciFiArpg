@@ -9,6 +9,8 @@ import { applyLaw, neutralLaw, type LawFlags, type LawId } from './laws';
 import type { Tunnel } from './tunnel';
 import { ticketForPlan, ticketForSeed, type TicketInfo } from './ticket';
 import { mixForPlanet, type CampaignState, type TicketPlan } from './campaign';
+import type { QuestState } from './quests';
+import type { ActiveBuff } from './contentKinds';
 
 import type { MissionMix } from '../enemies/families';
 import { applyBookmark, type Bookmark } from '../save/bookmark';
@@ -76,6 +78,10 @@ export interface RunState {
   plan?: TicketPlan;
   /** The character's campaign (copied from the saved record by applyCharacter, written back by serializeCharacter). */
   campaign?: CampaignState;
+  /** The side tickets the character holds (world/quests.ts; copied from the saved record, written back by serializeCharacter). */
+  quests?: QuestState;
+  /** The seal stamps on the player now (world/content.ts ticks them; run only, never saved). Absent = none. */
+  buffs?: ActiveBuff[];
 }
 
 /** Optional overrides for tests and screenshots; everything else comes from the seed. */

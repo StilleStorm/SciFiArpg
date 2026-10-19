@@ -199,6 +199,7 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
   on('footnote:added', (e) => play(e.correction ? 'correction' : 'footnote'));
   on('pickup:taken', () => play('pickup'));
   on('recovery:taken', () => play('paperSlide'));
+  on('content:opened', () => play('paperSlide')); // a teczka (world/content.ts); seals and events are heard in their stamp
   on('page:edge', () => play('pageEdge'));
   on('page:turn', (e) => {
     play('pageTurn');

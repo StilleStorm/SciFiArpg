@@ -3,5 +3,82 @@
     "ladowisko": "lądowisko",
     "wioska": "wioska",
     "miasteczko": "miasteczko"
+  },
+  "teczka": {
+    "open1": "Teczka nr {n} otwarta. Zawartość zgodna ze spisem w zakresie, w jakim spis istnieje.",
+    "open2": "Teczka nr {n} była opieczętowana. Pieczęć nie wskazywała przez kogo.",
+    "open3": "W teczce nr {n} znaleziono dokumenty. Dołączono je do sprawy bez czytania."
+  },
+  "seal": {
+    "taken": "{name} przyłożona. Obowiązuje przez {seconds} s.",
+    "expired": "{name} wygasła.",
+    "pilnosc": {
+      "name": "Pieczęć pilności",
+      "desc": "Chód szybszy o jedną czwartą.",
+      "stamp": "PILNE"
+    },
+    "kontrola": {
+      "name": "Pieczęć kontroli",
+      "desc": "Trafienia krytyczne częstsze o 15 punktów procentowych.",
+      "stamp": "SPRAWDZONO"
+    },
+    "argument": {
+      "name": "Pieczęć argumentacji",
+      "desc": "Miernik Argumentu napełnia się o połowę szybciej.",
+      "stamp": "UZASADNIONO"
+    },
+    "obieg": {
+      "name": "Pieczęć obiegowa",
+      "desc": "Łupy o jeden stopień lepsze.",
+      "stamp": "W OBIEGU"
+    },
+    "zwolnienie": {
+      "name": "Zwolnienie z opłat",
+      "desc": "Paragrafy nie pobierają opłaty: bez kosztu racji i bez dłuższego odnawiania.",
+      "stamp": "ZWOLNIONO"
+    },
+    "wypoczynek": {
+      "name": "Pieczęć urlopowa",
+      "desc": "Racja wraca o 3% maksimum na sekundę.",
+      "stamp": "URLOP"
+    }
+  },
+  "event": {
+    "formularz": {
+      "name": "Formularz do wypełnienia",
+      "start": "Formularz wymaga wypełnienia na miejscu, w ciągu {seconds} s obecności. Przeciwnicy nie zostali o tym poinformowani.",
+      "done": {
+        "stamp": "PRZYJĘTO",
+        "note": "Formularz wypełniony. Okoliczności wypełnienia uznano za należyte."
+      }
+    },
+    "przesylka": {
+      "name": "Przesyłka niedoręczona",
+      "start": "Odebrano przesyłkę. Adresat oczekuje w oznaczonym miejscu. Czas doręczenia: {seconds} s.",
+      "done": {
+        "stamp": "DORĘCZONO",
+        "note": "Przesyłkę doręczono. Adresat jej nie zamawiał i nie zgłosił zastrzeżeń."
+      },
+      "failed": {
+        "stamp": "ZWRÓCONO",
+        "note": "Termin doręczenia minął. Przesyłka wraca do nadawcy. Nadawcy nie ustalono."
+      }
+    },
+    "audyt": {
+      "name": "Audyt",
+      "start": "Rozpoczęto audyt. Przez {seconds} s nie wolno ponieść szkody ani oddalić się od stanowiska.",
+      "done": {
+        "stamp": "ZATWIERDZONO",
+        "note": "Audyt zakończony bez uwag. Uwagi zostaną dopisane później."
+      },
+      "failed": {
+        "stamp": "ODRZUCONO",
+        "note": {
+          "one": "Audyt zakończony uwagami. Opłata za ponowne rozpatrzenie: {count} gwiazdka.",
+          "few": "Audyt zakończony uwagami. Opłata za ponowne rozpatrzenie: {count} gwiazdki.",
+          "many": "Audyt zakończony uwagami. Opłata za ponowne rozpatrzenie: {count} gwiazdek."
+        }
+      }
+    }
   }
 }

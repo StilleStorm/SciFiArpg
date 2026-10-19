@@ -13,6 +13,7 @@ import { heroById } from './registry';
 import type { ParagraphNo } from './paragraphs';
 import type { ActiveUlt, UltRun } from './state';
 import { MAX_ULT_S, type UltEnv, type UltimateDef } from './ultimateDefs';
+import { paragraphsFree } from '../world/contentKinds';
 
 export { meterOf, ultimateReady } from '../combat/meter';
 
@@ -91,7 +92,7 @@ export function castUltimate(s: RunState, bus: Bus): boolean {
   const r = def.radius === null ? undefined : para.tune['radius'] ?? def.radius;
   if (r !== undefined) u.r = r;
   meterSpend(p);
-  if (patch.cost) p.hp = Math.max(Math.min(1, p.hp), p.hp - patch.cost);
+  if (patch.cost && !paragraphsFree(s.buffs)) p.hp = Math.max(Math.min(1, p.hp), p.hp - patch.cost); // zwolnienie waives the price
   run.active.push(u);
   const env = envOf(s, bus, def, u);
   def.cast(env);

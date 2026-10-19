@@ -3,6 +3,7 @@ import { tickStatuses } from '../combat/status';
 import type { Bus } from '../core/events';
 import { createGrid, type Enemy } from '../entities';
 import { tickBase } from '../world/base';
+import { contentPre, tickContent } from '../world/content';
 import { trackEnemies } from '../world/enemyInfo';
 import { lawPre, tickLaw } from '../world/laws';
 import { tickPageTurn } from '../world/pageTurn';
@@ -33,6 +34,7 @@ export function createSim(bus: Bus) {
       }
       s.time += dt;
       trackEnemies(s.enemies);
+      const undoContent = contentPre(s); // seals lay their numbers on the step, outside the clause's
       const undoLaw = lawPre(s);
       tickStatuses(s.player, dt);
       for (const e of s.enemies) tickStatuses(e, dt);
@@ -51,8 +53,10 @@ export function createSim(bus: Bus) {
       heroStep(s, bus, dt);
       collectPickups(s, bus);
       updateLoot(s, bus, dt);
+      tickContent(s, bus, dt);
       trickleSpawn(s, dt);
       undoLaw();
+      undoContent();
       tickLaw(s, bus, dt);
       tickPageTurn(s, bus);
       tickTunnel(s, bus);

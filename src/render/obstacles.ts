@@ -1,5 +1,6 @@
 import { createRng, type Rng } from '../core/rng';
 import { type Vec } from '../core/vec';
+import { CONTENT, type PageContent, type SealId, type Teczka, type Pieczec, type Zdarzenie } from '../world/contentKinds';
 import { FOLD, type Obstacle, type Page, type PageExit } from '../world/pages';
 import { t } from '../i18n';
 import { blobPoints, dotPath, el, n2, polyline, smoothClosed, wobblyCircle } from './svg';
@@ -467,7 +468,201 @@ export function drawPage(layer: SVGGElement, page: Page, header?: PageHeader): S
         break;
     }
   }
+  for (const c of page.content ?? []) ink.append(drawContentItem(c));
   if (page.exit) ink.append(drawExit(page, page.exit, page.index * 977 + 13));
   if (header) ink.append(drawHeader(page, header));
+  ink.setAttribute('data-page-ink', '1');
   return ink;
+}
+
+// ---------- page content (world/contentKinds.ts): teczki, seals, events ----------
+
+/** A ring of small ink dots: the mark of something the player may walk to or into. */
+function dotRing(radius: number, count: number, dr = 1.3): string {
+  let d = '';
+  for (let i = 0; i < count; i++) {
+    const a = (i / count) * Math.PI * 2;
+    d += dotPath(Math.cos(a) * radius, Math.sin(a) * radius, dr);
+  }
+  return d;
+}
+
+function inkDots(d: string): SVGPathElement {
+  const p = el('path', { d });
+  solid(p, 'var(--ink)');
+  return p;
+}
+
+function hatched(d: string): SVGPathElement {
+  return el('path', { d, fill: 'url(#hatch)', stroke: 'none' });
+}
+
+const box = (x0: number, y0: number, x1: number, y1: number): string =>
+  polyline([{ x: x0, y: y0 }, { x: x1, y: y0 }, { x: x1, y: y1 }, { x: x0, y: y1 }], true);
+
+const circleD = (cx: number, cy: number, r: number): string => `M${n2(cx - r)} ${n2(cy)}a${n2(r)} ${n2(r)} 0 1 0 ${n2(2 * r)} 0a${n2(r)} ${n2(r)} 0 1 0 ${n2(-2 * r)} 0Z`;
+
+/** A folder: closed with its string, or open and empty. */
+function drawTeczka(c: Teczka): SVGGElement {
+  const r = createRng(c.seed);
+  const j = (): number => r.range(-0.9, 0.9);
+  const rot = ((c.seed % 100) - 50) * 0.0035;
+  const g = el('g', { transform: `translate(${n2(c.x)} ${n2(c.y)}) rotate(${n2((rot * 180) / Math.PI)})` });
+  const body = polyline([{ x: -28 + j(), y: -16 + j() }, { x: 28 + j(), y: -16 + j() }, { x: 28 + j(), y: 20 + j() }, { x: -28 + j(), y: 20 + j() }], true);
+  const tab = polyline([{ x: -28, y: -16 }, { x: -26, y: -23 }, { x: -6, y: -23 }, { x: -2, y: -16 }]);
+  if (!c.opened) {
+    const front = el('path', { d: body, 'stroke-width': 1.9 });
+    front.style.fill = 'var(--paper)';
+    g.append(front, el('path', { d: tab, 'stroke-width': 1.6 }), hatched(box(-28, 14, 28, 20)));
+    g.append(el('path', { d: box(-21, -8, 1, 2), 'stroke-width': 1 }), el('path', { d: `M-18 -3H-2`, 'stroke-width': 0.9 }));
+    // the string: a button on the edge and a loop round it
+    g.append(el('path', { d: circleD(24, 2, 3.2), 'stroke-width': 1.3 }), el('path', { d: 'M24 2C14 -10 6 -2 -2 6', 'stroke-width': 1 }));
+    g.append(inkDots(dotRing(46, 14)));
+  } else {
+    // open: the front cover lies to the left, the back shows its emptiness
+    const back = el('path', { d: body, 'stroke-width': 1.5 });
+    back.style.fill = 'var(--paper)';
+    const cover = el('path', { d: polyline([{ x: -28, y: -16 }, { x: -52, y: -8 }, { x: -52, y: 27 }, { x: -28, y: 20 }], true), 'stroke-width': 1.5 });
+    cover.style.fill = 'var(--paper)';
+    g.append(back, el('path', { d: tab, 'stroke-width': 1.3 }), cover, hatched(polyline([{ x: -28, y: -16 }, { x: -52, y: -8 }, { x: -52, y: 27 }, { x: -28, y: 20 }], true)));
+    g.append(el('path', { d: 'M-20 -9H18M-20 -3H10M-20 3H20', 'stroke-width': 0.8 }));
+    g.setAttribute('opacity', '0.72');
+  }
+  return g;
+}
+
+/** Inside the seal: one drawn mark per buff. */
+const SEAL_GLYPH: Record<SealId, string> = {
+  pilnosc: 'M-10 -9L-1 0L-10 9M1 -9L10 0L1 9',
+  kontrola: `${circleD(0, 0, 7)}M0 -12V-4M0 4V12M-12 0H-4M4 0H12`,
+  argument: 'M-9 9V3M-3 9V-2M3 9V-7M9 9V-12',
+  obieg: 'M-9 -7H4V9H-9ZM-4 -11H9V5',
+  zwolnienie: `${circleD(0, 0, 8)}M-9 9L9 -9`,
+  wypoczynek: 'M0 -10V10M-10 0H10',
+};
+
+/** An office seal: a toothed round stamp with its mark, pressed once. */
+function drawPieczec(c: Pieczec): SVGGElement {
+  const r = createRng(c.seed);
+  const g = el('g', { transform: `translate(${n2(c.x)} ${n2(c.y)}) rotate(${n2(r.range(-12, 12))})` });
+  let teeth = '';
+  for (let i = 0; i < 20; i++) {
+    const a = (i / 20) * Math.PI * 2;
+    teeth += `M${n2(Math.cos(a) * 24)} ${n2(Math.sin(a) * 24)}L${n2(Math.cos(a) * 29)} ${n2(Math.sin(a) * 29)}`;
+  }
+  const band = hatched(`${circleD(0, 0, 24)}${circleD(0, 0, 18)}`);
+  band.setAttribute('fill-rule', 'evenodd');
+  g.append(band);
+  g.append(el('path', { d: wobblyCircle(r, 0, 0, 24, 14, 0.03), 'stroke-width': 1.8 }), el('path', { d: wobblyCircle(r, 0, 0, 18, 12, 0.03), 'stroke-width': 1 }), el('path', { d: teeth, 'stroke-width': 1.2 }));
+  g.append(el('path', { d: SEAL_GLYPH[c.seal], 'stroke-width': 2.4 }));
+  if (c.used) {
+    g.append(el('path', { d: 'M-30 20L30 -20', 'stroke-width': 1.2 }));
+    g.setAttribute('opacity', '0.3');
+  } else g.append(inkDots(dotRing(42, 16)));
+  return g;
+}
+
+function tick(x: number, y: number, s = 1): string {
+  return `M${n2(x)} ${n2(y)}L${n2(x + 3 * s)} ${n2(y + 4 * s)}L${n2(x + 10 * s)} ${n2(y - 5 * s)}`;
+}
+
+/** The form to fill: a sheet whose boxes get ticked while the player stands at it. */
+function drawFormularz(z: Zdarzenie, g: SVGGElement): void {
+  const r = createRng(z.seed);
+  const f = el('g', { transform: `translate(${n2(z.x)} ${n2(z.y)}) rotate(${n2(r.range(-5, 5))})` });
+  const sheet = el('path', { d: box(-32, -42, 32, 42), 'stroke-width': 1.7 });
+  sheet.style.fill = 'var(--paper)';
+  f.append(sheet, el('path', { d: 'M-24 -34H24M-24 -30H8', 'stroke-width': 1.6 }));
+  const rows = 5;
+  const filled = z.phase === 'done' ? rows : Math.floor((z.progress / CONTENT.formNeed) * rows + 1e-6);
+  let ticks = '';
+  let lines = '';
+  for (let i = 0; i < rows; i++) {
+    const y = -18 + i * 14;
+    lines += box(-26, y - 4, -19, y + 3) + `M-14 ${y}H${i < filled ? 24 : 18}`;
+    if (i < filled) ticks += tick(-26, y - 1, 0.8);
+  }
+  f.append(el('path', { d: lines, 'stroke-width': 1 }), el('path', { d: ticks, 'stroke-width': 1.7 }));
+  g.append(f);
+  if (z.phase === 'idle' || z.phase === 'active') {
+    const ring = inkDots(dotRing(CONTENT.formR, z.phase === 'active' ? 44 : 30, z.phase === 'active' ? 1.6 : 1.1));
+    ring.setAttribute('transform', `translate(${n2(z.x)} ${n2(z.y)})`);
+    g.append(ring);
+  }
+}
+
+/** A parcel at its place, its addressee's door elsewhere. */
+function drawPrzesylka(z: Zdarzenie, g: SVGGElement): void {
+  const r = createRng(z.seed);
+  if (z.phase === 'idle') {
+    const p = el('g', { transform: `translate(${n2(z.x)} ${n2(z.y)}) rotate(${n2(r.range(-8, 8))})` });
+    const front = el('path', { d: box(-22, -8, 22, 18), 'stroke-width': 1.7 });
+    front.style.fill = 'var(--paper)';
+    const top = el('path', { d: polyline([{ x: -22, y: -8 }, { x: -12, y: -18 }, { x: 32, y: -18 }, { x: 22, y: -8 }], true), 'stroke-width': 1.4 });
+    top.style.fill = 'var(--paper)';
+    p.append(top, front, hatched(polyline([{ x: 22, y: -8 }, { x: 32, y: -18 }, { x: 32, y: 8 }, { x: 22, y: 18 }], true)));
+    p.append(el('path', { d: polyline([{ x: 22, y: -8 }, { x: 32, y: -18 }, { x: 32, y: 8 }, { x: 22, y: 18 }], true), 'stroke-width': 1.4 }));
+    p.append(el('path', { d: 'M0 -8V18M7 -18L-3 -8', 'stroke-width': 1.2 }), el('path', { d: `${box(-18, 3, -5, 13)}M-16 6H-7M-16 10H-9`, 'stroke-width': 0.9 }));
+    p.append(inkDots(dotRing(44, 14)));
+    g.append(p);
+  }
+  if (z.to && z.phase !== 'failed') {
+    const a = el('g', { transform: `translate(${n2(z.to.x)} ${n2(z.to.y)})` });
+    a.append(el('path', { d: `${box(-20, -30, 20, 26)}M-12 -22H12M-12 -22V26M12 -22V26M-26 26H26`, 'stroke-width': 1.6 }));
+    a.append(el('path', { d: `${box(-9, -40, 9, -33)}`, 'stroke-width': 1 }), el('path', { d: 'M-36 -2H-26M-31 -7L-26 -2L-31 3', 'stroke-width': 1.5 }));
+    if (z.phase === 'done') a.append(el('path', { d: tick(-8, 0, 1.6), 'stroke-width': 2.6 }));
+    else a.append(inkDots(dotRing(CONTENT.addresseeR, z.phase === 'active' ? 30 : 14, z.phase === 'active' ? 1.6 : 1.1)));
+    g.append(a);
+  }
+}
+
+/** The audit: a clipboard at a desk; its ring is the stand the auditor allows. */
+function drawAudyt(z: Zdarzenie, g: SVGGElement): void {
+  const r = createRng(z.seed);
+  const f = el('g', { transform: `translate(${n2(z.x)} ${n2(z.y)}) rotate(${n2(r.range(-6, 6))})` });
+  const board = el('path', { d: box(-26, -34, 26, 34), 'stroke-width': 1.8 });
+  board.style.fill = 'var(--paper)';
+  f.append(board);
+  const clip = el('path', { d: box(-10, -40, 10, -30) });
+  solid(clip, 'var(--ink)');
+  f.append(clip);
+  let rows = '';
+  for (let i = 0; i < 3; i++) {
+    const y = -18 + i * 13;
+    rows += box(-19, y - 4, -12, y + 3) + `M-7 ${y}H18`;
+  }
+  f.append(el('path', { d: rows, 'stroke-width': 1 }), el('path', { d: `M-19 22H-2${box(4, 14, 20, 28)}`, 'stroke-width': 1 }));
+  if (z.phase === 'done') f.append(el('path', { d: 'M-14 4L-3 16L18 -14', 'stroke-width': 3 }));
+  else if (z.phase === 'failed') f.append(el('path', { d: 'M-16 -12L16 18M16 -12L-16 18', 'stroke-width': 2.6 }));
+  g.append(f);
+  if (z.phase === 'idle' || z.phase === 'active') {
+    const ring = inkDots(dotRing(z.phase === 'active' ? CONTENT.auditR : CONTENT.auditStart, z.phase === 'active' ? 44 : 22, z.phase === 'active' ? 1.6 : 1.1));
+    ring.setAttribute('transform', `translate(${n2(z.x)} ${n2(z.y)})`);
+    g.append(ring);
+  }
+}
+
+/** One object of the page content as a `<g data-content>`; redrawn from the item's state by `redrawContent`. */
+export function drawContentItem(c: PageContent): SVGGElement {
+  let g: SVGGElement;
+  if (c.kind === 'teczka') g = drawTeczka(c);
+  else if (c.kind === 'pieczec') g = drawPieczec(c);
+  else {
+    g = el('g', {});
+    if (c.event === 'formularz') drawFormularz(c, g);
+    else if (c.event === 'przesylka') drawPrzesylka(c, g);
+    else drawAudyt(c, g);
+  }
+  g.setAttribute('data-content', String(c.id));
+  g.setAttribute('data-kind', c.kind === 'zdarzenie' ? c.event : c.kind);
+  return g;
+}
+
+/** Make an item's drawing again after its state changed (or draw it on the page if it is new). */
+export function redrawContent(c: PageContent): void {
+  if (typeof document === 'undefined') return;
+  const fresh = drawContentItem(c);
+  const old = document.querySelector(`#page [data-content="${c.id}"]`);
+  if (old) old.replaceWith(fresh);
+  else document.querySelector('#page [data-page-ink]')?.append(fresh);
 }

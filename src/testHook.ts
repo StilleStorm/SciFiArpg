@@ -36,6 +36,8 @@ import { createEnemyHook, createSporHook, type EnemyHook, type SporHook } from '
 import { createAudioHook, type AudioHook } from './audio/hook';
 import type { CampaignView } from './ui/ticketModel';
 import type { PriorityId } from './world/campaign';
+import { createContentHook, type ContentHook } from './world/content';
+import { createQuestHook, type QuestHook } from './world/quests';
 
 export interface GameHook {
   /** Start a run from a seed (default 1) and show the run screen. */
@@ -122,6 +124,10 @@ export interface GameHook {
   spor: SporHook;
   /** Offline audio renders and the live context state (audio/hook.ts). */
   audio: AudioHook;
+  /** Page content (world/content.ts): teczki, seals, events; stamps on the player. */
+  content: ContentHook;
+  /** Side tickets (world/quests.ts): the board's offers, taking, finishing and reporting one. */
+  quests: QuestHook;
   /**
    * Save the orientation setting and ask for the lock where there is one. The layout itself follows the window:
    * in a browser test change the viewport (`page.setViewportSize`) to flip `data-orient`.
@@ -166,7 +172,7 @@ export interface GameHook {
    */
   startBase(seed?: number): RunState;
   /** Walk up to a station and tap it: its sheet opens ('biurko' the desk, 'kiosk' the Sklep, 'tablica' the settings, 'paczkomat' a footnote). */
-  station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean;
+  station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik'): boolean;
   /** "Akceptuję regulamin" without the sheet: the exit of the base opens. False outside the base. */
   acceptTicket(): boolean;
   /** Show the ticket form and the cards as for another campaign state (null: the real one). */
@@ -206,7 +212,7 @@ export interface HookDeps {
   openTunnel(): boolean;
   returnFromTunnel(): boolean;
   startBase(seed?: number): RunState;
-  station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean;
+  station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik'): boolean;
   acceptTicket(): boolean;
   /** Show the ticket form and the cards as for another campaign state (null: the real one). */
   setCampaignView(v: CampaignView | null): void;
@@ -299,6 +305,8 @@ export function installTestHook(deps: HookDeps): void {
     enemies: createEnemyHook(() => game.state, deps.bus),
     spor: createSporHook(() => game.state, deps.bus),
     audio: createAudioHook(),
+    content: createContentHook(() => game.state, deps.bus),
+    quests: createQuestHook(() => game.state, deps.bus),
     turnTo(index) {
       const s = game.state;
       if (!s || s.turning) return;

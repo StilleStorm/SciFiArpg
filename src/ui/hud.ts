@@ -137,6 +137,8 @@ export function createHud(
   onPause: () => void = () => undefined,
   onTunnel: () => void = () => undefined,
   onPotw: () => void = () => undefined,
+  /** The Reputacja line was tapped: the Karta osobowa (ui/karta-osobowa.ts). */
+  onReputacja: () => void = () => undefined,
 ): Hud {
   const el = h('div', 'hud paper');
   const racja = field('ui.hud.racja', 'racja');
@@ -147,7 +149,10 @@ export function createHud(
   const stronaLabel = strona.root.querySelector('label');
   const row1 = h('div', 'hud-row');
   const row2 = h('div', 'hud-row');
-  reputacja.root.classList.add('rep');
+  reputacja.root.classList.add('rep', 'tappable');
+  reputacja.root.setAttribute('role', 'button');
+  reputacja.root.setAttribute('aria-label', t('screens.osobowa.title'));
+  reputacja.root.addEventListener('click', onReputacja);
   row1.append(racja.root, argument.root);
   row2.append(reputacja.root, gwiazdki.root, strona.root);
   // A queued update: a typed line hanging under the form, tappable (44 px tall), shown only while one waits.

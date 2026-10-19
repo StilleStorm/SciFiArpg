@@ -104,7 +104,9 @@ export interface GameEvents {
    */
   'base:entered': { layout: 'ladowisko' | 'wioska' | 'miasteczko'; seed: number; number: number };
   /** The player tapped a station of the base and reached it: main.ts opens its sheet (biurko, kiosk, tablica, paczkomat). */
-  'station:opened': { station: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' };
+  'station:opened': { station: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik' };
+  /** A side ticket changed (world/quests.ts): taken from the board, counted, ready to report, paid out or given back. */
+  'quest:changed': { id: string; what: 'accepted' | 'progress' | 'ready' | 'done' | 'dropped' };
   /** A potwierdzenie slip was taken (systems/recovery.ts): `healed` racja restored at once (0 when kept), `held` slips now in the stack. */
   'recovery:taken': { healed: number; held: number };
   /** A held potwierdzenie was used, by the player's tap or automatically before a hit (`auto`). */
@@ -115,6 +117,14 @@ export interface GameEvents {
   'campaign:advanced': { from: number; to: number; finale: boolean };
   /** The final ticket was closed: the case is closed, extras and free travel are open. */
   'case:closed': undefined;
+  /** A teczka was opened (world/content.ts): its loot lies on the paper at x, y; audio plays a paper sound. */
+  'content:opened': { kind: 'teczka'; id: number; x: number; y: number };
+  /** A seal stamped a buff on the player (world/content.ts); x, y is the seal's place. */
+  'content:sealed': { seal: string; x: number; y: number };
+  /** A page event started, was won or failed (world/content.ts): `event` is formularz, przesylka or audyt. */
+  'content:event': { event: string; id: number; phase: 'active' | 'done' | 'failed'; x: number; y: number };
+  /** Page content `id` changed state: its drawing is made again (render/obstacles.ts redrawContent). */
+  'content:changed': { id: number };
 }
 
 type Args<K extends keyof GameEvents> = GameEvents[K] extends undefined ? [] : [GameEvents[K]];

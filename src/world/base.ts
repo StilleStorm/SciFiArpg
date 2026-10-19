@@ -33,9 +33,9 @@ export const WALK_R = 13;
 export type BaseLayout = 'ladowisko' | 'wioska' | 'miasteczko';
 export const BASE_LAYOUTS: readonly BaseLayout[] = ['ladowisko', 'wioska', 'miasteczko'];
 /** The stations that open a sheet. The tunnel is a hole, not a station: the player walks into it. */
-export type TappableStation = 'biurko' | 'kiosk' | 'tablica' | 'paczkomat';
+export type TappableStation = 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik';
 export type StationId = TappableStation | 'tunel';
-export const STATIONS: readonly TappableStation[] = ['biurko', 'kiosk', 'tablica', 'paczkomat'];
+export const STATIONS: readonly TappableStation[] = ['biurko', 'kiosk', 'tablica', 'paczkomat', 'urzednik'];
 
 export interface Station {
   id: TappableStation;
@@ -57,10 +57,12 @@ export const STATION_BOX: Record<TappableStation, Box> = {
   kiosk: { x0: -60, y0: -46, x1: 60, y1: 42 },
   tablica: { x0: -60, y0: -58, x1: 60, y1: 26 },
   paczkomat: { x0: -26, y0: -76, x1: 26, y1: 54 },
+  // the clerk (world/npc.ts, render/npc.ts): a standing figure with a stack of forms and a raised stamp
+  urzednik: { x0: -34, y0: -76, x1: 34, y1: 56 },
 };
 
 /** Where the margin-note label hangs: this far under the station's centre (world units), centred on it. */
-export const LABEL_DY: Record<TappableStation, number> = { biurko: 60, kiosk: 50, tablica: 32, paczkomat: 60 };
+export const LABEL_DY: Record<TappableStation, number> = { biurko: 60, kiosk: 50, tablica: 32, paczkomat: 60, urzednik: 62 };
 /** The label takes this many css px per character (Space Mono at `LABEL_PX`) and is this high (text and underline). */
 export const LABEL_CHAR_PX = 7.2;
 export const LABEL_H_PX = 20;
@@ -126,6 +128,7 @@ const SPECS: Record<BaseLayout, LayoutSpec> = {
       biurko: { x: 450, y: 325 },
       kiosk: { x: 660, y: 290 },
       paczkomat: { x: 705, y: 480 },
+      urzednik: { x: 130, y: 380 },
     },
     props: [
       { kind: 'scorch', x: 190, y: 550 },
@@ -135,7 +138,7 @@ const SPECS: Record<BaseLayout, LayoutSpec> = {
   },
   // huts around a lane
   wioska: {
-    spawn: { x: 450, y: 600 },
+    spawn: { x: 390, y: 610 },
     exit: 'bl',
     torn: 'tr',
     hole: { x: 590, y: 625 },
@@ -144,6 +147,7 @@ const SPECS: Record<BaseLayout, LayoutSpec> = {
       biurko: { x: 440, y: 330 },
       tablica: { x: 640, y: 280 },
       paczkomat: { x: 770, y: 495 },
+      urzednik: { x: 500, y: 565 },
     },
     props: [
       { kind: 'hut', x: 130, y: 470 },
@@ -163,6 +167,7 @@ const SPECS: Record<BaseLayout, LayoutSpec> = {
       tablica: { x: 450, y: 415 },
       kiosk: { x: 650, y: 290 },
       paczkomat: { x: 735, y: 520 },
+      urzednik: { x: 220, y: 480 },
     },
     props: [
       { kind: 'square', x: 450, y: 420 },
@@ -188,6 +193,8 @@ function stationBody(id: TappableStation): Circle[] {
       return [{ x: -38, y: 12, r: 12 }, { x: 0, y: 12, r: 10 }, { x: 38, y: 12, r: 12 }];
     case 'paczkomat':
       return [{ x: 0, y: -8, r: 22 }, { x: 0, y: 20, r: 20 }];
+    case 'urzednik':
+      return [{ x: 0, y: -42, r: 11 }, { x: 0, y: -4, r: 17 }, { x: 0, y: 34, r: 12 }];
   }
 }
 

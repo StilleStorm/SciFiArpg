@@ -256,7 +256,9 @@
           "title": "Ogłoszenie o tablicy",
           "text": "Ogłoszenia wywiesza się na tablicy ogłoszeń. To ogłoszenie dotyczy tablicy i wisi na niej od początku jej istnienia. Zdejmowanie wymaga zgody tablicy."
         }
-      }
+      },
+      "quests": "Zgłoszenia do wykonania",
+      "questsNote": "Zgłoszenia pobiera się z tablicy i na tablicy się je wykonuje. Kolejność dowolna, termin nieokreślony."
     },
     "exitNote": "wymaga zgłoszenia",
     "exitLocked": "Przejście wymaga zgłoszenia. Zgłoszenia przyjmuje biurko.",
@@ -266,7 +268,8 @@
       "kiosk": "Kiosk",
       "tablica": "Tablica",
       "paczkomat": "Paczkomat",
-      "tunel": "Tunel"
+      "tunel": "Tunel",
+      "urzednik": "Referent"
     },
     "plate": {
       "kiosk": "SKLEP"
@@ -318,5 +321,171 @@
     },
     "heroLabel": "Uwaga wnioskodawcy",
     "heroSlot": "TODO-story: wiersz bohatera"
+  },
+  "osobowa": {
+    "title": "Karta osobowa",
+    "sub": "{hero}, poziom {level}.",
+    "note": "Karta wypełniona przez Asystenta na podstawie stanu bieżącego. Stan bieżący może ulec zmianie w trakcie czytania.",
+    "back": "Wróć",
+    "deskLine": "Karta osobowa",
+    "deskNote": "Dane",
+    "secDane": "Dane osobowe",
+    "secDamage": "Obrażenia według rodzaju",
+    "secResist": "Odporności",
+    "secNotes": "Adnotacje",
+    "secPotw": "Potwierdzenia",
+    "secSpec": "Specjalizacja",
+    "secPerm": "Uprawnienia",
+    "reputacjaValue": "poz. {level}, {xp}",
+    "pewnosc": "Pewność siebie",
+    "upor": "Upór",
+    "atak": "Atak podstawowy",
+    "krytyk": "Argument nie do odparcia",
+    "tempo": "Tempo ataku",
+    "tempoValue": "{n} na s",
+    "zasieg": "Zasięg",
+    "ruch": "Szybkość ruchu",
+    "basic": "atak {value}",
+    "noneDmg": "brak",
+    "resist": {
+      "mechaniczny": "Mechaniczne",
+      "regulaminowy": "Regulaminowe",
+      "egzystencjalny": "Egzystencjalne"
+    },
+    "noNotes": "Brak adnotacji. Stan wolny od adnotacji.",
+    "seconds": "jeszcze {n} s",
+    "potwValue": "{count} z {cap}",
+    "noSpec": "Nie wybrano",
+    "capstone": "Zwieńczenie"
+  },
+  "npc": {
+    "referent": {
+      "name": "Referent ds. Przydziałów",
+      "role": "Komisja do Spraw Zjawisk Lokalnych, stanowisko 3",
+      "line0": "Zgłoszenie jest rozpatrywane. Kolejność rozpatrywania ustala się w trakcie rozpatrywania.",
+      "line1": "Przesyłki przyjmuję, ale ich nie doręczam. Doręczam, ale ich nie przyjmuję. Który wariant dotyczy zgłaszającego, ustali kolejka.",
+      "line2": "Stanowisko jest czynne do końca stanowiska."
+    },
+    "close": "Zamknij",
+    "back": "Wróć",
+    "nothing": "Brak poleceń na dziś. Polecenia wydaje się wczoraj.",
+    "parcel": "Przesyłka przyjęta: {title}. Pokwitowanie zostanie wydane po przyjęciu pokwitowania."
+  },
+  "quests": {
+    "readyNote": "Zgłoszenie «{title}» spełnia warunki wykonania. Zgłosić na tablicy.",
+    "active": "Przyjęte",
+    "available": "Do przyjęcia",
+    "none": "Brak ogłoszeń. Ogłoszenia są w druku.",
+    "accept": "Przyjmuję",
+    "report": "Zgłaszam wykonanie",
+    "drop": "Odstępuję",
+    "full": {
+      "one": "Przyjęto już {count} zgłoszenie. Więcej nie przyjmuje się.",
+      "few": "Przyjęto już {count} zgłoszenia. Więcej nie przyjmuje się.",
+      "many": "Przyjęto już {count} zgłoszeń. Więcej nie przyjmuje się."
+    },
+    "stamp": "Załatwiono",
+    "progress": "{done} z {n}",
+    "page": "strona {done} z {n}",
+    "stage0": "Przesyłka czeka na wyniesienie poza bazę.",
+    "stage1": "Przesyłka wyniesiona. Do doręczenia Referentowi.",
+    "stage2": "Doręczono.",
+    "planetNote": "Ogłoszenie dotyczy tej planety. Na innych planetach nie obowiązuje.",
+    "fromFamily": "z rodziny «{family}»",
+    "fromAny": "dowolnego pochodzenia",
+    "reward": {
+      "label": "Wynagrodzenie",
+      "stars": {
+        "one": "{count} gwiazdka",
+        "few": "{count} gwiazdki",
+        "many": "{count} gwiazdek"
+      },
+      "permission": "karta uprawnień: {family}",
+      "potw": {
+        "one": "{count} potwierdzenie",
+        "few": "{count} potwierdzenia",
+        "many": "{count} potwierdzeń"
+      }
+    },
+    "kill": {
+      "0": {
+        "title": "Likwidacja zjawisk",
+        "text": {
+          "one": "Zlikwidować {count} zjawisko {from}. Zjawisko zgłoszono jako jedno; liczba pojedyncza nie została potwierdzona.",
+          "few": "Zlikwidować {count} zjawiska {from}. Zjawiska zgłoszono jako jedno; liczba pojedyncza nie została potwierdzona.",
+          "many": "Zlikwidować {count} zjawisk {from}. Zjawiska zgłoszono jako jedno; liczba pojedyncza nie została potwierdzona."
+        }
+      },
+      "1": {
+        "title": "Porządkowanie okolicy",
+        "text": {
+          "one": "Skreślić {count} zjawisko {from}. Skreślenia dokonuje się długopisem służbowym, który wydano raz.",
+          "few": "Skreślić {count} zjawiska {from}. Skreślenia dokonuje się długopisem służbowym, który wydano raz.",
+          "many": "Skreślić {count} zjawisk {from}. Skreślenia dokonuje się długopisem służbowym, który wydano raz."
+        }
+      },
+      "2": {
+        "title": "Wniosek o ciszę",
+        "text": {
+          "one": "Doprowadzić do ustania {count} zjawiska {from}. Cisza zostanie przyznana w trybie ogólnym.",
+          "few": "Doprowadzić do ustania {count} zjawisk {from}. Cisza zostanie przyznana w trybie ogólnym.",
+          "many": "Doprowadzić do ustania {count} zjawisk {from}. Cisza zostanie przyznana w trybie ogólnym."
+        }
+      }
+    },
+    "fetch": {
+      "0": {
+        "title": "Rzeczy znalezione",
+        "text": {
+          "one": "Zebrać {count} znalezisko. Znalezisko należy zgłosić jako zagubione, a następnie jako odnalezione.",
+          "few": "Zebrać {count} znaleziska. Znaleziska należy zgłosić jako zagubione, a następnie jako odnalezione.",
+          "many": "Zebrać {count} znalezisk. Znaleziska należy zgłosić jako zagubione, a następnie jako odnalezione."
+        }
+      },
+      "1": {
+        "title": "Uzupełnienie braków",
+        "text": {
+          "one": "Uzupełnić braki w ilości {count} sztuki. Braków nie ma, więc uzupełnia się je z tego, co jest.",
+          "few": "Uzupełnić braki w ilości {count} sztuk. Braków nie ma, więc uzupełnia się je z tego, co jest.",
+          "many": "Uzupełnić braki w ilości {count} sztuk. Braków nie ma, więc uzupełnia się je z tego, co jest."
+        }
+      },
+      "2": {
+        "title": "Inwentaryzacja podłogi",
+        "text": {
+          "one": "Podnieść z podłogi {count} przedmiot. Podłoga nie była dotąd inwentaryzowana.",
+          "few": "Podnieść z podłogi {count} przedmioty. Podłoga nie była dotąd inwentaryzowana.",
+          "many": "Podnieść z podłogi {count} przedmiotów. Podłoga nie była dotąd inwentaryzowana."
+        }
+      }
+    },
+    "reach": {
+      "0": {
+        "title": "Odbiór na miejscu",
+        "text": "Dotrzeć do strony {count} zgłoszenia i potwierdzić swoją obecność. Obecność potwierdza się obecnością."
+      },
+      "1": {
+        "title": "Wizja lokalna",
+        "text": "Odbyć wizję lokalną na stronie {count} zgłoszenia. Wizja jest lokalna także w razie braku widoku."
+      },
+      "2": {
+        "title": "Oględziny",
+        "text": "Dojść do strony {count} zgłoszenia. Droga powrotna nie jest objęta zleceniem."
+      }
+    },
+    "deliver": {
+      "0": {
+        "title": "Doręczenie wniosku",
+        "text": "Wynieść przesyłkę poza bazę, na pierwszą stronę zgłoszenia, a po powrocie doręczyć ją Referentowi. Referent jest w bazie. Baza jest tutaj."
+      },
+      "1": {
+        "title": "Przesyłka zwrotna",
+        "text": "Wynieść przesyłkę poza bazę i zwrócić ją Referentowi. Nadawcą jest Referent. Odbiorcą jest Referent. Przewoźnik zostaje zgłaszający."
+      },
+      "2": {
+        "title": "Pokwitowanie",
+        "text": "Odebrać pokwitowanie, którego nie wydano. W tym celu wynieść poza bazę wniosek o pokwitowanie i doręczyć go po powrocie."
+      }
+    }
   }
 }

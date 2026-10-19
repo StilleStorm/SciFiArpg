@@ -12,9 +12,11 @@ import { type Vec } from '../core/vec';
 import { t } from '../i18n';
 import { FOLD, type Page } from '../world/pages';
 import { LABEL_DY, LABEL_H_PX, LABEL_PX, labelText, type BaseProp, type Station, type TappableStation } from '../world/base';
+import { npcAt } from '../world/npc';
 import type { RunState } from '../world/run';
 import { viewZoom } from './camera';
 import { drawIn } from './ink';
+import { drawNpc } from './npc';
 import { drawHeader, drawPage, type PageHeader } from './obstacles';
 import { dotPath, el, n2, polyline, wobblyCircle, wobblyLine } from './svg';
 import { easeOut, tween } from './tween';
@@ -290,7 +292,7 @@ function drawSquare(r: Rng): SVGGElement {
   return g;
 }
 
-function drawStation(st: Station): SVGGElement {
+function drawStation(st: Station, planet: number): SVGGElement {
   const r = createRng(977 + Math.round(st.x) * 31 + Math.round(st.y)).fork(st.id);
   const seed = Math.round(st.x * 13 + st.y * 7);
   const body = ((): SVGGElement => {
@@ -303,6 +305,8 @@ function drawStation(st: Station): SVGGElement {
         return drawTablica(r, seed);
       case 'paczkomat':
         return drawPaczkomat(r, seed);
+      case 'urzednik':
+        return drawNpc(npcAt(planet));
     }
   })();
   const g = at(st.x, st.y);
@@ -491,7 +495,7 @@ const placeLabel = (l: Label, zoom: number): void => {
  * Draw the base page into the #page layer: paper, frame, the decor, then the props and stations, the exit (dashed while
  * the ticket is not accepted) and the labels. `accepted` and `header` draw the unlocked state at once (a held run's base).
  */
-export function drawBase(layer: SVGGElement, page: Page, opts: { accepted: boolean; header: PageHeader | null }): BaseView {
+export function drawBase(layer: SVGGElement, page: Page, opts: { accepted: boolean; header: PageHeader | null; /** 0-based planet of the plan (game.ts passes `questPlanet(s)`); picks the clerk `npcAt(planet)`. */ planet?: number }): BaseView {
   const info = page.base;
   if (!info || !page.exit) throw new Error('drawBase needs a base page');
   const decorOnly: Page = { ...page, obstacles: page.obstacles.filter((o) => o.station === undefined), exit: null };
@@ -500,7 +504,7 @@ export function drawBase(layer: SVGGElement, page: Page, opts: { accepted: boole
   const props = el('g', { class: 'base-props' });
   for (const p of [...info.props].sort((a, b) => (a.kind === 'scorch' || a.kind === 'square' ? -1 : 0) - (b.kind === 'scorch' || b.kind === 'square' ? -1 : 0) || a.y - b.y)) props.append(drawProp(p));
   const stations = el('g', { class: 'base-stations' });
-  for (const st of [...info.stations].sort((a, b) => a.y - b.y)) stations.append(drawStation(st));
+  for (const st of [...info.stations].sort((a, b) => a.y - b.y)) stations.append(drawStation(st, opts.planet ?? 0));
   ink.append(props, stations);
 
   const exit = exitShapes(page, 977 + page.w);

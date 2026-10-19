@@ -201,6 +201,17 @@ describe('applyParagraph', () => {
     expect(none.s.player.hp).toBe(none.s.player.hpMax);
   });
 
+  it('a zwolnienie stamp waives the price: no racja cost, no added cooldown', () => {
+    const { s, bus } = scene('pralka', [[40, 0]], patchAt(0, { cost: 30, cd: 3 }));
+    s.buffs = [{ id: 'zwolnienie', remaining: 30, total: 30 }];
+    const was = s.player.hp;
+    castSkill(s, bus, 0);
+    expect(s.player.hp).toBe(was);
+    const plain = scene('pralka', [[40, 0]]);
+    castSkill(plain.s, plain.bus, 0);
+    expect(s.hero.cdTotal[0]).toBeCloseTo(plain.s.hero.cdTotal[0], 6);
+  });
+
   it('dur and dmg: the duration and the damage of the skill follow the patch', () => {
     const foam = (patch: ParagraphPatch | undefined): number => {
       const { s, bus } = scene('pralka', [], patch ? patchAt(1, patch) : []);

@@ -1,0 +1,104 @@
+/*
+ * The side tickets on the notice board (PLAN 8, STORY 5): cards ruled in ink, a typed title, the text in Garamond, the reward in
+ * mono. Two buttons per card, both at least 44 px; a reported ticket keeps its place with the red stamp. Paper and ink only.
+ */
+.bq {
+  margin: 0 0 14px;
+}
+.bq-head {
+  margin: 0;
+  padding-bottom: 2px;
+  font-family: var(--title);
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-bottom: 1.5px solid var(--ink);
+}
+.bq-note {
+  margin: 3px 0 8px;
+  font-family: var(--mono);
+  font-style: italic;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--ink-wet);
+}
+.bq-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bq-card {
+  position: relative;
+  margin: 0 0 10px;
+  padding: 7px 10px 2px;
+  border: 1.5px solid var(--ink);
+  font-size: 14.5px;
+  line-height: 1.3;
+}
+.bq-card.taken {
+  border-width: 4px;
+  border-style: double;
+  padding: 5px 8px 1px;
+}
+.bq-card.done {
+  border-style: dashed;
+  border-width: 1.5px;
+  color: var(--ink-wet);
+}
+.bq-title {
+  display: block;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.bq-text {
+  margin: 2px 0 0;
+}
+.bq-reward,
+.bq-progress,
+.bq-full {
+  margin: 3px 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.3;
+}
+.bq-progress {
+  font-weight: 700;
+}
+.bq-full {
+  font-style: italic;
+  color: var(--ink-wet);
+}
+.bq-actions {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 14px;
+  margin-top: 2px;
+}
+.bq-btn {
+  margin: 0;
+  min-height: 44px;
+  padding: 0 4px 6px;
+  display: inline-flex;
+  align-items: flex-end;
+  font-size: 12px;
+}
+.bq-btn.strong {
+  font-weight: 700;
+  border-bottom-width: 2px;
+}
+.bq-stamp {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  display: block;
+  pointer-events: none;
+  overflow: visible;
+}
+.bq-empty {
+  font-style: italic;
+  font-size: 14px;
+}

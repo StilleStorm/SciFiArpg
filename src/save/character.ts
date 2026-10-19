@@ -13,6 +13,7 @@ import { SLOTS, type Item, type Slot } from '../items/types';
 import { applyParagraphs, activeParagraphsOf, paragraphsOf, type ParagraphNo } from '../progression/paragraphs';
 import { applyProgress, padsFrom, serializeProgress, type ProgressData } from '../progression/persist';
 import { cloneCampaign, toCampaign, type CampaignState } from '../world/campaign';
+import { cloneQuests, toQuests, type QuestState } from '../world/quests';
 import type { RunState } from '../world/run';
 import { HELD_CAP } from '../systems/recovery';
 
@@ -38,6 +39,8 @@ export interface Character extends ProgressData {
   potwierdzenia?: number;
   /** The campaign of this character (world/campaign.ts): current planet, closed planets, final ticket, case closed. Absent = a new campaign. */
   campaign?: CampaignState;
+  /** The side tickets held and the count done (world/quests.ts). Absent = none, so older saves load. */
+  quests?: QuestState;
 }
 
 export function isHeroId(v: unknown): v is HeroId {
@@ -74,6 +77,7 @@ export function serializeCharacter(s: RunState): Character {
   const paragraphs = activeParagraphsOf(s);
   return {
     ...(s.campaign ? { campaign: cloneCampaign(s.campaign) } : {}),
+    ...(s.quests && (s.quests.active.length > 0 || s.quests.done > 0) ? { quests: cloneQuests(s.quests) } : {}),
     ...((p.potwierdzenia ?? 0) > 0 ? { potwierdzenia: p.potwierdzenia } : {}),
     ...(s.hero.ultimateId ? { ultimate: s.hero.ultimateId } : {}),
     ...(s.hero.spec ? { specialization: s.hero.spec } : {}),
@@ -116,6 +120,7 @@ export function applyCharacter(s: RunState, c: Character): void {
     if (c.ultParagraph) ultRun(s).para = c.ultParagraph;
   }
   if (c.campaign) s.campaign = cloneCampaign(c.campaign);
+  if (c.quests) s.quests = cloneQuests(c.quests);
   p.hp = p.hpMax;
   s.nextItemNumber = Math.max(s.nextItemNumber, highestNumber(c) + 1);
 }
@@ -162,6 +167,7 @@ export function toCharacter(raw: unknown): Character | null {
     ...(ultParagraph ? { ultParagraph } : {}),
     ...(held > 0 ? { potwierdzenia: held } : {}),
     ...(isRecord(raw['campaign']) ? { campaign: toCampaign(raw['campaign']) } : {}),
+    ...(isRecord(raw['quests']) ? { quests: toQuests(raw['quests']) } : {}),
   };
 }
 

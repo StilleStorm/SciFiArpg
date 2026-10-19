@@ -8,6 +8,7 @@ import { createViews, type Views } from './render/view';
 import { groundBuilders } from './render/figures';
 import { drawPage } from './render/obstacles';
 import { drawBase, type BaseView } from './render/stations';
+import { questPlanet } from './world/quests';
 import { freeViewRect, headerFrame, keepOutBlocks, viewZoom } from './render/camera';
 import { stationAt } from './world/base';
 import { onPageEntered } from './world/laws';
@@ -142,7 +143,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       fitBounds(s.page);
       if (s.phase === 'base' && s.base) {
         // The base page of the planet: stations, no enemies, a locked exit. The run starts when the exit is walked through.
-        baseView = drawBase(stage.page, s.page, { accepted: false, header: null });
+        baseView = drawBase(stage.page, s.page, { accepted: false, header: null, planet: questPlanet(s) }); // the planet's own clerk
         camera.snap(s.player.x, s.player.y);
         camera.apply();
         input.setEnabled(true);
