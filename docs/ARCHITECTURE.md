@@ -144,7 +144,28 @@ Every `SkillDef` has `aim: 'auto' | 'kierunek' | 'wskazanie'`. Pads (`ui/pads.ts
 Stations open on a tap anywhere on their drawing or label (`Game.onTap` emits `station:opened`); walking into them does nothing; labels are permanent. The notice board (`ui/board.ts`) shows three announcements and the ticket history; the desk keeps Nowe/Wznów zgłoszenie and Zmień profil; settings live only in the pause sheet (`go('settings')` opens pause + settings). `ui/sheet.ts guardGhostClicks()` drops the compatibility mouse events that follow a touch `pointerdown` so a sheet opened by a tap does not receive that tap's click. Opening a station sheet (`holdBase`) disables input and `releaseBase` re-enables it (the former hang).
 
 ## Fifth hero and the laser (2026-10-18)
-Heroes: pralka, konsultant, petlowiec, kartograf, nalesnik (`HERO_IDS` in save/character.ts and the save check list it too). Naleśnik logic in `heroes/nalesnik.ts` (orbit roll with a satellite, gravity pull, the `Zone` variant `'wniosek'` with `inside`), quirk in `heroes/shield.ts` (`projectileDamageMul`: skim from 90% racja; `Player.round` while rounded). Kartograf's auto is a hitscan laser: `fireAuto` → `fireLaser` → shared `attack()`; `attack:started` carries `laser {sx, sy, ex, ey, crit, metres, scale?}`; crit pierces along the line. The base page animates on a render clock `animMs` in game.ts because `RunState.time` does not advance in phase 'base'. Sounds: `nalesSlap`, `nalesOrbita`, `nalesGravity`, `nalesFlag`.
+Heroes: pralka, konsultant, petlowiec, kartograf, nalesnik (the list is `HERO_ID_LIST` in `heroes/registry.ts`; `HERO_IDS` in save/character.ts re-exports it and the save check uses `isHeroId`). Naleśnik logic in `heroes/nalesnik/steps.ts` (orbit roll with a satellite, gravity pull, the `Zone` variant `'wniosek'` with `inside`), quirk in `heroes/nalesnik/quirk.ts` (round up below a third of racja) and `heroes/shield.ts` (`projectileDamageMul` reads `Player.skim`, set from the `skim` trait: skim from 90% racja; `Player.round` while rounded). Kartograf's auto is a hitscan laser: `fireAuto` → `fireLaser` → shared `attack()`; `attack:started` carries `laser {sx, sy, ex, ey, crit, metres, scale?}`; crit pierces along the line. The base page animates on a render clock `animMs` in game.ts because `RunState.time` does not advance in phase 'base'. Sounds: `nalesSlap`, `nalesOrbita`, `nalesGravity`, `nalesFlag`.
+
+## Hero folders, registry, primitives (S1)
+One folder per hero, `src/heroes/<id>/`, exports `hero: HeroModule` (`heroes/module.ts`): `def` (`HeroDef` data, built with `defineHero`/`defineSkill`
+of `heroes/build.ts`), `figure` (`HeroFigure`: the drawing, wash, attack pose, `drive`/`build`/`patch` hooks), `sounds` (five recipe names by SkillIndex,
+`autoStart`), `casts` (`Record<SkillDef.id, SkillFn>`) and optionally `quirk` (`onHit`, `tick`). `heroes/registry.ts` is the one list of ids
+(`HERO_ID_LIST`, type `HeroId`) and modules: `HEROES` (the `HeroDef`s), `HERO_IDS`, `heroById(id): HeroModule`, `heroDef(id)`, `DEFAULT_HERO_ID`.
+`heroes/defs.ts` keeps the types and re-exports `HEROES/HERO_IDS/heroDef`. Nothing outside `src/heroes/<id>/` (and tests, i18n, the registry) may write a
+hero id: `scripts/lint-rules.mjs` rule `hero-id-literal`; the files of other domains that still did when it was written are listed in its
+`HERO_ID_DEBT` (the list only shrinks). What used to be `heroId === ...` branches is data: `HeroDef.traits` (`trialSpeed`, `seesDefects`, `revealsPage`, `skim`,
+`buffKillGwiazdki`), `auto.lash`, `chosenNoteKey`, `HeroModule.quirk`, `HeroModule.sounds`, `HeroFigure`.
+Casts are lists of steps (`heroes/cast.ts`: `cast(i, steps)`, `CastEnv`, `firstCast`; a step returning `false` = nothing happened, no cooldown) calling the
+primitives in `heroes/primitives/` (each takes `Ctx {s, bus}` and plain options; no state of its own): `dash` (dash/roll), `teleport`, `pull`, `push`
+(jump/sweep), `aoe`, `cone`, `line`, `hitscan`, `projectile`, `forkProjectile`, `zone` (with `max` per variant), `summon` (with `max`, `settle`),
+`removeSummon`, `decoy`, `statusApply` (`touch`), `buff`, `heal` (`amount`/`atLeast`), `shield`, `cooldownReset`, `deferredDamage`, `echo`,
+`stepDeferred` (called by `heroStep`; `HeroRun.deferred?` exists only once a skill queued a hit). Figures: `heroes/figureKit.ts` (types, `Parts`, helpers) and
+`heroes/poseKit.ts` (`HeroPose`, keyframes, the shared timing constants); `render/heroFigures.ts` is the engine that builds and patches the `<g>` from
+`heroById(id).figure`; `render/attackFx.ts` keeps the ink strokes and re-exports `heroPose(id, t)`/`HERO_ATTACK_MS` from the figures
+(`driveHeroStroke` takes the figure's `stroke: 'whip' | 'slap'`). Scaffold: `npm run new-hero <id>` (`scripts/new-hero.mjs`, templates `heroes/_template/*.tpl`,
+registers the hero, prints the checklist). Contract test: `heroes/contract.test.ts` replays every hero x skill x aim kind (and Petlowiec with a copy)
+on a fixed seeded scene against `heroes/contract.snapshot.json` (captured before the refactor; regenerate only for an intended change:
+`npx vitest run -u src/heroes/contract.test.ts`). Folder contract: `src/heroes/README.md`.
 
 ## Fourth and fifth skills (DESIGN 10.1)
 Types (`heroes/defs.ts`): `SkillIndex = 0..4` (a skill of the hero), `PadSlot = 0..2` (a pad); `HeroDef.skills` is a five-tuple;
@@ -152,10 +173,10 @@ Types (`heroes/defs.ts`): `SkillIndex = 0..4` (a skill of the hero), `PadSlot = 
 (length 5, all five cool down every step, run and base); `HeroRun.pads: [SkillIndex x3]` (default `[0, 1, 2]`).
 `heroes/loadout.ts`: `isInstalled`, `installedSkills`, `padSkill`, `padOf`, `assignPad(s, slot, i)` (refuses a not-installed skill; a skill on
 another pad swaps; the pads always hold three different installed skills), `fixPads` (after a load). `castSkill(s, bus, slot, free, aim)`
-checks and then runs the private `fire(s, bus, skill, slot, free, aim)`: the skill fn, the cooldown unless free, `skill:cast {slot, skill, free, aim}`,
-and `HeroRun.lastCast {skill, aim}` (resolved, concrete aim; not for free casts nor Już to było). Pralka's błąd programu (`quirks.ts`) picks
+checks and then runs the exported `fire(s, bus, skill, slot, free, aim)`: the skill fn (`heroById(id).casts[skill.id]`), the cooldown unless free, `skill:cast {slot, skill, free, aim}`,
+and `HeroRun.lastCast {skill, aim}` (resolved, concrete aim; not for free casts nor Już to było). Pralka's błąd programu (`pralka/quirk.ts`, dispatched by `quirks.ts onPlayerHit`) picks
 from `installedSkills`; an off-pad skill is cast through pad 0 with `pads[0]` swapped for that one call and put back.
-Code: casts in `heroes/skills2.ts` (`SKILLS2`, merged into `SKILLS`; Już to było stays in `skills.ts` because it calls `fire` and lets each
+Code: casts in `heroes/<id>/skills.ts` (Już to było in `petlowiec/skills.ts` calls `fire` and lets each
 live copy recast from its own position by standing the player there for the call), per-step effects in `heroes/steps2.ts` (called from
 `heroes/system.ts` in its fixed order), all numbers in `heroes/numbers.ts`, aim geometry in `heroes/aim.ts GEOMETRY`. New `HeroRun` fields:
 `reading` (Pralka's Wniosek o osobowość: until, acc, upor), `numer` (Konsultant's case number: id, until, handovers, number, x, y),

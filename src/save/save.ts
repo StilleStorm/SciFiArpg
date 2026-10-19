@@ -2,7 +2,7 @@ import type { HeroId } from '../heroes';
 import type { Theme } from '../render/stage';
 import type { LawId } from '../world/laws';
 import { toBookmark, type Bookmark } from './bookmark';
-import { characterFromOldSave, toCharacter, type Character } from './character';
+import { characterFromOldSave, isHeroId, toCharacter, type Character } from './character';
 
 export const SAVE_KEY = 'zgloszenie.meta';
 /** 2: the character record replaced the stash and the top-level gwiazdki; the bookmark was added. */
@@ -148,7 +148,7 @@ export function migrate(raw: unknown): MetaState {
   const bookmark = toBookmark(raw['bookmark']);
   if (bookmark) out.bookmark = bookmark;
   const hero = raw['heroId'];
-  if (hero === 'pralka' || hero === 'konsultant' || hero === 'petlowiec' || hero === 'kartograf' || hero === 'nalesnik') out.heroId = hero;
+  if (isHeroId(hero)) out.heroId = hero;
   return out;
 }
 

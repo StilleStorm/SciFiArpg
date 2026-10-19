@@ -153,6 +153,16 @@ export interface Redirect {
   next: number;
 }
 
+/** A hit that lands at `at` (run seconds) on whoever is within `r` of (x, y). */
+export interface DeferredHit {
+  at: number;
+  x: number;
+  y: number;
+  r: number;
+  type: DamageType;
+  mult: number;
+}
+
 /** What the player was, frozen at death, to be left behind as a copy (outcome Petla). */
 export interface CopySpec {
   heroId: HeroId;
@@ -234,6 +244,8 @@ export interface HeroRun {
   updateRequested: boolean;
   /** Death state. */
   deaths: number;
+  /** Damage queued to land later (primitives/effects.ts deferredDamage, echo); absent until a skill queues one. */
+  deferred?: DeferredHit[];
   /** Friendly copies that become hostile when their time is up (Petlowiec quirk). */
   ghosts: { id: number; copy: CopySpec }[];
   /** What a killed copy drops: enemy id -> item. */
@@ -309,9 +321,11 @@ export function applyHero(p: Player, def: HeroDef): void {
   recomputeStats(p);
   p.hp = p.hpMax;
   p.attackTimer = 0;
-  p.trialSpeed = def.id === 'konsultant' ? 2 : 1;
-  p.seesDefects = def.id === 'konsultant';
-  p.revealsPage = def.id === 'kartograf';
+  p.trialSpeed = def.traits?.trialSpeed ?? 1;
+  p.seesDefects = def.traits?.seesDefects === true;
+  p.revealsPage = def.traits?.revealsPage === true;
+  if (def.traits?.skim) p.skim = true;
+  else delete p.skim;
 }
 
 export function heroOf(p: Pick<Player, 'heroId'>): HeroDef {

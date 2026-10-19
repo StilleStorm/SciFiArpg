@@ -12,7 +12,8 @@
 import type { Bus } from '../core/events';
 import { createRng, type Rng } from '../core/rng';
 import type { Vec } from '../core/vec';
-import type { HeroId } from '../heroes';
+import { clamp01, pulse, smooth, type HeroPose } from '../heroes/poseKit';
+import { HEROES, heroById, type HeroId } from '../heroes/registry';
 import { t } from '../i18n';
 import { el, n2 } from './svg';
 import { easeOut, tween } from './tween';
@@ -20,57 +21,17 @@ import type { Views } from './view';
 
 // ---------- timing (pure) ----------
 
-export const HERO_ATTACK_MS: Record<HeroId, number> = { pralka: 320, konsultant: 230, petlowiec: 200, kartograf: 380, nalesnik: 220 };
-/** The Konsultant's cable: the tip reaches the target in 90 ms and snaps back in 120. The hit resolves when it arrives (heroes/auto.ts). */
-export const LASH_OUT_MS = 90;
-export const LASH_BACK_MS = 120;
-/** The Pralka's whip is drawn in 35 ms, stays fully drawn for 180 ms and is rubbed out in 45. */
-export const WHIP_AT_MS = 60;
-export const WHIP_DRAW_MS = 35;
-export const WHIP_HOLD_MS = 180;
-export const WHIP_ERASE_MS = 45;
+/** Length of each hero's auto-attack animation, ms (the `attackMs` of its figure.ts). */
+export const HERO_ATTACK_MS = Object.fromEntries(HEROES.map((h) => [h.id, heroById(h.id).figure.attackMs])) as Record<HeroId, number>;
 /** Wind-up 120 ms, lunge and return 100 ms. */
 export const ENEMY_MELEE_MS = 220;
 export const ENEMY_RANGED_MS = 140;
 /** Distance of the Pralka's lurch, of an enemy's wind-up (back) and lunge (forward), of a ranged enemy's recoil, in units. */
-export const LURCH = 16;
 export const WIND_UP = 6;
 export const LUNGE = 12;
 export const RECOIL = 4;
-export const KICK = 6;
-/** The Nalesnik's flip: it turns over in 220 ms, hopping 12 units toward the enemy; the ink slap is drawn as it lands. */
-export const FLIP_MS = 220;
-export const HOP = 12;
-export const SLAP_AT_MS = 90;
-export const SLAP_DRAW_MS = 35;
-export const SLAP_HOLD_MS = 25;
-export const SLAP_ERASE_MS = 70;
-/** Rotation of the Konsultant's throwing arm, degrees. */
-export const THROW_DEG = 40;
 /** The whole lunging body of an enemy tilts this many degrees at the full lunge. */
 export const LEAN_DEG = 8;
-
-const clamp01 = (v: number): number => (v < 0 ? 0 : v > 1 ? 1 : v);
-const smooth = (p: number): number => p * p * (3 - 2 * p);
-/** 0 -> 1 -> 0 over `dur` ms (peak in the middle); 0 outside. */
-export const pulse = (t: number, dur: number): number => (t <= 0 || t >= dur ? 0 : Math.sin((Math.PI * t) / dur));
-
-/** Piecewise smooth interpolation through [progress, value] keys sorted by progress. */
-export function keyframes(p: number, keys: readonly (readonly [number, number])[]): number {
-  const first = keys[0];
-  const last = keys[keys.length - 1];
-  if (!first || !last) return 0;
-  if (p <= first[0]) return first[1];
-  if (p >= last[0]) return last[1];
-  for (let i = 1; i < keys.length; i++) {
-    const b = keys[i];
-    const a = keys[i - 1];
-    if (!a || !b || p > b[0]) continue;
-    return a[1] + (b[1] - a[1]) * smooth((p - a[0]) / (b[0] - a[0] || 1));
-  }
-  return last[1];
-}
-
 /**
  * How far an enemy's body is from its place, along the line to its target (negative = away), `t` ms after the
  * attack began. Melee: leans back 6 over 120 ms, lunges 12 forward in 50 ms, is home 50 ms later. Ranged: a recoil.
@@ -83,85 +44,12 @@ export function enemyOffset(t: number, ranged: boolean): number {
   return LUNGE * (1 - smooth((t - 170) / 50));
 }
 
-/** A hero's pose `t` ms into its auto-attack. Neutral values: 0, door 1, nothing drawn. */
-export interface HeroPose {
-  /** Whole body toward the target, units. */
-  lurch: number;
-  /** Throwing arm, degrees; negative swings the hand toward the target. */
-  arm: number;
-  /** Drum, degrees (absolute). */
-  drum: number;
-  /** Porthole door, horizontal scale about its hinge. */
-  door: number;
-  /** Instrument pushed away from the target, units. */
-  kick: number;
-  /** Nalesnik's disc: vertical scale of the flip, -1 .. 1 (1 = lying as usual). */
-  flip: number;
-  /** Helmet dip, units down, and tilt, degrees toward the target. */
-  dip: number;
-  tilt: number;
-  /** The ticket has left the hand. */
-  ticketOut: boolean;
-  /** The Konsultant's cable: how far the tip is out toward the target, 0 (at the hand) .. 1 (on the target). */
-  lash: number;
-  /** The ticket card is stuck on the target at the tip of the cable. */
-  card: boolean;
-  /** The ink stroke of this attack, as the visible part of its length: from `erase` to `draw` (0..1 each). */
-  draw: number;
-  erase: number;
-}
+export type { HeroPose };
+export { FLIP_MS, HOP, KICK, keyframes, LASH_BACK_MS, LASH_OUT_MS, LURCH, neutralPose, pulse, SLAP_AT_MS, SLAP_DRAW_MS, SLAP_ERASE_MS, SLAP_HOLD_MS, THROW_DEG, WHIP_AT_MS, WHIP_DRAW_MS, WHIP_ERASE_MS, WHIP_HOLD_MS } from '../heroes/poseKit';
 
-export function neutralPose(): HeroPose {
-  return { lurch: 0, arm: 0, drum: 0, door: 1, kick: 0, flip: 1, dip: 0, tilt: 0, ticketOut: false, lash: 0, card: false, draw: 0, erase: 0 };
-}
-
+/** A hero's pose `t` ms into its auto-attack: the `pose` of the hero's own figure.ts. */
 export function heroPose(id: HeroId, t: number): HeroPose {
-  const pose = neutralPose();
-  switch (id) {
-    case 'pralka': {
-      // 320 ms: the body surges 16 and holds, the drum turns one full revolution, the door swings open to a sliver and back
-      const p = clamp01(t / 320);
-      pose.lurch = LURCH * keyframes(p, [[0, 0], [0.28, 1], [0.55, 1], [1, 0]]);
-      pose.drum = 360 * smooth(p);
-      pose.door = 1 - 0.95 * keyframes(p, [[0, 0], [0.3, 1], [0.65, 1], [1, 0]]);
-      // the whip: laid down as the body surges, fully drawn for 180 ms, then rubbed out from its root
-      pose.draw = clamp01((t - WHIP_AT_MS) / WHIP_DRAW_MS);
-      pose.erase = clamp01((t - WHIP_AT_MS - WHIP_DRAW_MS - WHIP_HOLD_MS) / WHIP_ERASE_MS);
-      break;
-    }
-    case 'konsultant': {
-      const p = clamp01(t / 160);
-      pose.arm = keyframes(p, [[0, 0], [0.15, 30], [0.4, -THROW_DEG], [1, 0]]);
-      // the ticket leaves the hand and comes back once the cable has snapped home
-      pose.ticketOut = t >= 24 && t < LASH_OUT_MS + LASH_BACK_MS - 5;
-      pose.lash = t <= 0 ? 0 : t < LASH_OUT_MS ? easeOut(t / LASH_OUT_MS) : t < LASH_OUT_MS + LASH_BACK_MS ? 1 - smooth((t - LASH_OUT_MS) / LASH_BACK_MS) : 0;
-      pose.card = t >= LASH_OUT_MS && t < LASH_OUT_MS + LASH_BACK_MS - 10;
-      break;
-    }
-    case 'petlowiec': {
-      const k = keyframes(clamp01(t / 200), [[0, 0], [0.3, 1], [0.7, 1], [1, 0]]);
-      pose.dip = 4 * k;
-      pose.tilt = 10 * k;
-      pose.draw = clamp01(t / 70);
-      pose.erase = clamp01((t - 130) / 70);
-      break;
-    }
-    case 'kartograf': {
-      // the instrument kicks back 6 units; the ruled line is not part of the pose (drawLaser, below)
-      pose.kick = t < 25 ? (KICK * t) / 25 : KICK * (1 - clamp01((t - 25) / 115)) ** 2;
-      break;
-    }
-    case 'nalesnik': {
-      // the disc turns over about its horizontal axis (vertical scale -1 -> 1) while it hops 12 units toward the enemy
-      const p = clamp01(t / FLIP_MS);
-      pose.flip = -Math.cos(Math.PI * p);
-      pose.lurch = HOP * keyframes(p, [[0, 0], [0.45, 1], [1, 0]]);
-      pose.draw = clamp01((t - SLAP_AT_MS) / SLAP_DRAW_MS);
-      pose.erase = clamp01((t - SLAP_AT_MS - SLAP_DRAW_MS - SLAP_HOLD_MS) / SLAP_ERASE_MS);
-      break;
-    }
-  }
-  return pose;
+  return heroById(id).figure.pose(t);
 }
 
 // ---------- geometry (pure) ----------
@@ -427,8 +315,8 @@ export function setStroke(node: Element, draw: number, erase: number): void {
 }
 
 /** The one-stroke ink marks that belong to a hero's attack, drawn in the fx layer. */
-export function driveHeroStroke(a: AttackAnim, id: HeroId, draw: number, erase: number): void {
-  if (id !== 'pralka' && id !== 'nalesnik') return;
+export function driveHeroStroke(a: AttackAnim, stroke: 'whip' | 'slap' | undefined, draw: number, erase: number): void {
+  if (!stroke) return;
   if (draw <= 0 || erase >= 1) {
     a.fx?.remove();
     a.fx = null;
@@ -440,7 +328,7 @@ export function driveHeroStroke(a: AttackAnim, id: HeroId, draw: number, erase: 
     const layer = fxLayer();
     if (!layer) return;
     let root: SVGElement;
-    if (id === 'pralka') {
+    if (stroke === 'whip') {
       // the stroke is laid over a slightly wider stroke of bare paper, so it reads on top of the figures it crosses
       const d = whipPath(a);
       const back = el('path', { d, pathLength: 1, 'stroke-width': 6, class: 'attack-ink-back' });
@@ -469,7 +357,7 @@ export function driveHeroStroke(a: AttackAnim, id: HeroId, draw: number, erase: 
     tween(1, () => undefined, { delay: 700, done: () => root.remove() });
   }
   for (const path of a.ink) setStroke(path, draw, erase);
-  if (id === 'pralka') {
+  if (stroke === 'whip') {
     const on = draw >= 1 && erase < 0.5;
     if (a.splash && on !== a.splashOn) {
       a.splashOn = on;

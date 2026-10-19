@@ -79,6 +79,8 @@ export interface Player extends Fighter {
   permissions: string[];
   /** Nalesnik's quirk: rounded up for a few seconds (heroes/quirks.ts sets it; the figure is drawn rounder). */
   round?: boolean;
+  /** The hero has the `skim` trait (heroes/defs.ts HeroTraits): projectiles skim off it at full racja (heroes/shield.ts). */
+  skim?: boolean;
 }
 
 export interface Enemy extends Fighter {

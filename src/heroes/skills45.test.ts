@@ -12,7 +12,8 @@ import { fireAuto, SIGHT_DX, SIGHT_DY } from './auto';
 import { HEROES, heroDef, type HeroDef, type SkillIndex } from './defs';
 import { assignPad, fixPads, installedSkills, isInstalled, padOf, padSkill } from './loadout';
 import { BEBEN_DAMAGE, BEBEN_KNOCKBACK, KSIEZYC_GAP_S, KSIEZYC_ORBIT, KSIEZYC_S, KSIEZYC_UPOR, NUMER_BONUS, PLYWY_PUSH, READING_UPOR, START_KNOCKBACK } from './numbers';
-import { castSkill, SKILLS } from './skills';
+import { heroById } from './registry';
+import { castSkill } from './skills';
 import { heroStep } from './system';
 import type { HeroId } from './index';
 
@@ -63,7 +64,7 @@ const east = { kind: 'kierunek', dx: 1, dy: 0 } as const;
 describe('the ten new skills are defined and registered', () => {
   it('every skill of every hero has a function, and 4 and 5 ask a permission', () => {
     for (const h of HEROES) {
-      for (const sk of h.skills) expect(SKILLS[sk.id], sk.id).toBeTypeOf('function');
+      for (const sk of h.skills) expect(heroById(h.id).casts[sk.id], sk.id).toBeTypeOf('function');
       expect(h.skills[3].requires).toBeTruthy();
       expect(h.skills[4].requires).toBeTruthy();
     }

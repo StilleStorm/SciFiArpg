@@ -5,6 +5,7 @@
  * Serialising reads a run state; applying puts the record on a fresh run state before the first step.
  */
 import type { HeroId } from '../heroes';
+import { DEFAULT_HERO_ID, HERO_IDS } from '../heroes/registry';
 import { recomputeStats } from '../items/stats';
 import { SLOTS, type Item, type Slot } from '../items/types';
 import { applyProgress, padsFrom, serializeProgress, type ProgressData } from '../progression/persist';
@@ -12,7 +13,7 @@ import type { RunState } from '../world/run';
 
 export const CHARACTER_VERSION = 1;
 
-export const HERO_IDS: readonly HeroId[] = ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'];
+export { HERO_IDS };
 
 export interface Character extends ProgressData {
   version: number;
@@ -27,7 +28,7 @@ export function isHeroId(v: unknown): v is HeroId {
   return typeof v === 'string' && (HERO_IDS as readonly string[]).includes(v);
 }
 
-export function emptyCharacter(heroId: HeroId = 'pralka'): Character {
+export function emptyCharacter(heroId: HeroId = DEFAULT_HERO_ID): Character {
   return {
     version: CHARACTER_VERSION,
     heroId,
@@ -126,6 +127,6 @@ export function characterFromOldSave(raw: Record<string, unknown>): Character | 
   const stash = isRecord(raw['stash']) ? raw['stash'] : null;
   const gwiazdki = typeof raw['gwiazdki'] === 'number' && Number.isFinite(raw['gwiazdki']) ? Math.max(0, Math.floor(raw['gwiazdki'])) : 0;
   if (!stash && gwiazdki === 0) return null;
-  const hero = isHeroId(raw['heroId']) ? raw['heroId'] : 'pralka';
+  const hero = isHeroId(raw['heroId']) ? raw['heroId'] : DEFAULT_HERO_ID;
   return toCharacter({ ...emptyCharacter(hero), ...(stash ? { inventory: stash['inventory'], equipment: stash['equipment'] } : {}), gwiazdki });
 }

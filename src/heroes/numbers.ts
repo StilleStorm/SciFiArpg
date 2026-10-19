@@ -63,3 +63,11 @@ export const KSIEZYC_LAUNCH = 420;
 
 /** Per-second effects (the reading, the legend) are applied this often, each tick with its share of the factor per second. */
 export const TICK_S = 0.5;
+
+/** The first three skills of each hero and the fixed numbers shared by their casts (moved out of the casts in S1; values unchanged). */
+/** Pralka: the radius of the foam shield. */
+export const FOAM_RADIUS = 44;
+/** Petlowiec: copies at most (before the update bonus), lines of the copy's disagreement, zones of Teren at most. */
+export const MAX_COPIES = 2;
+export const DISAGREE_LINES = 6;
+export const MAX_ZONES = 2;

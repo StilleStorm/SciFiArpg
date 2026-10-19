@@ -16,6 +16,7 @@ import { updatePadCooldowns, setPadHero, syncPads } from '../ui/pads';
 import { createUpdateForm, type UpdateForm } from '../ui/update';
 import { nextId, type RunState } from '../world/run';
 import { takeChosenNote } from './chosen';
+import { heroDef } from './defs';
 import { onPlayerHit } from './quirks';
 import { castSkill } from './skills';
 
@@ -115,7 +116,7 @@ export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
     const tier = ev.tier;
     const h = s.hero;
     p.gwiazdki += h.mods.gwiazdki;
-    if (p.heroId === 'konsultant' && s.time < h.buffUntil) p.gwiazdki += 1;
+    if (s.time < h.buffUntil) p.gwiazdki += heroDef(p.heroId).traits?.buffKillGwiazdki ?? 0;
     if (h.mods.lifeOnKill > 0) p.hp = Math.min(p.hpMax, p.hp + h.mods.lifeOnKill);
     maybeDropAppeal(s, ev.x, ev.y, tier);
     const item = takeCopyDrop(s, ev.id);
@@ -201,7 +202,9 @@ export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
       forced = null;
       setPadHero(s.player.heroId);
       // the Asystent's remark on a hero chosen for the first time (Nalesnik: filed by the profile screen)
-      if (takeChosenNote() === 'nalesnik') bus.emit('footnote', { text: t('heroes.nalesnik.chosen') });
+      const chosen = takeChosenNote();
+      const noteKey = chosen ? heroDef(chosen).chosenNoteKey : undefined;
+      if (noteKey) bus.emit('footnote', { text: t(noteKey) });
     },
     frame(s) {
       syncPads(s);

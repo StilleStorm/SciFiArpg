@@ -4,10 +4,11 @@
  */
 import type { Bus, GameEvents } from '../core/events';
 import type { Enemy } from '../entities';
+import { heroById } from '../heroes/registry';
 import type { RunState } from '../world/run';
 import { getMix } from './context';
 import { musicPhase, musicTurn, setMusicPaused, startMusic, stopMusic, tickMusic } from './music';
-import { FAMILY_FLAVOUR, HERO_SKILL_SOUNDS, play, startHum, type Hum, type PlayOpts, type SfxName } from './sfx';
+import { FAMILY_FLAVOUR, play, startHum, type Hum, type PlayOpts, type SfxName } from './sfx';
 
 export interface AudioDeps {
   getState(): RunState | null;
@@ -113,7 +114,9 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
   // ---- combat ----
   // the Nalesnik's auto-attack is a flip with a slap (its hit sound follows when it lands)
   on('attack:started', (e) => {
-    if (e.attacker === 'player' && deps.getState()?.player.heroId === 'nalesnik') play('nalesSlap');
+    const hero = e.attacker === 'player' ? deps.getState()?.player.heroId : undefined;
+    const slap = hero ? heroById(hero).sounds.autoStart : undefined;
+    if (slap) play(slap);
   });
   on('enemy:hit', (e) => {
     const en = enemyOf(e.id);
@@ -170,7 +173,7 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
     if (!hero) return;
     const gain = (e.free ? 0.85 : 1) * (1 + Math.min(0.2, fxRadius / 500));
     fxRadius = 0;
-    play(HERO_SKILL_SOUNDS[hero][e.skill], { gain });
+    play(heroById(hero).sounds.skills[e.skill], { gain });
   });
 
   // ---- paper, forms, the document ----

@@ -10,11 +10,12 @@ import { PAGE_H, PAGE_W, resolveMove } from '../world/pages';
 import type { RunState } from '../world/run';
 import { trackRun } from './aim';
 import { durationOf, enemiesWithin, nearestEnemy, power, setExistence, skillDamage, touchStatus } from './helpers';
-import { FOAM_RADIUS } from './skills';
+import { FOAM_RADIUS } from './numbers';
 import { heroDef } from './defs';
-import { stepFlag, stepGravity, stepOrbit, stepRoll } from './nalesnik';
+import { stepFlag, stepGravity, stepOrbit, stepRoll } from './nalesnik/steps';
 import { bindNumerBonus, landStart, stepLegend, stepMoon, stepNumer, stepReading, stepScale, stepTide, syncMoonUpor } from './steps2';
 import { tickRound } from './quirks';
+import { stepDeferred } from './primitives';
 import { pushRing, RING_STEP } from './state';
 
 export function heroStep(s: RunState, bus: Bus, dt: number): void {
@@ -55,6 +56,7 @@ export function heroStep(s: RunState, bus: Bus, dt: number): void {
   stepSummons(s, bus, dt);
   stepZones(s, bus, dt);
   stepProjectiles(s, bus, dt);
+  stepDeferred({ s, bus });
   if (tickUpdateQueue(s, dt) && canOpenUpdate(s, false)) bus.emit('update:ready');
 }
 

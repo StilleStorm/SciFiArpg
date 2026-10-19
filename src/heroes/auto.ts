@@ -7,6 +7,7 @@ import { heroDef } from './defs';
 import { SKALA_VERIFY_S } from './numbers';
 import { scaleActive } from './steps2';
 import { touchStatus } from './helpers';
+import { line } from './primitives';
 
 const SPEED = 520;
 /**
@@ -74,14 +75,7 @@ export function fireLaser(s: RunState, p: Player, target: Enemy, bus: Bus): Lase
     const reach = Math.max(p.attackRange, dist + 24);
     ex = sx + ux * reach;
     ey = sy + uy * reach;
-    const on: { e: Enemy; along: number }[] = [];
-    for (const e of s.enemies) {
-      if (e === target) continue;
-      const along = (e.x - sx) * ux + (e.y - sy) * uy;
-      if (along < 0 || along > reach + e.r) continue;
-      if (Math.abs((e.x - sx) * uy - (e.y - sy) * ux) <= e.r + LINE_HALF) on.push({ e, along });
-    }
-    on.sort((a, b) => a.along - b.along);
+    const on = line({ s, bus }, { x: sx, y: sy, dx: ux, dy: uy, reach, half: LINE_HALF, skip: target });
     for (const { e } of on) {
       attack(s, bus, p, e);
       if (scale) touchStatus(e, 'do_weryfikacji', SKALA_VERIFY_S, p.id);
@@ -108,7 +102,7 @@ export function fireAuto(s: RunState, p: Player, target: Enemy, bus?: Bus): bool
   }
   const d = Math.hypot(target.x - p.x, target.y - p.y) || 1;
   const reach = p.attackRange + 40;
-  const lash = p.heroId === 'konsultant';
+  const lash = def.auto.lash === true;
   // lash: the distance to where the hit circle touches the target, covered in LASH_S; then a few steps of grace
   const speed = lash ? Math.max(40, d - LASH_R - target.r) / LASH_S : SPEED;
   s.projectiles.push({

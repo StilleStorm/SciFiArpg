@@ -18,7 +18,7 @@ import {
   GRAVITY_SPEED,
   SATELLITE_R,
   SATELLITE_S,
-} from './nalesnik';
+} from './nalesnik/steps';
 import { ROUND_COOLDOWN_S, ROUND_S, ROUND_UPOR, tickRound } from './quirks';
 import { castSkill } from './skills';
 import { heroStep } from './system';
@@ -297,7 +297,7 @@ describe('Równowaga hydrostatyczna', () => {
     expect(projectileDamageMul(s.player)).toBe(0.7);
     s.player.hp = s.player.hpMax * 0.9 - 1;
     expect(projectileDamageMul(s.player)).toBe(1);
-    expect(projectileDamageMul({ heroId: 'pralka', hp: 10, hpMax: 10 })).toBe(1);
+    expect(projectileDamageMul({ hp: 10, hpMax: 10 })).toBe(1);
   });
 
   it('an enemy shot lands for 30 percent less on a Nalesnik at full racja, and in full on the other heroes', () => {

@@ -3,14 +3,14 @@
  * Wniosek o status. Per-step functions on the run state; heroes/system.ts calls them in its fixed order, heroes/skills.ts
  * starts them. The numbers are here so that the skills, the aim preview and the tests read the same ones.
  */
-import { applyStatus } from '../combat/status';
-import type { Bus } from '../core/events';
-import type { Enemy, Zone } from '../entities/types';
-import { rtOf } from '../enemies/runtime';
-import { resolveMove } from '../world/pages';
-import type { RunState } from '../world/run';
-import { heroDef } from './defs';
-import { durationOf, enemiesWithin, power, skillDamage, touchStatus } from './helpers';
+import { applyStatus } from '../../combat/status';
+import type { Bus } from '../../core/events';
+import type { Enemy, Zone } from '../../entities/types';
+import { rtOf } from '../../enemies/runtime';
+import { resolveMove } from '../../world/pages';
+import type { RunState } from '../../world/run';
+import { heroDef } from '../defs';
+import { durationOf, enemiesWithin, power, skillDamage, touchStatus } from '../helpers';
 
 /** Orbita: seconds the roll lasts (the length is ORBITA_LENGTH in aim.ts), and the satellite's circle. */
 export const ORBITA_TIME = 0.5;

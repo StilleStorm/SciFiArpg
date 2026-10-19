@@ -1,7 +1,7 @@
 /** The five heroes (DESIGN section 10, 10.1): numbers, auto-attack, five typed skills (the 4th and 5th installed through permissions), one quirk. Data only. */
 import type { DamageType, Stats } from '../combat/damage';
 import type { FamilyId } from '../enemies/ids';
-import type { HeroId } from './index';
+import type { HeroId } from './registry';
 
 /** A skill of the hero (0..4) and a pad (0..2); `HeroRun.pads` says which skill each pad fires (DESIGN 10.1). */
 export type SkillIndex = 0 | 1 | 2 | 3 | 4;
@@ -26,6 +26,20 @@ export interface SkillDef {
   aim: AimMode;
   /** Skills 4 and 5 only: the permission (enemy family) their first rank needs in the update form (DESIGN 10.1). */
   requires?: FamilyId;
+}
+
+/** Standing traits of a hero (S1: what used to be `heroId === ...` branches). */
+export interface HeroTraits {
+  /** Items are trialed this many times faster. */
+  trialSpeed?: number;
+  /** Enemy defects are visible at once. */
+  seesDefects?: boolean;
+  /** The whole page map is revealed on entry. */
+  revealsPage?: boolean;
+  /** Projectiles skim off at (nearly) full racja (heroes/shield.ts). */
+  skim?: boolean;
+  /** Extra gwiazdki per kill while the buff of skill 3 runs. */
+  buffKillGwiazdki?: number;
 }
 
 export interface HeroDef {
@@ -55,118 +69,15 @@ export interface HeroDef {
      * everything up to the range limit.
      */
     hitscan?: boolean;
+    /** Projectile only: the shot is a lash (fast, thick, heroes/auto.ts) rather than a thrown missile. */
+    lash?: boolean;
   };
+  /** Standing traits the player carries from level 1 (state.ts applyHero copies them onto the player). */
+  traits?: HeroTraits;
+  /** i18n key of the Asystent's remark on this hero chosen for the first time (heroes/chosen.ts). */
+  chosenNoteKey?: string;
   skills: readonly [SkillDef, SkillDef, SkillDef, SkillDef, SkillDef];
 }
 
-const skill = (hero: HeroId, n: 1 | 2 | 3 | 4 | 5, id: string, type: DamageType, cooldown: number, aim: AimMode, requires?: FamilyId): SkillDef => {
-  const def: SkillDef = {
-    id,
-    nameKey: `heroes.${hero}.skill${n}.name`,
-    padKey: `heroes.${hero}.skill${n}.pad`,
-    descKey: `heroes.${hero}.skill${n}.desc`,
-    type,
-    cooldown,
-    aim,
-  };
-  if (requires) def.requires = requires;
-  return def;
-};
-
-const hero = (
-  id: HeroId,
-  d: Omit<HeroDef, 'id' | 'nameKey' | 'descKeys' | 'quirkKey' | 'skills'> & { skills: HeroDef['skills'] },
-): HeroDef => ({
-  id,
-  nameKey: `heroes.${id}.name`,
-  descKeys: [`heroes.${id}.desc1`, `heroes.${id}.desc2`, `heroes.${id}.desc3`],
-  quirkKey: `heroes.${id}.quirk`,
-  ...d,
-});
-
-export const HEROES: readonly HeroDef[] = [
-  hero('pralka', {
-    racja: 120,
-    racjaPerLevel: 12,
-    speed: 112,
-    r: 16,
-    baseStats: { pewnoscSiebie: 100, upor: 70, dmgMin: 6, dmgMax: 11, critChance: 0.08, resist: { mechaniczny: 10 } },
-    auto: { type: 'mechaniczny', range: 56, cooldown: 0.95, projectile: false },
-    skills: [
-      skill('pralka', 1, 'wirowanie', 'mechaniczny', 7, 'auto'),
-      skill('pralka', 2, 'pranieWstepne', 'regulaminowy', 10, 'auto'),
-      skill('pralka', 3, 'odwirowanie', 'mechaniczny', 9, 'kierunek'),
-      skill('pralka', 4, 'beben', 'mechaniczny', 11, 'kierunek', 'urzadzenia'),
-      skill('pralka', 5, 'osobowosc', 'egzystencjalny', 22, 'auto', 'wygenerowane'),
-    ],
-  }),
-  hero('konsultant', {
-    racja: 76,
-    racjaPerLevel: 8,
-    speed: 128,
-    r: 13,
-    baseStats: { pewnoscSiebie: 95, upor: 38, dmgMin: 4, dmgMax: 8, critChance: 0.1, resist: { regulaminowy: 10 } },
-    auto: { type: 'regulaminowy', range: 190, cooldown: 0.75, projectile: true },
-    skills: [
-      skill('konsultant', 1, 'prosze', 'regulaminowy', 8, 'wskazanie'),
-      skill('konsultant', 2, 'przekierowuje', 'egzystencjalny', 12, 'kierunek'),
-      skill('konsultant', 3, 'pomoc', 'regulaminowy', 20, 'auto'),
-      skill('konsultant', 4, 'numer', 'regulaminowy', 13, 'wskazanie', 'powiadomienia'),
-      skill('konsultant', 5, 'rozlaczenie', 'mechaniczny', 18, 'kierunek', 'urzadzenia'),
-    ],
-  }),
-  hero('petlowiec', {
-    racja: 80,
-    racjaPerLevel: 8,
-    speed: 124,
-    r: 13,
-    baseStats: { pewnoscSiebie: 95, upor: 45, dmgMin: 5, dmgMax: 9, critChance: 0.1, resist: { egzystencjalny: 15 } },
-    auto: { type: 'egzystencjalny', range: 130, cooldown: 0.8, projectile: true },
-    skills: [
-      skill('petlowiec', 1, 'przybycie', 'regulaminowy', 9, 'auto'),
-      skill('petlowiec', 2, 'spor', 'egzystencjalny', 11, 'auto'),
-      skill('petlowiec', 3, 'petla', 'mechaniczny', 16, 'auto'),
-      skill('petlowiec', 4, 'juzBylo', 'egzystencjalny', 14, 'auto', 'wygenerowane'),
-      skill('petlowiec', 5, 'start', 'mechaniczny', 12, 'wskazanie', 'powiadomienia'),
-    ],
-  }),
-  hero('kartograf', {
-    racja: 68,
-    racjaPerLevel: 7,
-    speed: 134,
-    r: 13,
-    baseStats: { pewnoscSiebie: 110, upor: 32, dmgMin: 5, dmgMax: 10, critChance: 0.12, resist: {} },
-    auto: { type: 'mechaniczny', range: 260, cooldown: 1.05, projectile: true, hitscan: true, pierceOnCrit: true },
-    skills: [
-      skill('kartograf', 1, 'triangulacja', 'mechaniczny', 6, 'kierunek'),
-      skill('kartograf', 2, 'teren', 'egzystencjalny', 14, 'wskazanie'),
-      skill('kartograf', 3, 'korekta', 'regulaminowy', 10, 'wskazanie'),
-      skill('kartograf', 4, 'skala', 'regulaminowy', 16, 'auto', 'powiadomienia'),
-      skill('kartograf', 5, 'legenda', 'egzystencjalny', 15, 'wskazanie', 'wygenerowane'),
-    ],
-  }),
-  // a flat asteroid that applied for dwarf-planet status: the tanky one, the fastest (DESIGN 10, item 5)
-  hero('nalesnik', {
-    racja: 100,
-    racjaPerLevel: 10,
-    speed: 146,
-    r: 16,
-    baseStats: { pewnoscSiebie: 100, upor: 58, dmgMin: 5, dmgMax: 10, critChance: 0.08, resist: { mechaniczny: 8 } },
-    auto: { type: 'mechaniczny', range: 54, cooldown: 0.85, projectile: false },
-    skills: [
-      skill('nalesnik', 1, 'orbita', 'mechaniczny', 9, 'kierunek'),
-      skill('nalesnik', 2, 'grawitacja', 'egzystencjalny', 14, 'auto'),
-      skill('nalesnik', 3, 'wniosek', 'regulaminowy', 16, 'wskazanie'),
-      skill('nalesnik', 4, 'plywy', 'mechaniczny', 12, 'auto', 'urzadzenia'),
-      skill('nalesnik', 5, 'ksiezyc', 'egzystencjalny', 20, 'kierunek', 'powiadomienia'),
-    ],
-  }),
-];
-
-export const HERO_IDS: readonly HeroId[] = HEROES.map((h) => h.id);
-
-export function heroDef(id: HeroId): HeroDef {
-  const def = HEROES.find((h) => h.id === id) ?? HEROES[0];
-  if (!def) throw new Error('no heroes defined');
-  return def;
-}
+// The five heroes live in src/heroes/<id>/def.ts; the registry (heroes/registry.ts) lists them.
+export { HEROES, HERO_IDS, heroDef } from './registry';
