@@ -28,9 +28,8 @@ A skill is the list of these calls with its numbers. Randomness goes through `s.
 ## Adding a hero
 
 `npm run new-hero <id>` makes the folder from `_template/*.tpl` (compiling placeholders), registers the id, and prints `CHECKLIST.md`:
-figure, auto pose, skills, ultimates, passives, four recipes, profile text, upgrade pool, tests, shots, Anomalia face. The typed tables keyed by
-hero id in other domains (`audio/recipes.ts HERO_SKILL_SOUNDS`, `ui/pads.ts SKILL_DRAWINGS`, `render/wash.ts HERO_HUE`, `progression/update.ts`)
-stop compiling until they have the new entry: that is the to-do list. Regenerate the contract snapshot once, for the new keys only.
+figure, auto pose, skills, ultimates, passives, four recipes, profile text, upgrade pool, tests, shots, Anomalia face. Everything other domains
+need per hero is in the folder (`sounds.ts`, `pads.ts` glyphs, `passives.ts`, the wash `hue` in `figure.ts`); no table outside it is keyed by hero id. Regenerate the contract snapshot once, for the new keys only.
 
 ## Tests
 

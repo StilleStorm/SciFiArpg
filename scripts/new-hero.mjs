@@ -53,4 +53,4 @@ if (next === registry || !next.includes(`hero as ${id}`) || !next.includes(`, ${
 
 console.log(`${dry ? 'would make' : 'made'}:\n  ${made.join('\n  ')}\n`);
 console.log(readFileSync(join(TEMPLATE, 'CHECKLIST.md.tpl'), 'utf8').replaceAll('__ID__', id));
-console.log('Until the keys exist, the registry test fails on the missing i18n entries, and the typed tables keyed by hero id\n(audio/recipes.ts HERO_SKILL_SOUNDS, ui/pads.ts SKILL_DRAWINGS, render/wash.ts HERO_HUE, progression/update.ts pool) fail to compile: they are the to-do list.');
+console.log('Until the keys exist, the registry test fails on the missing i18n entries (profile text, passives): that is the to-do list.');

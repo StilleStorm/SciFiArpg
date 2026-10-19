@@ -148,13 +148,15 @@ Heroes: pralka, konsultant, petlowiec, kartograf, nalesnik (the list is `HERO_ID
 
 ## Hero folders, registry, primitives (S1)
 One folder per hero, `src/heroes/<id>/`, exports `hero: HeroModule` (`heroes/module.ts`): `def` (`HeroDef` data, built with `defineHero`/`defineSkill`
-of `heroes/build.ts`), `figure` (`HeroFigure`: the drawing, wash, attack pose, `drive`/`build`/`patch` hooks), `sounds` (five recipe names by SkillIndex,
-`autoStart`), `casts` (`Record<SkillDef.id, SkillFn>`) and optionally `quirk` (`onHit`, `tick`). `heroes/registry.ts` is the one list of ids
+of `heroes/build.ts`), `figure` (`HeroFigure`: the drawing, wash and its `hue`, attack pose, `drive`/`build`/`patch` hooks), `sounds` (five recipe names
+by SkillIndex, `autoStart`; audio/bindings.ts plays them), `casts` (`Record<SkillDef.id, SkillFn>`), `pads` (`HeroPadGlyphs`, five glyphs for ui/pads.ts),
+`passives` (six `HeroPassive {mods, requires?}` for progression/update.ts) and optionally `quirk` (`onHit`, `tick`). `heroes/registry.ts` is the one list of ids
 (`HERO_ID_LIST`, type `HeroId`) and modules: `HEROES` (the `HeroDef`s), `HERO_IDS`, `heroById(id): HeroModule`, `heroDef(id)`, `DEFAULT_HERO_ID`.
 `heroes/defs.ts` keeps the types and re-exports `HEROES/HERO_IDS/heroDef`. Nothing outside `src/heroes/<id>/` (and tests, i18n, the registry) may write a
-hero id: `scripts/lint-rules.mjs` rule `hero-id-literal`; the files of other domains that still did when it was written are listed in its
-`HERO_ID_DEBT` (the list only shrinks). What used to be `heroId === ...` branches is data: `HeroDef.traits` (`trialSpeed`, `seesDefects`, `revealsPage`, `skim`,
-`buffKillGwiazdki`), `auto.lash`, `chosenNoteKey`, `HeroModule.quirk`, `HeroModule.sounds`, `HeroFigure`.
+hero id, as a string literal or a table key: `scripts/lint-rules.mjs` rule `hero-id-literal` (and `registry.test.ts`); no exceptions. Another domain
+reads what it needs per hero from `heroById(id)` and uses `DEFAULT_HERO_ID` for the default. What used to be `heroId === ...` branches is data:
+`HeroDef.traits` (`trialSpeed`, `seesDefects`, `revealsPage`, `skim`, `friendlyCopy` (death/outcomes.ts petla ghost), `buffKillGwiazdki`), `auto.lash`,
+`chosenNoteKey` (ui/profile.ts files the note), `HeroModule.quirk/sounds/pads/passives`, `HeroFigure`.
 Casts are lists of steps (`heroes/cast.ts`: `cast(i, steps)`, `CastEnv`, `firstCast`; a step returning `false` = nothing happened, no cooldown) calling the
 primitives in `heroes/primitives/` (each takes `Ctx {s, bus}` and plain options; no state of its own): `dash` (dash/roll), `teleport`, `pull`, `push`
 (jump/sweep), `aoe`, `cone`, `line`, `hitscan`, `projectile`, `forkProjectile`, `zone` (with `max` per variant), `summon` (with `max`, `settle`),
@@ -186,8 +188,8 @@ death check. Skala 1:1 makes every laser pierce and sets `laser.scale` on `attac
 Entities: `Summon.variant 'moon'` with `orbit {angle, r, ring?, hits?}`, stepped by `stepMoon` (render: `heroFx.ts buildMoon/patchMoon`);
 `Zone.variant 'legenda'` (`inside`, `acc`, `order` of the wrong names), `'start'` (lands when `ttl` runs out: `landStart`), `'numer'`
 (`follow`, `number`). `skill:fx` kinds added: `drum`, `wet`, `section`, `cut`, `tide`, `capsule`.
-Pads (`ui/pads.ts`): `syncPads(s)` each frame (heroes/layer.ts) redraws word, label and glyph when `pads` changed (`SKILL_DRAWINGS` has five
-glyphs per hero); `updatePadCooldowns` draws `cd[pads[i]]`; a press resolves the skill through `padSkill`.
+Pads (`ui/pads.ts`): `syncPads(s)` each frame (heroes/layer.ts) redraws word, label and glyph when `pads` changed (glyphs from
+`heroById(id).pads`); `updatePadCooldowns` draws `cd[pads[i]]`; a press resolves the skill through `padSkill`.
 Progression (`progression/update.ts`): pool `skill1..skill5`; `requirementOf` gates rank 3 of skills 0..2 by family and rank 1 of 3..4 by
 `requires`; `newSkillOf(before, after)` is the index whose rank went 0 -> >0; `roman(rank)`. The update form's `onPick` (heroes/layer.ts)
 snapshots `ranks`, confirms, and for a new skill calls `UpdateForm.assign(s, skill, done)`: the same sheet becomes "Przypisz do przycisku"
