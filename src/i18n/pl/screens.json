@@ -51,18 +51,18 @@
     "tunnelReturn": "Wróć do zgłoszenia",
     "archive": "Archiwum eksportowe",
     "archiveExport": "Zapisz archiwum do pliku",
-    "archiveExportNote": "Cały zapis jednym plikiem: postać, wyposażenie, historia, ustawienia.",
+    "archiveExportNote": "Cały zapis w jednym pliku: postać, wyposażenie, historia, ustawienia.",
     "archiveImport": "Wczytaj archiwum z pliku",
     "archiveImportNote": "Wczytanie zastępuje obecny zapis. Wymaga potwierdzenia.",
     "importTitle": "Wczytanie archiwum",
-    "importBody": "Plik zawiera: profil {hero}, poziom {level}, zamkniętych zgłoszeń {tickets}. Obecny zapis zostanie zastąpiony i nie da się go odzyskać.",
+    "importBody": "Plik zawiera: profil {hero}, poziom {level}, zgłoszenia zamknięte: {tickets}. Obecny zapis zostanie zastąpiony. Odzyskania nie przewidziano.",
     "importConfirm": "Zastąp zapis",
     "importCancel": "Anuluj",
     "importDone": "Archiwum wczytano. Zapis zastąpiono.",
     "importBadFile": "Plik nie jest archiwum tej gry. Zapis nie został zmieniony.",
-    "importNewer": "Plik pochodzi z nowszej wersji gry. Zapis nie został zmieniony.",
+    "importNewer": "Plik sporządzono w nowszej wersji gry. Zapis nie został zmieniony.",
     "exportDone": "Archiwum przygotowano do pobrania.",
-    "exportFailed": "Przeglądarka odmówiła zapisu pliku."
+    "exportFailed": "Przeglądarka odmówiła zapisania pliku. Odmowy nie uzasadniono."
   },
   "history": {
     "line": "Nr {number} · {planet}",
@@ -106,10 +106,10 @@
     "damage": "Liczby obrażeń",
     "damageOff": "Nie wpisywać",
     "damageOn": "Wpisywać na marginesie",
-    "damageNote": "Liczba pojawia się obok trafienia i blednie. Domyślnie wyłączone.",
+    "damageNote": "Liczbę wpisuje się obok trafienia. Wpis blednie. Domyślnie nie wpisuje się.",
     "bug": "Zgłaszanie problemów",
-    "bugOn": "Pozycja w menu wstrzymania",
-    "bugOff": "Ukryta"
+    "bugOn": "Widoczne w menu wstrzymania",
+    "bugOff": "Ukryte"
   },
   "profile": {
     "title": "Profil użytkownika",
@@ -136,9 +136,9 @@
     "hold": "Prosimy czekać. Rozmowa jest nagrywana.",
     "subBase": "Zgłoszenie nr {number}. {planet}, baza.",
     "report": "Zgłoś problem z grą",
-    "reportNote": "Skopiuje do schowka krótki zapis stanu: wersję, profil, planetę, stronę, ostatnie zdarzenia i ustawienia.",
+    "reportNote": "Do schowka zostanie skopiowany krótki zapis stanu: wersja, profil, planeta, strona, ostatnie zdarzenia, ustawienia.",
     "reported": "Zapis stanu skopiowano do schowka. Prosimy dołączyć go do zgłoszenia.",
-    "reportFailed": "Schowek odmówił przyjęcia zapisu. Zgłoszenie nie zostało skopiowane."
+    "reportFailed": "Schowek odmówił przyjęcia zapisu. Zgłoszenie można złożyć bez niego."
   },
   "loadout": {
     "title": "Umiejętności",

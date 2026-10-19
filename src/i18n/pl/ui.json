@@ -61,6 +61,6 @@
   "potw": {
     "stamp": "Potwierdzono",
     "kept": "Racja pełna. Potwierdzenie załączono do akt ({count}).",
-    "auto": "Racja spadała poniżej progu. Potwierdzenie wykorzystano z urzędu. Pozostało w aktach: {count}."
+    "auto": "Racja spadłaby poniżej progu. Potwierdzenie wykorzystano z urzędu. Pozostało w aktach: {count}."
   }
 }
