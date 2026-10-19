@@ -2,6 +2,7 @@ import { createRng } from '../core/rng';
 import type { Pickup } from '../entities';
 import { t } from '../i18n';
 import { buildDrawing, starPath } from './itemDrawings';
+import { buildAffixMarks, buildTierMark, groundMark, numberSuffix } from './itemMarks';
 import { el } from './svg';
 import { TIER_HUE, washGroup } from './wash';
 
@@ -67,14 +68,20 @@ export function buildPickupCard(e: Pickup): SVGGElement {
   const tilt = (e.number % 5) - 2;
   const plate = el('g', { transform: `scale(${CARD_SCALE}) rotate(${tilt})` });
   plate.append(el('rect', { x: -17, y: -12, width: 34, height: 24 }));
-  if (item.tier === 'rzadki' || item.tier === 'unikatowy') {
-    plate.append(el('rect', { x: -14.5, y: -9.5, width: 29, height: 19, 'stroke-width': 0.8 }));
-  }
-  if (item.tier === 'unikatowy') plate.append(el('path', { d: 'M-5-12V-16H5V-12M-3-14H3', 'stroke-width': 1.1 }));
-  const art = buildDrawing(item.drawing);
-  art.setAttribute('transform', 'translate(-5 -0.5) scale(0.43)');
+  // the art, then the tier mark (never omitted) and one affix mark, in the art's own coordinates
+  const kind = groundMark(item);
+  const art = buildDrawing(item.drawing, kind === 'dotted');
   art.setAttribute('stroke-width', '2.6');
-  plate.append(art, el('text', { class: 't-plate', x: 12, y: 9, 'font-size': 7 }, [String(e.number)]));
+  const marked = el('g', { transform: 'translate(-5 -0.5) scale(0.43)' });
+  marked.append(art);
+  const tierMark = buildTierMark(item, 2.6);
+  if (tierMark) marked.append(tierMark);
+  const affixMark = kind ? buildAffixMarks([kind], 2.6) : null;
+  if (affixMark) marked.append(affixMark);
+  plate.append(marked, el('text', { class: 't-plate', x: 12, y: 9, 'font-size': 7 }, [String(e.number)]));
+  if (kind === 'ok') plate.append(el('text', { class: 't-plate', x: 12, y: 3.4, style: 'font-size:4.6px' }, [t('items.mark.ok')]));
+  if (kind === 'footnote') plate.append(el('text', { class: 't-plate', x: 17.2, y: 5.2, style: 'font-size:4.6px' }, [numberSuffix(['footnote'])]));
+  if (kind === 'strike') plate.append(el('path', { d: 'M7.6 9.6L16.6 3.8', 'stroke-width': 0.8 }));
   g.append(plate);
   return g;
 }

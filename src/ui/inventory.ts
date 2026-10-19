@@ -16,18 +16,21 @@ import {
 import { effectiveStats } from '../items/stats';
 import { SLOTS, type Item, type Slot, type StatBlock } from '../items/types';
 import { FREE_TRIAL_KILLS } from '../items/reviews';
+import { claimIsHearsay } from '../items/absurd';
 import { drawingSvg } from '../render/itemDrawings';
 import type { RunState } from '../world/run';
 import { h } from './dom';
 import {
   ROW_KEYS,
   caption,
+  declaredHead,
   deltaSpan,
   displayName,
   figure,
+  isStruck,
+  itemRowText,
   reviewText,
   rowLabel,
-  rowText,
   rowValue,
   shownStats,
   summary,
@@ -85,8 +88,8 @@ export function createInventorySheet(root: HTMLElement, host: InventoryHost, onC
       if (item && item.uid === selected) cell.classList.add('sel');
       const box = h('span', `inv-slot-box${item ? '' : ' empty'}`);
       if (item) {
-        box.append(drawingSvg(item.drawing));
-        box.append(h('span', 'inv-slot-n', String(item.number)));
+        box.append(drawingSvg(item.drawing, item)); // tier and affix marks (ITEMS 9)
+        box.append(h('span', isStruck(item) ? 'inv-slot-n struck' : 'inv-slot-n', String(item.number)));
         if (item.blockedBy && !item.adapter) cell.classList.add('blocked');
       }
       cell.append(box, h('span', 'inv-slot-label', t(`items.slotShort.${slot}`)));
@@ -104,11 +107,11 @@ export function createInventorySheet(root: HTMLElement, host: InventoryHost, onC
   function statsTable(item: Item): HTMLElement {
     const table = h('table', 'ttab');
     const head = h('tr');
-    head.append(h('th', '', t('items.ui.tableStat')), h('th', '', t('items.ui.declared')), h('th', '', t('items.ui.actual')), h('th', 'delta-cell'));
+    head.append(h('th', '', t('items.ui.tableStat')), h('th', '', declaredHead(item)), h('th', '', t('items.ui.actual')), h('th', 'delta-cell'));
     table.append(head);
     for (const key of ROW_KEYS) {
-      const c = rowText(item.claimed, key);
-      const a = rowText(item.actual, key);
+      const c = itemRowText(item, item.claimed, key);
+      const a = itemRowText(item, item.actual, key);
       if (!c && !a) continue;
       const row = h('tr');
       row.append(h('td', '', rowLabel(key)), h('td', '', c || '—'));
@@ -150,8 +153,8 @@ export function createInventorySheet(root: HTMLElement, host: InventoryHost, onC
     table.append(head);
     let rows = 0;
     for (const key of ROW_KEYS) {
-      const a = cur ? rowText(cur, key) : '';
-      const b = rowText(mine, key);
+      const a = cur && worn ? itemRowText(worn, cur, key) : '';
+      const b = itemRowText(item, mine, key);
       if (!a && !b) continue;
       rows++;
       const row = h('tr');
@@ -185,7 +188,7 @@ export function createInventorySheet(root: HTMLElement, host: InventoryHost, onC
       if (item.revealed) {
         const truth = item.review?.truth ?? 'honest';
         d.append(h('p', 'inv-line', t(truth === 'bought' ? 'items.review.bought' : truth === 'niedoceniony' ? 'items.review.underrated' : 'items.review.honest')));
-      } else if (item.trialTarget > 0) {
+      } else if (item.trialTarget > 0 || claimIsHearsay(item)) { // rzekomy: "0 z 0", it never reveals
         d.append(h('p', 'inv-line', `${t('items.review.unverified')} ${t('items.review.trial', { done: Math.floor(item.trialKills), total: item.trialTarget })}`));
       }
     }
@@ -272,7 +275,7 @@ export function createInventorySheet(root: HTMLElement, host: InventoryHost, onC
     row.append(figure(item, 56));
     const cap = h('span', 'inv-cap');
     const title = h('span', 'inv-title');
-    title.append(h('b', '', caption(item)), document.createTextNode(` ${displayName(item)}`));
+    title.append(h('b', isStruck(item) ? 'struck' : '', caption(item)), document.createTextNode(` ${displayName(item)}`));
     cap.append(title);
     cap.append(h('span', 'inv-rev', item.review ? reviewText(item) : t('items.review.none')));
     const flags: string[] = [tierWord(item)];

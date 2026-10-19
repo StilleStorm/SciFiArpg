@@ -195,3 +195,10 @@
   background-color: var(--paper);
   background-image: var(--paper-noise, none);
 }
+
+/* wycofany z obiegu: the plate number struck through (ITEMS 9) */
+.inv-slot-n.struck,
+.inv-title b.struck,
+.cap.struck {
+  text-decoration: line-through;
+}

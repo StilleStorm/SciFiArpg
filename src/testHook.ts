@@ -22,6 +22,7 @@ import { openKiosk } from './economy/kiosk';
 import { fillDemoInventory, giveRandomItem } from './items/demo';
 import type { Item, ItemTier, Slot } from './items';
 import { mountSklep, type SklepHandle } from './ui/sklep';
+import { mountGallery } from './ui/itemGallery';
 import { createHeroHook, type HeroHook } from './heroes/hook';
 import type { Aim } from './heroes/aim';
 import { castSkill } from './heroes/skills';
@@ -74,6 +75,8 @@ export interface GameHook {
   notes(): { n: number; text: string }[];
   /** Put a rolled item of `tier` (default zwykly) into the inventory; returns it, or null when there is no run or no room. */
   giveItem(tier?: ItemTier | 'unikatowy', slot?: Slot): Item | null;
+  /** Mount a screenshot gallery of item figures over the screen (S8): tiers per slot, all 40 bases, absurd-affix marks, ground plates. */
+  itemGallery(mode: 'tiers' | 'bases' | 'affixes' | 'ground'): void;
   /** Replace the inventory with six fixed items (two worn, one niekompatybilny, a unique, a free version). */
   demoInventory(): void;
   /** Open the Załączniki sheet (same as the pad). */
@@ -361,6 +364,7 @@ export function installTestHook(deps: HookDeps): void {
       if (!st) return null;
       return giveRandomItem(st.player, st.nextItemNumber++, tier, Math.max(1, st.player.level + st.pageIndex), slot);
     },
+    itemGallery: mountGallery,
     demoInventory() {
       const st = game.state;
       if (st) {
