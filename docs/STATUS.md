@@ -125,7 +125,9 @@ Progress is recorded here, one line per slice:
 
 - S7 done: nine planets as data (placeholder names), priority Niski–Krytyczny scaling enemies, reputacja, stars, loot tier and item level, unlocked by level; per-character campaign (next planet, closed planets, return ticket, zgłoszenia dodatkowe, free travel); ticket form with priority picker and travel list; opening page, chapter and red rewritten card frames (TODO-story text until S11); look pass. Parked: ARCHITECTURE.md over its three-page limit (fold at the M2 end); card text is TODO-story placeholders (voice/story, S11); the chapter and opening cards cover the base stations mid-page (accepted as modals); "Dotknij, aby pominąć" hint grey at 11 px, borderline; landscape HUD box cut at the left edge (existing); the portrait ticket answers are now a sticky footer.
 
-**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S8.
+- S8 done: 32 affixes (6 absurd with mechanics) with m/f/n/pl forms, tiers I–V by item level, names as noun + adjectives + model «…», 40 bases (8 per slot) with 21 new drawings, tier marks (stamp, thread, wax seal; paperclip reserved for sets) on ground and card, new stats wired; voice and look passes. The rzadki thread was ruled black at the gate (DESIGN §3 keeps red for stamps, strikes, Racja, corrections; ITEMS §9 updated); per-base `excludeAffixes` with a test for noun echoes; the tier numeral sits after the model, before an unwanted tail. Parked: `disposalRefusal` waits for sell/bin/reklamacja (S9+ must call it); a noun-phrase head or `adjBefore` for prepositional bases ("czapka z daszkiem", "zegarek z krokomierzem"), readable as is; drawn mark labels (REKLAMA, Nowość) stay under 11 px at the 40–56 px sheet figures (M7 small-text polish); the inventory card footnote is clipped behind the action buttons in landscape (existing).
+
+**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S9.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
