@@ -23,12 +23,16 @@ import {
   CLAIM_ROTATE_S,
   DEFECTS,
   ELITES,
+  eliteWord,
   ESCALATE_S,
   SPONSOR_SPEED_MUL,
   enemyName,
   tierStats,
 } from './families';
+import { ODNAWIALNY_QUIET_S, ODNAWIALNY_RATE, SHARED_AFFIXES, WIELOKROTNY_SHOTS, affixSpeedMul, affixTempoMul, hasAffix, ownAffixes, ownsAffix } from './elites';
 import { applyTierStats } from './make';
+import { namedRecord } from './named';
+import { bindEliteDeaths, trackElite } from './spawn';
 import { fireShot, updateEnemyProjectiles } from './projectiles';
 import { defectLearned, rtOf } from './runtime';
 import type { RangedSpec } from './partsBase';
@@ -215,7 +219,23 @@ function meet(s: RunState, e: Enemy, bus: Bus): void {
       return;
     }
   }
-  if (e.elite) {
+  const rt = rtOf(e);
+  if (rt.named) {
+    const nk = `named:${e.id}`;
+    if (!m.keys.has(nk) && d < MEET_RANGE) {
+      const body = assemble(e.seed, e.family, e.tier).body;
+      const affixes = ownAffixes(e).map((a) => eliteWord(a, body)).join(', ');
+      note(nk, t('enemies.named.footnote', { serial: serialOf(e.seed), name: rt.named.name, affixes }));
+      const rec = namedRecord(s, e.id);
+      if (rec) bus.emit('elite:named', { id: e.id, x: e.x, y: e.y, name: rec.name });
+      return;
+    }
+  }
+  if (rt.packSize && !m.keys.has('pack') && d < MEET_RANGE) {
+    note('pack', t('enemies.pack.footnote'));
+    return;
+  }
+  if (e.elite && !rt.named) {
     const ek = `elite:${e.elite.affix}`;
     if (!m.keys.has(ek) && d < MEET_RANGE) {
       const body = assemble(e.seed, e.family, e.tier).body;
@@ -303,7 +323,10 @@ function tickEnemy(s: RunState, e: Enemy, grid: Grid<Enemy>, near: Enemy[], bus:
 
   tickDefects(s, e, dt, chasing);
   if (e.boss) tickBoss(s, e, bus, dt);
-  e.attackCooldown = rt.baseCooldown / (rt.atkSpeed * (rt.heatPhase === 'hot' ? 2 : 1));
+  e.attackCooldown = rt.baseCooldown / (rt.atkSpeed * (rt.heatPhase === 'hot' ? 2 : 1) * affixTempoMul(e));
+  if (hasAffix(e, 'odnawialny') && e.hp < e.hpMax && s.time - rt.hurtAt > ODNAWIALNY_QUIET_S) {
+    e.hp = Math.min(e.hpMax, e.hp + e.hpMax * ODNAWIALNY_RATE * dt);
+  }
 
   if (isStunned(e)) {
     e.moving = false;
@@ -317,7 +340,7 @@ function tickEnemy(s: RunState, e: Enemy, grid: Grid<Enemy>, near: Enemy[], bus:
     }
   }
 
-  let speed = rt.baseSpeed * statusSpeedMul(e) * rt.speedMul * (rt.limped ? 0.6 : 1) * (e.elite?.affix === 'sponsorowany' ? SPONSOR_SPEED_MUL : 1);
+  let speed = rt.baseSpeed * statusSpeedMul(e) * rt.speedMul * (rt.limped ? 0.6 : 1) * affixSpeedMul(e, SPONSOR_SPEED_MUL);
   if (rt.heatPhase === 'stall') speed = 0;
   let tx = e.x;
   let ty = e.y;
@@ -371,10 +394,10 @@ function tickEnemy(s: RunState, e: Enemy, grid: Grid<Enemy>, near: Enemy[], bus:
 
   // shots of ranged enemies (a special: silenced enemies cannot)
   if (ranged && chasing && tg && dp <= ranged.range && rt.shootT <= 0 && !isSilenced(e) && !s.law.botTime) {
-    const count = e.boss ? (rt.phase >= 2 ? 5 : 3) : 1;
+    const count = e.boss ? (rt.phase >= 2 ? 5 : 3) : ownsAffix(e, 'wielokrotny') ? WIELOKROTNY_SHOTS : 1;
     fireShot(s, e, tg.x, tg.y, ranged, count);
     bus.emit('attack:started', { attackerId: e.id, attacker: 'enemy', x: e.x, y: e.y, tx: tg.x, ty: tg.y, ranged: true });
-    rt.shootT = (ranged.cooldown / (rt.atkSpeed * (rt.heatPhase === 'hot' ? 2 : 1))) * ai.range(0.85, 1.2);
+    rt.shootT = (ranged.cooldown / (rt.atkSpeed * (rt.heatPhase === 'hot' ? 2 : 1) * affixTempoMul(e))) * ai.range(0.85, 1.2);
   }
 
   // a taunting copy can be hit too (melee against the player is handled by systems/combat.ts)
@@ -386,11 +409,24 @@ function tickEnemy(s: RunState, e: Enemy, grid: Grid<Enemy>, near: Enemy[], bus:
 /** Per step: auras, every enemy, then the shots in flight. */
 export function updateEnemyAi(s: RunState, grid: Grid<Enemy>, bus: Bus, dt: number): void {
   const list = [...s.enemies];
-  for (const e of list) rtOf(e).dmgMult = 1;
+  bindEliteDeaths(s, bus);
+  const byId = new Map<number, Enemy>();
+  for (const e of list) {
+    rtOf(e).dmgMult = 1;
+    byId.set(e.id, e);
+    if (e.elite) trackElite(s, e);
+  }
+  // pack minions borrow the aura and tempo affixes of a living leader
+  for (const e of list) {
+    const rt = rtOf(e);
+    const lead = rt.packOf !== undefined ? byId.get(rt.packOf) : undefined;
+    rt.shared = lead ? ownAffixes(lead).filter((a) => SHARED_AFFIXES.includes(a)) : [];
+  }
   for (const a of list) {
-    if (a.elite?.affix !== 'zweryfikowany') continue;
+    if (!ownsAffix(a, 'zweryfikowany')) continue;
     for (const o of list) {
-      if (o !== a && Math.hypot(o.x - a.x, o.y - a.y) < AURA_RADIUS) rtOf(o).dmgMult = AURA_DMG_MUL;
+      if (o === a) continue;
+      if (Math.hypot(o.x - a.x, o.y - a.y) < AURA_RADIUS || rtOf(o).packOf === a.id) rtOf(o).dmgMult = AURA_DMG_MUL;
     }
   }
   const near: Enemy[] = [];

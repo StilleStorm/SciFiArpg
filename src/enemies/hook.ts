@@ -7,12 +7,18 @@ import { applyDamage } from '../systems/combat';
 import type { DamageType } from '../combat/damage';
 import { nextId, type RunState } from '../world/run';
 import { placeBoss } from './bosses';
-import { FAMILY_IDS, type EliteId, type FamilyId } from './families';
+import { ELITE_IDS, FAMILY_IDS, type EliteId, type FamilyId } from './families';
+import { ownAffixes } from './elites';
 import { makeEnemy } from './make';
+import { spawnWave } from './spawn';
 
 export interface EnemyHook {
   /** Put `n` enemies of a family in rows of three, 80-320 units above the player (all in view). Returns their ids. */
   spawnFamily(family: FamilyId, n?: number, opts?: { tier?: number; elite?: EliteId }): number[];
+  /** A leader (random or given affix) with its pack of 2-4 minions, about 220 units above the player. Returns the ids, leader first. */
+  spawnPack(family: FamilyId, affix?: EliteId): number[];
+  /** A named elite (2-3 affixes, a recorded name), about 220 units above the player. Returns its id. */
+  spawnNamed(family: FamilyId, affix?: EliteId): number | null;
   /** Put the family's boss about 170 units above the player. */
   spawnBoss(family: FamilyId): number | null;
   /** Hit an enemy with an attack of a damage type (goes through claims, existence and statuses). */
@@ -22,7 +28,7 @@ export interface EnemyHook {
   /** Apply a status to every enemy (default 8 s). */
   applyStatus(kind: StatusKind, seconds?: number): void;
   /** Plain data about the enemies. */
-  list(): { id: number; family: FamilyId; tier: number; x: number; y: number; hp: number; boss: boolean; elite: string | null; existence: number | null; claim: string | null; defect: string | null }[];
+  list(): { id: number; family: FamilyId; tier: number; x: number; y: number; hp: number; boss: boolean; elite: string | null; existence: number | null; claim: string | null; defect: string | null; affixes: string[]; named: string | null; packOf: number | null }[];
 }
 
 export function createEnemyHook(getState: () => RunState | null, bus: Bus): EnemyHook {
@@ -49,6 +55,20 @@ export function createEnemyHook(getState: () => RunState | null, bus: Bus): Enem
         ids.push(e.id);
       }
       return ids;
+    },
+    spawnPack(family, affix) {
+      const s = getState();
+      if (!s || !FAMILY_IDS.includes(family)) return [];
+      const at = { x: s.player.x, y: s.player.y - 220 };
+      const got = spawnWave(s, family, 1, at, { elite: affix ?? s.rngs.spawn.pick(ELITE_IDS), pack: true, makeNamed: false, minRadius: 0, maxRadius: 20, minPlayer: 100 });
+      return got.map((e) => e.id);
+    },
+    spawnNamed(family, affix) {
+      const s = getState();
+      if (!s || !FAMILY_IDS.includes(family)) return null;
+      const at = { x: s.player.x, y: s.player.y - 220 };
+      const got = spawnWave(s, family, 1, at, { elite: affix ?? s.rngs.spawn.pick(ELITE_IDS), makeNamed: true, pack: false, minRadius: 0, maxRadius: 20, minPlayer: 100 });
+      return got[0]?.id ?? null;
     },
     spawnBoss(family) {
       const s = getState();
@@ -79,6 +99,9 @@ export function createEnemyHook(getState: () => RunState | null, bus: Bus): Enem
         existence: e.existence ?? null,
         claim: e.claim?.textKey ?? null,
         defect: e.defect ?? null,
+        affixes: [...ownAffixes(e)],
+        named: e.rt?.named?.name ?? null,
+        packOf: e.rt?.packOf ?? null,
       }));
     },
   };

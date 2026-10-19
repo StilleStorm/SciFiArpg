@@ -1,6 +1,6 @@
 import type { Vec } from '../core/vec';
 import type { RangedSpec } from './partsBase';
-import type { DefectId } from './ids';
+import type { DefectId, EliteId } from './ids';
 
 /**
  * Per-enemy mutable state that only the enemy modules read (AI timers, defect and boss phases).
@@ -63,6 +63,17 @@ export interface EnemyRt {
   confirmed: boolean;
   /** Boss: run time at which the first Spor comment is posted (DESIGN 5.4); absent once posted. */
   sporAt?: number;
+  /** Every elite affix this enemy carries (a named elite has 2-3; the first is `Enemy.elite.affix`). Empty for plain enemies. */
+  affixes: EliteId[];
+  /** Affixes borrowed from the pack leader while it lives (enemies/elites.ts SHARED_AFFIXES). */
+  shared: EliteId[];
+  /** Pack member: the id of the leader. Leader: `packSize` minions were placed with it. */
+  packOf?: number;
+  packSize?: number;
+  /** A named elite: the recorded name (already translated). */
+  named?: { name: string };
+  /** Run time of the last hit taken (elite odnawialny heals after a quiet spell). */
+  hurtAt: number;
 }
 
 export function newRt(): EnemyRt {
@@ -97,6 +108,9 @@ export function newRt(): EnemyRt {
     volleyT: 4,
     confirm: 0,
     confirmed: false,
+    affixes: [],
+    shared: [],
+    hurtAt: -99,
   };
 }
 

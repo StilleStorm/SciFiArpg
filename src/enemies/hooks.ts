@@ -10,6 +10,7 @@ import type { Enemy, Player } from '../entities/types';
 import { resolveMove } from '../world/pages';
 import { sporMul } from '../combat/spor';
 import type { RunState } from '../world/run';
+import { POUFNY_DMG_MUL, hasAffix, ownsAffix } from './elites';
 import { rtOf } from './runtime';
 
 type Fighter = Player | Enemy;
@@ -37,10 +38,12 @@ export function modifyDamage(
   if (amount <= 0) return { amount, crit };
   let a = amount;
   let c = crit;
+  let answered = false;
   if (defender.kind === 'enemy') {
     const claim = defender.claim;
     if (type !== undefined && claim) {
       if (isRebuttal(claim, type)) {
+        answered = true;
         if (!c) {
           a *= 2;
           c = true;
@@ -57,6 +60,7 @@ export function modifyDamage(
     }
     if (s) a *= sporMul(s, defender.id); // the window of a won argument: x2 against that boss, on top of a rebuttal crit
     a *= existenceOf(defender);
+    if (hasAffix(defender, 'poufny') && !answered) a *= POUFNY_DMG_MUL; // confidential: only an answer to the claim goes through whole
   }
   a *= statusDamageTakenMul(defender);
   return { amount: Math.max(1, Math.round(a)), crit: c };
@@ -83,6 +87,7 @@ export function onEnemyHurt(s: RunState, bus: Bus, e: Enemy, type: DamageType | 
   void bus;
   const rt = rtOf(e);
   rt.asleep = false;
+  rt.hurtAt = s.time;
   if (e.defect === 'spins') {
     rt.spin = 0.55;
     rt.spinDir = s.rngs.ai.chance(0.5) ? 1 : -1;
@@ -93,7 +98,7 @@ export function onEnemyHurt(s: RunState, bus: Bus, e: Enemy, type: DamageType | 
   }
   if (e.defect === 'thinks' && type === 'egzystencjalny') applyStatus(e, 'zablokowany', 1, null);
   if (e.defect === 'limp' && !rt.limped && e.hp <= e.hpMax / 2) rt.limped = true;
-  if (e.elite?.affix === 'domniemany' && !rt.teleported && e.hp < e.hpMax / 2 && !isSilenced(e)) {
+  if (ownsAffix(e, 'domniemany') && !rt.teleported && e.hp < e.hpMax / 2 && !isSilenced(e)) {
     rt.teleported = true;
     teleportEnemy(s, e);
   }

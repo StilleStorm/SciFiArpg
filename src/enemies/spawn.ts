@@ -2,13 +2,18 @@
  * The spawning API (also re-exported from systems/enemies.ts): single enemies, waves around a point, elites,
  * the trickle. Everything rolls on `s.rngs.spawn`, so a seed reproduces the population.
  */
+import type { Bus, GameEvents } from '../core/events';
 import type { Vec } from '../core/vec';
 import type { Enemy } from '../entities/types';
+import { t } from '../i18n';
 import { resolveMove } from '../world/pages';
 import { nextId, type RunState } from '../world/run';
 import { ELITE_IDS, FAMILY_IDS, makeMix, pickFamily, setEnemyScale, type EliteId, type FamilyId, type MissionMix } from './families';
 import { planScale } from '../world/campaign';
-import { applyTierStats, makeEnemy } from './make';
+import { ownsAffix, POWIELONY_COPIES } from './elites';
+import { applyTierStats, makeEnemy, type MakeOpts } from './make';
+import { generateName, namedAllowed, namedRecord, NAMED_CHANCE, pickNamedAffixes, recordNamed } from './named';
+import { rtOf } from './runtime';
 
 export type { MissionMix };
 export const ENEMY_COUNT = 5;
@@ -16,9 +21,18 @@ const MIN_SPAWN_DISTANCE = 320;
 /** Share of ordinary spawns that come as elites. */
 const ELITE_CHANCE = 0.07;
 
+/** Elites rolled by the spawner lead a pack this often (explicit elites only when `pack: true`). */
+export const PACK_CHANCE = 0.5;
+export const PACK_MIN = 2;
+export const PACK_MAX = 4;
+
 export interface SpawnOpts {
   tier?: number;
   elite?: EliteId;
+  /** Two or three affixes and a recorded name instead of one affix (named elite). Needs `elite` or a rolled elite. */
+  makeNamed?: boolean;
+  /** Force (true) or forbid (false) the leader's pack of 2-4 minions. */
+  pack?: boolean;
   /** Ring around `around` the enemies are placed on. */
   minRadius?: number;
   maxRadius?: number;
@@ -27,7 +41,7 @@ export interface SpawnOpts {
 }
 
 /** Put one enemy at (x, y) if the spot is free (not inside an obstacle). */
-export function placeEnemy(s: RunState, family: FamilyId, x: number, y: number, opts: SpawnOpts = {}): Enemy | null {
+export function placeEnemy(s: RunState, family: FamilyId, x: number, y: number, opts: Omit<SpawnOpts, 'makeNamed' | 'pack'> & MakeOpts = {}): Enemy | null {
   const r = s.rngs.spawn;
   const e = makeEnemy(nextId(s), x, y, r.int(1, 1e6), family, opts);
   if (s.plan) {
@@ -40,7 +54,103 @@ export function placeEnemy(s: RunState, family: FamilyId, x: number, y: number, 
   if (Math.hypot(e.x - before.x, e.y - before.y) > 1) return null;
   e.home = { x: e.x, y: e.y };
   s.enemies.push(e);
+  trackElite(s, e);
   return e;
+}
+
+// ---------- elites alive, packs, names ----------
+
+const alive = new WeakMap<RunState, Map<number, Enemy>>();
+
+/** Remember an elite (or a bearer of any affix) so its death can be handled: copies, the named record. */
+export function trackElite(s: RunState, e: Enemy): void {
+  if (!e.elite) return;
+  let m = alive.get(s);
+  if (!m) {
+    m = new Map();
+    alive.set(s, m);
+  }
+  m.set(e.id, e);
+}
+
+/** The leader's affix list after the roll: one affix, or two to three plus a name when it becomes a named elite. */
+function eliteOpts(s: RunState, base: SpawnOpts, rolled: EliteId): MakeOpts {
+  const r = s.rngs.spawn;
+  const named = base.makeNamed ?? (base.elite === undefined && namedAllowed(s) && r.chance(NAMED_CHANCE));
+  if (!named) return { elite: rolled };
+  const affixes = [rolled, ...pickNamedAffixes(r).filter((a) => a !== rolled)].slice(0, r.chance(0.5) ? 2 : 3);
+  return { elite: rolled, affixes, named: generateName(r) };
+}
+
+/** Put the leader's minions around it: 2-4 of its family and tier, no elite of their own, sharing its aura. Returns them. */
+export function spawnPack(s: RunState, leader: Enemy): Enemy[] {
+  const r = s.rngs.spawn;
+  const want = r.int(PACK_MIN, PACK_MAX);
+  const out: Enemy[] = [];
+  for (let i = 0; i < want; i++) {
+    for (let tries = 0; tries < 10; tries++) {
+      const a = r.range(0, Math.PI * 2);
+      const d = r.range(46, 110);
+      const m = placeEnemy(s, leader.family, leader.x + Math.cos(a) * d, leader.y + Math.sin(a) * d, { tier: leader.tier });
+      if (!m) continue;
+      rtOf(m).packOf = leader.id;
+      out.push(m);
+      break;
+    }
+  }
+  rtOf(leader).packSize = out.length;
+  return out;
+}
+
+/** Copies a dying powielony elite leaves: ordinary enemies of its family and tier close to the spot. */
+function spawnCopies(s: RunState, e: Enemy, x: number, y: number): void {
+  const r = s.rngs.spawn;
+  for (let i = 0; i < POWIELONY_COPIES; i++) {
+    for (let tries = 0; tries < 8; tries++) {
+      const a = r.range(0, Math.PI * 2);
+      const d = r.range(18, 60);
+      if (placeEnemy(s, e.family, x + Math.cos(a) * d, y + Math.sin(a) * d, { tier: e.tier })) break;
+    }
+  }
+}
+
+function onEliteDied(s: RunState, bus: Bus, ev: GameEvents['enemy:died']): void {
+  const m = alive.get(s);
+  const e = m?.get(ev.id);
+  m?.delete(ev.id);
+  const rec = namedRecord(s, ev.id);
+  if (rec) {
+    bus.emit('elite:slain', { id: ev.id, x: ev.x, y: ev.y, name: rec.name, minTier: 'nietypowy' });
+    bus.emit('footnote', { text: t('enemies.named.slain', { name: rec.name }) });
+  }
+  if (e && ownsAffix(e, 'powielony')) spawnCopies(s, e, ev.x, ev.y);
+}
+
+const bound = new WeakMap<Bus, { s: RunState }>();
+/** Listen once per bus for elite deaths; the run in force is the one the AI last stepped (called from updateEnemyAi). */
+export function bindEliteDeaths(s: RunState, bus: Bus): void {
+  const cur = bound.get(bus);
+  if (cur) {
+    cur.s = s;
+    return;
+  }
+  const ref = { s };
+  bound.set(bus, ref);
+  bus.on('enemy:died', (ev) => onEliteDied(ref.s, bus, ev));
+}
+
+/** Place the leader (one affix or a named elite) and, when it is to lead a pack, its minions. Returns leader first. */
+function placeElite(s: RunState, family: FamilyId, x: number, y: number, tier: number, rolled: EliteId, o: SpawnOpts): Enemy[] {
+  const mk = eliteOpts(s, o, rolled);
+  const leader = placeEnemy(s, family, x, y, { tier, ...mk });
+  if (!leader) return [];
+  const rec = mk.named;
+  if (rec !== undefined) {
+    recordNamed(s, { id: leader.id, name: rec, affixes: mk.affixes ?? [rolled], family, claimed: false });
+    return [leader];
+  }
+  const pack = o.pack ?? (o.elite === undefined && s.rngs.spawn.chance(PACK_CHANCE));
+  return pack ? [leader, ...spawnPack(s, leader)] : [leader];
 }
 
 /** The mission's tier for a family: Powiadomienia start at 1, the others rise with the page. */
@@ -67,10 +177,11 @@ export function spawnWave(s: RunState, family: FamilyId, count: number, around: 
       if (Math.hypot(x - s.player.x, y - s.player.y) < (opts.minPlayer ?? 160)) continue;
       const elite = opts.elite ?? (wantElite || r.chance(ELITE_CHANCE * planScale(s.plan).eliteMul) ? r.pick(ELITE_IDS) : undefined);
       const tier = opts.tier ?? (fam === 'powiadomienia' ? 1 : pageTier(s));
-      const e = placeEnemy(s, fam, x, y, { tier, elite });
-      if (e) {
-        if (e.elite) wantElite = false;
-        out.push(e);
+      const placed = elite ? placeElite(s, fam, x, y, tier, elite, opts) : [placeEnemy(s, fam, x, y, { tier })].filter((e): e is Enemy => e !== null);
+      if (placed.length > 0) {
+        if (elite) wantElite = false;
+        out.push(...placed);
+        i += placed.length - 1; // a pack counts against the wave
         break;
       }
     }
@@ -137,10 +248,10 @@ export function countInView(s: RunState, view: Rect, minDist = 0): number {
 }
 
 /** One elite of a family near a point (default: somewhere on the page, away from the player). */
-export function spawnElite(s: RunState, family: FamilyId, around?: Vec, affix?: EliteId): Enemy | null {
+export function spawnElite(s: RunState, family: FamilyId, around?: Vec, affix?: EliteId, extra: Pick<SpawnOpts, 'makeNamed' | 'pack'> = {}): Enemy | null {
   const r = s.rngs.spawn;
   const at = around ?? { x: r.range(160, s.page.w - 160), y: r.range(160, s.page.h - 160) };
-  const got = spawnWave(s, family, 1, at, { elite: affix ?? r.pick(ELITE_IDS), minRadius: 0, maxRadius: 80 });
+  const got = spawnWave(s, family, 1, at, { elite: affix ?? r.pick(ELITE_IDS), minRadius: 0, maxRadius: 80, ...extra });
   // spawnWave doubles under Parzystosc; the elite is the first one
   return got[0] ?? null;
 }
@@ -155,7 +266,12 @@ export function spawnEnemy(s: RunState, minDistance = MIN_SPAWN_DISTANCE): Enemy
     if (Math.hypot(x - s.player.x, y - s.player.y) < minDistance) continue;
     const tier = family === 'powiadomienia' ? 1 : pageTier(s);
     const elite = r.chance(ELITE_CHANCE * planScale(s.plan).eliteMul) ? r.pick(ELITE_IDS) : undefined;
-    const e = placeEnemy(s, family, x, y, { tier, elite });
+    if (elite) {
+      const got = placeElite(s, family, x, y, tier, elite, {});
+      if (got[0]) return got[0];
+      continue;
+    }
+    const e = placeEnemy(s, family, x, y, { tier });
     if (e) return e;
   }
   return null;

@@ -125,6 +125,48 @@
       "n": "domniemane",
       "pl": "domniemane",
       "effect": "Raz, w połowie trafienia, przestaje być w tym miejscu."
+    },
+    "pilny": {
+      "m": "pilny",
+      "f": "pilna",
+      "n": "pilne",
+      "pl": "pilne",
+      "effect": "Uderza o połowę częściej. Sprawa jest pilna i taka pozostanie."
+    },
+    "odnawialny": {
+      "m": "odnawialny",
+      "f": "odnawialna",
+      "n": "odnawialne",
+      "pl": "odnawialne",
+      "effect": "Po trzech sekundach bez trafienia odzyskuje rację, ponieważ zasób jest odnawialny."
+    },
+    "powielony": {
+      "m": "powielony",
+      "f": "powielona",
+      "n": "powielone",
+      "pl": "powielone",
+      "effect": "Po usunięciu pozostawia dwa odpisy."
+    },
+    "poufny": {
+      "m": "poufny",
+      "f": "poufna",
+      "n": "poufne",
+      "pl": "poufne",
+      "effect": "Treść jest poufna: obrażenia są mniejsze o 30%, chyba że trafienie odpowiada na tezę."
+    },
+    "nadgorliwy": {
+      "m": "nadgorliwy",
+      "f": "nadgorliwa",
+      "n": "nadgorliwe",
+      "pl": "nadgorliwe",
+      "effect": "Z każdą sekundą działa szybciej, do 60% ponad normę."
+    },
+    "wielokrotny": {
+      "m": "wielokrotny",
+      "f": "wielokrotna",
+      "n": "wielokrotne",
+      "pl": "wielokrotne",
+      "effect": "Składany w kilku egzemplarzach: strzela trzykrotnie, a z bliska sięga dalej."
     }
   },
   "boss": {
@@ -195,5 +237,158 @@
   },
   "summon": {
     "reminder": "Przypomnienie"
+  },
+  "named": {
+    "footnote": "Do akt wpisano: {name}. Cechy: {affixes}.",
+    "slain": "Wpis zamknięty: {name}. Po egzemplarzu pozostał przedmiot.",
+    "noun": {
+      "monit": {
+        "text": "Monit",
+        "gender": "m"
+      },
+      "wezwanie": {
+        "text": "Wezwanie",
+        "gender": "n"
+      },
+      "pismo": {
+        "text": "Pismo",
+        "gender": "n"
+      },
+      "zawiadomienie": {
+        "text": "Zawiadomienie",
+        "gender": "n"
+      },
+      "upomnienie": {
+        "text": "Upomnienie",
+        "gender": "n"
+      },
+      "decyzja": {
+        "text": "Decyzja",
+        "gender": "f"
+      },
+      "notatka": {
+        "text": "Notatka",
+        "gender": "f"
+      },
+      "odpowiedz": {
+        "text": "Odpowiedź",
+        "gender": "f"
+      },
+      "okolnik": {
+        "text": "Okólnik",
+        "gender": "m"
+      },
+      "zalacznik": {
+        "text": "Załącznik",
+        "gender": "m"
+      }
+    },
+    "adj": {
+      "zbiorczy": {
+        "m": "Zbiorczy",
+        "f": "Zbiorcza",
+        "n": "Zbiorcze"
+      },
+      "ostateczny": {
+        "m": "Ostateczny",
+        "f": "Ostateczna",
+        "n": "Ostateczne"
+      },
+      "wtorny": {
+        "m": "Wtórny",
+        "f": "Wtórna",
+        "n": "Wtórne"
+      },
+      "ponowny": {
+        "m": "Ponowny",
+        "f": "Ponowna",
+        "n": "Ponowne"
+      },
+      "przejsciowy": {
+        "m": "Przejściowy",
+        "f": "Przejściowa",
+        "n": "Przejściowe"
+      },
+      "zastepczy": {
+        "m": "Zastępczy",
+        "f": "Zastępcza",
+        "n": "Zastępcze"
+      },
+      "okresowy": {
+        "m": "Okresowy",
+        "f": "Okresowa",
+        "n": "Okresowe"
+      },
+      "wewnetrzny": {
+        "m": "Wewnętrzny",
+        "f": "Wewnętrzna",
+        "n": "Wewnętrzne"
+      },
+      "uzupelniajacy": {
+        "m": "Uzupełniający",
+        "f": "Uzupełniająca",
+        "n": "Uzupełniające"
+      },
+      "szczegolowy": {
+        "m": "Szczegółowy",
+        "f": "Szczegółowa",
+        "n": "Szczegółowe"
+      }
+    },
+    "tail": {
+      "nieodebrany": {
+        "m": "nieodebrany od 2019",
+        "f": "nieodebrana od 2019",
+        "n": "nieodebrane od 2019"
+      },
+      "zwrocony": {
+        "m": "zwrócony do nadawcy",
+        "f": "zwrócona do nadawcy",
+        "n": "zwrócone do nadawcy"
+      },
+      "zlozony": {
+        "m": "złożony po terminie",
+        "f": "złożona po terminie",
+        "n": "złożone po terminie"
+      },
+      "doreczony": {
+        "m": "doręczony omyłkowo",
+        "f": "doręczona omyłkowo",
+        "n": "doręczone omyłkowo"
+      },
+      "uznany": {
+        "m": "uznany za doręczony",
+        "f": "uznana za doręczoną",
+        "n": "uznane za doręczone"
+      },
+      "przekazany": {
+        "m": "przekazany dalej",
+        "f": "przekazana dalej",
+        "n": "przekazane dalej"
+      },
+      "oczekujacy": {
+        "m": "oczekujący na pieczątkę",
+        "f": "oczekująca na pieczątkę",
+        "n": "oczekujące na pieczątkę"
+      },
+      "wycofany": {
+        "m": "wycofany i przywrócony",
+        "f": "wycofana i przywrócona",
+        "n": "wycofane i przywrócone"
+      },
+      "zaginiony": {
+        "m": "zaginiony w kancelarii",
+        "f": "zaginiona w kancelarii",
+        "n": "zaginione w kancelarii"
+      },
+      "podpisany": {
+        "m": "podpisany ołówkiem",
+        "f": "podpisana ołówkiem",
+        "n": "podpisane ołówkiem"
+      }
+    }
+  },
+  "pack": {
+    "footnote": "Napotkano grupę: egzemplarz przewodni i jego odpisy. Cecha przewodniego dotyczy wszystkich."
   }
 }

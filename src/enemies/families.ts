@@ -199,6 +199,12 @@ export const ELITES: Record<EliteId, EliteDef> = {
   sponsorowany: { id: 'sponsorowany', prefix: 'enemies.elite.sponsorowany' },
   nieuchronny: { id: 'nieuchronny', prefix: 'enemies.elite.nieuchronny' },
   domniemany: { id: 'domniemany', prefix: 'enemies.elite.domniemany' },
+  pilny: { id: 'pilny', prefix: 'enemies.elite.pilny' },
+  odnawialny: { id: 'odnawialny', prefix: 'enemies.elite.odnawialny' },
+  powielony: { id: 'powielony', prefix: 'enemies.elite.powielony' },
+  poufny: { id: 'poufny', prefix: 'enemies.elite.poufny' },
+  nadgorliwy: { id: 'nadgorliwy', prefix: 'enemies.elite.nadgorliwy' },
+  wielokrotny: { id: 'wielokrotny', prefix: 'enemies.elite.wielokrotny' },
 };
 export const ELITE_HP_MUL = 1.6;
 export const ELITE_DMG_MUL = 1.25;

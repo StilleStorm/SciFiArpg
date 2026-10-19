@@ -74,6 +74,10 @@ export interface GameEvents {
   'enemy:rebutted': { id: number };
   /** First hit of another type than the claim on this enemy ("nie na temat"). */
   'enemy:offTopic': { id: number; x: number; y: number };
+  /** The Asystent recorded a named elite (enemies/named.ts) when the player first met it. */
+  'elite:named': { id: number; x: number; y: number; name: string };
+  /** A named elite fell: the kill guarantees an item of at least `minTier` (systems/loot.ts claims it with claimNamedDrop). */
+  'elite:slain': { id: number; x: number; y: number; name: string; minTier: 'nietypowy' };
   /** A notification climbed to the next tier. */
   'enemy:escalated': { id: number; tier: number; x: number; y: number };
   /** A boss reached a new phase (Prototyp at half racja, Weryfikacja's grid solved, Hipoteza confirmed). */

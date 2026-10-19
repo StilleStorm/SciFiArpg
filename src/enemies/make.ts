@@ -18,11 +18,20 @@ import {
   type EliteId,
   type FamilyId,
 } from './families';
-import { newRt } from './runtime';
+import { ownsAffix, setAffixes, WIELOKROTNY_REACH } from './elites';
+import { newRt, rtOf } from './runtime';
+
+/** A named elite is sturdier than a plain one. */
+export const NAMED_HP_MUL = 1.4;
+export const NAMED_DMG_MUL = 1.1;
 
 export interface MakeOpts {
   tier?: number;
   elite?: EliteId;
+  /** Two or three affixes (named elites); wins over `elite`. */
+  affixes?: EliteId[];
+  /** The recorded name of a named elite (enemies/named.ts). */
+  named?: string;
 }
 
 /** Apply the numbers of (family, tier) to an enemy, keeping the hp fraction. Used at birth and on escalation. */
@@ -31,8 +40,9 @@ export function applyTierStats(e: Enemy, keepFraction: boolean): void {
   const def = FAMILY_DEFS[e.family];
   const asm = assemble(e.seed, e.family, e.tier);
   const elite = e.elite?.affix;
-  const hpMul = elite ? ELITE_HP_MUL * (elite === 'nieuchronny' ? NIEUCHRONNY_HP_MUL : 1) : 1;
-  const dmgMul = elite ? ELITE_DMG_MUL : 1;
+  const named = e.rt?.named !== undefined;
+  const hpMul = elite ? ELITE_HP_MUL * (ownsAffix(e, 'nieuchronny') ? NIEUCHRONNY_HP_MUL : 1) * (named ? NAMED_HP_MUL : 1) : 1;
+  const dmgMul = elite ? ELITE_DMG_MUL * (named ? NAMED_DMG_MUL : 1) : 1;
   const frac = keepFraction ? e.hp / Math.max(1, e.hpMax) : 1;
   const jitter = 0.92 + (createRng(e.seed).fork('speed').next() * 0.16);
   const resist = { ...def.resist };
@@ -53,7 +63,7 @@ export function applyTierStats(e: Enemy, keepFraction: boolean): void {
     critChance: st.critChance,
     resist,
   };
-  e.attackRange = asm.ranged ? 18 : st.attackRange;
+  e.attackRange = asm.ranged ? 18 : st.attackRange * (ownsAffix(e, 'wielokrotny') ? WIELOKROTNY_REACH : 1);
   e.attackCooldown = st.attackCooldown;
   const rt = (e.rt ??= newRt());
   rt.baseSpeed = e.speed;
@@ -66,14 +76,16 @@ export function makeEnemy(id: number, x: number, y: number, seed: number, family
   const e = createEnemy(id, x, y, seed);
   e.family = family;
   e.tier = asm.tier;
-  if (opts.elite) e.elite = { affix: opts.elite };
   if (asm.defect) e.defect = asm.defect;
   e.rt = newRt();
+  const affixes = opts.affixes && opts.affixes.length > 0 ? opts.affixes : opts.elite ? [opts.elite] : [];
+  if (affixes.length > 0) setAffixes(e, affixes);
+  if (opts.named !== undefined) e.rt.named = { name: opts.named };
   applyTierStats(e, false);
   e.attackTimer = 0.6;
   e.claim = pickClaim(createRng(seed).fork('claim'), family, e.tier);
   e.facing = seed % 2 === 0 ? 1 : -1;
-  const rt = e.rt;
+  const rt = rtOf(e);
   if (family === 'wygenerowane') {
     e.existence = createRng(seed).fork('e').range(0.45, 1);
     rt.eTarget = e.existence;
