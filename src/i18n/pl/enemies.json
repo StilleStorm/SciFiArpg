@@ -337,9 +337,9 @@
     },
     "tail": {
       "nieodebrany": {
-        "m": "nieodebrany od 2019",
-        "f": "nieodebrana od 2019",
-        "n": "nieodebrane od 2019"
+        "m": "nieodebrany od 2019 r.",
+        "f": "nieodebrana od 2019 r.",
+        "n": "nieodebrane od 2019 r."
       },
       "zwrocony": {
         "m": "zwrócony do nadawcy",

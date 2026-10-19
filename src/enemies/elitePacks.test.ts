@@ -173,7 +173,7 @@ describe('named elites', () => {
   });
   it('agrees the adjective and the tail with the noun', () => {
     const plain = (x: string): string => x.replace(/\u00a0/g, ' ');
-    expect(plain(composeName('monit', 'zbiorczy', 'nieodebrany'))).toBe('Monit Zbiorczy, nieodebrany od 2019');
+    expect(plain(composeName('monit', 'zbiorczy', 'nieodebrany'))).toBe('Monit Zbiorczy, nieodebrany od 2019 r.');
     expect(plain(composeName('decyzja', 'ostateczny', 'uznany'))).toBe('Decyzja Ostateczna, uznana za doręczoną');
     expect(plain(composeName('pismo', 'wtorny', 'wycofany'))).toBe('Pismo Wtórne, wycofane i przywrócone');
   });

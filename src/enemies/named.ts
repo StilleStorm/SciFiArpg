@@ -1,6 +1,6 @@
 /**
  * Named elites (PLAN 8, "Diablo 2 unique monsters"): two or three affixes and an absurd name the Asystent records
- * ("Monit Zbiorczy, nieodebrany od 2019"). At most one per two pages; the kill guarantees an item of at least
+ * ("Monit Zbiorczy, nieodebrany od 2019 r."). At most one per two pages; the kill guarantees an item of at least
  * nietypowy. Names are 30 parts in `enemies.named.*` (10 nouns, 10 adjectives, 10 participial tails), put together
  * with gender agreement. Pure data and lookups; spawning is in spawn.ts.
  */
@@ -22,7 +22,7 @@ export const NAMED_MIN_TIER = 'nietypowy' as const;
 
 const GENDERS3: readonly Gender[] = ['m', 'f', 'n'];
 
-/** A noun, an adjective and a tail agreeing in gender: "Monit Zbiorczy, nieodebrany od 2019". */
+/** A noun, an adjective and a tail agreeing in gender: "Monit Zbiorczy, nieodebrany od 2019 r.". */
 export function composeName(noun: string, adj: string, tail: string): string {
   const g = t(`enemies.named.noun.${noun}.gender`);
   const gender: Gender = GENDERS3.find((x) => x === g) ?? 'm';
