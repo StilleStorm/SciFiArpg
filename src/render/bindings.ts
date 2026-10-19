@@ -19,20 +19,25 @@ export interface PageBox {
 
 const RUN_PAGE: PageBox = { w: PAGE_W, h: PAGE_H, inset: PAGE_INSET };
 
+/** How far the "margines" note keeps from the hero touching the wall (units): above his head, or to his side. */
+const MARGIN_ABOVE = 66;
+const MARGIN_ASIDE = 72;
+
 /** Where the "margines" note goes for each wall of `page`: just inside the frame, beside the player. */
 export function marginSpot(side: Side, x: number, y: number, page: PageBox = RUN_PAGE): { x: number; y: number } {
+  // Beside the hero, never on him: above his head at a side wall, to one side of him at the top or bottom wall.
+  const aside = x + MARGIN_ASIDE <= page.w - page.inset - 40 ? x + MARGIN_ASIDE : x - MARGIN_ASIDE;
   switch (side) {
     case 'l':
-      return { x: page.inset + 44, y: y - 30 };
+      return { x: page.inset + 44, y: y - MARGIN_ABOVE };
     case 'r':
-      return { x: page.w - page.inset - 44, y: y - 30 };
+      return { x: page.w - page.inset - 44, y: y - MARGIN_ABOVE };
     case 't':
-      return { x, y: page.inset + 48 };
+      return { x: aside, y: page.inset + 30 };
     case 'b':
-      return { x, y: page.h - page.inset - 38 };
+      return { x: aside, y: page.h - page.inset - 20 };
   }
 }
-
 type Rect = { x0: number; y0: number; x1: number; y1: number };
 /** A stamp closer than this (vertically, units) to the point it must stay off covers the hero's figure. */
 const STAMP_CLEAR = 80;

@@ -15,6 +15,20 @@ describe('the "margines" note', () => {
     expect(b.y).toBeGreaterThan(base.h / 2);
   });
 
+  it('keeps off the hero touching the wall on every side', () => {
+    const cases: ['l' | 'r' | 't' | 'b', number, number][] = [
+      ['l', 40, 500],
+      ['r', PAGE_W - 40, 500],
+      ['t', 300, 40],
+      ['b', 300, PAGE_H - 40],
+      ['b', PAGE_W - 60, PAGE_H - 40],
+    ];
+    for (const [side, x, y] of cases) {
+      const m = marginSpot(side, x, y);
+      expect(Math.hypot(m.x - x, m.y - y)).toBeGreaterThanOrEqual(60);
+    }
+  });
+
   it('defaults to the run page', () => {
     expect(marginSpot('r', 0, 100).x).toBeGreaterThan(PAGE_W / 2);
     expect(marginSpot('b', 0, 100).y).toBeGreaterThan(PAGE_H / 2);

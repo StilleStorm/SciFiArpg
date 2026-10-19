@@ -339,8 +339,16 @@ button {
   stroke-linejoin: round;
   pointer-events: none;
 }
+/* a pad is a slip pinned over the page like the margin notes: its circle is filled with paper, so the page's hatched edge,
+   an obstacle or a figure passing under it does not run through the glyph */
+.pad .base > path:first-child {
+  fill: var(--paper);
+}
 .pad .word {
   margin-top: 1px;
+  /* a paper halo under the letters: the hatched page wall passes under the pads and must not cross the word */
+  -webkit-text-stroke: 3px var(--paper);
+  paint-order: stroke fill;
   font-style: italic;
   font-size: 12px;
   line-height: 13px;
@@ -494,7 +502,11 @@ button {
 /* ---------- Text inside the SVG layers ---------- */
 .t-note {
   fill: var(--ink);
-  stroke: none;
+  /* a paper halo under the letters, so the hatched page wall or a figure does not cross the word */
+  stroke: var(--paper);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  paint-order: stroke;
   font-family: var(--serif);
   font-style: italic;
   font-size: 11px;
