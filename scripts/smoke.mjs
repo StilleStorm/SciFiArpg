@@ -1667,6 +1667,8 @@ try {
     }));
     check('campaign: a completed ticket closes planet 1 once, the save holds it, the next base is planet 2 with its chapter card', after.screen === 'baza' && after.campaign?.current === 1 && after.campaign?.closed?.join() === '0' && after.plan?.planet === 1 && after.card === 'chapter' && after.history === 1, JSON.stringify(after));
     await cp.locator('.card-layer .card-skip').click({ timeout: 3000 }).catch(() => undefined);
+    const skipped = await cp.evaluate(() => ({ layer: !!document.querySelector('.card-layer'), screen: window.__game.screen() }));
+    check('campaign: one tap on the chapter card skips it and leaves the base free', !skipped.layer && skipped.screen === 'baza', JSON.stringify(skipped));
     // the case closed: the desk lists every planet for free travel; a pick re-lays the base, accepts at once and shows the card rewritten
     await cp.evaluate(() => {
       window.__game.state().campaign = { current: 0, closed: [0, 1, 2, 3, 4, 5, 6, 7, 8], finalTicket: false, caseClosed: true, extras: 0, cards: { opening: true, chapters: [0, 1, 2, 3, 4, 5, 6, 7, 8] } };
@@ -1683,6 +1685,18 @@ try {
     });
     trav.rows = rows;
     check('campaign: after the case nine planets are offered; travel to planet 5 accepts a travel ticket there and shows the rewritten card', rows === 9 && trav.screen === 'baza' && trav.plan?.kind === 'travel' && trav.plan?.planet === 4 && trav.accepted && trav.card === 'rewritten' && !trav.sheet, JSON.stringify(trav));
+    // enemies scale: the same family and seed, Niski on planet 1 against Krytyczny on planet 8
+    const hpOf = async (plan) => {
+      await cp.evaluate((pl) => window.__game.start(21, { plan: pl }), plan);
+      await sleep(600);
+      return cp.evaluate(() => {
+        window.__game.enemies.spawnFamily('urzadzenia', 1);
+        return window.__game.enemies.list()[0]?.hp ?? 0;
+      });
+    };
+    const hpLow = await hpOf({ kind: 'campaign', planet: 0, priority: 'niski', lawId: 'ciasteczka' });
+    const hpHigh = await hpOf({ kind: 'campaign', planet: 7, priority: 'krytyczny', lawId: 'czas-wsteczny' });
+    check('campaign: the same enemy has more racja on a late planet at Krytyczny than on planet 1 at Niski', hpLow > 0 && hpHigh > hpLow * 2, JSON.stringify({ hpLow, hpHigh }));
     await cctx.close();
   }
 
