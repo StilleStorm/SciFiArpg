@@ -238,6 +238,11 @@ export interface PageHeader {
    * the header is then set inside it, at most two lines, so a 390-unit view never cuts it off. Absent: the whole page width.
    */
   view?: { x0: number; x1: number };
+  /**
+   * The margin-note row over the top of the page in page units (`headerKeepOut` in render/camera.ts): the header is narrowed
+   * to the side of it when that leaves a readable width, otherwise set below it. Absent: nothing to avoid.
+   */
+  avoid?: { x0: number; y0: number; x1: number; y1: number };
 }
 
 /** Break a text into lines of at most `max` characters. */
@@ -293,12 +298,27 @@ const HEADER_Y = 52;
 /** How far a header that cannot avoid a torn top corner is set below it. */
 const BELOW_CORNER = 72;
 
+/** Width of the mono form line (11 px, tracked 0.12 em) per character, in units. */
+const TOP_ADVANCE = 11 * 0.72;
+/** The narrowest clause column that still reads as a header. */
+const MIN_HEADER_W = 240;
+/** Gap kept between the header and the note row. */
+const ROW_GAP = 10;
+
 /**
  * The header's box on `page`. On the whole page width it keeps clear of a torn (or, `avoidExit`, folded) top corner and
  * takes up to three lines. In a portrait view (`view` given) it is set inside the visible span with a 24-unit margin,
  * a smaller italic and two lines at most; when a top corner leaves too little room there, it goes below the corner.
+ * `avoid` (the margin-note row): the header is narrowed to the side of it when the form line (`topChars` long) and a
+ * 240-unit clause still fit, otherwise it is set below the row.
  */
-export function headerBox(page: Pick<Page, 'w' | 'torn' | 'exit'>, view?: { x0: number; x1: number }, avoidExit = true): HeaderBox {
+export function headerBox(
+  page: Pick<Page, 'w' | 'torn' | 'exit'>,
+  view?: { x0: number; x1: number },
+  avoidExit = true,
+  avoid?: { x0: number; y0: number; x1: number; y1: number },
+  topChars = 0,
+): HeaderBox {
   const topLeft = page.torn === 'tl' || (avoidExit && page.exit?.corner === 'tl');
   const topRight = page.torn === 'tr' || (avoidExit && page.exit?.corner === 'tr');
   let x0 = topLeft ? 180 : 52;
@@ -313,11 +333,23 @@ export function headerBox(page: Pick<Page, 'w' | 'torn' | 'exit'>, view?: { x0: 
     const v1 = Math.min(page.w - 52, view.x1 - 24);
     x0 = Math.max(x0, v0);
     x1 = Math.min(x1, v1);
-    if (x1 - x0 < 240) {
+    if (x1 - x0 < MIN_HEADER_W) {
       x0 = v0;
       x1 = v1;
       y = HEADER_Y + BELOW_CORNER;
     }
+  }
+  const bottom = y + 22 + maxLines * Math.round(size * 1.18);
+  if (avoid && avoid.x0 < x1 && avoid.x1 > x0 && avoid.y1 > y - 12 && avoid.y0 < bottom) {
+    // the row stands over the header's line: narrow the header to the wider side of the row, or set it below the row
+    const left = { x0, x1: Math.min(x1, avoid.x0 - ROW_GAP) };
+    const right = { x0: Math.max(x0, avoid.x1 + ROW_GAP), x1 };
+    const side = left.x1 - left.x0 >= right.x1 - right.x0 ? left : right;
+    const need = Math.max(MIN_HEADER_W, topChars * TOP_ADVANCE + 8);
+    if (side.x1 - side.x0 >= need) {
+      x0 = side.x0;
+      x1 = side.x1;
+    } else y = Math.max(y, Math.ceil(avoid.y1 + ROW_GAP + 11));
   }
   return { x0, x1, y, size, maxChars: Math.max(12, Math.floor((x1 - x0) / (size * SERIF_ADVANCE))), maxLines };
 }
@@ -325,7 +357,7 @@ export function headerBox(page: Pick<Page, 'w' | 'torn' | 'exit'>, view?: { x0: 
 /** The page header: one printed form with the HUD above it. Mono form line, then the clause in italic. */
 export function drawHeader(page: Page, header: PageHeader, opts: { cls?: string; avoidExit?: boolean } = {}): SVGGElement {
   const g = el('g', opts.cls ? { class: opts.cls } : {});
-  const box = headerBox(page, header.view, opts.avoidExit ?? true);
+  const box = headerBox(page, header.view, opts.avoidExit ?? true, header.avoid, header.top.length);
   g.append(el('text', { class: 't-head-top', x: box.x0, y: box.y }, [header.top]));
   const lines = wrapLines(header.clause, box.maxChars, box.maxLines);
   const step = Math.round(box.size * 1.18);

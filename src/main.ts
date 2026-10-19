@@ -10,7 +10,7 @@ import { bindAsystent } from './narration';
 import { bindFx } from './render/bindings';
 import { initDamageNumbers } from './render/damageNumbers';
 import { bindTunnelFx } from './render/tunnelFx';
-import { createCamera, freeViewRect } from './render/camera';
+import { createCamera, freeViewRect, keepOutBlocks } from './render/camera';
 import { initInk } from './render/ink';
 import { installPaper } from './render/paper';
 import { createWobble, getStage, setTheme } from './render/stage';
@@ -24,6 +24,7 @@ import { createBaza } from './ui/baza';
 import { createBoard } from './ui/board';
 import { createFootnotes } from './ui/footnotes';
 import { createHud } from './ui/hud';
+import { watchLayout } from './ui/keepOut';
 import { useHeld } from './systems/recovery';
 import { createJoystick } from './ui/joystick';
 import { applySteering, currentOrient, effectiveSteering, initLayout, lockOrientation, orientationSetting } from './ui/layout';
@@ -108,6 +109,7 @@ const game = createGame(stage, bus, camera, input, bounds);
 const hud = createHud(stage.ui, () => game.hero.requestUpdate(), () => pauseRun(), () => openTunnelNow(), () => void (game.state && useHeld(game.state, bus)));
 const footnotes = createFootnotes(stage.ui);
 const pads = createPads(stage.ui, bus);
+watchLayout(stage.ui); // what the HUD, pads and notes cover: bubbles, stamps and the page header keep out from under it
 const sporStrip = createSpor(stage.ui, bus, () => game.state); // the reply strip of a boss argument (hidden with the footnotes)
 const title = createTitle(stage.ui, () => go(meta.heroId ? 'baza' : 'profile'));
 const freshSeed = (): number => (Date.now() ^ Math.floor(Math.random() * 0x100000000)) >>> 0;
@@ -354,7 +356,14 @@ function openStation(id: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean 
 }
 bus.on('station:opened', (e) => void openStation(e.station));
 
-bindFx(bus, game.views, () => game.state?.page ?? null, () => freeViewRect(camera, 'stamp'), () => meta.settings.damageNumbers === true);
+bindFx(
+  bus,
+  game.views,
+  () => game.state?.page ?? null,
+  () => freeViewRect(camera, 'stamp'),
+  () => meta.settings.damageNumbers === true,
+  () => keepOutBlocks(camera),
+);
 bindPageTurn(bus, { stage, camera, views: game.views, getState: () => game.state, bounds });
 bindRunEvents(bus, () => game.state);
 // The tunnel closes itself on death, the end of the run and a page turn; both must hear `run:ended` before the handler below drops the state.

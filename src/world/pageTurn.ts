@@ -12,7 +12,7 @@ import { t } from '../i18n';
 import { openKiosk } from '../economy/kiosk';
 import { spawnBoss } from '../enemies/bosses';
 import { spawnEntryWave, spawnWave } from '../enemies/spawn';
-import { currentViewSize, portraitSpan, viewRect, type Camera } from '../render/camera';
+import { currentViewSize, headerFrame, viewRect, type Camera } from '../render/camera';
 import { drawIn, stamp } from '../render/ink';
 import { drawPage, type PageHeader } from '../render/obstacles';
 import type { Stage } from '../render/stage';
@@ -29,21 +29,24 @@ const KIOSK_TAP = 80;
 
 // ---------- header ----------
 
-/** The printed header of a run page. `view`: the visible span in a portrait view (`portraitSpan`), so the header fits on screen. */
-export function headerFor(s: RunState, view?: { x0: number; x1: number }): PageHeader {
+/** Where the header is set on screen (render/camera.ts `headerFrame`): the portrait span and the note row to keep clear of. */
+export type HeaderFrame = Pick<PageHeader, 'view' | 'avoid'>;
+
+/** The printed header of a run page, set inside `frame` (`headerFrame(camera)`) so it fits on screen and stays clear of the note row. */
+export function headerFor(s: RunState, frame: HeaderFrame = {}): PageHeader {
   return {
     top: t('screens.header.top', { number: s.ticket.number, page: s.pageIndex + 1, total: s.pageCount }),
     clause: t(`laws.${s.ticket.lawId}.header`, { planet: s.ticket.planetLoc }),
-    ...(view ? { view } : {}),
+    ...frame,
   };
 }
 
 /** The printed header of the base page: the form line and the clause (it appears once the ticket is accepted). */
-export function baseHeaderFor(s: RunState, view?: { x0: number; x1: number }): PageHeader {
+export function baseHeaderFor(s: RunState, frame: HeaderFrame = {}): PageHeader {
   return {
     top: t('screens.base.header', { number: s.ticket.number }),
     clause: t(`laws.${s.ticket.lawId}.header`, { planet: s.ticket.planetLoc }),
-    ...(view ? { view } : {}),
+    ...frame,
   };
 }
 
@@ -230,6 +233,8 @@ export function bindPageTurn(bus: Bus, deps: TurnDeps): () => void {
     oldWorld.removeAttribute('id');
     oldWorld.removeAttribute('filter');
     oldWorld.setAttribute('class', 'swept');
+    // the claim bubbles are not printed on the sheet: they do not go with it (a bubble on the sliding sheet ran under the pads)
+    oldWorld.querySelectorAll('.bubble').forEach((b) => b.remove());
     sheet.append(oldPage, oldWorld);
 
     // 2. Move the run to the new page and draw it underneath.
@@ -243,7 +248,7 @@ export function bindPageTurn(bus: Bus, deps: TurnDeps): () => void {
     stage.fx.replaceChildren();
     camera.snap(s.player.x, s.player.y);
     camera.apply();
-    const ink = drawPage(stage.page, s.page, headerFor(s, portraitSpan(camera)));
+    const ink = drawPage(stage.page, s.page, headerFor(s, headerFrame(camera)));
     const [nx = 0, ny = 0] = (stage.svg.getAttribute('viewBox') ?? '0 0 0 0').split(' ').map(Number);
     stage.svg.insertBefore(sheet, stage.fx.nextSibling);
 

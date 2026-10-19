@@ -1,4 +1,5 @@
 import { clamp, type Vec } from '../core/vec';
+import { cssToWorld, screenLayout, type Box } from './keepOut';
 
 /**
  * The view always shows at least MIN_VIEW_W wide and a minimum height that depends on the orientation (1 unit =
@@ -54,6 +55,8 @@ export interface Camera {
   y: number;
   w: number;
   h: number;
+  /** The page the view is clamped to (kept in step with the page shown). */
+  readonly bounds: { w: number; h: number };
   resize(): void;
   /** The rectangle in world units the camera shows at its current centre, clamped to the page like `apply()`. */
   viewRect(): { x0: number; y0: number; x1: number; y1: number };
@@ -77,6 +80,7 @@ export function createCamera(
     y: bounds.h / 2,
     w: MIN_VIEW_W,
     h: MIN_VIEW_H,
+    bounds,
     resize() {
       setViewSize(viewSizeFor(window.innerWidth, window.innerHeight));
       setViewZoom(Math.max(1, window.innerWidth) / viewSize.w);
@@ -136,18 +140,49 @@ export function portraitSpan(cam: Pick<Camera, 'w' | 'h' | 'viewRect'>): { x0: n
 
 /**
  * The part of the view not covered by the HUD form (top) and the footnote band (bottom), in world units: where claim
- * bubbles are kept (render/bubbleFocus). Insets in css px, as the layout draws them (ui/base.css, ui/landscape.css).
+ * bubbles and stamps are kept (render/bubbleFocus, render/bindings). The bands are measured from the DOM (render/keepOut);
+ * before the first measurement (tests) the insets below, in css px, stand in. What covers only part of the width (pads,
+ * margin notes, a corner HUD) is in `keepOutBlocks`.
  */
 const FREE_INSET = {
   bubble: { portrait: { top: 70, bottom: 110 }, landscape: { top: 58, bottom: 62 } },
   // a stamp is nearly as wide as a phone held upright, so in portrait it also keeps above the pads (the stamp pad tops them at ~330 px from the bottom)
   stamp: { portrait: { top: 70, bottom: 330 }, landscape: { top: 58, bottom: 62 } },
 };
-export function freeViewRect(cam: Pick<Camera, 'w' | 'h' | 'viewRect'>, use: 'bubble' | 'stamp' = 'bubble'): { x0: number; y0: number; x1: number; y1: number } {
+export function freeViewRect(cam: Pick<Camera, 'w' | 'h' | 'viewRect'>, use: 'bubble' | 'stamp' = 'bubble'): Box {
   const r = cam.viewRect();
-  const ins = cam.h > cam.w ? FREE_INSET[use].portrait : FREE_INSET[use].landscape;
   const z = viewZoom();
+  const l = screenLayout();
+  if (l) return { x0: r.x0, y0: r.y0 + l.top / z, x1: r.x1, y1: r.y0 + l.bottom / z };
+  const ins = cam.h > cam.w ? FREE_INSET[use].portrait : FREE_INSET[use].landscape;
   return { x0: r.x0, y0: r.y0 + ins.top / z, x1: r.x1, y1: r.y1 - ins.bottom / z };
+}
+
+/** The pads, margin notes and other partial covers in world units at the camera's view now, grown by `margin` units. */
+export function keepOutBlocks(cam: Pick<Camera, 'viewRect'>, margin = 0): Box[] {
+  const l = screenLayout();
+  if (!l) return [];
+  const r = cam.viewRect();
+  const z = viewZoom();
+  return l.blocks.map((b) => {
+    const w = cssToWorld(b, r, z);
+    return { x0: w.x0 - margin, y0: w.y0 - margin, x1: w.x1 + margin, y1: w.y1 + margin };
+  });
+}
+
+/**
+ * Where the margin-note row can stand over the top of the page, in page units: the row measured on screen, carried over
+ * every left edge the camera can take while the page top is in view (the header is printed once for the page and the
+ * camera then pans under the screen-fixed row; in portrait that leaves no room beside the row, so the header goes below it).
+ */
+export function headerKeepOut(cam: Pick<Camera, 'w' | 'h' | 'viewRect' | 'bounds'>): Box | undefined {
+  const l = screenLayout();
+  if (!l?.row) return undefined;
+  const z = viewZoom();
+  const top = viewRect(0, -1e9, cam.w, cam.h, cam.bounds).y0;
+  const lo = viewRect(-1e9, 0, cam.w, cam.h, cam.bounds).x0;
+  const hi = viewRect(1e9, 0, cam.w, cam.h, cam.bounds).x0;
+  return { x0: lo + l.row.x0 / z, x1: hi + l.row.x1 / z, y0: top + l.row.y0 / z, y1: top + l.row.y1 / z };
 }
 
 /** The rectangle the camera shows when it is centred on (cx, cy), clamped like `apply()` does. */
@@ -163,4 +198,11 @@ function axis(center: number, size: number, extent: number): number {
   const hi = extent + OVERSCAN - size;
   if (hi < lo) return extent / 2 - size / 2;
   return clamp(center - size / 2, lo, hi);
+}
+
+/** How the page header is set for this camera: inside the portrait span (`portraitSpan`) and clear of the note row (`headerKeepOut`). */
+export function headerFrame(cam: Pick<Camera, 'w' | 'h' | 'viewRect' | 'bounds'>): { view?: { x0: number; x1: number }; avoid?: Box } {
+  const view = portraitSpan(cam);
+  const avoid = headerKeepOut(cam);
+  return { ...(view ? { view } : {}), ...(avoid ? { avoid } : {}) };
 }

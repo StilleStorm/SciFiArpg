@@ -14,7 +14,8 @@ import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsB
 import { rtOf } from '../enemies/runtime';
 import { t } from '../i18n';
 import { ENEMY_MELEE_MS, LEAN_DEG, LUNGE, attackAt, enemyOffset } from './attackFx';
-import { bubbleRect, bubbleShown, shiftInto } from './bubbleFocus';
+import { bubbleBlocks, bubblePlaced, bubbleRect, bubbleShown } from './bubbleFocus';
+import { avoidBoxes, inflate } from './keepOut';
 import { currentViewSize, viewZoom } from './camera';
 import { drawIn, eraseOut, marginNote, stamp } from './ink';
 import { syncStatusMarkers } from './statusMarkers';
@@ -139,7 +140,8 @@ function bubbleTransform(top: number, sx = 0, sy = 0): string {
 }
 
 /**
- * How far (whole units) the shown claim bubble must move to stay inside the visible rectangle (bubbleFocus.bubbleRect):
+ * How far (whole units) the shown claim bubble must move to stay inside the visible rectangle (bubbleFocus.bubbleRect) and
+ * off the pads and margin notes (bubbleFocus.bubbleBlocks):
  * it is shifted inward rather than clipped at the screen edge. The `over` group is never mirrored on the page (its flip
  * cancels the figure's), so the bubble's box is in page units about the enemy's position.
  */
@@ -151,8 +153,9 @@ function bubbleShift(e: Enemy, st: FigState): [number, number] {
   const k = bubbleScale();
   const pv = st.bubbleTop;
   const M = 6;
-  const dx = shiftInto(e.x + k * x0, e.x + k * (x0 + w), view.x0 + M, view.x1 - M);
-  const dy = shiftInto(e.y + pv + k * (yt - pv), e.y + pv + k * (yt + h + 8 - pv), view.y0 + M, view.y1 - M);
+  const at = { x0: e.x + k * x0, x1: e.x + k * (x0 + w), y0: e.y + pv + k * (yt - pv), y1: e.y + pv + k * (yt + h + 8 - pv) };
+  const [dx, dy] = avoidBoxes(at, inflate(view, -M), bubbleBlocks().map((b) => inflate(b, M)));
+  bubblePlaced({ x0: at.x0 + dx, y0: at.y0 + dy, x1: at.x1 + dx, y1: at.y1 + dy });
   return [Math.round(dx), Math.round(dy)];
 }
 

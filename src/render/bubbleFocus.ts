@@ -3,10 +3,14 @@
  * once: bosses, then elites, then the nearest (within 260 units, or anywhere for 1.2 s after it was drawn in: the grace
  * counts toward the cap). While a stamp is on the page every claim bubble is hidden: the stamp is the event.
  * The others keep their bubble in the DOM with opacity 0 (a strike-through stays on it); nothing is rebuilt when it comes back.
- * A shown bubble is shifted inward so it stays inside the visible rectangle (`bubbleRect`), never clipped at the edge.
+ * A shown bubble is shifted inward so it stays inside the visible rectangle (`bubbleRect`), never clipped at the edge,
+ * and off the pads and margin notes (`bubbleBlocks`, render/keepOut).
  */
 import type { Enemy, Player } from '../entities/types';
 import { rtOf } from '../enemies/runtime';
+import type { Box } from './keepOut';
+
+export { shiftInto } from './keepOut';
 
 export const BUBBLE_RADIUS = 260;
 export const BUBBLE_NEW_S = 1.2;
@@ -24,6 +28,9 @@ export interface ViewBox {
 let shown = new Set<number>();
 let hushed = false;
 let rect: ViewBox | null = null;
+let blocks: readonly Box[] = [];
+/** The shown bubbles placed so far this frame: a later one keeps off them as off a pad. */
+const placed: Box[] = [];
 
 const rank = (e: Enemy): number => (e.boss === true ? 0 : e.elite !== undefined ? 1 : 2);
 
@@ -73,22 +80,31 @@ export function pickBubbles(
   return best.map((b) => b.id);
 }
 
-/** How far to move the span [lo, hi] so it lies inside [min, max]; a span wider than the room is put at `min`. Pure. */
-export function shiftInto(lo: number, hi: number, min: number, max: number): number {
-  if (hi - lo >= max - min) return min - lo;
-  if (lo < min) return min - lo;
-  if (hi > max) return max - hi;
-  return 0;
-}
-
 /**
  * Call once per rendered frame before the views sync. `view`: the world rectangle the bubbles must stay inside (the camera's
- * view minus the HUD); `hush`: a stamp is on the page, so no claim bubble speaks.
+ * view minus the HUD); `blocks`: the pads and margin notes over it, in world units (`keepOutBlocks`); `hush`: a stamp is on
+ * the page, so no claim bubble speaks.
  */
-export function updateBubbleFocus(enemies: readonly Enemy[], p: Pick<Player, 'x' | 'y'>, opts: { view?: ViewBox; hush?: boolean } = {}): void {
+export function updateBubbleFocus(
+  enemies: readonly Enemy[],
+  p: Pick<Player, 'x' | 'y'>,
+  opts: { view?: ViewBox; blocks?: readonly Box[]; hush?: boolean } = {},
+): void {
   shown = new Set(pickBubbles(enemies, p, BUBBLE_CAP, shown));
   hushed = opts.hush === true;
   rect = opts.view ?? null;
+  blocks = opts.blocks ?? [];
+  placed.length = 0;
+}
+
+/** What a shown bubble keeps out from under (world units), as of this frame: the pads and margin notes, then the bubbles placed before it. */
+export function bubbleBlocks(): readonly Box[] {
+  return placed.length > 0 ? [...blocks, ...placed] : blocks;
+}
+
+/** A shown bubble took this place this frame (world units). */
+export function bubblePlaced(b: Box): void {
+  placed.push(b);
 }
 
 /** Whether this enemy's claim bubble is on the paper right now. */

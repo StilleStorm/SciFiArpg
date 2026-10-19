@@ -8,7 +8,7 @@ import { createViews, type Views } from './render/view';
 import { groundBuilders } from './render/figures';
 import { drawPage } from './render/obstacles';
 import { drawBase, type BaseView } from './render/stations';
-import { freeViewRect, portraitSpan, viewZoom } from './render/camera';
+import { freeViewRect, headerFrame, keepOutBlocks, viewZoom } from './render/camera';
 import { stationAt } from './world/base';
 import { onPageEntered } from './world/laws';
 import { baseHeaderFor, headerFor, tapKiosk } from './world/pageTurn';
@@ -88,7 +88,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
     bounds.h = page.h;
   };
   bus.on('ticket:accepted', () => {
-    if (state?.phase === 'base') baseView?.unlock(baseHeaderFor(state, portraitSpan(camera)));
+    if (state?.phase === 'base') baseView?.unlock(baseHeaderFor(state, headerFrame(camera)));
   });
 
   const game: Game = {
@@ -129,7 +129,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       fitBounds(s.page);
       camera.snap(s.player.x, s.player.y);
       camera.apply();
-      drawPage(stage.page, s.page, headerFor(s, portraitSpan(camera)));
+      drawPage(stage.page, s.page, headerFor(s, headerFrame(camera)));
       views.sync(collect(s), s.time * 1000, { drawIn: false }); // they were on the page all along: no drawing in again
     },
     start(seed, opts) {
@@ -152,7 +152,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       baseView = null;
       camera.snap(s.player.x, s.player.y);
       camera.apply();
-      drawPage(stage.page, s.page, headerFor(s, portraitSpan(camera)));
+      drawPage(stage.page, s.page, headerFor(s, headerFrame(camera)));
       input.setEnabled(true);
       bus.emit('run:started', { seed });
       bus.emit('stamp', { text: t('ui.run.stamp'), x: s.player.x, y: s.player.y - 120 });
@@ -193,7 +193,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       else {
         baseView = null; // the exit walked through: the base drawing went with the old sheet
         exits.frame(s);
-        updateBubbleFocus(s.enemies, s.player, { view: freeViewRect(camera), hush: stampsOnPage() > 0 });
+        updateBubbleFocus(s.enemies, s.player, { view: freeViewRect(camera), blocks: keepOutBlocks(camera), hush: stampsOnPage() > 0 });
       }
       views.sync(ents, s.phase === 'base' ? animMs : s.time * 1000);
       camera.follow(s.player.x, s.player.y, dtSec);

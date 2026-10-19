@@ -28,6 +28,7 @@ import { castSkill } from './heroes/skills';
 import { holdPad, releasePad, tapUltimatePad, ultimatePadInfo } from './ui/pads';
 import { setMeterForUi } from './ui/ultimate';
 import { castUltimate, meterOf, ultimateReady } from './heroes/ultimate';
+import { screenLayout, type ScreenLayout } from './render/keepOut';
 import { heroDef } from './heroes/defs';
 import { categoryOf, loadoutAdvice, runCapstone, specializationOf } from './heroes/specializations';
 import { createEnemyHook, createSporHook, type EnemyHook, type SporHook } from './enemies/hook';
@@ -94,6 +95,8 @@ export interface GameHook {
   tapUltimate(): boolean;
   /** What the ultimate pad shows: ready, drawn disabled, strokes inked, hidden (below the level of the first ultimate). Null before the pads exist. */
   ultimatePad(): { ready: boolean; off: boolean; inked: number; hidden: boolean } | null;
+  /** What the HUD, pads and margin notes cover, in css px (render/keepOut.ts), measured now if stale. */
+  keepOut(): ScreenLayout | null;
   /** Set the player's level directly (no update form, no reputacja): shows the ultimate pad at FIRST_ULTIMATE_LEVEL and lets the cast go. */
   setLevel(level: number): void;
   /** Set the Argument meter (0..1) of the live run, for the interface only (shots, the pad leg). */
@@ -238,6 +241,7 @@ export function installTestHook(deps: HookDeps): void {
     releasePad,
     tapUltimate: tapUltimatePad,
     ultimatePad: ultimatePadInfo,
+    keepOut: screenLayout,
     setLevel: (level) => {
       if (game.state) game.state.player.level = Math.max(1, Math.floor(level));
     },

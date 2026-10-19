@@ -34,6 +34,14 @@ describe('where a stamp lands', () => {
     expect(Math.abs(at.y - hero.y)).toBeGreaterThanOrEqual(80);
     expect(at.y).toBeGreaterThan(hero.y);
   });
+  it('stays off the pads and the margin-note row', () => {
+    const row = { x0: 230, y0: 70, x1: 378, y1: 116 };
+    const pad = { x0: 300, y0: 580, x1: 386, y1: 720 };
+    const at = placeStamp(300, 100, 200, 41, view, undefined, [row, pad]);
+    expect(at.y - 20.5 >= row.y1 || at.x + 100 <= row.x0).toBe(true);
+    const low = placeStamp(195, 650, 330, 41, view, undefined, [row, pad]);
+    expect(low.y + 20.5).toBeLessThanOrEqual(pad.y0);
+  });
   it('without a view it lands where it was asked', () => {
     expect(placeStamp(5, 6, 100, 41, null)).toEqual({ x: 5, y: 6 });
   });

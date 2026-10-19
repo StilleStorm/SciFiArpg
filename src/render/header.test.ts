@@ -61,3 +61,30 @@ describe('the tape of a repaired hole', () => {
     expect(tapesOnPage(tapes, 3)).toEqual([]);
   });
 });
+
+describe('the header and the margin-note row', () => {
+  const plain = { w: 1200, torn: "bl" as const, exit: null };
+  it('in portrait it is set below the row (the span beside it is too narrow for the form line)', () => {
+    const view = { x0: 400, x1: 790 };
+    const avoid = { x0: 630, y0: 10, x1: 786, y1: 54 };
+    const box = headerBox(plain, view, true, avoid, 34);
+    expect(box.y - 11).toBeGreaterThanOrEqual(avoid.y1);
+    expect(box.x1).toBeLessThanOrEqual(view.x1);
+  });
+  it('in landscape it is narrowed to the side of the row and keeps its line', () => {
+    const avoid = { x0: 828, y0: 41, x1: 1220, y1: 100 };
+    const box = headerBox(plain, undefined, true, avoid, 34);
+    expect(box.x1).toBeLessThanOrEqual(avoid.x0);
+    expect(box.y).toBe(headerBox(plain).y);
+    expect(box.x1 - box.x0).toBeGreaterThanOrEqual(240);
+  });
+  it('the left-handed row on the left narrows it from the left', () => {
+    const avoid = { x0: -20, y0: 41, x1: 372, y1: 100 };
+    const box = headerBox(plain, undefined, true, avoid, 34);
+    expect(box.x0).toBeGreaterThanOrEqual(avoid.x1);
+  });
+  it('a row below the header leaves it alone', () => {
+    const avoid = { x0: 600, y0: 300, x1: 800, y1: 340 };
+    expect(headerBox(plain, undefined, true, avoid, 34)).toEqual(headerBox(plain));
+  });
+});
