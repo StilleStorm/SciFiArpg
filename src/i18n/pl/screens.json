@@ -133,41 +133,41 @@
     "karta": "Karta uprawnień",
     "remove": "Usuń",
     "new": "Nowa sprawa",
-    "full": "Wykaz jest pełny. Nowej sprawy nie można założyć.",
+    "full": "Wykaz jest pełny. Nową sprawę zakłada się po usunięciu jednej z dotychczasowych.",
     "empty": "Wykaz jest pusty. Należy założyć sprawę.",
     "back": "Wróć na okładkę",
     "backToBase": "Wróć do bazy",
     "removeTitle": "Usunięcie teczki",
-    "removeBody": "Teczka: {name} ({hero}, poziom {level}) zostanie usunięta razem z torbą, archiwum osobistym i historią zgłoszeń. Archiwum wspólne pozostaje. Odzyskania nie przewidziano.",
+    "removeBody": "Usunięta zostanie teczka: {name} ({hero}, poziom {level}), wraz z torbą, archiwum osobistym i historią zgłoszeń. Archiwum wspólne pozostaje. Odzyskania nie przewidziano.",
     "removeConfirm": "Usuń teczkę",
     "removeCancel": "Anuluj",
-    "removed": "Teczkę {name} usunięto."
+    "removed": "Usunięto teczkę: {name}."
   },
   "create": {
     "nameLabel": "Numer sprawy",
-    "nameNote": "Można wpisać własny. Najwyżej {max} znaków.",
+    "nameNote": "Numer nadano automatycznie. Dopuszcza się własny, do {max} znaków, w tym litery.",
     "toRoster": "Wróć do wykazu"
   },
   "error": {
-    "nameEmpty": "Numer sprawy jest wymagany.",
+    "nameEmpty": "Pole wymagane. Sprawa bez numeru nie istnieje.",
     "nameLong": "Numer sprawy może mieć najwyżej {max} znaków.",
-    "nameTaken": "Sprawa o tym numerze już istnieje.",
+    "nameTaken": "Sprawa o tym numerze już istnieje. Drugiej się nie zakłada.",
     "rosterFull": "Wykaz jest pełny.",
     "noCharacter": "Nie odnaleziono teczki.",
     "writeFailed": "Zapisu nie dokonano. Pamięć urządzenia jest zablokowana lub pełna.",
     "archiveFull": "Archiwum jest pełne.",
     "bagFull": "Torba jest pełna.",
     "noItem": "Nie odnaleziono przedmiotu.",
-    "samePlace": "Przedmiot już tam jest.",
-    "unknown": "Czynności nie przyjęto."
+    "samePlace": "Przedmiot już się tam znajduje.",
+    "unknown": "Czynności nie przyjęto. Przyczyny nie podano."
   },
   "archive": {
     "deskLine": "Torba i archiwa",
     "deskNote": "Przedmioty",
     "title": "Archiwum",
     "sub": "{name}, poziom {level}",
-    "noteShared": "Archiwum wspólne jest jedno dla wszystkich teczek.",
-    "noteTap": "Dotknij przedmiotu, a potem miejsca, do którego ma trafić.",
+    "noteShared": "Archiwum wspólne jest wspólne dla wszystkich teczek.",
+    "noteTap": "Dotknij przedmiotu, następnie miejsca docelowego.",
     "bag": "Torba",
     "personal": "Archiwum osobiste",
     "shared": "Archiwum wspólne",
@@ -177,11 +177,11 @@
     "chosen": "Wybrano: {name}",
     "moveTo": "Do: {place}",
     "moveHere": "Przenieś tutaj",
-    "cancel": "Odłóż wybór",
-    "moved": "Przeniesiono: {name}, do: {place}.",
-    "empty": "Pusto.",
+    "cancel": "Anuluj wybór",
+    "moved": "Przeniesiono: {name}. Miejsce docelowe: {place}.",
+    "empty": "Brak przedmiotów.",
     "back": "Wróć",
-    "cue": "Dalej w dół: dalsze miejsca."
+    "cue": "Dalsze miejsca poniżej"
   },
   "profile": {
     "title": "Profil użytkownika",
