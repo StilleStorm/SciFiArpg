@@ -4,6 +4,7 @@ import { xpToNext } from '../progression/xp';
 import { el as svgEl, n2, wobblyCircle } from '../render/svg';
 import type { RunState } from '../world/run';
 import { h } from './dom';
+import { meterOf } from './ultimate';
 import { createPauseButton } from './pause';
 import './tunnel.css';
 
@@ -87,6 +88,7 @@ export function createHud(
 ): Hud {
   const el = h('div', 'hud paper');
   const racja = field('ui.hud.racja', 'racja');
+  const argument = field('ui.hud.argument', 'arg');
   const reputacja = field('ui.hud.reputacja');
   const gwiazdki = field('ui.hud.gwiazdki');
   const strona = field('ui.hud.strona');
@@ -94,7 +96,7 @@ export function createHud(
   const row1 = h('div', 'hud-row');
   const row2 = h('div', 'hud-row');
   reputacja.root.classList.add('rep');
-  row1.append(racja.root);
+  row1.append(racja.root, argument.root);
   row2.append(reputacja.root, gwiazdki.root, strona.root);
   // A queued update: a typed line hanging under the form, tappable (44 px tall), shown only while one waits.
   const upd = h('button', 'upd hidden', t('forms.update.availableLine'));
@@ -110,8 +112,14 @@ export function createHud(
   const lost = svgEl('path', { class: 'lost' });
   svg.append(whole, left, lost);
   racja.blank.append(svg);
+  // The Argument meter: an ink underline that fills with the meter, and turns red when it is full.
+  const aSvg = svgEl('svg', { 'aria-hidden': 'true' });
+  const aWhole = svgEl('path', { class: 'whole' });
+  const aLeft = svgEl('path', { class: 'left' });
+  aSvg.append(aWhole, aLeft);
+  argument.blank.append(aSvg);
 
-  const cache = { racja: '', ratio: -1, width: 0, reputacja: '', gwiazdki: '', strona: '', upd: false, phase: '' };
+  const cache = { racja: '', ratio: -1, aRatio: -1, aWidth: 0, width: 0, reputacja: '', gwiazdki: '', strona: '', upd: false, phase: '' };
   const setText = (node: HTMLElement, key: 'racja' | 'reputacja' | 'gwiazdki' | 'strona', text: string): void => {
     if (cache[key] === text) return;
     cache[key] = text;
@@ -122,6 +130,7 @@ export function createHud(
     el,
     invalidate() {
       cache.width = 0;
+      cache.aWidth = 0;
     },
     update(s) {
       const p = s.player;
@@ -142,6 +151,17 @@ export function createHud(
       if (waiting !== cache.upd) {
         cache.upd = waiting;
         upd.classList.toggle('hidden', !waiting);
+      }
+      const aRatio = Math.round(meterOf(p) * 100) / 100;
+      const aWidth = argument.blank.clientWidth;
+      if (aWidth > 0 && (aRatio !== cache.aRatio || aWidth !== cache.aWidth)) {
+        cache.aRatio = aRatio;
+        cache.aWidth = aWidth;
+        aSvg.setAttribute('viewBox', `0 0 ${aWidth} 10`);
+        const d = racjaPaths(aWidth, aRatio);
+        aWhole.setAttribute('d', d.whole);
+        aLeft.setAttribute('d', d.left);
+        argument.root.classList.toggle('full', aRatio >= 1);
       }
       const ratio = Math.max(0, p.hp) / p.hpMax;
       const width = racja.blank.clientWidth;

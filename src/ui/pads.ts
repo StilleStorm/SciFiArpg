@@ -22,8 +22,9 @@ import { t } from '../i18n';
 import { runParagraph } from '../progression/paragraphs';
 import type { RunState } from '../world/run';
 import { hideAim, showAim } from '../render/aimFx';
-import { el, wobblyCircle } from '../render/svg';
+import { el, wobblyCircle, wobblyLine } from '../render/svg';
 import { h } from './dom';
+import { castUltimate, meterOf, ultimateReady, ultimateUnlocked } from './ultimate';
 import './forms.css';
 import './konfiguracja.css';
 
@@ -74,6 +75,22 @@ interface PadNode {
   pressedAt: number;
 }
 const nodes: PadNode[] = [];
+
+/** The fourth pad (DESIGN 10.2): the Argument stamp pad. Its ink cushion is hatched with this many strokes; the meter inks them in. */
+export const ULT_STROKES = 10;
+interface UltNode {
+  btn: HTMLButtonElement;
+  strokes: SVGPathElement[];
+  /** Strokes inked now; -1 = not drawn yet. */
+  inked: number;
+  ready: boolean;
+  /** The pad is drawn disabled and ignores presses. */
+  off: boolean;
+  /** Not shown at all: the hero has not reached the level of the first ultimate (heroes/ultimateDefs.ts FIRST_ULTIMATE_LEVEL). */
+  hidden: boolean;
+  pressedAt: number;
+}
+let ult: UltNode | null = null;
 let currentHero: HeroId | null = null;
 let busRef: Bus | null = null;
 /** The pad whose preview is on the page (the last aimed pad pressed). */
@@ -116,6 +133,7 @@ export function setPadHero(heroId: HeroId): void {
  * Otherwise it only compares four values.
  */
 export function syncPads(s: RunState): void {
+  syncUltimate(s);
   const hero = s.player.heroId;
   const pads = s.hero.pads;
   for (const slot of PAD_SLOTS) {
@@ -147,6 +165,99 @@ export function updatePadCooldowns(cd: readonly number[], total: readonly number
     n.btn.classList.toggle('cooling', cooling);
     if (cooling) n.ring.style.strokeDashoffset = String(offset);
   }
+}
+
+// ---------- the ultimate pad: a stamp pad that inks in as the Argument meter fills ----------
+
+/** How many of the cushion's strokes the meter inks (0..ULT_STROKES). Pure, tested. */
+export function inkedStrokes(meter: number): number {
+  return Math.min(ULT_STROKES, Math.max(0, Math.floor(meter * ULT_STROKES + 1e-9)));
+}
+
+/** Every frame: ink the cushion to the meter, draw the pad disabled until the meter is full. Compares two values when nothing changed. */
+function syncUltimate(s: RunState): void {
+  if (!ult) return;
+  const hidden = !ultimateUnlocked(s);
+  if (hidden !== ult.hidden) {
+    ult.hidden = hidden;
+    ult.btn.classList.toggle('locked', hidden);
+  }
+  const m = meterOf(s.player);
+  const ready = ultimateReady(s.player) && s.status === 'running' && s.phase === 'run';
+  const n = ready ? ULT_STROKES : inkedStrokes(m);
+  if (n !== ult.inked) {
+    ult.inked = n;
+    ult.strokes.forEach((st, i) => {
+      st.style.display = i < n ? 'block' : 'none';
+    });
+  }
+  if (ready !== ult.ready) {
+    ult.ready = ready;
+    ult.off = !ready;
+    ult.btn.classList.toggle('ready', ready);
+    ult.btn.classList.toggle('off', !ready);
+    ult.btn.setAttribute('aria-disabled', ready ? 'false' : 'true');
+  }
+}
+
+/** The ultimate pad was pressed: cast when the meter is full, otherwise nothing (the pad is drawn disabled). */
+function pressUltimate(): boolean {
+  const s = trackedRun();
+  if (!ult || !s || !busRef || ult.off || ult.hidden) return false;
+  ult.pressedAt = performance.now();
+  return castUltimate(s, busRef);
+}
+
+/** Test hook: press the ultimate pad. True when a cast happened. */
+export function tapUltimatePad(): boolean {
+  return pressUltimate();
+}
+
+/** Test hook: what the ultimate pad shows now. */
+export function ultimatePadInfo(): { ready: boolean; off: boolean; inked: number; hidden: boolean } | null {
+  return ult ? { ready: ult.ready, off: ult.off, inked: ult.inked, hidden: ult.hidden } : null;
+}
+
+function createUltimatePad(wrap: HTMLElement): void {
+  const rng = createRng(91);
+  const btn = h('button', 'pad ult off locked');
+  btn.type = 'button';
+  btn.setAttribute('aria-label', t('ui.pads.ultimateLabel'));
+  btn.setAttribute('aria-disabled', 'true');
+  const word = h('span', 'word', t('ui.pads.ultimate'));
+  const svg = el('svg', { viewBox: '-26 -26 52 52' });
+  // the tin (two strokes, dotted when disabled), the ink cushion inside it, the stamp standing on it
+  const tin = el('g', { class: 'base' });
+  const box = (x1: number, y1: number, x2: number, y2: number, j: number): string =>
+    [wobblyLine(rng, x1, y1, x2, y1, 3, j), wobblyLine(rng, x2, y1, x2, y2, 2, j), wobblyLine(rng, x2, y2, x1, y2, 3, j), wobblyLine(rng, x1, y2, x1, y1, 2, j)].join('');
+  tin.append(el('path', { d: box(-21, 2, 21, 20, 0.5) }), el('path', { d: box(-18.4, 4.6, 18.6, 17.6, 0.4), 'stroke-width': 0.9 }));
+  const cushion = el('g', { class: 'cushion' });
+  const strokes: SVGPathElement[] = [];
+  for (let i = 0; i < ULT_STROKES; i++) {
+    const x = -15.6 + (i * 31.2) / (ULT_STROKES - 1);
+    const st = el('path', { d: wobblyLine(rng, x, 6.4, x + 1.2, 15.6, 2, 0.3) });
+    strokes.push(st);
+    cushion.append(st);
+  }
+  const glyph = el('g', { class: 'glyph' });
+  glyph.append(
+    el('path', { d: box(-11, -6, 11, 0.5, 0.35) }),
+    el('path', { d: wobblyLine(rng, 0, -6, 0, -16, 2, 0.3) }),
+    el('path', { d: wobblyLine(rng, -7, -17, 7, -17, 3, 0.35) }),
+  );
+  svg.append(tin, cushion, glyph);
+  btn.append(svg, word);
+  // The pad answers the finger going down (another thumb may be on the joystick); a lone click still casts.
+  btn.addEventListener('pointerdown', (ev) => {
+    if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+    pressUltimate();
+  });
+  btn.addEventListener('click', () => {
+    if (performance.now() - (ult?.pressedAt ?? -Infinity) < CLICK_AFTER_PRESS_MS) return;
+    pressUltimate();
+  });
+  wrap.append(btn);
+  ult = { btn, strokes, inked: -1, ready: false, off: true, hidden: true, pressedAt: -Infinity };
 }
 
 // ---------- hold, drag, release (DESIGN 5.6) ----------
@@ -296,11 +407,12 @@ export function releasePad(slot: 1 | 2 | 3): boolean {
   return release(slot - 1, pr.x, pr.y, true);
 }
 
-/** Three skill buttons and the inventory button: circled margin notes with a word label. */
+/** Three skill buttons, the inventory button and the ultimate stamp pad: circled margin notes with a word label. */
 export function createPads(root: HTMLElement, bus: Bus): HTMLElement {
   const wrap = h('div', 'pads');
   const rng = createRng(77);
   nodes.length = 0;
+  ult = null;
   currentHero = null;
   busRef = bus;
   drawer = null;
@@ -375,6 +487,7 @@ export function createPads(root: HTMLElement, bus: Bus): HTMLElement {
     wrap.append(btn);
     nodes.push({ btn, svg, glyph, word, ptag, ptagN: 1, ring, circles: [...base.querySelectorAll('path')], thick: false, last: -2, press: null, release: null, pressedAt: -Infinity });
   });
+  createUltimatePad(wrap);
   root.append(wrap);
   setPadHero(DEFAULT_HERO_ID);
   return wrap;

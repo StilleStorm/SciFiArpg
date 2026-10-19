@@ -97,6 +97,10 @@
   right: calc(var(--side-r) + 30px);
   bottom: calc(env(safe-area-inset-bottom) + 96px);
 }
+:root[data-orient='landscape'] .pad.ult {
+  right: calc(var(--side-r) + 118px);
+  bottom: calc(env(safe-area-inset-bottom) + 100px);
+}
 :root[data-orient='landscape'] .pad.inv {
   left: auto;
   bottom: auto;
@@ -114,6 +118,10 @@
 :root[data-orient='landscape'] .lefty .pad.s3 {
   right: auto;
   left: calc(var(--side-l) + 30px);
+}
+:root[data-orient='landscape'] .lefty .pad.ult {
+  right: auto;
+  left: calc(var(--side-l) + 118px);
 }
 :root[data-orient='landscape'] .lefty .pad.inv {
   right: auto;
@@ -628,11 +636,11 @@
   margin: 6px 0 8px;
 }
 
-/* ---------- Spór: in landscape the replies stack in the right margin, left of the pad column (Załączniki, Tunel, Pauza and the skill
-   pads all stand to the right of it) and above the footnote slip ---------- */
+/* ---------- Spór: in landscape the replies stack in the right margin, left of the pad column (Załączniki, Tunel, Pauza, the skill
+   pads and the ultimate pad all stand to the right of it) and above the footnote slip ---------- */
 :root[data-orient='landscape'] .spor {
   left: auto;
-  right: calc(var(--side-r) + 150px);
+  right: calc(var(--side-r) + 250px);
   bottom: calc(env(safe-area-inset-bottom) + 90px);
   width: 214px;
   flex-direction: column;
@@ -643,5 +651,5 @@
 }
 :root[data-orient='landscape'] .lefty .spor {
   right: auto;
-  left: calc(var(--side-l) + 150px);
+  left: calc(var(--side-l) + 250px);
 }

@@ -21,7 +21,9 @@ import { mountSklep, type SklepHandle } from './ui/sklep';
 import { createHeroHook, type HeroHook } from './heroes/hook';
 import type { Aim } from './heroes/aim';
 import { castSkill } from './heroes/skills';
-import { holdPad, releasePad } from './ui/pads';
+import { holdPad, releasePad, tapUltimatePad, ultimatePadInfo } from './ui/pads';
+import { setMeterForUi } from './ui/ultimate';
+import { castUltimate, meterOf, ultimateReady } from './heroes/ultimate';
 import { createEnemyHook, createSporHook, type EnemyHook, type SporHook } from './enemies/hook';
 import { createAudioHook, type AudioHook } from './audio/hook';
 
@@ -77,6 +79,20 @@ export interface GameHook {
   holdPad(slot: 1 | 2 | 3, dx: number, dy: number): void;
   /** Lift the finger held by `holdPad`: the skill fires with that aim, or nothing if the finger is back on the pad. True when a cast was asked for. */
   releasePad(slot: 1 | 2 | 3): boolean;
+  /** Press the ultimate stamp pad (S3). True when a cast happened (the pad is disabled until the meter is full). */
+  tapUltimate(): boolean;
+  /** What the ultimate pad shows: ready, drawn disabled, strokes inked, hidden (below the level of the first ultimate). Null before the pads exist. */
+  ultimatePad(): { ready: boolean; off: boolean; inked: number; hidden: boolean } | null;
+  /** Set the player's level directly (no update form, no reputacja): shows the ultimate pad at FIRST_ULTIMATE_LEVEL and lets the cast go. */
+  setLevel(level: number): void;
+  /** Set the Argument meter (0..1) of the live run, for the interface only (shots, the pad leg). */
+  setMeterUi(v: number): void;
+  /** Fill the Argument meter of the live run (default full). The meter itself, not only its drawing. */
+  fillMeter(v?: number): void;
+  /** Cast the hero's ultimate now (heroes/ultimate.ts): needs a full meter. True when cast. */
+  castUltimate(): boolean;
+  /** Plain data: the meter and the running ultimates. */
+  ultimateInfo(): { meter: number; ready: boolean; active: string[]; paragraph: number } | null;
   /** Families, bosses and statuses on demand (enemies/hook.ts). */
   enemies: EnemyHook;
   /** The boss argument: answer a reply, read the prompt and the x2 window (enemies/hook.ts). */
@@ -197,6 +213,23 @@ export function installTestHook(deps: HookDeps): void {
     },
     holdPad,
     releasePad,
+    tapUltimate: tapUltimatePad,
+    ultimatePad: ultimatePadInfo,
+    setLevel: (level) => {
+      if (game.state) game.state.player.level = Math.max(1, Math.floor(level));
+    },
+    setMeterUi: (v) => {
+      if (game.state) setMeterForUi(game.state, v);
+    },
+    fillMeter: (v = 1) => {
+      if (game.state) game.state.player.meter = Math.min(1, Math.max(0, v));
+    },
+    castUltimate: () => (game.state ? castUltimate(game.state, deps.bus) : false),
+    ultimateInfo() {
+      const st = game.state;
+      if (!st) return null;
+      return { meter: meterOf(st.player), ready: ultimateReady(st.player), active: (st.hero.ult?.active ?? []).map((u) => u.id), paragraph: st.hero.ult?.para ?? 1 };
+    },
     enemies: createEnemyHook(() => game.state, deps.bus),
     spor: createSporHook(() => game.state, deps.bus),
     audio: createAudioHook(),

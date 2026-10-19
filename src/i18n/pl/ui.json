@@ -9,7 +9,8 @@
     "pauseLabel": "Wstrzymaj zgłoszenie",
     "tunnel": "Tunel",
     "tunnelLabel": "Otwórz tunel serwisowy",
-    "base": "Baza"
+    "base": "Baza",
+    "argument": "Argument"
   },
   "title": {
     "agency": "Centrum Obsługi Planet",
@@ -26,7 +27,9 @@
     "skill1": "Zarzut",
     "skill2": "Zażalenie",
     "skill3": "Sprostowanie",
-    "inventory": "Załączniki"
+    "inventory": "Załączniki",
+    "ultimate": "Ostateczny",
+    "ultimateLabel": "Argument ostateczny"
   },
   "ink": {
     "struck": "skreślono",
