@@ -39,6 +39,8 @@ only plan the lead reads; one slice = one loop iteration between a pickup and a 
 
 Milestone end (automode): tester e2e → look over `shots/` → story plan review (Fable, reads
 STATUS + the milestone's reports only, writes decisions into docs, parks player questions) →
+integrator folds the milestone's per-slice ARCHITECTURE.md sections into the contract sections
+they extend (hook names, events, shots kept; narrative dropped; the file stays under 350 lines) →
 gate → push → milestone report.
 
 ---
@@ -137,12 +139,12 @@ Reads: PLAN §7 (roster), ITEMS §8, §12 (Archiwum); DESIGN §3; ARCHITECTURE (
 Own: src/save/** (SAVE_VERSION 3: `characters[]` each with character, bookmark, history, personal archive 40; `sharedArchive` 40; `activeCharacterId`; migration from v2 wrapping the single character), src/i18n/pl/screens.json keys for errors.
 Allowed additive: src/entities/types.ts, src/testHook.ts.
 Forbidden: src/ui/**.
-Deliverables: (1) schema + migration + tests (v2 → v3 keeps everything). (2) APIs: `createCharacter(heroId, name)`, `selectCharacter`, `deleteCharacter`, `moveItem(from, to)` between bag/personal/shared with capacity checks.
+Deliverables: (1) schema + migration + tests (v2 → v3 keeps everything, including `Character.potwierdzenia`, the loadout, specialization and paragraphs). (2) APIs: `createCharacter(heroId, name)`, `selectCharacter`, `deleteCharacter`, `moveItem(from, to)` between bag/personal/shared with capacity checks. (3) `save/export.ts` follows: an archive written by S5 (format 1, one character) imports into v3; the export carries every character and the shared archive; the round trip stays byte-identical (test).
 #### Builder brief: ui-roster (parallel; disjoint)
 Own: src/ui/roster.ts (new: list of characters as case files with hero figure, level, planet; create: hero pick via the existing profile sheet + a name as "nr sprawy" auto-generated or typed; delete with a confirmation form), src/ui/profile.ts (becomes the hero pick inside creation), src/ui/archive.ts (new: personal + shared archive sheet at the desk with transfers), src/ui/baza.ts (desk lines), src/i18n/pl/screens.json.
 Allowed additive: src/main.ts (title → roster → base), src/testHook.ts.
 Forbidden: src/save/**.
-Deliverables: (1) roster screen in both orientations. (2) archive sheet with drag-free transfers (tap source, tap destination). (3) title flow updated; `Zmień profil` removed. Shots: `SHOT_PORT=4186 SHOT_OUT=dist-s6 SHOT_DIR=shots-s6`.
+Deliverables: (1) roster screen in both orientations; each case file opens the character's Karta uprawnień (S4 `ui/karta.ts`), which leaves the old profile sheet with it. (2) archive sheet with drag-free transfers (tap source, tap destination). (3) title flow updated; `Zmień profil` removed; the desk's Konfiguracja, Karta uprawnień and Archiwum eksportowe lines keep working per character. Shots: `SHOT_PORT=4186 SHOT_OUT=dist-s6 SHOT_DIR=shots-s6`.
 Voice: yes. Look: yes. Tester leg: create two characters → play one → switch → separate progress → transfer an item via the shared archive. Estimate: 1.4M. Parked: none.
 
 ### S7 Priority, planet sequence, final ticket, free travel, card frames
@@ -180,9 +182,9 @@ Goal: ITEMS slice c + PLAN §8 elites. Depends on: S7, S8.
 Reads: ITEMS §5, §6, §7.1–7.2; PLAN §8 (Elite packs); DESIGN §6; ARCHITECTURE (loot, enemies, economy).
 #### Builder brief: drops-economy
 Own: src/items/level.ts (new: ilvl = 5·(planet−1)+1 + page offset + priority bonus, cap 40; budgets per tier; lie magnitude per tier 15/25/35), src/systems/loot.ts (drop tables per family/rank, boss guarantees, permission cards, gwiazdki amounts), src/economy/sklep.ts (stock 6 plates per planet, prices by tier, fee, lie rate), src/i18n/pl/economy.json.
-Allowed additive: src/world/run.ts, src/testHook.ts.
+Allowed additive: src/world/run.ts, src/systems/recovery.ts (constants only), src/testHook.ts.
 Forbidden: src/enemies/**.
-Deliverables: (1) ilvl and budgets + tests. (2) drop tables + tests of expectations by seed. (3) Sklep stock rules + tests.
+Deliverables: (1) ilvl and budgets + tests. (2) drop tables + tests of expectations by seed; the table includes the potwierdzenia rate per rank (S5 shipped `.1/.5/1` untested) with a target of 1–2 slips per page at Normalny and a seeded test of that expectation. (3) Sklep stock rules + tests.
 #### Builder brief: elite-packs (parallel; disjoint)
 Own: src/enemies/** (packs: leader + 2–4 minions sharing the aura; named elites with 2–3 affixes, Asystent-recorded names from an i18n generator, ≤1 per two pages, guaranteed nietypowy+ drop; elite affix pool 4 → 10 with grammar forms), src/i18n/pl/enemies.json.
 Allowed additive: src/systems/loot.ts (named-elite drop hook; coordinate by a `// SEAM:` if the other builder is mid-edit), src/core/events.ts, src/testHook.ts.
@@ -199,7 +201,7 @@ Allowed additive: src/systems/step.ts, src/core/events.ts, src/testHook.ts, src/
 Forbidden: src/ui/**, src/world/quests.ts.
 Deliverables: (1) three content kinds placed by seed with tests. (2) the 6 seals' buffs as statuses/buffs. (3) events frame + 3 events.
 #### Builder brief: karta-quests-npc (parallel; disjoint)
-Own: src/ui/karta-osobowa.ts (new: stats, damage per type, resists, crit, speed, meter, buffs as stamps, held potwierdzenia, permissions; from the desk and the HUD Reputacja line), src/world/quests.ts (new: templates kill N / deliver / fetch / reach; state per character; rewards), src/ui/board.ts (ogłoszenia list with accept/complete; procedural drobne ogłoszenia 2 per planet), src/world/npc.ts + src/render/npc.ts (figure primitive on base pages: tap → short sheet; one placeholder clerk per base), src/i18n/pl/screens.json keys.
+Own: src/ui/karta-osobowa.ts (new: stats, damage per type, resists, crit, speed, meter, buffs as stamps, held potwierdzenia, specialization + capstone, permissions; a desk line beside Konfiguracja and Karta uprawnień, built the way `ui/karta.ts` is (pure model + sheet), and from the HUD Reputacja line; not a pause-sheet line, that grid is full at six), src/world/quests.ts (new: templates kill N / deliver / fetch / reach; state per character; rewards), src/ui/board.ts (ogłoszenia list with accept/complete; procedural drobne ogłoszenia 2 per planet), src/world/npc.ts + src/render/npc.ts (figure primitive on base pages: tap → short sheet; one placeholder clerk per base), src/i18n/pl/screens.json keys.
 Allowed additive: src/world/base.ts (NPC placement), src/save/character.ts (quest state), src/main.ts, src/testHook.ts.
 Forbidden: src/world/content.ts, src/world/pages.ts.
 Deliverables: (1) the sheet. (2) quest engine + tests. (3) board UI. (4) NPC primitive. Shots: `SHOT_PORT=4191 SHOT_OUT=dist-s10 SHOT_DIR=shots-s10`.
@@ -253,7 +255,7 @@ Reads: PLAN §3 (MVP shape), STATUS feedback section; ARCHITECTURE (narration).
 Own: src/narration/onramp.ts (new: 4 first-ticket footnotes: walk, attack, rebut, update), src/balance/*.ts (new: a single numbers file per domain re-exported where constants live), src/i18n/pl/narration.json keys.
 Allowed additive: constants files in heroes/items/enemies to import from balance.
 Forbidden: everything else.
-Deliverables: (1) on-ramp. (2) a `scripts/balance-report.mjs` that runs 20 seeded runs per hero at Normalny through the hook and prints time-to-boss, deaths, potwierdzenia used, drops by tier; (3) one tuning pass from its output with the changes listed in the report.
+Deliverables: (1) on-ramp (a fifth note on the first potwierdzenie, wiring the unused `ui.note.pickup`). (2) a `scripts/balance-report.mjs` that runs 20 seeded runs per hero at Normalny through the hook and prints time-to-boss, deaths, potwierdzenia dropped/held/used, ultimates cast, drops by tier; (3) one tuning pass from its output (recovery constants, meter fill, capstone magnitudes among them) with the changes listed in the report.
 Voice: yes (all Akt I text, full pass). Look: all `shots/`. Tester: `scripts/e2e-milestone-3.mjs` = Akt I start to finish skipping cards, both orientations, for two heroes. Estimate: 0.9M.
 
 M3 end = **MVP**: push; milestone report; player playtest; park feedback into STATUS.
@@ -272,7 +274,7 @@ Builder `reklamacja-paczkomat`: own src/economy/reklamacja.ts (re-roll one affix
 
 ### S19 Heroes filled: Pralka and Konsultant
 Depends on: S4, S17. Reads: SKILLS §1, §2; DESIGN §10.2; §14.3.
-Two builders in parallel, disjoint folders `src/heroes/pralka/` and `src/heroes/konsultant/` (+ their i18n files, recipes keyed by hero): each: skills to 10–11 with all paragraphs, 3 ultimates, passives 7–10, pad drawings for all, 4–6 recipes with body, profile text, upgrade pool, tests per skill × paragraph × aim, shot-heroes frames. `SHOT_PORT=4198/4199`. Voice: yes. Look: yes. Tester leg: every skill with every paragraph. Estimate: 1.5M.
+Two builders in parallel, disjoint folders `src/heroes/pralka/` and `src/heroes/konsultant/` (+ their i18n files, recipes keyed by hero): each: skills to 10–11 with all paragraphs, ultimates 2 and 3 (levels 24/36, of the two types the first lacks; the Konfiguracja ultimate slot and the meter from S3/S4 take them as data; `HeroSounds.ultimate` becomes a name per ultimate id, a `// SEAM:` for the integrator the first time), passives 7–10, pad drawings for all, 4–6 recipes with body, profile text, upgrade pool, tests per skill × paragraph × aim, shot-heroes frames. Capstones stay small named bonuses (DESIGN §10.3); a mechanical capstone is not a deliverable. `SHOT_PORT=4198/4199`. Voice: yes. Look: yes. Tester leg: every skill with every paragraph. Estimate: 1.5M.
 
 ### S20 Heroes filled: Pętlowiec and Kartograf — as S19 (`SHOT_PORT=4181/4182`). Estimate: 1.5M.
 

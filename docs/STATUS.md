@@ -100,7 +100,9 @@ PRODUCTION.md's milestone table (M1 = S1–S5 … M7) supersedes the list below.
 - **M6 Polish and balance**: slice 11, the on-ramp, phone feedback. Then Akt II and III as M7, M8.
 
 ## Needs the player
-(none)
+- Capstones as built are small flat bonuses (+20–25% on one skill, DESIGN §10.3). Keep them so, or
+  turn them into mechanical rules (Diablo 4 key passives) in M4 S19–S21? Recommendation: keep;
+  Diablo 2 had none, they read at a glance on the Karta, and the S16 balance pass tunes magnitudes.
 
 ## Game plan and the slice order
 The plan is docs/PRODUCTION.md: 7 milestones, 30 slices, each with a paste-ready builder brief.
@@ -114,7 +116,10 @@ Progress is recorded here, one line per slice:
 
 - S4 done: skill categories, three specializations per hero with capstones (one column at a time, ≥2 skills on the pads), full Konfiguracja form (pads, ultimate slot, specialization, advice), Karta uprawnień chart from the desk and profile (portrait stacks the columns for readable stamps), loadout + specialization + ultimate paragraph saved; voice and look passes.
 
-**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S5 (last of M1; then the M1 milestone steps).
+- S5 done: potwierdzenia (drop .1/.5/1 by rank, vacuum 90, heal 25% or held to 5, tap and auto-use under 15%, regen 2%/s after 4 s, HUD slip button), `navigator.storage.persist()`, Archiwum eksportowe export/import with confirmation, bug dump from the pause sheet, text size (3 steps), damage numbers (off by default); voice pass. Open: drop rates untested (S9/S16), DESIGN has no recovery section (PLAN §8 holds the rule).
+- M1 plan review done: PRODUCTION S6, S9, S10, S16, S19 briefs adjusted to what shipped (roster keeps Karta uprawnień and the archive format, potwierdzenia rates into the drop tables, Karta osobowa as a desk line, ultimates 2/3 as data on the S3/S4 slots, ARCHITECTURE folded at each milestone end); PLAN's duplicate §8 removed. Order unchanged.
+
+**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S6 (first of M2).
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
