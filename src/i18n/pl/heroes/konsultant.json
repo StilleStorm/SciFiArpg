@@ -98,21 +98,21 @@
       "name": "Infolinia",
       "cap": {
         "name": "Czas oczekiwania",
-        "desc": "Proszę czekać trwa o 25% dłużej."
+        "desc": "„Proszę czekać” trwa o 25% dłużej."
       }
     },
     "windykacja": {
       "name": "Windykacja",
       "cap": {
         "name": "Numer na wezwaniu",
-        "desc": "Numer sprawy zadaje o 20% więcej obrażeń."
+        "desc": "„Numer sprawy” zadaje o 20% więcej obrażeń."
       }
     },
     "sprzedaz": {
       "name": "Sprzedaż",
       "cap": {
         "name": "Oferta dodatkowa",
-        "desc": "Pomoc dodatkowa trwa o 25% dłużej."
+        "desc": "„Czy mogę jeszcze w czymś pomóc” trwa o 25% dłużej."
       }
     }
   }

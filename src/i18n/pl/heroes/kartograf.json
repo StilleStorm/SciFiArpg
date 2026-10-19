@@ -98,21 +98,21 @@
       "name": "Pomiar",
       "cap": {
         "name": "Dokładność do metra",
-        "desc": "Triangulacja zadaje o 20% więcej obrażeń."
+        "desc": "„Triangulacja” zadaje o 20% więcej obrażeń."
       }
     },
     "granica": {
       "name": "Granica",
       "cap": {
         "name": "Skala obowiązująca",
-        "desc": "Skala 1:1 trwa o 25% dłużej."
+        "desc": "„Skala 1:1” obowiązuje o 25% dłużej."
       }
     },
     "nieistnienie": {
       "name": "Nieistnienie",
       "cap": {
         "name": "Obszar skreślony",
-        "desc": "Teren nieistniejący obejmuje obszar większy o 20%."
+        "desc": "„Teren nieistniejący” nie istnieje na obszarze większym o 20%."
       }
     }
   }
