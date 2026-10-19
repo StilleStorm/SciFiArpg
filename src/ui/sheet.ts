@@ -89,7 +89,7 @@ export function createSheet(root: HTMLElement, opts: SheetOptions): Sheet {
 const CUE_ROOM = 13;
 
 /** The line boxes of the text (and the drawings) near the foot of a scrolled body (only those reaching within 80 px of its edge). */
-function lineBoxes(scroll: HTMLElement, bottom: number): { top: number; bottom: number }[] {
+export function lineBoxes(scroll: HTMLElement, bottom: number): { top: number; bottom: number }[] {
   const out: { top: number; bottom: number }[] = [];
   const walk = document.createTreeWalker(scroll, NodeFilter.SHOW_TEXT);
   const range = document.createRange();

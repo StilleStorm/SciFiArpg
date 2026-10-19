@@ -183,6 +183,33 @@
   flex-wrap: wrap;
   gap: 4px 26px;
 }
+/* the "c.d. poniżej" cue under the cut of the settings form (the sheets' .ps-more, as a line of its own) */
+.set-more {
+  align-self: stretch;
+  margin: 0;
+  border-top: 1px solid var(--ink);
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 15px;
+  letter-spacing: 0.04em;
+}
+.set-more {
+  position: relative;
+}
+.set-veil {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 1px);
+  height: 0;
+  background-color: var(--paper);
+  background-image: var(--paper-noise, none);
+  pointer-events: none;
+}
+.set-more[hidden] {
+  display: none;
+}
 .set-scroll > .eta {
   margin-top: 14px;
 }
@@ -378,7 +405,21 @@
 :root[data-orient='landscape'] .vol-range::-webkit-slider-thumb {
   margin-top: 2px;
 }
-:root[data-orient='landscape'] .set-scroll > .eta {
+:root[data-orient='landscape'] /* the "c.d. poniżej" cue under the cut of the settings form (the sheets' .ps-more, as a line of its own) */
+.set-more {
+  align-self: stretch;
+  margin: 0;
+  border-top: 1px solid var(--ink);
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 15px;
+  letter-spacing: 0.04em;
+}
+.set-more[hidden] {
+  display: none;
+}
+.set-scroll > .eta {
   margin-top: 8px;
 }
 :root[data-orient='landscape'] .frame:has(> .set-scroll) > .form-btn {

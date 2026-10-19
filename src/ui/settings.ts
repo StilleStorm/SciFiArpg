@@ -3,6 +3,7 @@ import { el } from '../render/svg';
 import type { Settings } from '../save/save';
 import { h } from './dom';
 import { currentOrient, effectiveSteering, orientationSetting } from './layout';
+import { cutEdge, lineBoxes, runsOn } from './sheet';
 import './textsize.css';
 
 export interface SettingsScreen {
@@ -133,6 +134,10 @@ export function createSettings(
     back.type = 'button';
     back.addEventListener('click', onBack);
     const body = h('div', 'set-scroll');
+    const more = h('p', 'set-more', t('ui.sheet.more'));
+    const veil = h('span', 'set-veil');
+    more.append(veil);
+    more.hidden = true;
     const grid = h('div', 'set-grid');
     grid.append(
       group(t('screens.settings.theme'), theme),
@@ -150,9 +155,20 @@ export function createSettings(
       h('h2', 'form-title tight', t('screens.settings.title')),
       h('hr', 'rule'),
       body,
+      more,
       back,
     );
     body.scrollTop = scrolled;
+    // the same "c.d. poniżej" cue as the sheets (ui/sheet.ts): printed under the cut while the form runs on below it
+    const place = (): void => {
+      more.hidden = !runsOn(body.scrollTop, body.clientHeight, body.scrollHeight);
+      if (more.hidden) return;
+      // a paper veil from the first sliced line down to the cut, so no line shows half its glyphs
+      const bottom = body.getBoundingClientRect().bottom;
+      veil.style.height = `${Math.max(0, Math.round(bottom - cutEdge(lineBoxes(body, bottom), bottom)))}px`;
+    };
+    body.addEventListener('scroll', place, { passive: true });
+    requestAnimationFrame(place);
   }
 
   return {
