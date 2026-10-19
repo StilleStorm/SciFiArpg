@@ -9,6 +9,7 @@ import { t } from '../i18n';
 import { blobPoints, dotPath, el, n2, smoothClosed, wobblyLine } from './svg';
 import { easeIn, easeOut, tween } from './tween';
 import { isWashPath } from './wash';
+import { readableUnits } from './camera';
 
 let fxLayer: SVGGElement | null = null;
 const fx = (): SVGGElement => must(fxLayer, 'ink layer (call initInk first)');
@@ -276,6 +277,7 @@ export function stamp(text: string, x: number, y: number, opts: StampOptions = {
 /** A short marginal note (italic) that fades. Used for "margines". */
 export function marginNote(text: string, x: number, y: number, rotation = 0, ttl = 1600): void {
   const note = el('text', { class: 't-note', x: n2(x), y: n2(y), transform: `rotate(${n2(rotation)} ${n2(x)} ${n2(y)})`, 'text-anchor': 'middle' }, [text]);
+  note.style.fontSize = `${readableUnits(11, 12)}px`; // at least 12 css px at the zoom now (landscape shows a unit smaller)
   note.style.opacity = '0';
   fx().append(note);
   tween(180, (p) => (note.style.opacity = String(p)));

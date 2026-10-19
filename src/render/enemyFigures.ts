@@ -16,7 +16,7 @@ import { t } from '../i18n';
 import { ENEMY_MELEE_MS, LEAN_DEG, LUNGE, attackAt, enemyOffset } from './attackFx';
 import { bubbleBlocks, bubblePlaced, bubbleRect, bubbleShown } from './bubbleFocus';
 import { avoidBoxes, inflate } from './keepOut';
-import { currentViewSize, viewZoom } from './camera';
+import { currentViewSize, readableUnits, viewZoom } from './camera';
 import { drawIn, eraseOut, marginNote, stamp } from './ink';
 import { syncStatusMarkers } from './statusMarkers';
 import { el, n2, wobblyCircle } from './svg';
@@ -313,12 +313,12 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   over.append(bubble, markers);
   if (boss) {
     over.append(
-      el('text', { x: 0, y: n2(boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16), 'text-anchor': 'middle', 'font-size': 9, 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: none` }, [t(`enemies.boss.${boss}.name`).toLocaleUpperCase('pl')]),
+      el('text', { x: 0, y: n2(boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: none` }, [t(`enemies.boss.${boss}.name`).toLocaleUpperCase('pl')]),
     );
   } else if (e.elite) {
     over.append(
       el('path', { d: `M${n2(-hw)} ${n2(feet + 3)}Q0 ${n2(feet + 6)} ${n2(hw)} ${n2(feet + 2.5)}M${n2(-hw + 5)} ${n2(feet + 6)}Q0 ${n2(feet + 8.5)} ${n2(hw - 4)} ${n2(feet + 5.5)}`, 'stroke-width': 1.1 }),
-      el('text', { x: 0, y: n2(feet + 19), 'text-anchor': 'middle', 'font-size': 12, style: `${FONT.serif}; fill: var(--ink); stroke: none` }, [eliteWord(e.elite.affix, asm.body)]),
+      el('text', { x: 0, y: n2(feet + 19), 'text-anchor': 'middle', 'font-size': readableUnits(12, 12), style: `${FONT.serif}; fill: var(--ink); stroke: none` }, [eliteWord(e.elite.affix, asm.body)]),
     );
   }
   g.append(under, fig, over);

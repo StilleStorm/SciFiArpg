@@ -30,6 +30,14 @@ export function viewZoom(): number {
   return zoom;
 }
 
+/**
+ * A world-text size in units that reads at least `minPx` css px at the zoom now (landscape shows a unit as 0.75 px on a
+ * phone): `units` when that is already enough, otherwise scaled up, in half units. Pure but for the zoom.
+ */
+export function readableUnits(units: number, minPx = 11): number {
+  return Math.max(units, Math.ceil((minPx / zoom) * 2) / 2);
+}
+
 /** Set what `viewZoom()` reports (tests). */
 export function setViewZoom(z: number): void {
   zoom = z > 0 ? z : 1;
