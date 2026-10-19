@@ -6,6 +6,7 @@ import { BUBBLE_CAP, BUBBLE_NEW_S, BUBBLE_RADIUS, bubbleShown, nearestBubbleEnem
 const at = (id: number, x: number, y: number, opts: Parameters<typeof makeEnemy>[5] = {}) => {
   const e = makeEnemy(id, x, y, id, 'urzadzenia', opts);
   rtOf(e).age = 30; // long since drawn in
+  if (e.claim) e.claim.textKey = `enemies.claim.test.c${id}`; // a distinct text each: twins are tested on their own
   return e;
 };
 
@@ -46,6 +47,19 @@ describe('claim bubble focus', () => {
     expect(pickBubbles(crowd, p)).toEqual([10, 11]);
     expect(pickBubbles(crowd, p, 2, new Set([12]))).toEqual([12, 10]);
     expect(pickBubbles(crowd, p, 2, new Set([15]))).toEqual([10, 11]);
+  });
+
+  it('two enemies with the same claim text never both speak: the nearer one does, the next claim takes the second place', () => {
+    const a = at(30, 560, 500);
+    const twin = at(31, 580, 500);
+    const other = at(32, 700, 500);
+    if (!a.claim || !twin.claim || !other.claim) throw new Error('claims expected');
+    twin.claim.textKey = a.claim.textKey;
+    other.claim.textKey = 'enemies.claim.test.other';
+    expect(pickBubbles([twin, a, other], p)).toEqual([a.id, other.id]);
+    // an elite twin outranks the common one, which keeps quiet
+    twin.elite = { affix: 'zweryfikowany' };
+    expect(pickBubbles([a, twin, other], p)).toEqual([twin.id, other.id]);
   });
 
   it('enemies without a claim never take a place', () => {

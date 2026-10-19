@@ -4,7 +4,7 @@
  * counts toward the cap). While a stamp is on the page every claim bubble is hidden: the stamp is the event.
  * The others keep their bubble in the DOM with opacity 0 (a strike-through stays on it); nothing is rebuilt when it comes back.
  * A shown bubble is shifted inward so it stays inside the visible rectangle (`bubbleRect`), never clipped at the edge,
- * and off the pads and margin notes (`bubbleBlocks`, render/keepOut).
+ * and off the pads and margin notes (`bubbleBlocks`, render/keepOut) and off the hero's own figure (`heroBox`).
  */
 import type { Enemy, Player } from '../entities/types';
 import { rtOf } from '../enemies/runtime';
@@ -50,7 +50,8 @@ export function nearestBubbleEnemy(enemies: readonly Enemy[], p: Pick<Player, 'x
 
 /**
  * The ids of the enemies whose claim bubbles speak: only enemies with a claim; bosses first, then elites, then the rest
- * (within `radius` or still in the new grace) by distance; `keep` (the ones shown last frame) win a near tie. Pure.
+ * (within `radius` or still in the new grace) by distance; `keep` (the ones shown last frame) win a near tie; two enemies
+ * with the same claim text never both speak (two identical bubbles read as one stacked label). Pure.
  */
 export function pickBubbles(
   enemies: readonly Enemy[],
@@ -59,13 +60,21 @@ export function pickBubbles(
   keep: ReadonlySet<number> = new Set(),
   radius = BUBBLE_RADIUS,
 ): number[] {
-  const best: { id: number; r: number; d: number }[] = [];
+  const best: { id: number; r: number; d: number; key: string }[] = [];
   for (const e of enemies) {
     if (!e.claim) continue;
     const r = rank(e);
     const d0 = Math.hypot(e.x - p.x, e.y - p.y);
     if (r === 2 && d0 > radius && rtOf(e).age >= BUBBLE_NEW_S) continue;
     const d = keep.has(e.id) ? d0 - KEEP_BIAS : d0;
+    const key = e.claim.textKey;
+    // the same claim is said once: a twin speaks only if it outranks the one already chosen, which then keeps quiet
+    const twin = best.findIndex((b) => b.key === key);
+    if (twin >= 0) {
+      const b = best[twin];
+      if (!b || b.r < r || (b.r === r && b.d <= d)) continue;
+      best.splice(twin, 1);
+    }
     // insertion into a list of at most `cap` (no sort, no garbage per enemy)
     let i = best.length;
     while (i > 0) {
@@ -74,10 +83,16 @@ export function pickBubbles(
       i--;
     }
     if (i >= cap) continue;
-    best.splice(i, 0, { id: e.id, r, d });
+    best.splice(i, 0, { id: e.id, r, d, key });
     if (best.length > cap) best.pop();
   }
   return best.map((b) => b.id);
+}
+
+/** The box a hero's figure takes around his feet point (world units), kept free of claim bubbles. */
+export const HERO_BOX = { left: 40, right: 40, up: 56, down: 34 };
+export function heroBox(p: Pick<Player, 'x' | 'y'>): Box {
+  return { x0: p.x - HERO_BOX.left, y0: p.y - HERO_BOX.up, x1: p.x + HERO_BOX.right, y1: p.y + HERO_BOX.down };
 }
 
 /**
@@ -93,7 +108,8 @@ export function updateBubbleFocus(
   shown = new Set(pickBubbles(enemies, p, BUBBLE_CAP, shown));
   hushed = opts.hush === true;
   rect = opts.view ?? null;
-  blocks = opts.blocks ?? [];
+  // the hero's own figure is kept clear like a pad: a bubble said next to him never covers him
+  blocks = [...(opts.blocks ?? []), heroBox(p)];
   placed.length = 0;
 }
 
