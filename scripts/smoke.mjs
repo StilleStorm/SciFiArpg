@@ -1597,6 +1597,16 @@ try {
   }
   const a1 = await page.evaluate(() => ({ bag: window.__game.state().player.inventory.length, stored: window.__game.meta().character?.inventory.length ?? -1, personal: document.querySelectorAll('.ar-sheet .ar-sec[data-place=personal] .ar-cell[data-uid]').length }));
   check('Archiwum: an item moved from the bag to the personal archive leaves the live bag and the stored one', a0.bag > 0 && a1.bag === a0.bag - 1 && a1.stored === a1.bag && a1.personal === a0.personal + 1, JSON.stringify({ a0, a1 }));
+  // personal -> shared: the shared archive is the one the other case file sees too
+  const sh0 = await page.evaluate(() => window.__game.meta().sharedArchive?.length ?? -1);
+  await page.locator('.ar-sheet .ar-sec[data-place=personal] .ar-cell[data-uid]').first().click({ timeout: 3000 });
+  await page.locator('.ar-sheet .ar-move[data-to=shared]').click({ timeout: 3000 });
+  await sleep(300);
+  const sh1 = await page.evaluate(() => {
+    const m = window.__game.meta();
+    return { shared: m.sharedArchive?.length ?? -1, personal: m.characters.find((c) => c.id === m.activeCharacterId)?.archive?.length ?? -1, cells: document.querySelectorAll('.ar-sheet .ar-sec[data-place=shared] .ar-cell[data-uid]').length };
+  });
+  check('Archiwum: an item moved on to the shared archive is stored there and shown there', a0.bag > 0 && sh1.shared === sh0 + 1 && sh1.cells === sh1.shared, JSON.stringify({ sh0, sh1 }));
   await shot('22-archive');
   await page.locator('.ar-sheet .ps-close').first().click({ timeout: 1500 }).catch(() => undefined);
   await sleep(300);
