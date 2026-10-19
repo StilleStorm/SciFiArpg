@@ -1,13 +1,13 @@
 /*
  * Potwierdzenie (PLAN 8): the margin note "Potw." that hangs on the HUD one slot further out than "Tunel", with the held
- * slips (one or two drawn, the count typed) on its top edge. Same pattern and geometry as ui/pause.css and ui/tunnel.css: 44 x 44, a slot is 52 px.
+ * slips (one or two drawn, the count typed) on its top edge. Same pattern and geometry as ui/pause.css and ui/tunnel.css: 48 x 48, a slot is 56 px.
  */
 .potw-btn {
   position: absolute;
-  right: 116px;
+  right: 124px;
   top: calc(100% + 6px);
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   padding: 0;
   pointer-events: auto;
   color: var(--ink);
@@ -35,7 +35,7 @@
   stroke-width: 2.6;
   paint-order: stroke;
   font-family: var(--mono);
-  font-size: 8.5px;
+  font-size: 10px;
   font-weight: 700;
 }
 .potw-btn .stack circle,
@@ -67,18 +67,18 @@
 }
 :root[data-orient='portrait'][data-steer='joystick'] .potw-btn {
   top: calc(100% + 80px);
-  right: 128px;
+  right: 136px;
 }
 :root[data-orient='portrait'][data-steer='joystick'] .lefty .potw-btn {
   top: calc(100% + 6px);
-  right: 116px;
+  right: 124px;
 }
 :root[data-orient='landscape'] .potw-btn {
   position: fixed;
   top: calc(env(safe-area-inset-top) + 76px);
-  right: calc(env(safe-area-inset-right) + 134px);
+  right: calc(env(safe-area-inset-right) + 142px);
 }
 :root[data-orient='landscape'] .lefty .potw-btn {
   right: auto;
-  left: calc(env(safe-area-inset-left) + 134px);
+  left: calc(env(safe-area-inset-left) + 142px);
 }

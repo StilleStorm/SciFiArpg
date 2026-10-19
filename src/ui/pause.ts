@@ -14,7 +14,7 @@ import './pause.css';
 const CLICK_AFTER_PRESS_MS = 700;
 
 /**
- * The pause note: a circled word, a 44 x 44 tap target. Like the skill pads it answers the finger going down, so it
+ * The pause note: a circled word, a 48 x 48 tap target. Like the skill pads it answers the finger going down, so it
  * works with another thumb already on the joystick; a lone click (keyboard, script) still pauses.
  */
 export function createPauseButton(onPause: () => void): HTMLButtonElement {
@@ -22,8 +22,8 @@ export function createPauseButton(onPause: () => void): HTMLButtonElement {
   btn.type = 'button';
   btn.setAttribute('aria-label', t('ui.hud.pauseLabel'));
   const rng = createRng(91);
-  const svg = el('svg', { viewBox: '-22 -22 44 44', 'aria-hidden': 'true' });
-  svg.append(el('path', { d: wobblyCircle(rng, 0, 0, 20.5, 11, 0.03) }), el('path', { d: wobblyCircle(rng, 0.5, -0.4, 19, 9, 0.035), 'stroke-width': 0.9 }));
+  const svg = el('svg', { viewBox: '-24 -24 48 48', 'aria-hidden': 'true' });
+  svg.append(el('path', { d: wobblyCircle(rng, 0, 0, 22.5, 11, 0.03) }), el('path', { d: wobblyCircle(rng, 0.5, -0.4, 21, 9, 0.035), 'stroke-width': 0.9 }));
   btn.append(svg, h('span', 'word', t('ui.hud.pause')));
   let pressedAt = -Infinity;
   btn.addEventListener('pointerdown', (ev) => {

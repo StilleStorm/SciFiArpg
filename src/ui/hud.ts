@@ -24,7 +24,7 @@ const LINE_Y = 6;
 const CLICK_AFTER_PRESS_MS = 700;
 
 /**
- * The Tunel note: a circled word, 44 x 44, hanging beside "Pauza" (ui/tunnel.css). Same pattern as the Pauza note: it
+ * The Tunel note: a circled word, 48 x 48, hanging beside "Pauza" (ui/tunnel.css). Same pattern as the Pauza note: it
  * answers the finger going down, so it works with another thumb already on the joystick; a lone click still opens it.
  */
 export function createTunnelButton(onTunnel: () => void): HTMLButtonElement {
@@ -32,8 +32,8 @@ export function createTunnelButton(onTunnel: () => void): HTMLButtonElement {
   btn.type = 'button';
   btn.setAttribute('aria-label', t('ui.hud.tunnelLabel'));
   const rng = createRng(137);
-  const svg = svgEl('svg', { viewBox: '-22 -22 44 44', 'aria-hidden': 'true' });
-  svg.append(svgEl('path', { d: wobblyCircle(rng, 0, 0, 20.5, 11, 0.03) }), svgEl('path', { d: wobblyCircle(rng, 0.5, -0.4, 19, 9, 0.035), 'stroke-width': 0.9 }));
+  const svg = svgEl('svg', { viewBox: '-24 -24 48 48', 'aria-hidden': 'true' });
+  svg.append(svgEl('path', { d: wobblyCircle(rng, 0, 0, 22.5, 11, 0.03) }), svgEl('path', { d: wobblyCircle(rng, 0.5, -0.4, 21, 9, 0.035), 'stroke-width': 0.9 }));
   btn.append(svg, h('span', 'word', t('ui.hud.tunnel')));
   let pressedAt = -Infinity;
   btn.addEventListener('pointerdown', (ev) => {
@@ -49,7 +49,7 @@ export function createTunnelButton(onTunnel: () => void): HTMLButtonElement {
 }
 
 /**
- * The Potwierdzenie note: a circled word, 44 x 44, one slot further out than "Tunel" (ui/potw.css), with the held slips
+ * The Potwierdzenie note: a circled word, 48 x 48, one slot further out than "Tunel" (ui/potw.css), with the held slips
  * (at most five) shown as one or two slips on its top edge and a typed count. Same pattern as the Pauza and Tunel notes: it answers the finger going down.
  */
 export function createPotwButton(onUse: () => void): { btn: HTMLButtonElement; show(n: number): void } {
@@ -57,8 +57,8 @@ export function createPotwButton(onUse: () => void): { btn: HTMLButtonElement; s
   btn.type = 'button';
   btn.setAttribute('aria-label', t('ui.hud.potwLabel'));
   const rng = createRng(211);
-  const svg = svgEl('svg', { viewBox: '-22 -22 44 44', 'aria-hidden': 'true' });
-  svg.append(svgEl('path', { d: wobblyCircle(rng, 0, 0, 20.5, 11, 0.03) }), svgEl('path', { d: wobblyCircle(rng, 0.5, -0.4, 19, 9, 0.035), 'stroke-width': 0.9 }));
+  const svg = svgEl('svg', { viewBox: '-24 -24 48 48', 'aria-hidden': 'true' });
+  svg.append(svgEl('path', { d: wobblyCircle(rng, 0, 0, 22.5, 11, 0.03) }), svgEl('path', { d: wobblyCircle(rng, 0.5, -0.4, 21, 9, 0.035), 'stroke-width': 0.9 }));
   const stack = svgEl('g', { class: 'stack' });
   svg.append(stack);
   btn.append(svg, h('span', 'word', t('ui.hud.potw')));

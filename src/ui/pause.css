@@ -3,13 +3,13 @@
  * inventory (a printed page over the game); only the three form lines are new. Paper, ink, no rounded cards.
  */
 
-/* ---------- the margin note: a circled word, 44 x 44, hanging under the HUD on the right ---------- */
+/* ---------- the margin note: a circled word, 48 x 48, hanging under the HUD on the right ---------- */
 .pause-btn {
   position: absolute;
   right: 12px;
   top: calc(100% + 6px);
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   padding: 0;
   pointer-events: auto;
   color: var(--ink);
@@ -178,7 +178,7 @@
 .lo-type {
   font-family: var(--mono);
   font-style: italic;
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--ink-wet);
 }
 .lo-rank {
@@ -241,7 +241,7 @@
 }
 .lo-req {
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 11px;
 }
 .lo-back {
   display: block;
