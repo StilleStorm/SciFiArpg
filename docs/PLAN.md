@@ -78,9 +78,10 @@ Existing numbers are kept until the balance pass.
 
 ### 3.1 The case file: acts as planets
 One ticket number the Komisja keeps reassigning. The campaign is a **sequence of planets**
-(proposed: five acts, sixteen planets, docs/STORY.md; no MVP cut), each an act's worth of
-play: a base, a clause, a document world, a family mix, four pisma (quest runs), two side
-tickets, a boss run, a story chapter. The final ticket closes the case; the Komisja then opens
+(decided: three acts, nine planets, docs/STORY.md §4; MVP = Akt I plus the finale, with the
+campaign's last planet a constant raised act by act, STORY §2), each with a base, a clause, a
+family mix, one ticket run of 4–6 pages to its boss, two or three hand-written side tickets plus
+procedural ones, a chapter card. The final ticket closes the case; the Komisja then opens
 case 48214 against the hero, which frames the Zgłoszenia dodatkowe. After the campaign
 the desk offers "Zgłoszenia dodatkowe": random planets with random clauses, the replayable loop.
 
@@ -110,6 +111,8 @@ which); boss roster from 3 to one per planet, with Spór comments as story beats
 Endgame systems beyond "Zgłoszenia dodatkowe", multiplayer, English, store release. Far future.
 
 ## 5. Slices (each fits between pickup and clear)
+Superseded by docs/PRODUCTION.md (S1–S30): 1 → S1, 2 → S2, 3 → S3, 4 → S4, 5 → S19–S21,
+6 → S7, 7 → S17–S18, 8 → S1/S21, 9 → S16. Kept for the record.
 1. Hero folder refactor + registry + primitives library extracted from the current skills
    (no behaviour change; the contract test).
 2. Paragraph system on existing skills (3 per skill, data only where possible) + unlock schedule

@@ -25,6 +25,7 @@ Language of code, comments and docs: English. Language of the game: Polish, thro
   - 3.5 How the look is verified
 - 4. World: the run
   - 4.1 The base, the tunnel, pause and save (the Diablo structure)
+  - 4.2 The campaign frame and page content (built in M2; the numbers that later slices rely on)
 - 5. Combat
   - 5.1 Base numbers (now)
   - 5.2 Claims and rebuttals (now)
@@ -252,7 +253,9 @@ inspects the PNGs in `shots/`. The lead rejects any screenshot that violates §3
   own slice of the absurd story. Fixed stations drawn as objects: the Sklep (a kiosk), the
   Asystent's desk (history, profile, resume or open a ticket), the paczkomat (deliveries,
   later), the settings as a notice board, and the base end of the tunnel. Walk up to a station
-  and tap it to open its form. No enemies. The base page is generated from the planet seed like
+  and tap it to open its form. Built S10: the planet's **clerk** (Referent) stands by the desk as
+  a station of its own (`urzednik`): a tap opens a short sheet of three lines, no dialogue tree;
+  the notice board also lists the side tickets (§4.2). No enemies. The base page is generated from the planet seed like
   any other page, with its own obstacles; the run's pages follow it. The current base screen
   becomes the form that opens from the desk.
 - **Tunel serwisowy** (town portal). The margin button on the HUD (§2) opens a tunnel on the
@@ -271,6 +274,37 @@ inspects the PNGs in `shots/`. The lead rejects any screenshot that violates §3
   Zakończ regenerates the page from the seed: enemies back, floor loot gone, racja full, and a
   footnote says the ticket was reassigned to another consultant. The exact-state return belongs
   to the tunnel within one session only.
+
+---
+
+### 4.2 The campaign frame and page content (built in M2; the numbers that later slices rely on)
+The rationale is in PLAN §3, §7, §8 and STORY; this is what shipped and what the story slices
+build on. Data lives in `world/campaign.ts`, `world/content.ts`, `world/quests.ts`, `world/npc.ts`.
+- **Campaign**: nine planets in three acts, one record per planet (dominant family and mix, law
+  pool, base layouts, location types, hosted set, page range, boss = the family boss of the
+  dominant phenomenon in a planet variant, STORY §4). The next ticket is the next planet; after
+  the last one (`CAMPAIGN_LAST`: 3 at the MVP, then 6, then 9, STORY §2) the return ticket to
+  planet 1 is the finale; after the case, zgłoszenia dodatkowe and free travel to closed planets.
+  Per character: current planet, closed list, cards seen. Cards: opening page, chapter card, the
+  red rewritten card; one tap skips.
+- **Priority** (difficulty) on the ticket: Niski / Normalny / Wysoki / Krytyczny, unlocked at
+  levels 1 / 1 / 8 / 18; scales enemy racja and damage, tier weights, XP, gwiazdki, loot tier and
+  item level (ITEMS §5.1). First-guess numbers until S16.
+- **Characters**: a roster of case files; each has its progress, bag and personal archive (40);
+  one shared Archiwum (40) moves items between them; export/import of the whole save.
+- **Page content**: teczki 0–2 per page (tap, walk, open: one item of the page's ilvl, often
+  gwiazdki, sometimes a potwierdzenie); pieczęcie 0–1 per page, six timed buffs of 40 s
+  (pilność speed, kontrola crit, argument meter gain, obieg loot tier, zwolnienie z opłat = the
+  paragraphs' price waived for 30 s, wypoczynek racja regen); one zdarzenie at most per page
+  (formularz under fire, przesyłka to a door, audyt), never on page 1 or the boss page.
+- **Elites**: packs (leader + 2–4 minions sharing the aura, bracketed) and named elites (2–3
+  affixes, a recorded name, at most one per two pages, a guaranteed nietypowy+ drop).
+- **Side tickets** at the board: four templates (kill N of a family, fetch N, reach page N,
+  deliver), at most three active, two procedural offers per planet plus the planet's hand-written
+  ones (STORY §5); rewards stars, a permission card, potwierdzenia; items only as an awizo (S18).
+- **Karta osobowa**: the character sheet from the desk and the HUD's Reputacja line.
+- **Recovery** (built S5, rule in PLAN §8): potwierdzenia drop by rank, vacuum 90, heal 25% or
+  held up to 5 (tap or auto-use under 15%), regen 2%/s after 4 s out of combat. No potions.
 
 ---
 
@@ -744,15 +778,9 @@ and is funny precisely because the Asystent reads it out flatly.
 8. Save (localStorage), PWA, deploy to GitHub Pages, night edition toggle.
 
 ### Planned next (decided 2026-10-18, in this order)
-1. Paint (§3.4): a sample on the current build first (hero, enemies per family, gwiazdki,
-   cards, page stains, day and night), judged on screenshots; then the rule is final and the
-   rest is built with it.
-2. Pause, the pause sheet with settings, save like Diablo 3 (§4.1).
-3. Tunel serwisowy with the exact-state return (§4.1).
-4. The walkable base page per planet with stations (§4.1).
-5. Aiming: tap or hold and drag, three aim modes, smart target by claim (§5.6).
-6. More skills: a 4th and 5th per hero through permissions, three of five on the pads (§10.1).
-7. Spór for bosses (§5.4). Przesyłka/paczkomat deliveries.
+All seven items shipped (paint, pause and save, tunnel, base page, aiming, 4th/5th skills,
+Spór) except przesyłka/paczkomat deliveries, which is PRODUCTION S18. The plan from here is
+docs/PRODUCTION.md (milestones M3–M7); STATUS.md records progress.
 
 ### Backlog
 - Branching pages with side załącznik pages.

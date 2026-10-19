@@ -313,8 +313,9 @@ complete there. Pętla copies drop one of your own items, as built.
 ### 6.2 The Komisja's bosses
 
 A planet boss (one per planet, PLAN §3.4) drops 3 items plus 25–35 gwiazdki: **one rzadki
-guaranteed, 35% a zestaw piece of the planet's set** (each planet hosts one set, so sets are
-farmable by replaying a ticket), **12% a unique**; Krytyczny doubles both. The final ticket's
+guaranteed, 35% a zestaw piece of the planet's set** (a planet hosts at most one set, §12.6, so
+sets are farmable by replaying a ticket; a planet without a set rolls that 35% as a rzadki),
+**12% a unique**; Krytyczny doubles both. The final ticket's
 boss drops one unique guaranteed, from those not yet archived. Winning the Spór adds one tier
 to the best drop ("Komisja przychyliła się").
 
@@ -444,6 +445,9 @@ inverts as the rest.
 
 ## 10. Slices (in order, each one builder brief)
 
+Superseded by docs/PRODUCTION.md: (a) + (b) + (d) shipped as S8, (c) as S9 (przesyłka left as a
+SEAM), (e) is S17, (f) is S18 (the Archiwum part shipped in S6). Kept for the record.
+
 1. **(a) Affix pool, tiers, roll rules, names.** `affixes.ts` gains family, tier, model token,
    absurd mechanics; `generate.ts` the band and exclusions; `grammar.ts` the model slot and the
    two-adjective rule; i18n forms for 15 new affixes; tests on names and exclusions. Unblocks
@@ -486,3 +490,14 @@ Each slice ends with `npm run check`, shots of the touched screens and a voice p
    bag and personal archive. Depends on the character roster (below).
 4. **Reklamacja:** one result, struck and retyped. No pick of two.
 5. **Lies grow with tier:** +15 / +25 / +35% overclaim for zwykły / nietypowy / rzadki.
+
+Added at the M2 plan review (story agent; the player may overrule at the M3 playtest):
+6. **Six sets, nine planets:** the first planet of each act hosts no set (1, 4, 7); the rest host
+   one each: 2 «Obieg dokumentów», 3 «Serwis», 5 «Ostatnia mila» (the shopping-app planet), 6
+   «Infolinia», 8 «Domniemanie», 9 «Awaria». S17 sets the `hostedSet` column accordingly (the S7
+   data has planets 1, 5, 7 empty; planet 4 moves to 5).
+7. **Items as side-ticket rewards** are never handed over at the board: the Komisja sends them,
+   so the reward is an awizo at the base paczkomat (§6.4, §8), built in S18. Until then side
+   tickets pay stars, permission cards and potwierdzenia (STORY §5).
+8. **Red is not a tier mark** (ruled at the S8 gate): the rzadki thread is black; the wax seal's
+   red dot stays because a seal impress is a stamp (§9 already updated).

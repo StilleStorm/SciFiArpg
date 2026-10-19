@@ -81,28 +81,23 @@ joystick/tap steering (§2), editorial rules (§12.1).
 - Whether bubbles/figures are readable at phone size.
 
 ## Milestones (for /automode)
-PRODUCTION.md's milestone table (M1 = S1–S5 … M7) supersedes the list below.
-- **M1 Systems core**: slices 1–4 (hero folders + primitives, paragraphs, Argument meter +
-  ultimates, loadout form + Karta uprawnień). Milestone e2e: a full run with a loadout and an
-  ultimate on every hero.
-- **M2 Items**: slices 5 and 8 (affix pool, bases to 40, item level, drops, Sklep, drawing
-  marks, sets, legendary paragraphs, Reklamacja, Archiwum). Milestone e2e: loot across tiers,
-  a set bonus, a reclamation, a stash transfer.
-- **M3 Heroes filled**: slice 6 (five hero slices from SKILLS.md) and 10a–10c (recovery, elite
-  packs, character sheet, save safety, settings). Milestone e2e: every skill and paragraph of
-  every hero against a fixed scene; recovery and auto-use.
-- **M4 Campaign frame**: slices 6a and 7 (roster screen, priority, planet sequence, final ticket,
-  free travel) and 10d (page content). Milestone e2e: a whole campaign skeleton at low priority
-  with placeholder chapter cards.
-- **M5 Akt I + finale (MVP)**: story content for planets 1–3 and the Anomalia frame from
-  STORY.md §8 (story agent plans, voice writes, builders code), chapter cards, opening page,
-  clerks, side tickets, hero lines. Milestone e2e: Akt I start to finish, skipping all cards.
-- **M6 Polish and balance**: slice 11, the on-ramp, phone feedback. Then Akt II and III as M7, M8.
+PRODUCTION.md's milestone table: M1 Systems core (S1–S5, done) · M2 Campaign frame (S6–S10,
+done) · M3 Akt I + finale = MVP (S11–S16) · M4 Depth (S17–S21) · M5 Akt II · M6 Akt III · M7
+Polish and release. Progress lines are below.
 
 ## Needs the player
 - Capstones as built are small flat bonuses (+20–25% on one skill, DESIGN §10.3). Keep them so, or
   turn them into mechanical rules (Diablo 4 key passives) in M4 S19–S21? Recommendation: keep;
   Diablo 2 had none, they read at a glance on the Karta, and the S16 balance pass tunes magnitudes.
+- Boss bodies (STORY §4): the code gives every planet the family boss of its dominant phenomenon
+  (Prototyp on planets 1–3, Weryfikacja 4–6, Hipoteza 7–9). M3 builds planet variants on those
+  bodies (variant line, own Spór comments, one data change). Should Akt II and III each get one
+  newly drawn boss body for their last planet (6 and 9), as Diablo gave each act its own boss, or
+  do variants carry the whole campaign? Recommendation: one new body per act at planets 6 and 9
+  (two drawings and two fights, in S24 and S27), variants elsewhere. Not blocking: S11–S15 proceed
+  with variants; S22/S24 wait for the answer.
+- MVP playtest questions to ask after M3 (not before): whether the Anomalia at `CAMPAIGN_LAST` 3
+  (level ~12–15) reads as a finale, and whether the hosted-set rule (ITEMS §12.6) should change.
 
 ## Game plan and the slice order
 The plan is docs/PRODUCTION.md: 7 milestones, 30 slices, each with a paste-ready builder brief.
@@ -119,7 +114,7 @@ Progress is recorded here, one line per slice:
 - S5 done: potwierdzenia (drop .1/.5/1 by rank, vacuum 90, heal 25% or held to 5, tap and auto-use under 15%, regen 2%/s after 4 s, HUD slip button), `navigator.storage.persist()`, Archiwum eksportowe export/import with confirmation, bug dump from the pause sheet, text size (3 steps), damage numbers (off by default); voice pass. Open: drop rates untested (S9/S16), DESIGN has no recovery section (PLAN §8 holds the rule).
 - M1 plan review done: PRODUCTION S6, S9, S10, S16, S19 briefs adjusted to what shipped (roster keeps Karta uprawnień and the archive format, potwierdzenia rates into the drop tables, Karta osobowa as a desk line, ultimates 2/3 as data on the S3/S4 slots, ARCHITECTURE folded at each milestone end); PLAN's duplicate §8 removed. Order unchanged.
 
-- **M1 Systems core complete** (2026-10-19): e2e:m1 green for 5 heroes × 2 orientations; look fixes (HUD keep-out for bubbles, stamps and the page header measured from the DOM; 11 px text; ink validation line; left-handed update line); voice pass; plan review adjusted S6, S9, S10, S16, S19–S21. Open polish for M7: ~25 CSS rules and a few drawn labels still under 11 px; portrait page header can drift off screen when the camera pans.
+- **M1 Systems core complete** (2026-10-19): e2e:m1 green for 5 heroes × 2 orientations; look fixes (HUD keep-out for bubbles, stamps and the page header measured from the DOM; 11 px text; ink validation line; left-handed update line); voice pass; plan review adjusted S6, S9, S10, S16, S19–S21. Open polish for M7: ~25 CSS rules and a few drawn labels still under 11 px; portrait page header can drift off screen when the camera pans. From the M2 look pass (reports/M2-look.md, folded into S28): Potw./Tunel/Pauza circles ~41 CSS px; claim bubbles over HUD buttons and over each other; large blots lingering (edge, cookies, kiosk); landscape footnote box over the play area; "margines" caption and the margin wall over the hero and pad labels; "Wielkość druku" label under the Wróć button; underlined links (Przyjmuję, Zamknij) as 44 px tap boxes everywhere.
 
 - S6 done: roster of characters as case files (create with hero pick + case number, delete with a form), SAVE_VERSION 3 with per-character progress/bag/personal archive 40 and a shared archive 40, v2 and S5-archive migration, tap-to-transfer Archiwum sheet at the desk, ghost-click guard fixed; voice and look passes. Parked: hero note on archived uniques (waits for legendary paragraphs, ITEMS 8); ARCHITECTURE.md ~370 lines, fold at M2 end; the landscape desk needs a scroll to reach the archive and export lines; the `.pen` accent is ruled for handwritten corrections only (re-check new users).
 
@@ -129,7 +124,11 @@ Progress is recorded here, one line per slice:
 
 - S9 done: item level by planet, page and priority (cap 40) with tier budgets and lie magnitudes, drop tables per family and rank with boss guarantees, Sklep stock 6 plates per planet with prices and lies (Oferta / Z adapterem stamps), elite packs (leader + 2–4 minions sharing the aura, ink brackets), named elites with 2–3 affixes and Asystent-recorded names (≤1 per two pages, guaranteed nietypowy+ drop), elite affix pool 10; voice and look passes. Parked: elite sounds (M7); zestaw, Spór tier bonus, the unique archive rule and the przesyłka seams wait for their slices; in forced crowds a neighbour's bubble can still cover an elite caption (captions now sit on a paper halo).
 
-**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S10.
+- S10 done: teczki 0–2/page (tap, walk, open), six pieczęcie as timed buffs on `RunState.buffs` (zwolnienie waives the paragraphs' price), three zdarzenia (formularz, przesyłka, audyt), the clerk as the `urzednik` station with a three-line sheet, side tickets on four templates with the board (accept / report / drop, max 3, two procedural offers per planet, `registerSideTickets` for the hand-written ones), Karta osobowa from the desk and the HUD; voice and look passes; scrolling sheets print a "c.d. poniżej" strip at a line boundary. Parked: item rewards for side tickets (S18, as an awizo); events have no story text (by decision, STORY §5); elite/event sounds (M7).
+- M2 e2e green (`npm run e2e:m2`, both orientations): roster, opening card, nine planets at Niski with cards, packs and named elites, side tickets, the return ticket, extras, free travel, reload. M2 look over `shots/`: FIX, no REDO; the list is folded into S28 and "Open polish" below.
+- M2 plan review done (story agent): STORY §2 `CAMPAIGN_LAST` (3 at the MVP, raised act by act, "Sprawę wznowiono" card), §3 finale delivery (one-page run on the struck base), §4 bosses as planet variants of the family bosses, §5 side-ticket items only as an awizo (S18) and the extras framed as the Komisja's case against the applicant, §7 one `story.json` with the key scheme, §8.0 the per-planet frame mapped onto the code; PRODUCTION S11–S18, S22–S24, S27–S28 briefs adjusted (S12 carries the story frames: cards and hero lines by planet/hero, Spór by planet, location types on pages, base layout from the record); ITEMS §12.6–8 (hosted sets rule, awizo rewards, red ruling); DESIGN §4.2 records what M2 shipped; PLAN §3.1 and §5, ITEMS §10, SKILLS questions marked superseded/answered. Order unchanged.
+
+**Next pickup:** `/pickup` then `/automode`; M2 end still owes the ARCHITECTURE fold, gate and push; then PRODUCTION.md S11.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).

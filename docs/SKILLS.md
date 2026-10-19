@@ -274,6 +274,10 @@ So that a sixth hero is data plus a figure, every hero has:
 
 ## Open questions for the player
 
+Answered in PLAN §7 (2026-10-18): 1 always on and free; 2 the three new primitives stay; 3 one
+page-wide ultimate per hero, through a status; 4 the permission gates the first rank only.
+Question 5 (Zderzenie's 600) is decided by play in S21. Kept for the record.
+
 1. The rule passive (number 7): always on and free, or one of the four slots so a player can
    switch Pralka's błąd programu off?
 2. Three skills need NEW primitives (cooldown reset, deferred damage, echo): keep them, or drop

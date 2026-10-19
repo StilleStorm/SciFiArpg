@@ -217,33 +217,33 @@ M2 end: tester `scripts/e2e-milestone-2.mjs`; look; story plan review; push; rep
 ### S11 Story plan for Akt I and the finale texts (no builder)
 Goal: STORY.md §8 for planets 1–3 and the finale, then the final Polish. Depends on: S10.
 Reads: STORY (all), DESIGN §12, §12.1, SKILLS (hero voices), ITEMS §12 (hosted sets).
-Story gap: STORY §8 planets 1–3 and the finale.
-Agents: `story` (Fable): for each of planets 1–3: name + epithet, general feel under Akt I, two or three location types from the list with one-line looks, the law, the dominant phenomenon and its boss with 2 Spór comments, the base layout and its clerk (name, role, 3 sheet lines), 2–3 side tickets (template + twist + reward), chapter card text (3–4 lines), hero lines ×5, hosted set; the opening page text; the Anomalia finale: phase-1/3 shared texts, the five faces' middle-phase lines and Spór comments, the final footnote. Then `voice` (Opus) writes the final Polish into src/i18n/pl/story/akt1.json (new file; keys per planet/element) and reviews the story agent's Polish names. No builder. Lead commits docs + json.
+Story gap: STORY §8.1–8.4 (planets 1–3 and the finale), on the frame of STORY §8.0.
+Agents: `story` (Fable): for each of planets 1–3 an §8.0 entry: name + epithet (and locative), general feel under Akt I, two or three location types from the closed list with one-line looks, the law from the planet's pool, the boss variant (line, 2 Spór comments × 3 replies, one data change), the base layout and its clerk (name, role, 3 sheet lines), 2–3 side tickets on the S10 templates (template, n, family, reward, title, text, twist), chapter card text (3 lines + 2 rewritten), hero lines ×5, hosted set per ITEMS §12.6; the opening page text + 5 hero lines; the Anomalia finale: phase-1/3 shared texts, the five faces' middle-phase lines and Spór comments, the final footnote. Then `voice` (Opus) writes the final Polish into `src/i18n/pl/story.json` (new file, domain `story`, keys exactly as STORY §7) and replaces the placeholder names in `planets.json` p1–p3; reviews the story agent's Polish. No builder. Lead commits docs + json.
 Voice: yes. Look: no. Tester: none. Estimate: 0.4M. Parked: anything the story agent marks blocking.
 
-### S12 Planet 1 content
-Goal: planet 1 fully built on the frames. Depends on: S11.
-Reads: STORY §8 planet 1; DESIGN §4, §4.1, §3.4; ARCHITECTURE (campaign, content, quests, npc, cards).
+### S12 Planet 1 content and the story frames
+Goal: planet 1 fully built, and the per-planet hooks the M2 code still lacks (cards and hero lines by planet and hero, Spór by planet, location types on pages, base layout from the planet record, clerk registration, `CAMPAIGN_LAST`). Depends on: S11.
+Reads: STORY §7 (keys), §8.0, §8.1 (planet 1), §2 (CAMPAIGN_LAST); DESIGN §4, §4.1, §4.2, §3.4; ARCHITECTURE (campaign, content, quests, npc, cards, bosses/Spór).
 #### Builder brief: planet-1
-Own: src/world/planets/p1.ts (new per-planet module: location types' obstacle sets and page shapes, base layout variant, clerk figure + sheet wiring, side tickets wiring, chapter card + opening page wiring, hosted set id), src/render/locations/*.ts (new obstacle/prop drawings for its two or three location types), src/enemies/bosses.ts (planet 1 boss story beats: Spór comments from the story json), src/i18n/pl/story/akt1.json (keys already written; only wiring).
-Allowed additive: src/world/campaign.ts (planet 1 record), src/world/base.ts, src/testHook.ts.
-Forbidden: other planets, src/ui/**.
-Deliverables: (1) two or three location types with ≥6 new drawings each. (2) base variant + clerk. (3) 2–3 side tickets live. (4) card + opening page live. Shots: `SHOT_PORT=4192 SHOT_OUT=dist-s12 SHOT_DIR=shots-s12` (each location, the base, the card).
-Voice: no (done in S11; light milestone pass). Look: yes. Tester leg: opening page → planet 1 base → clerk → side ticket → pages of each location → boss with its comments. Estimate: 1.1M.
+Own: src/world/planets/p1.ts (new per-planet module: registers the clerk (`registerNpc`), the side tickets (`registerSideTickets`, ids `h:p1:a..c`), the location drawings of its types, the boss variant data; imported once from a `src/world/planets/index.ts` registry), src/render/locations/*.ts (new obstacle/prop drawings for its two or three location types; a `registry.ts` keyed by `LocationType` with the current generic obstacles as the fallback), src/world/planets/index.ts.
+Allowed additive (the frames; keyed by planet index so S13/S14 add data only): src/world/pages.ts (`Page.location` picked per page from `PlanetDef.locations` by seed; obstacles from the location registry), src/world/base.ts (`layoutForSeed` picks from `PlanetDef.baseLayouts`), src/ui/cards.ts (lines from `story.p<N>.card.*` / `story.opening.*` with the hero's line by heroId, falling back to the `screens.cards.*` placeholders when the key is missing), src/combat/spor.ts (prompt table keyed by planet when `story.p<N>.boss.spor1` exists, else the family table), src/render/enemyFigures.ts (variant line under the boss name), src/enemies/bosses.ts (one data change per planet from the variant table), src/world/campaign.ts (planet 1 record per STORY §8.1; `CAMPAIGN_LAST = 3`: the return ticket after it, the "Sprawę wznowiono" red card when a save's closed list is shorter than a raised constant), src/testHook.ts.
+Forbidden: other planets' data, the rest of src/ui/**, src/i18n/** (voice owns story.json; wire keys only).
+Deliverables: (1) two or three location types with ≥6 new drawings each, chosen per page. (2) base layout from the record + planet 1's clerk. (3) 2–3 hand-written side tickets live. (4) chapter card, opening page and hero lines live for planet 1, placeholders elsewhere. (5) boss variant with its Spór comments. (6) `CAMPAIGN_LAST` with a test that closing planet 3 issues the return ticket. Shots: `SHOT_PORT=4192 SHOT_OUT=dist-s12 SHOT_DIR=shots-s12` (each location, the base with the clerk, the card, the boss with its variant line).
+Voice: no (done in S11; light milestone pass). Look: yes. Tester leg: opening page → planet 1 base → clerk → side ticket → pages of each location → boss with its comments. Estimate: 1.3M (the frames; S13 and S14 are lighter for it).
 
-### S13 Planet 2 content — as S12 for planet 2 (own src/world/planets/p2.ts; `SHOT_PORT=4193`). Estimate: 1.1M.
-### S14 Planet 3 content — as S12 for planet 3 (own src/world/planets/p3.ts; `SHOT_PORT=4194`). Estimate: 1.1M.
+### S13 Planet 2 content — as S12 for planet 2 without the frames (own src/world/planets/p2.ts and its drawings; `SHOT_PORT=4193`). Estimate: 1.0M.
+### S14 Planet 3 content — as S13 for planet 3 (own src/world/planets/p3.ts; `SHOT_PORT=4194`). Estimate: 1.0M.
 
 ### S15 Anomalia: shared phases and the five faces
 Goal: the finale on planet 1's rewritten base: phase 1 (family forms), phase 2 per hero, phase 3 (existence drops with correct replies; the closing stamp). Depends on: S14, S3.
-Reads: STORY §3; DESIGN §5.4, §5.5, §6 (bosses); ARCHITECTURE (bosses, Spór, existence, base).
+Reads: STORY §3 (incl. the delivery note: a one-page run on the rewritten base), §2; DESIGN §5.4, §5.5, §6 (bosses); ARCHITECTURE (bosses, Spór, existence, base, campaign).
 #### Builder brief: anomalia-core
-Own: src/enemies/anomalia/{core,phase1,phase3}.ts (new), src/world/finale.ts (new: the rewritten base page, the return ticket, case closed → endgame unlock, the final footnote), src/i18n/pl/story/finale keys wiring.
-Allowed additive: src/world/campaign.ts, src/enemies/bosses.ts (registration), src/core/events.ts, src/testHook.ts.
-Forbidden: the faces files.
-Deliverables: (1) phase 1 cycling the three family boss forms. (2) phase 3 existence-coefficient finish with the ODPOWIEDZIANO/closing stamp logic. (3) finale world + unlock. Tests for phase transitions.
+Own: src/enemies/anomalia/{core,phase1,phase3}.ts (new), src/world/finale.ts (new: the `final` ticket's run is one page, planet 1's base layout generated with the stations struck through and no station opening; the Anomalia at the desk; the final footnote; the unique drop from those not yet archived, from the existing pool, closing the S9 SEAM in loot.ts), `story.finale.phase1|phase3.*` keys wiring.
+Allowed additive: src/world/campaign.ts (the return ticket and `caseClosed` already exist: wire, do not rebuild), src/world/pages.ts (one-page final run), src/world/base.ts (the struck layout), src/enemies/bosses.ts (registration), src/combat/spor.ts (phase comments), src/systems/loot.ts, src/core/events.ts, src/testHook.ts.
+Forbidden: the faces files, src/ui/**.
+Deliverables: (1) phase 1 cycling the three family boss forms. (2) phase 3 existence-coefficient finish with the ODPOWIEDZIANO/closing stamp logic. (3) finale page + scaling by priority and `CAMPAIGN_LAST`. Tests for phase transitions and the one-page run.
 #### Builder brief: anomalia-faces (parallel; disjoint)
-Own: src/enemies/anomalia/faces/{kierownik,serwisant,wezel,planeta,obserwatorium}.ts + drawings, src/i18n/pl/story/finale face keys wiring.
+Own: src/enemies/anomalia/faces/{kierownik,serwisant,wezel,planeta,obserwatorium}.ts + drawings, `story.finale.face.<heroId>.*` keys wiring.
 Allowed additive: src/enemies/anomalia/index.ts (face registry by heroId), src/testHook.ts.
 Forbidden: core/phase files.
 Deliverables: (1) five middle phases exactly per STORY §3 with their mechanics (hold/transfer; paragraph strip; rewind; measured-real terrain; edge-on existence). (2) five figures in ink. Tests per face mechanic. Shots: `SHOT_PORT=4195 SHOT_OUT=dist-s15 SHOT_DIR=shots-s15` (each face mid-phase).
@@ -256,7 +256,7 @@ Reads: PLAN §3 (MVP shape), STATUS feedback section; ARCHITECTURE (narration).
 Own: src/narration/onramp.ts (new: 4 first-ticket footnotes: walk, attack, rebut, update), src/balance/*.ts (new: a single numbers file per domain re-exported where constants live), src/i18n/pl/narration.json keys.
 Allowed additive: constants files in heroes/items/enemies to import from balance.
 Forbidden: everything else.
-Deliverables: (1) on-ramp (a fifth note on the first potwierdzenie, wiring the unused `ui.note.pickup`). (2) a `scripts/balance-report.mjs` that runs 20 seeded runs per hero at Normalny through the hook and prints time-to-boss, deaths, potwierdzenia dropped/held/used, ultimates cast, drops by tier; (3) one tuning pass from its output (recovery constants, meter fill, capstone magnitudes among them) with the changes listed in the report.
+Deliverables: (1) on-ramp (a fifth note on the first potwierdzenie, wiring the unused `ui.note.pickup`; `ui.note.firstKill/start` wired or dropped). (2) a `scripts/balance-report.mjs` that runs 20 seeded runs per hero at Normalny through the hook and prints time-to-boss, deaths, potwierdzenia dropped/held/used, ultimates cast, drops by tier, gwiazdki earned, teczki opened, side tickets finished; (3) one tuning pass from its output (recovery constants and the S5 drop rates, meter fill, capstone magnitudes, the S7 PRIORITIES first guesses, the S9 ilvl/tier budgets, quest reward stars, the Anomalia at `CAMPAIGN_LAST` 3) with the changes listed in the report.
 Voice: yes (all Akt I text, full pass). Look: all `shots/`. Tester: `scripts/e2e-milestone-3.mjs` = Akt I start to finish skipping cards, both orientations, for two heroes. Estimate: 0.9M.
 
 M3 end = **MVP**: push; milestone report; player playtest; park feedback into STATUS.
@@ -267,11 +267,11 @@ M3 end = **MVP**: push; milestone report; player playtest; park feedback into ST
 
 ### S17 Sets and legendary paragraphs
 Depends on: S9, S2. Reads: ITEMS §4, §12 (uniques rule: +1/+2 ranks, exceed cap, unlock while worn, carries the paragraph); SKILLS (paragraph ids).
-Builder `sets-uniques`: own src/items/sets.ts (6 sets on compatibility tags, 2- and 3-piece bonuses), src/items/uniques.ts (10 new uniques with ranks + paragraph + story), src/render/itemDrawings.ts (paperclip mark for zestaw), src/i18n/pl/items.json. Allowed additive: src/heroes/** (rank-from-item hook, unlock-while-worn), src/items/stats.ts. Deliverables: (1) 6 sets with joint footnotes; (2) 10 uniques; (3) the ranks rule + tests. `SHOT_PORT=4196`. Voice: yes. Look: yes. Tester leg: equip 3 set pieces → bonus; wear a unique → skill unlocked and ranked. Estimate: 1.1M.
+Builder `sets-uniques`: own src/items/sets.ts (6 sets on compatibility tags, 2- and 3-piece bonuses), src/items/uniques.ts (10 new uniques with ranks + paragraph + story), src/render/itemDrawings.ts (paperclip mark for zestaw), src/i18n/pl/items.json. Allowed additive: src/heroes/** (rank-from-item hook, unlock-while-worn), src/items/stats.ts, src/systems/loot.ts and src/economy/sklep.ts (close the S9 SEAMs: zestaw 35% from the planet boss of the hosting planet, 10% zestaw offers in the Sklep, the won-Spór tier bonus "Komisja przychyliła się"), src/world/campaign.ts (`hostedSet` per ITEMS §12.6: the first planet of an act hosts none; move `ostatnia-mila` from planet 4 to 5), src/ui/archive.ts (the S6 parked hero note on an archived unique: which hero its paragraph concerns). Deliverables: (1) 6 sets with joint footnotes; (2) 10 uniques; (3) the ranks rule + tests; (4) the three loot seams closed with seeded tests. `SHOT_PORT=4196`. Voice: yes. Look: yes. Tester leg: equip 3 set pieces → bonus; wear a unique → skill unlocked and ranked; the hosting planet's boss drops its set piece by seed. Estimate: 1.2M.
 
 ### S18 Reklamacja, sinks, paczkomat deliveries
 Depends on: S17, S6. Reads: ITEMS §6.4, §7.3–7.4, §8, §12; DESIGN §7 (Przesyłka).
-Builder `reklamacja-paczkomat`: own src/economy/reklamacja.ts (re-roll one affix, once per item per planet, cost curve, Asystent lines), src/ui/sklep.ts (Reklamacja line), src/items/delivery.ts + src/ui/paczkomat.ts (awizo cards, base paczkomat pickup for stars, return after two runs), src/ui/inventory.ts ("Odrzuć do kosza" 10% of list), src/i18n/pl/economy.json. Allowed additive: src/world/base.ts (paczkomat station live), src/save/character.ts. Deliverables: (1) Reklamacja; (2) deliveries end to end; (3) sinks/sources table checked by a seeded simulation test. `SHOT_PORT=4197`. Voice: yes. Look: yes. Tester leg: reclaim → affix changed once; a rare drop → awizo → pickup. Estimate: 1.2M.
+Builder `reklamacja-paczkomat`: own src/economy/reklamacja.ts (re-roll one affix, once per item per planet, cost curve, Asystent lines), src/ui/sklep.ts (Reklamacja line), src/items/delivery.ts + src/ui/paczkomat.ts (awizo cards, base paczkomat pickup for stars, return after two runs), src/ui/inventory.ts ("Odrzuć do kosza" 10% of list), src/i18n/pl/economy.json. Allowed additive: src/world/base.ts (paczkomat station live), src/save/character.ts, src/systems/loot.ts (the S9 przesyłka SEAM on `dropLoot`), src/world/quests.ts (`QuestReward.item`: a unique or set piece paid as an awizo at the base paczkomat, never into the bag; the S10 parked item rewards). Every sell, bin and reclaim path calls `absurd.disposalRefusal` (S8 rule: wycofany z obiegu can only be dropped). Deliverables: (1) Reklamacja; (2) deliveries end to end, including a side-ticket item reward arriving as an awizo; (3) sinks/sources table checked by a seeded simulation test. `SHOT_PORT=4197`. Voice: yes. Look: yes. Tester leg: reclaim → affix changed once; a rare drop → awizo → pickup; a wycofany item refused at the bin. Estimate: 1.2M.
 
 ### S19 Heroes filled: Pralka and Konsultant
 Depends on: S4, S17. Reads: SKILLS §1, §2; DESIGN §10.2; §14.3.
@@ -287,19 +287,19 @@ M4 end: tester `e2e-milestone-4.mjs` (every skill/paragraph, a set, a reclamatio
 ---
 
 ## M5 Akt II (planets 4–6)
-### S22 Story plan Akt II (no builder) — as S11 for planets 4–6 (`story` then `voice` into src/i18n/pl/story/akt2.json). Story review decides whether a new enemy family is introduced here (parked if it needs the player). Estimate: 0.4M.
-### S23 Planets 4 and 5 — two builders in parallel, `src/world/planets/p4.ts`, `p5.ts`, own drawings, bosses' beats (`SHOT_PORT=4184/4185`). Estimate: 1.5M.
-### S24 Planet 6 and Akt II systems — builder `planet-6` plus builder `akt2-enemies` (new elite affixes/family if decided; Akt II laws' remaining mechanics). `SHOT_PORT=4186/4187`. Estimate: 1.5M.
+### S22 Story plan Akt II (no builder) — as S11 for planets 4–6 (`story` then `voice` appending to src/i18n/pl/story.json). Story review decides whether a new enemy family or one act event is introduced here (parked if it needs the player); the player's answer on boss bodies (STATUS "Needs the player") decides whether S24 draws a new body for planet 6. Estimate: 0.4M.
+### S23 Planets 4 and 5 — two builders in parallel, `src/world/planets/p4.ts`, `p5.ts`, own drawings, boss variants (`SHOT_PORT=4184/4185`). Estimate: 1.4M.
+### S24 Planet 6 and Akt II systems — builder `planet-6` plus builder `akt2-enemies` (new elite affixes/family if decided; Akt II laws' remaining mechanics; `CAMPAIGN_LAST` to 6 with the "Sprawę wznowiono" card for MVP saves). `SHOT_PORT=4186/4187`. Estimate: 1.5M.
 M5 end: e2e Akt II; look; story review; push.
 
 ## M6 Akt III (planets 7–9)
-### S25 Story plan Akt III (no builder) — as S11 for planets 7–9 (`akt3.json`). Estimate: 0.4M.
-### S26 Planets 7 and 8 — as S23 (`SHOT_PORT=4188/4189`). Estimate: 1.5M.
-### S27 Planet 9, the Observatory planet, finale polish — builder `planet-9` plus builder `finale-polish` (the return-to-planet-1 card in red, endgame "zgłoszenia dodatkowe" texts, certificates at the board). `SHOT_PORT=4191/4192`. Estimate: 1.5M.
+### S25 Story plan Akt III (no builder) — as S11 for planets 7–9 (appending to story.json). Estimate: 0.4M.
+### S26 Planets 7 and 8 — as S23 (`SHOT_PORT=4188/4189`). Estimate: 1.4M.
+### S27 Planet 9, the Observatory planet, finale polish — builder `planet-9` plus builder `finale-polish` (`CAMPAIGN_LAST` to 9, the return-to-planet-1 card in red, endgame "zgłoszenia dodatkowe" texts framed as the Komisja's case against the applicant (STORY §5), certificates at the board). `SHOT_PORT=4191/4192`. Estimate: 1.5M.
 M6 end: e2e Akt III + finale; look; story review; push.
 
 ## M7 Polish and release
-### S28 Polish bucket — builder `render-polish` (landscape clause header top centre, Odwirowanie knockback, appeal-form drawing, cookie-banner paper, simpler Wygenerowane drawings, "Muzyka na czekanie, utwór nr N" line) plus builder `audio-polish` (sounds for enemy:miss / offTopic / gwiazdki pickup, stereo panning). `SHOT_PORT=4193/4194`. Estimate: 1.3M.
+### S28 Polish bucket — builder `render-polish` (landscape clause header top centre, Odwirowanie knockback, appeal-form drawing, cookie-banner paper, simpler Wygenerowane drawings, "Muzyka na czekanie, utwór nr N" line; the M1/M2 look leftovers listed in STATUS "Open polish": text under 11 px in CSS and drawn labels, the HUD margin circles at 44 px, bubbles kept off the HUD buttons and each other, blots drying and capped in size, the landscape footnote box out of the play area, the "margines" caption off the hero, the inventory card footnote behind the buttons, the landscape desk scroll) plus builder `audio-polish` (sounds for enemy:miss / offTopic / gwiazdki pickup / elite:named / elite:slain, stereo panning). `SHOT_PORT=4193/4194`. Estimate: 1.4M.
 ### S29 Phone feedback and desktop — builder `feedback-bucket` (items parked under "Needs the player" that the player answered) plus builder `desktop` (WASD, mouse aim mode). Estimate: 1.2M.
 ### S30 Release prep — Cloudflare hosting + cloud save design, Play Store TWA assets, privacy policy text, assetlinks: needs the player (parked until they say go). Estimate: 0.8M.
 
