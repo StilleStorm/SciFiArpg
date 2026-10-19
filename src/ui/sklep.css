@@ -65,6 +65,7 @@
   font-weight: 700;
 }
 .sk-buy .ps-btn {
+  min-height: 44px;
   padding: 6px 9px 4px;
   font-size: 11px;
 }

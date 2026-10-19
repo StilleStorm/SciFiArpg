@@ -279,10 +279,11 @@ function addWash(under: SVGGElement, e: Enemy, hw: number, H: number, feet: numb
 
 /**
  * The caption under an elite: its affix adjective, or for a named elite the recorded name in two serif lines
- * (split after the comma: "Monit Zbiorczy," / "nieodebrany od 2019").
+ * (split after the comma: "Monit Zbiorczy," / "nieodebrany od 2019 r.").
  */
 function eliteCaption(e: Enemy, asm: Assembly, feet: number): SVGTextElement[] {
-  const style = `${FONT.serif}; fill: var(--ink); stroke: none`;
+  // A paper halo under the letters, so a neighbour's figure or bubble in a crowded pack does not eat the word.
+  const style = `${FONT.serif}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke`;
   const name = rtOf(e).named?.name;
   if (!name || !e.elite) return [el('text', { x: 0, y: n2(feet + 19), 'text-anchor': 'middle', 'font-size': readableUnits(12, 12), style }, [e.elite ? eliteWord(e.elite.affix, asm.body) : ''])];
   const cut = name.indexOf(', ');
