@@ -56,6 +56,9 @@ export interface PauseHandlers {
   /** The line "Konfiguracja": the loadout form (pads, ultimate, paragraphs, specialization; run and base). */
   onParagraphs?(): void;
   onEnd(): void;
+  /** "Zgłoś problem z grą": copy the state dump; the line is offered while this returns true (the setting `bugButton`). */
+  onReport?(): void;
+  showReport?(): boolean;
 }
 
 export interface PauseSheet {
@@ -65,6 +68,8 @@ export interface PauseSheet {
   /** Hide it without losing it (the settings stand over it) or bring it back. */
   setHidden(hidden: boolean): void;
   isOpen(): boolean;
+  /** A numbered note in the sheet's footnote area. */
+  note(text: string): void;
 }
 
 function line(label: string, note: string, onTap: () => void, id: string): HTMLElement {
@@ -97,6 +102,7 @@ export function createPauseSheet(root: HTMLElement, handlers: PauseHandlers): Pa
       );
       const paragraphs = handlers.onParagraphs;
       if (paragraphs) lines.append(line(t('forms.pause.paragraphs'), t('forms.pause.paragraphsNote'), paragraphs, 'paragraphs'));
+      if (handlers.onReport && handlers.showReport?.() !== false) lines.append(line(t('screens.pause.report'), t('screens.pause.reportNote'), handlers.onReport, 'report'));
       if (!info.base) lines.append(line(t('screens.pause.end'), t('screens.pause.endNote'), handlers.onEnd, 'end'));
       made.scroll.append(lines);
       made.note(t('screens.pause.hold'));
@@ -110,5 +116,8 @@ export function createPauseSheet(root: HTMLElement, handlers: PauseHandlers): Pa
       sheet?.el.classList.toggle('hidden', hidden);
     },
     isOpen: () => sheet !== null,
+    note(text) {
+      sheet?.note(text);
+    },
   };
 }

@@ -48,7 +48,21 @@
     "resumeNote": "{planet}, strona {page}. Zgłoszenie zostanie przekazane innemu konsultantowi.",
     "tunnelWaiting": "Zgłoszenie nr {number} czeka na stronie {page}.",
     "tunnelNote": "Stronę pozostawiono w stanie, w jakim ją opuszczono. Przeciwników również.",
-    "tunnelReturn": "Wróć do zgłoszenia"
+    "tunnelReturn": "Wróć do zgłoszenia",
+    "archive": "Archiwum eksportowe",
+    "archiveExport": "Zapisz archiwum do pliku",
+    "archiveExportNote": "Cały zapis jednym plikiem: postać, wyposażenie, historia, ustawienia.",
+    "archiveImport": "Wczytaj archiwum z pliku",
+    "archiveImportNote": "Wczytanie zastępuje obecny zapis. Wymaga potwierdzenia.",
+    "importTitle": "Wczytanie archiwum",
+    "importBody": "Plik zawiera: profil {hero}, poziom {level}, zamkniętych zgłoszeń {tickets}. Obecny zapis zostanie zastąpiony i nie da się go odzyskać.",
+    "importConfirm": "Zastąp zapis",
+    "importCancel": "Anuluj",
+    "importDone": "Archiwum wczytano. Zapis zastąpiono.",
+    "importBadFile": "Plik nie jest archiwum tej gry. Zapis nie został zmieniony.",
+    "importNewer": "Plik pochodzi z nowszej wersji gry. Zapis nie został zmieniony.",
+    "exportDone": "Archiwum przygotowano do pobrania.",
+    "exportFailed": "Przeglądarka odmówiła zapisu pliku."
   },
   "history": {
     "line": "Nr {number} · {planet}",
@@ -83,7 +97,19 @@
     "sfx": "Odgłosy kancelaryjne",
     "soundNote": "Muzyka towarzyszy wyłącznie rozpatrywaniu zgłoszenia. Poza nim obowiązuje cisza biurowa.",
     "back": "Wróć",
-    "note": "Zmiany zapisano. Zgody nie wymagano."
+    "note": "Zmiany zapisano. Zgody nie wymagano.",
+    "textSize": "Wielkość druku",
+    "textNormal": "Zwykła",
+    "textLarge": "Powiększona",
+    "textLarger": "Największa",
+    "textNote": "Dotyczy przypisów, kart i formularzy.",
+    "damage": "Liczby obrażeń",
+    "damageOff": "Nie wpisywać",
+    "damageOn": "Wpisywać na marginesie",
+    "damageNote": "Liczba pojawia się obok trafienia i blednie. Domyślnie wyłączone.",
+    "bug": "Zgłaszanie problemów",
+    "bugOn": "Pozycja w menu wstrzymania",
+    "bugOff": "Ukryta"
   },
   "profile": {
     "title": "Profil użytkownika",
@@ -108,7 +134,11 @@
     "end": "Zakończ zgłoszenie",
     "endNote": "Zgłoszenie zostanie przekazane innemu konsultantowi. Dotychczasowych ustaleń nie przekazuje się. Postać i wyposażenie zostaną zapisane. Strona zostanie wydrukowana od nowa, przeciwnicy również.",
     "hold": "Prosimy czekać. Rozmowa jest nagrywana.",
-    "subBase": "Zgłoszenie nr {number}. {planet}, baza."
+    "subBase": "Zgłoszenie nr {number}. {planet}, baza.",
+    "report": "Zgłoś problem z grą",
+    "reportNote": "Skopiuje do schowka krótki zapis stanu: wersję, profil, planetę, stronę, ostatnie zdarzenia i ustawienia.",
+    "reported": "Zapis stanu skopiowano do schowka. Prosimy dołączyć go do zgłoszenia.",
+    "reportFailed": "Schowek odmówił przyjęcia zapisu. Zgłoszenie nie zostało skopiowane."
   },
   "loadout": {
     "title": "Umiejętności",

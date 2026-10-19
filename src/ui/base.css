@@ -427,3 +427,36 @@
     opacity: 1;
   }
 }
+
+/* Archiwum eksportowe: a heading and two typed lines, each a link with its note under it */
+.archive {
+  margin-top: 16px;
+  border-top: 1px solid var(--ink);
+  padding-top: 8px;
+}
+.archive-title {
+  margin: 0 0 6px;
+  font-family: var(--title);
+  font-weight: 400;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.desk-sheet .archive-row .link-btn {
+  align-items: center;
+  padding-bottom: 0;
+}
+.desk-sheet .archive-row {
+  margin-bottom: 2px;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 0;
+}
+.archive-row > label {
+  min-width: 0;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 10.5px;
+  font-style: italic;
+  font-family: var(--serif);
+}

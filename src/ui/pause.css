@@ -108,6 +108,17 @@
   flex: 1;
   min-width: 0;
 }
+/* five or six lines do not fit side by side (the labels outgrow their boxes): two rows of three */
+:root[data-orient='landscape'] .pz-lines:has(> .pz-line:nth-child(5)) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 22px;
+  padding-top: 8px;
+}
+:root[data-orient='landscape'] .pz-lines:has(> .pz-line:nth-child(5)) .pz-note {
+  font-size: 13.5px;
+  line-height: 1.25;
+}
 
 /* ---------- the base: the unfinished ticket, first thing on the page ---------- */
 .resume-line {

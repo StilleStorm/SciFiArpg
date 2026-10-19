@@ -1,7 +1,9 @@
 import { t } from '../i18n';
 import type { Bookmark } from '../save/bookmark';
+import { describeMeta, downloadArchive, parseArchive, pickArchive } from '../save/export';
 import type { MetaState } from '../save/save';
 import { h } from './dom';
+import { openPopup, type Popup } from './popup';
 import { createSheet, type Sheet } from './sheet';
 import './base.css';
 
@@ -13,6 +15,8 @@ export interface BazaHandlers {
   onResume(bookmark: Bookmark): void;
   /** "Wróć do zgłoszenia": back through the service tunnel into the held run (only offered while a run is held). */
   onReturn?(): void;
+  /** An archive file was read and the player confirmed: this save replaces the stored one (main.ts saves and applies it). */
+  onImport?(meta: MetaState): void;
   /** The sheet was closed with "Zamknij". */
   onClose(): void;
 }
@@ -37,9 +41,52 @@ export interface Baza {
 export function createBaza(root: HTMLElement, handlers: BazaHandlers): Baza {
   let sheet: Sheet | null = null;
   let waiting: TunnelWait | null = null;
+  let current: MetaState | null = null;
+  let confirm: Popup | null = null;
+
+  const exportFile = (): void => {
+    if (!current) return;
+    sheet?.note(t(downloadArchive(current) ? 'screens.baza.exportDone' : 'screens.baza.exportFailed'));
+  };
+  const importFile = async (): Promise<void> => {
+    const text = await pickArchive();
+    if (text === null || !sheet) return;
+    const res = parseArchive(text);
+    if (!res.ok) {
+      sheet.note(t(res.reason === 'newer' ? 'screens.baza.importNewer' : 'screens.baza.importBadFile'));
+      return;
+    }
+    const info = describeMeta(res.meta);
+    confirm?.close();
+    confirm = openPopup(root, {
+      title: t('screens.baza.importTitle'),
+      body: [t('screens.baza.importBody', { hero: info.hero ? t(`screens.profile.${info.hero}`) : t('screens.baza.noHero'), level: info.level, tickets: info.tickets })],
+      buttons: [
+        {
+          label: t('screens.baza.importConfirm'),
+          onClick: () => {
+            confirm?.close();
+            handlers.onImport?.(res.meta);
+            sheet?.note(t('screens.baza.importDone'));
+          },
+        },
+        { label: t('screens.baza.importCancel'), quiet: true, onClick: () => confirm?.close() },
+      ],
+    });
+  };
+  const archiveLine = (label: string, note: string, id: string, onTap: () => void): HTMLElement => {
+    const row = h('div', 'trow archive-row');
+    const btn = h('button', 'link-btn', label);
+    btn.type = 'button';
+    btn.dataset['desk'] = id;
+    btn.addEventListener('click', onTap);
+    row.append(h('label', '', note), btn);
+    return row;
+  };
 
   const render = (meta: MetaState): void => {
     if (!sheet) return;
+    current = meta;
     const scroll = sheet.scroll;
     scroll.replaceChildren();
     const heroName = meta.heroId ? t(`screens.profile.${meta.heroId}`) : t('screens.baza.noHero');
@@ -71,10 +118,17 @@ export function createBaza(root: HTMLElement, handlers: BazaHandlers): Baza {
       block.append(resume, h('p', 'resume-note', t('screens.baza.resumeNote', { planet: mark.planetName, page: mark.pageIndex + 1 })));
       left.append(block);
     }
+    const archive = h('div', 'archive');
+    archive.append(
+      h('h3', 'archive-title', t('screens.baza.archive')),
+      archiveLine(t('screens.baza.archiveExport'), t('screens.baza.archiveExportNote'), 'export', exportFile),
+      archiveLine(t('screens.baza.archiveImport'), t('screens.baza.archiveImportNote'), 'import', () => void importFile()),
+    );
     right.append(profile, stars);
     const desk = h('div', 'desk');
     desk.append(...(left.childElementCount > 0 ? [left, right] : [right]));
     desk.classList.toggle('two', left.childElementCount > 0);
+    desk.append(archive);
     scroll.append(desk);
 
     // the action is pinned under the scrolling area, so a long desk never pushes it off the page
@@ -96,6 +150,7 @@ export function createBaza(root: HTMLElement, handlers: BazaHandlers): Baza {
       render(meta);
     },
     close() {
+      confirm?.close();
       sheet?.remove();
       sheet = null;
     },

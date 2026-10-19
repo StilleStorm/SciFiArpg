@@ -1,0 +1,16 @@
+/* Text size (settings): three steps, one root variable. Zoom is applied once per text area, never nested. */
+:root {
+  --ts: 1;
+}
+.fn-list,
+.pop,
+.ps-scroll,
+.ps-notes,
+.set-scroll {
+  zoom: var(--ts);
+}
+/* The landscape slip is exactly two printed lines high; it grows with the print so the newest note is never cut mid-line
+   (older notes that no longer fit are taken off whole by ui/footnotes.ts). 39 px of lines + 6 px of bottom margin at step 0. */
+:root[data-orient='landscape'] .foot.paper {
+  height: calc(39px * var(--ts) + 6px + env(safe-area-inset-bottom));
+}

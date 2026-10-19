@@ -39,6 +39,12 @@ export interface Settings {
   steering?: 'joystick' | 'tap';
   /** The player picked a steering mode himself, so it no longer follows the orientation. */
   steeringTouched?: boolean;
+  /** Text size step of footnotes, cards and forms: 0 = as printed, 1 = larger, 2 = largest. */
+  textSize?: 0 | 1 | 2;
+  /** Damage numbers in the margin beside a hit; off unless true. */
+  damageNumbers?: boolean;
+  /** The pause line "Zgłoś problem z grą"; on unless false. */
+  bugButton?: boolean;
 }
 
 export const DEFAULT_MUSIC_VOLUME = 80;
@@ -135,6 +141,9 @@ export function migrate(raw: unknown): MetaState {
       ...(orientation === 'landscape' || orientation === 'portrait' ? { orientation } : {}),
       ...(steering === 'joystick' || steering === 'tap' ? { steering } : {}),
       ...(rawSettings['steeringTouched'] === true ? { steeringTouched: true } : {}),
+      ...(rawSettings['textSize'] === 1 || rawSettings['textSize'] === 2 ? { textSize: rawSettings['textSize'] } : {}),
+      ...(rawSettings['damageNumbers'] === true ? { damageNumbers: true } : {}),
+      ...(rawSettings['bugButton'] === false ? { bugButton: false } : {}),
     },
   };
   delete out.heroId;

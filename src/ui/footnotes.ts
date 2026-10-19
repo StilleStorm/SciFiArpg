@@ -65,6 +65,8 @@ export function createFootnotes(root: HTMLElement): Footnotes {
   // a note can grow after it was printed: the serif arrives late on the first notes, a rotation narrows the slip
   document.fonts.addEventListener('loadingdone', queuePrune);
   window.addEventListener('resize', queuePrune);
+  // the print size (settings) zooms the list and grows the slip: refit then too
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(queuePrune).observe(list);
 
   const fn: Footnotes = {
     el,

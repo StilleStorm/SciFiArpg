@@ -3,6 +3,7 @@ import type { Bus, Side } from '../core/events';
 import { t } from '../i18n';
 import { PAGE_H, PAGE_INSET, PAGE_W } from '../world/pages';
 import { bindAttackFx } from './attackFx';
+import { bindDamageNumbers } from './damageNumbers';
 import { blot, marginNote, stamp, stampSize, strike } from './ink';
 import type { Views } from './view';
 
@@ -54,11 +55,15 @@ export function placeStamp(x: number, y: number, w: number, h: number, view: Rec
 }
 
 /** Bus events -> ink on the page. The only place gameplay events become pictures. `page` is the sheet shown now (the run's page or the base page). */
-export function bindFx(bus: Bus, views: Views, page: () => PageBox | null = () => null, view: () => Rect | null = () => null): void {
+export function bindFx(bus: Bus, views: Views, page: () => PageBox | null = () => null, view: () => Rect | null = () => null, damageNumbers: () => boolean = () => false): void {
   const hitBlot = (x: number, y: number, crit: boolean): void => {
     blot(x + jitter.range(-6, 6), y + jitter.range(-6, 6), crit ? jitter.range(9, 12) : jitter.range(3.5, 6), crit);
   };
   bindAttackFx(bus, views);
+  bindDamageNumbers(bus, damageNumbers, () => {
+    const v = view();
+    return v ? (v.x0 + v.x1) / 2 : null;
+  });
   bus.on('enemy:hit', (e) => hitBlot(e.x, e.y, e.crit));
   bus.on('player:hit', (e) => hitBlot(e.x, e.y, e.crit));
   bus.on('enemy:died', (e) => {

@@ -3,6 +3,7 @@ import { el } from '../render/svg';
 import type { Settings } from '../save/save';
 import { h } from './dom';
 import { currentOrient, effectiveSteering, orientationSetting } from './layout';
+import './textsize.css';
 
 export interface SettingsScreen {
   el: HTMLElement;
@@ -111,6 +112,23 @@ export function createSettings(
       volumeLine(t('screens.settings.music'), current.musicVolume, (v) => live({ musicVolume: v }), () => onVolumeSet('music')),
       volumeLine(t('screens.settings.sfx'), current.sfxVolume, (v) => live({ sfxVolume: v }), () => onVolumeSet('sfx')),
     );
+    const size = h('div', 'opts row');
+    const chosenSize = current.textSize ?? 0;
+    size.append(
+      option(t('screens.settings.textNormal'), chosenSize === 0, () => set({ textSize: 0 })),
+      option(t('screens.settings.textLarge'), chosenSize === 1, () => set({ textSize: 1 })),
+      option(t('screens.settings.textLarger'), chosenSize === 2, () => set({ textSize: 2 })),
+    );
+    const damage = h('div', 'opts row');
+    damage.append(
+      option(t('screens.settings.damageOff'), current.damageNumbers !== true, () => set({ damageNumbers: false })),
+      option(t('screens.settings.damageOn'), current.damageNumbers === true, () => set({ damageNumbers: true })),
+    );
+    const bug = h('div', 'opts row');
+    bug.append(
+      option(t('screens.settings.bugOn'), current.bugButton !== false, () => set({ bugButton: true })),
+      option(t('screens.settings.bugOff'), current.bugButton === false, () => set({ bugButton: false })),
+    );
     const back = h('button', 'form-btn', t('screens.settings.back'));
     back.type = 'button';
     back.addEventListener('click', onBack);
@@ -121,6 +139,9 @@ export function createSettings(
       group(t('screens.settings.hand'), hand),
       group(t('screens.settings.orientation'), orient, h('p', 'eta', t('screens.settings.orientationNote'))),
       group(t('screens.settings.steering'), steer, h('p', 'eta', t('screens.settings.steeringNote'))),
+      group(t('screens.settings.textSize'), size, h('p', 'eta', t('screens.settings.textNote'))),
+      group(t('screens.settings.damage'), damage, h('p', 'eta', t('screens.settings.damageNote'))),
+      group(t('screens.settings.bug'), bug),
       group(t('screens.settings.sound'), sound, h('p', 'eta', t('screens.settings.soundNote'))),
     );
     body.append(grid, h('p', 'eta', t('screens.settings.note')));

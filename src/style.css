@@ -499,6 +499,21 @@ button {
   font-style: italic;
   font-size: 11px;
 }
+.t-dmg {
+  fill: var(--ink);
+  stroke: none;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+}
+.t-dmg.crit {
+  font-size: 20px;
+}
+.dmg-under {
+  stroke: var(--accent);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+}
 .t-struck {
   fill: var(--accent);
   stroke: none;
