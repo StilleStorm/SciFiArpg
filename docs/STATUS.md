@@ -89,13 +89,9 @@ Polish and release. Progress lines are below.
 - Capstones as built are small flat bonuses (+20–25% on one skill, DESIGN §10.3). Keep them so, or
   turn them into mechanical rules (Diablo 4 key passives) in M4 S19–S21? Recommendation: keep;
   Diablo 2 had none, they read at a glance on the Karta, and the S16 balance pass tunes magnitudes.
-- Boss bodies (STORY §4): the code gives every planet the family boss of its dominant phenomenon
-  (Prototyp on planets 1–3, Weryfikacja 4–6, Hipoteza 7–9). M3 builds planet variants on those
-  bodies (variant line, own Spór comments, one data change). Should Akt II and III each get one
-  newly drawn boss body for their last planet (6 and 9), as Diablo gave each act its own boss, or
-  do variants carry the whole campaign? Recommendation: one new body per act at planets 6 and 9
-  (two drawings and two fights, in S24 and S27), variants elsewhere. Not blocking: S11–S15 proceed
-  with variants; S22/S24 wait for the answer.
+- Decided (player, 2026-10-19): one new boss body per act, drawn for the last planet of Akt II
+  and Akt III (planets 6 and 9), built in S24 and S27; variants of the family bosses elsewhere.
+  S22/S24 are unblocked.
 - MVP playtest questions to ask after M3 (not before): whether the Anomalia at `CAMPAIGN_LAST` 3
   (level ~12–15) reads as a finale, and whether the hosted-set rule (ITEMS §12.6) should change.
 
