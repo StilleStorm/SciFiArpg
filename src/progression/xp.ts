@@ -2,6 +2,7 @@
 import type { Bus } from '../core/events';
 import { heroDef } from '../heroes/defs';
 import { recomputeStats } from '../items/stats';
+import { xpMul } from '../world/campaign';
 import type { RunState } from '../world/run';
 
 export const MAX_LEVEL = 40;
@@ -29,7 +30,7 @@ export function xpTotalFor(level: number): number {
 export function gainXp(s: RunState, bus: Bus, amount: number): number {
   const p = s.player;
   if (p.level >= MAX_LEVEL) return 0;
-  p.xp += Math.max(0, Math.round(amount * s.hero.mods.xp));
+  p.xp += Math.max(0, Math.round(amount * s.hero.mods.xp * xpMul(s.plan)));
   let gained = 0;
   while (p.level < MAX_LEVEL && p.xp >= xpToNext(p.level)) {
     p.xp -= xpToNext(p.level);

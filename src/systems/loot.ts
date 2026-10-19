@@ -12,6 +12,7 @@ import { uniqueNote } from '../items/uniques';
 import { rollPotwierdzenie, takePotwierdzenie, tickRecovery } from './recovery';
 import type { DropSource, Item, ItemTier } from '../items/types';
 import { nextId, type RunState } from '../world/run';
+import { ilvlBonus, lootTierBonus, starMul } from '../world/campaign';
 
 interface DropTable {
   /** Chance of one item (bosses: guaranteed `guaranteed` items). */
@@ -30,8 +31,8 @@ export const DROPS: Record<DropSource, DropTable> = {
 
 const TIER_DOWN: Record<ItemTier, ItemTier> = { zwykly: 'zwykly', nietypowy: 'zwykly', rzadki: 'nietypowy', unikatowy: 'rzadki' };
 
-/** Level of dropped items: hero level plus how deep into the run we are. */
-export const dropLevel = (s: RunState): number => Math.max(1, s.player.level + s.pageIndex);
+/** Level of dropped items: hero level plus how deep into the run we are, plus the ticket priority's bonus (world/campaign.ts). */
+export const dropLevel = (s: RunState): number => Math.max(1, s.player.level + s.pageIndex + ilvlBonus(s.plan));
 
 function scatter(s: RunState, x: number, y: number): { x: number; y: number } {
   const rng = s.rngs.loot;
@@ -61,7 +62,7 @@ export function dropLoot(s: RunState, x: number, y: number, source: DropSource):
     const item = rollItem(rng, {
       level: dropLevel(s),
       source,
-      tierBonus: law.lootTierBonus,
+      tierBonus: law.lootTierBonus + lootTierBonus(s.plan),
       // The first boss drop is always at least rzadki.
       ...(source === 'boss' && i === 0 ? { tier: rng.chance(0.3) ? ('unikatowy' as const) : ('rzadki' as const) } : {}),
     });
@@ -73,7 +74,7 @@ export function dropLoot(s: RunState, x: number, y: number, source: DropSource):
     }
   }
   if (rng.chance(Math.min(1, table.star * Math.max(0.5, mul)))) {
-    const n = rng.int(table.starMin, table.starMax);
+    const n = Math.max(1, Math.round(rng.int(table.starMin, table.starMax) * starMul(s.plan)));
     const at = scatter(s, x, y);
     s.pickups.push(createPickup(nextId(s), at.x, at.y, 0, undefined, n));
   }
