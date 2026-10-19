@@ -16,6 +16,7 @@ const BASE = `http://127.0.0.1:${PORT}/SciFiArpg/`;
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const shotOf = (p, name) => p.screenshot({ path: `${SHOTS}/${name}.png` });
 
 mkdirSync(SHOTS, { recursive: true });
 const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--outDir', OUT, '--port', String(PORT), '--strictPort', '--host', '127.0.0.1'], {
@@ -166,6 +167,7 @@ try {
       await p.evaluate((m) => window.__game.setSteering(m), mode);
       for (const kind of ['biurko', 'tablica', 'kiosk', 'ticket']) {
         await p.evaluate(() => window.__game.startBase());
+        await p.evaluate(() => document.querySelector('.card-layer .card-skip')?.click()); // S7: a fresh case file's opening page
         await sleep(600);
         let r = { error: '' };
         try {
@@ -263,6 +265,7 @@ try {
     await sleep(600);
   }
   await shot('02-base');
+  await page.locator('.card-layer .card-skip').click({ timeout: 3000 }); // S7: the opening page of the first base is skipped with its button
   const baseSt = await page.evaluate(() => {
     const s = window.__game.state();
     return { screen: window.__game.screen(), phase: s.phase, enemies: s.enemies.length, time: s.time, locked: !s.base.accepted, layout: s.base.layout };
@@ -1019,6 +1022,7 @@ try {
 
   // the base in landscape first: a single quick tap on Pauza, and the controls after every sheet of a station (both modes)
   await lp.evaluate(() => window.__game.startBase()); // (the hero stays the default one: the aiming leg below depends on it)
+  await lp.evaluate(() => document.querySelector('.card-layer .card-skip')?.click()); // S7: the opening page of a fresh case file is skipped
   await sleep(900);
   await pauseTap(lp, 'landscape base');
   await controlsAfterSheets(lp, lctx, 'landscape base');
@@ -1611,6 +1615,76 @@ try {
   await page.locator('.ar-sheet .ps-close').first().click({ timeout: 1500 }).catch(() => undefined);
   await sleep(300);
   await page.locator('.desk-sheet .ps-close').first().click({ timeout: 1500 }).catch(() => undefined);
+
+  // ---------- 6c. the campaign (S7): opening card, priority, a closed ticket moves the planet on, free travel ----------
+  {
+    const cctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await cctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const cp = await cctx.newPage();
+    cp.on('pageerror', (e) => problems.push(`campaign pageerror: ${e.message}`));
+    await cp.goto(BASE, { waitUntil: 'load' });
+    await cp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await cp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await sleep(600);
+    if ((await cp.evaluate(() => window.__game.screen())) === 'profile') {
+      await cp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+      await sleep(900);
+    }
+    const first = await cp.evaluate(() => ({ card: document.querySelector('.card-layer')?.dataset.card ?? null, plan: window.__game.state()?.plan ?? null, seen: window.__game.meta().character?.campaign?.cards ?? null }));
+    check('campaign: a new case file opens on the opening page, the desk holds the planet 1 campaign ticket, the card is kept as seen', first.card === 'opening' && first.plan?.kind === 'campaign' && first.plan?.planet === 0 && first.seen?.opening === true, JSON.stringify(first));
+    await cp.locator('.card-layer .card-skip').click({ timeout: 3000 });
+    await cp.evaluate(() => window.__game.go('ticket'));
+    await cp.locator('.ticket-sheet').waitFor({ state: 'visible', timeout: 3000 });
+    const form = await cp.evaluate(() => ({
+      planet: document.querySelector('.ticket-sheet .tform .trow .tval')?.textContent ?? '',
+      locked: [...document.querySelectorAll('.ticket-sheet .tk-prio')].filter((b) => b.disabled).map((b) => b.dataset.priority),
+      travel: document.querySelectorAll('.ticket-sheet .tk-travel').length,
+    }));
+    check('campaign: the ticket names the planet from the campaign table, Wysoki and Krytyczny are locked at level 1, no travel before the case', /Planeta/.test(form.planet) && form.locked.join() === 'wysoki,krytyczny' && form.travel === 0, JSON.stringify(form));
+    await shotOf(cp, 'S7-campaign-ticket');
+    await cp.locator('.ticket-sheet .tk-prio[data-priority=niski]').click({ timeout: 2000 });
+    await cp.locator('.ticket-sheet button.start').click({ timeout: 2000 });
+    await sleep(1400);
+    await cp.evaluate(() => window.__game.walkToExit());
+    await sleep(2500);
+    const inRun = await cp.evaluate(() => ({ screen: window.__game.screen(), plan: window.__game.state()?.plan ?? null }));
+    check('campaign: the priority chosen on the form is on the run (RunState.plan)', inRun.screen === 'run' && inRun.plan?.priority === 'niski' && inRun.plan?.planet === 0, JSON.stringify(inRun));
+    await cp.evaluate(() => {
+      const s = window.__game.state();
+      s.victoryAt = s.time;
+    });
+    await sleep(2500);
+    const after = await cp.evaluate(() => ({
+      screen: window.__game.screen(),
+      campaign: window.__game.meta().character?.campaign ?? null,
+      plan: window.__game.state()?.plan ?? null,
+      card: document.querySelector('.card-layer')?.dataset.card ?? null,
+      history: window.__game.meta().history.length,
+    }));
+    check('campaign: a completed ticket closes planet 1 once, the save holds it, the next base is planet 2 with its chapter card', after.screen === 'baza' && after.campaign?.current === 1 && after.campaign?.closed?.join() === '0' && after.plan?.planet === 1 && after.card === 'chapter' && after.history === 1, JSON.stringify(after));
+    await cp.locator('.card-layer .card-skip').click({ timeout: 3000 }).catch(() => undefined);
+    // the case closed: the desk lists every planet for free travel; a pick re-lays the base, accepts at once and shows the card rewritten
+    await cp.evaluate(() => {
+      window.__game.state().campaign = { current: 0, closed: [0, 1, 2, 3, 4, 5, 6, 7, 8], finalTicket: false, caseClosed: true, extras: 0, cards: { opening: true, chapters: [0, 1, 2, 3, 4, 5, 6, 7, 8] } };
+    });
+    await cp.evaluate(() => window.__game.go('ticket'));
+    await cp.locator('.ticket-sheet .tk-travel').waitFor({ state: 'visible', timeout: 3000 });
+    const rows = await cp.evaluate(() => document.querySelectorAll('.ticket-sheet .tk-travel-row[data-planet]').length);
+    await shotOf(cp, 'S7-campaign-travel');
+    await cp.locator('.ticket-sheet .tk-travel-row[data-planet="4"] button').click({ timeout: 2000 });
+    await sleep(900);
+    const trav = await cp.evaluate(() => {
+      const s = window.__game.state();
+      return { rows: 0, screen: window.__game.screen(), plan: s?.plan ?? null, accepted: s?.base?.accepted ?? false, card: document.querySelector('.card-layer')?.dataset.card ?? null, sheet: !!document.querySelector('.ticket-sheet') };
+    });
+    trav.rows = rows;
+    check('campaign: after the case nine planets are offered; travel to planet 5 accepts a travel ticket there and shows the rewritten card', rows === 9 && trav.screen === 'baza' && trav.plan?.kind === 'travel' && trav.plan?.planet === 4 && trav.accepted && trav.card === 'rewritten' && !trav.sheet, JSON.stringify(trav));
+    await cctx.close();
+  }
 
   // ---------- 7. frame time with 40 enemies ----------
   // a fresh run: the death slip of the step above may still hold the old one

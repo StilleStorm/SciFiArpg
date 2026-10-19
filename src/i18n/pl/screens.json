@@ -32,7 +32,18 @@
     "accept": "Akceptuję regulamin",
     "decline": "Nie akceptuję",
     "declined": "Aby kontynuować, zaakceptuj regulamin.",
-    "stamp": "Zgłoszenie przyjęto"
+    "stamp": "Zgłoszenie przyjęto",
+    "act": "Etap",
+    "actValue": "Akt {act}",
+    "priority": "Priorytet zgłoszenia",
+    "priorityLocked": "od poziomu {level}",
+    "prioritySet": "Ustawiono priorytet: {name}.",
+    "travelTitle": "Zgłoszenia zamknięte",
+    "travelLead": "Sprawę zamknięto. Wcześniejsze planety pozostają dostępne na obecnym poziomie.",
+    "travelGo": "Wyjedź",
+    "extra": "Zgłoszenie dodatkowe",
+    "extraNote": "Planeta i regulamin: losowo.",
+    "finale": "Bilet powrotny"
   },
   "baza": {
     "title": "Panel użytkownika",
@@ -277,5 +288,35 @@
         "2": "Miasteczko, w którym wszystkie okna wychodzą na rynek. Przybycie zgłaszającego odnotowano w czterdziestu egzemplarzach."
       }
     }
+  },
+  "cards": {
+    "_todo": "TODO-story: nazwy planet, streszczenia i wiersze bohatera to wypełniacze do czasu S11.",
+    "skip": "Dotknij, aby pominąć",
+    "skipButton": "Pomiń",
+    "kind": {
+      "opening": "Strona otwierająca",
+      "chapter": "Karta rozdziału",
+      "rewritten": "Przepisano"
+    },
+    "stamp": "PRZEPISANO",
+    "act": "Akt {act}",
+    "title": "{act}. {planet}",
+    "openingTitle": "Zgłoszenie nr {number}",
+    "openingLines": {
+      "1": "TODO-story: Komisja przyjęła zgłoszenie i przypisała je do planety.",
+      "2": "TODO-story: Sytuację opisano urzędowo, bez przymiotników.",
+      "3": "TODO-story: Wnioskodawca stawia się osobiście."
+    },
+    "chapterLines": {
+      "1": "TODO-story: Streszczenie sprawy według Asystenta, wiersz pierwszy.",
+      "2": "TODO-story: Wiersz drugi.",
+      "3": "TODO-story: Wiersz trzeci."
+    },
+    "rewrittenLines": {
+      "1": "TODO-story: Sprawę przepisano. Poprzednie ustalenia uznano za wstępne.",
+      "2": "TODO-story: Wiersz drugi."
+    },
+    "heroLabel": "Uwaga wnioskodawcy",
+    "heroSlot": "TODO-story: wiersz bohatera"
   }
 }

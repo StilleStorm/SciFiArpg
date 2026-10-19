@@ -33,6 +33,8 @@ import { heroDef } from './heroes/defs';
 import { categoryOf, loadoutAdvice, runCapstone, specializationOf } from './heroes/specializations';
 import { createEnemyHook, createSporHook, type EnemyHook, type SporHook } from './enemies/hook';
 import { createAudioHook, type AudioHook } from './audio/hook';
+import type { CampaignView } from './ui/ticketModel';
+import type { PriorityId } from './world/campaign';
 
 export interface GameHook {
   /** Start a run from a seed (default 1) and show the run screen. */
@@ -164,6 +166,11 @@ export interface GameHook {
   station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean;
   /** "Akceptuję regulamin" without the sheet: the exit of the base opens. False outside the base. */
   acceptTicket(): boolean;
+  /** Show the ticket form and the cards as for another campaign state (null: the real one). */
+  setCampaignView(v: CampaignView | null): void;
+  showCard(kind: 'opening' | 'chapter' | 'rewritten'): void;
+  /** The priority chosen on the ticket accepted last. */
+  priority(): PriorityId;
   /**
    * Put the player into the exit of the base page and run one step: when the exit is open the page turn to the first page of
    * the run starts (the run begins). Returns whether the turn started; a locked exit only answers with its note.
@@ -198,6 +205,11 @@ export interface HookDeps {
   startBase(seed?: number): RunState;
   station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean;
   acceptTicket(): boolean;
+  /** Show the ticket form and the cards as for another campaign state (null: the real one). */
+  setCampaignView(v: CampaignView | null): void;
+  showCard(kind: 'opening' | 'chapter' | 'rewritten'): void;
+  /** The priority chosen on the ticket accepted last. */
+  priority(): PriorityId;
   /** The footnotes as printed (ui/footnotes.ts `recent`). */
   notes(): { n: number; text: string }[];
   /** Replace the save as the desk's confirmed import does (main.ts `importSave`). */
@@ -401,6 +413,9 @@ export function installTestHook(deps: HookDeps): void {
     startBase: (seed) => deps.startBase(seed),
     station: (name) => deps.station(name),
     acceptTicket: () => deps.acceptTicket(),
+    setCampaignView: (v) => deps.setCampaignView(v),
+    showCard: (kind) => deps.showCard(kind),
+    priority: () => deps.priority(),
     walkToExit() {
       const s = game.state;
       const exit = s?.page.exit;

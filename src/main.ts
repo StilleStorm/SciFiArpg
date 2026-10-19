@@ -42,7 +42,10 @@ import { rosterStore } from './ui/rosterStore';
 import { createSettings } from './ui/settings';
 import { guardGhostClicks } from './ui/sheet';
 import { mountSklep, type SklepHandle } from './ui/sklep';
+import { openCard, type CardHandle } from './ui/cards';
 import { createTicket } from './ui/ticket';
+import { campaignViewOf, cardToShow, markShown, type CampaignView } from './ui/ticketModel';
+import { bindCampaign, clampPriority, cloneCampaign, defaultPlan, DEFAULT_PRIORITY, extraPlan, newCampaign, noCardsSeen, toCampaign, travelPlan, type CampaignState, type PriorityId, type TicketPlan } from './world/campaign';
 import { createTitle } from './ui/title';
 import { acceptTicket } from './world/base';
 import { bindLaws, lawHooks } from './world/laws';
@@ -157,9 +160,54 @@ const onVolumeSet = (which: 'music' | 'sfx'): void => {
 const pauseSettings = createSettings(stage.ui, onSettingsChange, () => closePauseSettings(), onVolumeSet);
 const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onSkills: () => openPauseSkills(), onParagraphs: () => openKonfig('pause'), onEnd: () => endTicket(), onReport: () => reportProblem(), showReport: () => meta.settings.bugButton !== false });
 const ticket = createTicket(stage.ui, {
-  onAccept: () => acceptNow(),
+  onAccept: (priority) => acceptNow(priority),
+  onTravel: (planet, priority) => takePlan((c, seed) => travelPlan(c, planet, priority, seed), priority),
+  onExtra: (priority) => takePlan((c, seed) => extraPlan(c, priority, seed), priority),
   onClose: () => openSheet('biurko'),
 });
+
+// ---------- the campaign as the ticket form and the cards see it ----------
+/**
+ * The campaign lives on the character (world/campaign.ts, saved by save/character.ts); the base state carries a copy
+ * (`RunState.campaign`) and the plan on the desk (`RunState.plan`). `campaignOverride` is the test hook's way to show other states.
+ */
+let campaignOverride: CampaignView | null = null;
+const campaignView = (): CampaignView => {
+  if (campaignOverride) return campaignOverride;
+  const s = game.state;
+  return campaignViewOf(s?.campaign ?? newCampaign(), s?.plan);
+};
+let cardUi: CardHandle | null = null;
+
+/** The opening page or the chapter card of a new ticket's base, shown once per character (kept in its campaign); a tap removes it. */
+function showCard(number: number, force?: 'opening' | 'chapter' | 'rewritten'): void {
+  const s = game.state;
+  const view = campaignView();
+  const seen = s?.campaign?.cards ?? noCardsSeen();
+  const spec = force ? { kind: force, planetIndex: Math.min(Math.max(view.planetIndex, 0), 8) } : cardToShow(view, seen, meta.history.length);
+  if (!spec) return;
+  cardUi?.close();
+  if (!force && s) {
+    s.campaign = { ...cloneCampaign(s.campaign ?? newCampaign()), cards: markShown(seen, spec) };
+    if (meta.character) save(withCharacter(meta, s)); // a case file keeps it; a bare test start keeps it on the state only
+  }
+  cardUi = openCard(stage.ui, spec, { number, onDone: () => (cardUi = null) });
+}
+
+/**
+ * Free travel or a zgłoszenie dodatkowe from the ticket form: the base is laid out again for the new plan (same seed and
+ * number), its card is shown, and the ticket is accepted at once with the priority chosen on the form.
+ */
+function takePlan(make: (c: CampaignState, seed: number) => TicketPlan | null, priority: PriorityId): void {
+  const s = game.state;
+  if (screen !== 'baza' || !s || s.phase !== 'base') return;
+  const plan = make(s.campaign ?? newCampaign(), s.seed);
+  if (!plan) return;
+  closeSheet();
+  leave('newTicket'); // a run held in the tunnel is given up first, as the accept button does
+  enterBase({ seed: s.seed, number: s.ticket.number, plan, ...(s.campaign ? { campaign: s.campaign } : {}) });
+  acceptNow(priority);
+}
 
 /** The walkable screens: the base page and the run. */
 const live = (): boolean => screen === 'run' || screen === 'baza';
@@ -175,6 +223,7 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
   // A sheet over the base is one history entry; leaving the base for another screen replaces it instead of popping and pushing.
   syncHistory(sheetKind !== null && screen === 'baza' ? 'ticket' : screen, next);
   dropSheets();
+  if (next !== 'baza') cardUi?.close();
   if (next === 'profile' && screen !== 'profile') settleForRoster();
   screen = next;
   const walkable = next === 'run' || next === 'baza';
@@ -285,7 +334,7 @@ function showCreate(fromRoster: boolean): void {
  * open hole near the landing spot. Another ticket clears the footnotes; the same ticket (the tunnel's base, the base after
  * Zakończ) keeps them and their numbering, like the Asystent (narration/asystent.ts).
  */
-function enterBase(over: { seed?: number; number?: number } = {}): RunState {
+function enterBase(over: { seed?: number; number?: number; plan?: TicketPlan; campaign?: CampaignState } = {}): RunState {
   const held = hold.peek();
   const b = meta.bookmark;
   const seed = over.seed ?? (held ? held.seed : b ? b.seed : nextSeed);
@@ -296,13 +345,17 @@ function enterBase(over: { seed?: number; number?: number } = {}): RunState {
     notesFor = `${seed}:${number}`;
   }
   setOfficeOpen(null);
-  const resume = b && !held && b.seed === seed ? b : undefined;
+  const resume = b && !held && !over.plan && b.seed === seed ? b : undefined;
+  // The plan on the desk: the held run's, the bookmarked one, a travel/extra choice, or the campaign's next ticket.
+  const campaign = over.campaign ? cloneCampaign(over.campaign) : meta.character?.campaign ? toCampaign(meta.character.campaign) : newCampaign();
+  const plan = over.plan ?? held?.plan ?? resume?.plan ?? (held || resume ? undefined : defaultPlan(campaign, DEFAULT_PRIORITY, seed));
   const state = game.start(seed, {
+    ...(plan ? { plan } : {}),
     phase: 'base',
     ticketNumber: number,
     heroId: meta.heroId,
     character: meta.character,
-    ...(held ? { lawId: held.ticket.lawId, pageCount: held.pageCount } : {}),
+    ...(held && !over.plan ? { lawId: held.ticket.lawId, pageCount: held.pageCount } : {}),
     ...(resume ? { resume } : {}),
   });
   if (held?.tunnel) {
@@ -311,7 +364,9 @@ function enterBase(over: { seed?: number; number?: number } = {}): RunState {
     if (hole) tunnelFx.show(hole.x, hole.y, true);
     baza.setTunnel({ number: held.ticket.number, page: held.tunnel.pageIndex + 1 });
   } else baza.setTunnel(null);
+  if (over.campaign || !state.campaign) state.campaign = campaign;
   hud.invalidate();
+  if (!held && !resume) showCard(number);
   return state;
 }
 
@@ -382,7 +437,7 @@ function openSheet(kind: SheetKind): void {
       addArchiveDeskLine(stage.ui, () => openArchiveSheet());
       break;
     case 'ticket':
-      ticket.open(s.ticket);
+      ticket.open(s.ticket, { level: s.player.level, view: campaignView() });
       break;
     case 'tablica':
       board.open(meta);
@@ -409,11 +464,12 @@ function closeSheet(): void {
 }
 
 /** "Akceptuję regulamin": a run held in the tunnel is given up, the exit of the base opens, the clause header is printed. */
-function acceptNow(): boolean {
+function acceptNow(priority?: PriorityId): boolean {
   unlockAudio(); // the accept button is the natural unlock (DESIGN 14.5); any first tap also unlocks
   const s = game.state;
   if (screen !== 'baza' || !s || s.phase !== 'base') return false;
   leave('newTicket');
+  if (s.plan) s.plan = { ...s.plan, priority: clampPriority(priority ?? ticket.priority(), s.player.level) };
   if (!acceptTicket(s)) return false;
   bus.emit('ticket:accepted');
   closeSheet();
@@ -441,6 +497,8 @@ bindPageTurn(bus, { stage, camera, views: game.views, getState: () => game.state
 bindRunEvents(bus, () => game.state);
 // The tunnel closes itself on death, the end of the run and a page turn; both must hear `run:ended` before the handler below drops the state.
 bindTunnel(bus, () => game.state);
+// A completed ticket closes its planet in the character's campaign before the handler below saves the character.
+bindCampaign(bus, () => game.state);
 const tunnelFx = bindTunnelFx(bus, { page: stage.page, pageWidth: () => game.state?.page.w ?? PAGE_W });
 // The hole in the run takes the player to the base (holding the run); the hole in the base takes him back.
 bus.on('tunnel:entered', () => void (game.state?.phase === 'base' ? returnFromTunnel() : holdRun()));
@@ -853,7 +911,10 @@ installTestHook({
     return enterBase(seed === undefined ? {} : { seed });
   },
   station: openStation,
-  acceptTicket: acceptNow,
+  acceptTicket: () => acceptNow(),
+  setCampaignView: (v) => (campaignOverride = v),
+  showCard: (kind) => showCard(TICKET_BASE + meta.history.length, kind),
+  priority: () => game.state?.plan?.priority ?? DEFAULT_PRIORITY,
   notes: () => footnotes.recent(60),
   changeSettings: (patch) => {
     const next = { ...meta.settings, ...patch };
