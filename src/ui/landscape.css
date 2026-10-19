@@ -653,3 +653,9 @@
   right: auto;
   left: calc(var(--side-l) + 250px);
 }
+
+/* portrait + joystick, left-handed: the Załączniki pad hangs under the HUD on the left, so the update line hangs under the pad */
+:root[data-orient='portrait'][data-steer='joystick'] .lefty .upd {
+  top: calc(var(--band-top) + env(safe-area-inset-top) + 84px);
+  border-top: 1px solid var(--ink);
+}
