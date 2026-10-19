@@ -1,4 +1,4 @@
-/** The __ID__ module: data, drawing, sounds, casts, pad glyphs, passives. */
+/** The __ID__ module: data, drawing, sounds, casts, pad glyphs, passives, ultimates. */
 import type { HeroModule } from '../module';
 import { casts } from './skills';
 import { def } from './def';
@@ -7,5 +7,6 @@ import { pads } from './pads';
 import { paragraphs } from './paragraphs';
 import { passives } from './passives';
 import { sounds } from './sounds';
+import { ultimates } from './ultimates';
 
-export const hero: HeroModule = { def, figure, sounds, casts, paragraphs, pads, passives };
+export const hero: HeroModule = { def, figure, sounds, casts, paragraphs, pads, passives, ultimates };
