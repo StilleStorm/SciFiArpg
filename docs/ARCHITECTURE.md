@@ -6,7 +6,7 @@ Fonts: Michroma (titles, stamps), Space Mono (HUD, forms), EB Garamond (narratio
 `mechaniczny | regulaminowy | egzystencjalny`.
 
 ## Screens, phases, state
-Router (`main.ts`): title -> profile (no hero yet) -> **`baza`** (the walkable base page of a planet) -> **`run`** -> `baza`.
+Router (`main.ts`): title -> profile (the roster, or the creation form when there is no case file) -> **`baza`** (the walkable base page of a planet) -> **`run`** -> `baza`.
 The desk, ticket, Sklep and settings are sheets over the base page (`openSheet`, one history entry), not screens.
 `RunState` (`world/run.ts`, `createRun(seed, opts)`) is the one live state; `phase: 'base' | 'run'`. The base is the
 same object as the run it becomes: `createRun(seed, {phase: 'base'})` holds `page` = the base page (900 x 700,
@@ -19,9 +19,13 @@ base-phase RunState is live; `Game.adopt(held)` makes the held one live again (p
 draw-in). Other fields: four rng streams (`ai combat loot spawn`; every roll goes through them), `time`, `status`
 (`running | paused | dead`; sheets and forms use `paused`), `modal` (law sheets), `turning`, `pages`, `player`,
 `enemies projectiles pickups summons zones`, `law`, `hero` (`heroes/state.ts`), `victoryAt`, `tunnel?`.
-`MetaState` (`save/save.ts`, SAVE_VERSION 2, localStorage `zgloszenie.meta`) holds settings, history, `character`
-(`save/character.ts`) and `bookmark` (`save/bookmark.ts`: ticketNumber, seed, pageIndex, lawId, clockS, planetName,
-pageCount); loading never throws.
+`MetaState` (`save/save.ts`, SAVE_VERSION 3, localStorage `zgloszenie.meta`) holds settings, `stamps`, `runsCompleted`,
+the roster `characters: CharacterRecord[]` (`{id, name, character, bookmark?, history, archive}`), `sharedArchive` and
+`activeCharacterId?`. The active record is **mirrored** at the top level (`character` (`save/character.ts`), `bookmark`
+(`save/bookmark.ts`: ticketNumber, seed, pageIndex, lawId, clockS, planetName, pageCount), `history`, `heroId`), so the
+run flow reads and writes those as before; `syncActive` folds the mirror into its record, `withMirror` the reverse,
+`toStored` is what storage and the archive file get (no mirror). `migrate` reads v3 and v2 (a roster of one); loading
+never throws. Roster functions: see "Roster and archives (S6)".
 
 **Entity kinds** (`entities/types.ts`, all `{kind, id, x, y, r}`): `player`, `enemy` (family, tier, claim, defect,
 elite, boss, runtime bag `rtOf()`), `projectile`, `pickup` (item plate, gwiazdki star, permission card, or `potwierdzenie` slip), `summon`
@@ -153,19 +157,20 @@ words are bound to the next with U+00A0 by `t()`. No user-facing strings in `.ts
 `ultimateInfo() {meter, ready, active, paragraph}`, `setSpecialization(id|null)`, `loadoutInfo() {pads, categories, specialization, capstone, advice}`, `hero.{cast, installSkill, openAssign, assignPad, setParagraph, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
 `enemies.{spawnFamily, spawnBoss, hit, clear, list}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
 `npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot` (390x844 @2x and 844x390 into `shots/`);
-per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3,s4,s5,recovery}.mjs` (each with its own
-SHOT_PORT/SHOT_OUT/SHOT_DIR, usage in the header). `npm run smoke` plays a ticket with real buttons: profile, base
+per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3,s4,s5,s6,recovery}.mjs` (each with its own
+SHOT_PORT/SHOT_OUT/SHOT_DIR, usage in the header). `npm run smoke` plays a ticket with real buttons: creation form, base
 (HUD, margin note, update from the HUD line), desk, ticket, exit, run (header clear of the note row, no bubble under a pad or note,
 the update line clear in tap/joystick x both hands), fight, update, inventory, pause, Zakończ,
 the Argument meter and an ultimate (3d), bookmark resume, two tunnels and the return, boss, death, a landscape joystick leg (two touches, the footnote slip), the S4 leg (6f: desk loadout -> run -> reload, the chart), the S5 leg (6g: damage numbers, text size, drop ->
-heal, full -> held, tap use, auto-use, the pause bug line, export -> import equality),
+heal, full -> held, tap use, auto-use, the pause bug line, export -> import equality), the S6 leg (6h: roster over a held run
+settles it, a second file at level 1, the first file's level and bookmark back, an archive move),
 then 5 s of frame times with 40 enemies (`PERF_MAX_MS`, `SMOKE_UNCAPPED`); exit 1 on any failed check or page error.
 
 ## Aiming (DESIGN 5.6)
 Every `SkillDef` has `aim: 'auto' | 'kierunek' | 'wskazanie'`. Pads (`ui/pads.ts`) press, drag and release: a drag over 8 px on a non-auto skill shows the preview (`render/aimFx.ts`: dotted arrow or dotted circle in `#fx`), release fires with the resolved `Aim`, releasing back over the pad cancels (no cooldown), a quick tap is the auto cast. Pure logic in `heroes/aim.ts` (`autoTarget` prefers a standing-claim rebuttal in range, `dragToAim`, `isCancel`, `isTap`, resolvers per skill). `castSkill(s, bus, slot, free, aim)` in `heroes/skills.ts`; the pad hands the aim over through `queueAim` because `skill:N` has no payload (integrator may move it into the payload). Events: `skill:aim {slot, mode, x, y, dx, dy}` while held; `skill:cast` carries `aim`. Hook: `aimCast`, `holdPad`, `releasePad`. Port 4190 is unsafe in Chromium; shot-aim uses 4195.
 
 ## Base stations (after player feedback)
-Stations open on a tap anywhere on their drawing or label (`Game.onTap` emits `station:opened`); walking into them does nothing; labels are permanent. The notice board (`ui/board.ts`) shows three announcements and the ticket history; the desk keeps Nowe/Wznów zgłoszenie and Zmień profil; settings live only in the pause sheet (`go('settings')` opens pause + settings). `ui/sheet.ts guardGhostClicks()` drops the compatibility mouse events that follow a touch `pointerdown` so a sheet opened by a tap does not receive that tap's click. Opening a station sheet (`holdBase`) disables input and `releaseBase` re-enables it (the former hang).
+Stations open on a tap anywhere on their drawing or label (`Game.onTap` emits `station:opened`); walking into them does nothing; labels are permanent. The notice board (`ui/board.ts`) shows three announcements and the ticket history; the desk keeps Nowe/Wznów zgłoszenie, the case file line (Wykaz spraw), Karta, Konfiguracja, Torba i archiwa and the export lines; settings live only in the pause sheet (`go('settings')` opens pause + settings). `ui/sheet.ts guardGhostClicks()` drops the compatibility mouse events that follow a touch `pointerdown` so a sheet opened by a tap does not receive that tap's click. Opening a station sheet (`holdBase`) disables input and `releaseBase` re-enables it (the former hang).
 
 ## Fifth hero and the laser (2026-10-18)
 Heroes: pralka, konsultant, petlowiec, kartograf, nalesnik (the list is `HERO_ID_LIST` in `heroes/registry.ts`; `HERO_IDS` in save/character.ts re-exports it and the save check uses `isHeroId`). Naleśnik logic in `heroes/nalesnik/steps.ts` (orbit roll with a satellite, gravity pull, the `Zone` variant `'wniosek'` with `inside`), quirk in `heroes/nalesnik/quirk.ts` (round up below a third of racja) and `heroes/shield.ts` (`projectileDamageMul` reads `Player.skim`, set from the `skim` trait: skim from 90% racja; `Player.round` while rounded). Kartograf's auto is a hitscan laser: `fireAuto` → `fireLaser` → shared `attack()`; `attack:started` carries `laser {sx, sy, ex, ey, crit, metres, scale?}`; crit pierces along the line. The base page animates on a render clock `animMs` in game.ts because `RunState.time` does not advance in phase 'base'. Sounds: `nalesSlap`, `nalesOrbita`, `nalesGravity`, `nalesFlag`.
@@ -332,7 +337,7 @@ Save safety (`save/export.ts`): `requestPersistence()` on boot; archive `{kind: 
 meta}` with the meta written as `migrate` reads it (an export of an import is byte-identical); `parseArchive(text)` -> `{ok, meta}` or
 `{ok: false, reason: parse | kind | newer}`; `describeMeta` feeds the confirmation popup at the desk (`[data-desk=export|import]`,
 "Archiwum eksportowe"). A confirmed import goes through `main.ts importSave`: a run held in the tunnel is dropped unsaved, the save
-replaced, settings applied, the base printed again from the new character (or the profile screen without a hero), the desk reopened.
+replaced, settings applied, the base printed again from the new character (or the roster without an active file), the desk reopened.
 Bug dump: `bugDump({meta, bus, planet, page, total, device})` (version, hero, planet, page, settings, viewport, last 10 events) ->
 `copyText` (clipboard, textarea fallback) -> a footnote on the pause sheet (`PauseSheet.note`).
 Settings (`Settings`, kept by `migrate` only when not default): `textSize?: 0|1|2` -> `--ts` 1 / 1.15 / 1.3 on `<html>` (`ui/textsize.css`
@@ -340,3 +345,26 @@ zooms `.fn-list, .pop, .ps-scroll, .ps-notes, .set-scroll`; the landscape footno
 `ui/footnotes.ts` takes older notes off whole on a resize of the list), `damageNumbers?: true` (`render/damageNumbers.ts`: pool of 10
 nodes in `#fx`, Garamond digits beside an `enemy:hit`, a crit is larger with a red underline; `bindFx` 5th argument), `bugButton?: false`.
 Shots: `shot-s5.mjs` (4185, `dist-s5`, `shots-s5/`), `shot-recovery.mjs` (4176, `dist-recovery`, `shots-recovery/`).
+
+## Roster and archives (S6, ITEMS 8)
+`save/roster.ts` (pure: meta in, `{ok, meta}` out; the caller writes): `createCharacter(meta, heroId, name='')` (becomes
+active; `'hero' | 'full' | 'duplicate'`), `selectCharacter`, `deleteCharacter` (bag, gear, bookmark, Historia and the
+personal archive go; shared stays; active falls to the first remaining; `'unknown'`), `moveItem(meta, {zone, index}, to)`
+(`Zone = 'bag' | 'personal' | 'shared'`, caps 20/40/40; `'noCharacter' | 'missing' | 'full' | 'same'`; a plate number
+taken in the bag is renumbered, uid kept), `rosterOf`, `activeRecord`, `itemsIn`, `zoneCap`, `cleanName`;
+`MAX_CHARACTERS 8`, `ARCHIVE_CAP 40`, `NAME_MAX 24`. Names are plain strings ("0001" from `nextCaseName`); screens print
+"Sprawa nr ...". `ui/rosterStore.ts` is the only UI file on that API: it loads, applies, `saveMeta`s, and maps the codes
+to the screens' (`ui/rosterModel.ts errorText`). Screens: `ui/roster.ts mountRoster` (Wykaz spraw; per file Otwórz,
+Karta uprawnień (read-only `openKarta`), Usuń with a confirmation; Nowa sprawa; Wróć to the title or the base),
+`ui/profile.ts mountProfile(root, ProfileOptions)` (hero pick + case number field; the function form is the old preview),
+`ui/archive.ts openArchive` (a desk line `[data-desk=archiwum]`, two taps: item, then a place).
+main.ts: `go('profile')` first runs `settleForRoster()`: a held run is settled like Zakończ (`leave('changeHero')`), else
+a live base/run writes its character (a run its bookmark too), then the game stops, so nothing live can be mirrored into
+another file. After a store call main reloads `meta = loadMeta()`; the archive rewrites the live bag in place.
+`importSave` without a hero stops the game before the roster. Ghost clicks: `ui/sheet.ts guardGhostClicks` decides with
+the pure `isGhostOf(press, target, at)`: in the 700 ms tail of a press, an event honours only the pressed element, its
+contents and its ancestors; when the pressed element has left the page, only its ancestors at press time. A tap's own
+click may carry `detail 0`, so detail is not an exemption. Hooks: `[data-roster=new|open|karta|remove|back]`,
+`.rs-case[data-case][data-hero]`, `[data-profile=name]`, `[data-desk=roster|archiwum]`, `.ar-sec[data-place]
+.ar-cell[data-uid]`, `.ar-move[data-to]`. Shots: `shot-s6.mjs` (4186, `dist-s6`, `shots-s6/`). Open: the hero note on
+archived uniques waits for legendary paragraphs.
