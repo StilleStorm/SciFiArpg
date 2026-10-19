@@ -19,7 +19,11 @@
     "reports": "Zgłoszeń: {count}/{max}",
     "updated": "Sklep zaktualizowano do wersji {version}. Poprawki błędów i usprawnienia. Ofertę odświeżono.",
     "stamp": "Zaktualizowano",
-    "version": "Wersja sklepu: {version}."
+    "version": "Wersja sklepu: {version}.",
+    "kind": {
+      "oferta": "Oferta",
+      "adapter": "Z adapterem"
+    }
   },
   "lie": {
     "wariant": "Sprostowanie: zamiast «{listed}» wydano «{got}» (wariant). Gwiazdek nie zwraca się.",

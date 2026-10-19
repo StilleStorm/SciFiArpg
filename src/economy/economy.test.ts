@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { createRng } from '../core/rng';
+import { AFFIXES_BY_ID } from '../items/affixes';
+import { itemValue } from '../items/generate';
+import { listPrice } from '../items/level';
 import { t } from '../i18n';
 import { BASE_SCHEDULE, KIOSK_SCHEDULE, botLine, createHours, formatClock, hoursAt, officeOverride, setOfficeOpen } from './hours';
 import {
   FEE_RATE,
   LIE_RATES,
+  UPDATED_LIE_RATES,
   REPORTS_TO_UPDATE,
   buy,
   createSklep,
@@ -223,5 +227,56 @@ describe('office hours', () => {
     expect(botLine(1)).not.toBe(botLine(0));
     expect(formatClock(65)).toBe('1:05');
     expect(t('economy.hours.bot', { time: '0:10' })).toContain('0:10');
+  });
+});
+
+describe('Sklep stock rules (ITEMS 7.1)', () => {
+  const stockOf = (seed: number, visit = 1, level = 12) => {
+    const s = createSklep();
+    restock(s, seed, visit, level);
+    return s.stock;
+  };
+  it('six plates: three low in different slots, one rzadki, one oferta with a g3 line, one adapter', () => {
+    for (let seed = 1; seed <= 40; seed++) {
+      const stock = stockOf(seed);
+      expect(stock).toHaveLength(6);
+      expect(stock.map((l) => l.kind)).toEqual(['plate', 'plate', 'plate', 'plate', 'oferta', 'adapter']);
+      const low = stock.slice(0, 3);
+      for (const l of low) expect(['zwykly', 'nietypowy']).toContain(l.item.tier);
+      expect(new Set(low.map((l) => l.item.slot)).size).toBe(3);
+      expect(stock[3]?.item.tier).toBe('rzadki');
+      expect(stock[4]?.item.tier).toBe('rzadki');
+      expect(stock.every((l) => l.item.tier !== 'unikatowy')).toBe(true);
+      expect(stock[5]?.item.adapter).toBe(true);
+    }
+  });
+  it('the oferta carries a grade 3 affix in nearly every stock', () => {
+    let g3 = 0;
+    for (let seed = 1; seed <= 60; seed++) if (stockOf(seed)[4]?.item.affixes.some((a) => AFFIXES_BY_ID.get(a)?.grade === 3)) g3++;
+    expect(g3).toBeGreaterThanOrEqual(57);
+  });
+  it('stock sits at the band level and prices follow price1 * (1 + 0.1 ilvl) * tier', () => {
+    for (const l of stockOf(5, 1, 22)) {
+      expect(l.item.level).toBe(22);
+      if (l.kind !== 'adapter') expect(l.price).toBe(itemValue(l.item));
+    }
+    expect(listPrice(10, 22, 'rzadki')).toBe(Math.round(10 * 3.2 * 6));
+  });
+  it('the vendor lies about 1 in 6 at first, and after an update 1 in 4 or 1 in 10', () => {
+    let lies = 0;
+    let n = 0;
+    for (let seed = 1; seed <= 400; seed++) {
+      for (const l of stockOf(seed, 1)) {
+        n++;
+        if (l.lie) lies++;
+      }
+    }
+    expect(lies / n).toBeGreaterThan(0.13);
+    expect(lies / n).toBeLessThan(0.2);
+    const seen = new Set<number>();
+    for (let seed = 1; seed <= 40; seed++) seen.add(lieRate(1, seed));
+    expect([...seen].sort()).toEqual([...UPDATED_LIE_RATES].sort());
+    expect(lieRate(1, 9)).toBe(lieRate(1, 9));
+    expect(LIE_RATES[0]).toBeCloseTo(1 / 6);
   });
 });

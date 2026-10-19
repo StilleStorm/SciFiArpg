@@ -2,6 +2,7 @@ import type { Rng } from '../core/rng';
 import { AFFIXES_BY_ID, effectFor, randomAffixPool, type Affix } from './affixes';
 import { BASES, BASES_BY_ID, basesForSlot, oddStats, type BaseItem } from './bases';
 import { affixesOf, nameItem } from './grammar';
+import { TIER_BASE_MUL, ilvlScale, listPrice } from './level';
 import { FREE_TRIAL_KILLS, TRIAL_KILLS, actualFrom, rollReview, rollTruth } from './reviews';
 import { MOD_MULTIPLIER, STAT_FLOOR, modTierForLevel, rollModTier, type ModTier } from './tiers';
 import { makeUnique, uniquesForSlot } from './uniques';
@@ -31,8 +32,7 @@ export const TIER_WEIGHTS: Record<DropSource, readonly [number, number, number, 
 };
 
 const TIER_ORDER: readonly ItemTier[] = ['zwykly', 'nietypowy', 'rzadki', 'unikatowy'];
-const TIER_MUL: Record<ItemTier, number> = { zwykly: 1, nietypowy: 1.15, rzadki: 1.35, unikatowy: 1.6 };
-const TIER_PRICE: Record<ItemTier, number> = { zwykly: 1, nietypowy: 2.2, rzadki: 5, unikatowy: 14 };
+const TIER_MUL = TIER_BASE_MUL;
 const TIER_GRADE: Record<ItemTier, 1 | 2 | 3> = { zwykly: 1, nietypowy: 2, rzadki: 3, unikatowy: 3 };
 /** Probability that a rare item carries the free-version affix. */
 export const P_FREE = 0.12;
@@ -56,7 +56,7 @@ export function rollTier(rng: Rng, source: DropSource = 'common', bonus = 0): It
   return TIER_ORDER[idx] ?? 'zwykly';
 }
 
-const levelScale = (level: number): number => 1 + 0.12 * (Math.max(1, level) - 1);
+const levelScale = ilvlScale;
 
 /** Selection weight; grade 3 halves in the shop, and the shop never stocks what it says does not exist (wycofany). */
 const weightOf = (a: Affix, shop: boolean): number => (!shop ? a.weight : a.absurd === 'wycofany' ? 0 : a.grade === 3 ? a.weight / 2 : a.weight);
@@ -103,7 +103,7 @@ export function statsFor(base: BaseItem, affixes: readonly Affix[], level: numbe
 /** Price in gwiazdki before the shop's fee. */
 export function itemValue(item: Pick<Item, 'baseId' | 'tier' | 'level'>): number {
   const base = BASES_BY_ID.get(item.baseId);
-  return Math.max(1, Math.round((base?.price ?? 4) * TIER_PRICE[item.tier] * levelScale(item.level)));
+  return listPrice(base?.price ?? 4, item.level, item.tier);
 }
 
 /** The price to buy out a free version. */
@@ -123,7 +123,7 @@ export function buildItem(rng: Rng, base: BaseItem, tier: ItemTier, level: numbe
   const rzekomy = affixes.some((a) => a.absurd === 'rzekomy');
   // "Rzekomy": the claim is honest within 10%, and the register keeps it forever.
   const truth = rzekomy ? 'honest' : rollTruth(rng);
-  const actual = actualFrom(rng, claimed, truth);
+  const actual = actualFrom(rng, claimed, truth, tier);
   const review = rollReview(rng, truth);
   const free = affixes.some((a) => a.free);
   const baseTrial = free ? FREE_TRIAL_KILLS : TRIAL_KILLS[tier];

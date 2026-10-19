@@ -1,38 +1,86 @@
 import type { Bus } from '../core/events';
+import type { Rng } from '../core/rng';
 import { createPermissionPickup, createPickup } from '../entities/factory';
 import type { FamilyId } from '../enemies/ids';
+import { claimNamedDrop } from '../enemies/named';
 import type { Pickup } from '../entities/types';
 import { earnStars } from '../economy/stars';
 import { t } from '../i18n';
 import { tickAds } from '../items/ads';
 import { rollItem } from '../items/generate';
 import { addItem, inventoryFull } from '../items/inventory';
+import { ilvlFor } from '../items/level';
 import { advanceTrial, revealNote } from '../items/reviews';
 import { uniqueNote } from '../items/uniques';
 import { rollPotwierdzenie, takePotwierdzenie, tickRecovery } from './recovery';
 import type { DropSource, Item, ItemTier } from '../items/types';
 import { nextId, type RunState } from '../world/run';
-import { ilvlBonus, lootTierBonus, starMul } from '../world/campaign';
+import type { PriorityId } from '../world/campaign';
 
 interface DropTable {
-  /** Chance of one item (bosses: guaranteed `guaranteed` items). */
+  /** Chance of one item (bosses: `guaranteed` items instead). */
   item: number;
   guaranteed: number;
+  /** Chance of a gwiazdki pile and its size (ITEMS 6.5). */
   star: number;
   starMin: number;
   starMax: number;
 }
 
+/**
+ * ITEMS 6.1 and 6.5. `boss` is the planet boss (the only boss a run has): three items, 25-35 gwiazdki.
+ * The chance of a potwierdzenie per rank is `POTWIERDZENIE_DROP` (systems/recovery.ts), rolled last.
+ */
 export const DROPS: Record<DropSource, DropTable> = {
-  common: { item: 0.2, guaranteed: 0, star: 0.45, starMin: 1, starMax: 1 },
-  elite: { item: 0.7, guaranteed: 0, star: 1, starMin: 2, starMax: 4 },
-  boss: { item: 1, guaranteed: 3, star: 1, starMin: 8, starMax: 14 },
+  common: { item: 0.12, guaranteed: 0, star: 0.6, starMin: 1, starMax: 2 },
+  elite: { item: 1, guaranteed: 0, star: 1, starMin: 5, starMax: 8 },
+  boss: { item: 1, guaranteed: 3, star: 1, starMin: 25, starMax: 35 },
 };
 
+/** Tier weights zwykly / nietypowy / rzadki / unikatowy (ITEMS 6.1; zestaw has no tier yet and counts as rzadki). */
+export type TierWeights = readonly [number, number, number, number];
+export const DROP_TIER_WEIGHTS: Record<DropSource, TierWeights> = {
+  common: [75, 22, 3, 0],
+  elite: [35, 45, 19, 1],
+  /** The two items after the guaranteed rzadki. */
+  boss: [20, 50, 29, 1],
+};
+
+/** Share of rolls whose tier moves one column by priority: Niski left, Wysoki and Krytyczny right (ITEMS 6.1). */
+export const PRIORITY_TIER_SHIFT: Record<PriorityId, number> = { niski: -0.2, normalny: 0, wysoki: 0.1, krytyczny: 0.25 };
+/** Factor on every gwiazdki amount (ITEMS 6.5). */
+export const PRIORITY_STAR_MUL: Record<PriorityId, number> = { niski: 0.8, normalny: 1, wysoki: 1.3, krytyczny: 1.6 };
+/** The planet boss's first item: 12% a unique (doubled at Krytyczny); the rest is rzadki (ITEMS 6.2). */
+export const BOSS_UNIQUE_CHANCE = 0.12;
+// SEAM: ITEMS 6.2 also gives 35% a zestaw piece of the planet's set (sets slice) and "Komisja przychyliła się" (a won Spór adds one tier to the best drop); both wait for their systems.
+
+const TIER_ORDER: readonly ItemTier[] = ['zwykly', 'nietypowy', 'rzadki', 'unikatowy'];
 const TIER_DOWN: Record<ItemTier, ItemTier> = { zwykly: 'zwykly', nietypowy: 'zwykly', rzadki: 'nietypowy', unikatowy: 'rzadki' };
 
-/** Level of dropped items: hero level plus how deep into the run we are, plus the ticket priority's bonus (world/campaign.ts). */
-export const dropLevel = (s: RunState): number => Math.max(1, s.player.level + s.pageIndex + ilvlBonus(s.plan));
+const priorityOf = (s: RunState): PriorityId => s.plan?.priority ?? 'normalny';
+
+/**
+ * Roll a tier from the weights of a source. The priority moves a share of rolls one column (never past either end);
+ * a law's tier bonus lifts zwykły and nietypowy up to rzadki, and never rolls a unique by itself.
+ */
+export function rollDropTier(rng: Rng, weights: TierWeights, priority: PriorityId, lawBonus = 0): ItemTier {
+  const total = weights[0] + weights[1] + weights[2] + weights[3];
+  let r = rng.next() * total;
+  let idx = 0;
+  for (let i = 0; i < 4; i++) {
+    idx = i;
+    r -= weights[i] ?? 0;
+    if (r < 0) break;
+  }
+  const shift = PRIORITY_TIER_SHIFT[priority];
+  if (shift !== 0 && rng.chance(Math.abs(shift))) idx = Math.max(0, Math.min(3, idx + Math.sign(shift)));
+  if (lawBonus > 0 && idx < 2) idx = Math.min(2, idx + lawBonus);
+  return TIER_ORDER[idx] ?? 'zwykly';
+}
+
+/** Item level of a drop at this moment of the run (items/level.ts; ITEMS 5.1). A run without a ticket plan counts as planet 1 Normalny. */
+export const dropLevel = (s: RunState, boss = false): number =>
+  ilvlFor({ planet: s.plan?.planet ?? 0, priority: priorityOf(s), pageIndex: s.pageIndex, pageCount: s.pageCount, boss });
 
 function scatter(s: RunState, x: number, y: number): { x: number; y: number } {
   const rng = s.rngs.loot;
@@ -50,45 +98,65 @@ function dropItemPickup(s: RunState, x: number, y: number, item: Item): Pickup {
   return k;
 }
 
-/** Roll and place the drops of one dead enemy. */
+/**
+ * Roll and place the drops of one dead enemy.
+ * SEAM: ITEMS 6.4 przesyłka/awizo: a zestaw piece or unique from a common or elite arrives as a parcel at the paczkomat (slice f); for now it drops in place.
+ */
 export function dropLoot(s: RunState, x: number, y: number, source: DropSource): void {
   const table = DROPS[source];
   const rng = s.rngs.loot;
   const law = s.law;
   const mul = law.lootMul;
+  const priority = priorityOf(s);
+  const level = dropLevel(s, source === 'boss');
   let items = table.guaranteed;
   if (items === 0 && rng.chance(Math.min(1, table.item * mul))) items = 1;
   for (let i = 0; i < items; i++) {
-    const item = rollItem(rng, {
-      level: dropLevel(s),
-      source,
-      tierBonus: law.lootTierBonus + lootTierBonus(s.plan),
-      // The first boss drop is always at least rzadki.
-      ...(source === 'boss' && i === 0 ? { tier: rng.chance(0.3) ? ('unikatowy' as const) : ('rzadki' as const) } : {}),
-    });
+    let tier: ItemTier;
+    if (source === 'boss' && i === 0) {
+      // The first boss drop is always at least rzadki; the final ticket's boss always hands over a unique.
+      // SEAM: ITEMS 6.2 wants the final boss's unique to be one not yet archived (needs the archive's unique list in RunState).
+      const unique = s.plan?.kind === 'final' || rng.chance(Math.min(1, BOSS_UNIQUE_CHANCE * (priority === 'krytyczny' ? 2 : 1)));
+      tier = unique ? 'unikatowy' : 'rzadki';
+    } else {
+      tier = rollDropTier(rng, DROP_TIER_WEIGHTS[source], priority, law.lootTierBonus);
+    }
+    const item = rollItem(rng, { level, source, tier });
     dropItemPickup(s, x, y, item);
     if (law.lootPairs) {
-      const twin = rollItem(rng, { level: dropLevel(s), tier: TIER_DOWN[item.tier], ...(item.uniqueId ? {} : { slot: item.slot }) });
+      const twin = rollItem(rng, { level, tier: TIER_DOWN[item.tier], ...(item.uniqueId ? {} : { slot: item.slot }) });
       twin.variant = true;
       dropItemPickup(s, x, y, twin);
     }
   }
   if (rng.chance(Math.min(1, table.star * Math.max(0.5, mul)))) {
-    const n = Math.max(1, Math.round(rng.int(table.starMin, table.starMax) * starMul(s.plan)));
+    const n = Math.max(1, Math.round(rng.int(table.starMin, table.starMax) * PRIORITY_STAR_MUL[priority]));
     const at = scatter(s, x, y);
     s.pickups.push(createPickup(nextId(s), at.x, at.y, 0, undefined, n));
   }
   rollPotwierdzenie(s, x, y, source); // last, so the rolls above keep their sequence
 }
 
-/** An elite leaves a permission card one time in three; a boss always does. */
-export const ELITE_PERMISSION_CHANCE = 1 / 3;
+/**
+ * One guaranteed item of at least `minTier` (a named elite: nietypowy or better). The tier is rolled from the elite
+ * weights and lifted to the floor; the level is the page's. Returns the pickup. `bindLoot` calls it when
+ * `claimNamedDrop` (enemies/named.ts) answers for the dead enemy.
+ */
+export function dropGuaranteed(s: RunState, x: number, y: number, minTier: ItemTier = 'nietypowy'): Pickup {
+  const rng = s.rngs.loot;
+  const rolled = rollDropTier(rng, DROP_TIER_WEIGHTS.elite, priorityOf(s), s.law.lootTierBonus);
+  const tier = TIER_ORDER.indexOf(rolled) >= TIER_ORDER.indexOf(minTier) ? rolled : minTier;
+  return dropItemPickup(s, x, y, rollItem(rng, { level: dropLevel(s), source: 'elite', tier }));
+}
+
+/** An elite of the family leaves its permission card one time in five, if the hero does not hold it; a boss always does (ITEMS 6.3). */
+export const ELITE_PERMISSION_CHANCE = 0.2;
 
 /** Roll the permission card for a dead enemy of `family`. Null when none drops. */
 export function rollPermission(s: RunState, tier: DropSource, family: FamilyId | undefined): FamilyId | null {
   if (!family) return null;
   if (tier === 'boss') return family;
-  if (tier === 'elite' && s.rngs.loot.chance(ELITE_PERMISSION_CHANCE)) return family;
+  if (tier === 'elite' && !s.player.permissions.includes(family) && s.rngs.loot.chance(ELITE_PERMISSION_CHANCE)) return family;
   return null;
 }
 
@@ -150,6 +218,8 @@ export function bindLoot(bus: Bus, getState: () => RunState | null): void {
     if (!s) return;
     const tier = e.tier ?? 'common';
     dropLoot(s, e.x, e.y, tier);
+    const named = claimNamedDrop(s, e.id);
+    if (named) dropGuaranteed(s, e.x, e.y, named.minTier);
     const fam = rollPermission(s, tier, e.family);
     if (fam) dropPermission(s, e.x, e.y, fam);
     for (const r of advanceTrial(s.player)) bus.emit('footnote', { text: revealNote(r) });

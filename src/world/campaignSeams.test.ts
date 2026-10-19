@@ -37,7 +37,8 @@ describe('campaign seams', () => {
     expect(b.player.xp).toBeGreaterThan(a.player.xp);
     expect(c.player.xp).toBe(a.player.xp);
     expect(dropLevel(b)).toBe(dropLevel(a) + 6);
-    expect(dropLevel(c)).toBe(dropLevel(a));
+    // A run without a plan counts as planet 1 at Normalny (S9: ilvl no longer follows the hero's level).
+    expect(dropLevel(c)).toBe(dropLevel(createRun(5, { plan: plan('normalny', 0) })));
   });
 
   it('seen cards live in the campaign record and survive validation', () => {

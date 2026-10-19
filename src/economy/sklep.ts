@@ -1,6 +1,8 @@
 import { createRng, type Rng } from '../core/rng';
 import type { Player } from '../entities/types';
 import { t } from '../i18n';
+import { AFFIXES_BY_ID } from '../items/affixes';
+import { adapterPrice } from '../items/compat';
 import { itemValue, rollItem } from '../items/generate';
 import { addItem, inventoryFull } from '../items/inventory';
 import type { Item, ItemTier, Slot } from '../items/types';
@@ -9,15 +11,22 @@ import { spendStars } from './stars';
 
 /** Added at checkout, not shown in the price (footnote "Cena nie zawiera opłaty serwisowej."). */
 export const FEE_RATE = 0.2;
-/** Lie rate by number of store updates: 1 in 6 at first, then whatever the update decided. */
-export const LIE_RATES: readonly number[] = [1 / 6, 1 / 3, 1 / 12, 1 / 4];
+/** Lie rate: 1 in 6 at first; every store update then decides 1 in 4 or 1 in 10 at random (ITEMS 7.1). */
+export const FIRST_LIE_RATE = 1 / 6;
+export const UPDATED_LIE_RATES: readonly number[] = [1 / 4, 1 / 10];
+export const LIE_RATES: readonly number[] = [FIRST_LIE_RATE, ...UPDATED_LIE_RATES];
 export const REPORTS_TO_UPDATE = 3;
 export const STOCK_SIZE = 6;
 
 export type Lie = 'wariant' | 'cena';
 
+/** plate: an ordinary plate; oferta: the planet's special offer; adapter: a plate sold with its adapter (the compatibility clash is ignored). */
+export type ListingKind = 'plate' | 'oferta' | 'adapter';
+
 export interface Listing {
   id: number;
+  /** Absent in stock saved before S9 (= plate). */
+  kind?: ListingKind;
   /** The item as advertised. */
   item: Item;
   /** What is actually handed over (a different roll of the same base when lie = wariant). */
@@ -43,7 +52,11 @@ export function createSklep(): SklepState {
   return { stock: [], reports: 0, updates: 0, stockFor: -1, nextListingId: 1 };
 }
 
-export const lieRate = (updates: number): number => LIE_RATES[updates % LIE_RATES.length] ?? 1 / 6;
+/** The lie rate after `updates` store updates; the choice after an update is a pure function of the seed and the update count. */
+export function lieRate(updates: number, seed = 0): number {
+  if (updates <= 0) return FIRST_LIE_RATE;
+  return createRng(seed).fork(`sklep-rate:${updates}`).pick(UPDATED_LIE_RATES);
+}
 
 export const feeOf = (price: number): number => Math.ceil(price * FEE_RATE);
 export const totalOf = (price: number): number => price + feeOf(price);
@@ -72,16 +85,29 @@ function shuffled<T>(rng: Rng, list: readonly T[]): T[] {
   return a;
 }
 
+export interface ListingOptions {
+  /** Force the tier (stock rules); otherwise the shop's weights. */
+  tier?: ItemTier;
+  kind?: ListingKind;
+}
+
 /** Make one listing. Whether it lies is decided here, with the current lie rate. */
-export function makeListing(rng: Rng, id: number, level: number, slot: Slot, rate: number): Listing {
-  const tier = shopTier(rng);
-  const item = rollItem(rng, { tier, slot, level, shop: true });
-  const price = itemValue(item);
-  const listing: Listing = { id, item, delivered: item, price, truePrice: price, sold: false };
+export function makeListing(rng: Rng, id: number, level: number, slot: Slot, rate: number, opts: ListingOptions = {}): Listing {
+  const tier = opts.tier ?? shopTier(rng);
+  const kind = opts.kind ?? 'plate';
+  let item = rollItem(rng, { tier, slot, level, shop: true });
+  if (kind === 'oferta') {
+    // "A rzadki with a g3 affix": reroll a few times until one of the lines is grade 3.
+    for (let i = 0; i < 12 && !item.affixes.some((a) => AFFIXES_BY_ID.get(a)?.grade === 3); i++) item = rollItem(rng, { tier, slot, level, shop: true });
+  }
+  if (kind === 'adapter') item.adapter = true;
+  const price = itemValue(item) + (kind === 'adapter' ? adapterPrice(item) : 0);
+  const listing: Listing = { id, kind, item, delivered: item, price, truePrice: price, sold: false };
   if (rng.chance(rate)) {
     if (rng.chance(0.5)) {
       const variant = rollItem(rng, { tier, slot, level, baseId: item.baseId, shop: true });
       variant.variant = true;
+      if (kind === 'adapter') variant.adapter = true;
       listing.delivered = variant;
       listing.lie = 'wariant';
     } else {
@@ -92,12 +118,27 @@ export function makeListing(rng: Rng, id: number, level: number, slot: Slot, rat
   return listing;
 }
 
-/** New stock for a visit. Deterministic from (seed, visit key, updates). */
+/** The six plates of ITEMS 7.1: three zwykły or nietypowy in different slots, one rzadki, one oferta, one adapter (see `restock`). */
+/**
+ * New stock for a visit. Deterministic from (seed, visit key, updates). `level` is the item level of the band
+ * (items/level.ts shopIlvl: the planet's band at page offset 1); ui/sklep.ts and economy/kiosk.ts pass shopIlvl(planet).
+ */
 export function restock(state: SklepState, seed: number, visitKey: number, level: number): void {
   const rng = createRng(seed).fork(`sklep:${visitKey}:${state.updates}`);
-  const slots = shuffled(rng, [...SLOTS, ...SLOTS]).slice(0, STOCK_SIZE);
-  const rate = lieRate(state.updates);
-  state.stock = slots.map((slot) => makeListing(rng, state.nextListingId++, level, slot, rate));
+  const slots = shuffled(rng, SLOTS);
+  const rate = lieRate(state.updates, seed);
+  const lowTiers = (): ItemTier => (rng.chance(0.5) ? 'zwykly' : 'nietypowy');
+  const at = (i: number): Slot => slots[i % slots.length] ?? 'bron';
+  const specs: { slot: Slot; opts: ListingOptions }[] = [
+    { slot: at(0), opts: { tier: lowTiers() } },
+    { slot: at(1), opts: { tier: lowTiers() } },
+    { slot: at(2), opts: { tier: lowTiers() } },
+    { slot: at(3), opts: { tier: 'rzadki' } },
+    // SEAM: 10% of offers are a zestaw piece of the planet's set (sets slice); until then the offer is always the rzadki with a g3 affix.
+    { slot: at(4), opts: { tier: 'rzadki', kind: 'oferta' } },
+    { slot: at(0), opts: { tier: lowTiers(), kind: 'adapter' } },
+  ];
+  state.stock = specs.map((sp) => makeListing(rng, state.nextListingId++, level, sp.slot, rate, sp.opts));
   state.stockFor = visitKey;
 }
 

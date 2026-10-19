@@ -1,11 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { createBus } from '../core/events';
 import { INVENTORY_CAP } from '../items/inventory';
+import { createRng } from '../core/rng';
+import { ilvlFor } from '../items/level';
+import { populatePage } from '../world/pageTurn';
+import { defaultPlan, newCampaign, type PriorityId } from '../world/campaign';
 import { createRun } from '../world/run';
-import { DROPS, bindLoot, dropLoot, dropPermission, rollPermission, takePickup, updateLoot } from './loot';
+import { DROPS, DROP_TIER_WEIGHTS, bindLoot, dropGuaranteed, dropLevel, dropLoot, dropPermission, rollDropTier, rollPermission, takePickup, updateLoot } from './loot';
+import { POTWIERDZENIE_DROP } from './recovery';
+import { recordNamed } from '../enemies/named';
 
 describe('loot', () => {
-  it('common kills drop an item about one time in five, and stars about half the time', () => {
+  it('common kills drop an item about one time in eight, and stars 60% of the time', () => {
     const s = createRun(1);
     let items = 0;
     let stars = 0;
@@ -18,8 +24,8 @@ describe('loot', () => {
     }
     expect(items / n).toBeGreaterThan(DROPS.common.item - 0.04);
     expect(items / n).toBeLessThan(DROPS.common.item + 0.04);
-    expect(stars / n).toBeGreaterThan(0.38);
-    expect(stars / n).toBeLessThan(0.52);
+    expect(stars / n).toBeGreaterThan(0.54);
+    expect(stars / n).toBeLessThan(0.66);
   });
   it('bosses always drop three items and a pile of stars, and the first is rzadki or better', () => {
     const s = createRun(2);
@@ -29,7 +35,7 @@ describe('loot', () => {
       const items = s.pickups.filter((k) => k.item);
       expect(items).toHaveLength(3);
       expect(['rzadki', 'unikatowy']).toContain(items[0]?.item?.tier);
-      expect(s.pickups.some((k) => (k.gwiazdki ?? 0) >= 8)).toBe(true);
+      expect(s.pickups.some((k) => (k.gwiazdki ?? 0) >= 25)).toBe(true);
     }
   });
   it('drops are numbered from the run counter and reproducible from the seed', () => {
@@ -95,17 +101,33 @@ describe('loot', () => {
     updateLoot(s, bus, 1);
     expect(notes).toEqual([]);
   });
+  it('a named elite leaves one extra item of nietypowy or better, once', () => {
+    const plain = createRun(11);
+    const named = createRun(11);
+    recordNamed(named, { id: 7, name: 'x', affixes: ['pilny', 'poufny'], family: 'urzadzenia', claimed: false });
+    for (const s of [plain, named]) {
+      const bus = createBus();
+      bindLoot(bus, () => s);
+      bus.emit('enemy:died', { id: 7, x: 0, y: 0, tier: 'elite' });
+      bus.emit('enemy:died', { id: 7, x: 0, y: 0, tier: 'elite' });
+    }
+    const items = (s: typeof plain) => s.pickups.filter((k) => k.item);
+    expect(items(named).length).toBe(items(plain).length + 1);
+    expect(items(named).some((k) => k.item && k.item.tier !== 'zwykly')).toBe(true);
+  });
 });
 
 describe('permission cards', () => {
-  it('a boss always drops its family card, a common enemy never, an elite about one time in three', () => {
+  it('a boss always drops its family card, a common enemy never, an elite about one time in five', () => {
     const s = createRun(9);
     for (let i = 0; i < 20; i++) expect(rollPermission(s, 'boss', 'wygenerowane')).toBe('wygenerowane');
     for (let i = 0; i < 200; i++) expect(rollPermission(s, 'common', 'urzadzenia')).toBeNull();
     let n = 0;
     for (let i = 0; i < 3000; i++) if (rollPermission(s, 'elite', 'powiadomienia')) n++;
-    expect(n / 3000).toBeGreaterThan(0.29);
-    expect(n / 3000).toBeLessThan(0.37);
+    expect(n / 3000).toBeGreaterThan(0.17);
+    expect(n / 3000).toBeLessThan(0.23);
+    s.player.permissions.push('powiadomienia');
+    for (let i = 0; i < 300; i++) expect(rollPermission(s, 'elite', 'powiadomienia')).toBeNull();
   });
   it('taking the card grants the permission, footnotes it and never fills the inventory', () => {
     const s = createRun(9);
@@ -133,5 +155,131 @@ describe('permission cards', () => {
     expect(hasPermission(s, 'wygenerowane')).toBe(false);
     takePickup(s, createBus(), dropPermission(s, 1, 1, 'wygenerowane'));
     expect(hasPermission(s, 'wygenerowane')).toBe(true);
+  });
+});
+
+const planned = (seed: number, planet: number, priority: PriorityId) => {
+  const base = defaultPlan(newCampaign(), priority, seed);
+  return createRun(seed, { plan: { ...base, planet } });
+};
+
+describe('drop tables (ITEMS 6.1, 6.2, 6.5)', () => {
+  const share = (rolls: string[], tier: string): number => rolls.filter((t) => t === tier).length / rolls.length;
+  it('tier weights come out as the table says for common and elite kills', () => {
+    const rng = createRng(11);
+    const n = 20000;
+    const common = Array.from({ length: n }, () => rollDropTier(rng, DROP_TIER_WEIGHTS.common, 'normalny'));
+    expect(share(common, 'zwykly')).toBeCloseTo(0.75, 1);
+    expect(share(common, 'nietypowy')).toBeCloseTo(0.22, 1);
+    expect(share(common, 'unikatowy')).toBe(0);
+    const elite = Array.from({ length: n }, () => rollDropTier(rng, DROP_TIER_WEIGHTS.elite, 'normalny'));
+    expect(share(elite, 'nietypowy')).toBeCloseTo(0.45, 1);
+    expect(share(elite, 'rzadki')).toBeCloseTo(0.19, 1);
+  });
+  it('priority moves a share of rolls one column: Niski 20% left, Wysoki 10% and Krytyczny 25% right', () => {
+    const n = 40000;
+    const sh = (priority: PriorityId): number => {
+      const rng = createRng(12);
+      let z = 0;
+      for (let i = 0; i < n; i++) if (rollDropTier(rng, DROP_TIER_WEIGHTS.common, priority) === 'zwykly') z++;
+      return z / n;
+    };
+    // zwykły 75%: it loses a quarter of what moves right (nietypowy -> zwykły comes back from Niski).
+    expect(sh('wysoki')).toBeCloseTo(0.75 * 0.9, 1);
+    expect(sh('krytyczny')).toBeLessThan(sh('wysoki'));
+    expect(sh('niski')).toBeGreaterThan(sh('normalny'));
+  });
+  it('a law bonus lifts zwykły and nietypowy to rzadki at most', () => {
+    const rng = createRng(13);
+    for (let i = 0; i < 500; i++) expect(rollDropTier(rng, DROP_TIER_WEIGHTS.common, 'normalny', 1)).not.toBe('zwykly');
+  });
+  it('an elite always leaves one item; stars 5-8', () => {
+    const s = createRun(21);
+    for (let i = 0; i < 100; i++) {
+      s.pickups.length = 0;
+      dropLoot(s, 0, 0, 'elite');
+      expect(s.pickups.filter((k) => k.item)).toHaveLength(1);
+      const stars = s.pickups.find((k) => k.gwiazdki)?.gwiazdki ?? 0;
+      expect(stars).toBeGreaterThanOrEqual(5);
+      expect(stars).toBeLessThanOrEqual(8);
+    }
+  });
+  it('gwiazdki amounts follow the priority multiplier', () => {
+    const total = (priority: PriorityId): number => {
+      const s = planned(22, 0, priority);
+      let sum = 0;
+      for (let i = 0; i < 200; i++) {
+        s.pickups.length = 0;
+        dropLoot(s, 0, 0, 'boss');
+        sum += s.pickups.filter((k) => !k.item && k.gwiazdki).reduce((a, k) => a + (k.gwiazdki ?? 0), 0);
+      }
+      return sum / 200;
+    };
+    expect(total('normalny')).toBeGreaterThan(27);
+    expect(total('normalny')).toBeLessThan(33);
+    expect(total('krytyczny') / total('normalny')).toBeCloseTo(1.6, 1);
+    expect(total('niski') / total('normalny')).toBeCloseTo(0.8, 1);
+  });
+  it('the planet boss: first item rzadki or unique (12%, doubled at Krytyczny), the final ticket always a unique', () => {
+    const uniques = (priority: PriorityId): number => {
+      const s = planned(23, 2, priority);
+      let u = 0;
+      for (let i = 0; i < 1500; i++) {
+        s.pickups.length = 0;
+        dropLoot(s, 0, 0, 'boss');
+        const first = s.pickups.find((k) => k.item)?.item;
+        expect(['rzadki', 'unikatowy']).toContain(first?.tier);
+        if (first?.tier === 'unikatowy') u++;
+      }
+      return u / 1500;
+    };
+    expect(uniques('normalny')).toBeGreaterThan(0.09);
+    expect(uniques('normalny')).toBeLessThan(0.17);
+    expect(uniques('krytyczny')).toBeGreaterThan(0.19);
+    const fin = createRun(24, { plan: { ...defaultPlan(newCampaign(), 'normalny', 24), kind: 'final' } });
+    for (let i = 0; i < 20; i++) {
+      fin.pickups.length = 0;
+      dropLoot(fin, 0, 0, 'boss');
+      expect(fin.pickups.find((k) => k.item)?.item?.tier).toBe('unikatowy');
+    }
+  });
+  it('items drop at the item level of the planet, page and priority', () => {
+    const s = planned(25, 4, 'wysoki');
+    s.pageIndex = 0;
+    expect(dropLevel(s)).toBe(ilvlFor({ planet: 4, priority: 'wysoki', pageIndex: 0, pageCount: s.pageCount }));
+    for (let i = 0; i < 30; i++) dropLoot(s, 0, 0, 'elite');
+    for (const k of s.pickups) if (k.item) expect(k.item.level).toBe(dropLevel(s));
+    expect(dropLevel(s, true)).toBe(dropLevel(s) + 2);
+  });
+  it('the named-elite hook gives one item of at least nietypowy', () => {
+    const s = createRun(26);
+    for (let i = 0; i < 200; i++) expect(dropGuaranteed(s, 0, 0).item?.tier).not.toBe('zwykly');
+    expect(s.pickups).toHaveLength(200);
+  });
+});
+
+describe('potwierdzenia per page (S5 rates, S9 target)', () => {
+  it('rates are .1 / .5 / 1 and a Normalny page leaves 1-2 slips', () => {
+    expect(POTWIERDZENIE_DROP).toEqual({ common: 0.1, elite: 0.5, boss: 1 });
+    let slips = 0;
+    let pages = 0;
+    const TRICKLE = 4; // kills beyond the first population: one spawn per 10 s while the page is thin
+    for (let seed = 1; seed <= 60; seed++) {
+      const s = planned(seed, 0, 'normalny');
+      for (let pi = 0; pi < s.pageCount - 1; pi++) {
+        s.pageIndex = pi;
+        const page = s.pages[pi];
+        if (page) s.page = page;
+        s.enemies.length = 0;
+        s.pickups.length = 0;
+        populatePage(s, createBus());
+        for (const e of s.enemies) dropLoot(s, e.x, e.y, e.elite ? 'elite' : 'common');
+        for (let i = 0; i < TRICKLE; i++) dropLoot(s, 0, 0, 'common');
+        slips += s.pickups.filter((k) => k.potwierdzenie).length;
+        pages++;
+      }
+    }
+    expect(slips / pages).toBeGreaterThanOrEqual(1);
+    expect(slips / pages).toBeLessThanOrEqual(2);
   });
 });

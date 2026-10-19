@@ -1,6 +1,7 @@
 import type { Rng } from '../core/rng';
 import type { Player } from '../entities/types';
 import { t } from '../i18n';
+import { actualOverClaim } from './level';
 import { recomputeStats } from './stats';
 import { STAT_KEYS, emptyStats, type Item, type ItemTier, type Review, type ReviewTruth, type StatBlock } from './types';
 
@@ -26,9 +27,10 @@ function roundStat(v: number): number {
 }
 
 /** The real numbers behind the claimed ones. */
-export function actualFrom(rng: Rng, claimed: StatBlock, truth: ReviewTruth): StatBlock {
+export function actualFrom(rng: Rng, claimed: StatBlock, truth: ReviewTruth, tier: ItemTier = 'zwykly'): StatBlock {
   const out = emptyStats();
-  const common = truth === 'bought' ? rng.range(0.5, 0.8) : truth === 'niedoceniony' ? rng.range(1.25, 1.5) : 1;
+  // The lie is one multiplier on every line, its size grows with the tier (ITEMS 5.3, items/level.ts), plus a little noise.
+  const common = truth === 'honest' ? 1 : actualOverClaim(tier, truth) * rng.range(0.97, 1.03);
   for (const k of STAT_KEYS) {
     const spread = truth === 'honest' ? HONEST_SPREAD : 0.05;
     out[k] = roundStat(claimed[k] * common * (1 + rng.range(-spread, spread)));
