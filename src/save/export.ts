@@ -3,7 +3,7 @@
  * tested; the browser parts (download, file picker, clipboard) are small wrappers around them.
  */
 import type { Bus } from '../core/events';
-import { SAVE_VERSION, migrate, type MetaState } from './save';
+import { SAVE_VERSION, migrate, toStored, type MetaState } from './save';
 
 export const ARCHIVE_KIND = 'zgloszenie-archiwum';
 export const ARCHIVE_FORMAT = 1;
@@ -15,7 +15,8 @@ export interface Archive {
   /** The save version the file was written with. */
   version: number;
   exportedAt: string;
-  meta: MetaState;
+  /** The stored shape (`toStored`): the roster and the shared archive, no mirror of the active character. */
+  meta: Record<string, unknown>;
 }
 
 export type ImportResult =
@@ -24,7 +25,7 @@ export type ImportResult =
 
 /** The save is written as `migrate` reads it (defaults left out), so a file read back exports byte for byte the same. */
 export function buildArchive(meta: MetaState, now: Date = new Date()): Archive {
-  return { kind: ARCHIVE_KIND, format: ARCHIVE_FORMAT, version: SAVE_VERSION, exportedAt: now.toISOString(), meta: migrate(JSON.parse(JSON.stringify(meta))) };
+  return { kind: ARCHIVE_KIND, format: ARCHIVE_FORMAT, version: SAVE_VERSION, exportedAt: now.toISOString(), meta: toStored(meta) };
 }
 
 export function exportText(meta: MetaState, now?: Date): string {
@@ -48,8 +49,8 @@ export function parseArchive(text: string): ImportResult {
 }
 
 /** What the confirmation form shows about the file about to replace the save. */
-export function describeMeta(meta: MetaState): { hero: string | null; level: number; tickets: number } {
-  return { hero: meta.heroId ?? null, level: meta.character?.level ?? 1, tickets: meta.runsCompleted };
+export function describeMeta(meta: MetaState): { hero: string | null; level: number; tickets: number; characters: number } {
+  return { hero: meta.heroId ?? null, level: meta.character?.level ?? 1, tickets: meta.runsCompleted, characters: meta.characters.length };
 }
 
 export interface BugDumpInput {

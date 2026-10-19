@@ -12,7 +12,13 @@ describe('save', () => {
     const store = memory();
     const meta = { ...defaultMeta(), stamps: 4, runsCompleted: 2, heroId: 'pralka' as const };
     expect(saveMeta(meta, store)).toBe(true);
-    expect(loadMeta(store)).toEqual(meta);
+    const back = loadMeta(store);
+    expect(back.heroId).toBe('pralka');
+    expect(back.characters).toHaveLength(1);
+    expect(back.stamps).toBe(4);
+    expect(back.runsCompleted).toBe(2);
+    expect(saveMeta(back, store)).toBe(true);
+    expect(loadMeta(store)).toEqual(back);
   });
   it('survives garbage, missing storage and throwing storage', () => {
     expect(loadMeta(memory('{not json'))).toEqual(defaultMeta());
