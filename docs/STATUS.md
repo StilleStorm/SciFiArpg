@@ -81,6 +81,7 @@ joystick/tap steering (§2), editorial rules (§12.1).
 - Whether bubbles/figures are readable at phone size.
 
 ## Milestones (for /automode)
+PRODUCTION.md's milestone table (M1 = S1–S5 … M7) supersedes the list below.
 - **M1 Systems core**: slices 1–4 (hero folders + primitives, paragraphs, Argument meter +
   ultimates, loadout form + Karta uprawnień). Milestone e2e: a full run with a loadout and an
   ultimate on every hero.
@@ -105,11 +106,12 @@ joystick/tap steering (§2), editorial rules (§12.1).
 The plan is docs/PRODUCTION.md: 7 milestones, 30 slices, each with a paste-ready builder brief.
 Design docs: PLAN.md (+§7, §8), SKILLS.md, ITEMS.md (+§12), STORY.md, DESIGN §10.2–10.3.
 Progress is recorded here, one line per slice:
-- (none yet)
+- S1 done: per-hero folders behind a registry, 22 skill primitives, 25 skills as primitive lists (contract snapshot unchanged), new-hero scaffold, no hero id outside its folder (lint), smoke casts every skill of every hero.
 
-**Next pickup:** `/pickup` then `/automode`; the first slice is PRODUCTION.md S1.
+**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S2.
 
 ## Known limits
+- Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
 - iOS ignores orientation locks; the setting only picks the layout there.
 - Service worker: after a deploy, reload once (installed app: close and reopen).
 - Headless Chromium frame time is at the vsync floor with 40 enemies; phones unmeasured.
