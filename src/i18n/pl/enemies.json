@@ -138,7 +138,7 @@
       "f": "odnawialna",
       "n": "odnawialne",
       "pl": "odnawialne",
-      "effect": "Po trzech sekundach bez trafienia odzyskuje rację, ponieważ zasób jest odnawialny."
+      "effect": "Po trzech sekundach bez trafienia odzyskuje rację. Racja jest zasobem odnawialnym."
     },
     "powielony": {
       "m": "powielony",
@@ -152,7 +152,7 @@
       "f": "poufna",
       "n": "poufne",
       "pl": "poufne",
-      "effect": "Treść jest poufna: obrażenia są mniejsze o 30%, chyba że trafienie odpowiada na tezę."
+      "effect": "Treść poufna. Obrażenia mniejsze o 30%, chyba że trafienie odpowiada na tezę."
     },
     "nadgorliwy": {
       "m": "nadgorliwy",
@@ -166,7 +166,7 @@
       "f": "wielokrotna",
       "n": "wielokrotne",
       "pl": "wielokrotne",
-      "effect": "Składany w kilku egzemplarzach: strzela trzykrotnie, a z bliska sięga dalej."
+      "effect": "Składany w trzech egzemplarzach: strzela trzykrotnie, a z bliska sięga dalej."
     }
   },
   "boss": {
@@ -240,7 +240,7 @@
   },
   "named": {
     "footnote": "Do akt wpisano: {name}. Cechy: {affixes}.",
-    "slain": "Wpis zamknięty: {name}. Po egzemplarzu pozostał przedmiot.",
+    "slain": "Sprawę zamknięto: {name}. Po egzemplarzu pozostał przedmiot.",
     "noun": {
       "monit": {
         "text": "Monit",
@@ -362,9 +362,9 @@
         "n": "uznane za doręczone"
       },
       "przekazany": {
-        "m": "przekazany dalej",
-        "f": "przekazana dalej",
-        "n": "przekazane dalej"
+        "m": "przekazany wg właściwości",
+        "f": "przekazana wg właściwości",
+        "n": "przekazane wg właściwości"
       },
       "oczekujacy": {
         "m": "oczekujący na pieczątkę",
@@ -389,6 +389,6 @@
     }
   },
   "pack": {
-    "footnote": "Napotkano grupę: egzemplarz przewodni i jego odpisy. Cecha przewodniego dotyczy wszystkich."
+    "footnote": "Napotkano grupę: egzemplarz przewodni wraz z obsługą. Część jego cech obowiązuje grupę do odwołania."
   }
 }
