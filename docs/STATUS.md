@@ -127,7 +127,9 @@ Progress is recorded here, one line per slice:
 
 - S8 done: 32 affixes (6 absurd with mechanics) with m/f/n/pl forms, tiers I–V by item level, names as noun + adjectives + model «…», 40 bases (8 per slot) with 21 new drawings, tier marks (stamp, thread, wax seal; paperclip reserved for sets) on ground and card, new stats wired; voice and look passes. The rzadki thread was ruled black at the gate (DESIGN §3 keeps red for stamps, strikes, Racja, corrections; ITEMS §9 updated); per-base `excludeAffixes` with a test for noun echoes; the tier numeral sits after the model, before an unwanted tail. Parked: `disposalRefusal` waits for sell/bin/reklamacja (S9+ must call it); a noun-phrase head or `adjBefore` for prepositional bases ("czapka z daszkiem", "zegarek z krokomierzem"), readable as is; drawn mark labels (REKLAMA, Nowość) stay under 11 px at the 40–56 px sheet figures (M7 small-text polish); the inventory card footnote is clipped behind the action buttons in landscape (existing).
 
-**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S9.
+- S9 done: item level by planet, page and priority (cap 40) with tier budgets and lie magnitudes, drop tables per family and rank with boss guarantees, Sklep stock 6 plates per planet with prices and lies (Oferta / Z adapterem stamps), elite packs (leader + 2–4 minions sharing the aura, ink brackets), named elites with 2–3 affixes and Asystent-recorded names (≤1 per two pages, guaranteed nietypowy+ drop), elite affix pool 10; voice and look passes. Parked: elite sounds (M7); zestaw, Spór tier bonus, the unique archive rule and the przesyłka seams wait for their slices; in forced crowds a neighbour's bubble can still cover an elite caption (captions now sit on a paper halo).
+
+**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S10.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
