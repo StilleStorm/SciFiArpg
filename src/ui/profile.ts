@@ -6,8 +6,10 @@ import { t } from '../i18n';
 import { drawIn } from '../render/ink';
 import { buildHeroFigure } from '../render/heroFigures';
 import { el, wobblyLine } from '../render/svg';
+import { emptyCharacter } from '../save/character';
 import { loadMeta, saveMeta } from '../save/save';
 import { h } from './dom';
+import { openKarta, type KartaSheet } from './karta';
 import './forms.css';
 
 export interface Profile {
@@ -112,11 +114,26 @@ function buildProfile(root: HTMLElement, onChosen: (heroId: HeroId) => void): Pr
   choose.type = 'button';
   const nav = h('div', 'nav');
   nav.append(prev, choose, next);
+  // the printed chart of the hero shown (DESIGN 10.3): over this screen, from the saved character when it is this hero's
+  const kartaLink = h('button', 'karta-link', t('forms.karta.link'));
+  kartaLink.type = 'button';
+  kartaLink.dataset['profile'] = 'karta';
+  let karta: KartaSheet | null = null;
+  kartaLink.addEventListener('click', () => {
+    const def = heroes[index];
+    if (!def || karta) return;
+    const saved = loadMeta().character;
+    const c = saved && saved.heroId === def.id ? saved : emptyCharacter(def.id);
+    karta = openKarta(root, { progress: c, pads: c.pads, specialization: c.specialization ?? null, ...(c.ultimate ? { ultimate: c.ultimate } : {}) }, () => {
+      karta?.close();
+      karta = null;
+    });
+  });
 
   // The long text scrolls on a small phone; the buttons stay below it.
   const body = h('div', 'pscroll');
   body.append(top, name, desc, autoLabel, autoText, skillsLabel, skills, quirkLabel, quirk);
-  frame.append(head, h('hr', 'rule'), body, nav);
+  frame.append(head, h('hr', 'rule'), body, kartaLink, nav);
   root.append(screen);
 
   let index = 0;
@@ -171,6 +188,8 @@ function buildProfile(root: HTMLElement, onChosen: (heroId: HeroId) => void): Pr
   const profile: Profile = {
     el: screen,
     destroy() {
+      karta?.close();
+      karta = null;
       screen.remove();
       if (active === profile) active = null;
     },

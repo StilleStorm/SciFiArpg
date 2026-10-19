@@ -26,6 +26,7 @@ import { createJoystick } from './ui/joystick';
 import { applySteering, currentOrient, effectiveSteering, initLayout, lockOrientation, orientationSetting } from './ui/layout';
 import { bindLawSheets } from './ui/lawSheets';
 import { openLoadout, type LoadoutSheet } from './ui/loadout';
+import { addKartaDeskLine, kartaInputFromRun, openKarta, type KartaSheet } from './ui/karta';
 import { addDeskLine, openKonfiguracja, type KonfiguracjaSheet } from './ui/konfiguracja';
 import { createPads } from './ui/pads';
 import { createSpor } from './ui/spor';
@@ -262,6 +263,8 @@ function releaseBase(): void {
 
 /** Take every sheet off the page without touching the history (the caller does that). */
 function dropSheets(): void {
+  karta?.close();
+  karta = null;
   konfig?.close();
   konfig = null;
   baza.close();
@@ -294,6 +297,7 @@ function openSheet(kind: SheetKind): void {
     case 'biurko':
       baza.open(meta);
       addDeskLine(stage.ui, () => openKonfig('desk'));
+      addKartaDeskLine(stage.ui, () => openKartaSheet());
       break;
     case 'ticket':
       ticket.open(s.ticket);
@@ -461,15 +465,32 @@ function closeKonfig(): void {
   konfig?.close();
   konfig = null;
   if (konfigFrom === 'pause') pauseSheet.setHidden(false);
-  else {
-    stage.ui.querySelector('.desk-sheet')?.classList.remove('hidden');
-    const s = game.state;
-    if (s && s.phase === 'base') save(withCharacter(meta, s)); // a switch made at the desk is in the saved character now
-  }
+  else stage.ui.querySelector('.desk-sheet')?.classList.remove('hidden');
+  // the loadout and paragraphs chosen here are in the saved character now (mid-ticket: with the bookmark)
+  const s = game.state;
+  if (s && s.phase === 'base') save(withCharacter(meta, s));
+  else autosave.save();
+}
+
+/** The Karta uprawnień (DESIGN 10.3) stands over the desk; Wróć shows the desk again. */
+let karta: KartaSheet | null = null;
+function openKartaSheet(): void {
+  const s = game.state;
+  if (!s || karta) return;
+  stage.ui.querySelector('.desk-sheet')?.classList.add('hidden');
+  karta = openKarta(stage.ui, kartaInputFromRun(s), () => closeKartaSheet());
+}
+
+function closeKartaSheet(): void {
+  karta?.close();
+  karta = null;
+  stage.ui.querySelector('.desk-sheet')?.classList.remove('hidden');
 }
 
 /** Take the pause sheet and its settings off the page and let the loop run (used by resume, Zakończ and every screen change). */
 function clearPause(): void {
+  karta?.close();
+  karta = null;
   konfig?.close();
   konfig = null;
   loadout?.close();

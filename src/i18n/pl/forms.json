@@ -247,8 +247,8 @@
   },
   "konfiguracja": {
     "title": "Konfiguracja",
-    "sub": "Brzmienie umiejętności, paragraf po paragrafie.",
-    "note": "Paragraf czynny oznaczono pieczęcią. Zmiana obowiązuje od następnego użycia.",
+    "sub": "Pady, argument ostateczny i brzmienie umiejętności.",
+    "note": "Pieczęć oznacza paragraf czynny. Zmiana obowiązuje od następnego użycia.",
     "back": "Wróć",
     "deskLine": "Konfiguracja",
     "deskNote": "Paragrafy",
@@ -256,13 +256,68 @@
     "active": "Czynny",
     "lockedAt": "od poziomu {level}",
     "notInstalled": "Umiejętność nie została jeszcze zainstalowana.",
-    "boxLabel": "Paragraf {n}, {name}"
+    "boxLabel": "Paragraf {n}, {name}",
+    "slots": "Pady",
+    "slotPad": "Pad {n}",
+    "slotUlt": "Argument",
+    "slotNone": "puste",
+    "slotLocked": "od poz. {level}",
+    "padLabel": "Umieść „{skill}” na padzie {n}",
+    "specTitle": "Specjalizacja",
+    "specNote": "Zwieńczenie przysługuje jednej kolumnie naraz. Wymaga dwóch umiejętności tej kolumny na padach.",
+    "specCount": "{have} z {total}",
+    "specCountLabel": "Na padach: {have} z {total}",
+    "capstone": "Zwieńczenie",
+    "capGranted": "Przyznano.",
+    "capIdle": "Nieczynne: na padach jest za mało umiejętności tej kolumny.",
+    "capNone": "Nie wybrano kolumny.",
+    "ultTitle": "Argument ostateczny",
+    "ultLocked": "Argument ostateczny otwiera się na poziomie {level}.",
+    "adviceMissing": "Zalecenie (nieobowiązkowe): dwa pady mają tę samą kategorię. Nieobecne na padach: {missing}.",
+    "adviceOk": "Pady obejmują różne kategorie.",
+    "cue": "Dalsza część formularza poniżej",
+    "kartaLine": "Karta uprawnień",
+    "kartaNote": "Wykaz uprawnień"
   },
   "pause": {
-    "paragraphs": "Paragrafy",
-    "paragraphsNote": "Brzmienie umiejętności można zmienić bez opuszczania zgłoszenia."
+    "paragraphs": "Konfiguracja",
+    "paragraphsNote": "Pady, paragrafy i specjalizację można zmienić bez opuszczania zgłoszenia."
   },
   "pad": {
     "tag": "§{n}"
+  },
+  "category": {
+    "podstawowa": "podstawowa",
+    "ofensywna": "ofensywna",
+    "obronna": "obronna",
+    "uzytkowa": "użytkowa",
+    "ostateczna": "ostateczna"
+  },
+  "karta": {
+    "title": "Karta uprawnień",
+    "sub": "{hero}, poziom {level}.",
+    "note": "Linia kropkowana: kolejność nadawania uprawnień. Pieczęć: uprawnienie nadane.",
+    "noteGate": "Uprawnienie bez pieczęci jest wstrzymane do czasu spełnienia warunku.",
+    "link": "Karta uprawnień",
+    "back": "Wróć",
+    "approved": "Zatwierdzono",
+    "none": "Brak uprawnień",
+    "open": "Nie wybrano",
+    "level": "poz. {level}",
+    "fromLevel": "od poziomu {level}",
+    "needs": "wymaga: {family}",
+    "column": "Kolumna {n}",
+    "section": "§ {n}",
+    "passive": "cecha",
+    "passives": "Cechy",
+    "passivesNote": "Cechy wybiera się w formularzu aktualizacji.",
+    "capstone": "Zwieńczenie",
+    "capGranted": "Przyznano",
+    "capIdle": "Nieczynne",
+    "capHave": "Na padach: {have} z {total}",
+    "ultTitle": "Argument ostateczny",
+    "cue": "Dalsza część karty poniżej",
+    "deskLine": "Karta uprawnień",
+    "deskNote": "Wykaz"
   }
 }

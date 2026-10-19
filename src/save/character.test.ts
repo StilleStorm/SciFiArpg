@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { createBus } from '../core/events';
 import { assignPad, isInstalled } from '../heroes/loadout';
+import { setUltimateParagraph } from '../heroes/ultimate';
+import { commitLoadout } from '../ui/konfLoadout';
 import { fillDemoInventory } from '../items/demo';
 import { applyUpgrade, gainXp, MAX_LEVEL } from '../progression';
 import { createRun, type RunState } from '../world/run';
@@ -29,6 +31,23 @@ function veteran(heroId: 'pralka' | 'konsultant' = 'konsultant'): RunState {
 }
 
 describe('the character record', () => {
+  it('keeps the loadout: pads, specialization, ultimate and its paragraph (S4)', () => {
+    const a = createRun(5, { heroId: 'pralka' });
+    expect(commitLoadout(a, { pads: [2, 0, 1], specialization: 'osoba' }).ok).toBe(true);
+    setUltimateParagraph(a, 3);
+    const c = toCharacter(JSON.parse(JSON.stringify(serializeCharacter(a))));
+    expect(c?.specialization).toBe('osoba');
+    expect(c?.ultParagraph).toBe(3);
+    expect(c?.ultimate).toBe('pelnyCykl');
+    if (!c) return;
+    const b = createRun(6, { heroId: 'pralka', character: c });
+    expect(b.hero.pads).toEqual([2, 0, 1]);
+    expect(b.hero.spec).toBe('osoba');
+    expect(b.hero.ult?.para).toBe(3);
+    expect(toCharacter({ ...c, specialization: 'nieznana', ultParagraph: 7 })?.specialization).toBeUndefined();
+  });
+
+
   it('round-trips through JSON and gives the same stats after recomputeStats', () => {
     const a = veteran();
     expect(a.player.level).toBeGreaterThan(3);

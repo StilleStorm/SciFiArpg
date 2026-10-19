@@ -7,13 +7,13 @@
   flex-direction: column;
   padding: 2px 2px 0;
 }
-.kf-row {
+:is(.kf-row, .kf-ultrow) {
   padding: 8px 0;
   border-bottom: 1px solid var(--ink);
 }
 .kf-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
 }
 .kf-name {
@@ -26,6 +26,7 @@
   font-family: var(--mono);
   font-style: italic;
   font-size: 10.5px;
+  line-height: 1.2;
   color: var(--ink-wet);
 }
 .kf-boxes {
@@ -102,7 +103,7 @@
   font-size: 12px;
   color: var(--ink-wet);
 }
-.kf-row.off .kf-name {
+:is(.kf-row, .kf-ultrow).off .kf-name {
   color: var(--ink-wet);
 }
 .kf-back {
@@ -111,23 +112,198 @@
   margin-top: 18px;
   margin-bottom: 6px;
 }
-:root[data-orient='landscape'] .kf-row {
+/* the four slots, the specialization columns and the capstone line */
+.kf-top {
+  padding: 0 2px;
+}
+.kf-label {
+  margin: 8px 0 3px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-wet);
+}
+.kf-slots {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.kf-slot {
+  min-height: 46px;
+  padding: 3px 3px 2px 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  border: 1.5px solid var(--ink);
+  font-family: var(--mono);
+  overflow: hidden;
+}
+.kf-slot.ult {
+  border: 4px double var(--ink);
+}
+.kf-slot.off {
+  border-style: dashed;
+  color: var(--ink-wet);
+}
+.kf-slotn {
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  color: var(--ink-wet);
+}
+.kf-slotv {
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1.1;
+  overflow-wrap: break-word;
+}
+.kf-specs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.kf-spec {
+  min-height: 48px;
+  padding: 3px 4px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border: 1.5px solid var(--ink);
+  font-family: var(--mono);
+  color: var(--ink);
+}
+.kf-spec-name {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+}
+.kf-spec-n {
+  font-size: 10px;
+  font-style: italic;
+}
+.kf-spec.on {
+  background: var(--ink);
+  color: var(--paper);
+}
+.kf-spec:not(.on):active {
+  border-width: 3px;
+}
+.kf-cap-line {
+  margin: 6px 0 0;
+  font-size: 14.5px;
+  line-height: 1.25;
+}
+.kf-cap-line b {
+  font-family: var(--mono);
+  font-size: 0.82em;
+}
+.kf-cap-line i.idle {
+  color: var(--ink-wet);
+}
+.kf-cap-line i.granted {
+  font-family: var(--mono);
+  font-size: 0.8em;
+  font-weight: 700;
+  font-style: normal;
+}
+.kf-rows {
+  margin-top: 8px;
+  border-top: 1px solid var(--ink);
+}
+.kf-head {
+  justify-content: space-between;
+}
+.kf-id {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+.kf-pads {
+  flex: none;
+  display: flex;
+  gap: 4px;
+}
+.kf-pad {
+  width: 44px;
+  height: 44px;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 16px;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+}
+.kf-pad.on {
+  background: var(--ink);
+  color: var(--paper);
+}
+.kf-pad:not(.on):active {
+  border-width: 3px;
+}
+.kf-ultrow .kf-name {
+  font-family: var(--title);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.kf-advice {
+  margin: 10px 0 0;
+  font-family: var(--mono);
+  font-style: italic;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--ink-wet);
+}
+/* more form below: a typed line with a drawn arrow, only while the scroll area has more */
+.kf-cue {
+  display: none;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 3px;
+  border-top: 1px dotted var(--ink);
+  font-family: var(--mono);
+  font-style: italic;
+  font-size: 10.5px;
+  color: var(--ink-wet);
+}
+.kf-cue.on {
+  display: flex;
+}
+:root[data-orient='landscape'] :is(.kf-row, .kf-ultrow) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.25fr);
   column-gap: 14px;
   align-items: center;
   padding: 4px 0;
 }
+/* the head dissolves: the name, the pad chooser and the boxes become three columns of the row */
 :root[data-orient='landscape'] .kf-head {
+  display: contents;
+}
+:root[data-orient='landscape'] .kf-id {
   grid-column: 1;
+  grid-row: 1;
+}
+:root[data-orient='landscape'] .kf-pads {
+  grid-column: 2;
+  grid-row: 1 / span 2;
 }
 :root[data-orient='landscape'] .kf-desc {
   grid-column: 1;
+  grid-row: 2;
   margin-top: 1px;
-  font-size: 13.5px;
+  font-size: 13px;
 }
 :root[data-orient='landscape'] .kf-boxes {
-  grid-column: 2;
+  grid-column: 3;
   grid-row: 1 / span 2;
   margin-top: 0;
 }
@@ -135,10 +311,50 @@
   min-height: 46px;
 }
 :root[data-orient='landscape'] .kf-off {
-  grid-column: 1;
+  grid-column: 1 / -1;
+  grid-row: 2;
 }
 :root[data-orient='landscape'] .kf-back {
   max-width: 260px;
+}
+/* a page 390 px high: the footnote area goes (the note is printed on the form), the frame is tighter, the slots and columns stand side by side */
+:root[data-orient='landscape'] .kf-sheet .ps-notes {
+  display: none;
+}
+:root[data-orient='landscape'] .kf-sheet .ps-frame {
+  padding: 8px 14px 6px;
+}
+:root[data-orient='landscape'] .kf-sheet .ps-head {
+  padding-bottom: 4px;
+}
+:root[data-orient='landscape'] .kf-sheet .ps-scroll {
+  margin-top: 4px;
+}
+:root[data-orient='landscape'] .kf-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 16px;
+  align-items: start;
+}
+:root[data-orient='landscape'] .kf-top > :nth-child(1),
+:root[data-orient='landscape'] .kf-top > :nth-child(2) {
+  grid-column: 1;
+}
+:root[data-orient='landscape'] .kf-top > :nth-child(3),
+:root[data-orient='landscape'] .kf-top > :nth-child(4) {
+  grid-column: 2;
+}
+:root[data-orient='landscape'] .kf-top > :nth-child(1),
+:root[data-orient='landscape'] .kf-top > :nth-child(3) {
+  grid-row: 1;
+}
+:root[data-orient='landscape'] .kf-top > :nth-child(2),
+:root[data-orient='landscape'] .kf-top > :nth-child(4) {
+  grid-row: 2;
+}
+:root[data-orient='landscape'] .kf-top > :nth-child(5) {
+  grid-column: 1 / -1;
+  grid-row: 3;
 }
 
 /* the paragraph tag on a pad: only when § 2 or § 3 is active */

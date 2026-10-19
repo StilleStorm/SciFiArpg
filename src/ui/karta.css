@@ -1,0 +1,280 @@
+/*
+ * Karta uprawnień (DESIGN 10.3): a printed chart. Boxes ruled in ink, dotted lines between them in unlock order, the red stamp on
+ * what is held, grey dashed boxes for what is gated. Three columns; a capstone at each foot. Paper, ink, one accent, no rounded corners.
+ */
+.kt-body {
+  padding: 2px 2px 0;
+}
+.kt-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 8px;
+  align-items: start;
+}
+.kt-col {
+  min-width: 0;
+}
+.kt-colhead {
+  margin: 0;
+  padding-bottom: 2px;
+  font-family: var(--title);
+  font-weight: 400;
+  font-size: 9.5px;
+  line-height: 1.25;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-bottom: 1.5px solid var(--ink);
+}
+.kt-colno {
+  margin: 2px 0 6px;
+  font-family: var(--mono);
+  font-style: italic;
+  font-size: 9.5px;
+  color: var(--ink-wet);
+}
+.kt-chain {
+  display: flex;
+  flex-direction: column;
+}
+.kt-node,
+.kt-cap,
+.kt-ult {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px 5px 3px;
+  border: 1.5px solid var(--ink);
+  font-family: var(--mono);
+  min-width: 0;
+}
+/* the dotted line from the box above: unlock order */
+.kt-node + .kt-node,
+.kt-chain + .kt-cap {
+  margin-top: 12px;
+}
+.kt-node + .kt-node::before,
+.kt-chain + .kt-cap::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -13px;
+  height: 12px;
+  border-left: 1.5px dotted var(--ink);
+}
+.kt-tag {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 8.5px;
+  letter-spacing: 0.03em;
+  color: var(--ink-wet);
+  line-height: 1.2;
+}
+.kt-name {
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.15;
+  overflow-wrap: break-word;
+}
+.kt-node.paragraph {
+  border-width: 1px;
+  padding-top: 3px;
+}
+.kt-node.paragraph .kt-name {
+  font-size: 10px;
+  font-weight: 400;
+}
+.kt-node.passive {
+  outline: 1px solid currentColor;
+  outline-offset: -4px;
+  padding: 6px 7px 5px;
+}
+.kt-stamp {
+  display: block;
+  width: 100%;
+  max-width: 104px;
+  height: 24px;
+  margin-top: 1px;
+  overflow: visible;
+  pointer-events: none;
+}
+.kt-gate,
+.kt-need {
+  font-size: 8.5px;
+  line-height: 1.2;
+}
+.kt-gate {
+  margin-top: 1px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.kt-need {
+  font-style: italic;
+}
+.kt-node.gated,
+.kt-ult.gated {
+  border-style: dashed;
+  color: var(--ink-wet);
+}
+.kt-node.gated .kt-tag,
+.kt-ult.gated .kt-tag {
+  color: var(--ink-wet);
+}
+.kt-node.open {
+  border-style: dotted;
+}
+.kt-node.open .kt-need {
+  color: var(--ink-wet);
+}
+/* the capstone at the foot of a column */
+.kt-cap {
+  border: 4px double var(--ink);
+  padding: 4px 5px 3px;
+}
+.kt-cap.idle {
+  border-style: dashed;
+  border-width: 1.5px;
+  color: var(--ink-wet);
+}
+.kt-capdesc {
+  margin-top: 1px;
+  font-family: var(--serif);
+  font-size: 12.5px;
+  line-height: 1.2;
+}
+.kt-caphave {
+  font-size: 8.5px;
+  font-style: italic;
+  color: var(--ink-wet);
+}
+/* the ultimate across the top */
+.kt-ult {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 12px;
+  border: 4px double var(--ink);
+}
+.kt-ult.gated {
+  border-width: 1.5px;
+}
+.kt-ulttext {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.kt-ult .kt-name {
+  font-family: var(--title);
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.kt-ultparas {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 10px;
+  font-size: 9px;
+  line-height: 1.3;
+  color: var(--ink-wet);
+}
+.kt-ultparas span {
+  white-space: nowrap;
+}
+.kt-ult .kt-stamp {
+  flex: none;
+  width: 104px;
+  height: 26px;
+  margin: 0;
+}
+.kt-ult.gated .kt-gate,
+.kt-ult.gated .kt-need {
+  flex: none;
+  text-align: right;
+}
+.kt-band {
+  margin-top: 16px;
+}
+.kt-bandrow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* two in portrait: a long name ("bezpieczeństwa") keeps its word whole */
+  gap: 8px;
+}
+/* the band is a list, not an unlock chain: no dotted joins between its boxes */
+.kt-bandrow .kt-node + .kt-node {
+  margin-top: 0;
+}
+.kt-bandrow .kt-node + .kt-node::before {
+  display: none;
+}
+.kt-bandrow .kt-name {
+  overflow-wrap: normal;
+}
+.kt-back {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  margin-bottom: 6px;
+}
+:root[data-orient='landscape'] .kt-body {
+  padding-right: 2px;
+}
+:root[data-orient='landscape'] .kt-cols {
+  column-gap: 22px;
+}
+:root[data-orient='landscape'] .kt-bandrow {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+:root[data-orient='landscape'] .kt-name {
+  font-size: 12px;
+}
+:root[data-orient='landscape'] .kt-tag,
+:root[data-orient='landscape'] .kt-gate,
+:root[data-orient='landscape'] .kt-need {
+  font-size: 9.5px;
+}
+:root[data-orient='landscape'] .kt-stamp {
+  max-width: 170px;
+  height: 34px;
+}
+:root[data-orient='landscape'] .kt-node.paragraph .kt-name {
+  font-size: 11px;
+}
+:root[data-orient='landscape'] .kt-back {
+  max-width: 260px;
+}
+:root[data-orient='landscape'] .kt-sheet .ps-notes {
+  display: none;
+}
+:root[data-orient='landscape'] .kt-sheet .ps-frame {
+  padding: 8px 14px 6px;
+}
+:root[data-orient='landscape'] .kt-sheet .ps-head {
+  padding-bottom: 4px;
+}
+:root[data-orient='landscape'] .kt-sheet .ps-scroll {
+  margin-top: 4px;
+}
+
+/* the link on the profile screen, under the text and above the buttons */
+.profile .karta-link {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: flex-end;
+  min-height: 44px;
+  margin: 2px 0 0 2px;
+  padding: 0 0 4px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  border-bottom: 1.5px solid var(--ink);
+  color: var(--ink);
+}
+.profile .karta-link:active {
+  border-bottom-width: 3px;
+}

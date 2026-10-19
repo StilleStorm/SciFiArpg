@@ -1,6 +1,6 @@
 /**
  * Pause (DESIGN 2, 4.1). Two pieces: the margin note "Pauza" that hangs on the HUD, and the pause sheet, a printed form
- * with up to four lines: Wznów, Ustawienia, Umiejętności, Zakończ zgłoszenie. The sheet owns no rules: it only calls back. The router
+ * with up to five lines: Wznów, Ustawienia, Umiejętności, Konfiguracja, Zakończ zgłoszenie. The sheet owns no rules: it only calls back. The router
  * (main.ts) pauses the game, shows the sheet, opens the settings in place and takes the run to the base.
  */
 import { createRng } from '../core/rng';
@@ -53,7 +53,7 @@ export interface PauseHandlers {
   onSettings(): void;
   /** The line "Umiejętności": the loadout sheet (run and base). */
   onSkills(): void;
-  /** The line "Paragrafy": the Konfiguracja sheet (run and base). */
+  /** The line "Konfiguracja": the loadout form (pads, ultimate, paragraphs, specialization; run and base). */
   onParagraphs?(): void;
   onEnd(): void;
 }
