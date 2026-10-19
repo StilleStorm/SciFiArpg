@@ -1,14 +1,18 @@
 /** Which skills are installed and which sit on the three pads (DESIGN 10.1). Pure functions on the run state. */
 import type { RunState } from '../world/run';
 import { heroDef, PAD_SLOTS, SKILL_INDICES, type PadSlot, type SkillDef, type SkillIndex } from './defs';
+import { applyParagraph } from './paragraphs';
 
 /** Skills 1..3 are always installed; the 4th and 5th once an update gave them a rank. */
 export const isInstalled = (s: RunState, i: SkillIndex): boolean => i <= 2 || (s.hero.ranks[i] ?? 0) > 0;
 
 export const installedSkills = (s: RunState): SkillIndex[] => SKILL_INDICES.filter((i) => isInstalled(s, i));
 
+/** Skill `i` as it is cast now: the base data with the active paragraph laid on (heroes/paragraphs.ts). Pads and previews read this, not `def.skills`. */
+export const effectiveSkill = (s: RunState, i: SkillIndex): SkillDef => applyParagraph(heroDef(s.player.heroId).skills[i], s.hero.patch?.[i]);
+
 /** The skill pad `slot` fires. */
-export const padSkill = (s: RunState, slot: PadSlot): SkillDef => heroDef(s.player.heroId).skills[s.hero.pads[slot]];
+export const padSkill = (s: RunState, slot: PadSlot): SkillDef => effectiveSkill(s, s.hero.pads[slot]);
 
 /** The pad that holds skill `i`, if any. */
 export function padOf(s: RunState, i: SkillIndex): PadSlot | null {

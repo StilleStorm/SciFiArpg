@@ -12,7 +12,7 @@ import { knockback } from '../systems/combat';
 import { resolveMove } from '../world/pages';
 import type { RunState } from '../world/run';
 import { trackedRun } from './aim';
-import { heroDef } from './defs';
+import { effectiveSkill } from './loadout';
 import { areaOf, enemiesWithin, nearestEnemy, power, setExistence, skillDamage } from './helpers';
 import {
   KSIEZYC_GAP_S,
@@ -61,7 +61,7 @@ export function stepReading(s: RunState, bus: Bus, dt: number): void {
   rd.acc += dt;
   if (rd.acc < TICK_S) return;
   rd.acc -= TICK_S;
-  const type = heroDef(p.heroId).skills[4].type;
+  const type = effectiveSkill(s, 4).type;
   for (const e of enemiesWithin(s, p.x, p.y, r)) skillDamage(s, bus, e, type, READING_DAMAGE * TICK_S * power(s, 4));
   if (Math.floor(s.time) !== Math.floor(s.time - TICK_S)) bus.emit('skill:fx', { kind: 'section', x: p.x, y: p.y, x2: p.x, y2: p.y, r });
 }
@@ -120,7 +120,7 @@ export function bindNumerBonus(bus: object & Pick<Bus, 'on'>): void {
 /** The capsule lands: 2.0x in the circle, a push of 60, and the hit are przeczytane toward the Petlowiec for 2 s. */
 export function landStart(s: RunState, bus: Bus, z: Zone): void {
   const p = s.player;
-  const type = heroDef(p.heroId).skills[4].type;
+  const type = effectiveSkill(s, 4).type;
   bus.emit('skill:fx', { kind: 'capsule', x: z.x, y: z.y, x2: z.x, y2: z.y, r: z.r });
   for (const e of enemiesWithin(s, z.x, z.y, z.r)) {
     if (skillDamage(s, bus, e, type, START_DAMAGE * power(s, 4))) continue;
@@ -166,7 +166,7 @@ export function stepLegend(s: RunState, bus: Bus, z: Zone, dt: number): void {
   z.acc = (z.acc ?? 0) + dt;
   if (z.acc < TICK_S) return;
   z.acc -= TICK_S;
-  const type = heroDef(p.heroId).skills[4].type;
+  const type = effectiveSkill(s, 4).type;
   for (const e of here) skillDamage(s, bus, e, type, LEGENDA_DAMAGE * TICK_S * power(s, 4));
 }
 
@@ -177,7 +177,7 @@ export function stepTide(s: RunState, bus: Bus, dt: number): void {
   const tide = s.hero.tide;
   if (!tide) return;
   const p = s.player;
-  const type = heroDef(p.heroId).skills[3].type;
+  const type = effectiveSkill(s, 3).type;
   const before = tide.age;
   tide.age += dt;
   tide.radius = tide.max * Math.min(1, tide.age / PLYWY_S);

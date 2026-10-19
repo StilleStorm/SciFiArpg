@@ -6,6 +6,7 @@ import type { Enemy } from '../entities/types';
 import { applyDamage } from '../systems/combat';
 import type { RunState } from '../world/run';
 import type { SkillIndex } from './defs';
+import { castStatus, type ParagraphPatch } from './paragraphs';
 import { playerDamageMul } from './shield';
 
 export const RANK_DAMAGE = 0.25;
@@ -14,9 +15,17 @@ export const RANK_DURATION = 0.15;
 export const RANK_COOLDOWN = 0.07;
 
 /** Damage multiplier of a skill (by SkillIndex, not pad): ranks and passives. */
-export const power = (s: RunState, slot: SkillIndex): number => (1 + RANK_DAMAGE * s.hero.ranks[slot]) * s.hero.mods.dmg;
-export const areaOf = (s: RunState, slot: SkillIndex): number => (1 + RANK_AREA * s.hero.ranks[slot]) * s.hero.mods.area;
-export const durationOf = (s: RunState, slot: SkillIndex): number => (1 + RANK_DURATION * s.hero.ranks[slot]) * s.hero.mods.duration;
+export const power = (s: RunState, slot: SkillIndex): number => (1 + RANK_DAMAGE * s.hero.ranks[slot]) * s.hero.mods.dmg * (patchOf(s, slot)?.dmg ?? 1);
+export const areaOf = (s: RunState, slot: SkillIndex): number => (1 + RANK_AREA * s.hero.ranks[slot]) * s.hero.mods.area * (patchOf(s, slot)?.area ?? 1);
+export const durationOf = (s: RunState, slot: SkillIndex): number => (1 + RANK_DURATION * s.hero.ranks[slot]) * s.hero.mods.duration * (patchOf(s, slot)?.dur ?? 1);
+
+/** The patch of the active paragraph of skill `slot` (by SkillIndex), if it is not paragraph 1 (heroes/paragraphs.ts). */
+export const patchOf = (s: RunState, slot: SkillIndex): ParagraphPatch | undefined => s.hero.patch?.[slot];
+/** Paragraph shape fields: multiplier of the half-angle / width of a cone or line, and the extra projectiles or copies. */
+export const widthOf = (s: RunState, slot: SkillIndex): number => patchOf(s, slot)?.width ?? 1;
+export const countOf = (s: RunState, slot: SkillIndex): number => patchOf(s, slot)?.count ?? 0;
+/** Multiplier of the length of a flight, throw or orbit that the paragraph sets (the reach of an aimed skill reads it through `SkillDef.patch`). */
+export const reachMulOf = (s: RunState, slot: SkillIndex): number => patchOf(s, slot)?.reach ?? 1;
 export const cooldownOf = (s: RunState, slot: SkillIndex, base: number): number =>
   Math.max(1, base * s.hero.mods.cooldown * (1 - RANK_COOLDOWN * s.hero.ranks[slot]));
 
@@ -63,7 +72,15 @@ export function skillDamage(s: RunState, bus: Bus, target: Enemy, type: DamageTy
   const crit = rng.chance(Math.min(0.95, p.stats.critChance));
   const raw = Math.floor(rng.range(p.stats.dmgMin, p.stats.dmgMax + 1));
   const scaled = raw * mult * playerDamageMul(p) * (crit ? 2 : 1) * (1 - effectiveResist(target.stats, type) / 100);
-  return applyDamage(s, bus, target, Math.max(1, Math.round(scaled)), crit, type); // the type lets claims, rebuttals and existence apply
+  const killed = applyDamage(s, bus, target, Math.max(1, Math.round(scaled)), crit, type); // the type lets claims, rebuttals and existence apply
+  if (!killed) laidStatus(target); // a paragraph's status (heroes/paragraphs.ts)
+  return killed;
+}
+
+/** The status of the paragraph being cast, laid on `e` (statusApply and skillDamage call it); nothing outside a cast. */
+export function laidStatus(e: Enemy): void {
+  const c = castStatus();
+  if (c?.status) touchStatus(e, c.status.kind, c.status.seconds, c.source);
 }
 
 /** Keep a status alive without allocating every step: refresh only if it would run out. */

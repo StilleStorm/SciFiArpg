@@ -1,0 +1,74 @@
+{
+  "para": {
+    "orbita": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Przetoczenie po wskazanej linii. Pierwszy trafiony zostaje satelitą."
+      },
+      "2": {
+        "name": "Eliptyczna",
+        "desc": "Przetoczenie egzystencjalne, dłuższe o 30%."
+      },
+      "3": {
+        "name": "Stacjonarna",
+        "desc": "Przetoczenie regulaminowe. Satelita trzyma się 6 s. Odnowienie dłuższe o 3 s."
+      }
+    },
+    "grawitacja": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Przez 2 sekundy wszystko wokół spada na Naleśnika."
+      },
+      "2": {
+        "name": "Silniejsza",
+        "desc": "Przyciąganie mechaniczne trwa 1 s, obrażenia większe o połowę."
+      },
+      "3": {
+        "name": "Urzędowa",
+        "desc": "Przyciąganie regulaminowe, obszar większy o 25%. Odnowienie dłuższe o 3 s."
+      }
+    },
+    "wniosek": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Flaga na 8 sekund. W jej promieniu Naleśnik jest planetą."
+      },
+      "2": {
+        "name": "Uzupełniony",
+        "desc": "Flaga mniejsza o 35%, stoi 12 s."
+      },
+      "3": {
+        "name": "Przyspieszony",
+        "desc": "Bez wskazywania, egzystencjalny. Flaga stoi 5 s. Odnowienie dłuższe o 3 s."
+      }
+    },
+    "plywy": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Przypływ od krawędzi. Przeciwnicy odpływają, przedmioty przypływają."
+      },
+      "2": {
+        "name": "Przypływ",
+        "desc": "Przypływ egzystencjalny, obrażenia mniejsze o 30%."
+      },
+      "3": {
+        "name": "Syzygijne",
+        "desc": "Przypływ regulaminowy, zasięg większy o 20%. Odnowienie dłuższe o 2 s."
+      }
+    },
+    "ksiezyc": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Kamyk na orbicie krąży 8 sekund i trafia każdego, kogo minie."
+      },
+      "2": {
+        "name": "Zewnętrzny",
+        "desc": "Orbita szersza o połowę, księżyc krąży 12 s, obrażenia mniejsze o 30%."
+      },
+      "3": {
+        "name": "Regulaminowy",
+        "desc": "Księżyc regulaminowy, obrażenia większe o 30%. Odnowienie dłuższe o 3 s."
+      }
+    }
+  }
+}

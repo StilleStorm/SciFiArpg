@@ -10,6 +10,7 @@ import type { RunState } from '../world/run';
 import { AUTO_AIM, fitAim, resolveAim, takeQueuedAim, type Aim, type ResolvedAim } from './aim';
 import { heroDef, type PadSlot, type SkillIndex } from './defs';
 import { cooldownOf } from './helpers';
+import { applyParagraph, withCast } from './paragraphs';
 import { heroById } from './registry';
 
 export type { SkillFn } from './module';
@@ -52,12 +53,14 @@ export function castSkill(s: RunState, bus: Bus, slot: PadSlot, free = false, ai
  */
 export function fire(s: RunState, bus: Bus, skill: SkillIndex, slot: PadSlot, free: boolean, aim: Aim | undefined): boolean {
   const def = heroDef(s.player.heroId);
-  const sk = def.skills[skill];
+  const patch = s.hero.patch?.[skill];
+  const sk = applyParagraph(def.skills[skill], patch); // the active paragraph, laid on the data (heroes/paragraphs.ts)
   const fn = heroById(def.id).casts[sk.id];
   if (!fn) return false;
   const aimed = fitAim(sk, aim ?? AUTO_AIM);
   const resolved = resolveAim(s, sk, aimed);
-  if (fn(s, bus, def, aimed) === false) return false;
+  if (withCast(patch, s.player.id, () => fn(s, bus, def, aimed)) === false) return false;
+  if (patch?.cost) s.player.hp = Math.max(Math.min(1, s.player.hp), s.player.hp - patch.cost); // the price of the paragraph, never fatal
   if (!free) {
     const total = cooldownOf(s, skill, sk.cooldown);
     s.hero.cd[skill] = total;

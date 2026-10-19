@@ -4,7 +4,7 @@ import type { StatusKind } from '../../combat/status';
 import type { DamageType } from '../../combat/damage';
 import type { Enemy } from '../../entities/types';
 import { recomputeStats } from '../../items/stats';
-import { enemiesWithin, skillDamage, touchStatus } from '../helpers';
+import { enemiesWithin, laidStatus, skillDamage, touchStatus } from '../helpers';
 import type { SkillIndex } from '../defs';
 import type { Ctx } from './ctx';
 
@@ -21,6 +21,7 @@ export function statusApply(targets: readonly Enemy[], o: StatusOpts): void {
   for (const e of targets) {
     if (o.touch) touchStatus(e, o.kind, o.seconds, o.source);
     else applyStatus(e, o.kind, o.seconds, o.source);
+    laidStatus(e); // the status of the paragraph being cast, if it has one
   }
 }
 

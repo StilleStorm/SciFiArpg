@@ -9,7 +9,7 @@ import type { Enemy, Zone } from '../../entities/types';
 import { rtOf } from '../../enemies/runtime';
 import { resolveMove } from '../../world/pages';
 import type { RunState } from '../../world/run';
-import { heroDef } from '../defs';
+import { effectiveSkill } from '../loadout';
 import { durationOf, enemiesWithin, power, skillDamage, touchStatus } from '../helpers';
 
 /** Orbita: seconds the roll lasts (the length is ORBITA_LENGTH in aim.ts), and the satellite's circle. */
@@ -51,7 +51,7 @@ export function stepRoll(s: RunState, bus: Bus, dt: number): void {
   const roll = s.hero.roll;
   if (!roll) return;
   const p = s.player;
-  const type = heroDef(p.heroId).skills[0].type;
+  const type = effectiveSkill(s, 0).type;
   const move = Math.min(roll.left, dt) * roll.speed;
   const want = { x: p.x + roll.dx * move, y: p.y + roll.dy * move };
   const pos = { x: want.x, y: want.y };
@@ -118,7 +118,7 @@ export function stepGravity(s: RunState, bus: Bus, dt: number): void {
   const g = s.hero.gravity;
   if (!g) return;
   const p = s.player;
-  const type = heroDef(p.heroId).skills[1].type;
+  const type = effectiveSkill(s, 1).type;
   const step = GRAVITY_SPEED * dt;
   for (const e of [...s.enemies]) {
     const d = Math.hypot(e.x - p.x, e.y - p.y);
@@ -155,7 +155,7 @@ export function stepGravity(s: RunState, bus: Bus, dt: number): void {
 export function stepFlag(s: RunState, bus: Bus, z: Zone, dt: number): void {
   const p = s.player;
   const inside = z.inside ?? (z.inside = []);
-  const type = heroDef(p.heroId).skills[2].type;
+  const type = effectiveSkill(s, 2).type;
   const here = enemiesWithin(s, z.x, z.y, z.r);
   for (const e of here) {
     if (inside.includes(e.id)) continue;

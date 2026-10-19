@@ -8,6 +8,7 @@ import type { Family } from '../progression/update';
 import type { RunState } from '../world/run';
 import type { Aim } from './aim';
 import type { HeroDef } from './defs';
+import type { SkillParagraphs } from './paragraphs';
 import type { HeroFigure } from './figureKit';
 import type { Mods } from './state';
 
@@ -47,6 +48,8 @@ export interface HeroModule {
   sounds: HeroSounds;
   /** The cast of each skill, by `SkillDef.id` (built from the primitives in heroes/primitives). */
   casts: Readonly<Record<string, SkillFn>>;
+  /** The three paragraphs of each skill, by `SkillDef.id` (heroes/paragraphs.ts; text `heroes.<id>.para.<skill>.<n>.{name,desc}`). */
+  paragraphs: Readonly<Record<string, SkillParagraphs>>;
   /** The pad glyphs of the five skills. */
   pads: HeroPadGlyphs;
   /** The six passives the update form offers (`passive1..6`, text `forms.update.passive.<id>.N.{name,desc}`). */

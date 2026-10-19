@@ -2,29 +2,37 @@
 import { t } from '../../i18n';
 import { blinkOf, LINE_SPEED, LINE_TTL, radiusOf, reachOf, resolveDirection, terenCentre } from '../aim';
 import { cast } from '../cast';
-import { areaOf, durationOf, power } from '../helpers';
+import { areaOf, countOf, durationOf, power, reachMulOf } from '../helpers';
 import type { SkillFn } from '../module';
 import { LEGENDA_NAMES, LEGENDA_S, MAX_ZONES, SKALA_RANGE, SKALA_S } from '../numbers';
 import { aoe, decoy, fx, projectile, statusApply, teleport, zone } from '../primitives';
+
+const LINE_TURN = (15 * Math.PI) / 180;
 
 /** Triangulacja: a line shot through everything; damage grows with every enemy passed. */
 const triangulacja = cast(0, [
   ({ c, s, p, sk, aim }) => {
     const a = resolveDirection(s, sk, aim);
-    projectile(c, {
-      x: p.x + a.dx * 14,
-      y: p.y + a.dy * 14,
-      r: 7,
-      vx: a.dx * LINE_SPEED,
-      vy: a.dy * LINE_SPEED,
-      ttl: LINE_TTL * areaOf(s, 0),
-      damage: power(s, 0),
-      damageType: sk.type,
-      pierce: 99,
-      bonusPerPass: 0.35,
-    });
     const length = reachOf(s, sk);
-    fx(c, 'line', p.x, p.y, 0, p.x + a.dx * length, p.y + a.dy * length);
+    // the line, then (paragraph) `count` more at 15 degrees either side, alternating, each one wider than the last
+    for (let k = 0; k <= countOf(s, 0); k++) {
+      const turn = k === 0 ? 0 : (k % 2 === 1 ? 1 : -1) * Math.ceil(k / 2) * LINE_TURN;
+      const dx = a.dx * Math.cos(turn) - a.dy * Math.sin(turn);
+      const dy = a.dx * Math.sin(turn) + a.dy * Math.cos(turn);
+      projectile(c, {
+        x: p.x + dx * 14,
+        y: p.y + dy * 14,
+        r: 7,
+        vx: dx * LINE_SPEED,
+        vy: dy * LINE_SPEED,
+        ttl: LINE_TTL * areaOf(s, 0) * reachMulOf(s, 0),
+        damage: power(s, 0),
+        damageType: sk.type,
+        pierce: 99,
+        bonusPerPass: 0.35,
+      });
+      fx(c, 'line', p.x, p.y, 0, p.x + dx * length, p.y + dy * length);
+    }
   },
 ]);
 

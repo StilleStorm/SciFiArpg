@@ -19,6 +19,8 @@ interface Tree {
 }
 
 const files = import.meta.glob<Tree>('./pl/*.json', { eager: true, import: 'default' });
+/** pl/heroes/<id>.json: the paragraphs of one hero, merged under `heroes.<id>` (S2). */
+const heroFiles = import.meta.glob<Tree>('./pl/heroes/*.json', { eager: true, import: 'default' });
 
 function isPlural(v: Entry | Tree): v is PluralForms {
   return typeof v === 'object' && 'one' in v && 'few' in v && 'many' in v && typeof v['one'] === 'string';
@@ -38,6 +40,9 @@ let table = new Map<string, Entry>();
 for (const [path, tree] of Object.entries(files)) {
   const name = path.replace(/^.*\//, '').replace(/\.json$/, '');
   flatten(tree, name, table);
+}
+for (const [path, tree] of Object.entries(heroFiles)) {
+  flatten(tree, `heroes.${path.replace(/^.*\//, '').replace(/\.json$/, '')}`, table);
 }
 
 /** Replace the string table (tests). */

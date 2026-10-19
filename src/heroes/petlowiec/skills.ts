@@ -6,7 +6,7 @@ import { radiusOf, terenCentre, type Aim } from '../aim';
 import { cast } from '../cast';
 import { fireAuto } from '../auto';
 import type { HeroDef, SkillIndex } from '../defs';
-import { areaOf, durationOf, nearestEnemy, power, skillDamage } from '../helpers';
+import { areaOf, countOf, durationOf, nearestEnemy, patchOf, power, skillDamage } from '../helpers';
 import { padOf } from '../loadout';
 import type { SkillFn } from '../module';
 import { DISAGREE_LINES, JUZ_SPREAD, MAX_COPIES, START_DELAY_S } from '../numbers';
@@ -18,23 +18,25 @@ import { heroById } from '../registry';
 /** Przybycie przed wyjazdem: a copy from another loop for 8 s (two at most). It disagrees in a footnote. */
 const przybycie = cast(0, [
   ({ c, s, bus, p }) => {
-    const angle = s.rngs.combat.range(0, Math.PI * 2);
-    summon(c, {
-      variant: 'copy',
-      heroId: p.heroId,
-      x: p.x + Math.cos(angle) * 34,
-      y: p.y + Math.sin(angle) * 34,
-      max: MAX_COPIES + s.hero.mods.summonMax,
-      settle: true,
-      ttl: 8 * durationOf(s, 0),
-      damageType: p.damageType,
-      attackRange: p.attackRange,
-      attackCooldown: p.attackCooldown * 0.9,
-      damageMul: 0.7 * power(s, 0),
-      r: p.r,
-      speed: p.speed * 0.9,
-      facing: p.facing,
-    });
+    for (let k = 0; k <= countOf(s, 0); k++) {
+      const angle = s.rngs.combat.range(0, Math.PI * 2);
+      summon(c, {
+        variant: 'copy',
+        heroId: p.heroId,
+        x: p.x + Math.cos(angle) * 34,
+        y: p.y + Math.sin(angle) * 34,
+        max: MAX_COPIES + s.hero.mods.summonMax,
+        settle: true,
+        ttl: 8 * durationOf(s, 0),
+        damageType: p.damageType,
+        attackRange: p.attackRange,
+        attackCooldown: p.attackCooldown * 0.9,
+        damageMul: 0.7 * power(s, 0),
+        r: p.r,
+        speed: p.speed * 0.9,
+        facing: p.facing,
+      });
+    }
     bus.emit('footnote', { text: t(`heroes.petlowiec.disagree.${s.rngs.combat.int(1, DISAGREE_LINES)}`) });
   },
 ]);
@@ -56,7 +58,7 @@ const spor = cast(1, [
 /** Petla: back to where you were 3 s ago, with the racja you had then (if it was more). */
 const petla = cast(2, [
   ({ c, s, p }) => {
-    const then = ringBack(s.hero.ring, s.time, 3);
+    const then = ringBack(s.hero.ring, s.time, 3 * (patchOf(s, 2)?.dur ?? 1));
     if (!then) return false;
     teleport(c, { x: then.x, y: then.y });
     heal(c, { atLeast: then.hp });
@@ -103,8 +105,10 @@ const juzBylo = cast(3, [
       bus.emit('footnote', { text: t('heroes.petlowiec.alreadySaid') });
       return;
     }
-    fire(s, bus, last.skill, padOf(s, last.skill) ?? 0, true, last.aim);
-    for (const m of s.summons.filter((x) => x.variant === 'copy')) castFrom(s, bus, hero, last.skill, last.aim, { x: m.x, y: m.y });
+    for (let k = 0; k <= countOf(s, 3); k++) {
+      fire(s, bus, last.skill, padOf(s, last.skill) ?? 0, true, last.aim);
+      for (const m of s.summons.filter((x) => x.variant === 'copy')) castFrom(s, bus, hero, last.skill, last.aim, { x: m.x, y: m.y });
+    }
     if ((s.hero.noted & 8) === 0) {
       s.hero.noted |= 8;
       bus.emit('footnote', { text: t('heroes.petlowiec.alreadySaid') });
@@ -116,7 +120,7 @@ const juzBylo = cast(3, [
 const start = cast(4, [
   ({ c, s, sk, aim }) => {
     const { x, y } = terenCentre(s, sk, aim);
-    zone(c, { x, y, variant: 'start', r: radiusOf(s, sk), ttl: START_DELAY_S });
+    zone(c, { x, y, variant: 'start', r: radiusOf(s, sk), ttl: START_DELAY_S * (patchOf(s, 4)?.dur ?? 1) });
   },
 ]);
 

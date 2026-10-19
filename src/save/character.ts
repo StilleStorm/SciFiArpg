@@ -8,6 +8,7 @@ import type { HeroId } from '../heroes';
 import { DEFAULT_HERO_ID, HERO_IDS } from '../heroes/registry';
 import { recomputeStats } from '../items/stats';
 import { SLOTS, type Item, type Slot } from '../items/types';
+import { applyParagraphs, activeParagraphsOf, paragraphsOf, type ParagraphNo } from '../progression/paragraphs';
 import { applyProgress, padsFrom, serializeProgress, type ProgressData } from '../progression/persist';
 import type { RunState } from '../world/run';
 
@@ -22,6 +23,8 @@ export interface Character extends ProgressData {
   gwiazdki: number;
   equipment: Partial<Record<Slot, Item>>;
   inventory: Item[];
+  /** Active paragraph per skill id (S2); absent or a missing skill = paragraph 1, so saves from before load with § 1 active. */
+  paragraphs?: Record<string, ParagraphNo>;
 }
 
 export function isHeroId(v: unknown): v is HeroId {
@@ -55,7 +58,9 @@ const num = (v: unknown, fallback: number, min = 0): number => (typeof v === 'nu
 /** Read what a hero keeps from a run state. The result is plain data and shares nothing with the state. */
 export function serializeCharacter(s: RunState): Character {
   const p = s.player;
+  const paragraphs = activeParagraphsOf(s);
   return {
+    ...(Object.keys(paragraphs).length > 0 ? { paragraphs } : {}),
     ...serializeProgress(s),
     version: CHARACTER_VERSION,
     heroId: p.heroId,
@@ -84,7 +89,10 @@ export function applyCharacter(s: RunState, c: Character): void {
   p.equipment = clone(c.equipment);
   p.gwiazdki = c.gwiazdki;
   recomputeStats(p);
-  if (c.heroId === p.heroId) applyProgress(s, c);
+  if (c.heroId === p.heroId) {
+    applyProgress(s, c);
+    applyParagraphs(s, c.paragraphs); // what is not open (an old or damaged save) stays on paragraph 1
+  }
   p.hp = p.hpMax;
   s.nextItemNumber = Math.max(s.nextItemNumber, highestNumber(c) + 1);
 }
@@ -102,6 +110,11 @@ export function toCharacter(raw: unknown): Character | null {
   const rawUp = isRecord(raw['upgrades']) ? raw['upgrades'] : {};
   const upgrades: Record<string, number> = {};
   for (const [id, rank] of Object.entries(rawUp)) if (typeof rank === 'number' && rank > 0) upgrades[id] = Math.floor(rank);
+  const rawPara = isRecord(raw['paragraphs']) ? raw['paragraphs'] : {};
+  const paragraphs: Record<string, ParagraphNo> = {};
+  for (const [skill, n] of Object.entries(rawPara)) {
+    if ((n === 2 || n === 3) && paragraphsOf(raw['heroId'], skill).length > 0) paragraphs[skill] = n;
+  }
   const perms = Array.isArray(raw['permissions']) ? raw['permissions'].filter((x): x is string => typeof x === 'string') : [];
   return {
     version: CHARACTER_VERSION,
@@ -115,6 +128,7 @@ export function toCharacter(raw: unknown): Character | null {
     gwiazdki: Math.floor(num(raw['gwiazdki'], 0)),
     equipment,
     inventory: inv,
+    ...(Object.keys(paragraphs).length > 0 ? { paragraphs } : {}),
   };
 }
 

@@ -4,7 +4,8 @@ import { casts } from './skills';
 import { def } from './def';
 import { figure } from './figure';
 import { pads } from './pads';
+import { paragraphs } from './paragraphs';
 import { passives } from './passives';
 import { sounds } from './sounds';
 
-export const hero: HeroModule = { def, figure, sounds, casts, pads, passives };
+export const hero: HeroModule = { def, figure, sounds, casts, paragraphs, pads, passives };

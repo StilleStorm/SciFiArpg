@@ -11,6 +11,8 @@ import type { Aim } from './aim';
 import { castSkill } from './skills';
 import { heroDef } from './defs';
 import { assignPad } from './loadout';
+import type { ParagraphNo } from './paragraphs';
+import { setRunParagraph } from '../progression/paragraphs';
 
 export interface HeroHook {
   /** Fire skill 1, 2 or 3 now (same as the pad). Returns false on cooldown or if nothing happened. */
@@ -21,6 +23,8 @@ export interface HeroHook {
   openAssign(index: 3 | 4): boolean;
   /** Put skill `index` on pad 1..3 (heroes/loadout.ts assignPad). */
   assignPad(pad: 1 | 2 | 3, index: 0 | 1 | 2 | 3 | 4): boolean;
+  /** Switch the paragraph (1..3) of the skill with this id (e.g. 'wirowanie') for the next cast. `force` skips the unlock schedule (tests, shots). False when refused. */
+  setParagraph(skillId: string, n: ParagraphNo, force?: boolean): boolean;
   /** Add a permission token (a family id: 'urzadzenia', 'powiadomienia', 'wygenerowane'). */
   givePermission(family: string): void;
   /** Give reputacja; may open the update form. */
@@ -53,6 +57,10 @@ export interface HeroHook {
     zones: number;
     ranks: number[];
     pads: number[];
+    /** Active paragraph per skill (by SkillIndex). */
+    paragraphs: number[];
+    /** The skill ids by SkillIndex (what `setParagraph` takes). */
+    skillIds: string[];
     permissions: string[];
     offer: string[];
     status: string;
@@ -88,6 +96,10 @@ export function createHeroHook(game: Game, bus: Bus): HeroHook {
     assignPad(pad, index) {
       const s = game.state;
       return s ? assignPad(s, (pad - 1) as 0 | 1 | 2, index) : false;
+    },
+    setParagraph(skillId, n, force = true) {
+      const s = game.state;
+      return s ? setRunParagraph(s, skillId, n, force) : false;
     },
     givePermission(family) {
       const s = game.state;
@@ -153,6 +165,8 @@ export function createHeroHook(game: Game, bus: Bus): HeroHook {
         zones: s.zones.length,
         ranks: [...s.hero.ranks],
         pads: [...s.hero.pads],
+        paragraphs: [...(s.hero.para ?? [1, 1, 1, 1, 1])],
+        skillIds: heroDef(s.player.heroId).skills.map((k) => k.id),
         permissions: [...s.player.permissions],
         offer: s.hero.offer ? s.hero.offer.entries.map((e) => e.id) : [],
         status: s.status,

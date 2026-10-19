@@ -2,7 +2,7 @@
 import { t } from '../../i18n';
 import { reachOf, resolveDirection } from '../aim';
 import { cast, directionOf, firstCast } from '../cast';
-import { areaOf, durationOf, power, skillDamage, touchStatus } from '../helpers';
+import { areaOf, durationOf, power, skillDamage, touchStatus, widthOf } from '../helpers';
 import type { SkillFn } from '../module';
 import { BEBEN_DAMAGE, BEBEN_HALF, BEBEN_KNOCKBACK, BEBEN_VERIFY_S, FOAM_RADIUS, READING_R, READING_S, READING_UPOR } from '../numbers';
 import { aoe, buff, cone, dash, fx, pull, push, shield } from '../primitives';
@@ -53,7 +53,7 @@ const beben = cast(3, [
       dx: a.dx,
       dy: a.dy,
       reach,
-      half: BEBEN_HALF,
+      half: BEBEN_HALF * widthOf(s, 3),
       each: (e) => {
         fx(c, 'wet', e.x, e.y, e.r);
         if (skillDamage(s, bus, e, sk.type, BEBEN_DAMAGE * power(s, 3))) return;

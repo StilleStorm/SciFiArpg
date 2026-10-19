@@ -2,6 +2,7 @@
 import type { DamageType, Stats } from '../combat/damage';
 import type { FamilyId } from '../enemies/ids';
 import type { HeroId } from './registry';
+import type { ParagraphPatch } from './paragraphs';
 
 /** A skill of the hero (0..4) and a pad (0..2); `HeroRun.pads` says which skill each pad fires (DESIGN 10.1). */
 export type SkillIndex = 0 | 1 | 2 | 3 | 4;
@@ -26,6 +27,8 @@ export interface SkillDef {
   aim: AimMode;
   /** Skills 4 and 5 only: the permission (enemy family) their first rank needs in the update form (DESIGN 10.1). */
   requires?: FamilyId;
+  /** Set only on the copy `applyParagraph` makes: the patch of the active paragraph (heroes/paragraphs.ts). */
+  patch?: ParagraphPatch;
 }
 
 /** Standing traits of a hero (S1: what used to be `heroId === ...` branches). */

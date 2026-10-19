@@ -6,6 +6,7 @@ The folder compiles and plays with placeholders. A hero is done when every box i
 - [ ] `figure.ts`: the drawing (DESIGN 3, 10.2), the auto-attack pose and `drive`, the wash seed and `hue`.
 - [ ] Auto-attack: `heroes/auto.ts` handles a thrown shot, a lash and a hitscan; anything new is a new `def.auto` field plus a branch there.
 - [ ] `skills.ts`: five casts from the primitives (`heroes/primitives`); what a skill leaves running is stepped from `heroes/system.ts`.
+- [ ] `paragraphs.ts`: § 2 and § 3 of every skill as patches (at most four fields, `heroes/paragraphs.ts`), the level each skill opens at, text `heroes.__ID__.para.<skill>.<n>.{name,desc}` in `src/i18n/pl/heroes/__ID__.json`.
 - [ ] Ultimates (skill paragraphs the update form offers): add the entries in `progression` and the keys.
 - [ ] Passives: `traits` in `def.ts` for flags; `quirk.ts` for behaviour (`HeroModule.quirk`).
 - [ ] Four recipes (one per skill 2 to 5 plus the auto) in `audio/recipes.ts`, five names in `sounds.ts`.

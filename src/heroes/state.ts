@@ -4,6 +4,7 @@ import type { Item } from '../items';
 import { recomputeStats } from '../items/stats';
 import type { Player } from '../entities/types';
 import type { Aim } from './aim';
+import type { ParagraphNo, ParagraphPatch } from './paragraphs';
 import { heroDef, type HeroDef, type SkillIndex } from './defs';
 import type { HeroId } from './index';
 
@@ -244,6 +245,9 @@ export interface HeroRun {
   updateRequested: boolean;
   /** Death state. */
   deaths: number;
+  /** Active paragraph per skill (by SkillIndex) and its patch; both absent while every skill is on paragraph 1 (heroes/paragraphs.ts). */
+  para?: ParagraphNo[];
+  patch?: (ParagraphPatch | undefined)[];
   /** Damage queued to land later (primitives/effects.ts deferredDamage, echo); absent until a skill queues one. */
   deferred?: DeferredHit[];
   /** Friendly copies that become hostile when their time is up (Petlowiec quirk). */
@@ -337,9 +341,9 @@ export const RING_SECONDS = 3.2;
 export const RING_STEP = 0.1;
 
 /** Append a sample and drop the ones older than RING_SECONDS. */
-export function pushRing(ring: RingSample[], sample: RingSample): void {
+export function pushRing(ring: RingSample[], sample: RingSample, keep: number = RING_SECONDS): void {
   ring.push(sample);
-  while (ring.length > 1 && sample.t - (ring[0]?.t ?? sample.t) > RING_SECONDS) ring.shift();
+  while (ring.length > 1 && sample.t - (ring[0]?.t ?? sample.t) > keep) ring.shift();
 }
 
 /** The sample closest to `seconds` ago (the oldest one if the history is shorter than that). */

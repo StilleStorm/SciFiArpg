@@ -8,7 +8,7 @@ import type { Bus } from '../core/events';
 import { createPickup } from '../entities/factory';
 import type { Input } from '../input';
 import { t } from '../i18n';
-import { bossAlive, canOpenUpdate, entryView, gainXp, confirmUpdate, newSkillOf, openOffer, requestUpdate, reroll, xpForKill } from '../progression';
+import { bossAlive, canOpenUpdate, entryView, gainXp, confirmUpdate, newSkillOf, offerVersion, openOffer, requestUpdate, reroll, xpForKill } from '../progression';
 import { eraseOut } from '../render/ink';
 import type { Views } from '../render/view';
 import { createDeathForms, type DeathForms } from '../ui/deathForms';
@@ -67,7 +67,7 @@ export function createHeroLayer(deps: HeroLayerDeps): HeroLayer {
     input.setEnabled(false);
     const offer = openOffer(s);
     update.open({
-      version: s.player.level - Math.max(1, s.hero.pendingLevels) + 1, // the oldest queued level first
+      version: offerVersion(s), // the oldest queued level first
       entries: offer.entries.map((e) => entryView(s, e)),
       rerollUsed: s.hero.rerollUsed,
       onReport() {

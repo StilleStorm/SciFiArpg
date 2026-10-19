@@ -2,7 +2,7 @@
 import { applyDamage, killEnemy } from '../../systems/combat';
 import { pickTarget, reachOf, resolveDirection } from '../aim';
 import { cast } from '../cast';
-import { durationOf, power, skillDamage } from '../helpers';
+import { countOf, durationOf, enemiesWithin, power, skillDamage, widthOf } from '../helpers';
 import type { SkillFn } from '../module';
 import { NUMER_S, NUMER_STAMP_DAMAGE, ROZLACZENIE_BELOW, ROZLACZENIE_BLOCK_S, ROZLACZENIE_DAMAGE, ROZLACZENIE_HALF, ROZLACZENIE_THROW } from '../numbers';
 import { areaOf } from '../helpers';
@@ -17,6 +17,16 @@ const prosze = cast(0, [
     statusApply([target], { kind: 'zablokowany', seconds: secs, source: p.id });
     zone(c, { x: target.x, y: target.y - target.r - 18, variant: 'hourglass', r: 14, ttl: secs, follow: target.id });
     skillDamage(s, bus, target, sk.type, 0.6 * power(s, 0));
+    // paragraph: the nearest others to the first (within 120) are held as well
+    const more = enemiesWithin(s, target.x, target.y, 120)
+      .filter((e) => e !== target)
+      .sort((a, b) => Math.hypot(a.x - target.x, a.y - target.y) - Math.hypot(b.x - target.x, b.y - target.y))
+      .slice(0, countOf(s, 0));
+    for (const e of more) {
+      statusApply([e], { kind: 'zablokowany', seconds: secs, source: p.id });
+      zone(c, { x: e.x, y: e.y - e.r - 18, variant: 'hourglass', r: 14, ttl: secs, follow: e.id });
+      skillDamage(s, bus, e, sk.type, 0.6 * power(s, 0));
+    }
   },
 ]);
 
@@ -33,7 +43,7 @@ const przekierowuje = cast(1, [
       dx: a.dx,
       dy: a.dy,
       reach: range,
-      half: (40 * Math.PI) / 180,
+      half: ((40 * Math.PI) / 180) * widthOf(s, 1),
       each: (e) => {
         statusApply([e], { kind: 'zgloszony', seconds: secs, source: p.id });
         e.attackTimer = Math.max(e.attackTimer, secs);
@@ -75,7 +85,7 @@ const rozlaczenie = cast(4, [
   ({ c, s, bus, p, sk, aim }) => {
     const a = resolveDirection(s, sk, aim);
     const reach = reachOf(s, sk);
-    const first = line(c, { x: p.x, y: p.y, dx: a.dx, dy: a.dy, reach, half: ROZLACZENIE_HALF })[0]?.e;
+    const first = line(c, { x: p.x, y: p.y, dx: a.dx, dy: a.dy, reach, half: ROZLACZENIE_HALF * widthOf(s, 4) })[0]?.e;
     if (!first) return false;
     fx(c, 'cut', p.x, p.y, 0, first.x, first.y);
     if (!first.boss && first.hp < first.hpMax * ROZLACZENIE_BELOW) {

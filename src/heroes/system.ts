@@ -9,14 +9,14 @@ import { canOpenUpdate, tickUpdateQueue } from '../progression/queue';
 import { PAGE_H, PAGE_W, resolveMove } from '../world/pages';
 import type { RunState } from '../world/run';
 import { trackRun } from './aim';
-import { durationOf, enemiesWithin, nearestEnemy, power, setExistence, skillDamage, touchStatus } from './helpers';
+import { durationOf, enemiesWithin, nearestEnemy, patchOf, power, setExistence, skillDamage, touchStatus } from './helpers';
 import { FOAM_RADIUS } from './numbers';
-import { heroDef } from './defs';
+import { effectiveSkill } from './loadout';
 import { stepFlag, stepGravity, stepOrbit, stepRoll } from './nalesnik/steps';
 import { bindNumerBonus, landStart, stepLegend, stepMoon, stepNumer, stepReading, stepScale, stepTide, syncMoonUpor } from './steps2';
 import { tickRound } from './quirks';
 import { stepDeferred } from './primitives';
-import { pushRing, RING_STEP } from './state';
+import { pushRing, RING_SECONDS, RING_STEP } from './state';
 
 export function heroStep(s: RunState, bus: Bus, dt: number): void {
   trackRun(s); // the pad reads the live run to draw a held aim (heroes/aim.ts)
@@ -28,13 +28,19 @@ export function heroStep(s: RunState, bus: Bus, dt: number): void {
   h.ringTimer -= dt;
   if (h.ringTimer <= 0) {
     h.ringTimer = RING_STEP;
-    pushRing(h.ring, { t: s.time, x: p.x, y: p.y, hp: p.hp });
+    pushRing(h.ring, { t: s.time, x: p.x, y: p.y, hp: p.hp }, RING_SECONDS * Math.max(1, ...(h.patch ?? []).map((q) => q?.dur ?? 1)));
   }
   if (h.mods.regen > 0 && p.hp < p.hpMax) p.hp = Math.min(p.hpMax, p.hp + h.mods.regen * dt);
 
   if (p.shield > 0) {
     if (s.time >= h.shieldUntil) p.shield = 0;
-    else for (const e of enemiesWithin(s, p.x, p.y, FOAM_RADIUS)) touchStatus(e, 'do_weryfikacji', 2, p.id);
+    else {
+      const marked = patchOf(s, 1)?.status; // the paragraph of Pranie wstepne may add a marker to whoever touches the foam
+      for (const e of enemiesWithin(s, p.x, p.y, FOAM_RADIUS)) {
+        touchStatus(e, 'do_weryfikacji', 2, p.id);
+        if (marked) touchStatus(e, marked.kind, marked.seconds, p.id);
+      }
+    }
   }
   if (h.buffCrit !== 0 && s.time >= h.buffUntil) {
     p.baseStats.stats.critChance -= h.buffCrit;
@@ -98,7 +104,7 @@ function stepDash(s: RunState, bus: Bus, dt: number): void {
   s.hero.dash = null;
   if (dragged && s.enemies.includes(dragged)) {
     applyStatus(dragged, 'zablokowany', 1.5 * durationOf(s, 2), p.id);
-    skillDamage(s, bus, dragged, heroDef(p.heroId).skills[2].type, power(s, 2));
+    skillDamage(s, bus, dragged, effectiveSkill(s, 2).type, power(s, 2));
   }
 }
 

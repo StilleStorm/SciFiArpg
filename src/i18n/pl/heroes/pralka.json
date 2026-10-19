@@ -1,0 +1,74 @@
+{
+  "para": {
+    "wirowanie": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Obrót w miejscu. Przyciąga najbliższych."
+      },
+      "2": {
+        "name": "Z płukaniem",
+        "desc": "Obrót regulaminowy. Trafieni czekają na weryfikację 1 s."
+      },
+      "3": {
+        "name": "Bębna",
+        "desc": "Obrót szerszy o 20%. Trafieni zablokowani na 1 s. Odnowienie dłuższe o 3 s."
+      }
+    },
+    "pranieWstepne": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Piana na 5 sekund. Kto jej dotknie, czeka na weryfikację."
+      },
+      "2": {
+        "name": "Piana aktywna",
+        "desc": "Piana trwa 8 s. Odnowienie dłuższe o 2 s."
+      },
+      "3": {
+        "name": "Prasowanie",
+        "desc": "Piana trwa 3 s, a dotykający zostają zgłoszeni na 2 s. Kosztuje 6 racji."
+      }
+    },
+    "odwirowanie": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Przejazd z jednym przeciwnikiem. Na końcu jest zablokowany."
+      },
+      "2": {
+        "name": "Dalekobieżne",
+        "desc": "Przejazd dłuższy o 40%. Obrażenia na końcu większe o 20%."
+      },
+      "3": {
+        "name": "Wyrzut",
+        "desc": "Bez celowania, regulaminowy. Obrażenia na końcu większe o połowę. Odnowienie dłuższe o 3 s."
+      }
+    },
+    "beben": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Mokre pranie wylatuje stożkiem. Trafieni czekają na weryfikację."
+      },
+      "2": {
+        "name": "Na wprost",
+        "desc": "Wąski strumień: zasięg większy o 45%, kąt czterokrotnie węższy, obrażenia większe o 20%."
+      },
+      "3": {
+        "name": "Pełny załadunek",
+        "desc": "Pranie regulaminowe. Trafieni zablokowani na 1 s. Odnowienie dłuższe o 2 s."
+      }
+    },
+    "osobowosc": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Sześć sekund odczytu na głos. Słuchający tracą rację."
+      },
+      "2": {
+        "name": "Uzupełniony",
+        "desc": "Odczyt trwa 4 s zamiast 6. Obrażenia na sekundę większe o 70%."
+      },
+      "3": {
+        "name": "Odwołanie",
+        "desc": "Odczyt regulaminowy, obszar większy o 20%. Kosztuje 10 racji."
+      }
+    }
+  }
+}

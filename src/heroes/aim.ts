@@ -75,7 +75,7 @@ const GEOMETRY: Record<string, Geometry> = {
 };
 
 /** The arrow length (kierunek) or the farthest point (wskazanie) of a skill; 0 for an auto skill. */
-export const reachOf = (s: RunState, skill: SkillDef): number => GEOMETRY[skill.id]?.reach(s) ?? 0;
+export const reachOf = (s: RunState, skill: SkillDef): number => (GEOMETRY[skill.id]?.reach(s) ?? 0) * (skill.patch?.reach ?? 1);
 /** Radius of the circle drawn for a wskazanie skill. */
 export const radiusOf = (s: RunState, skill: SkillDef): number => GEOMETRY[skill.id]?.radius(s) ?? 0;
 /** How far the auto cast looks for a target. */
