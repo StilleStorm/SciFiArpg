@@ -141,10 +141,10 @@ const MORE: Record<string, Drawing> = {
     d: `M-18-5Q0-11 18-5V6Q0 12-18 6ZM-18 6V-5M18 6V-5${c(0, 1, 3.6)}M-6-14L-8-18M0-15V-19M6-14L8-18`,
     hatch: 'M-18-5Q-12-7-6-7V9Q-12 8-18 6Z',
   },
-  // hood with a face opening, a drawstring and a loose thread
+  // detachable hood: face opening, drawstrings, the press-stud band it unfastens at
   kaptur: {
-    d: 'M-16 18Q-19-6 0-18Q19-6 16 18ZM-8 14Q-10 0 0-7Q10 0 8 14M-8 14Q0 18 8 14M-5 16L-6 21Q-7 23-4 22M5 16V21',
-    hatch: 'M-16 18Q-19-6 0-18Q-12-6-10 14L-8 14Q-10 0 0-7Q-14 2-16 18Z',
+    d: 'M-16 14C-19-4-12-20 0-20C12-20 19-4 16 14M0-20V-10M-9 14C-11 0-6-10 0-10C6-10 11 0 9 14M-17 14H17V20H-17ZM-12.5 17A1 1 0 1 0-12.4 17M-5.5 17A1 1 0 1 0-5.4 17M5.5 17A1 1 0 1 0 5.6 17M12.5 17A1 1 0 1 0 12.6 17M-5 9Q-6 14-4.5 22M5 9Q6 14 4.5 22M-6 22H-3M3 22H6',
+    hatch: 'M-16 14C-19-4-12-20 0-20L0-10C-6-10-11 0-9 14Z',
   },
   // shower cap: gathered edge and crinkles
   czepek: {
@@ -166,7 +166,7 @@ const MORE: Record<string, Drawing> = {
   },
   // adjustable braces with clips
   szelki: {
-    d: 'M-12-19H-7V-2L0 8L7-2V-19H12V0L3 12V19H-3V12L-12 0ZM-13-22H-6V-19M6-22H13V-19M-15 0H-8V4H-15ZM8 0H15V4H8Z',
+    d: 'M-12-19H-7V-2L0 8L7-2V-19H12V0L3 12V19H-3V12L-12 0ZM-13-22H-6V-19M6-22H13V-19M-15 0H-8V4H-15ZM8 0H15V4H8ZM-14.5-14H-4.5V-9H-14.5ZM-9.5-14V-9M4.5-14H14.5V-9H4.5ZM9.5-14V-9',
     hatch: 'M-3 12H3V19H-3Z',
   },
   // consultant's jacket: lapels, one button
