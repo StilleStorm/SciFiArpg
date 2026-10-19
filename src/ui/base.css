@@ -196,6 +196,17 @@
   gap: 2px;
   padding: 6px 0 4px;
 }
+/* portrait: both answers stay on the page while the form scrolls (the priority block pushed "Nie akceptuję" below the fold) */
+:root:not([data-orient='landscape']) .ticket .tk-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  margin-top: auto;
+  padding: 6px 0 0;
+  border-top: 1px solid var(--ink);
+  background-color: var(--paper);
+  background-image: var(--paper-noise, none);
+}
 .tk-actions .start {
   margin-top: 0;
   min-height: 44px;
@@ -505,7 +516,7 @@
 }
 .tk-prio .tk-prio-need {
   display: block;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ink-wet);
 }
 .tk-prio.on {
@@ -548,13 +559,20 @@
   justify-content: space-between;
   gap: 8px;
   min-height: 44px;
+  padding: 6px 0;
   border-bottom: 1px dotted var(--ink);
   font-family: var(--mono);
   font-size: 12px;
 }
+.tk-travel-row > span {
+  flex: 1;
+  min-width: 0;
+}
+/* every answer box the same width, clear of the row rules */
 .tk-travel-row button {
+  flex: none;
+  width: 112px;
   min-height: 44px;
-  min-width: 44px;
   padding: 0 10px;
   border: 1px solid var(--ink);
   border-radius: 0;

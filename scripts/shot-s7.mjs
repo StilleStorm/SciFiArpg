@@ -99,7 +99,12 @@ try {
     await page.evaluate(() => window.__game.go('ticket'));
     await sleep(600);
     check(`${prefix}: three closed planets and the extra ticket are listed`, (await page.locator('.tk-travel-row').count()) === 4);
-    await page.locator('.tk-travel').scrollIntoViewIfNeeded();
+    // scroll to the end: the portrait answers are a sticky footer, so the last rows show only at the bottom
+    await page.evaluate(() => {
+      const sc = document.querySelector('.ticket-sheet .ps-scroll');
+      if (sc) sc.scrollTop = sc.scrollHeight;
+    });
+    await sleep(150);
     await shot('ticket-travel');
     await noHScroll('travel list');
     await page.evaluate(() => window.__game.go('baza'));
