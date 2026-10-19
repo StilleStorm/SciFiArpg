@@ -444,7 +444,7 @@
   align-self: start;
 }
 :root[data-orient='landscape'] .ps-scroll .inv-slot-label {
-  font-size: 7.5px;
+  font-size: 11px;
   letter-spacing: 0;
 }
 

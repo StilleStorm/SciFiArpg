@@ -987,6 +987,23 @@ s.struck-out.fresh::after {
   padding-top: 0;
   padding-bottom: 0;
 }
+/* text links ("Zmień profil", "Nie akceptuję", "Poprzedni" / "Następny"): a 44 px tap target around the underlined
+   words without moving the layout, like .ps-close::after */
+#ui .link-btn,
+#ui .arrow {
+  position: relative;
+}
+#ui .link-btn::after,
+#ui .arrow::after {
+  content: '';
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  top: 50%;
+  height: 44px;
+  min-width: 44px;
+  transform: translateY(-50%);
+}
 #ui .ps-close {
   text-decoration-thickness: 1.5px;
   padding-left: 8px;
