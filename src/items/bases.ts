@@ -22,6 +22,11 @@ export interface BaseItem {
    * StatBlock keys tempo, gwiazdki and proba (trial speed +30% = proba -30), which items/generate.ts adds as is.
    */
   odd?: { tempoPct?: number; gwiazdkiPct?: number; trialSpeedPct?: number };
+  /**
+   * Affixes never rolled on this base because their adjective repeats a word of the noun
+   * ("pieczątka serwisowa serwisowa"). bases.test.ts finds every such echo the slots allow and asks for it here.
+   */
+  excludeAffixes?: readonly string[];
 }
 
 /** A base's odd percentages as StatBlock keys (tempo -% cooldown, gwiazdki +%, proba -% trial kills). */

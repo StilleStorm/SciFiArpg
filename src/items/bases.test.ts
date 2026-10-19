@@ -3,6 +3,7 @@ import { createRng } from '../core/rng';
 import { t } from '../i18n';
 import { DRAWINGS } from '../render/itemDrawings';
 import { affixMarks, groundMark, tierMarkKind } from '../render/itemMarks';
+import { AFFIXES, affixForm, randomAffixPool, rollsOnSlot } from './affixes';
 import { BASES, basesForSlot } from './bases';
 import { rollItem } from './generate';
 import { ITEM_TIERS, SLOTS } from './types';
@@ -50,5 +51,24 @@ describe('rolled items by seed', () => {
     const item = { tier: 'zwykly' as const, affixes: ['sponsorowany', 'domniemany', 'asystent'], freeVersion: true };
     expect(affixMarks(item)).toEqual(['dotted', 'reklama', 'free', 'nowosc']);
     expect(groundMark(item)).toBe('dotted');
+  });
+});
+
+describe('per-base affix exclusions (an adjective that repeats the noun)', () => {
+  const words = (s: string): string[] => s.toLocaleLowerCase('pl').split(/[\s\u00a0,]+/).filter((w) => w.length > 3);
+  it('every echo of a noun word by an affix that can roll on the base is excluded on that base', () => {
+    const missing: string[] = [];
+    for (const b of BASES) {
+      const noun = new Set(words(t(`items.base.${b.id}.noun`)));
+      for (const a of AFFIXES) {
+        if (a.free || !rollsOnSlot(a, b.slot)) continue;
+        if (words(affixForm(a.id, b.gender)).some((w) => noun.has(w)) && !b.excludeAffixes?.includes(a.id)) missing.push(`${b.id}/${a.id}`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+  it('the random pool leaves out what the base excludes', () => {
+    expect(randomAffixPool(3, 'bron').some((a) => a.id === 'sluzbowy')).toBe(true);
+    expect(randomAffixPool(3, 'bron', [], ['sluzbowy']).some((a) => a.id === 'sluzbowy')).toBe(false);
   });
 });

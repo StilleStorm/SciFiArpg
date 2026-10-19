@@ -402,14 +402,16 @@ StatBlock adds percentages `zasieg`, `tempo` (negative = faster), `gwiazdki`, `p
 `trialTarget`); a base's `odd` (tempoPct, gwiazdkiPct, trialSpeedPct) enters them unscaled via `bases.oddStats`.
 `recomputeStats` reads them: range × (1+zasieg%), cooldown × max(0.5, 1+tempo%), `Player.starBonus = gwiazdki`; pickups pay
 through `economy/stars.earnStars` (fraction kept in `Player.starCarry`). Item adds `modTier?` (I–V, `tiers.modTierMark`
-"(III)" after the name in `ui/itemView.displayName`), `plain?`, `absurd?`. `items/absurd.ts`: `pageEntryAll(player, loot rng)`
+"(III)" placed by `grammar.withRegisterMark` after the model, before an unwanted-feature tail), `plain?`, `absurd?`.
+`BaseItem.excludeAffixes` (ids never rolled on that base, passed to `affixes.randomAffixPool`): a test finds every affix
+form repeating a noun word on a slot it can roll on and requires the id there. `items/absurd.ts`: `pageEntryAll(player, loot rng)`
 is called by `world/pageTurn.enterPage` after `page:entered` (recompute on `changed`, `notes` as footnotes);
 `stats.wearerDefence(p, combat rng)` is the defender block of every hit on the player (`systems/combat.attack`,
 `enemies/projectiles.fireShot`), taking a worn domniemany item's upor/resists off one hit in five (no roll without one);
 `disposalRefusal(item, 'sell'|'bin'|'reklamacja'|'drop')` is the one guard any way of getting rid of an item calls
 (wycofany: drop only; sell → the Sklep footnote). `RollOptions.shop` (the Sklep passes it): grade 3 halves, wycofany
 never stocked. Marks: `render/itemMarks.ts` (`AFFIX_MARK` keyed by `Affix.absurd`, `affixMarks`, `groundMark`,
-`buildTierMark`), `drawingSvg(id, item)` on cards, the worn strip and the Sklep; `itemView.itemRowText` ("ok. 16" on an
+`buildTierMark`; the rzadki thread is black, red stays with stamps per DESIGN §3), `drawingSvg(id, item)` on cards, the worn strip and the Sklep; `itemView.itemRowText` ("ok. 16" on an
 ewentualny pewność), `declaredHead` ("(wg relacji)" for rzekomy, which shows "Próba 0 z 0"), `isStruck` (wycofany
 number struck, class `.struck`). Hook `itemGallery(mode)`; shots `shot-s8.mjs`. Open: sell, bin and reklamacja are not built
 (S9+ must call `disposalRefusal`); sets (zestaw, paperclip) wait for S10.

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { t } from '../i18n';
 import { AFFIXES, AFFIXES_BY_ID, UNWANTED_FEATURES } from './affixes';
 import { BASES, BASES_BY_ID } from './bases';
-import { affixesOf, capitalize, nameItem } from './grammar';
+import { affixesOf, capitalize, nameItem, withRegisterMark } from './grammar';
 import { UNIQUES } from './uniques';
 
 const base = (id: string) => {
@@ -92,5 +92,21 @@ describe('item data', () => {
   });
   it('uses no exclamation marks outside advertisements and the Nowość notes', () => {
     for (const b of BASES) expect(t(`items.base.${b.id}.desc`)).not.toContain('!');
+  });
+});
+
+describe('withRegisterMark: the tier numeral sits after the model, before an unwanted feature', () => {
+  const kask = BASES_BY_ID.get('kask');
+  it('goes before the unwanted phrase and at the end without one', () => {
+    if (!kask) throw new Error('kask');
+    const ids = ['gwarancyjny', 'domniemany', 'markowy', 'asystent'];
+    expect(withRegisterMark(nameItem(kask, affixesOf(ids)), kask.gender, ids, '(III)')).toBe(
+      'kask kurierski gwarancyjny domniemany, model «Marka» (III) z\u00a0asystentem głosowym',
+    );
+    const plain = ['gwarancyjny', 'domniemany', 'markowy'];
+    expect(withRegisterMark(nameItem(kask, affixesOf(plain)), kask.gender, plain, '(II)')).toBe(
+      'kask kurierski gwarancyjny domniemany, model «Marka» (II)',
+    );
+    expect(withRegisterMark('kask kurierski', 'm', [], '')).toBe('kask kurierski');
   });
 });

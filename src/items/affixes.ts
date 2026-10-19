@@ -165,8 +165,14 @@ export function canCombine(chosen: readonly Affix[], next: Affix): boolean {
   return true;
 }
 
-/** The random pool for an item grade and slot, without what cannot sit next to `chosen`. */
-export const randomAffixPool = (grade: number, slot: Slot, chosen: readonly Affix[] = []): Affix[] =>
+/** The affix can roll on `slot` at all (no slot list = every slot). */
+export const rollsOnSlot = (a: Affix, slot: Slot): boolean => !a.slots || a.slots.includes(slot);
+
+/**
+ * The random pool for an item grade and slot, without what cannot sit next to `chosen` and without the
+ * base's own exclusions (an adjective that repeats the noun, bases.ts `excludeAffixes`).
+ */
+export const randomAffixPool = (grade: number, slot: Slot, chosen: readonly Affix[] = [], exclude: readonly string[] = []): Affix[] =>
   AFFIXES.filter(
-    (a) => !a.free && a.weight > 0 && a.grade <= grade && (!a.slots || a.slots.includes(slot)) && canCombine(chosen, a),
+    (a) => !a.free && a.weight > 0 && a.grade <= grade && rollsOnSlot(a, slot) && !exclude.includes(a.id) && canCombine(chosen, a),
   );

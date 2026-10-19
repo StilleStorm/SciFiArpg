@@ -55,6 +55,17 @@ export function joinName(head: string, gender: Gender, affixes: readonly Affix[]
   return out;
 }
 
+/**
+ * The register mark ("(III)") goes right after the model, before an unwanted feature phrase that the
+ * name ends with ("…, model «Zasięg» (III) z asystentem głosowym"). No tail: at the end. Empty mark: the name.
+ */
+export function withRegisterMark(name: string, gender: Gender, affixIds: readonly string[], mark: string): string {
+  if (!mark) return name;
+  const tail = nameParts(affixesOf(affixIds)).tail.map((a) => affixForm(a.id, gender)).join(' ');
+  if (tail && name.endsWith(` ${tail}`)) return `${name.slice(0, name.length - tail.length - 1)} ${mark} ${tail}`;
+  return `${name} ${mark}`;
+}
+
 /** Name of a generated item: base noun + affixes in the base's grammatical gender. */
 export function nameItem(base: BaseItem, affixes: readonly Affix[], lang: Lang = 'pl'): string {
   return joinName(baseNoun(base.id), base.gender, affixes, lang);

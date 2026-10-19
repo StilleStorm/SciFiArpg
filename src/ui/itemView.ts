@@ -1,6 +1,6 @@
 import { t } from '../i18n';
 import { claimIsHearsay, showsApproximately } from '../items/absurd';
-import { capitalize } from '../items/grammar';
+import { capitalize, withRegisterMark } from '../items/grammar';
 import { modTierMark } from '../items/tiers';
 import { effectiveStats } from '../items/stats';
 import { reviewLine } from '../items/reviews';
@@ -10,10 +10,9 @@ import { affixMarks, numberSuffix } from '../render/itemMarks';
 import { h } from './dom';
 import { num, signed } from './sheet';
 
-/** Caption name: capitalized, the magnitude tier numeral "(II)".."(V)" after it, "(wariant)" for shop lies and Parzystość drops. */
+/** Caption name: capitalized, the magnitude tier numeral "(II)".."(V)" after the model (before an unwanted feature), "(wariant)" for shop lies and Parzystość drops. */
 export function displayName(item: Item): string {
-  const mark = modTierMark(item.modTier);
-  const base = mark ? `${capitalize(item.name)} ${mark}` : capitalize(item.name);
+  const base = withRegisterMark(capitalize(item.name), item.gender, item.affixes, modTierMark(item.modTier));
   return item.variant ? `${base} (${t('items.variant')})` : base;
 }
 

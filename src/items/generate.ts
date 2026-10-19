@@ -182,7 +182,7 @@ export function rollAffixIds(rng: Rng, base: BaseItem, tier: ItemTier, shop = fa
     if (free) chosen.push(free);
   }
   while (chosen.length < count) {
-    let pool = randomAffixPool(TIER_GRADE[tier], base.slot, chosen);
+    let pool = randomAffixPool(TIER_GRADE[tier], base.slot, chosen, base.excludeAffixes);
     if (tier === 'rzadki' && chosen.length === count - 1 && !chosen.some((a) => a.grade >= 2)) {
       const better = pool.filter((a) => a.grade >= 2);
       if (better.length) pool = better;
