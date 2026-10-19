@@ -600,19 +600,24 @@
   left: 150px;
 }
 
-/* ---------- the profile: two balanced columns inside the scroll ---------- */
+/* ---------- the profile: who (left) and what (right) side by side inside the scroll; the whole body scrolls ---------- */
 :root[data-orient='landscape'] .profile .frame {
   padding: 12px 22px 8px;
 }
 :root[data-orient='landscape'] .profile .pscroll {
-  column-count: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 30px;
+  align-items: start;
+}
+:root[data-orient='landscape'] .profile .pf-foot {
+  flex-direction: row;
+  align-items: flex-end;
   column-gap: 30px;
 }
-:root[data-orient='landscape'] .profile .pscroll > * {
-  break-inside: avoid;
-}
-:root[data-orient='landscape'] .profile .pscroll > .label {
-  break-after: avoid;
+:root[data-orient='landscape'] .profile .pf-foot .pf-number {
+  flex: 1;
+  min-width: 0;
 }
 :root[data-orient='landscape'] .profile .top {
   grid-template-columns: 112px 1fr;

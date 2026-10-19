@@ -124,7 +124,7 @@ export function konfiguracjaSpecs(s: RunState): { specs: KonfSpec[]; chosen: Spe
  * A line at the foot of a sheet's scroll area that says there is more form below, shown only while there is. Returns `update`,
  * to call after the content changed, and `dispose`.
  */
-export function attachScrollCue(sheet: Sheet, key: string): { update(): void; dispose(): void } {
+export function attachScrollCue(sheet: Pick<Sheet, 'scroll'>, key: string): { update(): void; dispose(): void } {
   const cue = h('div', 'kf-cue');
   const svg = el('svg', { viewBox: '0 0 16 12', width: 16, height: 12, 'aria-hidden': 'true' });
   svg.setAttribute('style', 'fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;overflow:visible');

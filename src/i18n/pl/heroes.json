@@ -7,6 +7,7 @@
   "profile": {
     "title": "Profil użytkownika",
     "number": "Profil {n} z {total}",
+    "cue": "Dalsza część profilu poniżej",
     "photo": "Zdjęcie profilowe",
     "photoNote": "Zdjęcia nie zweryfikowano.",
     "verified": "zweryfikowany",

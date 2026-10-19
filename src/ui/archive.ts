@@ -8,6 +8,7 @@ import { capacityOf, caseTitle, errorText, ARCHIVE_PLACES, type ArchivePlace } f
 import type { Places, Result } from './rosterStore';
 import { h } from './dom';
 import { displayName, figure, shownStats, summary, tierWord } from './itemView';
+import { attachScrollCue } from './konfiguracja';
 import { createSheet, type Sheet } from './sheet';
 import './archive.css';
 
@@ -133,7 +134,16 @@ export function openArchive(root: HTMLElement, host: ArchiveHost, onClose: () =>
   }
   refresh();
 
-  return { el: sheet.el, refresh, close: () => sheet.remove() };
+  const cue = attachScrollCue(sheet, 'screens.archive.cue');
+
+  return {
+    el: sheet.el,
+    refresh,
+    close: () => {
+      cue.dispose();
+      sheet.remove();
+    },
+  };
 }
 
 /** The desk row, in the right-hand column of the desk. Call right after the desk sheet was opened. */

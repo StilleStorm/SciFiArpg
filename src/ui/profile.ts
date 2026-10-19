@@ -10,6 +10,7 @@ import { emptyCharacter } from '../save/character';
 import { loadMeta, saveMeta } from '../save/save';
 import { h } from './dom';
 import { openKarta, type KartaSheet } from './karta';
+import { attachScrollCue } from './konfiguracja';
 import { errorText, NAME_MAX } from './rosterModel';
 import type { Result } from './rosterStore';
 import './forms.css';
@@ -173,17 +174,25 @@ function buildProfile(root: HTMLElement, arg: ((heroId: HeroId) => void) | Profi
   numberRow.append(nameLabel, nameInput, nameNote);
 
   // The long text scrolls on a small phone; the buttons stay below it.
+  // Two blocks: who the hero is, and what the hero does. Stacked in portrait, side by side in landscape (each scrolls with the body).
   const body = h('div', 'pscroll');
-  body.append(top, name, desc, autoLabel, autoText, skillsLabel, skills, quirkLabel, quirk);
+  const colA = h('div', 'pcol');
+  colA.append(top, name, desc);
+  const colB = h('div', 'pcol');
+  colB.append(autoLabel, autoText, skillsLabel, skills, quirkLabel, quirk);
+  body.append(colA, colB);
   const toRoster = h('button', 'link-btn pf-roster', t('screens.create.toRoster'));
   toRoster.type = 'button';
   toRoster.dataset['profile'] = 'roster';
   toRoster.addEventListener('click', () => creating?.onCancel?.());
-  frame.append(head, h('hr', 'rule'), body, kartaLink);
-  if (creating) frame.append(numberRow);
-  frame.append(nav);
+  // The Karta link and the case number: stacked in portrait, one row in landscape so the scroll keeps its height.
+  const foot = h('div', 'pf-foot');
+  foot.append(kartaLink);
+  if (creating) foot.append(numberRow);
+  frame.append(head, h('hr', 'rule'), body, foot, nav);
   if (creating?.onCancel) frame.append(toRoster);
   root.append(screen);
+  const cue = attachScrollCue({ scroll: body }, 'heroes.profile.cue');
 
   let index = 0;
   const heroes: readonly HeroDef[] = HEROES;
@@ -251,6 +260,7 @@ function buildProfile(root: HTMLElement, arg: ((heroId: HeroId) => void) | Profi
     destroy() {
       karta?.close();
       karta = null;
+      cue.dispose();
       screen.remove();
       if (active === profile) active = null;
     },
@@ -260,6 +270,8 @@ function buildProfile(root: HTMLElement, arg: ((heroId: HeroId) => void) | Profi
       index = at >= 0 ? at : 0;
       render();
       screen.classList.remove('hidden');
+      body.scrollTop = 0;
+      cue.update();
     },
     hide() {
       screen.classList.add('hidden');

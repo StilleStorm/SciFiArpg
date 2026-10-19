@@ -585,6 +585,11 @@
 }
 
 /* ---------- profile: the case number while a case file is created (S6) ---------- */
+.profile .pf-foot {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+}
 .profile .pf-number {
   flex: none;
   padding-top: 8px;
