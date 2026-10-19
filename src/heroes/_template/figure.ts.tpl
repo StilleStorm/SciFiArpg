@@ -25,8 +25,9 @@ export function pose(t: number): HeroPose {
 
 export const figure: HeroFigure = {
   def: figureDef,
-  // TODO: the stain under the figure (centre, radius, fixed seed) and its hue in render/wash.ts HERO_HUE
+  // TODO: the stain under the figure (centre, radius, fixed seed) and its hue (render/wash.ts WashHue)
   wash: { cx: 0, cy: -4, r: 20, seed: 0x4900 },
+  hue: 'indigo',
   attackMs: 300,
   pose,
   // TODO: `drive` (move the parts of the figure each frame), `build` (extra drawing), `patch` (per-frame, attacking or not), `stroke`

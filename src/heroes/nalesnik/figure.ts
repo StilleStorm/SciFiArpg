@@ -127,6 +127,7 @@ function patchPancake(e: Walker, p: Parts, timeMs: number): void {
 export const figure: HeroFigure = {
   def: figureDef,
   wash: { cx: 0, cy: 1, r: 22, seed: 0x4805 },
+  hue: 'ochre',
   attackMs: 220,
   stroke: 'slap',
   pose,

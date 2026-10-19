@@ -5,6 +5,7 @@
 import { DAMAGE_TYPES, type DamageType } from '../combat/damage';
 import { heroDef, type SkillIndex } from '../heroes/defs';
 import type { HeroId } from '../heroes';
+import { heroById } from '../heroes/registry';
 import { neutralMods, type Mods, type OfferEntry, type UpdateOffer } from '../heroes/state';
 import { recomputeStats } from '../items/stats';
 import { t } from '../i18n';
@@ -42,48 +43,6 @@ const skillEntries = (): UpgradeDef[] =>
     // skills 1..3: the third rank is the one that wants a permission; skills 4..5: the first (requirementOf)
   }));
 
-const PASSIVES: Record<HeroId, { mods: Partial<Mods>; requires?: Family }[]> = {
-  pralka: [
-    { mods: { cooldown: -0.08 } },
-    { mods: { shield: 20 } },
-    { mods: { dmg: 0.1 } },
-    { mods: { regen: 0.6 } },
-    { mods: { area: 0.12 } },
-    { mods: { duration: 0.25, lifeOnKill: 2 }, requires: 'urzadzenia' },
-  ],
-  konsultant: [
-    { mods: { dmg: 0.1 } },
-    { mods: { cooldown: -0.08 } },
-    { mods: { crit: 0.05 } },
-    { mods: { duration: 0.2 } },
-    { mods: { xp: 0.1 } },
-    { mods: { dmg: 0.15, area: 0.1 }, requires: 'powiadomienia' },
-  ],
-  petlowiec: [
-    { mods: { duration: 0.2 } },
-    { mods: { dmg: 0.1 } },
-    { mods: { crit: 0.05 } },
-    { mods: { cooldown: -0.08 } },
-    { mods: { regen: 0.5 } },
-    { mods: { summonMax: 1 }, requires: 'wygenerowane' },
-  ],
-  kartograf: [
-    { mods: { area: 0.12 } },
-    { mods: { dmg: 0.1 } },
-    { mods: { cooldown: -0.08 } },
-    { mods: { speed: 0.1 } },
-    { mods: { duration: 0.2 } },
-    { mods: { crit: 0.06, dmg: 0.1 }, requires: 'urzadzenia' },
-  ],
-  nalesnik: [
-    { mods: { cooldown: -0.08 } },
-    { mods: { dmg: 0.1 } },
-    { mods: { area: 0.12 } },
-    { mods: { regen: 0.6 } },
-    { mods: { duration: 0.2 } },
-    { mods: { speed: 0.08, cooldown: -0.05 }, requires: 'powiadomienia' },
-  ],
-};
 
 const STATS: UpgradeDef[] = [
   { id: 'racja', kind: 'stat', maxRank: 5 },
@@ -96,7 +55,7 @@ const STATS: UpgradeDef[] = [
 
 /** Every entry the hero can ever be offered: 5 skills x 3 ranks, 6 passives, the stat upgrades. */
 export function poolFor(heroId: HeroId): UpgradeDef[] {
-  const passives = PASSIVES[heroId].map((p, i): UpgradeDef => {
+  const passives = heroById(heroId).passives.map((p, i): UpgradeDef => {
     const def: UpgradeDef = { id: `passive${i + 1}`, kind: 'passive', maxRank: 1, mods: p.mods, n: i + 1 };
     if (p.requires) def.requires = p.requires;
     return def;

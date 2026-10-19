@@ -5,6 +5,7 @@
  */
 import type { AttackAnim } from '../render/attackFx';
 import { n2 } from '../render/svg';
+import type { WashHue } from '../render/wash';
 import type { HeroId } from './registry';
 import type { HeroPose } from './poseKit';
 
@@ -65,6 +66,8 @@ export interface Parts {
   pancake: { squash: number; roll: number; flip: number; lastMs: number; px: number | null; py: number | null };
 }
 
+/** A circle as a path for a pad glyph (heroes/<id>/pads.ts), numbers left as written. */
+export const glyphCircle = (cx: number, cy: number, r: number): string => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0`;
 export const circlePath = (cx: number, cy: number, r: number): string => `M${n2(cx - r)} ${n2(cy)}a${n2(r)} ${n2(r)} 0 1 0 ${n2(2 * r)} 0a${n2(r)} ${n2(r)} 0 1 0 ${n2(-2 * r)} 0`;
 
 export interface Walker {
@@ -133,6 +136,8 @@ export interface HeroFigure {
   def: FigureDef;
   /** The stain under the figure: centre, radius (figure units) and its fixed seed. */
   wash: { cx: number; cy: number; r: number; seed: number };
+  /** The hue of that stain (DESIGN 3.4). */
+  hue: WashHue;
   /** Length of the auto-attack animation, ms. */
   attackMs: number;
   /** The player figure carries the foam-shield group. */

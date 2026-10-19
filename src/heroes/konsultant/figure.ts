@@ -68,6 +68,7 @@ function drive({ e, p, pose, a, t, side, fx }: DriveCtx): void {
 export const figure: HeroFigure = {
   def: figureDef,
   wash: { cx: 0, cy: -7, r: 20, seed: 0x4802 },
+  hue: 'ochre',
   attackMs: 230,
   pose,
   drive,

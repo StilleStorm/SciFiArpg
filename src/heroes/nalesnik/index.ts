@@ -1,9 +1,11 @@
-/** The nalesnik module: data, drawing, sounds, casts, quirk. */
+/** The nalesnik module: data, drawing, sounds, casts, pad glyphs, passives, quirk. */
 import type { HeroModule } from '../module';
 import { casts } from './skills';
 import { def } from './def';
 import { figure } from './figure';
+import { pads } from './pads';
+import { passives } from './passives';
 import { quirk } from './quirk';
 import { sounds } from './sounds';
 
-export const hero: HeroModule = { def, figure, sounds, casts, quirk };
+export const hero: HeroModule = { def, figure, sounds, casts, pads, passives, quirk };

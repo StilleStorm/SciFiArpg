@@ -4,10 +4,12 @@
  */
 import type { SfxName } from '../audio/recipes';
 import type { Bus } from '../core/events';
+import type { Family } from '../progression/update';
 import type { RunState } from '../world/run';
 import type { Aim } from './aim';
 import type { HeroDef } from './defs';
 import type { HeroFigure } from './figureKit';
+import type { Mods } from './state';
 
 /** A skill as a function on the run state. Returning false = nothing happened, no cooldown. `aim` is what the player aimed. */
 export type SkillFn = (s: RunState, bus: Bus, hero: HeroDef, aim: Aim) => void | false;
@@ -27,11 +29,27 @@ export interface HeroSounds {
   autoStart?: SfxName;
 }
 
+/**
+ * The five pad glyphs, by SkillIndex (ui/pads.ts draws them). Each is a list of path strings centred on 0,0 inside a
+ * 52 x 52 box; a leading "~" draws that stroke dotted.
+ */
+export type HeroPadGlyphs = readonly [readonly string[], readonly string[], readonly string[], readonly string[], readonly string[]];
+
+/** One passive of the update form (progression/update.ts): its change to Mods, and the permission family it needs. */
+export interface HeroPassive {
+  mods: Partial<Mods>;
+  requires?: Family;
+}
+
 export interface HeroModule {
   def: HeroDef;
   figure: HeroFigure;
   sounds: HeroSounds;
   /** The cast of each skill, by `SkillDef.id` (built from the primitives in heroes/primitives). */
   casts: Readonly<Record<string, SkillFn>>;
+  /** The pad glyphs of the five skills. */
+  pads: HeroPadGlyphs;
+  /** The six passives the update form offers (`passive1..6`, text `forms.update.passive.<id>.N.{name,desc}`). */
+  passives: readonly HeroPassive[];
   quirk?: HeroQuirk;
 }

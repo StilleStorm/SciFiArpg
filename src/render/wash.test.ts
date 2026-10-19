@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createRng } from '../core/rng';
-import { FAMILY_HUE, HERO_HUE, STAIN_HUES, TIER_HUE, WASH_HEX, WASH_HUES, WASH_MAX, WASH_MIN, washPath, washShape, washVar } from './wash';
+import { HERO_IDS, heroById } from '../heroes/registry';
+import { FAMILY_HUE, STAIN_HUES, TIER_HUE, WASH_HEX, WASH_HUES, WASH_MAX, WASH_MIN, washPath, washShape, washVar } from './wash';
 
 /** Sample every cubic of a closed `M..C..Z` path and return the distance of each sample from (cx, cy). */
 function radii(d: string, cx: number, cy: number): number[] {
@@ -85,8 +86,7 @@ describe('palette', () => {
   });
 
   it('maps every hero, family and tier to a hue; stains never take star yellow or stamp red', () => {
-    for (const hue of [...Object.values(HERO_HUE), ...Object.values(FAMILY_HUE), ...Object.values(TIER_HUE)]) expect(WASH_HUES).toContain(hue);
-    expect(Object.keys(HERO_HUE)).toHaveLength(5);
+    for (const hue of [...HERO_IDS.map((id) => heroById(id).figure.hue), ...Object.values(FAMILY_HUE), ...Object.values(TIER_HUE)]) expect(WASH_HUES).toContain(hue);
     expect(Object.keys(FAMILY_HUE)).toHaveLength(3);
     expect(Object.keys(TIER_HUE)).toHaveLength(4);
     expect(STAIN_HUES).not.toContain('yellow');

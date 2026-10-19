@@ -13,7 +13,7 @@ import { attackAt, driveHeroStroke, driveLash, driveLaser, scribblePath, setStro
 import { buildMoon, patchMoon } from './heroFx';
 import { el, n2 } from './svg';
 import type { Builder } from './view';
-import { HERO_HUE, washGroup } from './wash';
+import { washGroup } from './wash';
 import '../ui/forms.css';
 
 const LEG_PERIOD_MS = 150;
@@ -77,7 +77,7 @@ export function buildHeroFigure(heroId: HeroId, opts: FigureOpts = {}): SVGGElem
   if (opts.wash) {
     // DESIGN 3.4: a stain in the hero's hue, offset from the figure, under every stroke and scaling with it
     const at = figure.wash;
-    wash = washGroup(createRng(at.seed).fork('wash'), HERO_HUE[heroId], at.r, { cx: at.cx, cy: at.cy, faint: opts.faint === true });
+    wash = washGroup(createRng(at.seed).fork('wash'), figure.hue, at.r, { cx: at.cx, cy: at.cy, faint: opts.faint === true });
     inner.append(wash);
   }
   for (const [cx, cy, r] of def.echo ?? []) {

@@ -1,8 +1,10 @@
-/** The konsultant module: data, drawing, sounds, casts. */
+/** The konsultant module: data, drawing, sounds, casts, pad glyphs, passives. */
 import type { HeroModule } from '../module';
 import { casts } from './skills';
 import { def } from './def';
 import { figure } from './figure';
+import { pads } from './pads';
+import { passives } from './passives';
 import { sounds } from './sounds';
 
-export const hero: HeroModule = { def, figure, sounds, casts };
+export const hero: HeroModule = { def, figure, sounds, casts, pads, passives };

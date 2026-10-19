@@ -8,7 +8,6 @@
  */
 import type { Rng } from '../core/rng';
 import type { FamilyId } from '../enemies/ids';
-import type { HeroId } from '../heroes';
 import type { ItemTier } from '../items/types';
 import type { Vec } from '../core/vec';
 import { el, n2, smoothClosed } from './svg';
@@ -31,14 +30,6 @@ export const WASH_HEX: Record<WashHue, string> = {
 export const STAIN_HUES: readonly WashHue[] = ['indigo', 'brick', 'violet', 'green', 'ochre'];
 
 export const washVar = (hue: WashHue): string => `var(--wash-${hue})`;
-
-export const HERO_HUE: Record<HeroId, WashHue> = {
-  pralka: 'indigo',
-  konsultant: 'ochre',
-  petlowiec: 'violet',
-  kartograf: 'green',
-  nalesnik: 'ochre',
-};
 
 export const FAMILY_HUE: Record<FamilyId, WashHue> = {
   urzadzenia: 'indigo',
