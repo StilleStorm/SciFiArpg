@@ -19,7 +19,9 @@ base-phase RunState is live; `Game.adopt(held)` makes the held one live again (p
 draw-in). Other fields: four rng streams (`ai combat loot spawn`; every roll goes through them), `time`, `status`
 (`running | paused | dead`; sheets and forms use `paused`), `modal` (law sheets), `turning`, `pages`, `player`,
 `enemies projectiles pickups summons zones`, `law`, `hero` (`heroes/state.ts`), `victoryAt`, `tunnel?`, `plan?`
-(`TicketPlan`, world/campaign.ts), `campaign?` (`CampaignState`, the character's, see "Campaign (S7)").
+(`TicketPlan`, world/campaign.ts), `campaign?` (`CampaignState`, the character's, see "Campaign (S7)"), `quests?`
+(`QuestState`, saved with the character), `buffs?` (`ActiveBuff[]`, seal stamps, run only, never saved). `Page.content?` holds
+the page's teczki, seals and event (S10).
 `MetaState` (`save/save.ts`, SAVE_VERSION 3, localStorage `zgloszenie.meta`) holds settings, `stamps`, `runsCompleted`,
 the roster `characters: CharacterRecord[]` (`{id, name, character, bookmark?, history, archive}`), `sharedArchive` and
 `activeCharacterId?`. The active record is **mirrored** at the top level (`character` (`save/character.ts`), `bookmark`
@@ -60,7 +62,7 @@ after the boss fell (`canOpenUpdate`). In the base only the HUD tap opens it.
 ## Events (`core/events.ts`; adding one to `GameEvents` makes the compiler check every use)
 - Input: `skill:1|2|3`, `inventory`, `player:tap {x,y}`.
 - Flow: `screen:changed {screen}`, `base:entered {layout, seed, number}` (a base page is up; seed + number name the
-  ticket), `station:opened {station}` (biurko, kiosk, tablica, paczkomat reached: main opens its sheet),
+  ticket), `station:opened {station}` (biurko, kiosk, tablica, paczkomat, urzednik reached: main opens its sheet),
   `ticket:accepted` (the exit unlocks, the base header is printed), `run:started {seed}` (the exit was walked through, or
   a direct start), `page:entered {index, count}`, `page:turn {from, to}`, `page:edge {x, y, side}`,
   `run:ended {outcome}` (exactly once per run; main files it and goes to `baza`), `game:paused {paused}` (Game.pause/
@@ -75,6 +77,8 @@ after the boss fell (`canOpenUpdate`). In the base only the HUD tap opens it.
 - Campaign: `campaign:advanced {from, to, finale}`, `case:closed` (both from `settleCampaign` on `run:ended 'ukonczono'`).
 - Elites: `elite:named {id, x, y, name}` (a named elite placed), `elite:slain {id, x, y, name, minTier}` (it died; no sound yet).
 - Recovery: `recovery:taken {healed, held}` (0 healed = kept), `recovery:used {auto, healed, held}`.
+- Page content (S10): `content:opened {kind, id, x, y}`, `content:sealed {seal, x, y}`, `content:event {event, id, phase, x, y}`,
+  `content:changed {id}` (redraw one item). Quests: `quest:changed {id, what: accepted|progress|ready|done|dropped}`.
 - `Bus.recent(n = 10)`: the last events (ring of 40, minus `skill:aim`, `player:tap`, `enemy:miss`, `attack:started`) as
   `{name, payload}` text, for the bug dump.
 
@@ -158,16 +162,18 @@ words are bound to the next with U+00A0 by `t()`. No user-facing strings in `.ts
 `startBase(seed?)`, `station(name)`, `acceptTicket`, `walkToExit`, `openTunnel`, `enterTunnel`, `returnFromTunnel`,
 `tapUltimate`, `ultimatePad() {ready, off, inked, hidden}`, `keepOut()` (the measured screen layout), `setLevel(n)`, `fillMeter(v=1)`, `setMeterUi(v)`, `castUltimate`,
 `ultimateInfo() {meter, ready, active, paragraph}`, `setSpecialization(id|null)`, `loadoutInfo() {pads, categories, specialization, capstone, advice}`, `hero.{cast, installSkill, openAssign, assignPad, setParagraph, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
-`enemies.{spawnFamily, spawnBoss, spawnPack, spawnNamed, hit, clear, list}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
+`enemies.{spawnFamily, spawnBoss, spawnPack, spawnNamed, hit, clear, list}`, `content.{list, put(kind, {seal, dist, dy}), tap, open, seal, buffs}`,
+`quests.{offers, active, accept(idOrKind), drop, finish, report, happen, done}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
 `npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot` (390x844 @2x and 844x390 into `shots/`);
-per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3,s4,s5,s6,s7,s8,elite-packs,recovery}.mjs` (each with its own
+per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3,s4,s5,s6,s7,s8,elite-packs,recovery,s10-content,s10-quests}.mjs` (each with its own
 SHOT_PORT/SHOT_OUT/SHOT_DIR, usage in the header). `npm run smoke` plays a ticket with real buttons: creation form, base
 (HUD, margin note, update from the HUD line), desk, ticket, exit, run (header clear of the note row, no bubble under a pad or note,
 the update line clear in tap/joystick x both hands), fight, update, inventory, pause, Zakończ,
 the Argument meter and an ultimate (3d), bookmark resume, two tunnels and the return, boss, death, a landscape joystick leg (two touches, the footnote slip), the S4 leg (6f: desk loadout -> run -> reload, the chart), the S5 leg (6g: damage numbers, text size, drop ->
 heal, full -> held, tap use, auto-use, the pause bug line, export -> import equality), item marks on the sheet (S8), the S6 leg (6h: roster over a held run
 settles it, a second file at level 1, the first file's level and bookmark back, an archive move), the S9 checks (named elite caption
-and extra drop, pack brackets, Sklep kind stamps),
+and extra drop, pack brackets, Sklep kind stamps), the S10 checks (teczka tap opens it, a seal walked onto stamps
+`RunState.buffs`, Karta osobowa from the HUD prints it, the base clerk's sheet, a side ticket taken/reported pays),
 then 5 s of frame times with 40 enemies (`PERF_MAX_MS`, `SMOKE_UNCAPPED`); exit 1 on any failed check or page error.
 
 ## Aiming (DESIGN 5.6)
@@ -431,3 +437,18 @@ named}`; `spawnElite(..., {makeNamed, pack})`, packs of 2-4 minions, named elite
 (`enemyFigures.eliteCaption`): a named elite's name in two serif lines (`data-part="named"`), a pack minion's square
 bracket under the feet (`data-part="pack"`). Open SEAMs: zestaw drops and offers (S10 sets), the won-Spór tier bonus,
 the final boss "not yet archived" unique, przesyłka/awizo (slice f); elite sounds wait for M7.
+
+## Page content, side tickets, clerk, Karta osobowa (S10, PLAN 8)
+`world/contentKinds.ts` (data: `SEALS` six, `CONTENT` geometry, `paragraphsFree(buffs)`, `waivePrice(patch)`), `world/content.ts`
+(rules). `pages.placeContent` puts 0-2 teczki, 0-1 seal, 0-1 event (never page 1 or the boss page) from `r.fork('content')`.
+Step order: `contentPre(s)` before `lawPre` (lays seal numbers on player/clause for one step, undone after `undoLaw`),
+`tickContent(s, bus, dt)` after `updateLoot`. `bindContent(bus, getState)` is bound **once at boot** in main.ts (taps choose a
+folder; `content:changed` redraws via `render/obstacles.redrawContent`). Buffs: `grantSeal`, `activeBuffs(s)` (= `s.buffs`),
+`effectsOf`. zwolnienie = "free paragraphs": while held, `heroes/skills.ts` casts with `waivePrice(patch)` (no racja cost, no
+added cooldown) and `castUltimate` skips the racja cost. `world/quests.ts`: `QuestState {active, done, log}`, four procedural
+templates (kill, fetch, reach, deliver), max 3 active, `offersFor`, `takeQuest/dropQuest/completeQuest/visitClerk`,
+`bindQuests`, `questPlanet(s)` (= `plan.planet ?? campaign.current ?? 0`), rewards stars / a permission / a potwierdzenie
+(no items yet). `world/npc.ts`: `npcAt(planet)`, `registerNpc`; `render/npc.ts drawNpc`; `game.ts` passes
+`planet: questPlanet(s)` to `drawBase`. UI: `ui/npcSheet.ts`, board quest block (`ui/board.ts open(meta, quests?)`),
+`ui/karta-osobowa.ts` (`openKartaOsobowa`, from the desk line `[data-desk=osobowa]` and the HUD `.field.rep`).
+Open SEAM: hand-written side tickets and clerks per planet (`registerSideTickets`, `registerNpc`) wait for S11/S12.
