@@ -1,8 +1,9 @@
 import type { Rng } from '../core/rng';
-import { AFFIXES_BY_ID, randomAffixPool, type Affix } from './affixes';
-import { BASES, BASES_BY_ID, basesForSlot, type BaseItem } from './bases';
+import { AFFIXES_BY_ID, effectFor, randomAffixPool, type Affix } from './affixes';
+import { BASES, BASES_BY_ID, basesForSlot, oddStats, type BaseItem } from './bases';
 import { affixesOf, nameItem } from './grammar';
 import { FREE_TRIAL_KILLS, TRIAL_KILLS, actualFrom, rollReview, rollTruth } from './reviews';
+import { MOD_MULTIPLIER, STAT_FLOOR, modTierForLevel, rollModTier, type ModTier } from './tiers';
 import { makeUnique, uniquesForSlot } from './uniques';
 import { TAGS, addStats, emptyStats, mapStats, type DropSource, type Item, type ItemTier, type Slot, type StatBlock } from './types';
 
@@ -18,6 +19,8 @@ export interface RollOptions {
   tierBonus?: number;
   /** Force the base (shop variants use this). */
   baseId?: string;
+  /** Rolled for the Sklep: the weight of grade 3 affixes halves, so shop stock reads plainer than drops (ITEMS 3.4). */
+  shop?: boolean;
 }
 
 /** Weights: zwykly, nietypowy, rzadki, unikatowy. */
@@ -33,6 +36,8 @@ const TIER_PRICE: Record<ItemTier, number> = { zwykly: 1, nietypowy: 2.2, rzadki
 const TIER_GRADE: Record<ItemTier, 1 | 2 | 3> = { zwykly: 1, nietypowy: 2, rzadki: 3, unikatowy: 3 };
 /** Probability that a rare item carries the free-version affix. */
 export const P_FREE = 0.12;
+/** Zwykły items with no affix at all. */
+export const P_NO_AFFIX = 0.4;
 
 export function rollTier(rng: Rng, source: DropSource = 'common', bonus = 0): ItemTier {
   const w = TIER_WEIGHTS[source];
@@ -53,29 +58,46 @@ export function rollTier(rng: Rng, source: DropSource = 'common', bonus = 0): It
 
 const levelScale = (level: number): number => 1 + 0.12 * (Math.max(1, level) - 1);
 
-function pickWeighted(rng: Rng, pool: readonly Affix[]): Affix | null {
-  const total = pool.reduce((s, a) => s + a.weight, 0);
+/** Selection weight; grade 3 halves in the shop, and the shop never stocks what it says does not exist (wycofany). */
+const weightOf = (a: Affix, shop: boolean): number => (!shop ? a.weight : a.absurd === 'wycofany' ? 0 : a.grade === 3 ? a.weight / 2 : a.weight);
+
+function pickWeighted(rng: Rng, pool: readonly Affix[], shop = false): Affix | null {
+  const total = pool.reduce((s, a) => s + weightOf(a, shop), 0);
   if (total <= 0) return null;
   let r = rng.next() * total;
   for (const a of pool) {
-    r -= a.weight;
+    r -= weightOf(a, shop);
     if (r < 0) return a;
   }
-  return pool[pool.length - 1] ?? null;
+  return [...pool].reverse().find((a) => weightOf(a, shop) > 0) ?? null;
 }
 
-/** Roll the numbers of base + affixes at a level and tier. Integers; dmgMax >= dmgMin. */
-export function statsFor(base: BaseItem, affixes: readonly Affix[], level: number, tier: ItemTier): StatBlock {
+/** "w wersji próbnej": +20% to every stat on the item, for the first two pages. */
+export const TRIAL_BOOST = 1.2;
+
+function computeStats(base: BaseItem, affixes: readonly Affix[], level: number, tier: ItemTier, modTier: ModTier, boost: boolean): StatBlock {
   const ls = levelScale(level);
+  const mag = MOD_MULTIPLIER[modTier];
   let s = mapStats(addStats(emptyStats(), base.stats), (v) => (v === 0 ? 0 : Math.max(1, Math.round(v * ls * TIER_MUL[tier]))));
+  s = addStats(s, oddStats(base)); // percentages: not scaled by level or tier
   for (const a of affixes) {
     s = addStats(
       s,
-      mapStats(addStats(emptyStats(), a.effect), (v) => (v === 0 ? 0 : Math.sign(v) * Math.max(1, Math.round(Math.abs(v) * ls)))),
+      mapStats(addStats(emptyStats(), effectFor(a, base.slot)), (v) => (v === 0 ? 0 : Math.sign(v) * Math.max(1, Math.round(Math.abs(v) * mag)))),
     );
   }
+  for (const [k, floor] of Object.entries(STAT_FLOOR) as [keyof StatBlock, number][]) s[k] = Math.max(floor, s[k]);
+  if (boost && affixes.some((a) => a.absurd === 'probny')) s = mapStats(s, (v) => Math.round(v * TRIAL_BOOST));
   if (s.dmgMax < s.dmgMin) s.dmgMax = s.dmgMin;
   return s;
+}
+
+/**
+ * Roll the numbers of base + affixes at a level and tier. Integers; dmgMax >= dmgMin.
+ * The base scales with the item level; affixes with the magnitude tier I-V (default: the band of the level).
+ */
+export function statsFor(base: BaseItem, affixes: readonly Affix[], level: number, tier: ItemTier, modTier: ModTier = modTierForLevel(level)): StatBlock {
+  return computeStats(base, affixes, level, tier, modTier, true);
 }
 
 /** Price in gwiazdki before the shop's fee. */
@@ -96,11 +118,16 @@ function pickBase(rng: Rng, slot: Slot | undefined, baseId: string | undefined):
 /** Make a generated (non-unique) item. */
 export function buildItem(rng: Rng, base: BaseItem, tier: ItemTier, level: number, affixIds: readonly string[]): Item {
   const affixes = affixesOf(affixIds);
-  const claimed = statsFor(base, affixes, level, tier);
-  const truth = rollTruth(rng);
+  const modTier = affixes.length ? rollModTier(rng, level) : modTierForLevel(level);
+  const claimed = statsFor(base, affixes, level, tier, modTier);
+  const rzekomy = affixes.some((a) => a.absurd === 'rzekomy');
+  // "Rzekomy": the claim is honest within 10%, and the register keeps it forever.
+  const truth = rzekomy ? 'honest' : rollTruth(rng);
   const actual = actualFrom(rng, claimed, truth);
   const review = rollReview(rng, truth);
   const free = affixes.some((a) => a.free);
+  const baseTrial = free ? FREE_TRIAL_KILLS : TRIAL_KILLS[tier];
+  const trialTarget = rzekomy ? 0 : Math.max(1, Math.round(baseTrial * (1 + claimed.proba / 100)));
   const item: Item = {
     uid: rng.int(1, 0x3fffffff),
     number: 0,
@@ -116,9 +143,19 @@ export function buildItem(rng: Rng, base: BaseItem, tier: ItemTier, level: numbe
     actual,
     revealed: false,
     trialKills: 0,
-    trialTarget: free ? FREE_TRIAL_KILLS : TRIAL_KILLS[tier],
+    trialTarget,
     review,
   };
+  if (modTier > 1) item.modTier = modTier;
+  if (affixes.some((a) => a.absurd === 'probny')) {
+    const plainClaimed = computeStats(base, affixes, level, tier, modTier, false);
+    const ratio = (k: keyof StatBlock): number => (claimed[k] === 0 ? 0 : plainClaimed[k] / claimed[k]);
+    item.plain = { claimed: plainClaimed, actual: mapStats(actual, (v, k) => Math.round(v * ratio(k))) };
+  }
+  if (affixes.some((a) => a.absurd === 'ewentualny')) {
+    const nominal = Math.round(16 * MOD_MULTIPLIER[modTier]);
+    item.absurd = { ewentNominal: nominal, ewentNow: nominal };
+  }
   if (tier === 'rzadki') {
     const like = rng.pick(TAGS);
     const dislike = rng.pick(TAGS.filter((x) => x !== like));
@@ -132,22 +169,29 @@ export function buildItem(rng: Rng, base: BaseItem, tier: ItemTier, level: numbe
   return item;
 }
 
-function rollAffixIds(rng: Rng, base: BaseItem, tier: ItemTier): string[] {
-  const count = tier === 'zwykly' ? rng.int(0, 1) : tier === 'nietypowy' ? rng.int(1, 2) : rng.int(2, 3);
-  const ids: string[] = [];
-  let pool = randomAffixPool(TIER_GRADE[tier], base.slot);
+/**
+ * Affix ids for a generated item (ITEMS 3.4): count by tier (zwykły 0-1 with 40% none, nietypowy 1-2,
+ * rzadki 2-3 with at least one grade 2+), exclusions in `canCombine`, the free version replacing one
+ * rolled affix on 12% of rzadki.
+ */
+export function rollAffixIds(rng: Rng, base: BaseItem, tier: ItemTier, shop = false): string[] {
+  const count = tier === 'zwykly' ? (rng.chance(P_NO_AFFIX) ? 0 : 1) : tier === 'nietypowy' ? rng.int(1, 2) : rng.int(2, 3);
+  const chosen: Affix[] = [];
   if (tier === 'rzadki' && rng.chance(P_FREE)) {
     const free = AFFIXES_BY_ID.get('darmowy');
-    if (free) ids.push(free.id);
+    if (free) chosen.push(free);
   }
-  while (ids.length < count && pool.length) {
-    const a = pickWeighted(rng, pool);
+  while (chosen.length < count) {
+    let pool = randomAffixPool(TIER_GRADE[tier], base.slot, chosen);
+    if (tier === 'rzadki' && chosen.length === count - 1 && !chosen.some((a) => a.grade >= 2)) {
+      const better = pool.filter((a) => a.grade >= 2);
+      if (better.length) pool = better;
+    }
+    const a = pickWeighted(rng, pool, shop);
     if (!a) break;
-    ids.push(a.id);
-    pool = pool.filter((x) => x.id !== a.id);
+    chosen.push(a);
   }
-  // Adjectives first, the free-version phrase last (grammar.joinName sorts the same way).
-  return ids;
+  return chosen.map((a) => a.id);
 }
 
 /**
@@ -166,5 +210,5 @@ export function rollItem(rng: Rng, opts: RollOptions): Item {
     tier = 'rzadki';
   }
   const base = pickBase(rng, opts.slot, opts.baseId);
-  return buildItem(rng, base, tier, level, rollAffixIds(rng, base, tier));
+  return buildItem(rng, base, tier, level, rollAffixIds(rng, base, tier, opts.shop === true));
 }

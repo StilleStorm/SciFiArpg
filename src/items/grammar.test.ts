@@ -27,10 +27,23 @@ describe('nameItem: adjective after the noun, agreement by gender', () => {
   it('no affixes gives the bare noun', () => {
     expect(nameItem(base('ladowarka'), [])).toBe('ładowarka');
   });
-  it('several affixes: first after a space, the rest after commas, phrases last', () => {
-    expect(nameItem(base('kask'), affixesOf(['darmowy', 'gwarancyjny', 'domniemany']))).toBe('kask kurierski gwarancyjny, domniemany, w\u00a0wersji darmowej');
-    expect(nameItem(base('pieczatka'), affixesOf(['fabrycznienowy', 'gwarancyjny']))).toBe('pieczątka serwisowa fabrycznie nowa, gwarancyjna');
-    expect(nameItem(base('zaswiadczenie'), affixesOf(['zgodny', 'uzywany']))).toBe('zaświadczenie zgodne z\u00a0regulaminem, używane');
+  it('two affixes: adjectives after the noun, the phrase after them', () => {
+    expect(nameItem(base('kask'), affixesOf(['darmowy', 'gwarancyjny']))).toBe('kask kurierski gwarancyjny w\u00a0wersji darmowej');
+    expect(nameItem(base('pieczatka'), affixesOf(['fabrycznienowy', 'gwarancyjny']))).toBe('pieczątka serwisowa fabrycznie nowa gwarancyjna');
+    expect(nameItem(base('zaswiadczenie'), affixesOf(['zgodny', 'uzywany']))).toBe('zaświadczenie zgodne z\u00a0regulaminem używane');
+  });
+  it('three affixes: the highest grade becomes the model, a phrase never does', () => {
+    expect(nameItem(base('kask'), affixesOf(['gwarancyjny', 'domniemany', 'markowy']))).toBe('kask kurierski gwarancyjny domniemany, model «Marka»');
+    expect(nameItem(base('pieczatka'), affixesOf(['darmowy', 'gwarancyjny', 'domniemany']))).toBe(
+      'pieczątka serwisowa gwarancyjna w\u00a0wersji darmowej, model «Domniemanie»',
+    );
+    expect(nameItem(base('sluchawki'), affixesOf(['zweryfikowany', 'uzywany', 'limitowany']))).toBe('słuchawki douszne zweryfikowane używane, model «Edycja limitowana»');
+  });
+  it('an unwanted feature is appended last and does not count', () => {
+    expect(nameItem(base('kask'), affixesOf(['gwarancyjny', 'domniemany', 'markowy', 'asystent']))).toBe(
+      'kask kurierski gwarancyjny domniemany, model «Marka» z\u00a0asystentem głosowym',
+    );
+    expect(nameItem(base('kask'), affixesOf(['gwarancyjny', 'inteligentny']))).toBe('kask kurierski gwarancyjny inteligentny');
   });
   it('phrases with a preposition do not change with gender', () => {
     for (const g of ['czytnik', 'ladowarka', 'urzadzenie', 'rekawiczki']) {
@@ -45,7 +58,8 @@ describe('nameItem: adjective after the noun, agreement by gender', () => {
 describe('item data', () => {
   it('has the required amounts', () => {
     expect(BASES.length).toBeGreaterThanOrEqual(14);
-    expect(AFFIXES.length + UNWANTED_FEATURES.length).toBeGreaterThanOrEqual(18);
+    expect(AFFIXES.length).toBe(32);
+    expect(UNWANTED_FEATURES.length).toBe(8);
     expect(UNIQUES.length).toBeGreaterThanOrEqual(4);
   });
   it('covers all five slots and all four genders', () => {

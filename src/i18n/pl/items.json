@@ -42,7 +42,11 @@
     "resRegulaminowy": "Odporność reg.",
     "resEgzystencjalny": "Odporność egz.",
     "type": "Rodzaj argumentu",
-    "range": "Zasięg"
+    "range": "Zasięg",
+    "zasieg": "Zasięg",
+    "tempo": "Tempo",
+    "gwiazdki": "Gwiazdki",
+    "proba": "Próba"
   },
   "statShort": {
     "dmg": "Arg.",
@@ -52,7 +56,11 @@
     "crit": "N.d.o.",
     "resMechaniczny": "Odp.m.",
     "resRegulaminowy": "Odp.r.",
-    "resEgzystencjalny": "Odp.e."
+    "resEgzystencjalny": "Odp.e.",
+    "zasieg": "Zas.",
+    "tempo": "Tempo",
+    "gwiazdki": "Gw.",
+    "proba": "Próba"
   },
   "variant": "wariant",
   "full": "Załączniki są pełne. Przedmiot pozostawiono na stronie.",
@@ -132,6 +140,90 @@
     "zaswiadczenie": {
       "noun": "zaświadczenie",
       "desc": "Pismo urzędowe z pieczątką. Pieczątka jest czytelna, pismo mniej."
+    },
+    "zszywacz": {
+      "noun": "zszywacz biurowy",
+      "desc": "Zszywacz wyrzutowy. Zszywki w komplecie, adresat poza nim."
+    },
+    "segregator": {
+      "noun": "segregator dźwigniowy",
+      "desc": "Format A4, zawartość nieznana. Uderza w stronę, która jest właściwa."
+    },
+    "lupa": {
+      "noun": "lupa biurowa",
+      "desc": "Powiększenie nieuzasadnione. Rzecz oglądana nabiera wątpliwości."
+    },
+    "okulary": {
+      "noun": "okulary ochronne",
+      "desc": "Zgodne z normą. Normy nie podano."
+    },
+    "daszek": {
+      "noun": "daszek przeciwsłoneczny",
+      "desc": "Daszek bez korony. Słońce nie zostało zgłoszone."
+    },
+    "opaska": {
+      "noun": "opaska z lampką",
+      "desc": "Opaska na głowę z lampką czołową. Lampka nie świeci."
+    },
+    "kaptur": {
+      "noun": "kaptur odpinany",
+      "desc": "Kaptur odpinany, odpięty. Wątek luźny, sprawa również."
+    },
+    "czepek": {
+      "noun": "czepek foliowy",
+      "desc": "Jednorazowy, użyty wielokrotnie. Zgodnie z regulaminem, którego nie ma."
+    },
+    "plaszcz": {
+      "noun": "płaszcz służbowy",
+      "desc": "Dwurzędowy. Dwa rzędy guzików, jeden rząd odpowiedzialności."
+    },
+    "koszulka": {
+      "noun": "koszulka promocyjna",
+      "desc": "Rozmiar uniwersalny. Napis zakreślono, treść nie."
+    },
+    "kombinezon": {
+      "noun": "kombinezon serwisowy",
+      "desc": "Z identyfikatorem na piersi. Identyfikator dotyczy innej osoby."
+    },
+    "szelki": {
+      "noun": "szelki regulowane",
+      "desc": "Regulowane. Nieuregulowane."
+    },
+    "marynarka": {
+      "noun": "marynarka konsultanta",
+      "desc": "Jeden guzik, jedno stanowisko. Stanowisko jest wolne."
+    },
+    "powerbank": {
+      "noun": "powerbank",
+      "desc": "Pojemność deklarowana. Deklaracja wystarcza na trzy kreski."
+    },
+    "pilot": {
+      "noun": "pilot uniwersalny",
+      "desc": "Nie pasuje do niczego. Zgodnie z opisem."
+    },
+    "liczydlo": {
+      "noun": "liczydło",
+      "desc": "Nie wymaga aktualizacji. Wynik jest zawsze o jedną kulkę większy."
+    },
+    "zegarek": {
+      "noun": "zegarek z krokomierzem",
+      "desc": "Kroki liczy cudze. Czas płynie zgodnie z wnioskiem."
+    },
+    "faktura": {
+      "noun": "faktura VAT",
+      "desc": "Termin płatności minął. Podatek wskazano w innym miejscu."
+    },
+    "paragon": {
+      "noun": "paragon termiczny",
+      "desc": "Termograficzny, blaknie. Dowód zakupu blednie wraz z zakupem."
+    },
+    "polisa": {
+      "noun": "polisa",
+      "desc": "Wyłączenia na stronie czternastej. Strona czternasta nie istnieje."
+    },
+    "upowaznienie": {
+      "noun": "upoważnienie",
+      "desc": "Do czynności. Czynności nie wskazano."
     }
   },
   "affix": {
@@ -151,6 +243,21 @@
     "oryginalny": { "m": "oryginalny", "f": "oryginalna", "n": "oryginalne", "pl": "oryginalne" },
     "limitowany": { "m": "limitowany", "f": "limitowana", "n": "limitowane", "pl": "limitowane" },
     "fabrycznienowy": { "m": "fabrycznie nowy", "f": "fabrycznie nowa", "n": "fabrycznie nowe", "pl": "fabrycznie nowe" },
+    "sluzbowy": { "m": "służbowy", "f": "służbowa", "n": "służbowe", "pl": "służbowe" },
+    "zapasowy": { "m": "zapasowy", "f": "zapasowa", "n": "zapasowe", "pl": "zapasowe" },
+    "przemyslowy": { "m": "przemysłowy", "f": "przemysłowa", "n": "przemysłowe", "pl": "przemysłowe" },
+    "kolekcjonerski": { "m": "kolekcjonerski", "f": "kolekcjonerska", "n": "kolekcjonerskie", "pl": "kolekcjonerskie" },
+    "antywstrzasowy": { "m": "antywstrząsowy", "f": "antywstrząsowa", "n": "antywstrząsowe", "pl": "antywstrząsowe" },
+    "podpisany": { "m": "podpisany", "f": "podpisana", "n": "podpisane", "pl": "podpisane" },
+    "zatwierdzony": { "m": "zatwierdzony", "f": "zatwierdzona", "n": "zatwierdzone", "pl": "zatwierdzone" },
+    "udokumentowany": { "m": "udokumentowany", "f": "udokumentowana", "n": "udokumentowane", "pl": "udokumentowane" },
+    "dalekosiezny": { "m": "dalekosiężny", "f": "dalekosiężna", "n": "dalekosiężne", "pl": "dalekosiężne" },
+    "serwisowy": { "m": "serwisowy", "f": "serwisowa", "n": "serwisowe", "pl": "serwisowe" },
+    "oceniany": { "m": "oceniany", "f": "oceniana", "n": "oceniane", "pl": "oceniane" },
+    "testowany": { "m": "testowany", "f": "testowana", "n": "testowane", "pl": "testowane" },
+    "rzekomy": { "m": "rzekomy", "f": "rzekoma", "n": "rzekome", "pl": "rzekome" },
+    "probny": { "m": "w wersji próbnej", "f": "w wersji próbnej", "n": "w wersji próbnej", "pl": "w wersji próbnej" },
+    "wycofany": { "m": "wycofany z obiegu", "f": "wycofana z obiegu", "n": "wycofane z obiegu", "pl": "wycofane z obiegu" },
     "darmowy": {
       "m": "w wersji darmowej",
       "f": "w wersji darmowej",
@@ -195,6 +302,47 @@
       "n": "z trybem ciemnym",
       "pl": "z trybem ciemnym"
     }
+  },
+  "name": {
+    "model": "model «{model}»"
+  },
+  "model": {
+    "gwarancyjny": "Gwarancja",
+    "zweryfikowany": "Weryfikacja",
+    "odnowiony": "Renowacja",
+    "poleasingowy": "Leasing",
+    "uzywany": "Drugi obieg",
+    "sponsorowany": "Sponsor",
+    "nieuchronny": "Nieuchronność",
+    "domniemany": "Domniemanie",
+    "ewentualny": "Ewentualność",
+    "zgodny": "Regulamin",
+    "wzmocniony": "Wzmocnienie",
+    "certyfikowany": "Certyfikat",
+    "markowy": "Marka",
+    "oryginalny": "Oryginał",
+    "limitowany": "Edycja limitowana",
+    "fabrycznienowy": "Fabryka",
+    "sluzbowy": "Służba",
+    "zapasowy": "Zapas",
+    "przemyslowy": "Przemysł",
+    "kolekcjonerski": "Kolekcja",
+    "antywstrzasowy": "Amortyzacja",
+    "podpisany": "Podpis",
+    "zatwierdzony": "Zatwierdzenie",
+    "udokumentowany": "Dokumentacja",
+    "dalekosiezny": "Zasięg",
+    "serwisowy": "Serwis",
+    "oceniany": "Ocena",
+    "testowany": "Test",
+    "rzekomy": "Pogłoska"
+  },
+  "absurd": {
+    "probny": "Okres próbny dobiegł końca.",
+    "wycofany": "Przedmiot wycofany z obiegu. Sklep nie przyjmuje rzeczy, których nie ma.",
+    "wycofanyOwn": "Przedmiot wycofany z obiegu można wyłącznie porzucić.",
+    "approx": "ok.",
+    "hearsay": "(wg relacji)"
   },
   "unwanted": {
     "asystent": "Nowość! Dodano asystenta głosowego. Asystent nie wykonuje poleceń, lecz je komentuje.",
@@ -289,6 +437,11 @@
     "a4": "Reklama: Czy wiesz, że gwiazdki można wydawać? Sprawdź, na co!",
     "a5": "Reklama: 9 na 10 konsultantów poleca ten przedmiot. Dziesiąty jest na urlopie.",
     "a6": "Reklama: Przejdź na wersję bez reklam. Reklama o tym zniknie jako ostatnia."
+  },
+  "mark": {
+    "ok": "ok.",
+    "reklama": "REKLAMA",
+    "nowosc": "Nowość"
   },
   "ui": {
     "title": "Załączniki",

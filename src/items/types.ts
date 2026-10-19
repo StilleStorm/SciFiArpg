@@ -23,6 +23,11 @@ export const STAT_KEYS = [
   'resMechaniczny',
   'resRegulaminowy',
   'resEgzystencjalny',
+  // S8: percentage stats (zasieg +%, tempo -% cooldown, gwiazdki +%, proba -% trial kills).
+  'zasieg',
+  'tempo',
+  'gwiazdki',
+  'proba',
 ] as const;
 export type StatKey = (typeof STAT_KEYS)[number];
 /** Flat numbers an item can carry. crit is in percentage points; res* are percent. */
@@ -95,6 +100,12 @@ export interface Item {
   /** A shop lie: same base, different roll. */
   variant?: boolean;
   uniqueId?: string;
+  /** S8: tier I-V of the affix magnitudes (ITEMS 3.2); absent on older items = I. */
+  modTier?: 1 | 2 | 3 | 4 | 5;
+  /** S8: stats without the +20% of "w wersji próbnej", restored when the trial period ends. */
+  plain?: { claimed: StatBlock; actual: StatBlock };
+  /** S8: runtime state of the absurd affixes (items/absurd.ts). */
+  absurd?: { pagesWorn?: number; trialEnded?: boolean; ewentNominal?: number; ewentNow?: number };
 }
 
 export const emptyStats = (): StatBlock => ({
@@ -107,16 +118,20 @@ export const emptyStats = (): StatBlock => ({
   resMechaniczny: 0,
   resRegulaminowy: 0,
   resEgzystencjalny: 0,
+  zasieg: 0,
+  tempo: 0,
+  gwiazdki: 0,
+  proba: 0,
 });
 
 export function addStats(a: StatBlock, b: Partial<StatBlock>): StatBlock {
   const out = { ...a };
-  for (const k of STAT_KEYS) out[k] += b[k] ?? 0;
+  for (const k of STAT_KEYS) out[k] = (out[k] ?? 0) + (b[k] ?? 0);
   return out;
 }
 
 export function mapStats(a: StatBlock, fn: (v: number, k: StatKey) => number): StatBlock {
   const out = emptyStats();
-  for (const k of STAT_KEYS) out[k] = fn(a[k], k);
+  for (const k of STAT_KEYS) out[k] = fn(a[k] ?? 0, k);
   return out;
 }

@@ -15,3 +15,5 @@ export * from './inventory';
 export * from './ads';
 export * from './rename';
 export * from './unwanted';
+export * from './tiers';
+export * from './absurd';
