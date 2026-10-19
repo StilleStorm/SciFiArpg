@@ -66,6 +66,8 @@ try {
       const s = h.state();
       s.page.content = [];
       s.page.obstacles = [];
+      // the cleared obstacles' and content's drawings go too, or they float over the HUD pads with no body under them
+      for (const o of document.querySelectorAll('#page [data-obstacle], #page [data-content]')) o.remove();
       s.player.suspended = true;
       h.placePlayer(600, 800);
     });
@@ -74,7 +76,7 @@ try {
 
   // ---- teczki: closed, then open ----
   await stage(5);
-  const ids = await g(() => [window.__game.content.put('teczka', { dist: -60, dy: -40 }), window.__game.content.put('teczka', { dist: 70, dy: 40 })]);
+  const ids = await g(() => [window.__game.content.put('teczka', { dist: -60, dy: -40 }), window.__game.content.put('teczka', { dist: 150, dy: 90 })]);
   await wait(400);
   await shot('teczki-closed');
   await g((id) => window.__game.content.open(id), ids[0]);
@@ -85,7 +87,7 @@ try {
   await stage(5);
   const seals = ['pilnosc', 'kontrola', 'argument', 'obieg', 'zwolnienie', 'wypoczynek'];
   for (let i = 0; i < 6; i++)
-    await g(([seal, dist, dy]) => window.__game.content.put('pieczec', { seal, dist, dy }), [seals[i], (i % 3) * 100 - 100, i < 3 ? -60 : 60]);
+    await g(([seal, dist, dy]) => window.__game.content.put('pieczec', { seal, dist, dy }), [seals[i], (i % 3) * 110 - 110, i < 3 ? -150 : 115]);
   await wait(400);
   await shot('seals');
   // a stamp on the player: the buff's own stamp and footnote

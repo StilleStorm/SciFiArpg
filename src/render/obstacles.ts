@@ -406,6 +406,12 @@ function drawStains(page: Page): SVGGElement {
   return g;
 }
 
+/** Mark an obstacle drawing so tools (shots, the smoke) can find it in the #page layer. */
+function tagObstacle(g: SVGElement, kind: string): SVGElement {
+  g.setAttribute('data-obstacle', kind);
+  return g;
+}
+
 /** Fill the #page layer: the margin, the frame, the hatched edge and every obstacle. */
 export function drawPage(layer: SVGGElement, page: Page, header?: PageHeader): SVGGElement {
   layer.replaceChildren();
@@ -443,28 +449,28 @@ export function drawPage(layer: SVGGElement, page: Page, header?: PageHeader): S
     const r = createRng(o.seed);
     switch (o.kind) {
       case 'blot':
-        ink.append(drawBlot(o, r));
+        ink.append(tagObstacle(drawBlot(o, r), o.kind));
         break;
       case 'ring':
-        ink.append(drawRing(o, r));
+        ink.append(tagObstacle(drawRing(o, r), o.kind));
         break;
       case 'note':
-        ink.append(drawNote(o, r));
+        ink.append(tagObstacle(drawNote(o, r), o.kind));
         break;
       case 'torn':
-        ink.append(drawTorn(o, r, page));
+        ink.append(tagObstacle(drawTorn(o, r, page), o.kind));
         break;
       case 'qr':
-        ink.append(drawQr(o, r));
+        ink.append(tagObstacle(drawQr(o, r), o.kind));
         break;
       case 'sticky':
-        ink.append(drawSticky(o, r));
+        ink.append(tagObstacle(drawSticky(o, r), o.kind));
         break;
       case 'clip':
-        ink.append(drawClip(o));
+        ink.append(tagObstacle(drawClip(o), o.kind));
         break;
       case 'kiosk':
-        ink.append(drawKiosk(o, r));
+        ink.append(tagObstacle(drawKiosk(o, r), o.kind));
         break;
     }
   }
