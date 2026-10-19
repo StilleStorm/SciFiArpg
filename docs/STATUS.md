@@ -98,6 +98,10 @@ Polish and release. Progress lines are below.
 - Decided (player, 2026-10-19): one new boss body per act, drawn for the last planet of Akt II
   and Akt III (planets 6 and 9), built in S24 and S27; variants of the family bosses elsewhere.
   S22/S24 are unblocked.
+- Decided (player, 2026-10-19): Diablo-style flow. The base exit is always open and a new or loaded
+  game starts with its ticket already open (S11a, before S12); story locks are terrain or a figure on a
+  page, not the base exit. Waypoints ("przystanki") on the planets with a station in the base to travel
+  to them (S21a, after S21).
 - MVP playtest questions to ask after M3 (not before): whether the Anomalia at `CAMPAIGN_LAST` 3
   (level ~12–15) reads as a finale, and whether the hosted-set rule (ITEMS §12.6) should change.
 
@@ -132,7 +136,7 @@ Progress is recorded here, one line per slice:
 
 - **M2 Campaign frame complete** (2026-10-19): e2e:m2 green in both orientations (nine planets at Niski, roster, cards, items, elites, content, quests, return ticket, free travel); look fixes (HUD circles 48 px, bubble de-dup, drying blots, paper outlines, 11 px sheet text); ARCHITECTURE folded to under 300 lines; story plan review adjusted S12–S18, S28.
 
-**Next pickup:** Automode paused by the player after M2. Next: `/pickup` then `/automode`; the next slice is PRODUCTION.md S11 (story plan for Akt I, no builder).
+**Next pickup:** Automode paused by the player after M2. Next: `/pickup` then `/automode`; the next slice is PRODUCTION.md S11 (story plan for Akt I, no builder), then S11a (open exit).
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
