@@ -123,7 +123,9 @@ Progress is recorded here, one line per slice:
 
 - S6 done: roster of characters as case files (create with hero pick + case number, delete with a form), SAVE_VERSION 3 with per-character progress/bag/personal archive 40 and a shared archive 40, v2 and S5-archive migration, tap-to-transfer Archiwum sheet at the desk, ghost-click guard fixed; voice and look passes. Parked: hero note on archived uniques (waits for legendary paragraphs, ITEMS 8); ARCHITECTURE.md ~370 lines, fold at M2 end; the landscape desk needs a scroll to reach the archive and export lines; the `.pen` accent is ruled for handwritten corrections only (re-check new users).
 
-**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S7.
+- S7 done: nine planets as data (placeholder names), priority Niski–Krytyczny scaling enemies, reputacja, stars, loot tier and item level, unlocked by level; per-character campaign (next planet, closed planets, return ticket, zgłoszenia dodatkowe, free travel); ticket form with priority picker and travel list; opening page, chapter and red rewritten card frames (TODO-story text until S11); look pass. Parked: ARCHITECTURE.md over its three-page limit (fold at the M2 end); card text is TODO-story placeholders (voice/story, S11); the chapter and opening cards cover the base stations mid-page (accepted as modals); "Dotknij, aby pominąć" hint grey at 11 px, borderline; landscape HUD box cut at the left edge (existing); the portrait ticket answers are now a sticky footer.
+
+**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S8.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
