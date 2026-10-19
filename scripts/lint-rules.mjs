@@ -58,18 +58,16 @@ for (const f of files) {
   }
 }
 
-// Rule: no hero id literal outside src/heroes/<id>/ (S1). The ids come from heroes/registry.ts; tests, i18n and the registry itself
-// are exempt. The files in HERO_ID_DEBT still name a hero from before the registry existed: they belong to other domains and
-// the integrator closes them (each one gets its hero from the registry or the run state). The list may only shrink: a file that
-// no longer names a hero must come off it.
-const HERO_ID_DEBT = new Set(['src/ui/profile.ts', 'src/ui/pads.ts', 'src/world/run.ts', 'src/entities/factory.ts', 'src/death/outcomes.ts']);
+// Rule: no hero id outside src/heroes/<id>/ (S1), as a string literal or as an object key (a table keyed by hero). The ids come
+// from heroes/registry.ts; tests, i18n and the registry itself are exempt. What another domain needs per hero is a field of the
+// HeroModule (heroes/module.ts), read through heroById(); the default hero is DEFAULT_HERO_ID.
 {
   const registry = readFileSync(join(SRC, 'heroes/registry.ts'), 'utf8');
   const list = registry.match(/HERO_ID_LIST = \[([^\]]*)\]/);
   const ids = list ? [...list[1].matchAll(/'(\w+)'/g)].map((m) => m[1]) : [];
   if (ids.length === 0) report(join(SRC, 'heroes/registry.ts'), 0, 'hero-id-literal', 'HERO_ID_LIST not found');
   const idLiteral = new RegExp(`(['"\`])(${ids.join('|')})\\1`);
-  const seen = new Set();
+  const idKey = new RegExp(`(?:^|[{,])\\s*(${ids.join('|')})\\??\\s*:`);
   for (const f of files) {
     if (!f.endsWith('.ts') || isTest(f) || isI18n(f)) continue;
     const rel = relative(ROOT, f);
@@ -77,12 +75,9 @@ const HERO_ID_DEBT = new Set(['src/ui/profile.ts', 'src/ui/pads.ts', 'src/world/
     readFileSync(f, 'utf8').split('\n').forEach((raw, i) => {
       if (/^\s*(\*|\/\*|\/\/)/.test(raw)) return;
       const code = raw.replace(/\/\/.*$/, '');
-      if (!idLiteral.test(code)) return;
-      seen.add(rel);
-      if (!HERO_ID_DEBT.has(rel)) report(f, i + 1, 'hero-id-literal', raw);
+      if (idLiteral.test(code) || idKey.test(code)) report(f, i + 1, 'hero-id-literal', raw);
     });
   }
-  for (const rel of HERO_ID_DEBT) if (!seen.has(rel)) report(join(ROOT, rel), 0, 'hero-id-literal', 'no hero id literal left: remove this file from HERO_ID_DEBT in scripts/lint-rules.mjs');
 }
 
 if (findings.length) {

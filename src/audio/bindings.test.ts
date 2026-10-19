@@ -21,7 +21,8 @@ vi.mock('./music', () => music);
 vi.mock('./context', () => ({ getMix: () => ({ duck }), getContext: () => null, isRunning: () => true }));
 
 const { bindAudio, beastBody, HIT_STOP_MS, LAW_SOUNDS } = await import('./bindings');
-const { RECIPES, HERO_SKILL_SOUNDS } = await import('./sfx');
+const { RECIPES } = await import('./sfx');
+const { heroById } = await import('../heroes/registry');
 
 const names = (): string[] => played.map((p) => p.name);
 
@@ -99,7 +100,7 @@ describe('audio bindings', () => {
       played.length = 0;
       const { bus } = setup(hero);
       for (const skill of [0, 1, 2, 3, 4] as const) bus.emit('skill:cast', { slot: 0, skill, free: false });
-      expect(names()).toEqual([...HERO_SKILL_SOUNDS[hero]]);
+      expect(names()).toEqual([...heroById(hero).sounds.skills]);
     }
   });
 

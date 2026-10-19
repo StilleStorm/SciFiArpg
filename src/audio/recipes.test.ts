@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { HeroId } from '../heroes';
-import { FAMILY_FLAVOUR, HERO_SKILL_SOUNDS, RECIPES, SFX_NAMES, bodyLayers, recipeLength, validateRecipe, type Recipe } from './recipes';
+import { heroById, HERO_IDS } from '../heroes/registry';
+import { FAMILY_FLAVOUR, RECIPES, SFX_NAMES, bodyLayers, recipeLength, validateRecipe, type Recipe } from './recipes';
 import { TRIMS } from './levels';
 
 const recipes = RECIPES as Record<string, Recipe>;
@@ -57,10 +58,9 @@ describe('recipes follow DESIGN 14', () => {
   });
 
   it('every hero has five distinct skill sounds, all combat recipes, twenty-five in all', () => {
-    const heroes: HeroId[] = ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'];
     const all = new Set<string>();
-    for (const h of heroes) {
-      const five = HERO_SKILL_SOUNDS[h];
+    for (const h of HERO_IDS) {
+      const five = heroById(h).sounds.skills;
       expect(five).toHaveLength(5);
       expect(new Set(five).size, h).toBe(5);
       for (const n of five) {
@@ -69,7 +69,7 @@ describe('recipes follow DESIGN 14', () => {
         all.add(n);
       }
     }
-    expect(all.size).toBe(25);
+    expect(all.size).toBe(5 * HERO_IDS.length);
   });
 
   it('the fourth and fifth skills each have their own recipe, with a body and no raw tone', () => {
@@ -78,8 +78,8 @@ describe('recipes follow DESIGN 14', () => {
     ];
     const heroes: HeroId[] = ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'];
     heroes.forEach((h, i) => {
-      expect(HERO_SKILL_SOUNDS[h][3]).toBe(own[i * 2]);
-      expect(HERO_SKILL_SOUNDS[h][4]).toBe(own[i * 2 + 1]);
+      expect(heroById(h).sounds.skills[3]).toBe(own[i * 2]);
+      expect(heroById(h).sounds.skills[4]).toBe(own[i * 2 + 1]);
     });
     for (const n of own) {
       const r = recipes[n] as Recipe;

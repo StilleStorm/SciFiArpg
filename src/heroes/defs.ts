@@ -38,6 +38,8 @@ export interface HeroTraits {
   revealsPage?: boolean;
   /** Projectiles skim off at (nearly) full racja (heroes/shield.ts). */
   skim?: boolean;
+  /** On a petla death the old self stays behind as a friendly ghost first, not a hostile copy (death/outcomes.ts). */
+  friendlyCopy?: boolean;
   /** Extra gwiazdki per kill while the buff of skill 3 runs. */
   buffKillGwiazdki?: number;
 }

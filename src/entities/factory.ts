@@ -1,6 +1,7 @@
 import type { Enemy, Pickup, Player, Summon, Zone } from './types';
 import type { FamilyId } from '../enemies/ids';
 import type { Item } from '../items';
+import { DEFAULT_HERO_ID } from '../heroes/registry';
 
 /** Collision radius of a card on the ground (drawn 1.3 times larger than it was). */
 export const CARD_R = 18;
@@ -36,7 +37,7 @@ export function createPlayer(id: number, x: number, y: number): Player {
       attackRange: 64,
       attackCooldown: 0.6,
     },
-    heroId: 'pralka',
+    heroId: DEFAULT_HERO_ID,
     xp: 0,
     shield: 0,
     trialSpeed: 1,

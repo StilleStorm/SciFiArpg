@@ -11,7 +11,6 @@
  * `repeat` + `spread` turn a layer into a train of grains over `spread` seconds (scribbles, debris, dots).
  * `role` says what the layer is for; combat recipes must have a `body` (60-140 Hz thump or low pluck, 80-200 ms).
  */
-import type { HeroId } from '../heroes';
 import { TRIMS } from './levels';
 
 export type LayerKind = 'noise' | 'click' | 'pluck' | 'thump' | 'sine';
@@ -466,15 +465,6 @@ for (const [name, trim] of Object.entries(TRIMS)) {
 
 export type SfxName = keyof typeof RECIPES;
 export const SFX_NAMES = Object.keys(RECIPES) as SfxName[];
-
-/** One sound per skill, indexed by SkillIndex (DESIGN 10.1); five distinct combat recipes per hero. */
-export const HERO_SKILL_SOUNDS: Record<HeroId, readonly [SfxName, SfxName, SfxName, SfxName, SfxName]> = {
-  pralka: ['pralkaSpin', 'pralkaFoam', 'pralkaDrag', 'pralkaDrum', 'pralkaPersona'],
-  konsultant: ['konsBeep', 'konsRedirect', 'konsHeadset', 'konsCase', 'konsHangup'],
-  petlowiec: ['petlRemarks', 'petlSplice', 'petlRewind', 'petlDejaVu', 'petlLaunch'],
-  kartograf: ['kartoClick', 'kartoHum', 'kartoPin', 'kartoScale', 'kartoLegend'],
-  nalesnik: ['nalesOrbita', 'nalesGravity', 'nalesFlag', 'nalesTide', 'nalesMoon'],
-};
 
 export const FAMILY_FLAVOUR = {
   urzadzenia: 'flavDevice',

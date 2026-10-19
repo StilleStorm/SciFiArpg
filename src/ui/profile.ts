@@ -1,6 +1,6 @@
 /** PROFIL UZYTKOWNIKA: one printed profile per hero. The photo is a drawing, the verification is crossed out. */
 import { createRng } from '../core/rng';
-import { HEROES, heroDef, type HeroDef, type HeroId } from '../heroes';
+import { DEFAULT_HERO_ID, HEROES, heroDef, type HeroDef, type HeroId } from '../heroes';
 import { noteChosen } from '../heroes/chosen';
 import { t } from '../i18n';
 import { drawIn } from '../render/ink';
@@ -123,7 +123,7 @@ function buildProfile(root: HTMLElement, onChosen: (heroId: HeroId) => void): Pr
   const heroes: readonly HeroDef[] = HEROES;
 
   function render(): void {
-    const def = heroes[index] ?? heroDef('pralka');
+    const def = heroes[index] ?? heroDef(DEFAULT_HERO_ID);
     counter.textContent = t('heroes.profile.number', { n: index + 1, total: heroes.length });
     figureLayer.replaceChildren();
     const fig = buildHeroFigure(def.id);
@@ -151,7 +151,7 @@ function buildProfile(root: HTMLElement, onChosen: (heroId: HeroId) => void): Pr
     const def = heroes[index];
     if (!def) return;
     const before = loadMeta();
-    if (def.id === 'nalesnik' && before.character?.heroId !== 'nalesnik') noteChosen(def.id); // the Asystent notes the first choice
+    if (def.chosenNoteKey && before.character?.heroId !== def.id) noteChosen(def.id); // the Asystent notes the first choice
     saveMeta({ ...before, heroId: def.id });
     profile.destroy();
     onChosen(def.id);

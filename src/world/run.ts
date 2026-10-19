@@ -1,7 +1,7 @@
 import type { SporState } from '../combat/spor';
 import { createRng, type Rng } from '../core/rng';
 import type { Enemy, Pickup, Player, Projectile, Summon, Zone } from '../entities';
-import { applyHero, createHeroRun, heroDef, type HeroId, type HeroRun } from '../heroes';
+import { applyHero, createHeroRun, DEFAULT_HERO_ID, heroDef, type HeroId, type HeroRun } from '../heroes';
 import { createPlayer } from '../entities/factory';
 import { createBaseState, generateBase, layoutForSeed, type BaseState } from './base';
 import { generateRunPages, type Page } from './pages';
@@ -79,7 +79,7 @@ export interface RunOptions {
   ticketNumber?: number;
   lawId?: LawId;
   pageCount?: number;
-  /** Which hero to play; default Pralka. */
+  /** Which hero to play; default DEFAULT_HERO_ID. */
   heroId?: HeroId;
   /** Resume a bookmarked ticket: same seed, clause and page count, the page at that index, the clock restored (save/bookmark.ts). */
   resume?: Bookmark;
@@ -128,13 +128,13 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
     populate: phase !== 'base',
     kioskPending: false,
     victoryAt: null,
-    hero: createHeroRun(opts.heroId ?? 'pralka'),
+    hero: createHeroRun(opts.heroId ?? DEFAULT_HERO_ID),
     summons: [],
     zones: [],
     phase,
   };
   if (phase === 'base') state.base = createBaseState(layoutForSeed(seed), opts.resume ?? null);
-  applyHero(state.player, heroDef(opts.heroId ?? 'pralka'));
+  applyHero(state.player, heroDef(opts.heroId ?? DEFAULT_HERO_ID));
   applyLaw(state, ticket.lawId);
   if (opts.character) applyCharacter(state, opts.character);
   if (opts.resume && phase === 'run') applyBookmark(state, opts.resume);

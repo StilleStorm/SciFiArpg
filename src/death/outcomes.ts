@@ -8,6 +8,7 @@ import type { Bus } from '../core/events';
 import type { Rng } from '../core/rng';
 import { createEnemy, createSummon } from '../entities/factory';
 import type { Enemy } from '../entities/types';
+import { heroDef } from '../heroes/registry';
 import type { CopySpec } from '../heroes/state';
 import { allItems, dropItem, type Item } from '../items';
 import { t } from '../i18n';
@@ -90,7 +91,7 @@ export function applyPetla(s: RunState, bus: Bus): void {
   const copy = freezeCopy(s, s.rngs.loot);
   respawn(s);
   bus.emit('footnote', { text: t('heroes.copy.spawn') });
-  if (p.heroId === 'petlowiec') {
+  if (heroDef(p.heroId).traits?.friendlyCopy) {
     const g = createSummon(nextId(s), copy.x, copy.y, {
       variant: 'ghost',
       heroId: copy.heroId,

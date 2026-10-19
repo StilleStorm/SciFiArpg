@@ -9,6 +9,7 @@ export const def: HeroDef = defineHero('petlowiec', {
   r: 13,
   baseStats: { pewnoscSiebie: 95, upor: 45, dmgMin: 5, dmgMax: 9, critChance: 0.1, resist: { egzystencjalny: 15 } },
   auto: { type: 'egzystencjalny', range: 130, cooldown: 0.8, projectile: true },
+  traits: { friendlyCopy: true },
   skills: [
     defineSkill('petlowiec', 1, 'przybycie', 'regulaminowy', 9, 'auto'),
     defineSkill('petlowiec', 2, 'spor', 'egzystencjalny', 11, 'auto'),
