@@ -13,6 +13,7 @@ import { SLOTS, type Item, type Slot } from '../items/types';
 import { applyParagraphs, activeParagraphsOf, paragraphsOf, type ParagraphNo } from '../progression/paragraphs';
 import { applyProgress, padsFrom, serializeProgress, type ProgressData } from '../progression/persist';
 import type { RunState } from '../world/run';
+import { HELD_CAP } from '../systems/recovery';
 
 export const CHARACTER_VERSION = 1;
 
@@ -32,6 +33,8 @@ export interface Character extends ProgressData {
   specialization?: string;
   /** The ultimate's active paragraph (2 or 3); absent = § 1. */
   ultParagraph?: ParagraphNo;
+  /** Potwierdzenia held (0..5, systems/recovery.ts); absent = none, so older saves load. */
+  potwierdzenia?: number;
 }
 
 export function isHeroId(v: unknown): v is HeroId {
@@ -67,6 +70,7 @@ export function serializeCharacter(s: RunState): Character {
   const p = s.player;
   const paragraphs = activeParagraphsOf(s);
   return {
+    ...((p.potwierdzenia ?? 0) > 0 ? { potwierdzenia: p.potwierdzenia } : {}),
     ...(s.hero.ultimateId ? { ultimate: s.hero.ultimateId } : {}),
     ...(s.hero.spec ? { specialization: s.hero.spec } : {}),
     ...(s.hero.ult && s.hero.ult.para !== 1 ? { ultParagraph: s.hero.ult.para } : {}),
@@ -99,6 +103,7 @@ export function applyCharacter(s: RunState, c: Character): void {
   p.equipment = clone(c.equipment);
   p.gwiazdki = c.gwiazdki;
   recomputeStats(p);
+  if (c.potwierdzenia) p.potwierdzenia = Math.min(HELD_CAP, Math.max(0, Math.floor(c.potwierdzenia)));
   if (c.heroId === p.heroId) {
     applyProgress(s, c);
     applyParagraphs(s, c.paragraphs); // what is not open (an old or damaged save) stays on paragraph 1
@@ -132,6 +137,7 @@ export function toCharacter(raw: unknown): Character | null {
   const specialization = typeof raw['specialization'] === 'string' && specializationOf(raw['heroId'], raw['specialization']) ? raw['specialization'] : undefined;
   const rawUltPara = raw['ultParagraph'];
   const ultParagraph = rawUltPara === 2 || rawUltPara === 3 ? rawUltPara : undefined;
+  const held = Math.min(HELD_CAP, Math.floor(num(raw['potwierdzenia'], 0)));
   const perms = Array.isArray(raw['permissions']) ? raw['permissions'].filter((x): x is string => typeof x === 'string') : [];
   return {
     version: CHARACTER_VERSION,
@@ -149,6 +155,7 @@ export function toCharacter(raw: unknown): Character | null {
     ...(ultimate ? { ultimate } : {}),
     ...(specialization ? { specialization } : {}),
     ...(ultParagraph ? { ultParagraph } : {}),
+    ...(held > 0 ? { potwierdzenia: held } : {}),
   };
 }
 

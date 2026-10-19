@@ -83,6 +83,10 @@ export interface Player extends Fighter {
   skim?: boolean;
   /** The Argument meter, 0..1 (combat/meter.ts): fills from rebuttals, kills and a right Spor reply; full = one ultimate. Never saved. */
   meter: number;
+  /** Potwierdzenia held for later use, 0..5 (systems/recovery.ts; saved with the character). Absent = none. */
+  potwierdzenia?: number;
+  /** Run time (s) of the last blow that took racja; regen waits 4 s after it (systems/recovery.ts). */
+  hurtAt?: number;
 }
 
 export interface Enemy extends Fighter {
@@ -149,6 +153,8 @@ export interface Pickup extends Base {
   number: number;
   /** A permission card (a checkbox and the family word): taking it adds the family to player.permissions, never the inventory. */
   permission?: FamilyId;
+  /** A potwierdzenie: a stamped slip that restores racja or is kept (systems/recovery.ts). */
+  potwierdzenie?: true;
 }
 
 /** A friendly figure: a Petlowiec copy, a Kartograf decoy, or the 10-second friendly copy after Petla. */

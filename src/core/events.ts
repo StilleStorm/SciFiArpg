@@ -101,6 +101,10 @@ export interface GameEvents {
   'base:entered': { layout: 'ladowisko' | 'wioska' | 'miasteczko'; seed: number; number: number };
   /** The player tapped a station of the base and reached it: main.ts opens its sheet (biurko, kiosk, tablica, paczkomat). */
   'station:opened': { station: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' };
+  /** A potwierdzenie slip was taken (systems/recovery.ts): `healed` racja restored at once (0 when kept), `held` slips now in the stack. */
+  'recovery:taken': { healed: number; held: number };
+  /** A held potwierdzenie was used, by the player's tap or automatically before a hit (`auto`). */
+  'recovery:used': { auto: boolean; healed: number; held: number };
   /** "Akceptuję regulamin" (or "Wznów zgłoszenie") was pressed in the base: the exit of the base page is unlocked. */
   'ticket:accepted': undefined;
 }
@@ -111,9 +115,16 @@ type Handler<K extends keyof GameEvents> = (payload: GameEvents[K]) => void;
 export interface Bus {
   on<K extends keyof GameEvents>(name: K, fn: Handler<K>): () => void;
   emit<K extends keyof GameEvents>(name: K, ...payload: Args<K>): void;
+  /** The last `n` events (default 10) as name + short payload text, oldest first; for the bug report. */
+  recent?(n?: number): { name: string; payload: string }[];
 }
 
+/** Events too frequent to be worth a place in the bug report's short list. */
+const QUIET_EVENTS: ReadonlySet<string> = new Set(['skill:aim', 'player:tap', 'enemy:miss', 'attack:started']);
+const RECENT_KEEP = 40;
+
 export function createBus(): Bus {
+  const ring: { name: string; payload: string }[] = [];
   const handlers = new Map<keyof GameEvents, Set<Handler<keyof GameEvents>>>();
   return {
     on(name, fn) {
@@ -124,7 +135,20 @@ export function createBus(): Bus {
         set.delete(fn as Handler<keyof GameEvents>);
       };
     },
+    recent(n = 10) {
+      return ring.slice(-n);
+    },
     emit(name, ...payload) {
+      if (!QUIET_EVENTS.has(name)) {
+        let text = '';
+        try {
+          text = payload[0] === undefined ? '' : JSON.stringify(payload[0]).slice(0, 160);
+        } catch {
+          text = '?';
+        }
+        ring.push({ name, payload: text });
+        if (ring.length > RECENT_KEEP) ring.shift();
+      }
       const set = handlers.get(name);
       if (!set) return;
       for (const fn of [...set]) fn(payload[0] as GameEvents[keyof GameEvents]);

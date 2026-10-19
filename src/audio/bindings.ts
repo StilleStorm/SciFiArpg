@@ -198,6 +198,7 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
   on('player:unsuspended', () => play('stamp'));
   on('footnote:added', (e) => play(e.correction ? 'correction' : 'footnote'));
   on('pickup:taken', () => play('pickup'));
+  on('recovery:taken', () => play('paperSlide'));
   on('page:edge', () => play('pageEdge'));
   on('page:turn', (e) => {
     play('pageTurn');

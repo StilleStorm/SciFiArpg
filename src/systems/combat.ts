@@ -12,6 +12,7 @@ import { isRebuttal } from '../combat/claims';
 import { killFill, meterGain, METER_REBUTTAL } from '../combat/meter';
 import { heroDef } from '../heroes/defs';
 import { absorbShield, playerDamageMul } from '../heroes/shield';
+import { onPlayerBlow } from './recovery';
 
 type Fighter = Player | Enemy;
 
@@ -56,6 +57,7 @@ export function applyDamage(s: RunState, bus: Bus, defender: Fighter, amount: nu
   if (defender.kind === 'enemy' && defender.defect) learnDefect(s, defender.defect);
   if (defender.kind === 'player') amount = absorbShield(defender, amount);
   if (amount <= 0) return false;
+  if (defender.kind === 'player') onPlayerBlow(s, bus, amount); // regen pauses; a held potwierdzenie may be used first
   defender.hp -= amount;
   const payload = { x: defender.x, y: defender.y, amount, crit };
   if (defender.kind === 'enemy') bus.emit('enemy:hit', { id: defender.id, ...payload });

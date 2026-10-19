@@ -91,6 +91,11 @@ export function createPermissionPickup(id: number, x: number, y: number, family:
   return { kind: 'pickup', id, x, y, r: CARD_R, number: 0, permission: family };
 }
 
+/** A potwierdzenie slip on the ground. Number 0, never an inventory item. */
+export function createPotwierdzeniePickup(id: number, x: number, y: number): Pickup {
+  return { kind: 'pickup', id, x, y, r: 11, number: 0, potwierdzenie: true };
+}
+
 export function createSummon(id: number, x: number, y: number, init: Pick<Summon, 'variant' | 'heroId' | 'ttl'> & Partial<Summon>): Summon {
   return {
     kind: 'summon',

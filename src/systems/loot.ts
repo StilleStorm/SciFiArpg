@@ -9,6 +9,7 @@ import { rollItem } from '../items/generate';
 import { addItem, inventoryFull } from '../items/inventory';
 import { advanceTrial, revealNote } from '../items/reviews';
 import { uniqueNote } from '../items/uniques';
+import { rollPotwierdzenie, takePotwierdzenie, tickRecovery } from './recovery';
 import type { DropSource, Item, ItemTier } from '../items/types';
 import { nextId, type RunState } from '../world/run';
 
@@ -76,6 +77,7 @@ export function dropLoot(s: RunState, x: number, y: number, source: DropSource):
     const at = scatter(s, x, y);
     s.pickups.push(createPickup(nextId(s), at.x, at.y, 0, undefined, n));
   }
+  rollPotwierdzenie(s, x, y, source); // last, so the rolls above keep their sequence
 }
 
 /** An elite leaves a permission card one time in three; a boss always does. */
@@ -106,6 +108,7 @@ const fullNoted = new WeakMap<object, number>();
 export function takePickup(s: RunState, bus: Bus, k: Pickup): boolean {
   const p = s.player;
   if (p.suspended) return false;
+  if (k.potwierdzenie) return takePotwierdzenie(s, bus, k);
   if (k.permission) {
     // A permission is not an item: it goes straight into player.permissions (progression/update.ts reads it).
     const fam = t(`forms.update.family.${k.permission}`);
@@ -136,6 +139,7 @@ export function takePickup(s: RunState, bus: Bus, k: Pickup): boolean {
 /** Per-step loot work: advertisements for free-version items. */
 export function updateLoot(s: RunState, bus: Bus, dt: number): void {
   tickAds(s.player, bus, dt);
+  tickRecovery(s, bus, dt);
 }
 
 /** Subscribe to kills: drops and trial progress. Call once; `getState` returns the current run. */

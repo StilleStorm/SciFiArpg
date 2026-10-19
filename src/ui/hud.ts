@@ -1,12 +1,15 @@
 import { createRng } from '../core/rng';
 import { t } from '../i18n';
 import { xpToNext } from '../progression/xp';
+import { buildSlip } from '../render/pickupCard';
 import { el as svgEl, n2, wobblyCircle } from '../render/svg';
+import { heldOf } from '../systems/recovery';
 import type { RunState } from '../world/run';
 import { h } from './dom';
 import { meterOf } from './ultimate';
 import { createPauseButton } from './pause';
 import './tunnel.css';
+import './potw.css';
 
 export interface Hud {
   el: HTMLElement;
@@ -43,6 +46,54 @@ export function createTunnelButton(onTunnel: () => void): HTMLButtonElement {
     onTunnel();
   });
   return btn;
+}
+
+/**
+ * The Potwierdzenie note: a circled word, 44 x 44, one slot further out than "Tunel" (ui/potw.css), with the held slips
+ * (at most five) shown as one or two slips on its top edge and a typed count. Same pattern as the Pauza and Tunel notes: it answers the finger going down.
+ */
+export function createPotwButton(onUse: () => void): { btn: HTMLButtonElement; show(n: number): void } {
+  const btn = h('button', 'potw-btn empty');
+  btn.type = 'button';
+  btn.setAttribute('aria-label', t('ui.hud.potwLabel'));
+  const rng = createRng(211);
+  const svg = svgEl('svg', { viewBox: '-22 -22 44 44', 'aria-hidden': 'true' });
+  svg.append(svgEl('path', { d: wobblyCircle(rng, 0, 0, 20.5, 11, 0.03) }), svgEl('path', { d: wobblyCircle(rng, 0.5, -0.4, 19, 9, 0.035), 'stroke-width': 0.9 }));
+  const stack = svgEl('g', { class: 'stack' });
+  svg.append(stack);
+  btn.append(svg, h('span', 'word', t('ui.hud.potw')));
+  let shown = -1;
+  let pressedAt = -Infinity;
+  btn.addEventListener('pointerdown', (ev) => {
+    if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+    pressedAt = performance.now();
+    onUse();
+  });
+  btn.addEventListener('click', () => {
+    if (performance.now() - pressedAt < CLICK_AFTER_PRESS_MS) return;
+    onUse();
+  });
+  return {
+    btn,
+    show(n) {
+      if (n === shown) return;
+      shown = n;
+      btn.classList.toggle('empty', n <= 0);
+      stack.replaceChildren();
+      // Five slips side by side read as a strip: at most two are drawn, large enough to be slips, and the count is typed.
+      const drawn = Math.min(n, 2);
+      for (let i = 0; i < drawn; i++) {
+        const slip = buildSlip(0, 1);
+        slip.setAttribute('transform', `translate(${n2(-5 + i * 3.4)} ${n2(-12.5 - i * 2.2)}) rotate(${i === 0 ? -7 : 6}) scale(0.66)`);
+        stack.prepend(slip); // the later slip lies under the first
+      }
+      if (n > 1) {
+        const count = svgEl('text', { class: 'count', x: 7.5, y: -9.5 });
+        count.textContent = t('ui.hud.potwCount', { count: n });
+        stack.append(count);
+      }
+    },
+  };
 }
 
 /** Racja as a hand-drawn line: red up to the ratio, the lost part thin and struck through. */
@@ -85,6 +136,7 @@ export function createHud(
   onUpdateTap: () => void = () => undefined,
   onPause: () => void = () => undefined,
   onTunnel: () => void = () => undefined,
+  onPotw: () => void = () => undefined,
 ): Hud {
   const el = h('div', 'hud paper');
   const racja = field('ui.hud.racja', 'racja');
@@ -103,7 +155,8 @@ export function createHud(
   upd.type = 'button';
   upd.addEventListener('click', onUpdateTap);
   const tunnelBtn = createTunnelButton(onTunnel);
-  el.append(row1, row2, upd, createPauseButton(onPause), tunnelBtn);
+  const potw = createPotwButton(onPotw);
+  el.append(row1, row2, upd, createPauseButton(onPause), tunnelBtn, potw.btn);
   root.append(el);
 
   const svg = svgEl('svg', { 'aria-hidden': 'true' });
@@ -135,6 +188,7 @@ export function createHud(
     update(s) {
       const p = s.player;
       setText(racja.value, 'racja', `${Math.max(0, Math.ceil(p.hp))}/${p.hpMax}`);
+      potw.show(heldOf(p));
       setText(reputacja.value, 'reputacja', reputacjaText(s));
       setText(gwiazdki.value, 'gwiazdki', String(p.gwiazdki));
       // In the base the page field reads "Baza" with the kind of place typed in (a smaller type: "miasteczko" is long), and
@@ -144,6 +198,7 @@ export function createHud(
         if (stronaLabel) stronaLabel.textContent = t(s.phase === 'base' ? 'ui.hud.base' : 'ui.hud.strona');
         strona.root.classList.toggle('place', s.phase === 'base');
         tunnelBtn.classList.toggle('hidden', s.phase === 'base');
+        potw.btn.classList.toggle('hidden', s.phase === 'base');
         cache.strona = '\u0000'; // forces the value to be written again
       }
       setText(strona.value, 'strona', s.phase === 'base' ? (s.base ? t(`world.layout.${s.base.layout}`) : '') : t('ui.hud.pages', { page: s.pageIndex + 1, total: s.pageCount }));

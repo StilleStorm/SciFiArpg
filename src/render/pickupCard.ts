@@ -8,6 +8,27 @@ import { TIER_HUE, washGroup } from './wash';
 /** Cards on the ground are drawn this much larger than the 34 x 24 sketch below. */
 export const CARD_SCALE = 1.3;
 
+/**
+ * A potwierdzenie: a small slip, two typed lines and a round stamp in the accent red. About 22 x 14 units at scale 1;
+ * the same drawing is stacked in the HUD note (ui/hud.ts), so it takes only a tilt and a scale.
+ */
+export function buildSlip(tilt = 0, scale = 1): SVGGElement {
+  const g = el('g', { class: 'slip', transform: `rotate(${tilt}) scale(${scale})` });
+  g.append(
+    el('rect', { x: -11, y: -7, width: 22, height: 14 }),
+    el('path', { d: 'M-8.5-3H-0.5M-8.5 0.2H-2.5M-8.5 3.4H-4.5', 'stroke-width': 0.9 }),
+    el('circle', { cx: 5.2, cy: 1.6, r: 3.4, style: 'stroke:var(--accent)', 'stroke-width': 1.2 }),
+    el('path', { d: 'M3.6 1.8L4.8 3L6.9 0', style: 'stroke:var(--accent)', 'stroke-width': 1 }),
+  );
+  return g;
+}
+
+function potwierdzenieCard(e: Pickup): SVGGElement {
+  const g = el('g', { class: 'pickup potwierdzenie' });
+  g.append(buildSlip((e.id % 5) - 2, 1.3));
+  return g;
+}
+
 /** A permission: a checkbox with a tick in it and the family word under it. */
 function permissionCard(e: Pickup): SVGGElement {
   const g = el('g', { class: 'pickup permission' });
@@ -26,6 +47,7 @@ function permissionCard(e: Pickup): SVGGElement {
 
 /** A card sketched into the margin: a small plate with the item's drawing and its number; a star for gwiazdki. */
 export function buildPickupCard(e: Pickup): SVGGElement {
+  if (e.potwierdzenie) return potwierdzenieCard(e);
   if (e.permission) return permissionCard(e);
   const g = el('g', { class: 'pickup' });
   const item = e.item;

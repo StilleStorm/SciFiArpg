@@ -10,7 +10,10 @@
     "tunnel": "Tunel",
     "tunnelLabel": "Otwórz tunel serwisowy",
     "base": "Baza",
-    "argument": "Argument"
+    "argument": "Argument",
+    "potw": "Potw.",
+    "potwLabel": "Użyj potwierdzenia",
+    "potwCount": "×{count}"
   },
   "title": {
     "agency": "Centrum Obsługi Planet",
@@ -54,5 +57,10 @@
   },
   "tunnel": {
     "note": "c.d. na stronie __"
+  },
+  "potw": {
+    "stamp": "Potwierdzono",
+    "kept": "Racja pełna. Potwierdzenie załączono do akt ({count}).",
+    "auto": "Racja spadała poniżej progu. Potwierdzenie wykorzystano z urzędu. Pozostało w aktach: {count}."
   }
 }
