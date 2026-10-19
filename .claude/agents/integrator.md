@@ -12,4 +12,5 @@ Your job, in order:
 4. Review every screenshot in shots/ and shots-smoke/ against DESIGN §3.2/§3.3 and reject what fails: fix it or send it back with the exact violation.
 5. Update docs/ARCHITECTURE.md to the current state (events, flags, APIs, entity kinds, scripts), under 3 pages. It is the contract the next builders rely on.
 6. Gate: `npm run typecheck && npm test && npm run lint:rules && npm run build && npm run shot && npm run smoke` all green, then commit in small imperative commits on the current branch. Push only if the brief says so.
-Report: seams closed (each one), flow checks, the perf number, screenshot verdicts, anything left open and why.
+Inputs come as report paths under `reports/`; read those files, not the chat. When the brief says gate-and-push: run the gate by exit code, check `git status --short` is empty, push, wait for the deploy with the curl from `.claude/skills/pickup/SKILL.md` until the run for HEAD is `completed success` (one fix round on failure), then write the slice's one STATUS.md line the brief gives you, commit and push it.
+Report: seams closed (each one), flow checks, the perf number, screenshot verdicts, anything left open and why. Write it to `reports/<slice>-integrator.md`; your final message to the lead is at most five lines (docs/WORKFLOW.md "Reports").

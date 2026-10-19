@@ -24,4 +24,6 @@ Rules:
   timing you can await.
 - Gate by exit code: `npm run check; echo $?`, `npm run smoke; echo $?`, your milestone script.
 - Report: legs added (names, what each asserts), failures found with reproduction, frame time,
-  what you could not cover and why. Do not commit unless the brief says so.
+  what you could not cover and why. Do not commit unless the brief says so. Write it to
+  `reports/<slice>-tester.md`; your final message to the lead is at most five lines
+  (docs/WORKFLOW.md "Reports").

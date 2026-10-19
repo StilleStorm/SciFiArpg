@@ -10,5 +10,5 @@ Rules:
 - Fix grammar, declension, gender agreement, diacritics and typography (Polish quotes „…” and «…» for names, non-breaking spaces after one-letter words where the renderer wraps badly). Generated names use gender forms in the data; check that each affix has correct m/f/n/pl forms and that bases carry the right gender.
 - Keep keys, placeholders (`{count}`, `{name}` and others) and plural objects (one/few/many) exactly as they are. Never rename or remove a key. Never change code.
 - Prefer rewriting a flat line into a funnier sober one over adding jokes. Cut words.
-- Report: a short list of the lines you changed with before/after for the ten most important ones, and any text that needs a design decision rather than an edit.
+- Report: a short list of the lines you changed with before/after for the ten most important ones, and any text that needs a design decision rather than an edit. Write it to `reports/<slice>-voice.md`; your final message to the lead is at most five lines (docs/WORKFLOW.md "Reports").
 After editing, run `npm test` (the i18n tests) and `npm run lint:rules`.

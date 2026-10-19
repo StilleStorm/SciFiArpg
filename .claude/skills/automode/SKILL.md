@@ -8,77 +8,86 @@ The lead (this session) runs this loop. It plans nothing itself: the plan is doc
 (milestones, slices, briefs); the design is PLAN.md, SKILLS.md, ITEMS.md, STORY.md, DESIGN.md.
 Never use the Workflow tool; never read docs/workflows/ or agent transcripts.
 Agents do the work: `story` (Fable) for plan and story decisions, `builder` (Sonnet) for code,
-`integrator` (Opus) for seams and gates, `voice` (Opus) for Polish, `tester` (Sonnet) for
-end-to-end checks, `look` (Sonnet) for screenshots. The lead briefs, waits, gates by exit code,
-commits, pushes, updates STATUS.md, reports, and continues.
+`integrator` (Opus) for seams, gates, push and deploy, `voice` (Opus) for Polish, `tester`
+(Sonnet) for end-to-end checks, `look` (Sonnet) for screenshots.
+
+**The lead is a router, not a reader.** Its context is the budget for the whole session; aim for
+under 10k tokens per slice. Agents read the docs and each other's reports from `reports/`
+(docs/WORKFLOW.md "Reports"); the lead sees only their five-line replies. The lead never pastes a
+report, a doc section or a plan brief into a prompt: it passes paths and slice ids.
 
 ## Before the loop
-1. `/pickup` has run (STATUS read, tree clean and level with the remote).
+1. `/pickup` has run (STATUS read, tree clean and level with the remote). Automode needs from
+   pickup only steps 1–2; skip reading slice sections and DESIGN, the agents do that.
 2. Confirm the stop rule: the loop runs until the player writes "stop", or a stop condition
    below fires. Never ask the player a question inside the loop; park it instead (see Parking).
 
 ## One slice, in order
-1. **Read** the next slice entry in docs/PRODUCTION.md (the first not marked done in STATUS.md
-   progress) and only the doc sections its Reads line names. Paste its builder briefs under the
-   "Standard builder header" from PRODUCTION.md.
-   Budget: under 10k tokens of reading per slice.
-2. **Plan gap?** If the slice needs content or decisions not yet written in the docs (per-planet
-   content, NPC lines, a rule the brief would have to invent), run `story` with a brief naming
-   the gap and the doc section to fill. Accept its recommendation on every open question except
-   one it marks **BLOCKING FOR THE PLAYER**; a blocking question parks the slice (Parking).
-3. **Brief builders.** Write one brief per builder from the template in docs/WORKFLOW.md:
-   scope, owned files, allowed additive edits, forbidden files, deliverables with counts, the
-   contracts to rely on and to provide, screenshot env (`SHOT_PORT` unique per builder, 4181+,
-   never 4190), tests, report shape. Split a slice into at most three builders with disjoint
-   folders; run them in parallel only when their owned files do not overlap. Builders do not
-   commit.
-4. **Integrate.** Run `integrator` with every builder report pasted in. It closes `// SEAM:`
-   stubs, runs `npm run check`, `npm run shot`, `npm run smoke` (and `npm run render-audio`
-   when audio changed) by exit code, updates docs/ARCHITECTURE.md, commits with explicit paths.
-5. **Voice.** If any `src/i18n/pl/*.json` changed, run `voice` on those files only. Commit its
-   result with explicit paths.
-6. **Test.** Run `tester` to add the slice's smoke leg and contract tests; if it reports a
-   failure, run `integrator` once with the reproduction to fix it, then `tester` again. Commit.
-7. **Look.** Run `look` on at most six PNGs the builders flagged. A REDO verdict → one
-   `integrator` round with the exact violation, then `look` again. FIX verdicts ride along.
-8. **Gate and push.** The lead runs `npm run check; echo $?` and `npm run smoke; echo $?`; both
-   must print 0. Then `git status --short | wc -l` must print 0 (everything committed), then
-   `git push -u origin <branch>`. Wait for the deploy with the curl loop from `/pickup` until
-   `completed success`. A failed deploy → read the job, one `integrator` round, push again.
-9. **Record.** Update STATUS.md: mark the slice done with one line of what shipped, note
-   anything parked, name the next slice. Commit and push STATUS.md.
-10. **Report** to the player in at most eight lines: slice shipped, what it adds for the player,
-    anything parked, what starts next. Then continue with the next slice.
+1. **Find it.** The next slice is the first in docs/PRODUCTION.md not marked done in STATUS.md.
+   Read only its heading and builder list: `grep -n "^### S<n>" -A4 docs/PRODUCTION.md`. Do not
+   read its Reads sections.
+2. **Plan gap?** Only if the slice entry says it needs story or plan content (or a builder
+   reports the brief would have to invent a rule): run `story` pointing at the slice and the gap.
+   Accept its recommendations except one marked **BLOCKING FOR THE PLAYER**, which parks the
+   slice (Parking).
+3. **Builders.** One `builder` per builder named in the entry, in parallel when their owned files
+   do not overlap (at most three). The prompt is a pointer, under 80 words:
+   > Slice S<n>, builder `<name>`. Your brief: docs/PRODUCTION.md §S<n> (your builder's part) under
+   > §"Standard builder header". SHOT_PORT=<4181+, unique, never 4190>, SHOT_OUT=dist-<name>,
+   > SHOT_DIR=shots-<name>. Report to reports/S<n>-builder-<name>.md; reply in five lines.
+   Builders do not commit.
+4. **Integrate.** `integrator`: "Slice S<n>. Read reports/S<n>-builder-*.md. Close seams, run
+   check/shot/smoke (and render-audio if audio changed), update ARCHITECTURE.md, commit with
+   explicit paths. Do not push. Report to reports/S<n>-integrator.md."
+5. **Voice.** If its reply or a builder reply says `src/i18n/pl/*.json` changed: `voice` on those
+   files, "commit with explicit paths, report to reports/S<n>-voice.md".
+6. **Test.** `tester`: "Slice S<n>. Read reports/S<n>-*.md. Add the smoke leg and contract tests,
+   commit, report to reports/S<n>-tester.md." A RED reply → one `integrator` round pointing at
+   reports/S<n>-tester.md, then `tester` again.
+7. **Look.** `look`: "Slice S<n>. Review at most six PNGs flagged in reports/S<n>-builder-*.md;
+   report to reports/S<n>-look.md." REDO → one `integrator` round pointing at that file, then
+   `look` again. FIX verdicts ride along with the next integrator round.
+8. **Gate, push, deploy, record.** `integrator`: "Slice S<n> gate-and-push. Gate by exit code
+   (check, smoke), tree clean, push to <branch>, wait for the deploy of HEAD, one fix round on
+   failure. Then mark S<n> done in STATUS.md with this line: <one line of what shipped>; note
+   parked items; name S<n+1>; commit and push." The lead then checks only
+   `git status --short | wc -l` (0) and `git log origin/<branch> -1 --oneline` (the STATUS commit).
+9. **Report** to the player in at most eight lines: slice shipped, what it adds for the player,
+   anything parked, what starts next. Then continue with the next slice.
 
 ## Milestones (listed in STATUS.md)
-At the end of a milestone's last slice, before its push:
+At the end of a milestone's last slice, before step 8 (the same pointer style):
 - `tester` writes and runs `scripts/e2e-milestone-<n>.mjs` (whole flow, both orientations,
-  frame time); failures go through one `integrator` round each, at most two rounds.
-- `look` reviews every PNG in `shots/` (the stock set) and reports; REDO → `integrator`.
-- `story` runs a **plan review**: given STATUS and the reports of the milestone, does anything
-  in PLAN/SKILLS/ITEMS/STORY need remaking? It writes decisions into the docs and may reorder
-  the remaining slices in STATUS; it parks anything that needs the player.
-- Then the gate and push as for a slice, and a milestone report to the player (twelve lines).
+  frame time), report to reports/M<n>-tester.md; failures go through one `integrator` round
+  each, at most two rounds.
+- `look` reviews every PNG in `shots/`, report to reports/M<n>-look.md; REDO → `integrator`.
+- `story` runs a **plan review**: reads STATUS and reports/M<n>-*.md plus the slices' integrator
+  reports; does anything in PLAN/SKILLS/ITEMS/STORY need remaking? It writes decisions into the
+  docs, may reorder the remaining slices in STATUS, parks anything that needs the player.
+- `integrator` folds the milestone's ARCHITECTURE.md sections (PRODUCTION.md "Milestone end"),
+  then step 8, then a milestone report to the player (twelve lines).
 
 ## Parking
 A parked item is written in STATUS.md under "Needs the player" with the question, the
-recommendation, and which slice waits on it. The loop continues with the next slice that does
-not depend on it. If no slice can run, the loop stops (Stop).
+recommendation, and which slice waits on it (the integrator writes it in step 8; if the slice
+stops before step 8, a one-line `integrator` or the lead's own small edit does). The loop
+continues with the next slice that does not depend on it. If no slice can run, the loop stops.
 
 ## Retries and stop conditions
-- Any agent that fails or reports gates red: one retry with the failure pasted in. A second
-  failure on the same step stops the loop.
-- A gate the lead runs that fails twice in a row on the same slice stops the loop.
+- Any agent that replies RED: one retry, pointing at its own report file. A second RED on the
+  same step stops the loop.
+- Step 8 RED twice on the same slice stops the loop.
 - The loop also stops when the slice order is exhausted or everything is parked.
-- On stop: STATUS.md gets a "Stopped: <reason>" line with what is committed, what is not
-  (`git status --short`), and the next action; commit and push STATUS.md; tell the player in
-  eight lines. Never leave uncommitted builder work without a note in STATUS.
+- On stop: an `integrator` (or the lead, if that is what failed) writes a "Stopped: <reason>"
+  line in STATUS.md with what is committed, what is not (`git status --short`), and the next
+  action; commit and push STATUS.md; tell the player in eight lines. Never leave uncommitted
+  builder work without a note in STATUS.
 
 ## Context hygiene for the lead
-- Never read agent transcripts, test logs beyond their last lines, or screenshot folders;
-  the agents report, the lead relays.
-- Keep every agent brief under 600 words by pointing at doc sections instead of restating them.
-- One report line per slice in STATUS, not a diary.
-- When the session's context grows heavy, finish the current slice through step 9, then tell
+- Never open reports/, agent transcripts, logs, screenshots or doc sections; agents do.
+- Never re-paste text from one agent into another's prompt; name the file.
+- Gate output the lead runs is exit codes and counts only (`; echo $?`, `| wc -l`).
+- Agents run in the background; wait for their notification, never poll.
+- When the session's context grows heavy, finish the current slice through step 8, then tell
   the player it is a good moment to clear; the next session resumes with `/pickup` and
   `/automode`.

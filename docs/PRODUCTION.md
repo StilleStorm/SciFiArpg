@@ -24,7 +24,8 @@ only plan the lead reads; one slice = one loop iteration between a pickup and a 
 > `npm run check; echo $?`, `npm run shot; echo $?`, `npm run smoke; echo $?` (and
 > `npm run render-audio` if you touched audio) must print 0. Use your own `SHOT_PORT`, `SHOT_OUT`,
 > `SHOT_DIR`. Do not commit. Report: files; shared-file edits (exact); new events/fields/APIs;
-> SEAM list; unfinished; screenshot verdict against DESIGN §3.
+> SEAM list; unfinished; screenshot verdict against DESIGN §3. Write the report to
+> `reports/<slice>-builder-<name>.md` and answer the lead in at most five lines (WORKFLOW.md "Reports").
 
 ## Milestones
 | id | name | playable result | exit criteria |

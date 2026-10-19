@@ -23,3 +23,7 @@ Rules:
   STATUS for the slice order), never into chat alone. The voice editor (Opus) writes what
   characters say; builders (Sonnet) code; the integrator (Opus) closes seams; you do not edit
   code or i18n files.
+- Report: write what you changed in which doc sections and any open questions (with your
+  recommendation; mark player-only ones **BLOCKING FOR THE PLAYER**) to
+  `reports/<slice>-story.md`; your final message to the lead is at most five lines
+  (docs/WORKFLOW.md "Reports").

@@ -32,6 +32,14 @@ Diablo games have it?".
 - Green before reporting: `npm run typecheck && npm test && npm run lint:rules && npm run build`
   (and `npm run smoke` when the run flow is touched).
 
+## Reports: files for agents, five lines for the lead
+Every agent writes its full report to `reports/<slice>-<role>[-<name>].md` (for example
+`reports/S6-builder-roster.md`, `reports/S6-integrator.md`; the folder is git-ignored and
+overwritten per slice) in the shape its agent file names. Its final message to the lead is at
+most five lines: `GREEN` or `RED <step>`, the report path, commits made (hashes), SEAMs or
+failures left open (one line), questions for the player marked **BLOCKING FOR THE PLAYER**.
+The next agent's brief names the report paths to read; nobody pastes a report into a brief.
+
 ## Brief template (lead → builder)
 ```
 Scope: <one domain>, DESIGN §<n> (list the subsections).
@@ -42,7 +50,10 @@ Contracts you must provide: <exports/events with exact signatures>.
 Screenshots: SHOT_PORT=<n> SHOT_OUT=dist-<name> SHOT_DIR=shots-<name>; add scripts/shot-<name>.mjs if needed.
 Tests: <which pure functions>.
 Report shape: files; shared-file edits; new events/fields/flags/APIs; SEAM list; unfinished; screenshot verdict.
+Report to: reports/<slice>-builder-<name>.md; five lines to the lead (see Reports).
 ```
+In automode the brief already lives in docs/PRODUCTION.md; the lead's brief only points at it
+(slice, builder name, port, report path) instead of copying it.
 
 ## Gates
 - `npm run lint:rules`: Polish literals in code, `any`, non-null `!`, setTimeout, emoji,
@@ -58,4 +69,4 @@ Report shape: files; shared-file edits; new events/fields/flags/APIs; SEAM list;
 - Fable (lead): the brief, the plan, scope decisions, the final review.
 
 ## Automode
-`/automode` (`.claude/skills/automode/SKILL.md`) runs the slice order without the player: story → builders → integrator → voice → tester → look → gate → push → STATUS → report, with milestones, parking for player questions, retries and stop conditions. The `tester` agent (Sonnet) owns smoke legs and milestone e2e scripts.
+`/automode` (`.claude/skills/automode/SKILL.md`) runs the slice order without the player: story → builders → integrator → voice → tester → look → integrator gate, push, deploy and STATUS → report, with milestones, parking for player questions, retries and stop conditions. The lead only routes: short pointer briefs, five-line replies, report files on disk. The `tester` agent (Sonnet) owns smoke legs and milestone e2e scripts.
