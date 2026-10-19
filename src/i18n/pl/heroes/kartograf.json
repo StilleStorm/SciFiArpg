@@ -74,7 +74,7 @@
   "ult": {
     "mapaOstateczna": {
       "name": "Mapa ostateczna",
-      "desc": "Przez 6 s każdy przeciwnik na stronie jest zmierzony i zgłoszony. Pomiar strzela dwukrotnie, a każda linia przebija.",
+      "desc": "Przez 6 s każdy przeciwnik na stronie zostaje zmierzony i zgłoszony. Pomiar strzela dwukrotnie. Linie przechodzą na wylot.",
       "stamp": "ZATWIERDZONO DO DRUKU",
       "note": "Skala 1:1. Marginesy obrysowane.",
       "para": {
@@ -84,11 +84,11 @@
         },
         "2": {
           "name": "Druk pojedynczy",
-          "desc": "Mapa trwa 8 s, pomiar strzela raz."
+          "desc": "Mapa trwa 8 s. Pomiar strzela raz."
         },
         "3": {
           "name": "Nakład poczwórny",
-          "desc": "Mapa trwa 4 s, pomiar mechaniczny strzela czterokrotnie. Kosztuje 6 racji."
+          "desc": "Mapa trwa 4 s, pomiar mechaniczny strzela czterokrotnie. Kosztuje 6 racji."
         }
       }
     }

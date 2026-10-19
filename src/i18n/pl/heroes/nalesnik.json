@@ -74,7 +74,7 @@
   "ult": {
     "decyzjaKomisji": {
       "name": "Decyzja Komisji",
-      "desc": "Przez 8 s wniosek o promieniu 200 podąża za nim. Kto do niego wejdzie, zostaje zablokowany na 1,5 s i otrzymuje obrażenia. Naleśnik odzyskuje 6 racji na sekundę.",
+      "desc": "Przez 8 s za Naleśnikiem podąża wniosek o promieniu 200. Kto do niego wejdzie, zostaje zablokowany na 1,5 s i otrzymuje obrażenia. Wnioskodawca odzyskuje w tym czasie 6 racji na sekundę.",
       "stamp": "PLANETA KARŁOWATA",
       "note": "Asystent odnotował decyzję.",
       "para": {
@@ -84,11 +84,11 @@
         },
         "2": {
           "name": "Decyzja odmowna",
-          "desc": "Decyzja trwa 4 s, obrażenia egzystencjalne podwójne. Kosztuje 8 racji."
+          "desc": "Decyzja trwa 4 s, obrażenia egzystencjalne podwójne. Kosztuje 8 racji."
         },
         "3": {
           "name": "Decyzja warunkowa",
-          "desc": "Decyzja mechaniczna, bez blokady: każdy w obszarze otrzymuje co sekundę połowę obrażeń. Kosztuje 6 racji."
+          "desc": "Decyzja mechaniczna, bez blokady: każdy w obszarze otrzymuje co sekundę połowę obrażeń. Kosztuje 6 racji."
         }
       }
     }

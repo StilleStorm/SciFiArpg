@@ -74,9 +74,9 @@
   "ult": {
     "pelnyCykl": {
       "name": "Pełny cykl",
-      "desc": "Przez 5 sekund wszystko w promieniu 200 jest wciągane do bębna i co sekundę otrzymuje obrażenia. Na koniec cyklu zostaje zablokowane na 2 s.",
+      "desc": "Przez 5 s wszystko w promieniu 200 jest wciągane do bębna i co sekundę otrzymuje obrażenia. Na koniec cyklu zostaje zablokowane na 2 s.",
       "stamp": "CYKL ZAKOŃCZONY",
-      "note": "Program nr {number}.",
+      "note": "Program nr {number}.",
       "para": {
         "1": {
           "name": "Brzmienie podstawowe",
@@ -84,11 +84,11 @@
         },
         "2": {
           "name": "Program delikatny",
-          "desc": "Cykl trwa 8 s, obrażenia na sekundę mniejsze o połowę. Bez blokady na końcu. Pralka odzyskuje 3 racje na sekundę."
+          "desc": "Cykl trwa 8 s, obrażenia na sekundę mniejsze o połowę. Bez blokady na koniec. Pralka odzyskuje 3 racje na sekundę."
         },
         "3": {
           "name": "Program intensywny",
-          "desc": "Cykl regulaminowy, 3 s, obrażenia na sekundę dwa razy większe, promień 140. Kosztuje 8 racji."
+          "desc": "Cykl skrócony do 3 s, obrażenia na sekundę podwójne, promień 140. Kosztuje 8 racji."
         }
       }
     }
