@@ -1293,6 +1293,41 @@ try {
   check('kartograf: the auto-attack is a hitscan laser: no projectile, a ruled line and a distance label in the fx layer', laser.projectiles === 0 && laser.label !== null && laser.lines >= 1, JSON.stringify(laser));
   await shot('15-kartograf-laser');
 
+  // S9: a named elite is captioned with its full name and its kill leaves the extra item; pack minions carry the bracket
+  const elite = await page.evaluate(async () => {
+    const g = window.__game;
+    const s = g.state();
+    const frame = () => new Promise((r) => requestAnimationFrame(() => r(null)));
+    g.enemies.clear();
+    s.pickups.length = 0;
+    s.player.hp = s.player.hpMax = 1e9;
+    const id = g.enemies.spawnNamed('urzadzenia', 'pilny');
+    const pack = g.enemies.spawnPack('powiadomienia', 'pilny');
+    await frame();
+    await frame();
+    const nameLines = document.querySelectorAll(`[data-id="${id}"] [data-part="named"]`).length;
+    const marks = pack.slice(1).filter((m) => document.querySelector(`[data-id="${m}"] [data-part="pack"]`)).length;
+    const items = () => s.pickups.filter((k) => k.item).length;
+    for (const m of pack) for (const t of ['regulaminowy', 'mechaniczny', 'egzystencjalny']) g.enemies.hit(m, t, 1e7);
+    const before = items();
+    for (const t of ['regulaminowy', 'mechaniczny', 'egzystencjalny']) g.enemies.hit(id, t, 1e7);
+    const dead = !s.enemies.some((e) => e.id === id);
+    return { id, nameLines, minions: pack.length - 1, marks, dead, items: items() - before };
+  });
+  check('named elite: two caption lines with the recorded name; its kill leaves the elite item and the guaranteed one', elite.nameLines === 2 && elite.dead && elite.items >= 2, JSON.stringify(elite));
+  check('elite pack: every minion carries the bracket mark under its feet', elite.minions >= 2 && elite.marks === elite.minions, JSON.stringify(elite));
+
+  // S9: the Sklep stamps its oferta and its adapter plate over the price
+  const kinds = await page.evaluate(async () => {
+    window.__game.openSklep();
+    await new Promise((r) => requestAnimationFrame(() => r(null)));
+    const out = [...document.querySelectorAll('.sk-kind')].map((n) => n.textContent);
+    const rows = document.querySelectorAll('.sk-row').length;
+    document.querySelector('.ps-close')?.click();
+    return { rows, kinds: out };
+  });
+  check('sklep: six plates, the oferta and the adapter plate each carry a kind stamp', kinds.rows === 6 && kinds.kinds.length === 2, JSON.stringify(kinds));
+
   await page.evaluate(() => window.__game.start(12, { heroId: 'nalesnik' }));
   await sleep(1400);
   await settle(); // the regulamin sheet of a fresh run holds the clock until it is accepted

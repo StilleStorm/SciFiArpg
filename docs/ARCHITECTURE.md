@@ -73,6 +73,7 @@ after the boss fell (`canOpenUpdate`). In the base only the HUD tap opens it.
 - Presentation: `footnote {text}`, `footnote:added {n, text, correction}` (every printed footnote), `stamp {text, x, y, quiet?, away?}` (`quiet`: another recipe carries the thud, audio plays no stamp; `away`: a point it must not cover; `render/bindings.ts placeStamp` keeps every bus stamp inside `freeViewRect(camera, 'stamp')` and 80 units off `away`),
   `margin:note {text, x, y, ttl?}`, `law:trigger`, `law:ask`, `pickup:taken`.
 - Campaign: `campaign:advanced {from, to, finale}`, `case:closed` (both from `settleCampaign` on `run:ended 'ukonczono'`).
+- Elites: `elite:named {id, x, y, name}` (a named elite placed), `elite:slain {id, x, y, name, minTier}` (it died; no sound yet).
 - Recovery: `recovery:taken {healed, held}` (0 healed = kept), `recovery:used {auto, healed, held}`.
 - `Bus.recent(n = 10)`: the last events (ring of 40, minus `skill:aim`, `player:tap`, `enemy:miss`, `attack:started`) as
   `{name, payload}` text, for the bug dump.
@@ -157,15 +158,16 @@ words are bound to the next with U+00A0 by `t()`. No user-facing strings in `.ts
 `startBase(seed?)`, `station(name)`, `acceptTicket`, `walkToExit`, `openTunnel`, `enterTunnel`, `returnFromTunnel`,
 `tapUltimate`, `ultimatePad() {ready, off, inked, hidden}`, `keepOut()` (the measured screen layout), `setLevel(n)`, `fillMeter(v=1)`, `setMeterUi(v)`, `castUltimate`,
 `ultimateInfo() {meter, ready, active, paragraph}`, `setSpecialization(id|null)`, `loadoutInfo() {pads, categories, specialization, capstone, advice}`, `hero.{cast, installSkill, openAssign, assignPad, setParagraph, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
-`enemies.{spawnFamily, spawnBoss, hit, clear, list}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
+`enemies.{spawnFamily, spawnBoss, spawnPack, spawnNamed, hit, clear, list}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
 `npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot` (390x844 @2x and 844x390 into `shots/`);
-per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3,s4,s5,s6,s7,s8,recovery}.mjs` (each with its own
+per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3,s4,s5,s6,s7,s8,elite-packs,recovery}.mjs` (each with its own
 SHOT_PORT/SHOT_OUT/SHOT_DIR, usage in the header). `npm run smoke` plays a ticket with real buttons: creation form, base
 (HUD, margin note, update from the HUD line), desk, ticket, exit, run (header clear of the note row, no bubble under a pad or note,
 the update line clear in tap/joystick x both hands), fight, update, inventory, pause, Zakończ,
 the Argument meter and an ultimate (3d), bookmark resume, two tunnels and the return, boss, death, a landscape joystick leg (two touches, the footnote slip), the S4 leg (6f: desk loadout -> run -> reload, the chart), the S5 leg (6g: damage numbers, text size, drop ->
 heal, full -> held, tap use, auto-use, the pause bug line, export -> import equality), item marks on the sheet (S8), the S6 leg (6h: roster over a held run
-settles it, a second file at level 1, the first file's level and bookmark back, an archive move),
+settles it, a second file at level 1, the first file's level and bookmark back, an archive move), the S9 checks (named elite caption
+and extra drop, pack brackets, Sklep kind stamps),
 then 5 s of frame times with 40 enemies (`PERF_MAX_MS`, `SMOKE_UNCAPPED`); exit 1 on any failed check or page error.
 
 ## Aiming (DESIGN 5.6)
@@ -394,7 +396,7 @@ campaign, accept at once). `bindCampaign(bus, () => game.state)` is registered a
 removes it (`.card-layer[data-card]`). Hooks: `setCampaignView(v|null)` (view only), `showCard(kind)`, `priority()`
 (`state.plan.priority`). Smoke leg 6c plays it (opening card, locked priorities, priority on the run, a won ticket closes
 planet 1 once and shows planet 2's chapter card, nine travel rows, travel → rewritten card). Shots: `shot-s7.mjs` (4187,
-`dist-s7`, `shots-s7/`). Open: `ilvlBase(planet)` waits for the S9 item level; `PlanetDef.baseLayouts` (base still by
+`dist-s7`, `shots-s7/`). Open: `PlanetDef.baseLayouts` (base still by
 seed), planet mix in `pageTurn.planWaves` (only the trickle uses it) and boss scaling are data only.
 
 ## Items: affix pool, 40 bases, marks (S8, ITEMS 2/3/9)
@@ -415,3 +417,17 @@ never stocked. Marks: `render/itemMarks.ts` (`AFFIX_MARK` keyed by `Affix.absurd
 ewentualny pewność), `declaredHead` ("(wg relacji)" for rzekomy, which shows "Próba 0 z 0"), `isStruck` (wycofany
 number struck, class `.struck`). Hook `itemGallery(mode)`; shots `shot-s8.mjs`. Open: sell, bin and reklamacja are not built
 (S9+ must call `disposalRefusal`); sets (zestaw, paperclip) wait for S10.
+
+## Item level, drops, Sklep, elite packs (S9, ITEMS 5-7, PLAN 8)
+`items/level.ts`: `ilvlFor({planet, priority, pageIndex, pageCount, boss})`, `shopIlvl(planet)` (band + 1), `ilvlScale`,
+`TIER_BASE_MUL/TIER_BUDGET/TIER_PRICE_MUL`, `listPrice` (= `generate.itemValue`), `actualOverClaim` (lie size per tier).
+`systems/loot.ts`: `DROP_TIER_WEIGHTS`, `rollDropTier(rng, weights, priority, lawBonus)`, `dropLevel(s, boss)`,
+`dropGuaranteed(s, x, y, minTier)`; `bindLoot` on `enemy:died` runs `dropLoot`, then `enemies/named.claimNamedDrop(s, id)`
+(once per named elite, any listener order) → `dropGuaranteed`, then the permission card. `economy/sklep.ts restock(state,
+seed, visit, level)`: 3 low plates, 1 rzadki, 1 `oferta` (g3 line), 1 `adapter`; `Listing.kind` drawn as a `stamp-tag
+.sk-kind` over the price. Callers pass `shopIlvl(planet)`: `mountSklep(..., {planet})` (main: `plan.planet ?? campaign.current`;
+kiosk: `plan.planet`). Enemies: `ELITE_IDS` 10 (six new affixes in `enemies/elites.ts`), `EnemyRt.{affixes, packOf, packSize,
+named}`; `spawnElite(..., {makeNamed, pack})`, packs of 2-4 minions, named elites (`named.ts`, gap 2 pages). Render
+(`enemyFigures.eliteCaption`): a named elite's name in two serif lines (`data-part="named"`), a pack minion's square
+bracket under the feet (`data-part="pack"`). Open SEAMs: zestaw drops and offers (S10 sets), the won-Spór tier bonus,
+the final boss "not yet archived" unique, przesyłka/awizo (slice f); elite sounds wait for M7.
