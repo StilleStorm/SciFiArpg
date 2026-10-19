@@ -754,6 +754,26 @@ try {
   await page.locator('.ps-close').click({ timeout: 2000 }).catch(() => undefined);
   await sleep(300);
 
+  // ---------- 4a. S8 item marks per tier, gallery of 5 slots x 4 tiers ----------
+  const gal = await page.evaluate(() => {
+    window.__game.itemGallery('tiers');
+    const cells = [...document.querySelectorAll('#item-gallery .gal-cell')];
+    const rows = cells.map((c) => ({ tier: c.querySelector('.gal-name')?.textContent?.match(/\(([^()]+)\)\s*$/)?.[1] ?? '', tierMarks: c.querySelectorAll('.tier-mark').length, name: c.querySelector('.gal-name')?.textContent ?? '' }));
+    window.__game.itemGallery('affixes');
+    const affix = [...document.querySelectorAll('#item-gallery .gal-cell')].filter((c) => c.querySelector('.affix-mark')).length;
+    window.__game.itemGallery('ground');
+    const ground = document.querySelectorAll('#item-gallery .tier-mark').length;
+    document.getElementById('item-gallery')?.remove();
+    return { rows, affix, ground };
+  });
+  const byTier = (w) => gal.rows.filter((r) => r.tier === w);
+  check(
+    'S8 marks: 20 item figures; zwykły has no tier mark, nietypowy/rzadki/unikatowy have exactly one, names are clean Polish',
+    gal.rows.length === 20 && byTier('zwykły').length === 5 && byTier('zwykły').every((r) => r.tierMarks === 0) && ['nietypowy', 'rzadki', 'unikatowy'].every((w) => byTier(w).length >= 1 && byTier(w).every((r) => r.tierMarks === 1)) && gal.rows.every((r) => !/items\.|undefined/.test(r.name)),
+    JSON.stringify(gal.rows.map((r) => `${r.tier}:${r.tierMarks}`)),
+  );
+  check('S8 marks: absurd-affix figures draw a small mark and the ground plates draw tier marks', gal.affix >= 4 && gal.ground === 15, JSON.stringify({ affix: gal.affix, ground: gal.ground }));
+
   // ---------- 4b. pause, resume, Zakończ and the bookmark (DESIGN 4.1) ----------
   await settle();
   await page.evaluate(() => {
