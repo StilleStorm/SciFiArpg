@@ -63,8 +63,8 @@ after the boss fell (`canOpenUpdate`). In the base only the HUD tap opens it.
   `tunnel:closed {reason: return | second | death | end | page}` (the first three are taped).
 - Combat: `attack:started {attackerId, attacker, x, y, tx, ty, ranged}`, `player:hit`, `enemy:hit|miss`,
   `enemy:died {id, x, y, tier?, family?}`, `boss:died`, `boss:phase`, `enemy:rebutted|offTopic|escalated`.
-- Hero: `skill:cast {slot, skill, free, aim}`, `skill:fx` (kind, x, y, x2, y2, r), `summon:expired`, `player:levelup`, `update:ready`, `player:died`, `player:unsuspended`.
-- Presentation: `footnote {text}`, `footnote:added {n, text, correction}` (every printed footnote), `stamp`,
+- Hero: `skill:cast {slot, skill, free, aim}`, `ultimate:cast {heroId, ultimateId, x, y}`, `skill:fx` (kind, x, y, x2, y2, r), `summon:expired`, `player:levelup`, `update:ready`, `player:died`, `player:unsuspended`.
+- Presentation: `footnote {text}`, `footnote:added {n, text, correction}` (every printed footnote), `stamp {text, x, y, quiet?}` (`quiet`: another recipe carries the thud, audio plays no stamp),
   `margin:note {text, x, y, ttl?}`, `law:trigger`, `law:ask`, `pickup:taken`.
 
 ## The base page, the tunnel, pause and save (DESIGN 4.1)
@@ -102,7 +102,8 @@ margin notes) -> `#ui`. `render/bindings.ts bindFx(bus, views, page)`: the margi
 cut after a whole sentence. Camera (`render/camera.ts`): at least 390 wide, 700 tall in portrait, 520 in landscape;
 `bounds` follow the page shown. Ink: `drawIn, eraseOut, strike, blot, stamp, marginNote, tapMark` (`render/ink.ts`);
 paint only via `render/wash.ts washGroup`. No gradients, glow, shadows; red only for stamps, strikes, Racja.
-`render/attackFx.ts` turns `attack:started` into transform-only poses. Sheets share `ui/sheet.ts`; every `#ui` button
+`render/attackFx.ts` turns `attack:started` into transform-only poses. `render/ultFx.ts createUltFx(fx).frame(s)` (game.ts
+render) outlines each running ultimate with an `r` as a dotted `.ult-area` circle in #fx at its `x, y`, erased when it ends. Sheets share `ui/sheet.ts`; every `#ui` button
 is at least 44 x 44.
 
 ## Controls and layout (DESIGN 2)
@@ -116,7 +117,8 @@ landing on it steers) and otherwise only reaches the kiosk. Skill pads cast on `
 Web Audio only, synthesized; `audio/bindings.ts` is the one place events meet sounds; nothing exists before the first
 gesture; errors are swallowed. Music flags (`deriveFlags`): enemiesNear, elite, boss, botTime, `paused` (set from
 `game:paused`, played like bot hours), reversed, suspended, dead, pageTurn, `base` (calm layer, 6 dB down). Music runs
-from `run:started` to `run:ended` and in the base. `npm run render-audio` measures peaks, body band and clipping.
+from `run:started` to `run:ended` and in the base. Hero sounds come from `heroById(id).sounds` (`skills[5]`, `autoStart?`,
+`ultimate?`: played with a duck on `ultimate:cast`). `npm run render-audio` measures peaks, body band and clipping.
 
 ## i18n
 `t('domain.key', params)`; `src/i18n/pl/<domain>.json` (file name = prefix). Plurals `{one, few, many}`. One-letter
@@ -128,13 +130,14 @@ words are bound to the next with U+00A0 by `t()`. No user-facing strings in `.ts
 `demoInventory`, `openInventory`, `openSklep`, `openKiosk`, `setTheme`, `setOrientation`, `setSteering`,
 `setLeftHanded`, `controls`, `joystick(dx, dy)`, `pause`, `resume`, `endTicket`, `resumeTicket`, `character`,
 `startBase(seed?)`, `station(name)`, `acceptTicket`, `walkToExit`, `openTunnel`, `enterTunnel`, `returnFromTunnel`,
-`hero.{cast, installSkill, openAssign, assignPad, setParagraph, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
+`tapUltimate`, `ultimatePad() {ready, off, inked, hidden}`, `setLevel(n)`, `fillMeter(v=1)`, `setMeterUi(v)`, `castUltimate`,
+`ultimateInfo() {meter, ready, active, paragraph}`, `hero.{cast, installSkill, openAssign, assignPad, setParagraph, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
 `enemies.{spawnFamily, spawnBoss, hit, clear, list}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
 `npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot` (390x844 @2x and 844x390 into `shots/`);
-per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2}.mjs` (each with its own
+per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3}.mjs` (each with its own
 SHOT_PORT/SHOT_OUT/SHOT_DIR, usage in the header). `npm run smoke` plays a ticket with real buttons: profile, base
 (HUD, margin note, update from the HUD line), desk, ticket, exit, run, fight, update, inventory, pause, Zakończ,
-bookmark resume, two tunnels and the return, boss, death, a landscape joystick leg (two touches, the footnote slip),
+the Argument meter and an ultimate (3d), bookmark resume, two tunnels and the return, boss, death, a landscape joystick leg (two touches, the footnote slip),
 then 5 s of frame times with 40 enemies (`PERF_MAX_MS`, `SMOKE_UNCAPPED`); exit 1 on any failed check or page error.
 
 ## Aiming (DESIGN 5.6)
@@ -255,3 +258,28 @@ Hook (`enemies/hook.ts` or `heroes/hook.ts`): `spor.answer(index)`, `spor.info()
 a prompt is posted; a wrong answer costs racja; the right one opens the window (hp loss of the boss doubles).
 
 Spór layout: in portrait the boss's comment bubble stacks above its claim bubble; in landscape it stands beside it at the same height (right, or left when left-handed), chosen when the bubble is built. Reply strip: `ui/spor.ts`, boxed form buttons, 12 s TTL.
+
+## Argument meter and ultimates (S3, DESIGN 10.2)
+Meter: `Player.meter` 0..1, never saved. `combat/meter.ts` (pure): `meterOf`, `ultimateReady`, `meterGain(s, x)` (nothing while an
+ultimate runs), `meterSpend`, `killFill(tier)`, `tickMeter(s, clock, dt)`; constants `METER_REBUTTAL 0.08`, `METER_KILL 0.03 / _ELITE
+0.06 / _BOSS 0.15`, `METER_SPOR 0.5`, drain `METER_DRAIN_PER_S 0.01` after `METER_IDLE_S 4` with no enemy within `METER_COMBAT_R 320`.
+Sources: `systems/combat.ts applyDamage(s, bus, defender, amount, crit, type?, credit = true)` fills on a rebuttal (an enemy defender,
+`isRebuttal(claim, type)` checked before the claim is struck); pass `credit = false` for a blow that is not the player's (an enemy
+redirected onto another, `heroes/system.ts stepRedirects`). `killEnemy` adds `killFill`; `combat/spor.ts answerSpor` adds half on a
+right reply. Ultimates: `heroes/ultimateDefs.ts` (`defineUltimate(hero, spec)`, `UltimateDef {id, level, type, seconds, radius|null,
+pageWide, keys, list: 3 x UltimateParagraph {patch, tune}, cast, tick?, end?}`, `UltEnv`, `perSecond`, `MAX_ULT_S 8`, `MAX_ULT_RADIUS
+220`, `FIRST_ULTIMATE_LEVEL 12`); per hero `heroes/<id>/ultimates.ts` -> `HeroModule.ultimates` (template in `_template/ultimates.ts.tpl`).
+Runtime `heroes/ultimate.ts`: `ultimateOf(s)` (the first; S4's loadout will choose), `ultimateUnlocked(s)` (player level >= def.level),
+`castUltimate(s, bus)` (refuses unless running, run phase, no modal, unlocked, meter full, not botTime/stunned/silenced, none running;
+spends the meter, pays `patch.cost` in racja never fatally, pushes `ActiveUlt` onto `HeroRun.ult.active` with `r` = `tune.radius` or
+`def.radius`, runs `cast`, emits one quiet `stamp`, one `margin:note`, `ultimate:cast`), `stepUltimates` (heroStep: drain, tick, end),
+`setUltimateParagraph(s, n)` (not saved yet: S4), `ultimateSeconds`, `ultimateActive`, `ultimateAuto` (Kartograf: `shots`/`pierce` read by
+`heroes/auto.ts fireLaser`). UI: `ui/ultimate.ts` is the only door from ui to the meter. `ui/pads.ts`: the fourth pad `.pad.ult` (stamp
+pad, `ULT_STROKES 10` cushion strokes, `inkedStrokes(m)`), `.locked` (display none) below the unlock level, `.off` until full, `.ready`
+(red cushion); portrait above the three in the thumb column, landscape in the arc, lefty mirrored, hidden in the base; the Spór strip
+makes room (`.spor` right 96 px portrait, +250 px landscape). `ui/hud.ts`: field "Argument" (`.arg`) beside Racja, an ink underline that
+fills, red (`.full`) when full. Audio: five recipes `pralkaUlt, konsUlt, petlUlt, kartoUlt, nalesUlt` (body layers, end in the stamp
+thud), named by `HeroSounds.ultimate`. Smoke 3d: hidden and refused below 12, `setLevel(12)`, rebuttals fill to full, the pad is ready,
+a real click casts (one stamp, meter 0, `.ult-area` drawn), it ends within 8 s and the outline is gone. Shots: `scripts/shot-s3.mjs`
+(port 4183, `dist-s3`, `shots-s3/`: hidden, 30 %, full, after, in portrait tap/joystick/lefty and three landscapes).
+
