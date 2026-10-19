@@ -153,22 +153,30 @@ export const TECZKA_SLIP_CHANCE = 0.2;
 
 const priorityOf = (s: RunState) => s.plan?.priority ?? 'normalny';
 
-function around(s: RunState, x: number, y: number, min = 34, max = 58): { x: number; y: number } {
+/**
+ * Where the k-th thing out of a folder lands: on the far side from the hero (who stands at the folder when it opens),
+ * one slot per thing, fanned so the folder, the hero and the loot read as separate drawings.
+ */
+function around(s: RunState, x: number, y: number, k = 0): { x: number; y: number } {
   const rng = s.rngs.loot;
-  const a = rng.range(0, Math.PI * 2);
-  const d = rng.range(min, max);
+  const p = s.player;
+  const dx = x - p.x;
+  const dy = y - p.y;
+  const away = Math.hypot(dx, dy) > 12 ? Math.atan2(dy, dx) : rng.range(0, Math.PI * 2);
+  const a = away + (k - 1) * 0.95 + rng.range(-0.2, 0.2);
+  const d = 96 + rng.range(0, 30);
   return { x: x + Math.cos(a) * d, y: y + Math.sin(a) * d };
 }
 
 function payStars(s: RunState, x: number, y: number, base: number): number {
   const n = Math.max(1, Math.round(base * PRIORITY_STAR_MUL[priorityOf(s)]));
-  const at = around(s, x, y);
+  const at = around(s, x, y, 0);
   s.pickups.push(createPickup(nextId(s), at.x, at.y, 0, undefined, n));
   return n;
 }
 
 function paySlip(s: RunState, x: number, y: number): void {
-  const at = around(s, x, y);
+  const at = around(s, x, y, 2);
   s.pickups.push(createPotwierdzeniePickup(nextId(s), at.x, at.y));
 }
 
@@ -180,7 +188,7 @@ export function teczkaLoot(s: RunState, z: Teczka): { items: number; gwiazdki: n
   const extra = rt.wrapped ? 0 : effectsOf(activeBuffs(s)).lootTier;
   const tier = rollDropTier(rng, TECZKA_WEIGHTS, priorityOf(s), s.law.lootTierBonus + extra);
   const item = rollItem(rng, { level: dropLevel(s), source: 'common', tier });
-  const at = around(s, z.x, z.y);
+  const at = around(s, z.x, z.y, 1);
   item.number = s.nextItemNumber++;
   s.pickups.push(createPickup(nextId(s), at.x, at.y, item.number, item));
   let gwiazdki = 0;
