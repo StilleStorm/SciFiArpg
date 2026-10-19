@@ -258,7 +258,7 @@
         }
       },
       "quests": "Zgłoszenia do wykonania",
-      "questsNote": "Zgłoszenia pobiera się z tablicy i na tablicy się je wykonuje. Kolejność dowolna, termin nieokreślony."
+      "questsNote": "Zgłoszenia pobiera się z tablicy. Wykonanie zgłasza się na tablicy. Kolejność dowolna, termin nieokreślony."
     },
     "exitNote": "wymaga zgłoszenia",
     "exitLocked": "Przejście wymaga zgłoszenia. Zgłoszenia przyjmuje biurko.",
@@ -352,7 +352,7 @@
       "regulaminowy": "Regulaminowe",
       "egzystencjalny": "Egzystencjalne"
     },
-    "noNotes": "Brak adnotacji. Stan wolny od adnotacji.",
+    "noNotes": "Brak adnotacji. Stan nie budzi zastrzeżeń.",
     "seconds": "jeszcze {n} s",
     "potwValue": "{count} z {cap}",
     "noSpec": "Nie wybrano",
@@ -363,16 +363,16 @@
       "name": "Referent ds. Przydziałów",
       "role": "Komisja do Spraw Zjawisk Lokalnych, stanowisko 3",
       "line0": "Zgłoszenie jest rozpatrywane. Kolejność rozpatrywania ustala się w trakcie rozpatrywania.",
-      "line1": "Przesyłki przyjmuję, ale ich nie doręczam. Doręczam, ale ich nie przyjmuję. Który wariant dotyczy zgłaszającego, ustali kolejka.",
+      "line1": "Przesyłki przyjmuję, ale nie doręczam. Doręczam, ale nie przyjmuję. Wariant ustala kolejka.",
       "line2": "Stanowisko jest czynne do końca stanowiska."
     },
     "close": "Zamknij",
     "back": "Wróć",
     "nothing": "Brak poleceń na dziś. Polecenia wydaje się wczoraj.",
-    "parcel": "Przesyłka przyjęta: {title}. Pokwitowanie zostanie wydane po przyjęciu pokwitowania."
+    "parcel": "Przyjęto przesyłkę do zgłoszenia «{title}». Pokwitowanie wydaje się po złożeniu pokwitowania."
   },
   "quests": {
-    "readyNote": "Zgłoszenie «{title}» spełnia warunki wykonania. Zgłosić na tablicy.",
+    "readyNote": "Zgłoszenie «{title}» spełnia warunki wykonania. Wykonanie zgłasza się na tablicy.",
     "active": "Przyjęte",
     "available": "Do przyjęcia",
     "none": "Brak ogłoszeń. Ogłoszenia są w druku.",
@@ -380,15 +380,15 @@
     "report": "Zgłaszam wykonanie",
     "drop": "Odstępuję",
     "full": {
-      "one": "Przyjęto już {count} zgłoszenie. Więcej nie przyjmuje się.",
-      "few": "Przyjęto już {count} zgłoszenia. Więcej nie przyjmuje się.",
-      "many": "Przyjęto już {count} zgłoszeń. Więcej nie przyjmuje się."
+      "one": "Przyjęto już {count} zgłoszenie. Więcej się nie przyjmuje.",
+      "few": "Przyjęto już {count} zgłoszenia. Więcej się nie przyjmuje.",
+      "many": "Przyjęto już {count} zgłoszeń. Więcej się nie przyjmuje."
     },
     "stamp": "Załatwiono",
     "progress": "{done} z {n}",
     "page": "strona {done} z {n}",
     "stage0": "Przesyłka czeka na wyniesienie poza bazę.",
-    "stage1": "Przesyłka wyniesiona. Do doręczenia Referentowi.",
+    "stage1": "Przesyłkę wyniesiono. Do doręczenia Referentowi.",
     "stage2": "Doręczono.",
     "planetNote": "Ogłoszenie dotyczy tej planety. Na innych planetach nie obowiązuje.",
     "fromFamily": "z rodziny «{family}»",
@@ -411,17 +411,17 @@
       "0": {
         "title": "Likwidacja zjawisk",
         "text": {
-          "one": "Zlikwidować {count} zjawisko {from}. Zjawisko zgłoszono jako jedno; liczba pojedyncza nie została potwierdzona.",
-          "few": "Zlikwidować {count} zjawiska {from}. Zjawiska zgłoszono jako jedno; liczba pojedyncza nie została potwierdzona.",
-          "many": "Zlikwidować {count} zjawisk {from}. Zjawiska zgłoszono jako jedno; liczba pojedyncza nie została potwierdzona."
+          "one": "Zlikwidować {count} zjawisko {from}. Zgłoszono je jako kilka zjawisk. Liczby nie potwierdzono.",
+          "few": "Zlikwidować {count} zjawiska {from}. Zgłoszono je jako jedno zjawisko. Liczby nie potwierdzono.",
+          "many": "Zlikwidować {count} zjawisk {from}. Zgłoszono je jako jedno zjawisko. Liczby nie potwierdzono."
         }
       },
       "1": {
         "title": "Porządkowanie okolicy",
         "text": {
-          "one": "Skreślić {count} zjawisko {from}. Skreślenia dokonuje się długopisem służbowym, który wydano raz.",
-          "few": "Skreślić {count} zjawiska {from}. Skreślenia dokonuje się długopisem służbowym, który wydano raz.",
-          "many": "Skreślić {count} zjawisk {from}. Skreślenia dokonuje się długopisem służbowym, który wydano raz."
+          "one": "Skreślić {count} zjawisko {from}. Skreśla się długopisem służbowym. Długopis wydano jeden.",
+          "few": "Skreślić {count} zjawiska {from}. Skreśla się długopisem służbowym. Długopis wydano jeden.",
+          "many": "Skreślić {count} zjawisk {from}. Skreśla się długopisem służbowym. Długopis wydano jeden."
         }
       },
       "2": {
@@ -445,9 +445,9 @@
       "1": {
         "title": "Uzupełnienie braków",
         "text": {
-          "one": "Uzupełnić braki w ilości {count} sztuki. Braków nie ma, więc uzupełnia się je z tego, co jest.",
-          "few": "Uzupełnić braki w ilości {count} sztuk. Braków nie ma, więc uzupełnia się je z tego, co jest.",
-          "many": "Uzupełnić braki w ilości {count} sztuk. Braków nie ma, więc uzupełnia się je z tego, co jest."
+          "one": "Uzupełnić braki w ilości {count} sztuki. Braków nie stwierdzono. Uzupełnia się je z tego, co jest.",
+          "few": "Uzupełnić braki w ilości {count} sztuk. Braków nie stwierdzono. Uzupełnia się je z tego, co jest.",
+          "many": "Uzupełnić braki w ilości {count} sztuk. Braków nie stwierdzono. Uzupełnia się je z tego, co jest."
         }
       },
       "2": {
@@ -466,7 +466,7 @@
       },
       "1": {
         "title": "Wizja lokalna",
-        "text": "Odbyć wizję lokalną na stronie {count} zgłoszenia. Wizja jest lokalna także w razie braku widoku."
+        "text": "Odbyć wizję lokalną na stronie {count} zgłoszenia. Wizję uznaje się za lokalną także przy braku widoku."
       },
       "2": {
         "title": "Oględziny",
@@ -476,15 +476,15 @@
     "deliver": {
       "0": {
         "title": "Doręczenie wniosku",
-        "text": "Wynieść przesyłkę poza bazę, na pierwszą stronę zgłoszenia, a po powrocie doręczyć ją Referentowi. Referent jest w bazie. Baza jest tutaj."
+        "text": "Wynieść przesyłkę poza bazę, na pierwszą stronę zgłoszenia. Po powrocie doręczyć ją Referentowi. Referent jest w bazie. Baza jest tutaj."
       },
       "1": {
         "title": "Przesyłka zwrotna",
-        "text": "Wynieść przesyłkę poza bazę i zwrócić ją Referentowi. Nadawcą jest Referent. Odbiorcą jest Referent. Przewoźnik zostaje zgłaszający."
+        "text": "Wynieść przesyłkę poza bazę i zwrócić ją Referentowi. Nadawcą jest Referent. Odbiorcą jest Referent. Przewoźnikiem jest zgłaszający."
       },
       "2": {
         "title": "Pokwitowanie",
-        "text": "Odebrać pokwitowanie, którego nie wydano. W tym celu wynieść poza bazę wniosek o pokwitowanie i doręczyć go po powrocie."
+        "text": "Odebrać pokwitowanie, którego nie wydano. W tym celu wynieść poza bazę wniosek o pokwitowanie i po powrocie doręczyć go Referentowi."
       }
     }
   }

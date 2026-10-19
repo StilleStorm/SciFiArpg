@@ -6,8 +6,8 @@
   },
   "teczka": {
     "open1": "Teczka nr {n} otwarta. Zawartość zgodna ze spisem w zakresie, w jakim spis istnieje.",
-    "open2": "Teczka nr {n} była opieczętowana. Pieczęć nie wskazywała przez kogo.",
-    "open3": "W teczce nr {n} znaleziono dokumenty. Dołączono je do sprawy bez czytania."
+    "open2": "Teczka nr {n} była opieczętowana. Z pieczęci nie wynika, przez kogo.",
+    "open3": "W teczce nr {n} znaleziono dokumenty. Dołączono je do sprawy bez odczytania."
   },
   "seal": {
     "taken": "{name} przyłożona. Obowiązuje przez {seconds} s.",
@@ -19,7 +19,7 @@
     },
     "kontrola": {
       "name": "Pieczęć kontroli",
-      "desc": "Trafienia krytyczne częstsze o 15 punktów procentowych.",
+      "desc": "Szansa na argument nie do odparcia wyższa o 15 punktów procentowych.",
       "stamp": "SPRAWDZONO"
     },
     "argument": {
@@ -33,23 +33,23 @@
       "stamp": "W OBIEGU"
     },
     "zwolnienie": {
-      "name": "Zwolnienie z opłat",
-      "desc": "Paragrafy nie pobierają opłaty: bez kosztu racji i bez dłuższego odnawiania.",
+      "name": "Pieczęć zwolnienia z opłat",
+      "desc": "Paragrafy wykonuje się nieodpłatnie: bez kosztu racji i bez doliczonego czasu odnowienia.",
       "stamp": "ZWOLNIONO"
     },
     "wypoczynek": {
       "name": "Pieczęć urlopowa",
-      "desc": "Racja wraca o 3% maksimum na sekundę.",
+      "desc": "Racja wraca w tempie 3% maksimum na sekundę.",
       "stamp": "URLOP"
     }
   },
   "event": {
     "formularz": {
       "name": "Formularz do wypełnienia",
-      "start": "Formularz wymaga wypełnienia na miejscu, w ciągu {seconds} s obecności. Przeciwnicy nie zostali o tym poinformowani.",
+      "start": "Formularz wypełnia się na miejscu. Wymagana obecność: {seconds} s. Przeciwników o tym nie poinformowano.",
       "done": {
         "stamp": "PRZYJĘTO",
-        "note": "Formularz wypełniony. Okoliczności wypełnienia uznano za należyte."
+        "note": "Formularz wypełniony. Okoliczności wypełnienia uznano za typowe."
       }
     },
     "przesylka": {
@@ -66,7 +66,7 @@
     },
     "audyt": {
       "name": "Audyt",
-      "start": "Rozpoczęto audyt. Przez {seconds} s nie wolno ponieść szkody ani oddalić się od stanowiska.",
+      "start": "Rozpoczęto audyt. Przez {seconds} s nie wolno ponieść szkody ani opuścić stanowiska.",
       "done": {
         "stamp": "ZATWIERDZONO",
         "note": "Audyt zakończony bez uwag. Uwagi zostaną dopisane później."
