@@ -55,6 +55,10 @@ export interface Player extends Fighter {
   steer?: { dx: number; dy: number; mag: number };
   level: number;
   gwiazdki: number;
+  /** Percent more gwiazdki from pickups, from the gear (items/stats.ts sets it; economy/stars.ts earnStars reads it). */
+  starBonus?: number;
+  /** The fraction of a gwiazdka the bonus has accumulated so far (economy/stars.ts). Never saved. */
+  starCarry?: number;
   /** Worn items by slot (items/inventory.ts equips; items/stats.ts recomputes stats from them). */
   equipment: Partial<Record<Slot, Item>>;
   /** Carried items, at most INVENTORY_CAP (20). */

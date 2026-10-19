@@ -1,5 +1,7 @@
-import type { Stats } from '../combat/damage';
+import type { Defender, Stats } from '../combat/damage';
+import type { Rng } from '../core/rng';
 import type { Player } from '../entities/types';
+import { hitIgnoresItem } from './absurd';
 import { activeSets, refreshCompat, SET_BONUS } from './compat';
 import { RESIST_KEY, SLOTS, addStats, emptyStats, mapStats, type Item, type StatBlock } from './types';
 
@@ -53,6 +55,31 @@ export function recomputeStats(p: Player): void {
   if (p.hp > hpMax) p.hp = hpMax;
 
   p.damageType = weapon?.damageType ?? base.damageType;
-  p.attackRange = weapon?.range ?? base.attackRange;
-  p.attackCooldown = base.attackCooldown * (weapon?.cooldownMul ?? 1);
+  // S8 percentages: zasieg widens the reach, tempo (negative = faster) scales the cooldown, gwiazdki goes to the purse
+  p.attackRange = (weapon?.range ?? base.attackRange) * Math.max(0.5, 1 + sum.zasieg / 100);
+  p.attackCooldown = base.attackCooldown * (weapon?.cooldownMul ?? 1) * Math.max(TEMPO_FLOOR, 1 + sum.tempo / 100);
+  p.starBonus = sum.gwiazdki;
+}
+
+/** The fastest the summed tempo can make a cooldown (-50%). */
+export const TEMPO_FLOOR = 0.5;
+
+/**
+ * The player's defence against one incoming hit. A worn "domniemany" item is ignored by one hit in five
+ * (items/absurd.ts hitIgnoresItem): its upor and resists are taken off for that roll. Rolls only when such an item is worn.
+ */
+export function wearerDefence(p: Player, rng: Rng): Defender {
+  let out: Defender = p.stats;
+  for (const slot of SLOTS) {
+    const item = p.equipment[slot];
+    if (!item || !hitIgnoresItem(item, rng)) continue;
+    const e = effectiveStats(item);
+    if (out === p.stats) out = { upor: p.stats.upor, resist: { ...p.stats.resist } };
+    out.upor -= e.upor;
+    for (const type of ['mechaniczny', 'regulaminowy', 'egzystencjalny'] as const) {
+      const v = e[RESIST_KEY[type]];
+      if (v) out.resist[type] = (out.resist[type] ?? 0) - v;
+    }
+  }
+  return out;
 }

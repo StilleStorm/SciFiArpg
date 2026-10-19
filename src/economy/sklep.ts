@@ -75,12 +75,12 @@ function shuffled<T>(rng: Rng, list: readonly T[]): T[] {
 /** Make one listing. Whether it lies is decided here, with the current lie rate. */
 export function makeListing(rng: Rng, id: number, level: number, slot: Slot, rate: number): Listing {
   const tier = shopTier(rng);
-  const item = rollItem(rng, { tier, slot, level });
+  const item = rollItem(rng, { tier, slot, level, shop: true });
   const price = itemValue(item);
   const listing: Listing = { id, item, delivered: item, price, truePrice: price, sold: false };
   if (rng.chance(rate)) {
     if (rng.chance(0.5)) {
-      const variant = rollItem(rng, { tier, slot, level, baseId: item.baseId });
+      const variant = rollItem(rng, { tier, slot, level, baseId: item.baseId, shop: true });
       variant.variant = true;
       listing.delivered = variant;
       listing.lie = 'wariant';

@@ -7,6 +7,7 @@ import { nextId, type RunState } from '../world/run';
 import type { RangedSpec } from './partsBase';
 import { enemyOutgoing } from './hooks';
 import { projectileDamageMul } from '../heroes/shield';
+import { wearerDefence } from '../items/stats';
 
 /** Fire `count` shots from enemy e toward (tx, ty), fanned out by `spread` radians. */
 export function fireShot(s: RunState, e: Enemy, tx: number, ty: number, spec: RangedSpec, count = 1, spread = 0.22): void {
@@ -15,7 +16,7 @@ export function fireShot(s: RunState, e: Enemy, tx: number, ty: number, spec: Ra
   const p = s.player;
   for (let i = 0; i < count; i++) {
     const a = base + (count > 1 ? (i - (count - 1) / 2) * spread : 0);
-    const roll = rollDamage(e.stats, p.stats, spec.type, s.rngs.combat);
+    const roll = rollDamage(e.stats, wearerDefence(p, s.rngs.combat), spec.type, s.rngs.combat);
     const damage = roll.hit ? enemyOutgoing(e, Math.max(1, Math.round(roll.amount * spec.damageMul))) : 0;
     s.projectiles.push({
       kind: 'projectile',

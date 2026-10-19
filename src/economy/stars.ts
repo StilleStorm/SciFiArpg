@@ -8,6 +8,18 @@ export function addStars(p: Purse, n: number): void {
   if (k > 0) p.gwiazdki += k;
 }
 
+/**
+ * Gwiazdki earned from a pickup, with the gear's percent bonus (starBonus). The fractional part waits in starCarry,
+ * so +15% on single stars pays one extra star in about seven.
+ */
+export function earnStars(p: Pick<Player, 'gwiazdki' | 'starBonus' | 'starCarry'>, n: number): void {
+  if (n <= 0) return;
+  const total = n * (1 + Math.max(-100, p.starBonus ?? 0) / 100) + (p.starCarry ?? 0);
+  const whole = Math.floor(total + 1e-9);
+  p.starCarry = total - whole;
+  addStars(p, whole);
+}
+
 export const canAfford = (p: Purse, n: number): boolean => p.gwiazdki >= Math.ceil(n);
 
 /** Spend n gwiazdki. Returns false and changes nothing when there are not enough. */

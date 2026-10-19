@@ -19,6 +19,8 @@ import type { Stage } from '../render/stage';
 import { el, n2 } from '../render/svg';
 import { easeIn, tween } from '../render/tween';
 import type { Views } from '../render/view';
+import { pageEntryAll } from '../items/absurd';
+import { recomputeStats } from '../items/stats';
 import { canLeave, onPageEntered } from './laws';
 import { atExit } from './pages';
 import type { RunState } from './run';
@@ -143,6 +145,10 @@ export function enterPage(s: RunState, bus: Bus, index: number): void {
   s.spawnTimer = 10;
   onPageEntered(s, bus);
   bus.emit('page:entered', { index, count: s.pageCount });
+  // absurd affixes (items/absurd.ts): ewentualny re-rolls, sponsorowany advertises, the trial version runs out
+  const gear = pageEntryAll(s.player, s.rngs.loot);
+  if (gear.changed) recomputeStats(s.player);
+  for (const text of gear.notes) bus.emit('footnote', { text });
   // A resumed ticket is a new page from the seed handled by another consultant (DESIGN 4.1); said last, so it is the note that stays in view.
   if (resumed) bus.emit('footnote', { text: t('ui.note.reassigned', { number: s.ticket.number }) });
 }

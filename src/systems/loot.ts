@@ -2,7 +2,7 @@ import type { Bus } from '../core/events';
 import { createPermissionPickup, createPickup } from '../entities/factory';
 import type { FamilyId } from '../enemies/ids';
 import type { Pickup } from '../entities/types';
-import { addStars } from '../economy/stars';
+import { earnStars } from '../economy/stars';
 import { t } from '../i18n';
 import { tickAds } from '../items/ads';
 import { rollItem } from '../items/generate';
@@ -119,7 +119,7 @@ export function takePickup(s: RunState, bus: Bus, k: Pickup): boolean {
     return true;
   }
   if (k.gwiazdki !== undefined && !k.item) {
-    addStars(p, k.gwiazdki);
+    earnStars(p, k.gwiazdki);
     return true;
   }
   if (!k.item) return true;

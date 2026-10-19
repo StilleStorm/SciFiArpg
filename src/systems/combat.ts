@@ -13,6 +13,7 @@ import { killFill, meterGain, METER_REBUTTAL } from '../combat/meter';
 import { heroDef } from '../heroes/defs';
 import { absorbShield, playerDamageMul } from '../heroes/shield';
 import { onPlayerBlow } from './recovery';
+import { wearerDefence } from '../items/stats';
 
 type Fighter = Player | Enemy;
 
@@ -31,7 +32,8 @@ export function knockback(s: RunState, e: Enemy, fromX: number, fromY: number, d
 
 /** One attack: roll, apply, emit. Returns true if the defender died. */
 export function attack(s: RunState, bus: Bus, attacker: Fighter, defender: Fighter): boolean {
-  const res = rollDamage(attacker.stats, defender.stats, attacker.damageType, s.rngs.combat);
+  const guard = defender.kind === 'player' ? wearerDefence(defender, s.rngs.combat) : defender.stats; // domniemany gear may be ignored
+  const res = rollDamage(attacker.stats, guard, attacker.damageType, s.rngs.combat);
   attacker.attackTimer = attacker.attackCooldown;
   const dir = defender.x - attacker.x;
   // a walking player keeps facing where he walks (movement sets it every step); a turn here would flicker one frame
