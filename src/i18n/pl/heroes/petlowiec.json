@@ -92,5 +92,28 @@
         }
       }
     }
+  },
+  "spec": {
+    "zaloga": {
+      "name": "Załoga",
+      "cap": {
+        "name": "Pełny skład",
+        "desc": "Przybycie przed wyjazdem trwa o 25% dłużej."
+      }
+    },
+    "chronologia": {
+      "name": "Chronologia",
+      "cap": {
+        "name": "Skrócony obieg",
+        "desc": "Pętla odnawia się o 1 s szybciej."
+      }
+    },
+    "ladowanie": {
+      "name": "Lądowanie",
+      "cap": {
+        "name": "Szerokie pole",
+        "desc": "Spór obejmuje obszar większy o 20%."
+      }
+    }
   }
 }

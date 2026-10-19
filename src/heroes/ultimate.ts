@@ -23,7 +23,10 @@ export function ultRun(s: RunState): UltRun {
 }
 
 /** The ultimate the hero casts now (the first one; S4's loadout will choose), or undefined for a hero without one. */
-export const ultimateOf = (s: RunState): UltimateDef | undefined => heroById(s.player.heroId).ultimates?.[0];
+export const ultimateOf = (s: RunState): UltimateDef | undefined => {
+  const all = heroById(s.player.heroId).ultimates;
+  return all?.find((u) => u.id === s.hero.ultimateId) ?? all?.[0];
+};
 
 /** The hero has an ultimate and has reached the level it opens at (FIRST_ULTIMATE_LEVEL for the first): the pad shows, the cast may go. */
 export function ultimateUnlocked(s: RunState): boolean {

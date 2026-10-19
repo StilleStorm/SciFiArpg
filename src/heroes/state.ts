@@ -280,6 +280,9 @@ export interface HeroRun {
   /** Active paragraph per skill (by SkillIndex) and its patch; both absent while every skill is on paragraph 1 (heroes/paragraphs.ts). */
   para?: ParagraphNo[];
   patch?: (ParagraphPatch | undefined)[];
+  /** The chosen specialization id and ultimate id of the loadout (heroes/specializations.ts); absent = none chosen / the hero's first ultimate. */
+  spec?: string;
+  ultimateId?: string;
   /** The ultimate: paragraph, running effects, meter quiet (heroes/ultimate.ts). */
   ult?: UltRun;
   /** Damage queued to land later (primitives/effects.ts deferredDamage, echo); absent until a skill queues one. */

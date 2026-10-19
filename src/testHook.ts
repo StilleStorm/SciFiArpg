@@ -24,6 +24,8 @@ import { castSkill } from './heroes/skills';
 import { holdPad, releasePad, tapUltimatePad, ultimatePadInfo } from './ui/pads';
 import { setMeterForUi } from './ui/ultimate';
 import { castUltimate, meterOf, ultimateReady } from './heroes/ultimate';
+import { heroDef } from './heroes/defs';
+import { categoryOf, loadoutAdvice, runCapstone, specializationOf } from './heroes/specializations';
 import { createEnemyHook, createSporHook, type EnemyHook, type SporHook } from './enemies/hook';
 import { createAudioHook, type AudioHook } from './audio/hook';
 
@@ -93,6 +95,10 @@ export interface GameHook {
   castUltimate(): boolean;
   /** Plain data: the meter and the running ultimates. */
   ultimateInfo(): { meter: number; ready: boolean; active: string[]; paragraph: number } | null;
+  /** Choose the specialization of the live run (null = none); true when it is a column of the hero (heroes/specializations.ts). */
+  setSpecialization(id: string | null): boolean;
+  /** Plain data: pad skill ids, categories, the chosen specialization, the capstone in force (skill id or null), advice. */
+  loadoutInfo(): { pads: string[]; categories: (string | null)[]; specialization: string | null; capstone: string | null; advice: string[] } | null;
   /** Families, bosses and statuses on demand (enemies/hook.ts). */
   enemies: EnemyHook;
   /** The boss argument: answer a reply, read the prompt and the x2 window (enemies/hook.ts). */
@@ -229,6 +235,30 @@ export function installTestHook(deps: HookDeps): void {
       const st = game.state;
       if (!st) return null;
       return { meter: meterOf(st.player), ready: ultimateReady(st.player), active: (st.hero.ult?.active ?? []).map((u) => u.id), paragraph: st.hero.ult?.para ?? 1 };
+    },
+    setSpecialization(id) {
+      const st = game.state;
+      if (!st) return false;
+      if (id === null) {
+        delete st.hero.spec;
+        return true;
+      }
+      if (!specializationOf(st.player.heroId, id)) return false;
+      st.hero.spec = id;
+      return true;
+    },
+    loadoutInfo() {
+      const st = game.state;
+      if (!st) return null;
+      const skills = heroDef(st.player.heroId).skills;
+      const cap = runCapstone(st);
+      return {
+        pads: st.hero.pads.map((i) => skills[i].id),
+        categories: st.hero.pads.map((i) => categoryOf(skills[i])),
+        specialization: st.hero.spec ?? null,
+        capstone: cap ? cap.capstone.skill : null,
+        advice: loadoutAdvice({ heroId: st.player.heroId, pads: st.hero.pads }),
+      };
     },
     enemies: createEnemyHook(() => game.state, deps.bus),
     spor: createSporHook(() => game.state, deps.bus),

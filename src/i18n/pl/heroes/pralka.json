@@ -92,5 +92,28 @@
         }
       }
     }
+  },
+  "spec": {
+    "pralnia": {
+      "name": "Pralnia",
+      "cap": {
+        "name": "Pełny program",
+        "desc": "Wirowanie obejmuje krąg szerszy o 20%."
+      }
+    },
+    "osoba": {
+      "name": "Osoba",
+      "cap": {
+        "name": "Uznanie osobowości",
+        "desc": "Wniosek o osobowość trwa o 25% dłużej."
+      }
+    },
+    "serwis": {
+      "name": "Serwis",
+      "cap": {
+        "name": "Przegląd bębna",
+        "desc": "Otwarcie bębna zadaje o 20% więcej obrażeń."
+      }
+    }
   }
 }

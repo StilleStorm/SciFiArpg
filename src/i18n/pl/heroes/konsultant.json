@@ -92,5 +92,28 @@
         }
       }
     }
+  },
+  "spec": {
+    "infolinia": {
+      "name": "Infolinia",
+      "cap": {
+        "name": "Czas oczekiwania",
+        "desc": "Proszę czekać trwa o 25% dłużej."
+      }
+    },
+    "windykacja": {
+      "name": "Windykacja",
+      "cap": {
+        "name": "Numer na wezwaniu",
+        "desc": "Numer sprawy zadaje o 20% więcej obrażeń."
+      }
+    },
+    "sprzedaz": {
+      "name": "Sprzedaż",
+      "cap": {
+        "name": "Oferta dodatkowa",
+        "desc": "Pomoc dodatkowa trwa o 25% dłużej."
+      }
+    }
   }
 }

@@ -6,6 +6,8 @@
  */
 import type { HeroId } from '../heroes';
 import { DEFAULT_HERO_ID, HERO_IDS } from '../heroes/registry';
+import { specializationOf, ultimatesOf } from '../heroes/specializations';
+import { ultRun } from '../heroes/ultimate';
 import { recomputeStats } from '../items/stats';
 import { SLOTS, type Item, type Slot } from '../items/types';
 import { applyParagraphs, activeParagraphsOf, paragraphsOf, type ParagraphNo } from '../progression/paragraphs';
@@ -25,6 +27,11 @@ export interface Character extends ProgressData {
   inventory: Item[];
   /** Active paragraph per skill id (S2); absent or a missing skill = paragraph 1, so saves from before load with § 1 active. */
   paragraphs?: Record<string, ParagraphNo>;
+  /** Loadout (S4): the ultimate id and the specialization whose capstone is wanted; absent = the hero's first ultimate / none. Old saves load without them. */
+  ultimate?: string;
+  specialization?: string;
+  /** The ultimate's active paragraph (2 or 3); absent = § 1. */
+  ultParagraph?: ParagraphNo;
 }
 
 export function isHeroId(v: unknown): v is HeroId {
@@ -60,6 +67,9 @@ export function serializeCharacter(s: RunState): Character {
   const p = s.player;
   const paragraphs = activeParagraphsOf(s);
   return {
+    ...(s.hero.ultimateId ? { ultimate: s.hero.ultimateId } : {}),
+    ...(s.hero.spec ? { specialization: s.hero.spec } : {}),
+    ...(s.hero.ult && s.hero.ult.para !== 1 ? { ultParagraph: s.hero.ult.para } : {}),
     ...(Object.keys(paragraphs).length > 0 ? { paragraphs } : {}),
     ...serializeProgress(s),
     version: CHARACTER_VERSION,
@@ -92,6 +102,9 @@ export function applyCharacter(s: RunState, c: Character): void {
   if (c.heroId === p.heroId) {
     applyProgress(s, c);
     applyParagraphs(s, c.paragraphs); // what is not open (an old or damaged save) stays on paragraph 1
+    if (c.ultimate) s.hero.ultimateId = c.ultimate;
+    if (c.specialization) s.hero.spec = c.specialization;
+    if (c.ultParagraph) ultRun(s).para = c.ultParagraph;
   }
   p.hp = p.hpMax;
   s.nextItemNumber = Math.max(s.nextItemNumber, highestNumber(c) + 1);
@@ -115,6 +128,10 @@ export function toCharacter(raw: unknown): Character | null {
   for (const [skill, n] of Object.entries(rawPara)) {
     if ((n === 2 || n === 3) && paragraphsOf(raw['heroId'], skill).length > 0) paragraphs[skill] = n;
   }
+  const ultimate = typeof raw['ultimate'] === 'string' && ultimatesOf(raw['heroId']).includes(raw['ultimate']) ? raw['ultimate'] : undefined;
+  const specialization = typeof raw['specialization'] === 'string' && specializationOf(raw['heroId'], raw['specialization']) ? raw['specialization'] : undefined;
+  const rawUltPara = raw['ultParagraph'];
+  const ultParagraph = rawUltPara === 2 || rawUltPara === 3 ? rawUltPara : undefined;
   const perms = Array.isArray(raw['permissions']) ? raw['permissions'].filter((x): x is string => typeof x === 'string') : [];
   return {
     version: CHARACTER_VERSION,
@@ -129,6 +146,9 @@ export function toCharacter(raw: unknown): Character | null {
     equipment,
     inventory: inv,
     ...(Object.keys(paragraphs).length > 0 ? { paragraphs } : {}),
+    ...(ultimate ? { ultimate } : {}),
+    ...(specialization ? { specialization } : {}),
+    ...(ultParagraph ? { ultParagraph } : {}),
   };
 }
 

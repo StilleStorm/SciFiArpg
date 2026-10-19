@@ -2,6 +2,7 @@ import type { Bus } from '../core/events';
 import { createRng } from '../core/rng';
 import { heroDef, PAD_SLOTS, type HeroId, type PadSlot, type SkillDef, type SkillIndex } from '../heroes';
 import { padSkill } from '../heroes/loadout';
+import { withCapstone } from '../heroes/specializations';
 import { DEFAULT_HERO_ID, heroById } from '../heroes/registry';
 import {
   AUTO_AIM,
@@ -293,7 +294,8 @@ function aimAt(slot: number, n: PadNode, x: number, y: number): Aim | null {
   if (isCancel(pointer, pad)) return null;
   const s = trackedRun();
   if (!sk || !s || sk.aim === 'auto') return AUTO_AIM;
-  return dragToAim(sk.aim, pad, pointer, s.player, reachOf(s, sk));
+  const aim = sk.aim;
+  return withCapstone(s, s.hero.pads[slot as PadSlot], () => dragToAim(aim, pad, pointer, s.player, reachOf(s, sk)));
 }
 
 /** Put the preview of pad `slot` on the page, or take it away. Only the pad that was pressed last draws. */
@@ -311,7 +313,8 @@ function show(slot: number, n: PadNode, emit: boolean): void {
   if (pr.aiming) aim = aimAt(slot, n, pr.x, pr.y);
   else if (performance.now() - pr.t0 >= TAP_MS) aim = AUTO_AIM; // held still: show what a tap would do
   setThick(n, pr.aiming && aim !== null);
-  showAim(aim ? previewOf(s, sk, aim) : null);
+  const shown = aim;
+  showAim(shown ? withCapstone(s, s.hero.pads[slot as PadSlot], () => previewOf(s, sk, shown)) : null); // the capstone's area as the cast has it
   if (emit && aim) {
     const r = resolveAim(s, sk, aim);
     busRef?.emit('skill:aim', { slot: slot as 0 | 1 | 2, mode: r.kind, x: r.x, y: r.y, dx: r.dx, dy: r.dy });

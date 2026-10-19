@@ -2,6 +2,7 @@
 import type { RunState } from '../world/run';
 import { heroDef, PAD_SLOTS, SKILL_INDICES, type PadSlot, type SkillDef, type SkillIndex } from './defs';
 import { applyParagraph } from './paragraphs';
+import { mergeCapstone, runCapstone } from './specializations';
 
 /** Skills 1..3 are always installed; the 4th and 5th once an update gave them a rank. */
 export const isInstalled = (s: RunState, i: SkillIndex): boolean => i <= 2 || (s.hero.ranks[i] ?? 0) > 0;
@@ -11,8 +12,17 @@ export const installedSkills = (s: RunState): SkillIndex[] => SKILL_INDICES.filt
 /** Skill `i` as it is cast now: the base data with the active paragraph laid on (heroes/paragraphs.ts). Pads and previews read this, not `def.skills`. */
 export const effectiveSkill = (s: RunState, i: SkillIndex): SkillDef => applyParagraph(heroDef(s.player.heroId).skills[i], s.hero.patch?.[i]);
 
-/** The skill pad `slot` fires. */
-export const padSkill = (s: RunState, slot: PadSlot): SkillDef => effectiveSkill(s, s.hero.pads[slot]);
+/**
+ * The skill pad `slot` fires, as the pad previews it: the active paragraph and, when it belongs to this skill, the capstone
+ * (heroes/specializations.ts), so the aim preview's reach and area match the cast. Casts do not read this (`withCapstone` does).
+ */
+export function padSkill(s: RunState, slot: PadSlot): SkillDef {
+  const i = s.hero.pads[slot];
+  const sk = heroDef(s.player.heroId).skills[i];
+  const cap = runCapstone(s);
+  if (!cap || cap.capstone.skill !== sk.id) return effectiveSkill(s, i);
+  return applyParagraph(sk, mergeCapstone(s.hero.patch?.[i], cap.capstone.patch));
+}
 
 /** The pad that holds skill `i`, if any. */
 export function padOf(s: RunState, i: SkillIndex): PadSlot | null {

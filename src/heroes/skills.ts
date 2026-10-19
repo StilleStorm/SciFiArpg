@@ -10,8 +10,9 @@ import type { RunState } from '../world/run';
 import { AUTO_AIM, fitAim, resolveAim, takeQueuedAim, type Aim, type ResolvedAim } from './aim';
 import { heroDef, type PadSlot, type SkillIndex } from './defs';
 import { cooldownOf } from './helpers';
-import { applyParagraph, withCast } from './paragraphs';
+import { applyParagraph, withCast, type ParagraphPatch } from './paragraphs';
 import { heroById } from './registry';
+import { withCapstone } from './specializations';
 
 export type { SkillFn } from './module';
 export { FOAM_RADIUS } from './numbers';
@@ -52,8 +53,12 @@ export function castSkill(s: RunState, bus: Bus, slot: PadSlot, free = false, ai
  * `skill:cast` event, and the note of what was cast for Juz to bylo. A free cast takes the aim it is given (auto by default).
  */
 export function fire(s: RunState, bus: Bus, skill: SkillIndex, slot: PadSlot, free: boolean, aim: Aim | undefined): boolean {
+  return withCapstone(s, skill, (patch) => cast(s, bus, skill, slot, free, aim, patch));
+}
+
+/** The body of `fire`, with the patch of the skill as it is cast (the paragraph, and the capstone if it belongs to this skill). */
+function cast(s: RunState, bus: Bus, skill: SkillIndex, slot: PadSlot, free: boolean, aim: Aim | undefined, patch: ParagraphPatch | undefined): boolean {
   const def = heroDef(s.player.heroId);
-  const patch = s.hero.patch?.[skill];
   const sk = applyParagraph(def.skills[skill], patch); // the active paragraph, laid on the data (heroes/paragraphs.ts)
   const fn = heroById(def.id).casts[sk.id];
   if (!fn) return false;

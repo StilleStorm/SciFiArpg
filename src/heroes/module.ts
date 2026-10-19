@@ -11,6 +11,7 @@ import type { HeroDef } from './defs';
 import type { SkillParagraphs } from './paragraphs';
 import type { HeroFigure } from './figureKit';
 import type { Mods } from './state';
+import type { HeroSpecs } from './specDefs';
 import type { UltimateDef } from './ultimateDefs';
 
 /** A skill as a function on the run state. Returning false = nothing happened, no cooldown. `aim` is what the player aimed. */
@@ -60,4 +61,6 @@ export interface HeroModule {
   quirk?: HeroQuirk;
   /** The ultimates, by level (12 / 24 / 36); S3 builds the first (heroes/ultimate.ts casts it). Text `heroes.<id>.ult.<ultimate>.*`. */
   ultimates?: readonly UltimateDef[];
+  /** Skill categories and the three specializations with their capstones (S4, heroes/specDefs.ts; read through heroes/specializations.ts). */
+  specs?: HeroSpecs;
 }
