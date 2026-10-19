@@ -244,7 +244,8 @@
 }
 
 /* ---------- the ultimate pad and the Argument meter (DESIGN 10.2) ---------- */
-/* HUD: the Argument field stands beside Racja; its underline is ink while it fills and red once the meter is full */
+/* HUD: the Argument field stands beside Racja; its underline is ink while it fills and a heavier ink once the meter is full
+   (red is for stamps, strikes and Racja: the ready signal in red is the pad's cushion) */
 .hud .field.arg {
   flex: 0.8;
 }
@@ -275,9 +276,10 @@
   stroke-width: 2.4;
 }
 .hud .arg.full .left {
-  stroke: var(--accent);
+  stroke-width: 3.2;
 }
-/* the pad: a stamp pad. Disabled it is drawn dotted and in wet ink; ready, the cushion is inked red and the tin is thick */
+/* the pad: a stamp pad. Disabled it is drawn dotted and in wet ink; ready, the cushion is inked red, the tin is thick and the
+   word, in black ink, gets a red underline (the only red besides the cushion) */
 .pad.ult .cushion path {
   stroke: var(--ink-wet);
   stroke-width: 1.4;
@@ -297,8 +299,12 @@
   stroke-width: 2.2;
 }
 .pad.ult.ready .word {
-  color: var(--accent);
+  color: var(--ink);
   font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
 }
 .pads.in-base .pad.ult,
 .pad.ult.locked {
