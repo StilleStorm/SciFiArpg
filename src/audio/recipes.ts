@@ -437,6 +437,70 @@ export const RECIPES = {
     pluck(270, 0.6, 0.15, { delay: 0.01, bright: 1200, role: 'tail' }),
   ], 0.3, 7),
 
+  // ---------- ultimates (DESIGN 10.2): one per hero, longer and heavier than a skill, each ending in the stamp ----------
+  /** Pralka, Pełny cykl: the drum spins up, everything is pulled in, CYKL ZAKOŃCZONY thudded down at the end. */
+  pralkaUlt: combat([
+    click(3000, 0.45),
+    thump(92, 0.18, 0.95, { pitchDrop: 0.3 }),
+    thump(48, 0.35, 0.7, { delay: 0.002, pitchDrop: 0.1, role: 'sub' }),
+    noise(110, 0.7, 0.55, { q: 2.5, attack: 0.25, role: 'body' }),
+    noise(600, 0.65, 0.38, { q: 1, attack: 0.3, pitchDrop: -1.4, delay: 0.04, role: 'tail' }),
+    { ...thump(86, 0.1, 0.55, { pitchDrop: 0.15, delay: 0.1 }), repeat: 8, spread: 0.55 },
+    click(2400, 0.5, { delay: 0.74 }),
+    thump(70, 0.2, 1.0, { delay: 0.74, pitchDrop: 0.25 }),
+    noise(2600, 0.2, 0.3, { q: 0.8, attack: 0.02, delay: 0.76, role: 'tail' }),
+  ], 1.2, 9),
+  /** Konsultant, Przekazanie do działu: a handset lifted, a transfer click, PRZEKAZANO stamped on the form. */
+  konsUlt: combat([
+    click(2600, 0.55),
+    pluck(1040, 0.08, 0.3, { delay: 0.01, bright: 4000, role: 'transient' }),
+    thump(104, 0.16, 0.95, { delay: 0.02, pitchDrop: 0.3 }),
+    thump(52, 0.3, 0.65, { delay: 0.02, pitchDrop: 0.1, role: 'sub' }),
+    noise(800, 0.35, 0.4, { q: 1.5, attack: 0.02, pitchDrop: -3, delay: 0.1, role: 'tail' }),
+    { ...click(3200, 0.25, { decay: 0.008, role: 'tail' }), repeat: 9, spread: 0.45, delay: 0.14 },
+    click(2200, 0.55, { delay: 0.62 }),
+    thump(80, 0.2, 1.0, { delay: 0.64, pitchDrop: 0.25 }),
+    noise(1500, 0.18, 0.32, { q: 0.8, delay: 0.66, role: 'tail' }),
+  ], 1.2, 9),
+  /** Pętlowiec, Zebranie wszystkich pętli: four arrivals one on another, five attendance ticks, OBECNI. */
+  petlUlt: combat([
+    click(2800, 0.5),
+    thump(98, 0.17, 0.9, { pitchDrop: 0.3 }),
+    thump(50, 0.3, 0.6, { delay: 0.002, pitchDrop: 0.1, role: 'sub' }),
+    thump(94, 0.12, 0.6, { delay: 0.11, pitchDrop: 0.3 }),
+    thump(90, 0.12, 0.55, { delay: 0.22, pitchDrop: 0.3 }),
+    thump(86, 0.12, 0.5, { delay: 0.33, pitchDrop: 0.3 }),
+    noise(1600, 0.3, 0.3, { q: 0.8, attack: 0.1, pitchDrop: 0.7, delay: 0.05, role: 'tail' }),
+    { ...click(3600, 0.32, { q: 3, decay: 0.01, role: 'tail' }), repeat: 5, spread: 0.3, delay: 0.5 },
+    click(2300, 0.5, { delay: 0.85 }),
+    thump(74, 0.2, 1.0, { delay: 0.85, pitchDrop: 0.25 }),
+  ], 1.2, 9),
+  /** Kartograf, Mapa ostateczna: the ruler dragged across the sheet, the scale bar ticked off, ZATWIERDZONO DO DRUKU. */
+  kartoUlt: combat([
+    click(2200, 0.4),
+    thump(108, 0.15, 0.9, { pitchDrop: 0.3 }),
+    thump(54, 0.3, 0.6, { delay: 0.002, pitchDrop: 0.1, role: 'sub' }),
+    noise(4000, 0.5, 0.3, { q: 1.4, attack: 0.04, pitchDrop: 0.5, delay: 0.04, role: 'tail' }),
+    noise(120, 0.6, 0.4, { q: 3, attack: 0.1, role: 'body' }),
+    { ...click(3400, 0.3, { q: 3, decay: 0.008, role: 'tail' }), repeat: 12, spread: 0.5, delay: 0.1 },
+    click(2800, 0.5, { delay: 0.68 }),
+    pluck(2600, 0.2, 0.2, { delay: 0.68, bright: 9000 }),
+    thump(78, 0.2, 1.0, { delay: 0.69, pitchDrop: 0.25 }),
+  ], 1.2, 9),
+  /** Nalesnik, Decyzja Komisji: a committee gavel, a dwarf planet settling on the form, PLANETA KARŁOWATA. */
+  nalesUlt: combat([
+    click(2000, 0.5),
+    thump(86, 0.2, 1.0, { pitchDrop: 0.3 }),
+    thump(46, 0.45, 0.8, { delay: 0.002, pitchDrop: 0.1, role: 'sub' }),
+    pluck(90, 0.2, 0.6, { delay: 0.01, bright: 600, role: 'body' }),
+    pluck(180, 1.0, 0.3, { delay: 0.015, bright: 900, role: 'tail' }),
+    noise(300, 0.5, 0.35, { q: 0.8, attack: 0.3, pitchDrop: 0.6, delay: 0.1, role: 'tail' }),
+    click(2200, 0.5, { delay: 0.55 }),
+    thump(68, 0.2, 1.0, { delay: 0.55, pitchDrop: 0.25 }),
+    thump(44, 0.4, 0.7, { delay: 0.552, pitchDrop: 0.1, role: 'sub' }),
+    { ...noise(3600, 0.012, 0.28, { q: 1.2, role: 'tail' }), repeat: 8, spread: 0.3, delay: 0.58 },
+  ], 1.2, 9),
+
   // ---------- flavours: laid over hit / crit / kill by the enemy family ----------
   /** Devices clank: inharmonic metal. */
   flavDevice: light([

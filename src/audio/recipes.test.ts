@@ -3,6 +3,7 @@ import type { HeroId } from '../heroes';
 import { heroById, HERO_IDS } from '../heroes/registry';
 import { FAMILY_FLAVOUR, RECIPES, SFX_NAMES, bodyLayers, recipeLength, validateRecipe, type Recipe } from './recipes';
 import { TRIMS } from './levels';
+import { ultimateSound } from './bindings';
 
 const recipes = RECIPES as Record<string, Recipe>;
 
@@ -86,6 +87,24 @@ describe('recipes follow DESIGN 14', () => {
       expect(bodyLayers(r).length, n).toBeGreaterThan(0);
       expect(r.layers.some((l) => l.kind === 'sine'), n).toBe(false);
       expect(recipeLength(r), n).toBeLessThan(1);
+    }
+  });
+
+  it('every hero has its own ultimate recipe: a combat sound with a body, a sub, a tail and a late stamp thud, no raw tone', () => {
+    const own = ['pralkaUlt', 'konsUlt', 'petlUlt', 'kartoUlt', 'nalesUlt'];
+    expect(new Set(HERO_IDS.map((h) => ultimateSound(h))).size).toBe(HERO_IDS.length);
+    for (const h of HERO_IDS) expect(own).toContain(ultimateSound(h) ?? '');
+    for (const n of own) {
+      const r = recipes[n] as Recipe;
+      expect(r.combat, n).toBe(true);
+      expect(bodyLayers(r).length, n).toBeGreaterThan(0);
+      expect(r.layers.some((l) => l.role === 'sub'), n).toBe(true);
+      expect(r.layers.some((l) => l.role === 'tail'), n).toBe(true);
+      expect(r.layers.some((l) => l.kind === 'sine'), n).toBe(false);
+      // the closing stamp: a thump at least half a second in
+      expect(r.layers.some((l) => l.kind === 'thump' && (l.delay ?? 0) >= 0.5), n).toBe(true);
+      expect(recipeLength(r), n).toBeGreaterThan(0.8);
+      expect(recipeLength(r), n).toBeLessThan(1.4);
     }
   });
 

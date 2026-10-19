@@ -4,7 +4,7 @@
  */
 import type { Bus, GameEvents } from '../core/events';
 import type { Enemy } from '../entities';
-import { heroById } from '../heroes/registry';
+import { heroById, HERO_IDS, type HeroId } from '../heroes/registry';
 import type { RunState } from '../world/run';
 import { getMix } from './context';
 import { musicPhase, musicTurn, setMusicPaused, startMusic, stopMusic, tickMusic } from './music';
@@ -43,6 +43,11 @@ export const LAW_SOUNDS: Record<string, SfxName> = {
   'code:requested': 'footnote',
   'code:accepted': 'stamp',
 };
+
+/** The sound of hero `id`'s ultimate (`HeroModule.sounds.ultimate`); undefined for a hero without one. */
+export function ultimateSound(id: HeroId): SfxName | undefined {
+  return heroById(id).sounds.ultimate;
+}
 
 /** After this many exceptions the sound is switched off for the session; the game never depends on it. */
 const MAX_FAILURES = 20;
@@ -176,8 +181,19 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
     play(heroById(hero).sounds.skills[e.skill], { gain });
   });
 
+  // the ultimate: the hero's own long recipe (body, then the stamp thud at the end); the page ducks under it like under a kill
+  on('ultimate:cast', (e) => {
+    if (!HERO_IDS.includes(e.heroId as HeroId)) return;
+    const name = ultimateSound(e.heroId as HeroId);
+    if (!name) return;
+    play(name);
+    duck();
+  });
+
   // ---- paper, forms, the document ----
-  on('stamp', () => play('stamp'));
+  on('stamp', (e) => {
+    if (!e.quiet) play('stamp'); // an ultimate's stamp is heard in its own recipe
+  });
   on('player:levelup', () => play('stamp'));
   on('player:unsuspended', () => play('stamp'));
   on('footnote:added', (e) => play(e.correction ? 'correction' : 'footnote'));

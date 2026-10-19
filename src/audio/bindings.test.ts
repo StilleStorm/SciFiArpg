@@ -42,6 +42,26 @@ beforeEach(() => {
 });
 
 describe('audio bindings', () => {
+  it('an ultimate plays the hero\'s own recipe and ducks the page', () => {
+    for (const [hero, sound] of [['pralka', 'pralkaUlt'], ['konsultant', 'konsUlt'], ['petlowiec', 'petlUlt'], ['kartograf', 'kartoUlt'], ['nalesnik', 'nalesUlt']] as const) {
+      played.length = 0;
+      duck.mockClear();
+      const { bus } = setup(hero);
+      bus.emit('ultimate:cast', { heroId: hero, ultimateId: 'x', x: 0, y: 0 });
+      expect(names(), hero).toEqual([sound]);
+      expect(duck).toHaveBeenCalledTimes(1);
+    }
+  });
+
+  it('a quiet stamp (an ultimate\'s, whose recipe ends in the thud) plays nothing; a plain one plays the stamp', () => {
+    const { bus } = setup();
+    played.length = 0;
+    bus.emit('stamp', { text: 'x', x: 0, y: 0, quiet: true });
+    expect(names()).toEqual([]);
+    bus.emit('stamp', { text: 'x', x: 0, y: 0 });
+    expect(names()).toEqual(['stamp']);
+  });
+
   it('a crit holds the game for 40 ms and plays the crit sound with the family flavour', () => {
     const { bus, s, freeze } = setup();
     const e = createEnemy(20, 0, 0, 1);
