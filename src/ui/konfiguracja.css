@@ -25,7 +25,7 @@
 .kf-type {
   font-family: var(--mono);
   font-style: italic;
-  font-size: 10.5px;
+  font-size: 11px;
   line-height: 1.2;
   color: var(--ink-wet);
 }
@@ -55,7 +55,7 @@
 }
 .kf-cap {
   font-style: italic;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.15;
   text-align: center;
 }
@@ -77,11 +77,13 @@
 .kf-box.active .kf-cap {
   display: none;
 }
+/* 11.5 px lettering (viewBox 132 at font 14): a little wider than the box, so it overhangs the rules like a real stamp */
 .kf-stamp {
   display: block;
-  width: 84px;
-  max-width: 100%;
-  height: 24px;
+  flex: none;
+  width: 108px;
+  height: 31px;
+  margin: 0 -8px;
   overflow: visible;
   pointer-events: none;
 }
@@ -119,7 +121,7 @@
 .kf-label {
   margin: 8px 0 3px;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-wet);
@@ -128,6 +130,13 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
+}
+/* portrait: two by two, so a pad's skill name ("Odwirowanie") keeps its word whole at 11 px */
+:root:not([data-orient='landscape']) .kf-slots {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+:root:not([data-orient='landscape']) .kf-slot {
+  min-height: 40px;
 }
 .kf-slot {
   min-height: 46px;
@@ -148,12 +157,12 @@
   color: var(--ink-wet);
 }
 .kf-slotn {
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.04em;
   color: var(--ink-wet);
 }
 .kf-slotv {
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1.1;
   overflow-wrap: break-word;
@@ -182,7 +191,7 @@
   text-align: center;
 }
 .kf-spec-n {
-  font-size: 10px;
+  font-size: 11px;
   font-style: italic;
 }
 .kf-spec.on {
@@ -271,7 +280,7 @@
   border-top: 1px dotted var(--ink);
   font-family: var(--mono);
   font-style: italic;
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--ink-wet);
 }
 .kf-cue.on {

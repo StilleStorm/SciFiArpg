@@ -197,9 +197,19 @@ export function kartaInputFromRun(s: RunState): KartaInput {
 
 // ---------- drawing ----------
 
+/** Lettering on the chart's stamps, in css px: a phone reads nothing under 11. */
+const STAMP_PX = 11.5;
+
 function stampSvg(text: string, size: number, rot: number): SVGSVGElement {
   const { w, h: hh } = stampSize(text, size);
-  const svg = el('svg', { class: 'kt-stamp', viewBox: `${-w / 2 - 3} ${-hh / 2 - 3} ${w + 6} ${hh + 6}`, 'aria-hidden': 'true' });
+  const k = STAMP_PX / size;
+  const svg = el('svg', {
+    class: 'kt-stamp',
+    viewBox: `${-w / 2 - 3} ${-hh / 2 - 3} ${w + 6} ${hh + 6}`,
+    width: ((w + 6) * k).toFixed(1),
+    height: ((hh + 6) * k).toFixed(1),
+    'aria-hidden': 'true',
+  });
   const g = el('g', {});
   svg.append(g);
   stamp(text, 0, 0, { parent: g, ttl: Infinity, rotation: rot, fontSize: size });
