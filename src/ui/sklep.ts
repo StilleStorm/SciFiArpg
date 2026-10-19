@@ -15,6 +15,7 @@ import {
 } from '../economy/sklep';
 import { t } from '../i18n';
 import { allItems } from '../items/inventory';
+import { shopIlvl } from '../items/level';
 import { h } from './dom';
 import { displayName, figure, reviewText, shownStats, summary, tierWord } from './itemView';
 import { createSheet } from './sheet';
@@ -33,6 +34,8 @@ export interface SklepOptions {
   onClose?: () => void;
   /** Number for a bought item ("Ryc. N"). Default: one past the highest number the player holds. */
   nextNumber?: () => number;
+  /** Planet index whose item band the stock is rolled in (items/level.ts shopIlvl). Default: planet 1. */
+  planet?: number;
 }
 
 export interface SklepHandle {
@@ -55,7 +58,7 @@ function nextNumberFor(p: Purse): number {
 export function mountSklep(container: HTMLElement, meta: { runsCompleted: number }, player: Purse, opts: SklepOptions = {}): SklepHandle {
   const mode = opts.mode ?? 'base';
   const state = opts.state ?? loadSklep();
-  const level = Math.max(1, player.level);
+  const level = shopIlvl(opts.planet ?? 0);
   if (mode === 'base' && state.stockFor !== meta.runsCompleted) {
     restock(state, BASE_STORE_SEED, meta.runsCompleted, level);
     saveSklep(state);
@@ -146,6 +149,7 @@ export function mountSklep(container: HTMLElement, meta: { runsCompleted: number
       h('span', 'sk-tag', `${tierWord(l.item)} · ${t(`items.slotShort.${l.item.slot}`)}`),
     );
     const buyBox = h('div', 'sk-buy');
+    if (l.kind === 'oferta' || l.kind === 'adapter') buyBox.append(h('span', 'stamp-tag sk-kind', t(`economy.sklep.kind.${l.kind}`)));
     buyBox.append(h('span', 'sk-price', t('items.ui.price', { count: l.price })));
     const b = h('button', 'ps-btn', isSold ? t('economy.sklep.got') : t('economy.sklep.get'));
     b.type = 'button';

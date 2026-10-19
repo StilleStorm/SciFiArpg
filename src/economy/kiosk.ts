@@ -1,5 +1,6 @@
 import type { Bus } from '../core/events';
 import { t } from '../i18n';
+import { shopIlvl } from '../items/level';
 import { mountSklep, type SklepHandle } from '../ui/sklep';
 import type { RunState } from '../world/run';
 import { botLine, officeOverride, setOfficeOpen } from './hours';
@@ -28,6 +29,8 @@ export function kioskIsOpen(s: RunState): boolean {
   return open && !s.law.botTime;
 }
 
+const planetOf = (s: RunState): number => s.plan?.planet ?? 0;
+
 /** The stock of this page's kiosk, made once per run and page. */
 function storeFor(s: RunState): SklepState {
   const perRun = stores.get(s) ?? new Map<number, SklepState>();
@@ -35,7 +38,7 @@ function storeFor(s: RunState): SklepState {
   const existing = perRun.get(s.pageIndex);
   if (existing) return existing;
   const fresh = createSklep();
-  restock(fresh, s.seed, s.pageIndex + 1, Math.max(1, s.player.level + s.pageIndex));
+  restock(fresh, s.seed, s.pageIndex + 1, shopIlvl(planetOf(s)));
   perRun.set(s.pageIndex, fresh);
   return fresh;
 }
@@ -63,6 +66,7 @@ export function openKiosk(): 'sheet' | 'bot' | 'none' {
   handle = mountSklep(c.root, { runsCompleted: s.pageIndex }, s.player, {
     mode: 'kiosk',
     state: storeFor(s),
+    planet: planetOf(s),
     say: (text) => c.bus.emit('footnote', { text }),
     nextNumber: () => s.nextItemNumber++,
     onClose: () => {

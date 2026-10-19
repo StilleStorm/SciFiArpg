@@ -446,6 +446,7 @@ function openSheet(kind: SheetKind): void {
       // The base Sklep spends the gwiazdki of the live player and fills the bag and gear the run starts with.
       shop = mountSklep(stage.ui, { runsCompleted: meta.runsCompleted }, s.player, {
         nextNumber: () => s.nextItemNumber++,
+        planet: s.plan?.planet ?? s.campaign?.current ?? 0,
         onClose: () => {
           shop = null;
           if (game.state === s) save(withCharacter(meta, s));
