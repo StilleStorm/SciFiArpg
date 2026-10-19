@@ -333,6 +333,14 @@ try {
   check('tapping the desk opens its sheet at once', await page.evaluate(() => document.querySelector('.desk-sheet') !== null));
   await sleep(500);
   await shot('02b-desk');
+  // Konfiguracja from the desk (S2): over the hidden desk sheet; Wróć shows the desk again
+  await page.locator('[data-desk=konfiguracja]').click({ timeout: 3000 });
+  await page.locator('.kf-sheet .kf-row').first().waitFor({ state: 'visible', timeout: 3000 });
+  const kfDesk = await page.evaluate(() => ({ rows: document.querySelectorAll('.kf-sheet .kf-row').length, desk: !!document.querySelector('.desk-sheet:not(.hidden)'), stamps: document.querySelectorAll('.kf-sheet .kf-box.active .kf-stamp').length }));
+  check('the desk line "Konfiguracja" opens the sheet over the hidden desk, § 1 stamped on the installed skills', kfDesk.rows === 5 && !kfDesk.desk && kfDesk.stamps >= 3, JSON.stringify(kfDesk));
+  await page.locator('.kf-back').click({ timeout: 3000 });
+  await sleep(300);
+  check('Wróć from Konfiguracja shows the desk again', await page.evaluate(() => !document.querySelector('.kf-sheet') && !!document.querySelector('.desk-sheet:not(.hidden)')));
   await clickText('Nowe zgłoszenie');
   await sleep(600);
   await shot('03-ticket');
@@ -517,6 +525,64 @@ try {
   await sleep(400);
   const laterState = await page.evaluate(() => ({ info: window.__game.hero.info(), form: !!document.querySelector('.sheet.assigning:not(.hidden)') }));
   check('"Później" leaves the pads as they are and closes the form', laterOk && laterState.info.pads.join() === '3,2,1' && laterState.info.ranks[4] === 1 && !laterState.form && laterState.info.status === 'running', JSON.stringify(laterState.info.pads));
+
+  // ---------- 3c. paragraphs (S2): a level up offers the paragraph that opens, the pick is active, the pad shows the tag, the pause sheet switches it back ----------
+  let paraOffer = null;
+  for (let k = 0; k < 20 && !paraOffer; k++) {
+    await page.evaluate(() => {
+      window.__game.enemies.clear();
+      window.__game.hero.levelUp();
+    });
+    await sleep(250);
+    await page.locator('.hud .upd').click({ timeout: 3000 });
+    await page.locator('.sheet:not(.hidden) .entry').first().waitFor({ state: 'visible', timeout: 3000 });
+    const off = await page.evaluate(() => window.__game.hero.info());
+    const at = off.offer.findIndex((id) => id.startsWith('para:'));
+    if (at >= 0) paraOffer = { at, id: off.offer[at], level: off.level, offer: off.offer };
+    else await settle();
+  }
+  check('a level up at the level a paragraph opens leads the update form with it, plus two other entries', paraOffer !== null && paraOffer.at === 0 && paraOffer.offer.length === 3, JSON.stringify(paraOffer));
+  if (paraOffer) {
+    const [, skillStr, nStr] = paraOffer.id.split(':');
+    const skill = Number(skillStr);
+    const n = Number(nStr);
+    const tagText = await page.locator('.sheet:not(.hidden) .entry').nth(paraOffer.at).innerText();
+    check('the paragraph entry is labelled "Paragraf" and names its number', /paragraf/i.test(tagText) && tagText.toLowerCase().replace(/\s+/g, ' ').includes(`paragraf ${n}`), tagText.replace(/\s+/g, ' '));
+    await shot('07c-update-paragraph');
+    await page.evaluate((i) => window.__game.hero.pickUpdate(i), paraOffer.at);
+    await sleep(1300);
+    await settle();
+    const padsBefore = await page.evaluate(() => window.__game.hero.info().pads);
+    await page.evaluate((i) => window.__game.hero.assignPad(1, i), skill);
+    await sleep(300);
+    const picked = await page.evaluate(() => ({ info: window.__game.hero.info(), tag: document.querySelector('.pad.s1 .ptag')?.textContent ?? null }));
+    check('picking it makes the paragraph active and pad 1 wears the § tag', picked.info.paragraphs[skill] === n && picked.tag === `§${n}`, JSON.stringify({ para: picked.info.paragraphs, tag: picked.tag }));
+    await shot('07d-pad-tag');
+    // switch back to § 1 from the pause sheet with the real buttons
+    await page.locator('.hud .pause-btn').click({ timeout: 3000 });
+    await sleep(400);
+    await page.locator('[data-pause=paragraphs]').click({ timeout: 3000 });
+    await page.locator('.kf-sheet .kf-row').first().waitFor({ state: 'visible', timeout: 3000 });
+    const kf = await page.evaluate((i) => ({
+      rows: document.querySelectorAll('.kf-sheet .kf-row').length,
+      active: document.querySelector(`.kf-sheet .kf-row[data-skill="${i}"] .kf-box.active`)?.getAttribute('data-n') ?? null,
+      stamps: document.querySelectorAll('.kf-sheet .kf-box.active .kf-stamp').length,
+      pause: !!document.querySelector('.pause-sheet:not(.hidden)'),
+    }), skill);
+    check('the pause line "Paragrafy" opens Konfiguracja over the hidden pause sheet, the active box stamped', kf.rows === 5 && kf.active === String(n) && kf.stamps >= 3 && !kf.pause, JSON.stringify(kf));
+    await shot('08aa-konfiguracja');
+    await page.locator(`.kf-sheet .kf-row[data-skill="${skill}"] .kf-box[data-n="1"]`).click({ timeout: 3000 });
+    await sleep(200);
+    await page.locator('.kf-back').click({ timeout: 3000 });
+    await sleep(300);
+    const kfBack = await page.evaluate(() => ({ kf: !!document.querySelector('.kf-sheet'), pause: !!document.querySelector('.pause-sheet:not(.hidden)'), status: window.__game.state().status }));
+    check('Wróć closes Konfiguracja and shows the pause sheet again', !kfBack.kf && kfBack.pause && kfBack.status === 'paused', JSON.stringify(kfBack));
+    await page.locator('[data-pause=resume]').click({ timeout: 3000 });
+    await sleep(400);
+    const switched = await page.evaluate(() => ({ info: window.__game.hero.info(), tag: document.querySelector('.pad.s1 .ptag')?.textContent ?? null }));
+    check('the switch to § 1 holds after Wznów and the pad tag is gone', switched.info.paragraphs[skill] === 1 && switched.tag === '' && switched.info.status === 'running', JSON.stringify({ para: switched.info.paragraphs, tag: switched.tag }));
+    await page.evaluate((pads) => pads.forEach((k, i) => window.__game.hero.assignPad(i + 1, k)), padsBefore); // the order the rest of the smoke expects
+  }
 
   // ---------- 4. inventory sheet ----------
   await page.evaluate(() => window.__game.demoInventory());
@@ -1146,20 +1212,27 @@ try {
       g.hero.installSkill(3);
       g.hero.installSkill(4);
       const out = { hero: g.hero.info().heroId, cast: [], cd: [], st0, st1: s.status };
-      for (let k = 0; k < 5; k++) {
-        g.hero.assignPad(1, k);
-        for (const e of s.enemies) e.hp = e.hpMax = 1e9;
-        s.hero.cd.fill(0); // the previous skill's cooldown is not what is tested
-        const ok = g.hero.cast(1);
-        if (!ok && !out.why) out.why = { k, pend: s.hero.pendingLevels, off: g.hero.info().offer, lvl: s.player.level, t: s.time, status: s.status, modal: s.modal, phase: s.phase, bot: s.law.botTime, cd: [...s.hero.cd], pads: [...s.hero.pads], ranks: [...s.hero.ranks] };
-        out.cast.push(ok);
-        out.cd.push(g.hero.info().cd[k] > 0);
-        g.advance(0.5);
+      const ids = g.hero.info().skillIds;
+      out.para = [];
+      // every skill with each of its three paragraphs (S2): the patched cast fires and starts a cooldown too
+      for (const n of [1, 2, 3]) {
+        for (let k = 0; k < 5; k++) {
+          g.hero.assignPad(1, k);
+          if (!g.hero.setParagraph(ids[k], n, true)) out.para.push(`${ids[k]}:${n}`);
+          for (const e of s.enemies) e.hp = e.hpMax = 1e9;
+          s.hero.cd.fill(0); // the previous skill's cooldown is not what is tested
+          const ok = g.hero.cast(1);
+          if (!ok && !out.why) out.why = { k, n, pend: s.hero.pendingLevels, off: g.hero.info().offer, lvl: s.player.level, t: s.time, status: s.status, modal: s.modal, phase: s.phase, bot: s.law.botTime, cd: [...s.hero.cd], pads: [...s.hero.pads], ranks: [...s.hero.ranks] };
+          out.cast.push(ok);
+          out.cd.push(g.hero.info().cd[k] > 0);
+          g.advance(0.5);
+        }
       }
+      out.active = g.hero.info().paragraphs;
       return out;
     });
     const r = castAll[id];
-    check(`${id}: all five skills cast and start a cooldown`, r.hero === id && r.cast.every(Boolean) && r.cd.every(Boolean), JSON.stringify(r));
+    check(`${id}: all five skills cast and start a cooldown with § 1, § 2 and § 3`, r.hero === id && r.cast.length === 15 && r.cast.every(Boolean) && r.cd.every(Boolean) && r.para.length === 0 && r.active.every((n) => n === 3), JSON.stringify(r));
   }
   await shot('16b-every-hero-cast');
 
