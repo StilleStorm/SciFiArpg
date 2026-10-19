@@ -6,8 +6,9 @@ import type { Vec } from '../core/vec';
 import type { Enemy } from '../entities/types';
 import { resolveMove } from '../world/pages';
 import { nextId, type RunState } from '../world/run';
-import { ELITE_IDS, FAMILY_IDS, makeMix, pickFamily, type EliteId, type FamilyId, type MissionMix } from './families';
-import { makeEnemy } from './make';
+import { ELITE_IDS, FAMILY_IDS, makeMix, pickFamily, setEnemyScale, type EliteId, type FamilyId, type MissionMix } from './families';
+import { planScale } from '../world/campaign';
+import { applyTierStats, makeEnemy } from './make';
 
 export type { MissionMix };
 export const ENEMY_COUNT = 5;
@@ -29,6 +30,11 @@ export interface SpawnOpts {
 export function placeEnemy(s: RunState, family: FamilyId, x: number, y: number, opts: SpawnOpts = {}): Enemy | null {
   const r = s.rngs.spawn;
   const e = makeEnemy(nextId(s), x, y, r.int(1, 1e6), family, opts);
+  if (s.plan) {
+    // The campaign's planet and priority scale racja and damage; the numbers are applied again with the scale set.
+    setEnemyScale(e, planScale(s.plan));
+    applyTierStats(e, false);
+  }
   const before = { x: e.x, y: e.y };
   resolveMove(s.page, e, e.r);
   if (Math.hypot(e.x - before.x, e.y - before.y) > 1) return null;
@@ -39,7 +45,7 @@ export function placeEnemy(s: RunState, family: FamilyId, x: number, y: number, 
 
 /** The mission's tier for a family: Powiadomienia start at 1, the others rise with the page. */
 function pageTier(s: RunState): number {
-  return 1 + Math.floor(s.pageIndex / 2);
+  return Math.max(1, 1 + Math.floor(s.pageIndex / 2) + planScale(s.plan).tierOffset);
 }
 
 /** `count` enemies of a family around a point (a ring of 90-230 units). Returns those that fit. */
@@ -59,7 +65,7 @@ export function spawnWave(s: RunState, family: FamilyId, count: number, around: 
       const y = around.y + Math.sin(a) * d;
       if (x < 60 || y < 60 || x > s.page.w - 60 || y > s.page.h - 60) continue;
       if (Math.hypot(x - s.player.x, y - s.player.y) < (opts.minPlayer ?? 160)) continue;
-      const elite = opts.elite ?? (wantElite || r.chance(ELITE_CHANCE) ? r.pick(ELITE_IDS) : undefined);
+      const elite = opts.elite ?? (wantElite || r.chance(ELITE_CHANCE * planScale(s.plan).eliteMul) ? r.pick(ELITE_IDS) : undefined);
       const tier = opts.tier ?? (fam === 'powiadomienia' ? 1 : pageTier(s));
       const e = placeEnemy(s, fam, x, y, { tier, elite });
       if (e) {
@@ -148,7 +154,7 @@ export function spawnEnemy(s: RunState, minDistance = MIN_SPAWN_DISTANCE): Enemy
     const y = r.range(80, s.page.h - 80);
     if (Math.hypot(x - s.player.x, y - s.player.y) < minDistance) continue;
     const tier = family === 'powiadomienia' ? 1 : pageTier(s);
-    const elite = r.chance(ELITE_CHANCE) ? r.pick(ELITE_IDS) : undefined;
+    const elite = r.chance(ELITE_CHANCE * planScale(s.plan).eliteMul) ? r.pick(ELITE_IDS) : undefined;
     const e = placeEnemy(s, family, x, y, { tier, elite });
     if (e) return e;
   }

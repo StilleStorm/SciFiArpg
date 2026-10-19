@@ -6,9 +6,22 @@ import type { Claim } from '../combat/claims';
 import type { DamageType } from '../combat/damage';
 import type { Rng } from '../core/rng';
 import { genderForm, t, type Gender } from '../i18n';
+import type { EnemyScale } from '../world/campaign';
 import { FAMILY_IDS, type DefectId, type EliteId, type FamilyId } from './ids';
 
 export * from './ids';
+
+/** What the campaign does to one enemy's numbers (world/campaign.ts enemyScaleFor); kept beside the enemy so escalation keeps it. */
+const SCALES = new WeakMap<object, EnemyScale>();
+export function setEnemyScale(e: object, scale: EnemyScale): void {
+  SCALES.set(e, scale);
+}
+export const enemyScaleOf = (e: object): EnemyScale | undefined => SCALES.get(e);
+/** Racja and damage of a tier row times the scale (the rest of the row is untouched). */
+export function scaleStats(st: TierStats, scale: EnemyScale | undefined): TierStats {
+  if (!scale) return st;
+  return { ...st, hp: Math.max(1, Math.round(st.hp * scale.hp)), dmgMin: Math.max(1, Math.round(st.dmgMin * scale.dmg)), dmgMax: Math.max(1, Math.round(st.dmgMax * scale.dmg)) };
+}
 
 export interface TierStats {
   hp: number;

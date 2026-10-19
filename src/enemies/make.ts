@@ -11,7 +11,9 @@ import {
   ESCALATE_S,
   FAMILY_DEFS,
   NIEUCHRONNY_HP_MUL,
+  enemyScaleOf,
   pickClaim,
+  scaleStats,
   tierStats,
   type EliteId,
   type FamilyId,
@@ -25,7 +27,7 @@ export interface MakeOpts {
 
 /** Apply the numbers of (family, tier) to an enemy, keeping the hp fraction. Used at birth and on escalation. */
 export function applyTierStats(e: Enemy, keepFraction: boolean): void {
-  const st = tierStats(e.family, e.tier);
+  const st = scaleStats(tierStats(e.family, e.tier), enemyScaleOf(e));
   const def = FAMILY_DEFS[e.family];
   const asm = assemble(e.seed, e.family, e.tier);
   const elite = e.elite?.affix;

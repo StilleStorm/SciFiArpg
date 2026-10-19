@@ -2,6 +2,7 @@ import { createRng } from '../core/rng';
 import { FAMILY_IDS, type FamilyId } from '../enemies/ids';
 import { t } from '../i18n';
 import { LAWS, type LawId } from './laws';
+import { planetDef, type TicketPlan } from './campaign';
 
 /** Everything the ticket header says about a run. A pure function of the seed. */
 export interface TicketInfo {
@@ -47,5 +48,22 @@ export function ticketForSeed(seed: number, number = TICKET_BASE): TicketInfo {
     pageCount,
     planet: t('screens.planet.name', { ordinal: ordinal(n, 'nom'), adjective: adj }),
     planetLoc: t('screens.planet.loc', { ordinal: ordinal(n, 'loc') }),
+  };
+}
+
+/**
+ * The ticket of a campaign plan: the planet, clause and dominant family come from the plan's planet, the page count is
+ * drawn from the planet's range by the seed. A pure function of (seed, plan, number).
+ */
+export function ticketForPlan(seed: number, plan: TicketPlan, number = TICKET_BASE): TicketInfo {
+  const p = planetDef(plan.planet);
+  const r = createRng(seed).fork('ticket-plan');
+  return {
+    number,
+    lawId: plan.lawId,
+    family: p.dominant,
+    pageCount: r.int(p.pages[0], p.pages[1]),
+    planet: t(p.nameKey),
+    planetLoc: t(p.locKey),
   };
 }

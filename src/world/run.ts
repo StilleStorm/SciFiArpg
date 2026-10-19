@@ -7,7 +7,8 @@ import { createBaseState, generateBase, layoutForSeed, type BaseState } from './
 import { generateRunPages, type Page } from './pages';
 import { applyLaw, neutralLaw, type LawFlags, type LawId } from './laws';
 import type { Tunnel } from './tunnel';
-import { ticketForSeed, type TicketInfo } from './ticket';
+import { ticketForPlan, ticketForSeed, type TicketInfo } from './ticket';
+import { mixForPlanet, type CampaignState, type TicketPlan } from './campaign';
 
 import type { MissionMix } from '../enemies/families';
 import { applyBookmark, type Bookmark } from '../save/bookmark';
@@ -71,6 +72,10 @@ export interface RunState {
   base?: BaseState;
   /** The boss argument (DESIGN 5.4, combat/spor.ts): the comment that is up, the x2 window; absent until a boss posts. */
   spor?: SporState;
+  /** The planet, priority and clause of this ticket (world/campaign.ts); absent for the older random tickets, which scale nothing. */
+  plan?: TicketPlan;
+  /** The character's campaign (copied from the saved record by applyCharacter, written back by serializeCharacter). */
+  campaign?: CampaignState;
 }
 
 /** Optional overrides for tests and screenshots; everything else comes from the seed. */
@@ -87,11 +92,15 @@ export interface RunOptions {
   character?: Character;
   /** 'base' starts in the walkable base page of the planet (the exit is locked until the ticket is accepted); default 'run'. */
   phase?: 'base' | 'run';
+  /** Planet, priority and clause from the campaign; the ticket is made from it (ticketForPlan) and the enemies scale with it. */
+  plan?: TicketPlan;
 }
 
 export function createRun(seed: number, opts: RunOptions = {}): RunState {
   const rng = createRng(seed);
-  const ticket = ticketForSeed(seed, opts.ticketNumber ?? opts.resume?.ticketNumber);
+  const ticketNumber = opts.ticketNumber ?? opts.resume?.ticketNumber;
+  const plan = opts.plan ?? opts.resume?.plan;
+  const ticket = plan ? ticketForPlan(seed, plan, ticketNumber) : ticketForSeed(seed, ticketNumber);
   const lawId = opts.lawId ?? opts.resume?.lawId;
   const pageCount = opts.pageCount ?? opts.resume?.pageCount;
   if (lawId) ticket.lawId = lawId;
@@ -132,6 +141,7 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
     summons: [],
     zones: [],
     phase,
+    ...(plan ? { plan: { ...plan, lawId: ticket.lawId }, mix: mixForPlanet(plan.planet) } : {}),
   };
   if (phase === 'base') state.base = createBaseState(layoutForSeed(seed), opts.resume ?? null);
   applyHero(state.player, heroDef(opts.heroId ?? DEFAULT_HERO_ID));

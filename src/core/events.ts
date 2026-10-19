@@ -107,6 +107,10 @@ export interface GameEvents {
   'recovery:used': { auto: boolean; healed: number; held: number };
   /** "Akceptuję regulamin" (or "Wznów zgłoszenie") was pressed in the base: the exit of the base page is unlocked. */
   'ticket:accepted': undefined;
+  /** A campaign planet was closed (world/campaign.ts settleCampaign): `to` is the next planet (0-based); `finale` = planet 9 was closed and the return ticket to planet 1 is next. */
+  'campaign:advanced': { from: number; to: number; finale: boolean };
+  /** The final ticket was closed: the case is closed, extras and free travel are open. */
+  'case:closed': undefined;
 }
 
 type Args<K extends keyof GameEvents> = GameEvents[K] extends undefined ? [] : [GameEvents[K]];

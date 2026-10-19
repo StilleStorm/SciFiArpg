@@ -3,6 +3,7 @@
  * Resuming regenerates the pages from the seed and jumps to the page: enemies back, floor loot gone, racja full.
  * The exact-state return (enemies, loot, statuses) belongs to the service tunnel inside one session, not here.
  */
+import { toPlan, type TicketPlan } from '../world/campaign';
 import { LAWS, type LawId } from '../world/laws';
 import type { RunState } from '../world/run';
 
@@ -21,7 +22,11 @@ export interface Bookmark {
   planetName: string;
   /** How many pages the planet had: page generation depends on it, so it is kept even when the seed alone would say. */
   pageCount: number;
+  /** The campaign plan of the ticket (planet, priority, clause); absent for the older random tickets and older saves. */
+  plan?: TicketPlan;
 }
+
+const isLaw = (v: unknown): v is LawId => typeof v === 'string' && LAWS.some((l) => l.id === v);
 
 /** Take a bookmark of the run as it stands. */
 export function bookmarkOf(s: RunState): Bookmark {
@@ -34,6 +39,7 @@ export function bookmarkOf(s: RunState): Bookmark {
     clockS: Math.round(s.time * 100) / 100,
     planetName: s.ticket.planet,
     pageCount: s.pageCount,
+    ...(s.plan ? { plan: { ...s.plan } } : {}),
   };
 }
 
@@ -48,6 +54,7 @@ export function toBookmark(raw: unknown): Bookmark | null {
   if (typeof lawId !== 'string' || !LAWS.some((l) => l.id === lawId)) return null;
   if (!finite(r['pageCount']) || r['pageCount'] < 1) return null;
   const pageCount = Math.floor(r['pageCount']);
+  const plan = toPlan(r['plan'], isLaw);
   return {
     version: BOOKMARK_VERSION,
     ticketNumber: Math.floor(r['ticketNumber']),
@@ -57,6 +64,7 @@ export function toBookmark(raw: unknown): Bookmark | null {
     clockS: Math.max(0, r['clockS']),
     planetName: typeof r['planetName'] === 'string' ? r['planetName'] : '',
     pageCount,
+    ...(plan ? { plan } : {}),
   };
 }
 

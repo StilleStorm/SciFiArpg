@@ -1,0 +1,23 @@
+{
+  "_todo": "TODO-story: nazwy planet to tymczasowe oznaczenia do slice'u S11.",
+  "p1": { "name": "Planeta Dwudziesta Trzecia (Nieprzyjemna)", "loc": "Planecie Dwudziestej Trzeciej" },
+  "p2": { "name": "Planeta Czterdziesta Siódma (Zaktualizowana)", "loc": "Planecie Czterdziestej Siódmej" },
+  "p3": { "name": "Planeta Trzynasta (Niekompletna)", "loc": "Planecie Trzynastej" },
+  "p4": { "name": "Planeta Dziewiąta (Przekierowana)", "loc": "Planecie Dziewiątej" },
+  "p5": { "name": "Planeta Pięćdziesiąta Pierwsza (Pilna)", "loc": "Planecie Pięćdziesiątej Pierwszej" },
+  "p6": { "name": "Planeta Trzydziesta Druga (Wielokrotna)", "loc": "Planecie Trzydziestej Drugiej" },
+  "p7": { "name": "Planeta Siedemnasta (Domniemana)", "loc": "Planecie Siedemnastej" },
+  "p8": { "name": "Planeta Czterdziesta (Wygenerowana)", "loc": "Planecie Czterdziestej" },
+  "p9": { "name": "Planeta Pięćdziesiąta Siódma (Nieznana)", "loc": "Planecie Pięćdziesiątej Siódmej" },
+  "act": {
+    "1": "Akt I, Rozpatrywanie",
+    "2": "Akt II, Eskalacja",
+    "3": "Akt III, Weryfikacja"
+  },
+  "priority": {
+    "niski": { "name": "Niski", "hint": "Zgłoszenie zostanie rozpatrzone w wolnej chwili. Przeciwnicy również." },
+    "normalny": { "name": "Normalny", "hint": "Standardowy tryb rozpatrywania." },
+    "wysoki": { "name": "Wysoki", "hint": "Zgłoszenie oznaczono jako pilne. Pilność dotyczy także przeciwników." },
+    "krytyczny": { "name": "Krytyczny", "hint": "Zgłoszenie krytyczne. Gwarancji nie udzielamy." }
+  }
+}
