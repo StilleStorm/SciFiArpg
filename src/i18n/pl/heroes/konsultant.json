@@ -70,5 +70,27 @@
         "desc": "Rozłączenie regulaminowe, bez celowania. Obrażenia większe o 40%. Kosztuje 8 racji."
       }
     }
+  },
+  "ult": {
+    "przekazanie": {
+      "name": "Przekazanie do działu",
+      "desc": "Każdy przeciwnik na stronie zostaje zgłoszony, otrzymuje jednorazowe obrażenia i przez 5 s atakuje najbliższego innego.",
+      "stamp": "PRZEKAZANO",
+      "note": "Przekazano do działu. Dział: nieustalony.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Przekazanie podstawowe. Cała strona kieruje sprawę do siebie nawzajem."
+        },
+        "2": {
+          "name": "Sprawa zasadnicza",
+          "desc": "Obrażenia egzystencjalne, jednorazowe, prawie dwa razy większe. Przekazanie trwa 3 s. Kosztuje 6 racji."
+        },
+        "3": {
+          "name": "Przekazanie bez uwag",
+          "desc": "Przekazanie trwa 8 s, bez obrażeń. Każdy zgon przeciwnika w tym czasie daje gwiazdkę. Kosztuje 5 racji."
+        }
+      }
+    }
   }
 }

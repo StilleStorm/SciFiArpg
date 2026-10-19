@@ -37,7 +37,8 @@ export interface GameEvents {
   footnote: { text: string };
   /** A footnote was printed with number `n`; `correction` = the Asystent's later correction of a wrong note (audio: typewriter key / carriage return). */
   'footnote:added': { n: number; text: string; correction: boolean };
-  stamp: { text: string; x: number; y: number };
+  /** A stamp on the page. `quiet`: another sound carries it (an ultimate's recipe ends in its own thud), audio does not play the stamp. */
+  stamp: { text: string; x: number; y: number; quiet?: boolean };
   /** A short handwritten note in the margin next to world x, y (text is already translated). */
   'margin:note': { text: string; x: number; y: number; ttl?: number };
   'run:ended': { outcome: 'zgloszenie' | 'petla' | 'zawieszenie' | 'ukonczono' };
@@ -56,6 +57,8 @@ export interface GameEvents {
   'player:tap': { x: number; y: number };
   /** A hero skill fired: `slot` is the pad (0..2), `skill` the hero's skill index (0..4, DESIGN 10.1); free = fired by the Pralka quirk without cooldown. */
   'skill:cast': { slot: 0 | 1 | 2; skill: 0 | 1 | 2 | 3 | 4; free: boolean; aim?: { kind: 'auto' | 'kierunek' | 'wskazanie'; dx: number; dy: number; x: number; y: number } };
+  /** An ultimate was cast (combat/meter.ts castUltimate): the hero, the ultimate's id and where it was cast; audio/bindings.ts plays the hero's ultimate recipe. */
+  'ultimate:cast': { heroId: string; ultimateId: string; x: number; y: number };
   /** A pad is held and dragged (DESIGN 5.6): the aim as it would fire now (direction and point both filled); pads.ts emits it on every change. */
   'skill:aim': { slot: 0 | 1 | 2; mode: 'auto' | 'kierunek' | 'wskazanie'; x: number; y: number; dx: number; dy: number };
   /** A summon ran out of time or was replaced; its drawing is rubbed out. */

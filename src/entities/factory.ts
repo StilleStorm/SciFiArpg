@@ -45,6 +45,7 @@ export function createPlayer(id: number, x: number, y: number): Player {
     revealsPage: false,
     suspended: false,
     permissions: [],
+    meter: 0,
   };
 }
 

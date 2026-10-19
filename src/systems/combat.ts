@@ -8,6 +8,8 @@ import { isStunned } from '../combat/status';
 import { resolveMove } from '../world/pages';
 import { type RunState } from '../world/run';
 import { fireAuto } from '../heroes/auto';
+import { isRebuttal } from '../combat/claims';
+import { killFill, meterGain, METER_REBUTTAL } from '../combat/meter';
 import { heroDef } from '../heroes/defs';
 import { absorbShield, playerDamageMul } from '../heroes/shield';
 
@@ -43,12 +45,14 @@ export function attack(s: RunState, bus: Bus, attacker: Fighter, defender: Fight
   }
   const dealt =
     attacker.kind === 'player' ? Math.max(1, Math.round(res.amount * playerDamageMul(attacker))) : enemyOutgoing(attacker, res.amount);
-  return applyDamage(s, bus, defender, dealt, res.crit, attacker.damageType);
+  return applyDamage(s, bus, defender, dealt, res.crit, attacker.damageType, attacker.kind !== 'enemy'); // an enemy's blow earns the player no Argument
 }
 
 /** Subtract racja, emit the hit event, and handle death. Returns true if the defender died. */
-export function applyDamage(s: RunState, bus: Bus, defender: Fighter, amount: number, crit: boolean, type?: DamageType): boolean {
+export function applyDamage(s: RunState, bus: Bus, defender: Fighter, amount: number, crit: boolean, type?: DamageType, credit = true): boolean {
+  const rebuttal = credit && type !== undefined && defender.kind === 'enemy' && isRebuttal(defender.claim, type);
   ({ amount, crit } = modifyDamage(bus, defender, amount, crit, type, s)); // claims, existence, zgloszony
+  if (rebuttal) meterGain(s, METER_REBUTTAL); // the Argument meter (combat/meter.ts)
   if (defender.kind === 'enemy' && defender.defect) learnDefect(s, defender.defect);
   if (defender.kind === 'player') amount = absorbShield(defender, amount);
   if (amount <= 0) return false;
@@ -73,6 +77,7 @@ export function killEnemy(s: RunState, bus: Bus, e: Enemy): void {
   if (i < 0) return;
   s.enemies.splice(i, 1);
   s.kills++;
+  meterGain(s, killFill(e.boss ? 'boss' : e.elite ? 'elite' : 'common'));
   bus.emit('enemy:died', { id: e.id, x: e.x, y: e.y, tier: e.boss ? 'boss' : e.elite ? 'elite' : 'common', family: e.family });
   if (e.boss) bus.emit('boss:died', { id: e.id, family: e.family, x: e.x, y: e.y });
 }

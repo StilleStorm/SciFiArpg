@@ -193,6 +193,38 @@ export interface UpdateOffer {
   level: number;
 }
 
+/** An ultimate that is running (heroes/ultimate.ts): resolved numbers at the cast, the seconds left, what the tick keeps. */
+export interface ActiveUlt {
+  id: string;
+  para: ParagraphNo;
+  /** Seconds left, and the length it was cast for. */
+  left: number;
+  dur: number;
+  /** Damage multiplier of the paragraph, times the hero's mods. */
+  dmg: number;
+  x: number;
+  y: number;
+  /** Seconds gathered towards the next once-a-second tick. */
+  acc: number;
+  /** Ids of the enemies already dealt with (entered, struck once). */
+  ids: number[];
+  /** The kill count the tick has already counted. */
+  seen: number;
+  /** Radius of the area it acts in (resolved at the cast from the paragraph's `tune.radius` or the def), absent for one without (render/ultFx.ts outlines it at x, y). */
+  r?: number;
+  /** Kartograf: the auto-attack fires this many shots and every line pierces while it runs (heroes/auto.ts). */
+  shots?: number;
+  pierce?: boolean;
+}
+
+/** The ultimate side of a run (S3): the active paragraph (1..3), what runs now, and the quiet that drains the meter. Absent until first used. */
+export interface UltRun {
+  para: ParagraphNo;
+  active: ActiveUlt[];
+  /** Seconds with no enemy near (combat/meter.ts). */
+  idle: number;
+}
+
 export interface HeroRun {
   heroId: HeroId;
   /** Seconds left per skill (keyed by SkillIndex, not by pad), and the length of the cooldown just started. */
@@ -248,6 +280,8 @@ export interface HeroRun {
   /** Active paragraph per skill (by SkillIndex) and its patch; both absent while every skill is on paragraph 1 (heroes/paragraphs.ts). */
   para?: ParagraphNo[];
   patch?: (ParagraphPatch | undefined)[];
+  /** The ultimate: paragraph, running effects, meter quiet (heroes/ultimate.ts). */
+  ult?: UltRun;
   /** Damage queued to land later (primitives/effects.ts deferredDamage, echo); absent until a skill queues one. */
   deferred?: DeferredHit[];
   /** Friendly copies that become hostile when their time is up (Petlowiec quirk). */

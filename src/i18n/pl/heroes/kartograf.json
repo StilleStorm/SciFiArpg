@@ -70,5 +70,27 @@
         "desc": "Legenda regulaminowa, obrażenia większe o 30%. Kosztuje 8 racji."
       }
     }
+  },
+  "ult": {
+    "mapaOstateczna": {
+      "name": "Mapa ostateczna",
+      "desc": "Przez 6 s każdy przeciwnik na stronie jest zmierzony i zgłoszony. Pomiar strzela dwukrotnie, a każda linia przebija.",
+      "stamp": "ZATWIERDZONO DO DRUKU",
+      "note": "Skala 1:1. Marginesy obrysowane.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Wydanie podstawowe. Dwa pomiary na strzał, wszystko na wylot."
+        },
+        "2": {
+          "name": "Druk pojedynczy",
+          "desc": "Mapa trwa 8 s, pomiar strzela raz."
+        },
+        "3": {
+          "name": "Nakład poczwórny",
+          "desc": "Mapa trwa 4 s, pomiar mechaniczny strzela czterokrotnie. Kosztuje 6 racji."
+        }
+      }
+    }
   }
 }

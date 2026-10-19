@@ -6,6 +6,7 @@ import { t } from '../i18n';
 import { applyDamage } from '../systems/combat';
 import type { RunState } from '../world/run';
 import { DAMAGE_TYPES, type DamageType } from './damage';
+import { meterGain, METER_SPOR } from './meter';
 
 /**
  * Spor (boss arguments), DESIGN 5.4. At each boss phase the boss posts a comment; three replies appear as margin
@@ -140,6 +141,7 @@ export function answerSpor(s: RunState, bus: Bus, index: 0 | 1 | 2): 'right' | '
   bus.emit('spor:answered', { id: boss.id, index, right });
   if (right) {
     sp.window = SPOR_WINDOW_S;
+    meterGain(s, METER_SPOR); // a right reply fills half of the Argument meter
     bus.emit('stamp', { text: t('combat.spor.stamp'), x: boss.x, y: boss.y - 12 }); // on the body, so the struck comment above stays legible
   } else {
     const p = s.player;

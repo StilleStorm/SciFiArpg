@@ -11,6 +11,7 @@ import type { HeroDef } from './defs';
 import type { SkillParagraphs } from './paragraphs';
 import type { HeroFigure } from './figureKit';
 import type { Mods } from './state';
+import type { UltimateDef } from './ultimateDefs';
 
 /** A skill as a function on the run state. Returning false = nothing happened, no cooldown. `aim` is what the player aimed. */
 export type SkillFn = (s: RunState, bus: Bus, hero: HeroDef, aim: Aim) => void | false;
@@ -28,6 +29,8 @@ export interface HeroSounds {
   skills: readonly [SfxName, SfxName, SfxName, SfxName, SfxName];
   /** Played when the auto-attack starts. */
   autoStart?: SfxName;
+  /** The ultimate's recipe (audio/bindings.ts plays it on `ultimate:cast`; it ends in the stamp's thud). */
+  ultimate?: SfxName;
 }
 
 /**
@@ -55,4 +58,6 @@ export interface HeroModule {
   /** The six passives the update form offers (`passive1..6`, text `forms.update.passive.<id>.N.{name,desc}`). */
   passives: readonly HeroPassive[];
   quirk?: HeroQuirk;
+  /** The ultimates, by level (12 / 24 / 36); S3 builds the first (heroes/ultimate.ts casts it). Text `heroes.<id>.ult.<ultimate>.*`. */
+  ultimates?: readonly UltimateDef[];
 }

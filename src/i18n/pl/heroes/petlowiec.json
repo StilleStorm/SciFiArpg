@@ -70,5 +70,27 @@
         "desc": "Lądowanie egzystencjalne, obszar większy o 30%. Odnowienie dłuższe o 4 s."
       }
     }
+  },
+  "ult": {
+    "zebranie": {
+      "name": "Zebranie wszystkich pętli",
+      "desc": "Cztery kopie na 6 s, ponad zwykły limit kopii. Każda przy przybyciu zabiera głos w Sporze na obszarze 85.",
+      "stamp": "OBECNI",
+      "note": "Lista obecności: pięć podpisów.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Zebranie podstawowe. Cztery kopie, jedna lista obecności."
+        },
+        "2": {
+          "name": "Pełna frekwencja",
+          "desc": "Sześć kopii, ale tylko na 3 s."
+        },
+        "3": {
+          "name": "Skład ograniczony",
+          "desc": "Dwie kopie, obrażenia egzystencjalne większe o połowę. Kosztuje 6 racji."
+        }
+      }
+    }
   }
 }

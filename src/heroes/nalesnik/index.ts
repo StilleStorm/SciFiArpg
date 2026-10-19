@@ -8,5 +8,6 @@ import { paragraphs } from './paragraphs';
 import { passives } from './passives';
 import { quirk } from './quirk';
 import { sounds } from './sounds';
+import { ultimates } from './ultimates';
 
-export const hero: HeroModule = { def, figure, sounds, casts, paragraphs, pads, passives, quirk };
+export const hero: HeroModule = { def, figure, sounds, casts, paragraphs, pads, passives, quirk, ultimates };

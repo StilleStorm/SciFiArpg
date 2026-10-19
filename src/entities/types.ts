@@ -81,6 +81,8 @@ export interface Player extends Fighter {
   round?: boolean;
   /** The hero has the `skim` trait (heroes/defs.ts HeroTraits): projectiles skim off it at full racja (heroes/shield.ts). */
   skim?: boolean;
+  /** The Argument meter, 0..1 (combat/meter.ts): fills from rebuttals, kills and a right Spor reply; full = one ultimate. Never saved. */
+  meter: number;
 }
 
 export interface Enemy extends Fighter {

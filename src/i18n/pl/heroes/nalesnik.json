@@ -70,5 +70,27 @@
         "desc": "Księżyc regulaminowy, obrażenia większe o 30%. Odnowienie dłuższe o 3 s."
       }
     }
+  },
+  "ult": {
+    "decyzjaKomisji": {
+      "name": "Decyzja Komisji",
+      "desc": "Przez 8 s wniosek o promieniu 200 podąża za nim. Kto do niego wejdzie, zostaje zablokowany na 1,5 s i otrzymuje obrażenia. Naleśnik odzyskuje 6 racji na sekundę.",
+      "stamp": "PLANETA KARŁOWATA",
+      "note": "Asystent odnotował decyzję.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Decyzja podstawowa. Wniosek rozpatrzony od ręki."
+        },
+        "2": {
+          "name": "Decyzja odmowna",
+          "desc": "Decyzja trwa 4 s, obrażenia egzystencjalne podwójne. Kosztuje 8 racji."
+        },
+        "3": {
+          "name": "Decyzja warunkowa",
+          "desc": "Decyzja mechaniczna, bez blokady: każdy w obszarze otrzymuje co sekundę połowę obrażeń. Kosztuje 6 racji."
+        }
+      }
+    }
   }
 }

@@ -70,5 +70,27 @@
         "desc": "Odczyt regulaminowy, obszar większy o 20%. Kosztuje 10 racji."
       }
     }
+  },
+  "ult": {
+    "pelnyCykl": {
+      "name": "Pełny cykl",
+      "desc": "Przez 5 sekund wszystko w promieniu 200 jest wciągane do bębna i co sekundę otrzymuje obrażenia. Na koniec cyklu zostaje zablokowane na 2 s.",
+      "stamp": "CYKL ZAKOŃCZONY",
+      "note": "Program nr {number}.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Program podstawowy. Bęben wciąga, obraca i na koniec blokuje."
+        },
+        "2": {
+          "name": "Program delikatny",
+          "desc": "Cykl trwa 8 s, obrażenia na sekundę mniejsze o połowę. Bez blokady na końcu. Pralka odzyskuje 3 racje na sekundę."
+        },
+        "3": {
+          "name": "Program intensywny",
+          "desc": "Cykl regulaminowy, 3 s, obrażenia na sekundę dwa razy większe, promień 140. Kosztuje 8 racji."
+        }
+      }
+    }
   }
 }

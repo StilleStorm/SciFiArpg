@@ -16,6 +16,7 @@ import { stepFlag, stepGravity, stepOrbit, stepRoll } from './nalesnik/steps';
 import { bindNumerBonus, landStart, stepLegend, stepMoon, stepNumer, stepReading, stepScale, stepTide, syncMoonUpor } from './steps2';
 import { tickRound } from './quirks';
 import { stepDeferred } from './primitives';
+import { stepUltimates } from './ultimate';
 import { pushRing, RING_SECONDS, RING_STEP } from './state';
 
 export function heroStep(s: RunState, bus: Bus, dt: number): void {
@@ -63,6 +64,7 @@ export function heroStep(s: RunState, bus: Bus, dt: number): void {
   stepZones(s, bus, dt);
   stepProjectiles(s, bus, dt);
   stepDeferred({ s, bus });
+  stepUltimates(s, bus, dt);
   if (tickUpdateQueue(s, dt) && canOpenUpdate(s, false)) bus.emit('update:ready');
 }
 
@@ -137,7 +139,7 @@ function stepRedirects(s: RunState, bus: Bus, dt: number): void {
     if (s.time >= r.next && best <= e.attackRange + e.r + other.r && !s.law.botTime) {
       r.next = s.time + 0.8;
       const res = rollDamage(e.stats, other.stats, e.damageType, s.rngs.combat);
-      if (res.hit) applyDamage(s, bus, other, res.amount, res.crit, e.damageType);
+      if (res.hit) applyDamage(s, bus, other, res.amount, res.crit, e.damageType, false); // an enemy's blow: no credit to the meter
     }
   }
 }
