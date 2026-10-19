@@ -166,6 +166,12 @@ export function strike(g: SVGGElement): void {
 // ---------- blot ----------
 
 const BLOT_MAX = 20;
+/** Ink share of a blot's fill (%): as it lands, at full ink, and once dried into the paper. */
+const BLOT_WET = 45;
+const BLOT_DRIED = 22;
+/** A blot stays black this long after it darkened, then dries over BLOT_DRY_MS (DESIGN 3.2: a hit leaves a blot that dries). */
+const BLOT_HOLD_MS = 500;
+const BLOT_DRY_MS = 1800;
 interface BlotSlot {
   node: SVGPathElement;
   cancel: () => void;
@@ -173,7 +179,7 @@ interface BlotSlot {
 const blotPool: BlotSlot[] = [];
 let blotNext = 0;
 
-/** An ink blob at (x, y), `size` = radius in units. It darkens over 300 ms and stays. Pooled: max 20. */
+/** An ink blob at (x, y), `size` = radius in units. It darkens over 300 ms, then dries to a pale stain that stays. Pooled: max 20. */
 export function blot(x: number, y: number, size: number, crit = false): void {
   let slot = blotPool[blotNext];
   if (!slot) {
@@ -198,11 +204,18 @@ export function blot(x: number, y: number, size: number, crit = false): void {
   }
   node.setAttribute('d', d);
   node.setAttribute('transform', `translate(${n2(x)} ${n2(y)})`);
-  const paint = (p: number): void => {
-    node.style.fill = `color-mix(in srgb, var(--ink) ${Math.round(45 + 55 * p)}%, var(--paper))`;
+  const mix = (pct: number): void => {
+    node.style.fill = `color-mix(in srgb, var(--ink) ${Math.round(pct)}%, var(--paper))`;
   };
-  paint(0);
-  slot.cancel = tween(300, paint);
+  mix(BLOT_WET);
+  // wet: it darkens to full ink in 300 ms; then it dries into the paper to a pale stain that no longer reads as a hit
+  const s = slot;
+  const cancelWet = tween(300, (p) => mix(BLOT_WET + (100 - BLOT_WET) * p), {
+    done: () => {
+      s.cancel = tween(BLOT_DRY_MS, (p) => mix(100 - (100 - BLOT_DRIED) * p), { delay: BLOT_HOLD_MS });
+    },
+  });
+  slot.cancel = cancelWet;
 }
 
 // ---------- stamp ----------
