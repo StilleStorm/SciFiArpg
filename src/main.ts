@@ -15,7 +15,7 @@ import { initInk } from './render/ink';
 import { installPaper } from './render/paper';
 import { createWobble, getStage, setTheme } from './render/stage';
 import { tickTweens } from './render/tween';
-import { bindAutosave, settleRun, withBookmark, withCharacter } from './save/autosave';
+import { bindAutosave, savable, settleRun, withBookmark, withCharacter } from './save/autosave';
 import { markRewritten } from './save/history';
 import { bugDump, copyText, deviceInfo, requestPersistence } from './save/export';
 import { loadMeta, saveMeta, type Settings } from './save/save';
@@ -35,7 +35,10 @@ import { addDeskLine, openKonfiguracja, type KonfiguracjaSheet } from './ui/konf
 import { createPads } from './ui/pads';
 import { createSpor } from './ui/spor';
 import { createPauseSheet } from './ui/pause';
-import { mountProfile } from './ui/profile';
+import { mountProfile, unmountProfile } from './ui/profile';
+import { addArchiveDeskLine, openArchive, type ArchiveSheet } from './ui/archive';
+import { mountRoster, type Roster } from './ui/roster';
+import { rosterStore } from './ui/rosterStore';
 import { createSettings } from './ui/settings';
 import { guardGhostClicks } from './ui/sheet';
 import { mountSklep, type SklepHandle } from './ui/sklep';
@@ -111,7 +114,11 @@ const footnotes = createFootnotes(stage.ui);
 const pads = createPads(stage.ui, bus);
 watchLayout(stage.ui); // what the HUD, pads and notes cover: bubbles, stamps and the page header keep out from under it
 const sporStrip = createSpor(stage.ui, bus, () => game.state); // the reply strip of a boss argument (hidden with the footnotes)
-const title = createTitle(stage.ui, () => go(meta.heroId ? 'baza' : 'profile'));
+// The cover leads to the roster (the creation form when there is no case file yet); a file opens the base.
+const title = createTitle(stage.ui, () => {
+  rosterFrom = 'title';
+  go('profile');
+});
 const freshSeed = (): number => (Date.now() ^ Math.floor(Math.random() * 0x100000000)) >>> 0;
 /** The planet of the next ticket: chosen when the previous ticket ended (a bookmark or a held run overrides it). */
 let nextSeed = freshSeed();
@@ -125,9 +132,9 @@ let shop: SklepHandle | null = null;
 
 const baza = createBaza(stage.ui, {
   onNewTicket: () => openSheet('ticket'),
-  onChangeHero: () => {
-    leave('changeHero'); // another hero cannot walk back into this run
-    go('profile');
+  onOpenRoster: () => {
+    rosterFrom = 'baza';
+    go('profile'); // go() settles the live base and any held run into this file first (settleForRoster)
   },
   onReturn: () => returnFromTunnel(),
   onResume: () => resumeTicket(),
@@ -168,6 +175,7 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
   // A sheet over the base is one history entry; leaving the base for another screen replaces it instead of popping and pushing.
   syncHistory(sheetKind !== null && screen === 'baza' ? 'ticket' : screen, next);
   dropSheets();
+  if (next === 'profile' && screen !== 'profile') settleForRoster();
   screen = next;
   const walkable = next === 'run' || next === 'baza';
   hud.el.classList.toggle('hidden', !walkable);
@@ -177,6 +185,7 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
   pads.classList.toggle('in-base', next === 'baza');
   footnotes.closeHistory(); // the history sheet belongs to the screen it was opened on (the notes themselves may run on)
   if (next !== 'title') title.hide();
+  if (next !== 'profile') dropRosterScreens();
   if (next !== 'run') clearPause();
   if (!walkable) input.setEnabled(false);
   switch (next) {
@@ -184,11 +193,8 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
       title.show(meta.runsCompleted);
       break;
     case 'profile':
-      // The profile screen saves the hero itself and then calls back.
-      mountProfile(stage.ui, () => {
-        meta = loadMeta();
-        go('baza');
-      });
+      if (rosterStore().files().length > 0) showRoster();
+      else showCreate(false);
       break;
     case 'baza':
       enterBase();
@@ -207,6 +213,70 @@ function go(next: Screen, seed: number = freshSeed(), opts: RunOptions = {}): vo
       break;
   }
   bus.emit('screen:changed', { screen });
+}
+
+// ---------- the roster and the creation of a case file ----------
+/** Where "Wróć" of the roster leads: the cover it came from, or the base it was opened in. */
+let rosterFrom: 'title' | 'baza' = 'title';
+let rosterUi: Roster | null = null;
+/** The hero pick is up for a new case file that came from the roster (the back button returns to the roster). */
+let creatingFromRoster = false;
+
+/**
+ * The roster can make another case file active or delete this one, and the save mirrors the active file at the top level:
+ * whatever is live must be written into the file it belongs to before the roster opens, and must not stay live after.
+ * A held run is settled like Zakończ (bookmark), the live base or run writes its character (a run also its bookmark),
+ * and the game stops, so nothing (autosave, a walk out of the exit, the tunnel) can write it over the next file.
+ */
+function settleForRoster(): void {
+  const here = game.state;
+  if (hold.held) leave('changeHero');
+  else if (here && live() && savable(here)) save(withBookmark(withCharacter(meta, here), here));
+  if (game.state) game.stop();
+  baza.setTunnel(null);
+}
+
+function dropRosterScreens(): void {
+  rosterUi?.destroy();
+  rosterUi = null;
+  unmountProfile();
+  creatingFromRoster = false;
+}
+
+function showRoster(): void {
+  dropRosterScreens();
+  rosterUi = mountRoster(
+    stage.ui,
+    rosterStore(),
+    {
+      onOpen: () => {
+        meta = loadMeta(); // the file the store made active: its character, bookmark and history
+        go('baza');
+      },
+      onCreate: () => showCreate(true),
+      onBack: () => go(rosterFrom === 'baza' && meta.character ? 'baza' : 'title'),
+      onRemoved: () => {
+        meta = loadMeta();
+      },
+    },
+    rosterFrom,
+  );
+}
+
+function showCreate(fromRoster: boolean): void {
+  dropRosterScreens();
+  creatingFromRoster = fromRoster;
+  const store = rosterStore();
+  mountProfile(stage.ui, {
+    defaultName: store.nextName(),
+    create: (heroId, name) => store.create(heroId, name),
+    onCreated: () => {
+      creatingFromRoster = false;
+      meta = loadMeta();
+      go('baza');
+    },
+    ...(fromRoster ? { onCancel: () => showRoster() } : {}),
+  });
 }
 
 /**
@@ -272,6 +342,8 @@ function releaseBase(): void {
 
 /** Take every sheet off the page without touching the history (the caller does that). */
 function dropSheets(): void {
+  archiveUi?.close();
+  archiveUi = null;
   karta?.close();
   karta = null;
   konfig?.close();
@@ -307,6 +379,7 @@ function openSheet(kind: SheetKind): void {
       baza.open(meta);
       addDeskLine(stage.ui, () => openKonfig('desk'));
       addKartaDeskLine(stage.ui, () => openKartaSheet());
+      addArchiveDeskLine(stage.ui, () => openArchiveSheet());
       break;
     case 'ticket':
       ticket.open(s.ticket);
@@ -510,6 +583,40 @@ function closeKartaSheet(): void {
   stage.ui.querySelector('.desk-sheet')?.classList.remove('hidden');
 }
 
+/** The Archiwum (ITEMS 8) stands over the desk the same way: the bag of the live base, the personal archive, the shared one. */
+let archiveUi: ArchiveSheet | null = null;
+function openArchiveSheet(): void {
+  const s = game.state;
+  if (!s || archiveUi || s.phase !== 'base') return;
+  save(withCharacter(meta, s)); // storage then holds the bag as it is now; the store moves items there
+  const store = rosterStore();
+  stage.ui.querySelector('.desk-sheet')?.classList.add('hidden');
+  archiveUi = openArchive(
+    stage.ui,
+    {
+      who: () => ({ name: store.activeName() ?? '', level: meta.character?.level ?? 1 }),
+      places: () => store.places(),
+      move: (uid, from, to) => {
+        const res = store.move(uid, from, to);
+        if (res.ok) {
+          meta = loadMeta();
+          const bag = meta.character?.inventory ?? [];
+          s.player.inventory.length = 0;
+          s.player.inventory.push(...bag.map((i) => ({ ...i })));
+        }
+        return res;
+      },
+    },
+    () => closeArchiveSheet(),
+  );
+}
+
+function closeArchiveSheet(): void {
+  archiveUi?.close();
+  archiveUi = null;
+  stage.ui.querySelector('.desk-sheet')?.classList.remove('hidden');
+}
+
 /** Take the pause sheet and its settings off the page and let the loop run (used by resume, Zakończ and every screen change). */
 function clearPause(): void {
   karta?.close();
@@ -633,6 +740,7 @@ function importSave(next: typeof meta): void {
   save(next);
   applySettings(next.settings);
   if (!next.heroId) {
+    game.stop(); // the old file's base is not settled into the imported save (settleForRoster finds nothing live)
     go('profile');
     return;
   }
@@ -707,7 +815,10 @@ window.addEventListener('popstate', () => {
   }
   if (HISTORY_LEVEL[screen] === 1) {
     poppedByUser = true;
-    go(screen === 'profile' && !meta.heroId ? 'title' : 'baza');
+    if (screen === 'profile' && creatingFromRoster) {
+      pushEntry(false, 'profile'); // the entry the press consumed stands again: the roster is the same screen
+      showRoster();
+    } else go(screen === 'profile' ? (rosterFrom === 'baza' && meta.character ? 'baza' : 'title') : 'baza');
     poppedByUser = false;
   }
 });

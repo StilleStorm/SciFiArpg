@@ -450,6 +450,9 @@ try {
   await lwait(200);
   await lp.evaluate(() => window.__game.go('profile'));
   await lwait(900);
+  await lshot('roster'); // a case file exists by now: the roster comes first, a new file leads to the hero pick
+  await lp.locator('[data-roster=new]').click();
+  await lwait(900);
   await lshot('profile');
   await lp.locator('.profile .choose').click();
   await lwait(500);

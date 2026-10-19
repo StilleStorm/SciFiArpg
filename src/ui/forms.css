@@ -583,3 +583,51 @@
     font-size: 15px;
   }
 }
+
+/* ---------- profile: the case number while a case file is created (S6) ---------- */
+.profile .pf-number {
+  flex: none;
+  padding-top: 8px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  align-items: end;
+}
+.profile .pf-label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  padding-bottom: 6px;
+}
+.profile .pf-input {
+  min-width: 0;
+  min-height: 40px;
+  padding: 4px 2px 2px;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  border-bottom: 1.5px solid var(--ink);
+  border-radius: 0;
+  outline: none;
+}
+.profile .pf-input:focus {
+  border-bottom-width: 3px;
+}
+.profile .pf-note {
+  grid-column: 1 / -1;
+  margin: 3px 0 0;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.2;
+}
+.profile .pf-note.bad {
+  color: var(--ink); /* an error is said in ink (DESIGN 3.2) */
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.profile .pf-roster {
+  align-self: center;
+  margin-top: 4px;
+  min-height: 40px;
+}

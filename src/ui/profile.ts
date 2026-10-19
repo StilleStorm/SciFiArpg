@@ -10,6 +10,8 @@ import { emptyCharacter } from '../save/character';
 import { loadMeta, saveMeta } from '../save/save';
 import { h } from './dom';
 import { openKarta, type KartaSheet } from './karta';
+import { errorText, NAME_MAX } from './rosterModel';
+import type { Result } from './rosterStore';
 import './forms.css';
 
 export interface Profile {
@@ -19,6 +21,19 @@ export interface Profile {
   hide(): void;
   /** Remove the screen from the page. */
   destroy(): void;
+}
+
+/**
+ * The hero pick inside creating a case file (S6): the chosen hero and the typed case number go to `create`; on success the
+ * screen is removed and `onCreated` follows, on a refusal the text of the error stands under the number and nothing is lost.
+ */
+export interface ProfileOptions {
+  /** The case number offered in the field. */
+  defaultName: string;
+  create(heroId: HeroId, name: string): Result<string>;
+  onCreated(id: string, heroId: HeroId): void;
+  /** "Wróć do wykazu"; absent when there is no roster to return to. */
+  onCancel?(): void;
 }
 
 let active: Profile | null = null;
@@ -52,19 +67,26 @@ function arrow(dir: 1 | -1): SVGSVGElement {
   return svg;
 }
 
-/**
- * Build the hero-select screen in `root` and show it at once. Choosing a hero saves `heroId` to MetaState,
- * removes the screen and calls `onChosen(heroId)`. Mounting again replaces the previous screen.
- */
-export function mountProfile(root: HTMLElement, onChosen: (heroId: HeroId) => void): Profile {
+/** Take the hero pick off the page, if it is up. */
+export function unmountProfile(): void {
   active?.destroy();
-  const profile = buildProfile(root, onChosen);
+}
+
+/**
+ * Build the hero-select screen in `root` and show it at once. With a function: choosing a hero saves `heroId` to MetaState,
+ * removes the screen and calls it (the hero preview of the test hook). With `ProfileOptions`: creating a case file.
+ * Mounting again replaces the previous screen.
+ */
+export function mountProfile(root: HTMLElement, arg: ((heroId: HeroId) => void) | ProfileOptions): Profile {
+  active?.destroy();
+  const profile = buildProfile(root, arg);
   active = profile;
   profile.show();
   return profile;
 }
 
-function buildProfile(root: HTMLElement, onChosen: (heroId: HeroId) => void): Profile {
+function buildProfile(root: HTMLElement, arg: ((heroId: HeroId) => void) | ProfileOptions): Profile {
+  const creating = typeof arg === 'function' ? null : arg;
   const screen = h('div', 'screen paper profile hidden');
   const frame = h('div', 'frame');
   screen.append(frame);
@@ -130,10 +152,37 @@ function buildProfile(root: HTMLElement, onChosen: (heroId: HeroId) => void): Pr
     });
   });
 
+  // The case number (creation only): typed over the auto-generated "Sprawa nr N".
+  const numberRow = h('div', 'pf-number');
+  const nameInput = h('input', 'pf-input');
+  nameInput.type = 'text';
+  nameInput.maxLength = NAME_MAX;
+  nameInput.autocomplete = 'off';
+  nameInput.spellcheck = false;
+  nameInput.id = 'pf-case-name';
+  nameInput.dataset['profile'] = 'name';
+  nameInput.value = creating?.defaultName ?? '';
+  const nameLabel = h('label', 'pf-label', t('screens.create.nameLabel'));
+  nameLabel.htmlFor = nameInput.id;
+  const nameNote = h('p', 'pf-note', t('screens.create.nameNote', { max: NAME_MAX }));
+  nameNote.setAttribute('role', 'status');
+  nameInput.addEventListener('input', () => {
+    nameNote.textContent = t('screens.create.nameNote', { max: NAME_MAX });
+    nameNote.classList.remove('bad');
+  });
+  numberRow.append(nameLabel, nameInput, nameNote);
+
   // The long text scrolls on a small phone; the buttons stay below it.
   const body = h('div', 'pscroll');
   body.append(top, name, desc, autoLabel, autoText, skillsLabel, skills, quirkLabel, quirk);
-  frame.append(head, h('hr', 'rule'), body, kartaLink, nav);
+  const toRoster = h('button', 'link-btn pf-roster', t('screens.create.toRoster'));
+  toRoster.type = 'button';
+  toRoster.dataset['profile'] = 'roster';
+  toRoster.addEventListener('click', () => creating?.onCancel?.());
+  frame.append(head, h('hr', 'rule'), body, kartaLink);
+  if (creating) frame.append(numberRow);
+  frame.append(nav);
+  if (creating?.onCancel) frame.append(toRoster);
   root.append(screen);
 
   let index = 0;
@@ -167,11 +216,23 @@ function buildProfile(root: HTMLElement, onChosen: (heroId: HeroId) => void): Pr
   choose.addEventListener('click', () => {
     const def = heroes[index];
     if (!def) return;
+    if (creating) {
+      const res = creating.create(def.id, nameInput.value);
+      if (!res.ok) {
+        nameNote.textContent = errorText(res.error);
+        nameNote.classList.add('bad');
+        return;
+      }
+      if (def.chosenNoteKey) noteChosen(def.id); // the Asystent notes the choice
+      profile.destroy();
+      creating.onCreated(res.value, def.id);
+      return;
+    }
     const before = loadMeta();
     if (def.chosenNoteKey && before.character?.heroId !== def.id) noteChosen(def.id); // the Asystent notes the first choice
     saveMeta({ ...before, heroId: def.id });
     profile.destroy();
-    onChosen(def.id);
+    if (typeof arg === 'function') arg(def.id);
   });
 
   let downX: number | null = null;
@@ -194,7 +255,7 @@ function buildProfile(root: HTMLElement, onChosen: (heroId: HeroId) => void): Pr
       if (active === profile) active = null;
     },
     show() {
-      const saved = loadMeta().heroId;
+      const saved = creating ? undefined : loadMeta().heroId;
       const at = saved ? heroes.findIndex((x) => x.id === saved) : 0;
       index = at >= 0 ? at : 0;
       render();
