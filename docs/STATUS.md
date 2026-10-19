@@ -119,6 +119,8 @@ Progress is recorded here, one line per slice:
 - S5 done: potwierdzenia (drop .1/.5/1 by rank, vacuum 90, heal 25% or held to 5, tap and auto-use under 15%, regen 2%/s after 4 s, HUD slip button), `navigator.storage.persist()`, Archiwum eksportowe export/import with confirmation, bug dump from the pause sheet, text size (3 steps), damage numbers (off by default); voice pass. Open: drop rates untested (S9/S16), DESIGN has no recovery section (PLAN §8 holds the rule).
 - M1 plan review done: PRODUCTION S6, S9, S10, S16, S19 briefs adjusted to what shipped (roster keeps Karta uprawnień and the archive format, potwierdzenia rates into the drop tables, Karta osobowa as a desk line, ultimates 2/3 as data on the S3/S4 slots, ARCHITECTURE folded at each milestone end); PLAN's duplicate §8 removed. Order unchanged.
 
+- **M1 Systems core complete** (2026-10-19): e2e:m1 green for 5 heroes × 2 orientations; look fixes (HUD keep-out for bubbles, stamps and the page header measured from the DOM; 11 px text; ink validation line; left-handed update line); voice pass; plan review adjusted S6, S9, S10, S16, S19–S21. Open polish for M7: ~25 CSS rules and a few drawn labels still under 11 px; portrait page header can drift off screen when the camera pans.
+
 **Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S6 (first of M2).
 
 ## Known limits
