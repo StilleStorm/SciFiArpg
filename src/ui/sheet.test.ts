@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isGhostOf, type GuardNode, type Press } from './sheet';
+import { cutEdge, isGhostOf, runsOn, type GuardNode, type Press } from './sheet';
 
 /** A tiny tree: nodes know their parent; `contains` walks up from the other node. */
 class N implements GuardNode {
@@ -52,5 +52,32 @@ describe('isGhostOf', () => {
     expect(isGhostOf(pressOf(a, 100), b, 100 + 701)).toBe(false);
     expect(isGhostOf(pressOf(a, Infinity), b, 50)).toBe(true);
     expect(isGhostOf(null, b, 50)).toBe(false);
+  });
+});
+
+describe('the c.d. cue', () => {
+  it('shows only while more than a sliver is left below', () => {
+    expect(runsOn(0, 500, 900)).toBe(true);
+    expect(runsOn(400, 500, 900)).toBe(false);
+    expect(runsOn(396, 500, 900)).toBe(false);
+  });
+  it('starts its strip where it slices no line', () => {
+    // max 983 slices the line 975..995; the nearest clean height above is that line's top
+    expect(cutEdge([{ top: 950, bottom: 970 }, { top: 975, bottom: 995 }], 983)).toBe(975);
+    // nothing sliced: the strip keeps its full room
+    expect(cutEdge([{ top: 950, bottom: 970 }], 983)).toBe(983);
+    // touching lines of one paragraph: only the sliced one goes under the strip
+    expect(cutEdge([{ top: 696, bottom: 715 }, { top: 715, bottom: 734 }, { top: 734, bottom: 753 }], 748)).toBe(734);
+    // two interleaved columns (the landscape Karta osobowa): a line's bottom in one column is a clean cut for both
+    const cols = [
+      { top: 289, bottom: 306 },
+      { top: 311, bottom: 328 },
+      { top: 300, bottom: 316 },
+      { top: 330, bottom: 346 },
+    ];
+    expect(cutEdge(cols, 329)).toBe(329);
+    expect(cutEdge(cols, 320)).toBe(289);
+    // a fraction of a px past a line's bottom is not a slice
+    expect(cutEdge(cols, 328.6)).toBe(328.6);
   });
 });

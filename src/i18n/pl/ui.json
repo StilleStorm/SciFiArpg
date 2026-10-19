@@ -62,5 +62,8 @@
     "stamp": "Potwierdzono",
     "kept": "Racja pełna. Potwierdzenie załączono do akt ({count}).",
     "auto": "Racja spadłaby poniżej progu. Potwierdzenie wykorzystano z urzędu. Pozostało w aktach: {count}."
+  },
+  "sheet": {
+    "more": "c.d. poniżej"
   }
 }

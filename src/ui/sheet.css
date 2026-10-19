@@ -92,6 +92,28 @@
   width: 64px;
   border-top: 2px solid var(--ink);
 }
+/* a paper strip across the foot of the body: the sliced line goes under it and the strip says the page goes on */
+.ps-more {
+  position: absolute;
+  top: -14px;
+  left: 0;
+  right: 0;
+  height: 13px;
+  padding: 0;
+  box-sizing: border-box;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 13px;
+  letter-spacing: 0.04em;
+  background-color: var(--paper);
+  background-image: var(--paper-noise, none);
+  /* taps reach the row under it, as they did before the strip */
+  pointer-events: none;
+}
+.ps-more[hidden] {
+  display: none;
+}
 .ps-notes .fn {
   margin: 0 0 2px;
   max-height: 30px;

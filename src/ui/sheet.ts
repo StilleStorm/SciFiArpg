@@ -34,9 +34,36 @@ export function createSheet(root: HTMLElement, opts: SheetOptions): Sheet {
   head.append(titles, close);
   const scroll = h('div', 'ps-scroll');
   const notes = h('div', 'ps-notes');
+  // printed under the cut while the body runs on below it, so a line sliced by the rule reads as a page that continues
+  const more = h('span', 'ps-more', t('ui.sheet.more'));
+  more.hidden = true;
+  notes.append(more);
   frame.append(head, scroll, notes);
   el.append(frame);
   root.append(el);
+  let queued = false;
+  const place = (): void => {
+    queued = false;
+    more.hidden = !runsOn(scroll.scrollTop, scroll.clientHeight, scroll.scrollHeight);
+    if (more.hidden) return;
+    // the strip starts at the top of the first printed line the body's edge would slice, so no line shows half a glyph
+    const bottom = scroll.getBoundingClientRect().bottom;
+    // the strip hangs from the notes' rule (their top border) up to the edge, across the gap between body and notes
+    const rule = notes.getBoundingClientRect().top;
+    const edge = cutEdge(lineBoxes(scroll, bottom), Math.min(bottom, rule - CUE_ROOM));
+    const tall = Math.round(rule - edge);
+    more.style.height = `${tall}px`;
+    more.style.top = `${-tall - 1}px`;
+    more.style.paddingTop = `${Math.max(0, tall - CUE_ROOM)}px`;
+  };
+  const cue = (): void => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(place);
+  };
+  scroll.addEventListener('scroll', cue, { passive: true });
+  new MutationObserver(cue).observe(scroll, { childList: true, subtree: true });
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(cue).observe(scroll);
   let count = 0;
   return {
     el,
@@ -47,7 +74,7 @@ export function createSheet(root: HTMLElement, opts: SheetOptions): Sheet {
       const p = h('p', 'fn');
       p.append(h('sup', '', String(count)), document.createTextNode(text));
       notes.append(p);
-      while (notes.children.length > 2) notes.firstElementChild?.remove();
+      while (notes.querySelectorAll('.fn').length > 2) notes.querySelector('.fn')?.remove();
     },
     setTitle(text) {
       title.textContent = text;
@@ -56,6 +83,48 @@ export function createSheet(root: HTMLElement, opts: SheetOptions): Sheet {
       el.remove();
     },
   };
+}
+
+/** Room the cue's own words need above the notes' rule, in px (one 13 px mono line). */
+const CUE_ROOM = 13;
+
+/** The line boxes of the text (and the drawings) near the foot of a scrolled body (only those reaching within 80 px of its edge). */
+function lineBoxes(scroll: HTMLElement, bottom: number): { top: number; bottom: number }[] {
+  const out: { top: number; bottom: number }[] = [];
+  const walk = document.createTreeWalker(scroll, NodeFilter.SHOW_TEXT);
+  const range = document.createRange();
+  for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+    if (!n.textContent?.trim()) continue;
+    range.selectNodeContents(n);
+    for (const r of range.getClientRects()) if (r.bottom > bottom - 80 && r.top < bottom) out.push({ top: r.top, bottom: r.bottom });
+  }
+  // drawings (a stamp, the slips) are cut whole or not at all
+  for (const g of scroll.querySelectorAll('svg')) {
+    const r = g.getBoundingClientRect();
+    if (r.height > 0 && r.bottom > bottom - 80 && r.top < bottom) out.push({ top: r.top, bottom: r.bottom });
+  }
+  return out;
+}
+
+/**
+ * Where the cue strip starts: the lowest height at or above `max` that slices no printed line (a line's top or bottom,
+ * or `max` itself when it falls between lines). Columns side by side are handled together, line by line.
+ */
+export function cutEdge(lines: readonly { top: number; bottom: number }[], max: number): number {
+  const cands = [max];
+  for (const l of lines) {
+    if (l.top <= max) cands.push(l.top);
+    if (l.bottom <= max) cands.push(l.bottom);
+  }
+  cands.sort((x, y) => y - x);
+  // a line box overhangs its ink by a couple of px, so a cut that close to its top or bottom slices nothing visible
+  for (const e of cands) if (!lines.some((l) => l.top < e - 2 && l.bottom > e + 2)) return e;
+  return max;
+}
+
+/** True while a scrolled body has more than a sliver left below its visible part. */
+export function runsOn(top: number, visible: number, total: number): boolean {
+  return top + visible < total - 6;
 }
 
 /** 4,5 and a real minus sign. */
