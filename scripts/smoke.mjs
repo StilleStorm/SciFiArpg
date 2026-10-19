@@ -195,6 +195,23 @@ try {
     check(`${label}: the next tap (Wznów) closes it and the game runs on`, !shut.sheet && shut.status === 'running', JSON.stringify(shut));
   }
 
+  /** Tunel and Pauza: the whole 44 x 44 px around each answers a tap (nothing laid over them, the update note included). */
+  async function hitAreas(label) {
+  const hits = await page.evaluate(() =>
+    ['.hud .tunnel-btn', '.hud .pause-btn'].map((sel) => {
+      const b = document.querySelector(sel);
+      if (!b) return { sel, missing: true };
+      const r = b.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const pts = [[0, 0], [-21, -21], [21, -21], [-21, 21], [21, 21], [-21, 0], [21, 0], [0, -21], [0, 21]];
+      const miss = pts.filter(([dx, dy]) => document.elementFromPoint(cx + dx, cy + dy)?.closest(sel) !== b).length;
+      return { sel, w: Math.round(r.width), h: Math.round(r.height), miss };
+    }),
+  );
+  check(`${label}: Tunel and Pauza answer a tap anywhere in 44 x 44 px around them`, hits.every((h) => !h.missing && h.miss === 0), JSON.stringify(hits));
+  }
+
   /** Take whatever holds the run: a law sheet, the update form (opened from the HUD line). Returns how many things it closed. */
   async function settle() {
     let closed = 0;
@@ -622,14 +639,39 @@ try {
   const ultFull = await page.evaluate(() => ({ info: window.__game.ultimateInfo(), pad: window.__game.ultimatePad(), arg: document.querySelector('.hud .arg')?.classList.contains('full') ?? false }));
   check('rebuttals fill the Argument meter, the stamp pad is shown and ready, the HUD underline is full', ultFull.info.ready && ultFull.pad?.ready === true && ultFull.pad.hidden === false && ultFull.arg, JSON.stringify({ rebuttals, ...ultFull }));
   await shot('07e-ultimate-ready');
+  // the crowd of six speaks through two bubbles at most, every one inside the screen; the ready pad's word is ink, underlined in red
+  const crowd = await page.evaluate(() => {
+    const on = [...document.querySelectorAll('#world [data-kind="enemy"] [data-part="over"] > .bubble:not(.comment):not(.bubble-off)')].filter((b) => b.childElementCount > 0);
+    const out = on.filter((b) => {
+      const r = b.getBoundingClientRect();
+      return r.left < -1 || r.right > innerWidth + 1 || r.top < -1 || r.bottom > innerHeight + 1;
+    }).length;
+    const word = document.querySelector('.pad.ult .word');
+    const cs = word ? getComputedStyle(word) : null;
+    const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();
+    return { shown: on.length, out, color: cs?.color ?? '', line: cs?.textDecorationLine ?? '', lineColor: cs?.textDecorationColor ?? '', ink };
+  });
+  check('a crowd of six shows at most two claim bubbles, none past the screen edge', crowd.shown <= 2 && crowd.shown >= 1 && crowd.out === 0, JSON.stringify(crowd));
+  check('the ready pad word is ink with a red underline (red stays on the cushion and the line)', crowd.line.includes('underline') && crowd.color !== crowd.lineColor, JSON.stringify(crowd));
+  await hitAreas('the meter full');
   const fxTexts = () => page.evaluate(() => [...document.querySelectorAll('#fx .stamp-frame')].length);
   const stampsBefore = await fxTexts();
   await page.locator('.pad.ult').click({ timeout: 3000 });
   await sleep(350);
   const ultCast = await page.evaluate(() => ({ info: window.__game.ultimateInfo(), pad: window.__game.ultimatePad(), area: document.querySelectorAll('#fx .ult-area').length }));
   const stampsAfter = await fxTexts();
+  const ultStamp = await page.evaluate(() => {
+    const st = [...document.querySelectorAll('#fx .stamp-frame')].pop()?.getBoundingClientRect();
+    const hero = document.querySelector('#world [data-kind="player"]')?.getBoundingClientRect();
+    const bubbles = document.querySelectorAll('#world [data-kind="enemy"] [data-part="over"] > .bubble:not(.comment):not(.bubble-off)').length;
+    if (!st || !hero) return { missing: true };
+    const hy = hero.top + hero.height / 2;
+    return { clear: hy < st.top || hy > st.bottom, inside: st.left >= 0 && st.right <= innerWidth && st.top >= 0 && st.bottom <= innerHeight, bubbles };
+  });
+  check('the ultimate stamp lands beside the hero (not across him), inside the screen, and the claim bubbles keep quiet under it', ultStamp.clear === true && ultStamp.inside === true && ultStamp.bubbles === 0, JSON.stringify(ultStamp));
   check('a real tap on the pad casts: a stamp lands, the meter is empty, the pad is off again, the area is outlined', stampsAfter > stampsBefore && ultCast.info.meter === 0 && ultCast.info.active.length === 1 && ultCast.pad?.off === true && ultCast.area === 1, JSON.stringify({ stampsBefore, stampsAfter, ...ultCast }));
   await shot('07f-ultimate-cast');
+  await hitAreas('the update note up');
   await page.evaluate(() => window.__game.enemies.clear()); // the immortal row goes before it can wear the player down
   await sleep(6500);
   const ultEnd = await page.evaluate(() => ({ info: window.__game.ultimateInfo(), area: document.querySelectorAll('#fx .ult-area').length }));
