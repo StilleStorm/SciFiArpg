@@ -128,10 +128,10 @@ words are bound to the next with U+00A0 by `t()`. No user-facing strings in `.ts
 `demoInventory`, `openInventory`, `openSklep`, `openKiosk`, `setTheme`, `setOrientation`, `setSteering`,
 `setLeftHanded`, `controls`, `joystick(dx, dy)`, `pause`, `resume`, `endTicket`, `resumeTicket`, `character`,
 `startBase(seed?)`, `station(name)`, `acceptTicket`, `walkToExit`, `openTunnel`, `enterTunnel`, `returnFromTunnel`,
-`hero.{cast, installSkill, openAssign, assignPad, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
+`hero.{cast, installSkill, openAssign, assignPad, setParagraph, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
 `enemies.{spawnFamily, spawnBoss, hit, clear, list}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
 `npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot` (390x844 @2x and 844x390 into `shots/`);
-per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout}.mjs` (each with its own
+per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2}.mjs` (each with its own
 SHOT_PORT/SHOT_OUT/SHOT_DIR, usage in the header). `npm run smoke` plays a ticket with real buttons: profile, base
 (HUD, margin note, update from the HUD line), desk, ticket, exit, run, fight, update, inventory, pause, Zakończ,
 bookmark resume, two tunnels and the return, boss, death, a landscape joystick leg (two touches, the footnote slip),
@@ -203,6 +203,31 @@ step at once), `assignPad(pad 1..3, index)`, `info().pads`. Smoke 3b: skill 4 fr
 hook's assign step on pad 1, a tap casting skill 4 with its ring, the loadout from the pause sheet (swap, Wróć, words after Wznów), Później
 for skill 5. Shots: `scripts/shot-skills.mjs` (port 4197, `shots-skills/`: each new skill mid-effect), `scripts/shot-loadout.mjs` (port 4198,
 `shots-loadout/`: assign step, pads, loadout run/base, the glyph strips).
+
+## Paragraphs (S2, DESIGN 10.2)
+Data: `heroes/paragraphs.ts` (`Paragraph {n, nameKey, descKey, patch, permission?}`, `ParagraphPatch` of at most four fields from
+`type, aim, reach, area, width, count, dur, dmg, cd, cost, status`, `applyParagraph(skill, patch)`, `PARAGRAPH_STEP {2: 6, 3: 14}`);
+`heroes/<id>/paragraphs.ts` gives every skill its opening level and § 1..3 (`HeroModule.paragraphs`); texts `heroes.<id>.para.<skill>.<n>.{name,desc}`
+in `i18n/pl/heroes/<id>.json`. On a run `HeroRun.para` (n per SkillIndex) and `HeroRun.patch` exist only while some skill is off § 1.
+Every read of a skill's shape goes through `heroes/loadout.ts effectiveSkill(s, i)` (and `padSkill`, the helpers' power/area/dur/reach):
+casts, pads, aim previews, the loadout and Konfiguracja types. Engine `progression/paragraphs.ts` (pure): `paragraphsOf(heroId, skillId)`,
+`paragraphLevel`, `isParagraphUnlocked(progress, skillId, n)` (§ 2 at skill level + 6, § 3 at + 14, or the paragraph's family permission;
+skills 4/5 once installed), `unlockedParagraphs(c)`, `activeParagraph/setActiveParagraph(c, skillId, n)` on a `Character`; on a run
+`runProgress(s)`, `runParagraph(s, i)`, `setRunParagraph(s, skillId, n, force?)` (refuses a closed paragraph unless `force`),
+`applyParagraphs`, `activeParagraphsOf`, `skillWith`. Save: `Character.paragraphs?: {skillId: 2|3}` written from the run, applied after
+`applyProgress` (closed ones fall back to § 1). Update form (`progression/update.ts`): `offerVersion(s)` is the level the form installs
+(the oldest queued); `paragraphEntries(s)` are the paragraphs opening exactly at that version, open and not active, as offer ids
+`para:<skill index>:<n>` (`paraId`, `parseParagraphId`; never stored in `upgrades`); `pickFeature` leads with a new skill, else the first
+paragraph; `composeOffer` adds two passive/stat entries; `confirmUpdate` of a `para:` id calls `setRunParagraph` (the pick is the active
+paragraph). One passed over stays switchable and is not offered again. UI: `ui/konfiguracja.ts openKonfiguracja(root, s, onBack)` (+ pure
+`konfiguracjaRows`: per skill three `.kf-box[data-n]` `active | open | locked`, the active one stamped CZYNNY in place of its name, which
+heads the row's description `.kf-dname`; a tap on an open box calls `setRunParagraph`); opened from the pause line `[data-pause=paragraphs]`
+and the desk line `[data-desk=konfiguracja]` (main.ts `openKonfig` hides the sheet under it, `closeKonfig` shows it again and, at the desk,
+writes the character; also closed by `clearPause`/`dropSheets`). Pads show `.ptag` "§2"/"§3" from `runParagraph`. Hook:
+`hero.setParagraph(skillId, n, force = true)`, `info().paragraphs`, `info().skillIds`. Smoke: the desk line opens and Wróć returns (2b);
+leg 3c levels up until the form leads with a `para:` entry, picks it, checks the pad tag, switches back to § 1 at the pause sheet;
+6e casts every skill of every hero with § 1, § 2 and § 3. Shots: `scripts/shot-s2.mjs`
+(port 4182, `shots-s2/`: update form with a paragraph, pad tag, Konfiguracja from pause and desk, both orientations).
 
 ## Spór (DESIGN 5.4)
 State: `RunState.spor?: SporState` (`combat/spor.ts`): `{ prompt: SporPrompt | null; bossId: number; phase: 1 | 2; ttl: number;
