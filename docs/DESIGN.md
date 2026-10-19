@@ -630,9 +630,11 @@ Księżyc); the voice editor decides the final words.
 - **Categories:** podstawowa, ofensywna, obronna, użytkowa, ostateczna. 10–11 skills per hero
   (2 / 2–3 / 2 / 2–3) and 3 ultimates at levels 12 / 24 / 36. The desk form shows the
   categories; the rule of three (one per category on the pads) is recommended, not enforced.
-- **Paragraphs (runes):** every skill and ultimate has § 1, § 2, § 3, one active. § 1 is the base,
-  § 2 reshapes (shape, aim, count, duration), § 3 retypes or adds a status with a cost; a
-  paragraph patches at most four fields. Unlock: § 2 at skill level + 6, § 3 at + 14, or by a
+- **Paragraphs (runes):** every skill and ultimate has § 1, § 2, § 3, one active. § 1 is the base;
+  § 2 and § 3 are two different variants, each patching at most four fields (shape, aim, count,
+  duration, type, status); at least one of the two carries a cost (racja, cooldown, or a
+  self-status). Which one reshapes and which retypes is per skill (decided 2026-10-19 to match
+  the built data). Unlock: § 2 at skill level + 6, § 3 at + 14, or by a
   family permission for the rare ones. The permission-gated fourth and fifth skills need the
   permission for their first rank only.
 - **Ultimates: argument ostateczny.** No mana; skills run on cooldowns. The **Argument meter**

@@ -52,6 +52,15 @@
   letter-spacing: 0.04em;
   border-bottom: 1.5px solid var(--ink);
 }
+.ps-close {
+  position: relative;
+}
+/* a 44 px tap target around the underlined word, without moving the layout */
+.ps-close::after {
+  content: '';
+  position: absolute;
+  inset: -14px -12px;
+}
 .ps-close:active {
   border-bottom-width: 3px;
 }

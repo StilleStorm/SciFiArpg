@@ -108,7 +108,9 @@ Design docs: PLAN.md (+§7, §8), SKILLS.md, ITEMS.md (+§12), STORY.md, DESIGN 
 Progress is recorded here, one line per slice:
 - S1 done: per-hero folders behind a registry, 22 skill primitives, 25 skills as primitive lists (contract snapshot unchanged), new-hero scaffold, no hero id outside its folder (lint), smoke casts every skill of every hero.
 
-**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S2.
+- S2 done: 75 paragraphs (§1–3 on every skill) with the patch engine and unlock schedule (+6/+14 or permission), the update form offers paragraphs, Konfiguracja at the desk and the pause sheet, pad § tag; voice pass; DESIGN §10.2 paragraph rule relaxed to match the data.
+
+**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S3.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).

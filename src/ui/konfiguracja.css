@@ -147,10 +147,10 @@
   left: calc(50% + 24px);
   top: 0;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1;
-  color: var(--accent);
+  color: var(--ink);
   pointer-events: none;
 }
 .pad .ptag:empty {
