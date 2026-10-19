@@ -1390,6 +1390,107 @@ try {
   const lo3 = await page.evaluate(() => window.__game.loadoutInfo());
   check('after a reload the character keeps the pads and the column', lo3 !== null && lo3.pads.join() === lo1.pads.join() && lo3.specialization === kfSpec && lo3.capstone === lo1.capstone, JSON.stringify(lo3));
 
+  // ---------- 6g. S5: potwierdzenia, damage numbers, text size, export/import ----------
+  await page.evaluate(() => window.__game.start(13, { pageCount: 5, lawId: 'grawitacja' }));
+  await sleep(1500);
+  await settle();
+  // damage numbers: off by default, a digit beside the hit when on
+  const dmgOff = await page.evaluate(() => {
+    window.__game.hitEnemy();
+    return [...document.querySelectorAll('.dmg')].filter((n) => n.style.opacity !== '0').length;
+  });
+  await page.evaluate(() => window.__game.setSettings({ damageNumbers: true }));
+  const dmgOn = await page.evaluate(() => {
+    window.__game.hitEnemy();
+    return [...document.querySelectorAll('.dmg')].filter((n) => n.style.opacity !== '0').map((n) => n.querySelector('.t-dmg')?.textContent ?? '');
+  });
+  check('damage numbers: none while off; a handwritten digit beside the hit when on', dmgOff === 0 && dmgOn.length === 1 && /^\d+$/.test(dmgOn[0]), JSON.stringify({ dmgOff, dmgOn }));
+  await page.evaluate(() => window.__game.setSettings({ damageNumbers: false }));
+  // text size: the step sets --ts on the root
+  const ts = await page.evaluate(() => {
+    const read = () => getComputedStyle(document.documentElement).getPropertyValue('--ts').trim();
+    window.__game.setSettings({ textSize: 2 });
+    const big = read();
+    window.__game.setSettings({ textSize: 0 });
+    return { big, normal: read() };
+  });
+  check('text size: the largest step sets --ts 1.3, the first 1', ts.big === '1.3' && ts.normal === '1', JSON.stringify(ts));
+  await page.evaluate(() => {
+    const s = window.__game.state();
+    s.enemies.length = 0;
+    window.__game.setHeldPotwierdzenia(0);
+  });
+  // drop -> heal: hurt, a slip laid 60 units off is pulled in and restores a quarter
+  const rc1 = await page.evaluate(() => {
+    const g = window.__game;
+    const p = g.state().player;
+    g.hurtPlayer(Math.round(p.hpMax * 0.5));
+    return { hp: p.hp, max: p.hpMax };
+  });
+  await page.evaluate(() => window.__game.dropPotwierdzenie(60));
+  await sleep(900);
+  const rc2 = await page.evaluate(() => ({ hp: window.__game.state().player.hp, left: window.__game.state().pickups.filter((k) => k.potwierdzenie).length, held: window.__game.heldPotwierdzenia() }));
+  check('potwierdzenie: a dropped slip is pulled in and heals 25% of racja', rc2.left === 0 && rc2.held === 0 && Math.abs(rc2.hp - rc1.hp - Math.round(rc1.max * 0.25)) < 1.5, JSON.stringify({ rc1, rc2 }));
+  // full -> held
+  await page.evaluate(() => {
+    const p = window.__game.state().player;
+    p.hp = p.hpMax;
+    window.__game.dropPotwierdzenie(60);
+  });
+  await sleep(900);
+  const held1 = await page.evaluate(() => ({ held: window.__game.heldPotwierdzenia(), slips: document.querySelectorAll('.potw-btn .slip').length }));
+  check('potwierdzenie: taken at full racja it is held and drawn on the HUD note', held1.held === 1 && held1.slips === 1, JSON.stringify(held1));
+  // tap use
+  const tap0 = await page.evaluate(() => {
+    const g = window.__game;
+    const p = g.state().player;
+    g.hurtPlayer(Math.round(p.hpMax * 0.4));
+    return p.hp;
+  });
+  await page.locator('.potw-btn').tap({ timeout: 2000 });
+  await sleep(200);
+  const tap1 = await page.evaluate(() => ({ hp: window.__game.state().player.hp, held: window.__game.heldPotwierdzenia() }));
+  check('potwierdzenie: a tap on the note uses the held slip and heals', tap1.held === 0 && tap1.hp > tap0, JSON.stringify({ tap0, ...tap1 }));
+  // auto-use below 15%
+  const auto = await page.evaluate(() => {
+    const g = window.__game;
+    const p = g.state().player;
+    p.hp = p.hpMax;
+    g.setHeldPotwierdzenia(3);
+    const notes0 = g.notes().length;
+    g.hurtPlayer(Math.round(p.hpMax * 0.9));
+    return { held: g.heldPotwierdzenia(), hp: p.hp, max: p.hpMax, notes: g.notes().length - notes0 };
+  });
+  await sleep(200);
+  const stackShown = await page.evaluate(() => ({ slips: document.querySelectorAll('.potw-btn .slip').length, count: document.querySelector('.potw-btn .count')?.textContent ?? '' }));
+  check('potwierdzenie: a blow that would leave under 15% uses one first, with a footnote', auto.held === 2 && auto.hp > 0 && auto.notes >= 1, JSON.stringify(auto));
+  check('potwierdzenie: two held read as two drawn slips and a typed count', stackShown.slips === 2 && stackShown.count.includes('2'), JSON.stringify(stackShown));
+  await shot('21-potwierdzenia');
+  // the bug line on the pause sheet
+  await page.evaluate(() => window.__game.pause());
+  await sleep(300);
+  check('pause: "Zgłoś problem z grą" is on the sheet', (await page.locator('[data-pause=report]').count()) === 1);
+  await page.evaluate(() => window.__game.resume());
+  // export -> import equality: the archive read back replaces the save and exports the same
+  await page.evaluate(() => window.__game.startBase());
+  await sleep(700);
+  const arch = await page.evaluate(() => {
+    const g = window.__game;
+    const a = g.exportArchive();
+    g.setSettings({ textSize: 1 }); // the save moves on after the export
+    const changed = g.meta().settings.textSize;
+    const ok = g.importArchive(a);
+    const b = g.exportArchive();
+    const refused = g.importArchive('{"kind":"other"}');
+    const ma = JSON.parse(a).meta;
+    const mb = JSON.parse(b).meta;
+    const keys = (x, y, pre) => Object.keys({ ...x, ...y }).flatMap((k) => (JSON.stringify(x?.[k]) === JSON.stringify(y?.[k]) ? [] : x?.[k] && typeof x[k] === 'object' && !Array.isArray(x[k]) ? keys(x[k], y?.[k], `${pre}${k}.`) : [`${pre}${k}: ${JSON.stringify(x?.[k])?.slice(0, 60)} -> ${JSON.stringify(y?.[k])?.slice(0, 60)}`]));
+    const differ = keys(ma, mb, '');
+    return { ok, refused, changed, same: differ.length === 0, differ, screen: g.screen(), ts: g.meta().settings.textSize ?? 0, desk: !!document.querySelector('.desk-sheet') };
+  });
+  check('archive: export -> import gives back the same save, the base is printed again with the desk open; a foreign file is refused', arch.ok && !arch.refused && arch.same && arch.changed === 1 && arch.ts === 0 && arch.screen === 'baza' && arch.desk, JSON.stringify(arch));
+  await page.locator('.desk-sheet .ps-close').first().click({ timeout: 1500 }).catch(() => undefined);
+
   // ---------- 7. frame time with 40 enemies ----------
   // a fresh run: the death slip of the step above may still hold the old one
   await page.evaluate(() => window.__game.start(11, { pageCount: 5, lawId: 'grawitacja' }));
