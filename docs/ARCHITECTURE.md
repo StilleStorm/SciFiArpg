@@ -134,13 +134,13 @@ words are bound to the next with U+00A0 by `t()`. No user-facing strings in `.ts
 `setLeftHanded`, `controls`, `joystick(dx, dy)`, `pause`, `resume`, `endTicket`, `resumeTicket`, `character`,
 `startBase(seed?)`, `station(name)`, `acceptTicket`, `walkToExit`, `openTunnel`, `enterTunnel`, `returnFromTunnel`,
 `tapUltimate`, `ultimatePad() {ready, off, inked, hidden}`, `setLevel(n)`, `fillMeter(v=1)`, `setMeterUi(v)`, `castUltimate`,
-`ultimateInfo() {meter, ready, active, paragraph}`, `hero.{cast, installSkill, openAssign, assignPad, setParagraph, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
+`ultimateInfo() {meter, ready, active, paragraph}`, `setSpecialization(id|null)`, `loadoutInfo() {pads, categories, specialization, capstone, advice}`, `hero.{cast, installSkill, openAssign, assignPad, setParagraph, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
 `enemies.{spawnFamily, spawnBoss, hit, clear, list}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
 `npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot` (390x844 @2x and 844x390 into `shots/`);
-per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3}.mjs` (each with its own
+per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3,s4}.mjs` (each with its own
 SHOT_PORT/SHOT_OUT/SHOT_DIR, usage in the header). `npm run smoke` plays a ticket with real buttons: profile, base
 (HUD, margin note, update from the HUD line), desk, ticket, exit, run, fight, update, inventory, pause, Zakończ,
-the Argument meter and an ultimate (3d), bookmark resume, two tunnels and the return, boss, death, a landscape joystick leg (two touches, the footnote slip),
+the Argument meter and an ultimate (3d), bookmark resume, two tunnels and the return, boss, death, a landscape joystick leg (two touches, the footnote slip), the S4 leg (6f: desk loadout -> run -> reload, the chart),
 then 5 s of frame times with 40 enemies (`PERF_MAX_MS`, `SMOKE_UNCAPPED`); exit 1 on any failed check or page error.
 
 ## Aiming (DESIGN 5.6)
@@ -272,11 +272,11 @@ redirected onto another, `heroes/system.ts stepRedirects`). `killEnemy` adds `ki
 right reply. Ultimates: `heroes/ultimateDefs.ts` (`defineUltimate(hero, spec)`, `UltimateDef {id, level, type, seconds, radius|null,
 pageWide, keys, list: 3 x UltimateParagraph {patch, tune}, cast, tick?, end?}`, `UltEnv`, `perSecond`, `MAX_ULT_S 8`, `MAX_ULT_RADIUS
 220`, `FIRST_ULTIMATE_LEVEL 12`); per hero `heroes/<id>/ultimates.ts` -> `HeroModule.ultimates` (template in `_template/ultimates.ts.tpl`).
-Runtime `heroes/ultimate.ts`: `ultimateOf(s)` (the first; S4's loadout will choose), `ultimateUnlocked(s)` (player level >= def.level),
+Runtime `heroes/ultimate.ts`: `ultimateOf(s)` (`HeroRun.ultimateId`, else the first), `ultimateUnlocked(s)` (player level >= def.level),
 `castUltimate(s, bus)` (refuses unless running, run phase, no modal, unlocked, meter full, not botTime/stunned/silenced, none running;
 spends the meter, pays `patch.cost` in racja never fatally, pushes `ActiveUlt` onto `HeroRun.ult.active` with `r` = `tune.radius` or
 `def.radius`, runs `cast`, emits one quiet `stamp` at `ultStampSpot` (above or below the hero, the emptier side, `away` = hero), one `margin:note`, `ultimate:cast`), `stepUltimates` (heroStep: drain, tick, end),
-`setUltimateParagraph(s, n)` (not saved yet: S4), `ultimateSeconds`, `ultimateActive`, `ultimateAuto` (Kartograf: `shots`/`pierce` read by
+`setUltimateParagraph(s, n)` (saved as `Character.ultParagraph`), `ultimateSeconds`, `ultimateActive`, `ultimateAuto` (Kartograf: `shots`/`pierce` read by
 `heroes/auto.ts fireLaser`). UI: `ui/ultimate.ts` is the only door from ui to the meter. `ui/pads.ts`: the fourth pad `.pad.ult` (stamp
 pad, `ULT_STROKES 10` cushion strokes, `inkedStrokes(m)`), `.locked` (display none) below the unlock level, `.off` until full, `.ready`
 (red cushion, the word in ink with a red underline); portrait above the three in the thumb column, landscape in the arc, lefty mirrored, hidden in the base; the Spór strip
@@ -286,3 +286,28 @@ thud), named by `HeroSounds.ultimate`. Smoke 3d: hidden and refused below 12, `s
 a real click casts (one stamp, meter 0, `.ult-area` drawn), it ends within 8 s and the outline is gone. Shots: `scripts/shot-s3.mjs`
 (port 4183, `dist-s3`, `shots-s3/`: hidden, 30 %, full, after, in portrait tap/joystick/lefty and three landscapes).
 
+## Loadout, categories, specializations (S4, DESIGN 10.2–10.3)
+Data: `heroes/specDefs.ts` (`SkillCategory`, `HeroSpecs {categories: skillId -> category, list: 3 Specialization}`, `defineSpec(hero, id,
+skills, capstoneSkill, patch)`; `Capstone {nameKey, descKey, skill, patch}` where `CapstonePatch` = `area, dmg, dur, width, reach`
+multipliers + `cd` seconds); per hero `heroes/<id>/specs.ts` -> `HeroModule.specs`; texts `heroes.<id>.spec.<spec>.{name, cap.name,
+cap.desc}`, category names `forms.category.<c>`. API `heroes/specializations.ts` (pure): `categoryOf(skill|id)` (null when unknown),
+`categoryNameKey`, `specializationsOf(heroId)`, `specializationOf`, `ultimatesOf`, `isSkillUnlocked/unlockedSkills(c)`,
+`capstoneCount(c, specId)`, `activeCapstone(c: LoadoutView) -> {spec, capstone} | null` (only the chosen column, only with >= 2 of its
+skills on the pads), `setLoadout(c, {pads, ultimate, specialization|null}) -> {ok} | {ok: false, reason}` (all or nothing; any three
+different unlocked skills), `loadoutAdvice(c) -> SkillCategory[]` (advice only: the categories missing when two pads share one).
+At the cast `heroes/skills.ts fire` runs inside `withCapstone(s, skill, fn)` (the run patch of that skill is swapped for
+`mergeCapstone(paragraph patch, capstone)` and restored); `runCapstone(s)`. Preview: `heroes/loadout.ts padSkill` carries the capstone
+(cooldown, patch); `ui/pads.ts` computes the aim preview inside `withCapstone`, so its reach and area match the cast. `effectiveSkill`
+stays paragraph-only (casts read it inside `withCapstone`).
+Run and save: `HeroRun.pads`, `HeroRun.ultimateId?`, `HeroRun.spec?`, `HeroRun.ult.para`; `Character.pads`, `ultimate?`,
+`specialization?`, `ultParagraph?: 2|3` (validated by `toCharacter`, applied in `applyCharacter`). UI door `ui/konfLoadout.ts`:
+`viewOf(s)`, `loadoutOf(s)`, `chosenSpec(s)`, `commitLoadout(s, partial) -> LoadoutResult` (through `setLoadout`, pads written in place).
+`main.ts closeKonfig` writes the save on every close (base: `withCharacter`; run: `autosave.save()`).
+Konfiguracja (`ui/konfiguracja.ts`): slots `.kf-slot[data-slot=1..3|ult]`, column buttons `.kf-spec[data-spec]` (`.on` = chosen, a
+second tap withdraws), the capstone line `.kf-cap-line` (`i.granted|idle`), per skill row `.kf-pad[data-pad]` (swap like `assignPad`),
+the category beside the type, the advice line `.kf-advice`. Karta uprawnień (`ui/karta.ts`): pure `kartaModel(KartaInput {progress,
+pads, specialization?, ultimate?})`, `kartaInputFromRun(s)`; `openKarta(root, input, onBack)`; the ultimate band on top, three
+`.kt-col[data-spec]` with `.kt-node[data-node][data-state=granted|gated|open]` in unlock order (stamp ZATWIERDZONO / BRAK UPRAWNIEŃ),
+`.kt-cap[data-capstone]` at the foot, the passives in `.kt-band` under the columns (no column names them). Opened from the desk
+(`[data-desk=karta]`, main.ts `openKartaSheet`) and the profile (`[data-profile=karta]`, from the saved character). Shots:
+`scripts/shot-s4.mjs` (port 4184, `dist-s4`, `shots-s4/`).
