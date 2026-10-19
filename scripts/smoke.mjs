@@ -1337,6 +1337,7 @@ try {
     const raf = () => new Promise((r) => requestAnimationFrame(() => r(null)));
     g.enemies.clear();
     s.player.hp = s.player.hpMax = 1e9;
+    const itemsBefore = s.pickups.filter((k) => k.item).length;
     const folder = g.content.put('teczka', { dist: 140 });
     await raf();
     const drawn = document.querySelector(`#page [data-content="${folder}"]`) !== null;
@@ -1346,6 +1347,12 @@ try {
       await sleep(100);
       opened = g.content.list().some((c) => c.id === folder && c.state === 'opened');
     }
+    const loot = { items: s.pickups.filter((k) => k.item).length - itemsBefore };
+    let stamped = false;
+    const watch = new MutationObserver(() => {
+      if ([...document.querySelectorAll('.t-stamp')].some((n) => /ZWOLNIEN|ZWOLNION|OPŁAT/i.test(n.textContent ?? ''))) stamped = true;
+    });
+    watch.observe(document.body, { childList: true, subtree: true, characterData: true });
     const seal = g.content.put('pieczec', { seal: 'zwolnienie', dist: 120 });
     const it = g.content.list().find((c) => c.id === seal);
     if (it) s.player.target = { x: it.x, y: it.y };
@@ -1355,10 +1362,13 @@ try {
       used = g.content.list().some((c) => c.id === seal && c.state === 'used');
     }
     const onRun = (s.buffs ?? []).map((b) => b.id);
-    return { drawn, opened, used, onRun };
+    await raf();
+    watch.disconnect();
+    const anyStamp = [...document.querySelectorAll('.t-stamp')].map((n) => n.textContent);
+    return { drawn, opened, used, onRun, loot, stamped, anyStamp };
   });
-  check('teczka: drawn on the page, a tap walks the hero there and opens it', content.drawn && content.opened, JSON.stringify(content));
-  check('pieczęć: walked onto, it stamps zwolnienie on RunState.buffs', content.used && content.onRun.includes('zwolnienie'), JSON.stringify(content));
+  check('teczka: drawn on the page, a tap walks the hero there and opens it', content.drawn && content.opened && content.loot.items === 1, JSON.stringify(content));
+  check('pieczęć: walked onto, it stamps zwolnienie on RunState.buffs', content.used && content.onRun.includes('zwolnienie') && (content.stamped || content.anyStamp.length > 0), JSON.stringify(content));
   await page.locator('.field.rep').first().click();
   await page.locator('.os-sheet').waitFor({ state: 'visible', timeout: 3000 }).catch(() => undefined);
   const card = await page.evaluate(() => ({
@@ -1379,12 +1389,40 @@ try {
   await page.locator('.npc-sheet .ps-close').first().click().catch(() => undefined);
   await sleep(200);
   check('urzędnik: drawn on the base page, a tap opens his sheet with three lines', clerkDrawn && clerkOpen && clerkLines === 3, JSON.stringify({ clerkDrawn, clerkOpen, clerkLines }));
+  const cb = await page.locator('[data-station=urzednik]').first().boundingBox();
+  if (cb) await page.touchscreen.tap(cb.x + cb.width / 2, cb.y + cb.height / 2);
+  const tapOpened = await page.locator('.npc-sheet').waitFor({ state: 'visible', timeout: 4000 }).then(() => true, () => false);
+  await page.locator('.npc-sheet .ps-close').first().click().catch(() => undefined);
+  await sleep(200);
+  check('urzędnik: a real touch on the figure opens his sheet', tapOpened, JSON.stringify({ cb }));
+  // the board: accept from the sheet, finish by the hook, report from the sheet; stars and the stamped card
+  await page.evaluate(() => window.__game.station('tablica'));
+  await page.locator('[data-bq=accept]').first().waitFor({ state: 'visible', timeout: 3000 }).catch(() => undefined);
+  const stars0 = await page.evaluate(() => window.__game.state().player.gwiazdki);
+  const qid = await page.locator('[data-bq=accept]').first().getAttribute('data-quest').catch(() => null);
+  await page.locator('[data-bq=accept]').first().click().catch(() => undefined);
+  await sleep(200);
+  const takenUi = await page.locator(`[data-quest="${qid}"] [data-bq=drop]`).count();
+  const fin = await page.evaluate((id) => window.__game.quests.finish(id), qid);
+  await page.locator('.ps-close').first().click().catch(() => undefined);
+  await sleep(200);
+  await page.evaluate(() => window.__game.station('tablica'));
+  await page.locator(`[data-bq=report][data-quest="${qid}"]`).waitFor({ state: 'visible', timeout: 3000 }).catch(() => undefined);
+  await page.locator(`[data-bq=report][data-quest="${qid}"]`).click().catch(() => undefined);
+  await sleep(200);
+  const board = await page.evaluate((id) => ({
+    stars: window.__game.state().player.gwiazdki,
+    stamped: document.querySelector(`[data-quest="${id}"] .bq-stamp`) !== null,
+    active: window.__game.quests.active().some((a) => a.id === id),
+  }), qid);
+  await page.locator('.ps-close').first().click().catch(() => undefined);
+  check('tablica: accept on the board, finish, report: ZAŁATWIONO stamped, stars paid, off the list', qid !== null && takenUi === 1 && fin && board.stamped && board.stars > stars0 && !board.active, JSON.stringify({ qid, takenUi, fin, stars0, board }));
   const quest = await page.evaluate(() => {
     const q = window.__game.quests;
     const s = window.__game.state();
     const stars0 = s.player.gwiazdki;
     const done0 = q.done();
-    const id = q.accept('kill');
+    const id = q.accept(q.offers()[0]?.id ?? 'kill');
     const taken = q.active().length;
     if (id) q.finish(id);
     const reported = id ? q.report(id) : false;
