@@ -16,6 +16,7 @@ const pen = createRng(0x51ce); // render-only randomness, never gameplay
 
 export function initInk(layer: SVGGElement): void {
   fxLayer = layer;
+  pageStamps.clear();
   blotPool.length = 0;
   blotNext = 0;
 }
@@ -214,13 +215,25 @@ export interface StampOptions {
   fontSize?: number;
 }
 
+/** Stamps on the page (the fx layer) that have not faded yet; claim bubbles keep quiet while any is there (render/bubbleFocus). */
+const pageStamps = new Set<SVGGElement>();
+
+/** How many stamps are on the page right now (from the slam until the fade ends). Sheets' own stamps do not count. */
+export function stampsOnPage(): number {
+  return pageStamps.size;
+}
+
+/** The frame of a stamp of `text` at `size` (units, before rotation). */
+export function stampSize(text: string, size = 17): { w: number; h: number } {
+  return { w: text.length * (size * 1.06 + 2) + 30, h: size + 24 };
+}
+
 /** A red rubber stamp slammed onto (x, y): scale 1.4 -> 1 in 120 ms, rough coverage via a mask. */
 export function stamp(text: string, x: number, y: number, opts: StampOptions = {}): SVGGElement {
   const parent = opts.parent ?? fx();
   const size = opts.fontSize ?? 17;
   const label = text.toLocaleUpperCase('pl');
-  const w = label.length * (size * 1.06 + 2) + 30;
-  const h = size + 24;
+  const { w, h } = stampSize(text, size);
   const rot = opts.rotation ?? pen.range(-7, 7);
   const grain = pen.range(0, 360);
   const place = el('g', {});
@@ -240,12 +253,20 @@ export function stamp(text: string, x: number, y: number, opts: StampOptions = {
   masked.setAttribute('mask', 'url(#stamp-mask)');
   place.append(masked);
   parent.append(place);
+  const onPage = opts.parent === undefined;
+  if (onPage) pageStamps.add(place);
   const set = (s: number): void => place.setAttribute('transform', `translate(${n2(x)} ${n2(y)}) rotate(${n2(rot)}) scale(${n2(s)})`);
   set(1.4);
   tween(120, (p) => set(1.4 - 0.4 * p), { ease: easeIn });
   const ttl = opts.ttl ?? 2400;
   if (Number.isFinite(ttl)) {
-    tween(400, (p) => (place.style.opacity = String(1 - p)), { delay: 120 + ttl, done: () => place.remove() });
+    tween(400, (p) => (place.style.opacity = String(1 - p)), {
+      delay: 120 + ttl,
+      done: () => {
+        place.remove();
+        pageStamps.delete(place);
+      },
+    });
   }
   return place;
 }

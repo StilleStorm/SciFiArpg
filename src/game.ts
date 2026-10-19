@@ -8,11 +8,11 @@ import { createViews, type Views } from './render/view';
 import { groundBuilders } from './render/figures';
 import { drawPage } from './render/obstacles';
 import { drawBase, type BaseView } from './render/stations';
-import { portraitSpan, viewZoom } from './render/camera';
+import { freeViewRect, portraitSpan, viewZoom } from './render/camera';
 import { stationAt } from './world/base';
 import { onPageEntered } from './world/laws';
 import { baseHeaderFor, headerFor, tapKiosk } from './world/pageTurn';
-import { tapMark } from './render/ink';
+import { stampsOnPage, tapMark } from './render/ink';
 import type { Stage } from './render/stage';
 import { createSim } from './systems/step';
 import { installItems } from './items/install';
@@ -193,7 +193,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       else {
         baseView = null; // the exit walked through: the base drawing went with the old sheet
         exits.frame(s);
-        updateBubbleFocus(s.enemies, s.player);
+        updateBubbleFocus(s.enemies, s.player, { view: freeViewRect(camera), hush: stampsOnPage() > 0 });
       }
       views.sync(ents, s.phase === 'base' ? animMs : s.time * 1000);
       camera.follow(s.player.x, s.player.y, dtSec);

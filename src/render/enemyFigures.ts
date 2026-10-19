@@ -14,7 +14,7 @@ import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsB
 import { rtOf } from '../enemies/runtime';
 import { t } from '../i18n';
 import { ENEMY_MELEE_MS, LEAN_DEG, LUNGE, attackAt, enemyOffset } from './attackFx';
-import { bubbleShown } from './bubbleFocus';
+import { bubbleRect, bubbleShown, shiftInto } from './bubbleFocus';
 import { currentViewSize, viewZoom } from './camera';
 import { drawIn, eraseOut, marginNote, stamp } from './ink';
 import { syncStatusMarkers } from './statusMarkers';
@@ -47,6 +47,9 @@ interface FigState {
   bubbleOn: boolean;
   /** The zoom transform the bubble carries (see bubbleTransform). */
   bubbleTf: string;
+  /** The shift inward last given to the shown bubble; a hidden bubble keeps it while it fades. */
+  bubbleSx: number;
+  bubbleSy: number;
   /** The Spor comment bubble over the claim bubble (bosses), its key, whether it is struck, and whether it is being rubbed out. */
   comment: SVGGElement | null;
   commentKey: string;
@@ -126,9 +129,31 @@ function bubbleBox(lines: string[]): { w: number; h: number } {
  * The bubble is an annotation, so it keeps its css px size when the camera zooms out (landscape shows 520 units
  * tall, which would shrink 16 units to 12 px): it is scaled up about its tail by 1 / zoom, never below 1.
  */
-function bubbleTransform(top: number): string {
-  const k = Math.min(1.6, Math.max(1, 1 / viewZoom()));
-  return k === 1 ? '' : `translate(0 ${n2(top)}) scale(${n2(k)}) translate(0 ${n2(-top)})`;
+function bubbleScale(): number {
+  return Math.min(1.6, Math.max(1, 1 / viewZoom()));
+}
+function bubbleTransform(top: number, sx = 0, sy = 0): string {
+  const k = bubbleScale();
+  const shift = sx || sy ? `translate(${sx} ${sy})` : '';
+  return k === 1 ? shift : `${shift} translate(0 ${n2(top)}) scale(${n2(k)}) translate(0 ${n2(-top)})`.trim();
+}
+
+/**
+ * How far (whole units) the shown claim bubble must move to stay inside the visible rectangle (bubbleFocus.bubbleRect):
+ * it is shifted inward rather than clipped at the screen edge. The `over` group is never mirrored on the page (its flip
+ * cancels the figure's), so the bubble's box is in page units about the enemy's position.
+ */
+function bubbleShift(e: Enemy, st: FigState): [number, number] {
+  const view = bubbleRect();
+  const box = st.bubble.dataset['box'];
+  if (!view || !box) return [0, 0];
+  const [x0 = 0, yt = 0, w = 0, h = 0] = box.split(' ').map(Number);
+  const k = bubbleScale();
+  const pv = st.bubbleTop;
+  const M = 6;
+  const dx = shiftInto(e.x + k * x0, e.x + k * (x0 + w), view.x0 + M, view.x1 - M);
+  const dy = shiftInto(e.y + pv + k * (yt - pv), e.y + pv + k * (yt + h + 8 - pv), view.y0 + M, view.y1 - M);
+  return [Math.round(dx), Math.round(dy)];
 }
 
 function buildBubble(e: Enemy, top: number): SVGGElement {
@@ -312,6 +337,8 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
     claimSig: claimSig(e),
     bubbleOn: true,
     bubbleTf: bubbleTransform(bubbleTop),
+    bubbleSx: 0,
+    bubbleSy: 0,
     comment: null,
     commentKey: '',
     commentStruck: false,
@@ -370,6 +397,9 @@ function syncComment(e: Enemy, st: FigState): void {
     st.commentKey = c.key;
     st.commentStruck = false;
     st.commentLeaving = false;
+    // the comment moves with the claim bubble (the same pivot, the same shift inward)
+    if (st.bubbleTf) st.comment.setAttribute('transform', st.bubbleTf);
+    else st.comment.removeAttribute('transform');
     st.over.append(st.comment);
     drawIn(st.comment, 240);
   }
@@ -556,6 +586,7 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
       st.bubble.replaceWith(nb);
       st.bubble = nb;
       nb.classList.toggle('bubble-off', !st.bubbleOn);
+      st.bubbleTf = '\u0000'; // the new bubble carries the bare zoom transform: write the shifted one below
       drawIn(nb, 220);
       if (e.claim?.struck) strikeBubble(nb, false);
     } else if (e.claim?.struck) {
@@ -563,7 +594,9 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
     }
   }
 
-  const tf = bubbleTransform(st.bubbleTop);
+  const on = bubbleShown(e);
+  if (on) [st.bubbleSx, st.bubbleSy] = bubbleShift(e, st);
+  const tf = bubbleTransform(st.bubbleTop, st.bubbleSx, st.bubbleSy);
   if (tf !== st.bubbleTf) {
     st.bubbleTf = tf;
     if (tf) st.bubble.setAttribute('transform', tf);
@@ -575,7 +608,6 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
   }
   if (e.boss) syncComment(e, st);
 
-  const on = bubbleShown(e);
   if (on !== st.bubbleOn) {
     st.bubbleOn = on;
     st.bubble.classList.toggle('bubble-off', !on);

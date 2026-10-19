@@ -134,6 +134,22 @@ export function portraitSpan(cam: Pick<Camera, 'w' | 'h' | 'viewRect'>): { x0: n
   return { x0: r.x0, x1: r.x1 };
 }
 
+/**
+ * The part of the view not covered by the HUD form (top) and the footnote band (bottom), in world units: where claim
+ * bubbles are kept (render/bubbleFocus). Insets in css px, as the layout draws them (ui/base.css, ui/landscape.css).
+ */
+const FREE_INSET = {
+  bubble: { portrait: { top: 70, bottom: 110 }, landscape: { top: 58, bottom: 62 } },
+  // a stamp is nearly as wide as a phone held upright, so in portrait it also keeps above the pads (the stamp pad tops them at ~330 px from the bottom)
+  stamp: { portrait: { top: 70, bottom: 330 }, landscape: { top: 58, bottom: 62 } },
+};
+export function freeViewRect(cam: Pick<Camera, 'w' | 'h' | 'viewRect'>, use: 'bubble' | 'stamp' = 'bubble'): { x0: number; y0: number; x1: number; y1: number } {
+  const r = cam.viewRect();
+  const ins = cam.h > cam.w ? FREE_INSET[use].portrait : FREE_INSET[use].landscape;
+  const z = viewZoom();
+  return { x0: r.x0, y0: r.y0 + ins.top / z, x1: r.x1, y1: r.y1 - ins.bottom / z };
+}
+
 /** The rectangle the camera shows when it is centred on (cx, cy), clamped like `apply()` does. */
 export function viewRect(cx: number, cy: number, w: number, h: number, bounds: { w: number; h: number }): { x0: number; y0: number; x1: number; y1: number } {
   const x0 = axis(cx, w, bounds.w);
