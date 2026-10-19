@@ -72,31 +72,58 @@ export function signed(n: number): string {
 /** The mouse events that follow a touch come this soon after its pointerup. */
 const TAIL_MS = 700;
 
+/** What the ghost-click guard needs of a DOM node (structural, so the decision is testable without a DOM). */
+export interface GuardNode {
+  readonly isConnected: boolean;
+  contains(other: GuardNode | null): boolean;
+}
+
+/** A press as the guard remembers it: the pressed element, its ancestors at the moment of the press, when it was let go. */
+export interface Press<N extends GuardNode = GuardNode> {
+  pressed: N;
+  /** The pressed element and its ancestors, taken at pointerdown (they may leave the page afterwards). */
+  path: readonly N[];
+  upAt: number;
+}
+
+/**
+ * True when a trusted mouse event at `at` on `target` is the ghost of `press`, i.e. it lands on something that did not hold
+ * the pressed element. While the pressed element is on the page, the event belongs to the press when its target holds or
+ * is held by it. When the pressed element has left the page (the tap removed or re-rendered it), only its old ancestors
+ * may take the event: a sheet line that appeared under the finger was in no such path, and its click is a ghost.
+ */
+export function isGhostOf<N extends GuardNode>(press: Press<N> | null, target: N | null, at: number): boolean {
+  if (!press || !target || at - press.upAt > TAIL_MS) return false;
+  const { pressed } = press;
+  if (pressed.isConnected) return !(pressed === target || pressed.contains(target) || target.contains(pressed));
+  return !press.path.includes(target);
+}
+
 /**
  * A finger that opens a sheet on pointerdown (the Pauza note, a station tapped in tap mode) is still on the glass when the
  * sheet appears. The browser then sends the compatibility mousedown / mouseup / click of that same tap to whatever is under
  * the finger now, which is a button of the new sheet (Wznów, Ustawienia, Zamknij ...), and that button fires at once: the
  * sheet opens and shuts again, or opens the wrong line. A mouse or touch event in the tail of a press is honoured only when
- * it belongs to it: its target holds, or is held by, the element that was pressed. Keyboard, accessibility and script clicks
- * (no press just before, or detail 0) and presses whose element has left the page pass. Returns the function that takes the
- * guard off.
+ * it belongs to it (`isGhostOf`). Script clicks pass; keyboard and accessibility clicks pass because no press is in the tail.
+ * The click a tap leaves behind can carry detail 0 (Chromium's touch emulation sends it alone, after the pointerup), so detail
+ * says nothing.
+ * Returns the function that takes the guard off.
  */
 export function guardGhostClicks(doc: Document = document): () => void {
-  let pressed: Node | null = null;
-  let upAt = -Infinity;
+  let press: Press<Node> | null = null;
   const onDown = (ev: Event): void => {
-    pressed = ev.target instanceof Node ? ev.target : null;
-    upAt = Infinity;
+    const pressed = ev.target instanceof Node ? ev.target : null;
+    const path = ev.composedPath().filter((n): n is Node => n instanceof Node);
+    press = pressed ? { pressed, path, upAt: Infinity } : null;
   };
   const onUp = (ev: Event): void => {
-    upAt = ev.timeStamp;
+    if (press) press.upAt = ev.timeStamp;
   };
   const onMouse = (ev: Event): void => {
     const me = ev as MouseEvent;
-    if (!me.isTrusted || (me.type === 'click' && me.detail === 0)) return;
+    if (!me.isTrusted) return; // a script click; a keyboard click has no press in its tail (a tap's own click may carry detail 0)
     const target = me.target instanceof Node ? me.target : null;
-    if (!pressed || !target || !pressed.isConnected || me.timeStamp - upAt > TAIL_MS) return;
-    if (pressed === target || pressed.contains(target) || target.contains(pressed)) return;
+    if (!isGhostOf(press, target, me.timeStamp)) return;
     me.stopImmediatePropagation();
     me.preventDefault();
   };
