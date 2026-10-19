@@ -121,7 +121,9 @@ Progress is recorded here, one line per slice:
 
 - **M1 Systems core complete** (2026-10-19): e2e:m1 green for 5 heroes × 2 orientations; look fixes (HUD keep-out for bubbles, stamps and the page header measured from the DOM; 11 px text; ink validation line; left-handed update line); voice pass; plan review adjusted S6, S9, S10, S16, S19–S21. Open polish for M7: ~25 CSS rules and a few drawn labels still under 11 px; portrait page header can drift off screen when the camera pans.
 
-**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S6 (first of M2).
+- S6 done: roster of characters as case files (create with hero pick + case number, delete with a form), SAVE_VERSION 3 with per-character progress/bag/personal archive 40 and a shared archive 40, v2 and S5-archive migration, tap-to-transfer Archiwum sheet at the desk, ghost-click guard fixed; voice and look passes. Parked: hero note on archived uniques (waits for legendary paragraphs, ITEMS 8); ARCHITECTURE.md ~370 lines, fold at M2 end; the landscape desk needs a scroll to reach the archive and export lines; the `.pen` accent is ruled for handwritten corrections only (re-check new users).
+
+**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S7.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
