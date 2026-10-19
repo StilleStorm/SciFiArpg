@@ -112,7 +112,9 @@ Progress is recorded here, one line per slice:
 
 - S3 done: Argument meter (rebuttal/kill/Spór fills, drain), first ultimate per hero with §1–3 (Pełny cykl, Przekazanie, Zebranie, Mapa ostateczna, Decyzja Komisji), stamp pad hidden below level 12, HUD Argument line, five ultimate recipes, running-area outline; look fixes: claim bubbles capped at two and hushed under stamps, stamps placed off the hero; voice pass.
 
-**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S4.
+- S4 done: skill categories, three specializations per hero with capstones (one column at a time, ≥2 skills on the pads), full Konfiguracja form (pads, ultimate slot, specialization, advice), Karta uprawnień chart from the desk and profile (portrait stacks the columns for readable stamps), loadout + specialization + ultimate paragraph saved; voice and look passes.
+
+**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S5 (last of M1; then the M1 milestone steps).
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
