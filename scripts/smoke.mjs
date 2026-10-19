@@ -1542,6 +1542,66 @@ try {
   check('archive: export -> import gives back the same save, the base is printed again with the desk open; a foreign file is refused', arch.ok && !arch.refused && arch.same && arch.changed === 1 && arch.ts === 0 && arch.screen === 'baza' && arch.desk, JSON.stringify(arch));
   await page.locator('.desk-sheet .ps-close').first().click({ timeout: 1500 }).catch(() => undefined);
 
+  // ---------- 6h. S6: the roster settles a held run, a second case file keeps its own progress, the archive moves an item ----------
+  await page.evaluate(() => window.__game.start(17, { pageCount: 5 }));
+  await sleep(1500);
+  await settle();
+  const r0 = await page.evaluate(() => {
+    const g = window.__game;
+    const s = g.state();
+    window.__keep = s;
+    g.setLevel(4); // a level the new file must not share
+    return { level: s.player.level, ticket: s.ticket.number, opened: g.openTunnel() };
+  });
+  const rHeld = await page.evaluate(() => window.__game.enterTunnel());
+  await sleep(500);
+  await page.evaluate(() => window.__game.station('biurko'));
+  await page.locator('[data-desk=roster]').click({ timeout: 3000 });
+  await page.locator('.roster .rs-case').first().waitFor({ state: 'visible', timeout: 3000 });
+  const r1 = await page.evaluate(() => {
+    const g = window.__game;
+    return { screen: g.screen(), state: g.state() === null, bm: g.meta().bookmark?.ticketNumber ?? null, back: g.returnFromTunnel(), files: document.querySelectorAll('.roster .rs-case').length, active: document.querySelector('.roster .rs-case.active')?.dataset.case ?? null };
+  });
+  check('the roster opens from the desk over a held run: the run is settled with a bookmark, nothing stays live or held', r0.opened && rHeld && r1.screen === 'profile' && r1.state && r1.bm === r0.ticket && !r1.back && r1.files >= 1 && r1.active !== null, JSON.stringify({ r0, rHeld, r1 }));
+  await shot('21-roster');
+  await page.locator('[data-roster=new]').click({ timeout: 3000 });
+  await page.locator('button.choose').locator('visible=true').first().waitFor({ timeout: 3000 });
+  await page.locator('button.choose').locator('visible=true').last().click({ timeout: 3000 });
+  await page.waitForFunction(() => window.__game.screen() === 'baza', null, { timeout: 5000 }).catch(() => undefined);
+  await sleep(500);
+  const r2 = await page.evaluate(() => {
+    const m = window.__game.meta();
+    return { screen: window.__game.screen(), files: m.characters.length, active: m.activeCharacterId, level: m.character?.level ?? 0, bag: m.character?.inventory.length ?? -1, bm: !!m.bookmark };
+  });
+  check('a new case file starts at level 1 with an empty bag and no bookmark, and becomes the active one', r2.screen === 'baza' && r2.files === r1.files + 1 && r2.active !== r1.active && r2.level === 1 && r2.bag === 0 && !r2.bm, JSON.stringify(r2));
+  await page.evaluate(() => window.__game.station('biurko'));
+  await page.locator('[data-desk=roster]').click({ timeout: 3000 });
+  await page.locator(`.roster .rs-case[data-case="${r1.active}"] [data-roster=open]`).click({ timeout: 3000 });
+  await page.waitForFunction(() => window.__game.screen() === 'baza', null, { timeout: 5000 }).catch(() => undefined);
+  await sleep(500);
+  const r3 = await page.evaluate(() => {
+    const m = window.__game.meta();
+    return { active: m.activeCharacterId, level: m.character?.level ?? 0, bm: m.bookmark?.ticketNumber ?? null, files: m.characters.length };
+  });
+  check('opening the first file again gives back its level and its bookmark; the new file stays in the roster', r3.active === r1.active && r0.level === 4 && r3.level === r0.level && r3.bm === r0.ticket && r3.files === r2.files, JSON.stringify({ r0, r3 }));
+  // the archive: an item of the bag goes to the personal archive and the live bag follows
+  await page.evaluate(() => window.__game.giveItem?.());
+  await page.evaluate(() => window.__game.station('biurko'));
+  await page.locator('[data-desk=archiwum]').click({ timeout: 3000 });
+  await page.locator('.ar-sheet').waitFor({ state: 'visible', timeout: 3000 });
+  const a0 = await page.evaluate(() => ({ bag: window.__game.state().player.inventory.length, personal: document.querySelectorAll('.ar-sheet .ar-sec[data-place=personal] .ar-cell[data-uid]').length }));
+  if (a0.bag > 0) {
+    await page.locator('.ar-sheet .ar-sec[data-place=bag] .ar-cell[data-uid]').first().click({ timeout: 3000 });
+    await page.locator('.ar-sheet .ar-move[data-to=personal]').click({ timeout: 3000 });
+    await sleep(300);
+  }
+  const a1 = await page.evaluate(() => ({ bag: window.__game.state().player.inventory.length, stored: window.__game.meta().character?.inventory.length ?? -1, personal: document.querySelectorAll('.ar-sheet .ar-sec[data-place=personal] .ar-cell[data-uid]').length }));
+  check('Archiwum: an item moved from the bag to the personal archive leaves the live bag and the stored one', a0.bag > 0 && a1.bag === a0.bag - 1 && a1.stored === a1.bag && a1.personal === a0.personal + 1, JSON.stringify({ a0, a1 }));
+  await shot('22-archive');
+  await page.locator('.ar-sheet .ps-close').first().click({ timeout: 1500 }).catch(() => undefined);
+  await sleep(300);
+  await page.locator('.desk-sheet .ps-close').first().click({ timeout: 1500 }).catch(() => undefined);
+
   // ---------- 7. frame time with 40 enemies ----------
   // a fresh run: the death slip of the step above may still hold the old one
   await page.evaluate(() => window.__game.start(11, { pageCount: 5, lawId: 'grawitacja' }));
