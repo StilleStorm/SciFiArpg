@@ -126,7 +126,7 @@ export function mountRoster(root: HTMLElement, store: RosterStore, handlers: Ros
       h('p', 'rs-meta', file.planet ? t('screens.roster.planet', { planet: file.planet }) : t('screens.roster.noPlanet')),
       h('p', 'rs-meta', t('screens.roster.tickets', { count: file.tickets })),
     );
-    if (file.active) info.append(h('p', 'rs-current pen', t('screens.roster.current')));
+    if (file.active) info.append(h('p', 'rs-current', t('screens.roster.current')));
     const open = h('button', 'rs-enter', t('screens.roster.open'));
     open.type = 'button';
     open.dataset['roster'] = 'open';

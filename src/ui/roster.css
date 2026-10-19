@@ -128,7 +128,10 @@
 }
 .rs-current {
   margin: 4px 0 0;
+  font-family: var(--serif);
+  font-style: italic;
   font-size: 14px;
+  color: var(--ink); /* a status line, said in ink: the accent is for stamps, strikes and corrections (DESIGN 3.2) */
 }
 .rs-actions {
   grid-column: 1 / -1;
