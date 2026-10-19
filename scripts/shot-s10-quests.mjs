@@ -57,6 +57,21 @@ try {
       const w = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
       check(`${prefix}: ${label}: no horizontal scroll`, w <= 0, String(w));
     };
+    // the tap box of a control: how many px of a vertical line through its centre land on it (::after counts)
+    const tapHeight = (sel) =>
+      page.evaluate((sel) => {
+        const e = document.querySelector(sel);
+        if (!e) return 0;
+        e.scrollIntoView({ block: 'center' });
+        const b = e.getBoundingClientRect();
+        const x = b.left + b.width / 2;
+        let n = 0;
+        for (let y = b.top + b.height / 2 - 40; y <= b.top + b.height / 2 + 40; y++) {
+          const at = document.elementFromPoint(x, y);
+          if (at && (at === e || e.contains(at))) n++;
+        }
+        return n;
+      }, sel);
     const screenName = () => page.evaluate(() => window.__game.screen());
 
     // ---- cover -> creation -> base (the opening page is tapped away) ----
@@ -95,6 +110,11 @@ try {
     check(`${prefix}: two tickets taken`, (await page.locator('.bq-card.taken').count()) === 2);
     const first = await page.evaluate(() => window.__game.quests.active()[0]?.id ?? '');
     await shot('board-taken');
+    const dropTap = await tapHeight('.bq-card [data-bq=drop]');
+    check(`${prefix}: Odstępuję has a 44 px tap box`, dropTap >= 44, String(dropTap));
+    const closeTap = await tapHeight('.board-sheet .ps-close');
+    check(`${prefix}: Zamknij has a 44 px tap box`, closeTap >= 44, String(closeTap));
+    check(`${prefix}: the board prints the c.d. cue while cards run on below`, (await page.locator('.board-sheet .ps-more:not([hidden])').count()) === 1);
     await page.evaluate((id) => window.__game.quests.finish(id), first);
     // reopen: the card reads as ready
     await page.locator('.ps-close').click();
@@ -133,6 +153,9 @@ try {
     await sleep(350);
     check(`${prefix}: the card has its sections`, (await page.locator('.os-sec').count()) === 7);
     await shot('osobowa-top');
+    check(`${prefix}: the card prints the c.d. cue above the cut`, (await page.locator('.os-sheet .ps-more:not([hidden])').count()) === 1);
+    const osClose = await tapHeight('.os-sheet .ps-close');
+    check(`${prefix}: Zamknij on the card has a 44 px tap box`, osClose >= 44, String(osClose));
     await noHScroll('Karta osobowa');
     await page.evaluate(() => {
       const sc = document.querySelector('.os-sheet .ps-scroll');
@@ -140,6 +163,7 @@ try {
     });
     await sleep(200);
     await shot('osobowa-foot');
+    check(`${prefix}: the cue goes at the foot of the card`, (await page.locator('.os-sheet .ps-more:not([hidden])').count()) === 0);
     await page.locator('[data-osobowa=back]').click();
     await sleep(200);
     check(`${prefix}: Wróć shows the desk again`, (await page.locator('.desk-sheet:not(.hidden)').count()) === 1 && (await page.locator('.os-sheet').count()) === 0);

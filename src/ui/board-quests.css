@@ -78,12 +78,13 @@
   column-gap: 14px;
   margin-top: 2px;
 }
-.bq-btn {
+/* the word sits close under the card's text; the 44 px tap box is the shared link-btn ::after, centred on it */
+#ui .bq-btn {
   margin: 0;
-  min-height: 44px;
-  padding: 0 4px 6px;
+  min-height: 30px;
+  padding: 0 4px;
   display: inline-flex;
-  align-items: flex-end;
+  align-items: center;
   font-size: 12px;
 }
 .bq-btn.strong {
