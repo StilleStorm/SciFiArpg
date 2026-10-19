@@ -225,6 +225,11 @@ try {
   await shot('settings');
   await page.getByText('Leworęczny').click();
   await wait(200);
+  // Wróć to the pause sheet, then Wznów: the run is shot without a sheet over it
+  await page.locator('.form-btn', { hasText: 'Wróć' }).click();
+  await wait(300);
+  await page.locator('[data-pause=resume]').click();
+  await wait(300);
   await page.evaluate(() => window.__game.start(5));
   await wait(1300);
   await shot('run-lefty');
