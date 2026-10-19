@@ -1127,6 +1127,42 @@ try {
   check('nalesnik: Orbita rolls and catches a satellite, Grawitacja pulls, Wniosek plants one flag that is drawn', skills.orbita && skills.satellite && skills.gravity && skills.flag && skills.flagDrawn === 1, JSON.stringify(skills));
   await shot('16-nalesnik-skills');
 
+  // ---------- 6e. every hero casts every skill (S1 registry) ----------
+  const castAll = {};
+  for (const [i, id] of ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'].entries()) {
+    await page.evaluate((a) => window.__game.start(30 + a.i, { heroId: a.id }), { i, id });
+    await sleep(300);
+    // a law may open its banner on the first page: answer it as the player would
+    if (await page.evaluate(() => window.__game.state().modal === 'cookies')) await page.locator('.cookie button').last().click({ timeout: 3000 });
+    castAll[id] = await page.evaluate(() => {
+      const g = window.__game;
+      const s = g.state();
+      g.enemies.clear();
+      s.player.hp = s.player.hpMax = 1e9;
+      s.hero.pendingLevels = 0;
+      g.placePlayer(600, 800);
+      g.hero.spawn(6);
+      const st0 = s.status;
+      g.hero.installSkill(3);
+      g.hero.installSkill(4);
+      const out = { hero: g.hero.info().heroId, cast: [], cd: [], st0, st1: s.status };
+      for (let k = 0; k < 5; k++) {
+        g.hero.assignPad(1, k);
+        for (const e of s.enemies) e.hp = e.hpMax = 1e9;
+        s.hero.cd.fill(0); // the previous skill's cooldown is not what is tested
+        const ok = g.hero.cast(1);
+        if (!ok && !out.why) out.why = { k, pend: s.hero.pendingLevels, off: g.hero.info().offer, lvl: s.player.level, t: s.time, status: s.status, modal: s.modal, phase: s.phase, bot: s.law.botTime, cd: [...s.hero.cd], pads: [...s.hero.pads], ranks: [...s.hero.ranks] };
+        out.cast.push(ok);
+        out.cd.push(g.hero.info().cd[k] > 0);
+        g.advance(0.5);
+      }
+      return out;
+    });
+    const r = castAll[id];
+    check(`${id}: all five skills cast and start a cooldown`, r.hero === id && r.cast.every(Boolean) && r.cd.every(Boolean), JSON.stringify(r));
+  }
+  await shot('16b-every-hero-cast');
+
   // ---------- 7. frame time with 40 enemies ----------
   // a fresh run: the death slip of the step above may still hold the old one
   await page.evaluate(() => window.__game.start(11, { pageCount: 5, lawId: 'grawitacja' }));
