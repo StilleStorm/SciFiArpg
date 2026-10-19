@@ -139,7 +139,7 @@
   line-height: 1.25;
 }
 :root[data-orient='landscape'] .board-notice b {
-  font-size: 10.5px;
+  font-size: 11px;
 }
 :root[data-orient='landscape'] .board-sheet .ps-frame {
   padding-top: 10px;
@@ -345,7 +345,7 @@
   flex: 1.5;
 }
 .hud .field.place .blank {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: -0.02em;
 }
 
@@ -383,7 +383,7 @@
   background-image: var(--paper-noise, none);
   color: var(--ink);
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 11px;
   line-height: 1.25;
   text-align: left;
   pointer-events: auto;
@@ -481,7 +481,7 @@
   min-width: 0;
   text-transform: none;
   letter-spacing: 0;
-  font-size: 10.5px;
+  font-size: 11px;
   font-style: italic;
   font-family: var(--serif);
 }
@@ -543,7 +543,7 @@
 .tk-travel h3 {
   margin: 0 0 4px;
   font-family: var(--title);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -645,7 +645,7 @@
 .card-hero-label {
   display: block;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-wet);

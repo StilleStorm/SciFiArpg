@@ -63,7 +63,7 @@
   margin: 0;
   font-family: var(--title);
   font-weight: 400;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -99,7 +99,7 @@
   padding: 0 1px;
   background-color: var(--paper);
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1;
 }
 .ar-cell.sel {

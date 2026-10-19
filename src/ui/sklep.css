@@ -2,7 +2,7 @@
 .sk-hours {
   margin: 2px 0 6px;
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: 0.04em;
 }
 .sk-hours b {
@@ -43,7 +43,7 @@
 }
 .sk-sum {
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 11px;
   line-height: 1.2;
 }
 .sk-tag {
@@ -99,7 +99,7 @@
 }
 .sk-foot .count {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
 }
 .sk-version {
   margin: 6px 0 0;
