@@ -629,7 +629,7 @@ pattern line {
 .declined {
   min-height: 21px;
   margin: 14px 0 0;
-  color: var(--accent);
+  color: var(--ink);
   font-size: 15px;
   font-style: italic;
 }
