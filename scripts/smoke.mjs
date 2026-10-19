@@ -586,7 +586,7 @@ try {
       stamps: document.querySelectorAll('.kf-sheet .kf-box.active .kf-stamp').length,
       pause: !!document.querySelector('.pause-sheet:not(.hidden)'),
     }), skill);
-    check('the pause line "Paragrafy" opens Konfiguracja over the hidden pause sheet, the active box stamped', kf.rows === 5 && kf.active === String(n) && kf.stamps >= 3 && !kf.pause, JSON.stringify(kf));
+    check('the pause line "Konfiguracja" opens the sheet over the hidden pause sheet, the active box stamped', kf.rows === 5 && kf.active === String(n) && kf.stamps >= 3 && !kf.pause, JSON.stringify(kf));
     await shot('08aa-konfiguracja');
     await page.locator(`.kf-sheet .kf-row[data-skill="${skill}"] .kf-box[data-n="1"]`).click({ timeout: 3000 });
     await sleep(200);
@@ -1330,6 +1330,65 @@ try {
     check(`${id}: all five skills cast and start a cooldown with § 1, § 2 and § 3`, r.hero === id && r.cast.length === 15 && r.cast.every(Boolean) && r.cd.every(Boolean) && r.para.length === 0 && r.active.every((n) => n === 3), JSON.stringify(r));
   }
   await shot('16b-every-hero-cast');
+
+  // ---------- 6f. Konfiguracja and the Karta uprawnień (S4): a pad and a column changed at the desk hold in the run and after a reload ----------
+  await page.evaluate(() => window.__game.startBase());
+  await sleep(700);
+  await page.evaluate(() => window.__game.station('biurko'));
+  await page.locator('[data-desk=konfiguracja]').click({ timeout: 3000 });
+  await page.locator('.kf-sheet .kf-row').first().waitFor({ state: 'visible', timeout: 3000 });
+  const lo0 = await page.evaluate(() => window.__game.loadoutInfo());
+  const kfRow = await page.evaluate(() => [...document.querySelectorAll('.kf-sheet .kf-row')].find((r) => !r.classList.contains('off') && !r.querySelector('.kf-pad.on[data-pad="1"]'))?.dataset.skill);
+  await page.locator(`.kf-sheet .kf-row[data-skill="${kfRow}"] .kf-pad[data-pad="1"]`).click({ timeout: 3000 });
+  if ((await page.locator('.kf-sheet .kf-spec.on').count()) > 0) await page.locator('.kf-sheet .kf-spec.on').click({ timeout: 3000 }); // start from no column
+  const kfSpec = await page.evaluate(() => [...document.querySelectorAll('.kf-sheet .kf-spec')].find((b) => parseInt(b.querySelector('.kf-spec-n').textContent, 10) >= 2)?.dataset.spec);
+  await page.locator(`.kf-sheet .kf-spec[data-spec="${kfSpec}"]`).click({ timeout: 3000 });
+  await sleep(300);
+  const lo1 = await page.evaluate(() => window.__game.loadoutInfo());
+  const kfShown = await page.evaluate(() => ({
+    slot1: document.querySelector('.kf-sheet .kf-slot[data-slot="1"] .kf-slotv')?.textContent,
+    row1: document.querySelector('.kf-sheet .kf-row .kf-pad.on[data-pad="1"]')?.closest('.kf-row')?.querySelector('.kf-name')?.textContent,
+    granted: !!document.querySelector('.kf-sheet .kf-cap-line i.granted'),
+    pressed: document.querySelector('.kf-sheet .kf-spec.on')?.dataset.spec,
+  }));
+  check(
+    'Konfiguracja: a pad and a column changed at the desk; the run state, the slot line and the capstone line agree',
+    lo1 !== null && lo1.pads.join() !== lo0.pads.join() && lo1.specialization === kfSpec && lo1.capstone !== null && kfShown.slot1 === kfShown.row1 && kfShown.granted && kfShown.pressed === kfSpec,
+    JSON.stringify({ before: lo0, after: lo1, kfRow, kfSpec, kfShown }),
+  );
+  await shot('19-konfiguracja-loadout');
+  await page.locator('.kf-back').click({ timeout: 3000 });
+  await sleep(300);
+  // the chart from the desk: stamps on what is held, the chosen column's capstone granted
+  await page.locator('[data-desk=karta]').click({ timeout: 3000 });
+  await page.locator('.kt-sheet .kt-col').first().waitFor({ state: 'visible', timeout: 3000 });
+  const kt = await page.evaluate((spec) => ({
+    cols: document.querySelectorAll('.kt-sheet .kt-col').length,
+    approved: [...document.querySelectorAll('.kt-sheet .kt-node.skill[data-state=granted] .kt-stamp')].filter((n) => /ZATWIERDZONO/.test(n.textContent)).length,
+    gated: document.querySelectorAll('.kt-sheet .kt-node[data-state=gated] .kt-gate').length,
+    cap: document.querySelector(`.kt-sheet .kt-cap[data-capstone="${spec}"]`)?.classList.contains('granted'),
+    caps: document.querySelectorAll('.kt-sheet .kt-cap.granted').length,
+    desk: !!document.querySelector('.desk-sheet:not(.hidden)'),
+  }), kfSpec);
+  check('Karta uprawnień: three columns, ZATWIERDZONO on unlocked skills, one capstone granted (the chosen column), over the hidden desk', kt.cols === 3 && kt.approved >= 3 && kt.cap === true && kt.caps === 1 && !kt.desk, JSON.stringify(kt));
+  await shot('20-karta');
+  await page.locator('.kt-back').click({ timeout: 3000 });
+  await sleep(300);
+  check('Wróć from the chart shows the desk again', await page.evaluate(() => !document.querySelector('.kt-sheet') && !!document.querySelector('.desk-sheet:not(.hidden)')));
+  await page.locator('.desk-sheet .ps-close').first().click({ timeout: 1500 }).catch(() => undefined);
+  await page.evaluate(() => {
+    window.__game.acceptTicket();
+    window.__game.walkToExit();
+  });
+  await sleep(1800);
+  const lo2 = await page.evaluate(() => ({ phase: window.__game.state().phase, ...window.__game.loadoutInfo() }));
+  check('the run starts with the desk loadout: same pads, the capstone in force', lo2.phase === 'run' && lo2.pads.join() === lo1.pads.join() && lo2.capstone === lo1.capstone && lo2.specialization === kfSpec, JSON.stringify(lo2));
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => window.__game !== undefined);
+  await page.evaluate(() => window.__game.startBase());
+  await sleep(700);
+  const lo3 = await page.evaluate(() => window.__game.loadoutInfo());
+  check('after a reload the character keeps the pads and the column', lo3 !== null && lo3.pads.join() === lo1.pads.join() && lo3.specialization === kfSpec && lo3.capstone === lo1.capstone, JSON.stringify(lo3));
 
   // ---------- 7. frame time with 40 enemies ----------
   // a fresh run: the death slip of the step above may still hold the old one
