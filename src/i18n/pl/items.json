@@ -43,10 +43,10 @@
     "resEgzystencjalny": "Odporność egz.",
     "type": "Rodzaj argumentu",
     "range": "Zasięg",
-    "zasieg": "Zasięg",
-    "tempo": "Tempo",
+    "zasieg": "Dalekosiężność",
+    "tempo": "Zwłoka",
     "gwiazdki": "Gwiazdki",
-    "proba": "Próba"
+    "proba": "Czas próby"
   },
   "statShort": {
     "dmg": "Arg.",
@@ -57,8 +57,8 @@
     "resMechaniczny": "Odp.m.",
     "resRegulaminowy": "Odp.r.",
     "resEgzystencjalny": "Odp.e.",
-    "zasieg": "Zas.",
-    "tempo": "Tempo",
+    "zasieg": "Dal.",
+    "tempo": "Zwł.",
     "gwiazdki": "Gw.",
     "proba": "Próba"
   },
@@ -143,11 +143,11 @@
     },
     "zszywacz": {
       "noun": "zszywacz biurowy",
-      "desc": "Zszywacz wyrzutowy. Zszywki w komplecie, adresat poza nim."
+      "desc": "Zszywacz wyrzutowy. Zszywki dołączono, adresata nie."
     },
     "segregator": {
       "noun": "segregator dźwigniowy",
-      "desc": "Format A4, zawartość nieznana. Uderza w stronę, która jest właściwa."
+      "desc": "Format A4, zawartość nieustalona. Uderza we właściwą stronę. Właściwą ustala segregator."
     },
     "lupa": {
       "noun": "lupa biurowa",
@@ -159,19 +159,19 @@
     },
     "daszek": {
       "noun": "daszek przeciwsłoneczny",
-      "desc": "Daszek bez korony. Słońce nie zostało zgłoszone."
+      "desc": "Daszek bez czapki. Słońca nie zgłoszono."
     },
     "opaska": {
-      "noun": "opaska z lampką",
-      "desc": "Opaska na głowę z lampką czołową. Lampka nie świeci."
+      "noun": "latarka czołowa",
+      "desc": "Lampka na opasce elastycznej. Oświetla to, co już zauważono."
     },
     "kaptur": {
       "noun": "kaptur odpinany",
-      "desc": "Kaptur odpinany, odpięty. Wątek luźny, sprawa również."
+      "desc": "Odpięty. Nie ustalono, od czego."
     },
     "czepek": {
       "noun": "czepek foliowy",
-      "desc": "Jednorazowy, użyty wielokrotnie. Zgodnie z regulaminem, którego nie ma."
+      "desc": "Jednorazowy. Użyty wielokrotnie, za każdym razem po raz pierwszy."
     },
     "plaszcz": {
       "noun": "płaszcz służbowy",
@@ -179,7 +179,7 @@
     },
     "koszulka": {
       "noun": "koszulka promocyjna",
-      "desc": "Rozmiar uniwersalny. Napis zakreślono, treść nie."
+      "desc": "Rozmiar uniwersalny. Pasuje wszystkim w równym, niewielkim stopniu."
     },
     "kombinezon": {
       "noun": "kombinezon serwisowy",
@@ -195,11 +195,11 @@
     },
     "powerbank": {
       "noun": "powerbank",
-      "desc": "Pojemność deklarowana. Deklaracja wystarcza na trzy kreski."
+      "desc": "Pojemność 20\u00a0000 mAh według opakowania. Naładowano opakowanie."
     },
     "pilot": {
       "noun": "pilot uniwersalny",
-      "desc": "Nie pasuje do niczego. Zgodnie z opisem."
+      "desc": "Nie pasuje do niczego, w sposób uniwersalny."
     },
     "liczydlo": {
       "noun": "liczydło",
@@ -207,15 +207,15 @@
     },
     "zegarek": {
       "noun": "zegarek z krokomierzem",
-      "desc": "Kroki liczy cudze. Czas płynie zgodnie z wnioskiem."
+      "desc": "Liczy kroki, cudze. Czas odmierza na wniosek."
     },
     "faktura": {
       "noun": "faktura VAT",
-      "desc": "Termin płatności minął. Podatek wskazano w innym miejscu."
+      "desc": "Termin płatności upłynął przed datą wystawienia."
     },
     "paragon": {
       "noun": "paragon termiczny",
-      "desc": "Termograficzny, blaknie. Dowód zakupu blednie wraz z zakupem."
+      "desc": "Blaknie. Wraz z nim blaknie zakup."
     },
     "polisa": {
       "noun": "polisa",
@@ -252,7 +252,7 @@
     "zatwierdzony": { "m": "zatwierdzony", "f": "zatwierdzona", "n": "zatwierdzone", "pl": "zatwierdzone" },
     "udokumentowany": { "m": "udokumentowany", "f": "udokumentowana", "n": "udokumentowane", "pl": "udokumentowane" },
     "dalekosiezny": { "m": "dalekosiężny", "f": "dalekosiężna", "n": "dalekosiężne", "pl": "dalekosiężne" },
-    "serwisowy": { "m": "serwisowy", "f": "serwisowa", "n": "serwisowe", "pl": "serwisowe" },
+    "serwisowy": { "m": "wyregulowany", "f": "wyregulowana", "n": "wyregulowane", "pl": "wyregulowane" },
     "oceniany": { "m": "oceniany", "f": "oceniana", "n": "oceniane", "pl": "oceniane" },
     "testowany": { "m": "testowany", "f": "testowana", "n": "testowane", "pl": "testowane" },
     "rzekomy": { "m": "rzekomy", "f": "rzekoma", "n": "rzekome", "pl": "rzekome" },
@@ -331,7 +331,7 @@
     "podpisany": "Podpis",
     "zatwierdzony": "Zatwierdzenie",
     "udokumentowany": "Dokumentacja",
-    "dalekosiezny": "Zasięg",
+    "dalekosiezny": "Horyzont",
     "serwisowy": "Serwis",
     "oceniany": "Ocena",
     "testowany": "Test",
