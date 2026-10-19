@@ -1,0 +1,158 @@
+/*
+ * Konfiguracja (DESIGN 10.2): per skill three paragraph boxes ruled like a form; the active box carries the red stamp.
+ * Also the small paragraph tag on a pad. Paper, ink, one accent, no rounded corners.
+ */
+.kf-rows {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 2px 0;
+}
+.kf-row {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ink);
+}
+.kf-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.kf-name {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+}
+.kf-type {
+  font-family: var(--mono);
+  font-style: italic;
+  font-size: 10.5px;
+  color: var(--ink-wet);
+}
+.kf-boxes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 6px;
+}
+.kf-box {
+  position: relative;
+  min-height: 52px;
+  padding: 4px 4px 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border: 1.5px solid var(--ink);
+  font-family: var(--mono);
+  color: var(--ink);
+}
+.kf-n {
+  white-space: nowrap;
+  font-weight: 700;
+  font-size: 15px;
+}
+.kf-cap {
+  font-style: italic;
+  font-size: 10px;
+  line-height: 1.15;
+  text-align: center;
+}
+.kf-box.active {
+  outline: 1px solid var(--ink);
+  outline-offset: 2px;
+}
+.kf-box.locked {
+  color: var(--ink-wet);
+  border-style: dashed;
+}
+.kf-box:disabled {
+  cursor: default;
+}
+.kf-box:not(:disabled):active {
+  border-width: 3px;
+}
+/* the active box: the number, and the stamp where the name was; the name heads the description under the row */
+.kf-box.active .kf-cap {
+  display: none;
+}
+.kf-stamp {
+  display: block;
+  width: 84px;
+  max-width: 100%;
+  height: 24px;
+  overflow: visible;
+  pointer-events: none;
+}
+.kf-dname {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.8em;
+  margin-right: 0.5em;
+}
+.kf-desc {
+  margin: 6px 0 0;
+  font-size: 15px;
+  line-height: 1.25;
+}
+.kf-off {
+  margin: 3px 0 0;
+  font-family: var(--mono);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-wet);
+}
+.kf-row.off .kf-name {
+  color: var(--ink-wet);
+}
+.kf-back {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  margin-bottom: 6px;
+}
+:root[data-orient='landscape'] .kf-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr);
+  column-gap: 14px;
+  align-items: center;
+  padding: 4px 0;
+}
+:root[data-orient='landscape'] .kf-head {
+  grid-column: 1;
+}
+:root[data-orient='landscape'] .kf-desc {
+  grid-column: 1;
+  margin-top: 1px;
+  font-size: 13.5px;
+}
+:root[data-orient='landscape'] .kf-boxes {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  margin-top: 0;
+}
+:root[data-orient='landscape'] .kf-box {
+  min-height: 46px;
+}
+:root[data-orient='landscape'] .kf-off {
+  grid-column: 1;
+}
+:root[data-orient='landscape'] .kf-back {
+  max-width: 260px;
+}
+
+/* the paragraph tag on a pad: only when § 2 or § 3 is active */
+.pad .ptag {
+  position: absolute;
+  left: calc(50% + 24px);
+  top: 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  pointer-events: none;
+}
+.pad .ptag:empty {
+  display: none;
+}

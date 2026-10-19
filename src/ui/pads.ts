@@ -19,11 +19,13 @@ import {
   type Point,
 } from '../heroes/aim';
 import { t } from '../i18n';
+import { runParagraph } from '../progression/paragraphs';
 import type { RunState } from '../world/run';
 import { hideAim, showAim } from '../render/aimFx';
 import { el, wobblyCircle } from '../render/svg';
 import { h } from './dom';
 import './forms.css';
+import './konfiguracja.css';
 
 type PadId = 'skill1' | 'skill2' | 'skill3' | 'inventory';
 
@@ -57,6 +59,10 @@ interface PadNode {
   svg: SVGSVGElement;
   glyph: SVGGElement;
   word: HTMLElement;
+  /** The small "§2" / "§3" tag: shown while a paragraph other than § 1 is active on the skill this pad holds. */
+  ptag: HTMLElement;
+  /** The paragraph number the tag shows now (1 = no tag). */
+  ptagN: number;
   ring: SVGPathElement;
   /** The two circle strokes; drawn thicker while the pad is aiming. */
   circles: SVGPathElement[];
@@ -112,6 +118,14 @@ export function setPadHero(heroId: HeroId): void {
 export function syncPads(s: RunState): void {
   const hero = s.player.heroId;
   const pads = s.hero.pads;
+  for (const slot of PAD_SLOTS) {
+    const n = nodes[slot];
+    const para = runParagraph(s, pads[slot]);
+    if (n && n.ptagN !== para) {
+      n.ptagN = para;
+      n.ptag.textContent = para > 1 ? t('forms.pad.tag', { n: para }) : '';
+    }
+  }
   if (currentHero === hero && pads[0] === shownPads[0] && pads[1] === shownPads[1] && pads[2] === shownPads[2]) return;
   currentHero = hero;
   shownPads = [pads[0], pads[1], pads[2]];
@@ -305,7 +319,9 @@ export function createPads(root: HTMLElement, bus: Bus): HTMLElement {
     const ring = el('path', { class: 'cd', d: wobblyCircle(rng, 0, 0, 25.4, 12, 0.012), pathLength: 100 });
     ring.style.strokeDasharray = '100';
     svg.append(base, glyph, ring);
-    btn.append(svg, word);
+    const ptag = h('span', 'ptag');
+    ptag.setAttribute('aria-hidden', 'true');
+    btn.append(svg, word, ptag);
     if (id === 'inventory') btn.setAttribute('aria-label', t('ui.pads.inventory'));
     const slot = PADS.indexOf(id);
     if (id === 'inventory') {
@@ -357,7 +373,7 @@ export function createPads(root: HTMLElement, bus: Bus): HTMLElement {
       });
     }
     wrap.append(btn);
-    nodes.push({ btn, svg, glyph, word, ring, circles: [...base.querySelectorAll('path')], thick: false, last: -2, press: null, release: null, pressedAt: -Infinity });
+    nodes.push({ btn, svg, glyph, word, ptag, ptagN: 1, ring, circles: [...base.querySelectorAll('path')], thick: false, last: -2, press: null, release: null, pressedAt: -Infinity });
   });
   root.append(wrap);
   setPadHero(DEFAULT_HERO_ID);

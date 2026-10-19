@@ -5,7 +5,7 @@
  * already on another pad swaps with the one on the tapped pad) and redraws. The sheet owns no rules: heroes/loadout.ts does.
  */
 import { heroDef, PAD_SLOTS, SKILL_INDICES, type PadSlot, type SkillIndex } from '../heroes';
-import { assignPad, isInstalled, padOf } from '../heroes/loadout';
+import { assignPad, effectiveSkill, isInstalled, padOf } from '../heroes/loadout';
 import { t } from '../i18n';
 import { roman } from '../progression/update';
 import type { RunState } from '../world/run';
@@ -36,7 +36,7 @@ export function loadoutRows(s: RunState): LoadoutRow[] {
     return {
       index,
       name: t(sk.nameKey),
-      type: t(`heroes.types.${sk.type}`),
+      type: t(`heroes.types.${effectiveSkill(s, index).type}`), // the active paragraph may change the type
       rank: rank > 0 ? roman(rank) : t('screens.loadout.noRank'),
       desc: t(sk.descKey),
       installed,

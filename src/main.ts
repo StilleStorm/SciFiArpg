@@ -26,6 +26,7 @@ import { createJoystick } from './ui/joystick';
 import { applySteering, currentOrient, effectiveSteering, initLayout, lockOrientation, orientationSetting } from './ui/layout';
 import { bindLawSheets } from './ui/lawSheets';
 import { openLoadout, type LoadoutSheet } from './ui/loadout';
+import { addDeskLine, openKonfiguracja, type KonfiguracjaSheet } from './ui/konfiguracja';
 import { createPads } from './ui/pads';
 import { createSpor } from './ui/spor';
 import { createPauseSheet } from './ui/pause';
@@ -137,7 +138,7 @@ const onVolumeSet = (which: 'music' | 'sfx'): void => {
 };
 // The settings live in the pause sheet only: Wróć returns to the sheet.
 const pauseSettings = createSettings(stage.ui, onSettingsChange, () => closePauseSettings(), onVolumeSet);
-const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onSkills: () => openPauseSkills(), onEnd: () => endTicket() });
+const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onSkills: () => openPauseSkills(), onParagraphs: () => openKonfig('pause'), onEnd: () => endTicket() });
 const ticket = createTicket(stage.ui, {
   onAccept: () => acceptNow(),
   onClose: () => openSheet('biurko'),
@@ -261,6 +262,8 @@ function releaseBase(): void {
 
 /** Take every sheet off the page without touching the history (the caller does that). */
 function dropSheets(): void {
+  konfig?.close();
+  konfig = null;
   baza.close();
   board.close();
   ticket.close();
@@ -290,6 +293,7 @@ function openSheet(kind: SheetKind): void {
   switch (kind) {
     case 'biurko':
       baza.open(meta);
+      addDeskLine(stage.ui, () => openKonfig('desk'));
       break;
     case 'ticket':
       ticket.open(s.ticket);
@@ -441,8 +445,33 @@ function closePauseSkills(): void {
   pauseSheet.setHidden(false);
 }
 
+/** Konfiguracja (DESIGN 10.2) stands over the desk or the pause sheet; Wróć shows what stood under it again. */
+let konfig: KonfiguracjaSheet | null = null;
+let konfigFrom: 'desk' | 'pause' = 'pause';
+function openKonfig(from: 'desk' | 'pause'): void {
+  const s = game.state;
+  if (!s || konfig) return;
+  konfigFrom = from;
+  if (from === 'pause') pauseSheet.setHidden(true);
+  else stage.ui.querySelector('.desk-sheet')?.classList.add('hidden');
+  konfig = openKonfiguracja(stage.ui, s, () => closeKonfig());
+}
+
+function closeKonfig(): void {
+  konfig?.close();
+  konfig = null;
+  if (konfigFrom === 'pause') pauseSheet.setHidden(false);
+  else {
+    stage.ui.querySelector('.desk-sheet')?.classList.remove('hidden');
+    const s = game.state;
+    if (s && s.phase === 'base') save(withCharacter(meta, s)); // a switch made at the desk is in the saved character now
+  }
+}
+
 /** Take the pause sheet and its settings off the page and let the loop run (used by resume, Zakończ and every screen change). */
 function clearPause(): void {
+  konfig?.close();
+  konfig = null;
   loadout?.close();
   loadout = null;
   pauseSettings.hide();

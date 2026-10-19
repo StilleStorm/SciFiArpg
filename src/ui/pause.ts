@@ -53,6 +53,8 @@ export interface PauseHandlers {
   onSettings(): void;
   /** The line "Umiejętności": the loadout sheet (run and base). */
   onSkills(): void;
+  /** The line "Paragrafy": the Konfiguracja sheet (run and base). */
+  onParagraphs?(): void;
   onEnd(): void;
 }
 
@@ -93,6 +95,8 @@ export function createPauseSheet(root: HTMLElement, handlers: PauseHandlers): Pa
         line(t('screens.pause.settings'), t('screens.pause.settingsNote'), handlers.onSettings, 'settings'),
         line(t('screens.pause.skills'), t('screens.pause.skillsNote'), handlers.onSkills, 'skills'),
       );
+      const paragraphs = handlers.onParagraphs;
+      if (paragraphs) lines.append(line(t('forms.pause.paragraphs'), t('forms.pause.paragraphsNote'), paragraphs, 'paragraphs'));
       if (!info.base) lines.append(line(t('screens.pause.end'), t('screens.pause.endNote'), handlers.onEnd, 'end'));
       made.scroll.append(lines);
       made.note(t('screens.pause.hold'));
