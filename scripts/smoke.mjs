@@ -584,6 +584,59 @@ try {
     await page.evaluate((pads) => pads.forEach((k, i) => window.__game.hero.assignPad(i + 1, k)), padsBefore); // the order the rest of the smoke expects
   }
 
+  // ---------- 3d. the Argument meter and the ultimate (S3): rebuttals fill it, the stamp pad inks in, a real tap casts ----------
+  await settle();
+  const ultLocked = await page.evaluate(() => ({ level: window.__game.state().player.level, pad: window.__game.ultimatePad(), shown: document.querySelector('.pad.ult')?.getClientRects().length ?? 0 }));
+  if (ultLocked.level < 12) check('below level 12 the ultimate pad is hidden', ultLocked.pad?.hidden === true && ultLocked.shown === 0, JSON.stringify(ultLocked));
+  const refused = await page.evaluate(() => {
+    if (window.__game.state().player.level >= 12) return null;
+    window.__game.fillMeter(1);
+    const cast = window.__game.castUltimate();
+    window.__game.fillMeter(0);
+    return cast;
+  });
+  if (refused !== null) check('below level 12 a full meter casts nothing', refused === false);
+  await page.evaluate(() => {
+    window.__game.setLevel(Math.max(12, window.__game.state().player.level));
+    window.__game.fillMeter(0);
+  });
+  // rebut until full: every standing claim answered with its own type (one rebuttal per claim; a fresh row each round)
+  let rebuttals = 0;
+  for (let k = 0; k < 20; k++) {
+    const r = await page.evaluate(() => {
+      const g = window.__game;
+      g.enemies.clear();
+      g.enemies.spawnFamily('urzadzenia', 6);
+      const st = g.state();
+      let n = 0;
+      for (const e of st.enemies) {
+        e.hp = e.hpMax = 1e6;
+        if (e.claim && !e.claim.struck && g.enemies.hit(e.id, e.claim.type, 1)) n++;
+      }
+      return { n, meter: g.ultimateInfo().meter };
+    });
+    rebuttals += r.n;
+    if (r.meter >= 1) break;
+  }
+  await sleep(300);
+  const ultFull = await page.evaluate(() => ({ info: window.__game.ultimateInfo(), pad: window.__game.ultimatePad(), arg: document.querySelector('.hud .arg')?.classList.contains('full') ?? false }));
+  check('rebuttals fill the Argument meter, the stamp pad is shown and ready, the HUD underline is full', ultFull.info.ready && ultFull.pad?.ready === true && ultFull.pad.hidden === false && ultFull.arg, JSON.stringify({ rebuttals, ...ultFull }));
+  await shot('07e-ultimate-ready');
+  const fxTexts = () => page.evaluate(() => [...document.querySelectorAll('#fx .stamp-frame')].length);
+  const stampsBefore = await fxTexts();
+  await page.locator('.pad.ult').click({ timeout: 3000 });
+  await sleep(350);
+  const ultCast = await page.evaluate(() => ({ info: window.__game.ultimateInfo(), pad: window.__game.ultimatePad(), area: document.querySelectorAll('#fx .ult-area').length }));
+  const stampsAfter = await fxTexts();
+  check('a real tap on the pad casts: a stamp lands, the meter is empty, the pad is off again, the area is outlined', stampsAfter > stampsBefore && ultCast.info.meter === 0 && ultCast.info.active.length === 1 && ultCast.pad?.off === true && ultCast.area === 1, JSON.stringify({ stampsBefore, stampsAfter, ...ultCast }));
+  await shot('07f-ultimate-cast');
+  await page.evaluate(() => window.__game.enemies.clear()); // the immortal row goes before it can wear the player down
+  await sleep(6500);
+  const ultEnd = await page.evaluate(() => ({ info: window.__game.ultimateInfo(), area: document.querySelectorAll('#fx .ult-area').length }));
+  check('the ultimate ends within 8 s and its outline is rubbed out', ultEnd.info.active.length === 0 && ultEnd.area === 0, JSON.stringify(ultEnd));
+  await page.evaluate(() => window.__game.enemies.clear());
+  await settle();
+
   // ---------- 4. inventory sheet ----------
   await page.evaluate(() => window.__game.demoInventory());
   await page.locator('.pad.inv').click({ timeout: 2000 }).catch(() => undefined);
