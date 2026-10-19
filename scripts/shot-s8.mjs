@@ -64,6 +64,17 @@ try {
     await page.evaluate((m) => window.__game.itemGallery(m), mode);
     await wait(300);
     await shot(`s8-${mode}`);
+    if (mode === 'tiers' || mode === 'bases') {
+      // the rest of the sheet below the fold: the middle and the end
+      for (const [part, frac] of [['mid', 0.4], ['end', 1]]) {
+        await page.evaluate((f) => {
+          const g = document.getElementById('item-gallery');
+          if (g) g.scrollTop = (g.scrollHeight - g.clientHeight) * f;
+        }, frac);
+        await wait(150);
+        await shot(`s8-${mode}-${part}`);
+      }
+    }
   }
   await page.evaluate(() => window.__game.setTheme('night'));
   await wait(300);

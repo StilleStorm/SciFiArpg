@@ -50,7 +50,7 @@ export function mountGallery(mode: GalleryMode): void {
   document.getElementById('item-gallery')?.remove();
   const root = h('div', 'item-gallery');
   root.id = 'item-gallery';
-  root.style.cssText = 'position:fixed;inset:0;z-index:99;background:var(--paper);overflow:auto;padding:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;align-content:start';
+  root.style.cssText = 'position:fixed;inset:0;z-index:99;background:var(--paper);overflow:auto;padding:8px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 6px;align-content:start';
   const items = demoItems(mode);
   if (mode === 'ground') {
     const svg = el('svg', { viewBox: '0 0 380 560', width: '100%', style: 'grid-column:1/-1;fill:none;stroke:var(--ink);stroke-width:1.4' });
@@ -63,7 +63,7 @@ export function mountGallery(mode: GalleryMode): void {
   } else {
     for (const item of items) {
       const cell = h('div', 'gal-cell');
-      cell.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px;font:10px var(--mono);text-align:center';
+      cell.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;font:11px var(--mono);line-height:1.3;text-align:center;overflow-wrap:break-word';
       const cap = captionNode(item);
       cell.append(figure(item, 76), cap, h('span', 'gal-name', `${displayName(item)} (${tierWord(item)})`));
       root.append(cell);
