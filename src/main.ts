@@ -8,6 +8,7 @@ import { t } from './i18n';
 import { createInput } from './input';
 import { bindAsystent } from './narration';
 import { bindFx } from './render/bindings';
+import { initDamageNumbers } from './render/damageNumbers';
 import { bindTunnelFx } from './render/tunnelFx';
 import { createCamera, freeViewRect } from './render/camera';
 import { initInk } from './render/ink';
@@ -16,12 +17,14 @@ import { createWobble, getStage, setTheme } from './render/stage';
 import { tickTweens } from './render/tween';
 import { bindAutosave, settleRun, withBookmark, withCharacter } from './save/autosave';
 import { markRewritten } from './save/history';
+import { bugDump, copyText, deviceInfo, requestPersistence } from './save/export';
 import { loadMeta, saveMeta, type Settings } from './save/save';
 import { installTestHook } from './testHook';
 import { createBaza } from './ui/baza';
 import { createBoard } from './ui/board';
 import { createFootnotes } from './ui/footnotes';
 import { createHud } from './ui/hud';
+import { useHeld } from './systems/recovery';
 import { createJoystick } from './ui/joystick';
 import { applySteering, currentOrient, effectiveSteering, initLayout, lockOrientation, orientationSetting } from './ui/layout';
 import { bindLawSheets } from './ui/lawSheets';
@@ -49,6 +52,8 @@ const stage = getStage();
 guardGhostClicks(); // a tap that opens a sheet on pointerdown must not click the sheet's button under the finger
 installPaper();
 initInk(stage.fx);
+initDamageNumbers(stage.fx);
+requestPersistence(); // once, guarded: the browser may then keep the save when space runs low
 
 const bus = createBus();
 /** The page the camera clamps to: the base page is smaller than the run's pages, so the game and the page turn keep this in step. */
@@ -69,6 +74,7 @@ function applySettings(s: Settings): void {
   setTheme(s.theme);
   stage.ui.classList.toggle('lefty', s.leftHanded);
   setVolumes(s.musicVolume, s.sfxVolume);
+  document.documentElement.style.setProperty('--ts', String([1, 1.15, 1.3][s.textSize ?? 0] ?? 1));
   const steering = effectiveSteering(s, currentOrient());
   applySteering(steering);
   input.setMode(steering);
@@ -99,7 +105,7 @@ const input = createInput(
 initLayout(() => applySettings(meta.settings)); // data-orient on <html> follows the window; steering follows it until the player chooses
 applySettings(meta.settings);
 const game = createGame(stage, bus, camera, input, bounds);
-const hud = createHud(stage.ui, () => game.hero.requestUpdate(), () => pauseRun(), () => openTunnelNow());
+const hud = createHud(stage.ui, () => game.hero.requestUpdate(), () => pauseRun(), () => openTunnelNow(), () => void (game.state && useHeld(game.state, bus)));
 const footnotes = createFootnotes(stage.ui);
 const pads = createPads(stage.ui, bus);
 const sporStrip = createSpor(stage.ui, bus, () => game.state); // the reply strip of a boss argument (hidden with the footnotes)
@@ -123,6 +129,7 @@ const baza = createBaza(stage.ui, {
   },
   onReturn: () => returnFromTunnel(),
   onResume: () => resumeTicket(),
+  onImport: (next) => importSave(next),
   onClose: () => closeSheet(),
 });
 // The notice board: the announcements and the Historia zgłoszeń (a lost ticket is rewritten on the first visit).
@@ -139,7 +146,7 @@ const onVolumeSet = (which: 'music' | 'sfx'): void => {
 };
 // The settings live in the pause sheet only: Wróć returns to the sheet.
 const pauseSettings = createSettings(stage.ui, onSettingsChange, () => closePauseSettings(), onVolumeSet);
-const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onSkills: () => openPauseSkills(), onParagraphs: () => openKonfig('pause'), onEnd: () => endTicket() });
+const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onSkills: () => openPauseSkills(), onParagraphs: () => openKonfig('pause'), onEnd: () => endTicket(), onReport: () => reportProblem(), showReport: () => meta.settings.bugButton !== false });
 const ticket = createTicket(stage.ui, {
   onAccept: () => acceptNow(),
   onClose: () => openSheet('biurko'),
@@ -347,7 +354,7 @@ function openStation(id: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean 
 }
 bus.on('station:opened', (e) => void openStation(e.station));
 
-bindFx(bus, game.views, () => game.state?.page ?? null, () => freeViewRect(camera, 'stamp'));
+bindFx(bus, game.views, () => game.state?.page ?? null, () => freeViewRect(camera, 'stamp'), () => meta.settings.damageNumbers === true);
 bindPageTurn(bus, { stage, camera, views: game.views, getState: () => game.state, bounds });
 bindRunEvents(bus, () => game.state);
 // The tunnel closes itself on death, the end of the run and a page turn; both must hear `run:ended` before the handler below drops the state.
@@ -422,6 +429,13 @@ function pauseRun(): boolean {
 function resumeRun(): void {
   clearPause();
   game.resume();
+}
+
+/** "Zgłoś problem z grą": the state dump goes to the clipboard and a footnote on the sheet says so. */
+function reportProblem(): void {
+  const s = game.state;
+  const text = bugDump({ meta, bus, planet: s?.ticket.planet ?? null, page: s ? s.pageIndex + 1 : null, total: s?.pageCount ?? null, device: deviceInfo() });
+  void copyText(text).then((ok) => pauseSheet.note(t(ok ? 'screens.pause.reported' : 'screens.pause.reportFailed')));
 }
 
 function openPauseSettings(): void {
@@ -596,6 +610,28 @@ function leave(action: LeaveAction): void {
   if (game.state === s) game.stop();
 }
 
+/**
+ * An archive replaced the save (the desk's confirmation form). A run held in the tunnel belonged to the old save and is
+ * dropped unsaved; the base page is printed again from the new character, so walking out or settling a held run can never
+ * write the old character back over the imported one. Without a hero the profile screen asks for one.
+ */
+function importSave(next: typeof meta): void {
+  const held = hold.take();
+  if (held) {
+    closeTunnel(held, bus, closeFor('abandon'));
+    baza.setTunnel(null);
+  }
+  save(next);
+  applySettings(next.settings);
+  if (!next.heroId) {
+    go('profile');
+    return;
+  }
+  dropSheets();
+  enterBase();
+  openSheet('biurko'); // the desk is drawn again from the new save
+}
+
 // ---------- the back button (Android) ----------
 /**
  * The run screen, the profile screen and a sheet over the base page (the desk, the ticket, the Sklep, the notice board; counted
@@ -685,6 +721,7 @@ installTestHook({
   go,
   getMeta: () => meta,
   setMeta: (m) => (meta = m),
+  importSave,
   pause: pauseRun,
   resume: resumeRun,
   openTunnel: openTunnelNow,

@@ -6,6 +6,10 @@ import { addFootnote } from './ui/footnotes';
 import type { Enemy } from './entities';
 import type { Bus } from './core/events';
 import { applyDamage } from './systems/combat';
+import { createPotwierdzeniePickup } from './entities/factory';
+import { HELD_CAP, heldOf, useHeld } from './systems/recovery';
+import { nextId } from './world/run';
+import { exportText, parseArchive } from './save/export';
 import { attack as attackWith } from './systems/combat';
 import { fireAuto } from './heroes/auto';
 import type { Input } from './input';
@@ -55,6 +59,11 @@ export interface GameHook {
   hurtPlayer(amount: number): void;
   /** Put the player at world (x, y) and clear its walk target. */
   placePlayer(x: number, y: number): void;
+  /** Potwierdzenia (systems/recovery.ts): lay one slip `dist` units from the player (default 60); the held count; set it (0..5); tap the note. */
+  dropPotwierdzenie(dist?: number): void;
+  heldPotwierdzenia(): number;
+  setHeldPotwierdzenia(n: number): void;
+  usePotwierdzenie(): boolean;
   setTheme(theme: Theme): void;
   theme(): 'day' | 'night';
   footnote(text: string): void;
@@ -114,6 +123,12 @@ export interface GameHook {
   setSteering(steering: Steering): void;
   /** The left-handed mirror, as the settings screen sets it. */
   setLeftHanded(on: boolean): void;
+  /** Merge into the saved settings and apply them (text size, damage numbers, bug button, ...). */
+  setSettings(patch: Partial<Settings>): void;
+  /** The archive file's text as "Zapisz archiwum do pliku" writes it (save/export.ts). */
+  exportArchive(): string;
+  /** Read an archive's text and, when valid, replace the save as a confirmed import does. False when the file is refused. */
+  importArchive(text: string): boolean;
   /** What steers now: the layout orientation and the steering in force. */
   controls(): { orient: Orient; steering: Steering };
   /** Hold the stick at a finger offset of (dx, dy) css px from its centre (null lets go). Needs joystick mode. */
@@ -182,6 +197,8 @@ export interface HookDeps {
   acceptTicket(): boolean;
   /** The footnotes as printed (ui/footnotes.ts `recent`). */
   notes(): { n: number; text: string }[];
+  /** Replace the save as the desk's confirmed import does (main.ts `importSave`). */
+  importSave(meta: MetaState): void;
 }
 
 const NEAR = 90;
@@ -299,6 +316,19 @@ export function installTestHook(deps: HookDeps): void {
       const s = game.state;
       if (s && s.status === 'running' && s.phase === 'run') applyDamage(s, deps.bus, s.player, amount, false);
     },
+    dropPotwierdzenie(dist = 60) {
+      const s = game.state;
+      if (s) s.pickups.push(createPotwierdzeniePickup(nextId(s), s.player.x + dist, s.player.y));
+    },
+    heldPotwierdzenia: () => game.state ? heldOf(game.state.player) : 0,
+    setHeldPotwierdzenia(n) {
+      const s = game.state;
+      if (s) s.player.potwierdzenia = Math.max(0, Math.min(HELD_CAP, Math.floor(n)));
+    },
+    usePotwierdzenie() {
+      const s = game.state;
+      return s ? useHeld(s, deps.bus) : false;
+    },
     placePlayer(x, y) {
       const s = game.state;
       if (!s) return;
@@ -335,6 +365,13 @@ export function installTestHook(deps: HookDeps): void {
     openKiosk: () => openKiosk(),
     setOrientation: (orient) => deps.changeSettings({ orientation: orient }),
     setLeftHanded: (on) => deps.changeSettings({ leftHanded: on }),
+    setSettings: (patch) => deps.changeSettings(patch),
+    exportArchive: () => exportText(deps.getMeta()),
+    importArchive(text) {
+      const res = parseArchive(text);
+      if (res.ok) deps.importSave(res.meta);
+      return res.ok;
+    },
     setSteering: (steering) => deps.changeSettings({ steering, steeringTouched: true }),
     controls: () => ({ orient: currentOrient(), steering: effectiveSteering(deps.getMeta().settings, currentOrient()) }),
     joystick(dx, dy) {
