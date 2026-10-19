@@ -1765,6 +1765,33 @@ try {
     const hpLow = await hpOf({ kind: 'campaign', planet: 0, priority: 'niski', lawId: 'ciasteczka' });
     const hpHigh = await hpOf({ kind: 'campaign', planet: 7, priority: 'krytyczny', lawId: 'czas-wsteczny' });
     check('campaign: the same enemy has more racja on a late planet at Krytyczny than on planet 1 at Niski', hpLow > 0 && hpHigh > hpLow * 2, JSON.stringify({ hpLow, hpHigh }));
+    // S9: planet 3 at Wysoki: item level inside 14..18, a pack and a named elite appear, the named kill pays its guaranteed item
+    await cp.evaluate(() => window.__game.start(33, { plan: { kind: 'campaign', planet: 2, priority: 'wysoki', lawId: 'ciasteczka' }, pageCount: 5 }));
+    await sleep(600);
+    const s9 = await cp.evaluate(async () => {
+      const g = window.__game;
+      const s = g.state();
+      const frame = () => new Promise((r) => requestAnimationFrame(() => r(null)));
+      g.enemies.clear();
+      s.pickups.length = 0;
+      s.player.hp = s.player.hpMax = 1e9;
+      const pack = g.enemies.spawnPack('powiadomienia', 'pilny');
+      const id = g.enemies.spawnNamed('urzadzenia', 'pilny');
+      await frame();
+      await frame();
+      const listed = g.enemies.list();
+      const named = listed.find((e) => e.id === id);
+      const packed = listed.filter((e) => pack.includes(e.id));
+      const kill = (i) => { for (const t of ['regulaminowy', 'mechaniczny', 'egzystencjalny']) g.enemies.hit(i, t, 1e7); };
+      for (const m of pack) kill(m);
+      s.pickups.length = 0;
+      kill(id);
+      const items = s.pickups.filter((k) => k.item).map((k) => ({ tier: k.item.tier, level: k.item.level }));
+      return { packSize: packed.length, namedAffixes: named?.affixes.length ?? 0, named: !!named?.named, items, priority: s.plan?.priority };
+    });
+    const inBand = s9.items.every((i) => i.level >= 14 && i.level <= 18);
+    check('S9 planet 3 Wysoki: a pack of 3+ and a named elite with 2-3 affixes appear', s9.priority === 'wysoki' && s9.packSize >= 3 && s9.named && s9.namedAffixes >= 2 && s9.namedAffixes <= 3, JSON.stringify(s9));
+    check('S9 planet 3 Wysoki: the named kill leaves a nietypowy+ item and every drop is item level 14-18', s9.items.length >= 1 && inBand && s9.items.some((i) => i.tier !== 'zwykly'), JSON.stringify(s9.items));
     await cctx.close();
   }
 
