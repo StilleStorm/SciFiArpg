@@ -3,50 +3,61 @@
 Plain data, pure functions, one thin render layer. One `<svg id="stage">` plus an HTML overlay `<div id="ui">`;
 `window.__game` drives it from tests, shots and the smoke script. Folder READMEs in `src/*/` say what each domain owns.
 Fonts: Michroma (titles, stamps), Space Mono (HUD, forms), EB Garamond (narration, footnotes). Damage types:
-`mechaniczny | regulaminowy | egzystencjalny`.
+`mechaniczny | regulaminowy | egzystencjalny`. Folded through M2 (S1–S10); a new slice adds its section at the end and the
+integrator folds it at the milestone end.
 
 ## Screens, phases, state
-Router (`main.ts`): title -> profile (the roster, or the creation form when there is no case file) -> **`baza`** (the walkable base page of a planet) -> **`run`** -> `baza`.
-The desk, ticket, Sklep and settings are sheets over the base page (`openSheet`, one history entry), not screens.
-`RunState` (`world/run.ts`, `createRun(seed, opts)`) is the one live state; `phase: 'base' | 'run'`. The base is the
-same object as the run it becomes: `createRun(seed, {phase: 'base'})` holds `page` = the base page (900 x 700,
-`world/base.ts generateBase`), `base` (`BaseState`: layout, accepted, resume bookmark) and `pageIndex` = the run page
-the exit leads to. Walking through the unlocked exit (`world/pageTurn.ts enterPage` -> `beginRun`) flips the phase,
-deletes `base`, starts the clock and emits `run:started`. In the base: no clock, laws, spawns, fights, bookmark, or
-`heroStep` (`heroBaseStep` only cools the pads and opens a queued update the HUD line asked for; `castSkill` ignores
-the pads). While a tunnel holds a run, that RunState waits in `hold` (`createRunHold`, never copied) and a second,
-base-phase RunState is live; `Game.adopt(held)` makes the held one live again (page redrawn, entities synced with no
-draw-in). Other fields: four rng streams (`ai combat loot spawn`; every roll goes through them), `time`, `status`
-(`running | paused | dead`; sheets and forms use `paused`), `modal` (law sheets), `turning`, `pages`, `player`,
-`enemies projectiles pickups summons zones`, `law`, `hero` (`heroes/state.ts`), `victoryAt`, `tunnel?`, `plan?`
-(`TicketPlan`, world/campaign.ts), `campaign?` (`CampaignState`, the character's, see "Campaign (S7)"), `quests?`
-(`QuestState`, saved with the character), `buffs?` (`ActiveBuff[]`, seal stamps, run only, never saved). `Page.content?` holds
-the page's teczki, seals and event (S10).
-`MetaState` (`save/save.ts`, SAVE_VERSION 3, localStorage `zgloszenie.meta`) holds settings, `stamps`, `runsCompleted`,
-the roster `characters: CharacterRecord[]` (`{id, name, character, bookmark?, history, archive}`), `sharedArchive` and
+Router (`main.ts`): title -> profile (the roster, or the creation form when there is no case file) -> **`baza`** (the
+walkable base page of a planet) -> **`run`** -> `baza`. The desk, ticket, Sklep, board, archive and settings are sheets over
+the base page (`openSheet`, one history entry), not screens; cards (`ui/cards.ts`) are modal layers.
+`RunState` (`world/run.ts`, `createRun(seed, opts)`) is the one live state; `phase: 'base' | 'run'`. The base is the same
+object as the run it becomes: `createRun(seed, {phase: 'base'})` holds `page` = the base page (900 x 700,
+`world/base.ts generateBase`), `base` (`BaseState`: layout, accepted, resume bookmark) and `pageIndex` = the run page the
+exit leads to. Walking through the unlocked exit (`world/pageTurn.ts enterPage` -> `beginRun`) flips the phase, deletes
+`base`, starts the clock and emits `run:started`. In the base: no clock, laws, spawns, fights, bookmark or `heroStep`
+(`heroBaseStep` only cools the pads and opens a queued update the HUD line asked for; `castSkill` ignores the pads). While
+a tunnel holds a run, that RunState waits in `hold` (`createRunHold`, never copied) and a second, base-phase RunState is
+live; `Game.adopt(held)` makes the held one live again (page redrawn, entities synced with no draw-in).
+Other fields: four rng streams (`ai combat loot spawn`; every roll goes through them), `time`, `status` (`running |
+paused | dead`; sheets and forms use `paused`), `modal` (law sheets), `turning`, `pages` (`Page.content?`: teczki, seal,
+event), `player`, `enemies projectiles pickups summons zones`, `law`, `hero` (`heroes/state.ts`), `victoryAt`, `tunnel?`,
+`spor?`, `plan?` (`TicketPlan`), `mix`, `campaign?` (`CampaignState`), `quests?` (`QuestState`, saved with the character),
+`buffs?` (`ActiveBuff[]`, seal stamps, run only, never saved).
+`MetaState` (`save/save.ts`, SAVE_VERSION 3, localStorage `zgloszenie.meta`): settings, `stamps`, `runsCompleted`, the
+roster `characters: CharacterRecord[]` (`{id, name, character, bookmark?, history, archive}`), `sharedArchive`,
 `activeCharacterId?`. The active record is **mirrored** at the top level (`character` (`save/character.ts`), `bookmark`
-(`save/bookmark.ts`: ticketNumber, seed, pageIndex, lawId, clockS, planetName, pageCount, `plan?`), `history`, `heroId`), so the
-run flow reads and writes those as before; `syncActive` folds the mirror into its record, `withMirror` the reverse,
-`toStored` is what storage and the archive file get (no mirror). `migrate` reads v3 and v2 (a roster of one); loading
-never throws. Roster functions: see "Roster and archives (S6)".
+(`save/bookmark.ts`: ticketNumber, seed, pageIndex, lawId, clockS, planetName, pageCount, `plan?`), `history`, `heroId`);
+`syncActive` folds the mirror into its record, `withMirror` the reverse, `toStored` is what storage and the archive file
+get. `migrate` reads v3 and v2 (a roster of one; the S5 archive too); loading never throws. `Character` carries level,
+upgrades, gear, bag, purse, `potwierdzenia`, `pads`, `paragraphs?`, `ultimate?`, `specialization?`, `ultParagraph?`,
+`campaign?`, quests.
+Roster (`save/roster.ts`, pure: meta in, `{ok, meta}` out; the caller writes): `createCharacter(meta, heroId, name='')`
+(`'hero' | 'full' | 'duplicate'`), `selectCharacter`, `deleteCharacter` (shared archive stays), `moveItem(meta, {zone,
+index}, to)` (`Zone = 'bag' | 'personal' | 'shared'`, caps 20/40/40; `'noCharacter' | 'missing' | 'full' | 'same'`),
+`rosterOf`, `activeRecord`, `itemsIn`, `zoneCap`, `cleanName`, `nextCaseName`; `MAX_CHARACTERS 8`, `ARCHIVE_CAP 40`,
+`NAME_MAX 24`. `ui/rosterStore.ts` is the only UI file on that API (codes -> `ui/rosterModel.ts errorText`). `go('profile')`
+first runs `settleForRoster()` (a held run is settled like Zakończ; a live base/run writes its character), so nothing live
+is mirrored into another file.
 
-**Entity kinds** (`entities/types.ts`, all `{kind, id, x, y, r}`): `player`, `enemy` (family, tier, claim, defect,
-elite, boss, runtime bag `rtOf()`), `projectile`, `pickup` (item plate, gwiazdki star, permission card, or `potwierdzenie` slip), `summon`
-(copy, decoy, ghost), `zone` (`teren`, `hourglass`). Radii match the drawing (`ENEMY_SCALE` 1.2, `HERO_SCALE` 1.15,
-`CARD_SCALE` 1.3). Adding a kind: type + factory, array on `RunState`, a `Builder` (`create`, `patch`, `drawInMs`),
-a case in `render/view.ts`.
+**Entity kinds** (`entities/types.ts`, all `{kind, id, x, y, r}`): `player`, `enemy` (family, tier, claim, defect, elite,
+boss, runtime bag `rtOf()`: `affixes, packOf, packSize, named, age`), `projectile`, `pickup` (item plate, gwiazdki star,
+permission card, or `potwierdzenie` slip), `summon` (copy, decoy, ghost, `moon`), `zone` (`teren`, `hourglass`, `wniosek`,
+`legenda`, `start`, `numer`). Radii match the drawing (`ENEMY_SCALE` 1.2, `HERO_SCALE` 1.15, `CARD_SCALE` 1.3). Adding a
+kind: type + factory, array on `RunState`, a `Builder` (`create`, `patch`, `drawInMs`), a case in `render/view.ts`.
 
 ## Loop and systems
 `core/loop.ts`: fixed 60 Hz `update`, rAF `render`, `loop.after()` timers (never `setTimeout`), `pause()/resume()`,
-`freeze(ms)` (hit-stop). `systems/step.ts` order (run phase): law pre, statuses, `movePlayer`, enemy AI,
-`playerAttacks` + `enemiesAttack` (skipped in bot hours), `heroStep`, `collectPickups`, `updateLoot`, `trickleSpawn`,
-law post, `tickLaw`, `tickPageTurn`, `tickTunnel`. Base phase: `movePlayer`, `heroBaseStep`, `tickBase`, `tickTunnel`.
-`systems/combat.ts applyDamage(s, bus, defender, amount, crit, type?)` is the only place racja changes (claims,
-existence, zgloszony via `enemies/hooks.ts modifyDamage`, then death); pass `type` always. A blow on the player calls
-`systems/recovery.ts onPlayerBlow` first (regen pause; auto-use of a held potwierdzenie). Formula in `combat/damage.ts`.
-Update queue (`progression/queue.ts`): a level up only queues (`pendingLevels++`, margin note, HUD line); the form opens
-on a calm page (no enemy within 320 for 1.5 s), a page turn or the HUD tap, never with a live boss, a sheet up, or
-after the boss fell (`canOpenUpdate`). In the base only the HUD tap opens it.
+`freeze(ms)` (hit-stop). `systems/step.ts` order (run phase): `contentPre`, law pre, statuses, `movePlayer`, enemy AI,
+`playerAttacks` + `enemiesAttack` (skipped in bot hours), `heroStep`, `collectPickups`, `updateLoot` (with `tickRecovery`),
+`tickContent`, `trickleSpawn`, law post, `tickLaw`, `tickPageTurn`, `tickTunnel`. Base phase: `movePlayer`, `heroBaseStep`,
+`tickBase`, `tickTunnel`.
+`systems/combat.ts applyDamage(s, bus, defender, amount, crit, type?, credit = true)` is the only place racja changes
+(claims, existence, zgloszony and Spór via `enemies/hooks.ts modifyDamage`, then death); pass `type` always; `credit =
+false` for a blow that is not the player's (no meter). A blow on the player calls `systems/recovery.ts onPlayerBlow` first;
+`items/stats.ts wearerDefence(p, combat rng)` is the defender block of every hit on the player. Formula in `combat/damage.ts`.
+Update queue (`progression/queue.ts`): a level up only queues (`pendingLevels++`, margin note, HUD line); the form opens on a
+calm page (no enemy within 320 for 1.5 s), a page turn or the HUD tap, never with a live boss, a sheet up, or after the boss
+fell (`canOpenUpdate`). In the base only the HUD tap opens it.
 
 ## Law flags (`world/laws.ts`; neutral values when no clause is active; read unconditionally; run phase only)
 | flag | read by |
@@ -60,395 +71,222 @@ after the boss fell (`canOpenUpdate`). In the base only the HUD tap opens it.
 | `killCost`, `cookies`, `twoFactorExit`, `officeOpen`, `hours` | economy, `ui/lawSheets.ts`, kiosk |
 
 ## Events (`core/events.ts`; adding one to `GameEvents` makes the compiler check every use)
-- Input: `skill:1|2|3`, `inventory`, `player:tap {x,y}`.
-- Flow: `screen:changed {screen}`, `base:entered {layout, seed, number}` (a base page is up; seed + number name the
-  ticket), `station:opened {station}` (biurko, kiosk, tablica, paczkomat, urzednik reached: main opens its sheet),
-  `ticket:accepted` (the exit unlocks, the base header is printed), `run:started {seed}` (the exit was walked through, or
-  a direct start), `page:entered {index, count}`, `page:turn {from, to}`, `page:edge {x, y, side}`,
-  `run:ended {outcome}` (exactly once per run; main files it and goes to `baza`), `game:paused {paused}` (Game.pause/
-  resume), `run:bookmarked {pageIndex}` (autosave wrote the bookmark).
-- Tunnel: `tunnel:opened {x, y, pageIndex}`, `tunnel:entered` (player walked onto an armed hole), `tunnel:returned`,
-  `tunnel:closed {reason: return | second | death | end | page}` (the first three are taped).
-- Combat: `attack:started {attackerId, attacker, x, y, tx, ty, ranged}`, `player:hit`, `enemy:hit|miss`,
+- Input: `skill:1|2|3`, `inventory`, `player:tap {x,y}`, `skill:aim {slot, mode, x, y, dx, dy}` (while a pad is held).
+- Flow: `screen:changed {screen}`, `base:entered {layout, seed, number}`, `station:opened {station}` (biurko, kiosk,
+  tablica, paczkomat, urzednik), `ticket:accepted`, `run:started {seed}`, `page:entered {index, count}`, `page:turn {from,
+  to}`, `page:edge {x, y, side}`, `run:ended {outcome}` (exactly once per run; main files it and goes to `baza`),
+  `game:paused {paused}`, `run:bookmarked {pageIndex}`.
+- Tunnel: `tunnel:opened {x, y, pageIndex}`, `tunnel:entered`, `tunnel:returned`, `tunnel:closed {reason: return |
+  second | death | end | page}` (the first three are taped).
+- Combat: `attack:started {attackerId, attacker, x, y, tx, ty, ranged, laser?}`, `player:hit`, `enemy:hit|miss`,
   `enemy:died {id, x, y, tier?, family?}`, `boss:died`, `boss:phase`, `enemy:rebutted|offTopic|escalated`.
-- Hero: `skill:cast {slot, skill, free, aim}`, `ultimate:cast {heroId, ultimateId, x, y}`, `skill:fx` (kind, x, y, x2, y2, r), `summon:expired`, `player:levelup`, `update:ready`, `player:died`, `player:unsuspended`.
-- Presentation: `footnote {text}`, `footnote:added {n, text, correction}` (every printed footnote), `stamp {text, x, y, quiet?, away?}` (`quiet`: another recipe carries the thud, audio plays no stamp; `away`: a point it must not cover; `render/bindings.ts placeStamp` keeps every bus stamp inside `freeViewRect(camera, 'stamp')` and 80 units off `away`),
-  `margin:note {text, x, y, ttl?}`, `law:trigger`, `law:ask`, `pickup:taken`.
+- Spór: `spor:posted {id, phase, commentKey, replies}`, `spor:answered {id, index, right}`, `spor:closed {id, reason:
+  answered | expired | died}`.
+- Hero: `skill:cast {slot, skill, free, aim}`, `ultimate:cast {heroId, ultimateId, x, y}`, `skill:fx {kind, x, y, x2, y2,
+  r}`, `summon:expired`, `player:levelup`, `update:ready`, `player:died`, `player:unsuspended`.
+- Presentation: `footnote {text}`, `footnote:added {n, text, correction}`, `stamp {text, x, y, quiet?, away?}` (`quiet`:
+  audio plays no thud; `away`: a point it must not cover), `margin:note {text, x, y, ttl?}`, `law:trigger`, `law:ask`,
+  `pickup:taken`.
 - Campaign: `campaign:advanced {from, to, finale}`, `case:closed` (both from `settleCampaign` on `run:ended 'ukonczono'`).
-- Elites: `elite:named {id, x, y, name}` (a named elite placed), `elite:slain {id, x, y, name, minTier}` (it died; no sound yet).
+- Elites: `elite:named {id, x, y, name}`, `elite:slain {id, x, y, name, minTier}` (no sound yet).
 - Recovery: `recovery:taken {healed, held}` (0 healed = kept), `recovery:used {auto, healed, held}`.
-- Page content (S10): `content:opened {kind, id, x, y}`, `content:sealed {seal, x, y}`, `content:event {event, id, phase, x, y}`,
-  `content:changed {id}` (redraw one item). Quests: `quest:changed {id, what: accepted|progress|ready|done|dropped}`.
+- Page content: `content:opened {kind, id, x, y}`, `content:sealed {seal, x, y}`, `content:event {event, id, phase, x, y}`,
+  `content:changed {id}`. Quests: `quest:changed {id, what: accepted|progress|ready|done|dropped}`.
 - `Bus.recent(n = 10)`: the last events (ring of 40, minus `skill:aim`, `player:tap`, `enemy:miss`, `attack:started`) as
-  `{name, payload}` text, for the bug dump.
+  text, for the bug dump.
 
-## The base page, the tunnel, pause and save (DESIGN 4.1)
-`world/base.ts`: three layouts from the seed, stations (`tapStation`, `stationReached`, `tickBase` emits
-`station:opened` and the locked-exit note), `acceptTicket(s, bookmark?)`, `exitLocked`, `bookmarkAllowed`,
-`arrivalKey`. `render/stations.ts drawBase` returns `BaseView {frame(s), unlock(header)}` (labels within
-`LABEL_RANGE`, solid exit, clause header). HUD in the base: the page field reads "Baza" + the layout word
-(`world.layout.*`), Tunel note hidden; skill pads hidden (`.pads.in-base`).
+## The base page, stations, the tunnel, pause and save (DESIGN 4.1)
+`world/base.ts`: three layouts from the seed, stations (`tapStation`, `stationReached`, `tickBase` emits the locked-exit
+note), `acceptTicket(s, bookmark?)`, `exitLocked`, `bookmarkAllowed`, `arrivalKey`. Stations open on a tap on their
+drawing or label (`Game.onTap` emits `station:opened`; targets >= 44 css px at any zoom); walking into them does nothing.
+`render/stations.ts drawBase` returns `BaseView {frame(s), unlock(header)}`; `game.ts` passes `planet: questPlanet(s)`.
+HUD in the base: the page field reads "Baza" + the layout word, Tunel and Potw. notes and skill pads hidden
+(`.pads.in-base`). Opening a station sheet (`holdBase`) disables input, `releaseBase` re-enables it. Board
+(`ui/board.ts open(meta, quests?)`): announcements, the quest block, ticket history. Desk lines `[data-desk=...]`:
+Nowe/Wznów zgłoszenie, `roster`, `karta`, `konfiguracja`, `osobowa`, `archiwum`, `export|import`. Settings live only in the
+pause sheet (`go('settings')` opens pause + settings).
 `world/tunnel.ts`: pure `planOpen, stepTunnel, isOnHole, closeFor, fateOfHeldRun, createRunHold, carryPurse`, thin
-`openTunnel, closeTunnel, tickTunnel, bindTunnel, cutBaseHole`. Entering holds the exact RunState (`game.pause()`,
-`hold.hold`) and shows the base of the same planet with the hole; returning (`returnFromTunnel`) adopts it, calls
-`tunnelFx.restore(pageIndex)` (tapes cut earlier on that page), `tunnelFx.show(...)`, resumes and tapes the hole.
-Starting another ticket, resuming the bookmark or changing the hero settles the held run (bookmark + character).
-`render/tunnelFx.ts bindTunnelFx(bus, {page, pageWidth})` returns a handle: unbind function + `show(x, y, animate?,
-page?)`, `restore(page)`, `tapes()`.
-Pause: `Game.pause()/resume()` hold the same state (status `paused`, input off, `Loop.pause()`); the pause sheet offers
-Wznów, Ustawienia, Umiejętności, Konfiguracja, Zgłoś problem z grą (`[data-pause=report]`, hidden by `bugButton: false`),
-Zakończ (run only); five or six lines stand in a 3-column grid in landscape. Android back: the run sits one history entry above `baza`; `popstate` in a run
-toggles the pause sheet. Save: `save/autosave.ts` writes the character on `page:entered`, `game:paused`, Zakończ,
-`run:ended`, hidden tab; `settleRun` files the ticket and clears the bookmark. A bookmark makes the desk offer
-"Wznów zgłoszenie"; resuming regenerates the bookmarked page from the seed (`createRun(seed, {character, resume})`).
+`openTunnel, closeTunnel, tickTunnel, bindTunnel, cutBaseHole`. Entering holds the exact RunState and shows the base with
+the hole; returning (`returnFromTunnel`) adopts it, calls `tunnelFx.restore(pageIndex)` and `show(...)`, resumes and tapes
+the hole. Starting another ticket, resuming the bookmark or changing the file settles the held run.
+`render/tunnelFx.ts bindTunnelFx(bus, {page, pageWidth})` -> unbind + `show(x, y, animate?, page?)`, `restore`, `tapes`.
+Pause: `Game.pause()/resume()` hold the same state (status `paused`, input off, `Loop.pause()`); lines `[data-pause=resume|
+settings|skills|paragraphs|report|end]` (report hidden by `bugButton: false`; end in the run only); a 3-column grid in
+landscape. Android back: `popstate` in a run toggles the pause sheet. Save: `save/autosave.ts` writes the character on
+`page:entered`, `game:paused`, Zakończ, `run:ended`, hidden tab; `settleRun` files the ticket and clears the bookmark;
+resuming regenerates the bookmarked page (`createRun(seed, {character, resume})`). Save safety (`save/export.ts`):
+`requestPersistence()` on boot; archive `{kind: 'zgloszenie-archiwum', format 1, version, exportedAt, meta}` (an export of
+an import is byte-identical); `parseArchive(text)` -> `{ok, meta}` | `{ok: false, reason: parse | kind | newer}`;
+`describeMeta` feeds the confirmation; `main.ts importSave` replaces the save and reprints the base. Bug dump: `bugDump({meta,
+bus, planet, page, total, device})` -> `copyText` -> a footnote on the pause sheet (`PauseSheet.note`).
+
+## Heroes (DESIGN 10; `src/heroes/README.md` is the folder contract)
+One folder per hero `src/heroes/<id>/` exporting `hero: HeroModule` (`heroes/module.ts`): `def` (`HeroDef`, via
+`defineHero`/`defineSkill`), `figure` (`HeroFigure`: drawing, wash `hue`, attack pose, `drive/build/patch`), `sounds` (five
+recipe names, `autoStart`, `ultimate`), `casts` (`Record<skillId, SkillFn>`), `pads` (five glyphs), `passives` (six
+`HeroPassive`), `paragraphs`, `ultimates`, `specs`, optional `quirk` (`onHit`, `tick`). `heroes/registry.ts` is the one list:
+`HERO_ID_LIST` (pralka, konsultant, petlowiec, kartograf, nalesnik), `HeroId`, `HEROES`, `HERO_IDS`, `heroById(id)`,
+`heroDef(id)`, `DEFAULT_HERO_ID`, `isHeroId`. No hero id outside its folder (lint `hero-id-literal`); per-hero branches are
+data: `HeroDef.traits` (`trialSpeed`, `seesDefects`, `revealsPage`, `skim`, `friendlyCopy`, `buffKillGwiazdki`),
+`auto.lash`, `chosenNoteKey`. Casts are step lists (`heroes/cast.ts cast(i, steps)`, `CastEnv`; a step returning `false` =
+no cooldown) over the primitives in `heroes/primitives/` (`dash teleport pull push aoe cone line hitscan projectile
+forkProjectile zone summon removeSummon decoy statusApply buff heal shield cooldownReset deferredDamage echo stepDeferred`).
+Figures: `heroes/figureKit.ts`, `heroes/poseKit.ts`, engine `render/heroFigures.ts`. Scaffold `npm run new-hero <id>`
+(templates `heroes/_template/*.tpl`). Contract test `heroes/contract.test.ts` against `contract.snapshot.json`
+(`npx vitest run -u src/heroes/contract.test.ts` only for an intended change). Numbers in `heroes/numbers.ts`, aim
+geometry in `heroes/aim.ts GEOMETRY`, per-step effects in `heroes/steps2.ts`; `heroes/shield.ts projectileDamageMul` (skim),
+`bindNumerBonus` (an `enemy:hit` listener). The base page animates on game.ts's render clock `animMs` (no `RunState.time` there).
+Skills: `SkillIndex 0..4`, `PadSlot 0..2`, `SkillDef.requires?: FamilyId` (rank 1 of skills 3 and 4), `SkillDef.aim: 'auto'
+| 'kierunek' | 'wskazanie'`. `HeroRun.cd/cdTotal/ranks` keyed by SkillIndex, `pads: [SkillIndex x3]`. `heroes/loadout.ts`:
+`isInstalled`, `installedSkills`, `padSkill` (carries paragraph + capstone), `padOf`, `assignPad`, `fixPads`,
+`effectiveSkill(s, i)` (every read of a skill's shape). `castSkill(s, bus, slot, free, aim)` -> `fire(...)` (inside
+`withCapstone`) -> `skill:cast`, `HeroRun.lastCast`. Aiming: pads press, drag (> 8 px shows `render/aimFx.ts`), release
+fires, back over the pad cancels; `heroes/aim.ts autoTarget, dragToAim, isCancel, isTap`; the pad hands the aim through
+`queueAim`. Kartograf's auto is a hitscan laser (`fireLaser`, `attack:started.laser {sx, sy, ex, ey, crit, metres, scale?}`).
+Paragraphs: `heroes/paragraphs.ts` (`Paragraph {n, nameKey, descKey, patch, permission?}`, at most four patch fields,
+`applyParagraph`, `PARAGRAPH_STEP {2: 6, 3: 14}`); engine `progression/paragraphs.ts` (`paragraphsOf`, `isParagraphUnlocked`,
+`unlockedParagraphs`, `setActiveParagraph`, `runParagraph`, `setRunParagraph(s, skillId, n, force?)`, `applyParagraphs`).
+Update form (`progression/update.ts`): `offerVersion`, `paragraphEntries` (`para:<i>:<n>`), `pickFeature`, `composeOffer`,
+`confirmUpdate`, `requirementOf`, `newSkillOf`; a new skill goes to `UpdateForm.assign` ("Przypisz do przycisku",
+`.assign-pad[data-pad]`, `.report.later`). Sheets: `ui/loadout.ts openLoadout` (`.lo-row[data-skill]`, `.lo-pad[data-pad]`),
+`ui/konfiguracja.ts openKonfiguracja` (`.kf-box[data-n]`, `.kf-slot[data-slot=1..3|ult]`, `.kf-spec[data-spec]`,
+`.kf-cap-line`, `.kf-pad[data-pad]`, `.kf-advice`), `ui/karta.ts openKarta(root, kartaModel(input), onBack)` (`.kt-col`,
+`.kt-node[data-state=granted|gated|open]`, `.kt-cap`; from `[data-desk=karta]` and `[data-profile=karta]`).
+Argument meter (`combat/meter.ts`, `Player.meter` 0..1, never saved): `meterGain`, `meterSpend`, `killFill(tier)`,
+`tickMeter`; rebuttal .08, kill .03/.06/.15, Spór .5, drain .01/s after 4 s calm. Ultimates (`heroes/ultimateDefs.ts
+defineUltimate`, `MAX_ULT_S 8`, `MAX_ULT_RADIUS 220`, `FIRST_ULTIMATE_LEVEL 12`; runtime `heroes/ultimate.ts`
+`ultimateOf, ultimateUnlocked, castUltimate, stepUltimates, setUltimateParagraph, ultimateAuto`): a quiet stamp at
+`ultStampSpot`, a margin note, `ultimate:cast`; `render/ultFx.ts` draws a dotted `.ult-area`. UI door `ui/ultimate.ts`; the
+fourth pad `.pad.ult` (`.locked`, `.off`, `.ready`). Specializations (`heroes/specDefs.ts`, `heroes/specializations.ts`):
+`categoryOf`, `specializationsOf`, `activeCapstone` (chosen column with >= 2 of its skills on the pads), `setLoadout(c,
+{pads, ultimate, specialization|null})`, `loadoutAdvice`; UI door `ui/konfLoadout.ts commitLoadout`.
+
+## Spór (DESIGN 5.4; `combat/spor.ts`)
+`RunState.spor?: {prompt, bossId, phase, ttl, window, answered}`; `SPOR_TTL_S 12`, `SPOR_WINDOW_S 5`, `SPOR_WRONG_COST 0.1`;
+`promptFor(boss, phase, rng)`, `postSpor` (from `enemies/bosses.ts tickBoss`: phase 1 at `rt.sporAt`, phase 2 with
+`boss:phase`), `answerSpor(s, bus, index)`, `tickSpor`, `sporMul(s, defenderId)`. Keys `enemies.boss.<boss>.spor<1|2>.*`.
+UI `ui/spor.ts`: three `.spor-reply[data-reply]` by the footnote slip; the boss's `.bubble.comment` in enemyFigures.
+
+## Items, loot, recovery, Sklep (ITEMS 2–9, PLAN 8)
+Items: bases (`items/bases.ts`, 40, `excludeAffixes`, `odd` via `oddStats`), affixes (`items/affixes.ts`, 32, tiers I–V
+`modTier`, `absurd`, `UNWANTED_FEATURES`, `randomAffixPool`), names by `items/grammar.ts` (`withRegisterMark`: the tier
+numeral after the model, before an unwanted tail). StatBlock percentages `zasieg`, `tempo`, `gwiazdki`, `proba`, read by
+`recomputeStats`; stars through `economy/stars.earnStars`. `items/absurd.ts pageEntryAll` runs on `page:entered`.
+`disposalRefusal(item, 'sell'|'bin'|'reklamacja'|'drop')` is the guard every way of getting rid of an item must call.
+Item level `items/level.ts`: `ilvlFor({planet, priority, pageIndex, pageCount, boss})` (cap 40), `shopIlvl(planet)`,
+`ilvlScale`, `TIER_BASE_MUL/TIER_BUDGET/TIER_PRICE_MUL`, `listPrice`, `actualOverClaim`. Drops `systems/loot.ts`:
+`DROP_TIER_WEIGHTS`, `rollDropTier`, `dropLevel`, `dropGuaranteed`; `bindLoot` on `enemy:died`: `dropLoot` (potwierdzenie
+rolled last), `enemies/named.claimNamedDrop` -> `dropGuaranteed`, the permission card. Sklep `economy/sklep.ts restock(state,
+seed, visit, level)`: 3 low, 1 rzadki, 1 `oferta`, 1 `adapter` (`Listing.kind` as `.sk-kind` stamp); `mountSklep(...,
+{planet})`, `RollOptions.shop`. Elites: `ELITE_IDS` 10, `spawnElite(..., {makeNamed, pack})`, packs of 2–4, named elites
+(`enemies/named.ts`, one per two pages). Marks `render/itemMarks.ts`: `buildTierMark` (nietypowy stamp, rzadki thread,
+unikatowy wax seal, zestaw paperclip), `affixMarks`, `groundMark`, `buildAffixMarks`; all black ink but the seal's red dot
+(ITEMS §9). `drawingSvg(id, item)`; `itemView.itemRowText`, `declaredHead`, `isStruck`.
+Recovery (`systems/recovery.ts`): `POTWIERDZENIE_DROP {common .1, elite .5, boss 1}`, `VACUUM_RADIUS 90`, `REGEN_RATE 2%`/s
+after `REGEN_DELAY 4` s, `HEAL_SHARE 25%`, `HELD_CAP 5`, `AUTO_FLOOR 15%`; `takePotwierdzenie`, `useHeld(s, bus, auto?,
+incoming?)`, `onPlayerBlow`. HUD `ui/hud.ts createPotwButton` (`.potw-btn`, draws at most two slips, `.count` from two up).
+Archive: `ui/archive.ts openArchive` (`.ar-sec[data-place] .ar-cell[data-uid]`, `.ar-move[data-to]`).
+
+## Campaign, page content, quests (PLAN 3, 7, 8)
+`world/campaign.ts` owns the priorities (`PRIORITIES`, `PRIORITY_IDS`, `DEFAULT_PRIORITY`, `priorityUnlocked`,
+`availablePriorities`, `clampPriority`; unlock 1/1/8/18), the nine planets (`PLANETS`, `planetDef(i)`; `planets.pN.name|loc`
+is the only planet-name source), `CampaignState {current, closed, finalTicket, caseClosed, extras, cards?}` and the plans
+(`nextCampaignPlan`, `extraPlan`, `travelList`, `travelPlan`, `defaultPlan`, `closeTicket`, `toCampaign`, `toPlan`,
+`toCardsSeen`). `TicketPlan {kind: campaign|final|extra|travel, planet, priority, lawId}`; `createRun(seed, {plan})` uses
+`world/ticket.ts ticketForPlan`; enemies scale by `planScale(s.plan)`, xp by `xpMul`, loot by `lootTierBonus`, `starMul`,
+`ilvlBonus`; no plan = neutral. main.ts `enterBase(over)` picks the plan (over -> held -> bookmark -> `defaultPlan`) and
+shows the card (`ui/ticketModel.cardToShow`); `acceptNow(priority)`; ticket form `ui/ticket.ts open(info, {level, view})`
+(`onAccept`, `onTravel`, `onExtra` -> `takePlan`). `bindCampaign(bus, () => game.state)` is bound after `bindTunnel` and
+before main's `run:ended`; `settleCampaign` once per plan object. Cards `ui/cards.ts openCard(root, {kind:
+opening|chapter|rewritten, planetIndex}, {number, onDone})` (`.card-layer[data-card]`, `.card-skip`; text TODO-story until S11).
+Page content: `world/contentKinds.ts` (`SEALS` six, `CONTENT`, `paragraphsFree(buffs)`, `waivePrice(patch)`),
+`world/content.ts` (`contentPre`, `tickContent`, `grantSeal`, `activeBuffs`, `effectsOf`); `pages.placeContent` puts 0–2
+teczki, 0–1 seal, 0–1 event (never page 1 or the boss page); `bindContent(bus, getState)` bound once at boot;
+`render/obstacles.redrawContent`. Quests `world/quests.ts`: `QuestState {active, done, log}`, kinds kill/fetch/reach/deliver,
+max 3, `offersFor`, `takeQuest/dropQuest/completeQuest/visitClerk`, `bindQuests`, `questPlanet(s)`. NPC `world/npc.ts
+npcAt/registerNpc`, `render/npc.ts drawNpc`, `ui/npcSheet.ts`; `ui/karta-osobowa.ts openKartaOsobowa` (desk line and the HUD
+`.field.rep`). Open SEAMs: hand-written side tickets and clerks (`registerSideTickets`, `registerNpc`) wait for S11/S12;
+zestaw, the won-Spór tier bonus, the unarchived final unique, przesyłka wait for S17/S18.
 
 ## Narration (`narration/asystent.ts`)
-One narrator per ticket, keyed by seed + number: `base:entered` for a new ticket starts it and writes the arrival note
-once; the run, the tunnel's base and the base after Zakończ go on with it. Footnote numbers run on the same way
-(`main.ts notesFor`). The Asystent ticks wherever the walkable screen runs (not under sheets); its idle note is
-`idle_base` in the base, `idle` in the run. 1 in 8 notes is wrong and corrected 10-20 s later by number.
+One narrator per ticket, keyed by seed + number: `base:entered` for a new ticket starts it and writes the arrival note once;
+the run, the tunnel's base and the base after Zakończ go on with it; footnote numbers likewise (`main.ts notesFor`). It
+ticks wherever the walkable screen runs (not under sheets); idle note `idle_base` in the base, `idle` in the run. 1 in 8
+notes is wrong and corrected 10–20 s later by number.
 
 ## Render
 `views.sync(entities, timeMs, {drawIn?})` creates one `<g data-id>` per entity and patches only `transform` and a few
-attributes; `drawIn: false` skips the draw-in (a redrawn page). Layers: `#page` (paper, obstacles, header, exit, holes,
-base stations; no filter) -> `#world` (entities; wobble filter re-seeded every 500 ms) -> `#fx` (blots, strikes, stamps,
-margin notes) -> `#ui`. `render/bindings.ts bindFx(bus, views, page, view, damageNumbers)`: the margin note sits inside the page shown
-(`marginSpot(side, x, y, page)`). Headers: `obstacles.ts drawHeader/headerBox/wrapLines`; `headerFor(s, view?)`,
-`baseHeaderFor(s, frame?)` take `headerFrame(camera)` = `{view?: portraitSpan, avoid?: headerKeepOut}`: in portrait the header
-fits the visible span, two lines, cut after a whole sentence; `headerBox(page, view, avoidExit, avoid, topChars)` narrows it
-beside the margin-note row when the form line and 240 units still fit (landscape), else sets it below the row (portrait). Camera (`render/camera.ts`): at least 390 wide, 700 tall in portrait, 520 in landscape;
-`bounds` follow the page shown. Ink: `drawIn, eraseOut, strike, blot, stamp, marginNote, tapMark` (`render/ink.ts`);
-paint only via `render/wash.ts washGroup`. No gradients, glow, shadows; red only for stamps, strikes, Racja. `stampsOnPage()` counts fx-layer
-stamps until they fade. Claim bubbles (`render/bubbleFocus.ts`, game.ts render): `pickBubbles` shows at most `BUBBLE_CAP 2` (bosses, elites,
-then nearest within 260 or in the 1.2 s new grace), none while `stampsOnPage() > 0`; hidden ones stay in the DOM (strikes kept); a shown one is
-moved by `avoidBoxes` (render/keepOut.ts) inside `freeViewRect(camera)` and off `keepOutBlocks(camera)` and the bubbles placed
-before it this frame (`bubblePlaced`). Stamps: `placeStamp(x, y, w, h, view, away?, blocks)` (bindFx 6th argument = blocks).
-Keep-out (`render/keepOut.ts`, measured by `ui/keepOut.ts watchLayout(ui)`): `screenLayout()` = `{w, h, top, bottom, blocks, row}`
-in css px from the DOM (HUD bottom and footnote band when they span the width, else blocks; pads, the update line, the
-Potw./Tunel/Pauza notes; `row` = the notes as the run shows them + a pad in their corner). Re-measured lazily after a resize,
-an `<html>` data-orient/data-steer/style change, a layout class change in #ui (paint-only tokens ignored) or a HUD/foot resize;
-pending observer records are read synchronously, so a page drawn right after the HUD is shown sees the new layout. Never fixed
-pixels; the insets in camera.ts are only the fallback before a measurement (tests). World text that must read on a phone uses
-`readableUnits(units, minPx=11)` (elite word, boss name, margin notes). The swept sheet of a page turn drops its bubbles.
-`render/attackFx.ts` turns `attack:started` into transform-only poses. `render/ultFx.ts createUltFx(fx).frame(s)` (game.ts
-render) outlines each running ultimate with an `r` as a dotted `.ult-area` circle in #fx at its `x, y`, erased when it ends. Sheets share `ui/sheet.ts`; every `#ui` button
-is at least 44 x 44.
+attributes. Layers: `#page` (paper, obstacles incl. inked obstacle blots, header, exit, holes, stations; no filter) ->
+`#world` (entities; wobble filter re-seeded every 500 ms) -> `#fx` (blots, strikes, stamps, margin notes) -> `#ui`.
+`render/bindings.ts bindFx(bus, views, page, view, damageNumbers, blocks)`: hit blots (`blot`: wet 45% -> full ink in
+300 ms, held 500 ms, dried to a 22% stain over 1.8 s; pool of 20), strikes on death, the "margines" note at
+`marginSpot(side, x, y, page)` (above the hero at a side wall, 72 units beside him at the top or bottom wall), stamps at
+`placeStamp(x, y, w, h, view, away?, blocks)` inside `freeViewRect(camera, 'stamp')` and 80 units off `away`. Ink:
+`drawIn, eraseOut, strike, blot, stamp, marginNote, tapMark` (`render/ink.ts`); `.t-note` margin notes and the pad words
+carry a paper halo (paint-order stroke). Paint only via `render/wash.ts washGroup`. No gradients, glow, shadows; red only
+for stamps, strikes, Racja, handwritten corrections. `stampsOnPage()` counts fx stamps until they fade.
+Headers: `obstacles.ts drawHeader/headerBox/wrapLines`; `headerFor(s, view?)`, `baseHeaderFor(s, frame?)` take
+`headerFrame(camera)` = `{view?: portraitSpan, avoid?: headerKeepOut}` (portrait: two lines in the visible span, cut after a
+sentence; landscape: beside the note row). Camera (`render/camera.ts`): at least 390 wide, 700 tall in portrait, 520 in
+landscape; `bounds` follow the page shown; `readableUnits(units, minPx=11)` for world text.
+Claim bubbles (`render/bubbleFocus.ts`, from game.ts render): `pickBubbles` shows at most `BUBBLE_CAP 2` (bosses, elites, then
+nearest within 260 or in the 1.2 s new grace; never two with the same claim text), none while `stampsOnPage() > 0`; hidden
+ones stay in the DOM; a shown one is moved by `avoidBoxes` inside `freeViewRect(camera)`, off `keepOutBlocks(camera)`, off
+the hero (`heroBox(p)`, `HERO_BOX`) and off the bubbles placed before it (`bubblePlaced`).
+Keep-out (`render/keepOut.ts`, measured by `ui/keepOut.ts watchLayout(ui)`): `screenLayout()` = `{w, h, top, bottom, blocks,
+row}` in css px from the DOM (HUD and footnote band; pads, the update line, the Potw./Tunel/Pauza notes; `row` = the notes
+as the run shows them). Re-measured lazily after a resize, orientation/steering/style change, a layout class change in #ui
+(paint-only tokens ignored) or a HUD/foot resize. Never fixed pixels outside the fallback insets in camera.ts.
+`render/attackFx.ts` turns `attack:started` into transform-only poses; `render/damageNumbers.ts` (setting, pool of 10).
+Sheets share `ui/sheet.ts` (`createSheet`, the `c.d. poniżej` cue `runsOn/cutEdge`, also under the settings form
+`.set-more`; `guardGhostClicks` with the pure `isGhostOf`). Every `#ui` button is at least 44 x 44 css px.
 
 ## Controls and layout (DESIGN 2)
 `ui/layout.ts` sets `data-orient` and `data-steer` on `<html>`; landscape and joystick rules live in `ui/landscape.css`.
-`input.ts`: `held()` (tap mode), `steer()` (joystick), `setEnabled`, `setMode`, `setLeftHanded`, `inject`. Joystick:
-the first pointer on the steering half owns the stick; a quick tap (<260 ms, <10 px) calls `onTap(x, y, false)`, which
-opens the footnote history when it lands on the slip (the slip has `pointer-events: none` in joystick mode, so a thumb
-landing on it steers) and otherwise only reaches the kiosk. Skill pads cast on `pointerdown`. Portrait + joystick puts Załączniki
-under the HUD (right; left when left-handed, then the update line hangs under the pad). The notes' circles are paper-filled.
+`input.ts`: `held()` (tap mode), `steer()` (joystick), `setEnabled`, `setMode`, `setLeftHanded`, `inject`. Joystick: the
+first pointer on the steering half owns the stick; a quick tap (< 260 ms, < 10 px) calls `onTap(x, y, false)` (footnote
+history on the slip, else the kiosk). Pads and notes act on `pointerdown`. HUD notes Pauza/Tunel/Potw. (`ui/pause.css`,
+`ui/tunnel.css`, `ui/potw.css`): 48 x 48 circled words, a slot is 56 px (right 12/68/124; portrait joystick under the
+Załączniki pad 24/80/136; landscape 30/86/142, mirrored when left-handed). Notes and pad circles are paper-filled.
+Settings (`Settings`, kept by `migrate` only when not default): theme, hand, orientation, steering, volumes, `textSize?:
+0|1|2` (`--ts` zoom, `ui/textsize.css`), `damageNumbers?: true`, `bugButton?: false`.
 
 ## Audio (`audio/`, DESIGN 14)
 Web Audio only, synthesized; `audio/bindings.ts` is the one place events meet sounds; nothing exists before the first
-gesture; errors are swallowed. Music flags (`deriveFlags`): enemiesNear, elite, boss, botTime, `paused` (set from
-`game:paused`, played like bot hours), reversed, suspended, dead, pageTurn, `base` (calm layer, 6 dB down). Music runs
-from `run:started` to `run:ended` and in the base. Hero sounds come from `heroById(id).sounds` (`skills[5]`, `autoStart?`,
-`ultimate?`: played with a duck on `ultimate:cast`). `npm run render-audio` measures peaks, body band and clipping.
+gesture; errors are swallowed. Music flags (`deriveFlags`): enemiesNear, elite, boss, botTime, `paused`, reversed,
+suspended, dead, pageTurn, `base` (calm layer, 6 dB down). Music runs from `run:started` to `run:ended` and in the base.
+Hero sounds from `heroById(id).sounds`; ultimates `pralkaUlt, konsUlt, petlUlt, kartoUlt, nalesUlt`; `recovery:taken` ->
+`paperSlide`; Spór posted -> `footnote`, right -> `strikeThrough` + `stamp`, wrong -> `paperTear`. `npm run render-audio`.
 
 ## i18n
-`t('domain.key', params)`; `src/i18n/pl/<domain>.json` (file name = prefix). Plurals `{one, few, many}`. One-letter
-words are bound to the next with U+00A0 by `t()`. No user-facing strings in `.ts`.
+`t('domain.key', params)`; `src/i18n/pl/<domain>.json` (file name = prefix; heroes in `pl/heroes/<id>.json`). Plurals
+`{one, few, many}`. One-letter words are bound to the next with U+00A0 by `t()`. No user-facing strings in `.ts`.
 
 ## Test hook and scripts
-`window.__game`: `start(seed, opts)`, `go`, `state`, `meta/setMeta`, `screen`, `advance(s)`, `turnTo(page)`,
-`attack`, `hitEnemy`, `killEnemy`, `hurtPlayer`, `placePlayer`, `snapshot`, `footnote(text)`, `notes()`, `giveItem`,
-`demoInventory`, `openInventory`, `openSklep`, `openKiosk`, `setTheme`, `setOrientation`, `setSteering`,
-`setLeftHanded`, `setSettings(patch)`, `controls`, `dropPotwierdzenie(dist)`, `heldPotwierdzenia`,
-`setHeldPotwierdzenia(n)`, `usePotwierdzenie`, `exportArchive()`, `importArchive(text)` (as a confirmed import), `joystick(dx, dy)`, `pause`, `resume`, `endTicket`, `resumeTicket`, `character`,
-`startBase(seed?)`, `station(name)`, `acceptTicket`, `walkToExit`, `openTunnel`, `enterTunnel`, `returnFromTunnel`,
-`tapUltimate`, `ultimatePad() {ready, off, inked, hidden}`, `keepOut()` (the measured screen layout), `setLevel(n)`, `fillMeter(v=1)`, `setMeterUi(v)`, `castUltimate`,
-`ultimateInfo() {meter, ready, active, paragraph}`, `setSpecialization(id|null)`, `loadoutInfo() {pads, categories, specialization, capstone, advice}`, `hero.{cast, installSkill, openAssign, assignPad, setParagraph, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
-`enemies.{spawnFamily, spawnBoss, spawnPack, spawnNamed, hit, clear, list}`, `content.{list, put(kind, {seal, dist, dy}), tap, open, seal, buffs}`,
-`quests.{offers, active, accept(idOrKind), drop, finish, report, happen, done}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
-`npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot` (390x844 @2x and 844x390 into `shots/`);
-per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3,s4,s5,s6,s7,s8,elite-packs,recovery,s10-content,s10-quests}.mjs` (each with its own
-SHOT_PORT/SHOT_OUT/SHOT_DIR, usage in the header). `npm run smoke` plays a ticket with real buttons: creation form, base
-(HUD, margin note, update from the HUD line), desk, ticket, exit, run (header clear of the note row, no bubble under a pad or note,
-the update line clear in tap/joystick x both hands), fight, update, inventory, pause, Zakończ,
-the Argument meter and an ultimate (3d), bookmark resume, two tunnels and the return, boss, death, a landscape joystick leg (two touches, the footnote slip), the S4 leg (6f: desk loadout -> run -> reload, the chart), the S5 leg (6g: damage numbers, text size, drop ->
-heal, full -> held, tap use, auto-use, the pause bug line, export -> import equality), item marks on the sheet (S8), the S6 leg (6h: roster over a held run
-settles it, a second file at level 1, the first file's level and bookmark back, an archive move), the S9 checks (named elite caption
-and extra drop, pack brackets, Sklep kind stamps), the S10 checks (teczka tap opens it, a seal walked onto stamps
-`RunState.buffs`, Karta osobowa from the HUD prints it, the base clerk's sheet, a side ticket taken/reported pays),
-then 5 s of frame times with 40 enemies (`PERF_MAX_MS`, `SMOKE_UNCAPPED`); exit 1 on any failed check or page error.
-
-## Aiming (DESIGN 5.6)
-Every `SkillDef` has `aim: 'auto' | 'kierunek' | 'wskazanie'`. Pads (`ui/pads.ts`) press, drag and release: a drag over 8 px on a non-auto skill shows the preview (`render/aimFx.ts`: dotted arrow or dotted circle in `#fx`), release fires with the resolved `Aim`, releasing back over the pad cancels (no cooldown), a quick tap is the auto cast. Pure logic in `heroes/aim.ts` (`autoTarget` prefers a standing-claim rebuttal in range, `dragToAim`, `isCancel`, `isTap`, resolvers per skill). `castSkill(s, bus, slot, free, aim)` in `heroes/skills.ts`; the pad hands the aim over through `queueAim` because `skill:N` has no payload (integrator may move it into the payload). Events: `skill:aim {slot, mode, x, y, dx, dy}` while held; `skill:cast` carries `aim`. Hook: `aimCast`, `holdPad`, `releasePad`. Port 4190 is unsafe in Chromium; shot-aim uses 4195.
-
-## Base stations (after player feedback)
-Stations open on a tap anywhere on their drawing or label (`Game.onTap` emits `station:opened`); walking into them does nothing; labels are permanent. The notice board (`ui/board.ts`) shows three announcements and the ticket history; the desk keeps Nowe/Wznów zgłoszenie, the case file line (Wykaz spraw), Karta, Konfiguracja, Torba i archiwa and the export lines; settings live only in the pause sheet (`go('settings')` opens pause + settings). `ui/sheet.ts guardGhostClicks()` drops the compatibility mouse events that follow a touch `pointerdown` so a sheet opened by a tap does not receive that tap's click. Opening a station sheet (`holdBase`) disables input and `releaseBase` re-enables it (the former hang).
-
-## Fifth hero and the laser (2026-10-18)
-Heroes: pralka, konsultant, petlowiec, kartograf, nalesnik (the list is `HERO_ID_LIST` in `heroes/registry.ts`; `HERO_IDS` in save/character.ts re-exports it and the save check uses `isHeroId`). Naleśnik logic in `heroes/nalesnik/steps.ts` (orbit roll with a satellite, gravity pull, the `Zone` variant `'wniosek'` with `inside`), quirk in `heroes/nalesnik/quirk.ts` (round up below a third of racja) and `heroes/shield.ts` (`projectileDamageMul` reads `Player.skim`, set from the `skim` trait: skim from 90% racja; `Player.round` while rounded). Kartograf's auto is a hitscan laser: `fireAuto` → `fireLaser` → shared `attack()`; `attack:started` carries `laser {sx, sy, ex, ey, crit, metres, scale?}`; crit pierces along the line. The base page animates on a render clock `animMs` in game.ts because `RunState.time` does not advance in phase 'base'. Sounds: `nalesSlap`, `nalesOrbita`, `nalesGravity`, `nalesFlag`.
-
-## Hero folders, registry, primitives (S1)
-One folder per hero, `src/heroes/<id>/`, exports `hero: HeroModule` (`heroes/module.ts`): `def` (`HeroDef` data, built with `defineHero`/`defineSkill`
-of `heroes/build.ts`), `figure` (`HeroFigure`: the drawing, wash and its `hue`, attack pose, `drive`/`build`/`patch` hooks), `sounds` (five recipe names
-by SkillIndex, `autoStart`; audio/bindings.ts plays them), `casts` (`Record<SkillDef.id, SkillFn>`), `pads` (`HeroPadGlyphs`, five glyphs for ui/pads.ts),
-`passives` (six `HeroPassive {mods, requires?}` for progression/update.ts) and optionally `quirk` (`onHit`, `tick`). `heroes/registry.ts` is the one list of ids
-(`HERO_ID_LIST`, type `HeroId`) and modules: `HEROES` (the `HeroDef`s), `HERO_IDS`, `heroById(id): HeroModule`, `heroDef(id)`, `DEFAULT_HERO_ID`.
-`heroes/defs.ts` keeps the types and re-exports `HEROES/HERO_IDS/heroDef`. Nothing outside `src/heroes/<id>/` (and tests, i18n, the registry) may write a
-hero id, as a string literal or a table key: `scripts/lint-rules.mjs` rule `hero-id-literal` (and `registry.test.ts`); no exceptions. Another domain
-reads what it needs per hero from `heroById(id)` and uses `DEFAULT_HERO_ID` for the default. What used to be `heroId === ...` branches is data:
-`HeroDef.traits` (`trialSpeed`, `seesDefects`, `revealsPage`, `skim`, `friendlyCopy` (death/outcomes.ts petla ghost), `buffKillGwiazdki`), `auto.lash`,
-`chosenNoteKey` (ui/profile.ts files the note), `HeroModule.quirk/sounds/pads/passives`, `HeroFigure`.
-Casts are lists of steps (`heroes/cast.ts`: `cast(i, steps)`, `CastEnv`, `firstCast`; a step returning `false` = nothing happened, no cooldown) calling the
-primitives in `heroes/primitives/` (each takes `Ctx {s, bus}` and plain options; no state of its own): `dash` (dash/roll), `teleport`, `pull`, `push`
-(jump/sweep), `aoe`, `cone`, `line`, `hitscan`, `projectile`, `forkProjectile`, `zone` (with `max` per variant), `summon` (with `max`, `settle`),
-`removeSummon`, `decoy`, `statusApply` (`touch`), `buff`, `heal` (`amount`/`atLeast`), `shield`, `cooldownReset`, `deferredDamage`, `echo`,
-`stepDeferred` (called by `heroStep`; `HeroRun.deferred?` exists only once a skill queued a hit). Figures: `heroes/figureKit.ts` (types, `Parts`, helpers) and
-`heroes/poseKit.ts` (`HeroPose`, keyframes, the shared timing constants); `render/heroFigures.ts` is the engine that builds and patches the `<g>` from
-`heroById(id).figure`; `render/attackFx.ts` keeps the ink strokes and re-exports `heroPose(id, t)`/`HERO_ATTACK_MS` from the figures
-(`driveHeroStroke` takes the figure's `stroke: 'whip' | 'slap'`). Scaffold: `npm run new-hero <id>` (`scripts/new-hero.mjs`, templates `heroes/_template/*.tpl`,
-registers the hero, prints the checklist). Contract test: `heroes/contract.test.ts` replays every hero x skill x aim kind (and Petlowiec with a copy)
-on a fixed seeded scene against `heroes/contract.snapshot.json` (captured before the refactor; regenerate only for an intended change:
-`npx vitest run -u src/heroes/contract.test.ts`). Folder contract: `src/heroes/README.md`.
-
-## Fourth and fifth skills (DESIGN 10.1)
-Types (`heroes/defs.ts`): `SkillIndex = 0..4` (a skill of the hero), `PadSlot = 0..2` (a pad); `HeroDef.skills` is a five-tuple;
-`SkillDef.requires?: FamilyId` is the permission rank 1 of skills 3 and 4 wants. `HeroRun.cd/cdTotal/ranks` are keyed by SkillIndex
-(length 5, all five cool down every step, run and base); `HeroRun.pads: [SkillIndex x3]` (default `[0, 1, 2]`).
-`heroes/loadout.ts`: `isInstalled`, `installedSkills`, `padSkill`, `padOf`, `assignPad(s, slot, i)` (refuses a not-installed skill; a skill on
-another pad swaps; the pads always hold three different installed skills), `fixPads` (after a load). `castSkill(s, bus, slot, free, aim)`
-checks and then runs the exported `fire(s, bus, skill, slot, free, aim)`: the skill fn (`heroById(id).casts[skill.id]`), the cooldown unless free, `skill:cast {slot, skill, free, aim}`,
-and `HeroRun.lastCast {skill, aim}` (resolved, concrete aim; not for free casts nor Już to było). Pralka's błąd programu (`pralka/quirk.ts`, dispatched by `quirks.ts onPlayerHit`) picks
-from `installedSkills`; an off-pad skill is cast through pad 0 with `pads[0]` swapped for that one call and put back.
-Code: casts in `heroes/<id>/skills.ts` (Już to było in `petlowiec/skills.ts` calls `fire` and lets each
-live copy recast from its own position by standing the player there for the call), per-step effects in `heroes/steps2.ts` (called from
-`heroes/system.ts` in its fixed order), all numbers in `heroes/numbers.ts`, aim geometry in `heroes/aim.ts GEOMETRY`. New `HeroRun` fields:
-`reading` (Pralka's Wniosek o osobowość: until, acc, upor), `numer` (Konsultant's case number: id, until, handovers, number, x, y),
-`scale` (Kartograf's Skala 1:1: until, from, to on `attackRange`), `tide` (Naleśnik's Pływy ring), `moonUpor`, `lastCast`, `noted` (first-cast
-footnote bits). Numer sprawy's +35% is an `enemy:hit` listener (`bindNumerBonus`, bound once per bus) that takes the extra racja before the
-death check. Skala 1:1 makes every laser pierce and sets `laser.scale` on `attack:started` (render/attackFx.ts halves the tick spacing).
-Entities: `Summon.variant 'moon'` with `orbit {angle, r, ring?, hits?}`, stepped by `stepMoon` (render: `heroFx.ts buildMoon/patchMoon`);
-`Zone.variant 'legenda'` (`inside`, `acc`, `order` of the wrong names), `'start'` (lands when `ttl` runs out: `landStart`), `'numer'`
-(`follow`, `number`). `skill:fx` kinds added: `drum`, `wet`, `section`, `cut`, `tide`, `capsule`.
-Pads (`ui/pads.ts`): `syncPads(s)` each frame (heroes/layer.ts) redraws word, label and glyph when `pads` changed (glyphs from
-`heroById(id).pads`); `updatePadCooldowns` draws `cd[pads[i]]`; a press resolves the skill through `padSkill`.
-Progression (`progression/update.ts`): pool `skill1..skill5`; `requirementOf` gates rank 3 of skills 0..2 by family and rank 1 of 3..4 by
-`requires`; `newSkillOf(before, after)` is the index whose rank went 0 -> >0; `roman(rank)`. The update form's `onPick` (heroes/layer.ts)
-snapshots `ranks`, confirms, and for a new skill calls `UpdateForm.assign(s, skill, done)`: the same sheet becomes "Przypisz do przycisku"
-(`.sheet.assigning`, three `.assign-pad[data-pad]` with the words they carry, `.report.later` "Później"); `done` closes and resumes.
-`ui/loadout.ts openLoadout(root, s, onBack)` (+ pure `loadoutRows`) is the sheet behind the pause line `[data-pause=skills]`
-"Umiejętności" (run and base; main.ts `openPauseSkills/closePauseSkills`, `clearPause` closes it): five `.lo-row[data-skill]`, a greyed
-`.off` row for a skill not installed, `.lo-pad[data-pad]` (`.on` = occupied). Save: `ProgressData.pads`; `padsFrom(v)` reads it leniently
-(not three indexes 0..4 -> `[0, 1, 2]`), `applyProgress` sets it then `fixPads`; `save/character.ts toCharacter` uses `padsFrom`.
-Hook: `hero.cast(slot, aim?)`, `installSkill(3|4)`, `openAssign(3|4)`, `assignPad(pad 1..3, index)`, `info().pads`. Smoke 3b covers the
-assign step, the pause loadout and Później. Shots: `shot-skills.mjs` (4197), `shot-loadout.mjs` (4198).
-
-## Paragraphs (S2, DESIGN 10.2)
-Data: `heroes/paragraphs.ts` (`Paragraph {n, nameKey, descKey, patch, permission?}`, `ParagraphPatch` of at most four fields from
-`type, aim, reach, area, width, count, dur, dmg, cd, cost, status`, `applyParagraph(skill, patch)`, `PARAGRAPH_STEP {2: 6, 3: 14}`);
-`heroes/<id>/paragraphs.ts` gives every skill its opening level and § 1..3 (`HeroModule.paragraphs`); texts `heroes.<id>.para.<skill>.<n>.{name,desc}`
-in `i18n/pl/heroes/<id>.json`. On a run `HeroRun.para` (n per SkillIndex) and `HeroRun.patch` exist only while some skill is off § 1.
-Every read of a skill's shape goes through `heroes/loadout.ts effectiveSkill(s, i)` (and `padSkill`, the helpers' power/area/dur/reach):
-casts, pads, aim previews, the loadout and Konfiguracja types. Engine `progression/paragraphs.ts` (pure): `paragraphsOf(heroId, skillId)`,
-`paragraphLevel`, `isParagraphUnlocked(progress, skillId, n)` (§ 2 at skill level + 6, § 3 at + 14, or the paragraph's family permission;
-skills 4/5 once installed), `unlockedParagraphs(c)`, `activeParagraph/setActiveParagraph(c, skillId, n)` on a `Character`; on a run
-`runProgress(s)`, `runParagraph(s, i)`, `setRunParagraph(s, skillId, n, force?)` (refuses a closed paragraph unless `force`),
-`applyParagraphs`, `activeParagraphsOf`, `skillWith`. Save: `Character.paragraphs?: {skillId: 2|3}` written from the run, applied after
-`applyProgress` (closed ones fall back to § 1). Update form (`progression/update.ts`): `offerVersion(s)` is the level the form installs
-(the oldest queued); `paragraphEntries(s)` are the paragraphs opening exactly at that version, open and not active, as offer ids
-`para:<skill index>:<n>` (`paraId`, `parseParagraphId`; never stored in `upgrades`); `pickFeature` leads with a new skill, else the first
-paragraph; `composeOffer` adds two passive/stat entries; `confirmUpdate` of a `para:` id calls `setRunParagraph` (the pick is the active
-paragraph). One passed over stays switchable and is not offered again. UI: `ui/konfiguracja.ts openKonfiguracja(root, s, onBack)` (+ pure
-`konfiguracjaRows`: per skill three `.kf-box[data-n]` `active | open | locked`, the active one stamped CZYNNY in place of its name, which
-heads the row's description `.kf-dname`; a tap on an open box calls `setRunParagraph`); opened from the pause line `[data-pause=paragraphs]`
-and the desk line `[data-desk=konfiguracja]` (main.ts `openKonfig` hides the sheet under it, `closeKonfig` shows it again and, at the desk,
-writes the character; also closed by `clearPause`/`dropSheets`). Pads show `.ptag` "§2"/"§3" from `runParagraph`. Hook:
-`hero.setParagraph(skillId, n, force = true)`, `info().paragraphs`, `info().skillIds`. Smoke 2b, 3c, 6e. Shots: `shot-s2.mjs` (4182).
-
-## Spór (DESIGN 5.4)
-State: `RunState.spor?: SporState` (`combat/spor.ts`): `{ prompt: SporPrompt | null; bossId: number; phase: 1 | 2; ttl: number;
-window: number; answered: Record<number, 1 | 2> }` (`answered[bossId]` = the last phase that already posted, so each boss posts
-once per phase; `window` = seconds left of the x2 against `bossId`). Pure logic in `combat/spor.ts`: `SPOR_TTL_S = 12`,
-`SPOR_WINDOW_S = 5`, `SPOR_WRONG_COST = 0.1`, `promptFor(boss: BossId, phase: 1 | 2, rng): SporPrompt` (shuffles the three
-replies with the seeded rng, sets `correct`), `answerSpor(s, bus, index: 0 | 1 | 2): 'right' | 'wrong' | 'none'`, `tickSpor(s, bus, dt)`
-(ttl, window, erases on boss death), `sporMul(s, defenderId): 1 | 2`. The prompt data: `SPOR_PROMPTS[boss]` is two entries
-(phase 1, 2) each `{ commentKey, replies: [reply per type] }`; keys `enemies.boss.<boss>.spor<1|2>.comment` and
-`.reply.<mechaniczny|regulaminowy|egzystencjalny>` in `src/i18n/pl/enemies.json`.
-Trigger: `enemies/bosses.ts` sets `rt.sporAt = s.time + 1.5` in `spawnBoss`; `tickBoss` posts phase 1 when `s.time >= rt.sporAt`
-and phase 2 on the same branch that emits `boss:phase`, both through `postSpor(s, bus, e, phase)` (combat/spor.ts), which emits
-`spor:posted {id, phase, commentKey, replies: textKey[]}`. Answers emit `spor:answered {id, index, right}`; the end of a prompt emits
-`spor:closed {id, reason: 'answered' | 'expired' | 'died'}`. Wrong: `player.hp -= 10% of hpMax` (through `applyDamage` with
-`type` undefined and a `footnote` 'combat.spor.offTopic'); right: `window = 5`, `stamp` 'combat.spor.stamp' over the boss.
-Damage: `enemies/hooks.ts modifyDamage` multiplies by `sporMul(s, defender.id)` for an enemy defender; `applyDamage` passes `s`.
-UI: `ui/spor.ts createSpor(root, bus, s)`: three `.spor-reply[data-reply]` boxed buttons in a `.spor` strip by the footnote slip
-(portrait above it, landscape right margin above the pads), built on `spor:posted`, struck on a wrong answer, removed 600 ms after
-`spor:closed`. Input is unchanged while a prompt is up; a tap on a reply does not steer.
-Render: `render/enemyFigures.ts` adds the boss's `.bubble.comment` on `spor:posted`, strikes it on a right answer, erases it on
-`spor:closed`. Audio: posted -> `footnote`, right -> `strikeThrough` + `stamp`, wrong -> `paperTear`.
-Hook: `spor.answer(index)`, `spor.info()`. Smoke 5a: posted, wrong costs racja, right opens the window. Portrait stacks the comment
-bubble above the claim bubble; landscape sets it beside it (mirrored when left-handed).
-
-## Argument meter and ultimates (S3, DESIGN 10.2)
-Meter: `Player.meter` 0..1, never saved. `combat/meter.ts` (pure): `meterOf`, `ultimateReady`, `meterGain(s, x)` (nothing while an
-ultimate runs), `meterSpend`, `killFill(tier)`, `tickMeter(s, clock, dt)`; constants `METER_REBUTTAL 0.08`, `METER_KILL 0.03 / _ELITE
-0.06 / _BOSS 0.15`, `METER_SPOR 0.5`, drain `METER_DRAIN_PER_S 0.01` after `METER_IDLE_S 4` with no enemy within `METER_COMBAT_R 320`.
-Sources: `systems/combat.ts applyDamage(s, bus, defender, amount, crit, type?, credit = true)` fills on a rebuttal (an enemy defender,
-`isRebuttal(claim, type)` checked before the claim is struck); pass `credit = false` for a blow that is not the player's (an enemy
-redirected onto another, `heroes/system.ts stepRedirects`). `killEnemy` adds `killFill`; `combat/spor.ts answerSpor` adds half on a
-right reply. Ultimates: `heroes/ultimateDefs.ts` (`defineUltimate(hero, spec)`, `UltimateDef {id, level, type, seconds, radius|null,
-pageWide, keys, list: 3 x UltimateParagraph {patch, tune}, cast, tick?, end?}`, `UltEnv`, `perSecond`, `MAX_ULT_S 8`, `MAX_ULT_RADIUS
-220`, `FIRST_ULTIMATE_LEVEL 12`); per hero `heroes/<id>/ultimates.ts` -> `HeroModule.ultimates` (template in `_template/ultimates.ts.tpl`).
-Runtime `heroes/ultimate.ts`: `ultimateOf(s)` (`HeroRun.ultimateId`, else the first), `ultimateUnlocked(s)` (player level >= def.level),
-`castUltimate(s, bus)` (refuses unless running, run phase, no modal, unlocked, meter full, not botTime/stunned/silenced, none running;
-spends the meter, pays `patch.cost` in racja never fatally, pushes `ActiveUlt` onto `HeroRun.ult.active` with `r` = `tune.radius` or
-`def.radius`, runs `cast`, emits one quiet `stamp` at `ultStampSpot` (above or below the hero, the emptier side, `away` = hero), one `margin:note`, `ultimate:cast`), `stepUltimates` (heroStep: drain, tick, end),
-`setUltimateParagraph(s, n)` (saved as `Character.ultParagraph`), `ultimateSeconds`, `ultimateActive`, `ultimateAuto` (Kartograf: `shots`/`pierce` read by
-`heroes/auto.ts fireLaser`). UI: `ui/ultimate.ts` is the only door from ui to the meter. `ui/pads.ts`: the fourth pad `.pad.ult` (stamp
-pad, `ULT_STROKES 10` cushion strokes, `inkedStrokes(m)`), `.locked` (display none) below the unlock level, `.off` until full, `.ready`
-(red cushion, the word in ink with a red underline); portrait above the three in the thumb column, landscape in the arc, lefty mirrored, hidden in the base; the Spór strip
-makes room (`.spor` right 96 px portrait, +250 px landscape). `ui/hud.ts`: field "Argument" (`.arg`) beside Racja, an ink underline that
-fills, heavier ink (`.full`) when full (not red). Audio: five recipes `pralkaUlt, konsUlt, petlUlt, kartoUlt, nalesUlt` (body layers, end in the stamp
-thud), named by `HeroSounds.ultimate`. Smoke 3d (refused below 12, fill, cast, end). Shots: `shot-s3.mjs` (4183, `dist-s3`).
-
-## Loadout, categories, specializations (S4, DESIGN 10.2–10.3)
-Data: `heroes/specDefs.ts` (`SkillCategory`, `HeroSpecs {categories: skillId -> category, list: 3 Specialization}`, `defineSpec(hero, id,
-skills, capstoneSkill, patch)`; `Capstone {nameKey, descKey, skill, patch}` where `CapstonePatch` = `area, dmg, dur, width, reach`
-multipliers + `cd` seconds); per hero `heroes/<id>/specs.ts` -> `HeroModule.specs`; texts `heroes.<id>.spec.<spec>.{name, cap.name,
-cap.desc}`, category names `forms.category.<c>`. API `heroes/specializations.ts` (pure): `categoryOf(skill|id)` (null when unknown),
-`categoryNameKey`, `specializationsOf(heroId)`, `specializationOf`, `ultimatesOf`, `isSkillUnlocked/unlockedSkills(c)`,
-`capstoneCount(c, specId)`, `activeCapstone(c: LoadoutView) -> {spec, capstone} | null` (only the chosen column, only with >= 2 of its
-skills on the pads), `setLoadout(c, {pads, ultimate, specialization|null}) -> {ok} | {ok: false, reason}` (all or nothing; any three
-different unlocked skills), `loadoutAdvice(c) -> SkillCategory[]` (advice only: the categories missing when two pads share one).
-At the cast `heroes/skills.ts fire` runs inside `withCapstone(s, skill, fn)` (the run patch of that skill is swapped for
-`mergeCapstone(paragraph patch, capstone)` and restored); `runCapstone(s)`. Preview: `heroes/loadout.ts padSkill` carries the capstone
-(cooldown, patch); `ui/pads.ts` computes the aim preview inside `withCapstone`, so its reach and area match the cast. `effectiveSkill`
-stays paragraph-only (casts read it inside `withCapstone`).
-Run and save: `HeroRun.pads`, `HeroRun.ultimateId?`, `HeroRun.spec?`, `HeroRun.ult.para`; `Character.pads`, `ultimate?`,
-`specialization?`, `ultParagraph?: 2|3` (validated by `toCharacter`, applied in `applyCharacter`). UI door `ui/konfLoadout.ts`:
-`viewOf(s)`, `loadoutOf(s)`, `chosenSpec(s)`, `commitLoadout(s, partial) -> LoadoutResult` (through `setLoadout`, pads written in place).
-`main.ts closeKonfig` writes the save on every close (base: `withCharacter`; run: `autosave.save()`).
-Konfiguracja (`ui/konfiguracja.ts`): slots `.kf-slot[data-slot=1..3|ult]`, column buttons `.kf-spec[data-spec]` (`.on` = chosen, a
-second tap withdraws), the capstone line `.kf-cap-line` (`i.granted|idle`), per skill row `.kf-pad[data-pad]` (swap like `assignPad`),
-the category beside the type, the advice line `.kf-advice`. Karta uprawnień (`ui/karta.ts`): pure `kartaModel(KartaInput {progress,
-pads, specialization?, ultimate?})`, `kartaInputFromRun(s)`; `openKarta(root, input, onBack)`; the ultimate band on top, three
-`.kt-col[data-spec]` with `.kt-node[data-node][data-state=granted|gated|open]` in unlock order (stamp ZATWIERDZONO / BRAK UPRAWNIEŃ),
-`.kt-cap[data-capstone]` at the foot, the passives in `.kt-band` under the columns (no column names them). Opened from the desk
-(`[data-desk=karta]`, main.ts `openKartaSheet`) and the profile (`[data-profile=karta]`, from the saved character). Shots:
-`scripts/shot-s4.mjs` (port 4184, `dist-s4`, `shots-s4/`).
-
-## Recovery, save safety, small settings (S5, PLAN 8)
-Potwierdzenia (`systems/recovery.ts`, pure but for the bus): `POTWIERDZENIE_DROP {common .1, elite .5, boss 1}` rolled last in
-`dropLoot` on `rngs.loot`; `createPotwierdzeniePickup` (`Pickup.potwierdzenie: true`, number 0); `tickRecovery` (from `updateLoot`) pulls
-slips within `VACUUM_RADIUS 90` (+ radii) while one can be taken and regenerates `REGEN_RATE 2%`/s after `REGEN_DELAY 4` s since
-`Player.hurtAt`; `takePotwierdzenie` heals `HEAL_SHARE 25%` when not full, else keeps it (`Player.potwierdzenia`, cap `HELD_CAP 5`,
-saved as `Character.potwierdzenia`), at the cap it stays on the ground; `useHeld(s, bus, auto?, incoming?)` (tap or auto; auto measures
-against the racja after the incoming blow, so a heavy blow at full racja still uses one; stamp "Potwierdzono", footnote on auto);
-`onPlayerBlow` uses one when a blow would leave under `AUTO_FLOOR 15%`. HUD: `ui/hud.ts createPotwButton` (`.potw-btn`, 44 px, one slot
-beyond Tunel in every layout, `ui/potw.css`; hidden in the base) draws at most two slips (`render/pickupCard.ts buildSlip`) and types
-the count (`.count`, `ui.hud.potwCount`) from two up. Audio: `recovery:taken` -> `paperSlide`; a use is heard through its `stamp`.
-Save safety (`save/export.ts`): `requestPersistence()` on boot; archive `{kind: 'zgloszenie-archiwum', format 1, version, exportedAt,
-meta}` with the meta written as `migrate` reads it (an export of an import is byte-identical); `parseArchive(text)` -> `{ok, meta}` or
-`{ok: false, reason: parse | kind | newer}`; `describeMeta` feeds the confirmation popup at the desk (`[data-desk=export|import]`,
-"Archiwum eksportowe"). A confirmed import goes through `main.ts importSave`: a run held in the tunnel is dropped unsaved, the save
-replaced, settings applied, the base printed again from the new character (or the roster without an active file), the desk reopened.
-Bug dump: `bugDump({meta, bus, planet, page, total, device})` (version, hero, planet, page, settings, viewport, last 10 events) ->
-`copyText` (clipboard, textarea fallback) -> a footnote on the pause sheet (`PauseSheet.note`).
-Settings (`Settings`, kept by `migrate` only when not default): `textSize?: 0|1|2` -> `--ts` 1 / 1.15 / 1.3 on `<html>` (`ui/textsize.css`
-zooms `.fn-list, .pop, .ps-scroll, .ps-notes, .set-scroll`; the landscape footnote slip grows to two lines at that size, and
-`ui/footnotes.ts` takes older notes off whole on a resize of the list), `damageNumbers?: true` (`render/damageNumbers.ts`: pool of 10
-nodes in `#fx`, Garamond digits beside an `enemy:hit`, a crit is larger with a red underline; `bindFx` 5th argument), `bugButton?: false`.
-Shots: `shot-s5.mjs` (4185, `dist-s5`, `shots-s5/`), `shot-recovery.mjs` (4176, `dist-recovery`, `shots-recovery/`).
-
-## Roster and archives (S6, ITEMS 8)
-`save/roster.ts` (pure: meta in, `{ok, meta}` out; the caller writes): `createCharacter(meta, heroId, name='')` (becomes
-active; `'hero' | 'full' | 'duplicate'`), `selectCharacter`, `deleteCharacter` (bag, gear, bookmark, Historia and the
-personal archive go; shared stays; active falls to the first remaining; `'unknown'`), `moveItem(meta, {zone, index}, to)`
-(`Zone = 'bag' | 'personal' | 'shared'`, caps 20/40/40; `'noCharacter' | 'missing' | 'full' | 'same'`; a plate number
-taken in the bag is renumbered, uid kept), `rosterOf`, `activeRecord`, `itemsIn`, `zoneCap`, `cleanName`;
-`MAX_CHARACTERS 8`, `ARCHIVE_CAP 40`, `NAME_MAX 24`. Names are plain strings ("0001" from `nextCaseName`); screens print
-"Sprawa nr ...". `ui/rosterStore.ts` is the only UI file on that API: it loads, applies, `saveMeta`s, and maps the codes
-to the screens' (`ui/rosterModel.ts errorText`). Screens: `ui/roster.ts mountRoster` (Wykaz spraw; per file Otwórz,
-Karta uprawnień (read-only `openKarta`), Usuń with a confirmation; Nowa sprawa; Wróć to the title or the base),
-`ui/profile.ts mountProfile(root, ProfileOptions)` (hero pick + case number field; the function form is the old preview),
-`ui/archive.ts openArchive` (a desk line `[data-desk=archiwum]`, two taps: item, then a place).
-main.ts: `go('profile')` first runs `settleForRoster()`: a held run is settled like Zakończ (`leave('changeHero')`), else
-a live base/run writes its character (a run its bookmark too), then the game stops, so nothing live can be mirrored into
-another file. After a store call main reloads `meta = loadMeta()`; the archive rewrites the live bag in place.
-`importSave` without a hero stops the game before the roster. Ghost clicks: `ui/sheet.ts guardGhostClicks` decides with
-the pure `isGhostOf(press, target, at)`: in the 700 ms tail of a press, an event honours only the pressed element, its
-contents and its ancestors; when the pressed element has left the page, only its ancestors at press time. A tap's own
-click may carry `detail 0`, so detail is not an exemption. Hooks: `[data-roster=new|open|karta|remove|back]`,
-`.rs-case[data-case][data-hero]`, `[data-profile=name]`, `[data-desk=roster|archiwum]`, `.ar-sec[data-place]
-.ar-cell[data-uid]`, `.ar-move[data-to]`. Shots: `shot-s6.mjs` (4186, `dist-s6`, `shots-s6/`). Open: the hero note on
-archived uniques waits for legendary paragraphs.
-
-## Campaign (S7, PLAN 3.1/3.2/7)
-`world/campaign.ts` is the single owner of the priority table (`PRIORITIES`, `PRIORITY_IDS`, `DEFAULT_PRIORITY`,
-`priorityUnlocked`, `availablePriorities`, `clampPriority`; unlock 1/1/8/18; i18n `planets.priority.<id>.name|hint`), the
-nine planets (`PLANETS`, `planetDef(i)`, 0-based; `planets.pN.name|loc` is the only planet-name source, cards and the
-travel list included), the per-character `CampaignState {current, closed, finalTicket, caseClosed, extras, cards?}` and
-the plans: `nextCampaignPlan`, `extraPlan`, `travelList`, `travelPlan`, `defaultPlan` (next campaign ticket, or an extra
-after the case), `closeTicket` (pure), `toCampaign`, `toPlan`, `toCardsSeen`. `TicketPlan {kind: campaign|final|extra|travel,
-planet, priority, lawId}`. Scaling: `createRun(seed, {plan})` (or `resume.plan`) makes the ticket with
-`world/ticket.ts ticketForPlan` and sets `RunState.plan` + `mix`; `enemies/spawn.ts` scales by `planScale(s.plan)`
-(`families.ts setEnemyScale/enemyScaleOf/scaleStats`); `progression/xp.ts gainXp` × `xpMul`; `systems/loot.ts`
-`tierBonus += lootTierBonus`, stars × `starMul` (min 1), `dropLevel += ilvlBonus`. No plan = neutral (the random
-tickets of the test hook). The character: `Character.campaign?` (save/character.ts), copied to `RunState.campaign`.
-main.ts flow: `enterBase(over)` picks the plan (`over.plan` → held run's → bookmark's → `defaultPlan(campaign,
-'normalny', seed)`), sets `state.campaign`, shows the card (`ui/ticketModel.cardToShow` over `campaignViewOf(campaign,
-plan)`; seen cards go to `campaign.cards` and the save). `acceptNow(priority)` writes `clampPriority(priority, level)`
-onto `s.plan`. Ticket form (`ui/ticket.ts`, `open(info, {level, view})`): `onAccept(priority)`, `onTravel(planet,
-priority)`, `onExtra(priority)` → `takePlan` (leave a held run, re-lay the base with the new plan and the live
-campaign, accept at once). `bindCampaign(bus, () => game.state)` is registered after `bindTunnel` and before main's
-`run:ended` handler, so `settleRun` saves the advanced campaign; `settleCampaign` is once per plan object. Cards:
-`ui/cards.ts openCard(root, {kind: opening|chapter|rewritten, planetIndex}, {number, onDone})`, tap or `.card-skip`
-removes it (`.card-layer[data-card]`). Hooks: `setCampaignView(v|null)` (view only), `showCard(kind)`, `priority()`
-(`state.plan.priority`). Smoke leg 6c plays it (opening card, locked priorities, priority on the run, a won ticket closes
-planet 1 once and shows planet 2's chapter card, nine travel rows, travel → rewritten card). Shots: `shot-s7.mjs` (4187,
-`dist-s7`, `shots-s7/`). Open: `PlanetDef.baseLayouts` (base still by
-seed), planet mix in `pageTurn.planWaves` (only the trickle uses it) and boss scaling are data only.
-
-## Items: affix pool, 40 bases, marks (S8, ITEMS 2/3/9)
-StatBlock adds percentages `zasieg`, `tempo` (negative = faster), `gwiazdki`, `proba` (−% trial kills, applied at build to
-`trialTarget`); a base's `odd` (tempoPct, gwiazdkiPct, trialSpeedPct) enters them unscaled via `bases.oddStats`.
-`recomputeStats` reads them: range × (1+zasieg%), cooldown × max(0.5, 1+tempo%), `Player.starBonus = gwiazdki`; pickups pay
-through `economy/stars.earnStars` (fraction kept in `Player.starCarry`). Item adds `modTier?` (I–V, `tiers.modTierMark`
-"(III)" placed by `grammar.withRegisterMark` after the model, before an unwanted-feature tail), `plain?`, `absurd?`.
-`BaseItem.excludeAffixes` (ids never rolled on that base, passed to `affixes.randomAffixPool`): a test finds every affix
-form repeating a noun word on a slot it can roll on and requires the id there. `items/absurd.ts`: `pageEntryAll(player, loot rng)`
-is called by `world/pageTurn.enterPage` after `page:entered` (recompute on `changed`, `notes` as footnotes);
-`stats.wearerDefence(p, combat rng)` is the defender block of every hit on the player (`systems/combat.attack`,
-`enemies/projectiles.fireShot`), taking a worn domniemany item's upor/resists off one hit in five (no roll without one);
-`disposalRefusal(item, 'sell'|'bin'|'reklamacja'|'drop')` is the one guard any way of getting rid of an item calls
-(wycofany: drop only; sell → the Sklep footnote). `RollOptions.shop` (the Sklep passes it): grade 3 halves, wycofany
-never stocked. Marks: `render/itemMarks.ts` (`AFFIX_MARK` keyed by `Affix.absurd`, `affixMarks`, `groundMark`,
-`buildTierMark`; the rzadki thread is black, red stays with stamps per DESIGN §3), `drawingSvg(id, item)` on cards, the worn strip and the Sklep; `itemView.itemRowText` ("ok. 16" on an
-ewentualny pewność), `declaredHead` ("(wg relacji)" for rzekomy, which shows "Próba 0 z 0"), `isStruck` (wycofany
-number struck, class `.struck`). Hook `itemGallery(mode)`; shots `shot-s8.mjs`. Open: sell, bin and reklamacja are not built
-(S9+ must call `disposalRefusal`); sets (zestaw, paperclip) wait for S10.
-
-## Item level, drops, Sklep, elite packs (S9, ITEMS 5-7, PLAN 8)
-`items/level.ts`: `ilvlFor({planet, priority, pageIndex, pageCount, boss})`, `shopIlvl(planet)` (band + 1), `ilvlScale`,
-`TIER_BASE_MUL/TIER_BUDGET/TIER_PRICE_MUL`, `listPrice` (= `generate.itemValue`), `actualOverClaim` (lie size per tier).
-`systems/loot.ts`: `DROP_TIER_WEIGHTS`, `rollDropTier(rng, weights, priority, lawBonus)`, `dropLevel(s, boss)`,
-`dropGuaranteed(s, x, y, minTier)`; `bindLoot` on `enemy:died` runs `dropLoot`, then `enemies/named.claimNamedDrop(s, id)`
-(once per named elite, any listener order) → `dropGuaranteed`, then the permission card. `economy/sklep.ts restock(state,
-seed, visit, level)`: 3 low plates, 1 rzadki, 1 `oferta` (g3 line), 1 `adapter`; `Listing.kind` drawn as a `stamp-tag
-.sk-kind` over the price. Callers pass `shopIlvl(planet)`: `mountSklep(..., {planet})` (main: `plan.planet ?? campaign.current`;
-kiosk: `plan.planet`). Enemies: `ELITE_IDS` 10 (six new affixes in `enemies/elites.ts`), `EnemyRt.{affixes, packOf, packSize,
-named}`; `spawnElite(..., {makeNamed, pack})`, packs of 2-4 minions, named elites (`named.ts`, gap 2 pages). Render
-(`enemyFigures.eliteCaption`): a named elite's name in two serif lines (`data-part="named"`), a pack minion's square
-bracket under the feet (`data-part="pack"`). Open SEAMs: zestaw drops and offers (S10 sets), the won-Spór tier bonus,
-the final boss "not yet archived" unique, przesyłka/awizo (slice f); elite sounds wait for M7.
-
-## Page content, side tickets, clerk, Karta osobowa (S10, PLAN 8)
-`world/contentKinds.ts` (data: `SEALS` six, `CONTENT` geometry, `paragraphsFree(buffs)`, `waivePrice(patch)`), `world/content.ts`
-(rules). `pages.placeContent` puts 0-2 teczki, 0-1 seal, 0-1 event (never page 1 or the boss page) from `r.fork('content')`.
-Step order: `contentPre(s)` before `lawPre` (lays seal numbers on player/clause for one step, undone after `undoLaw`),
-`tickContent(s, bus, dt)` after `updateLoot`. `bindContent(bus, getState)` is bound **once at boot** in main.ts (taps choose a
-folder; `content:changed` redraws via `render/obstacles.redrawContent`). Buffs: `grantSeal`, `activeBuffs(s)` (= `s.buffs`),
-`effectsOf`. zwolnienie = "free paragraphs": while held, `heroes/skills.ts` casts with `waivePrice(patch)` (no racja cost, no
-added cooldown) and `castUltimate` skips the racja cost. `world/quests.ts`: `QuestState {active, done, log}`, four procedural
-templates (kill, fetch, reach, deliver), max 3 active, `offersFor`, `takeQuest/dropQuest/completeQuest/visitClerk`,
-`bindQuests`, `questPlanet(s)` (= `plan.planet ?? campaign.current ?? 0`), rewards stars / a permission / a potwierdzenie
-(no items yet). `world/npc.ts`: `npcAt(planet)`, `registerNpc`; `render/npc.ts drawNpc`; `game.ts` passes
-`planet: questPlanet(s)` to `drawBase`. UI: `ui/npcSheet.ts`, board quest block (`ui/board.ts open(meta, quests?)`),
-`ui/karta-osobowa.ts` (`openKartaOsobowa`, from the desk line `[data-desk=osobowa]` and the HUD `.field.rep`).
-Open SEAM: hand-written side tickets and clerks per planet (`registerSideTickets`, `registerNpc`) wait for S11/S12.
+`window.__game`: `start(seed, opts)`, `go`, `state`, `meta/setMeta`, `screen`, `advance(s)`, `turnTo(page)`, `attack`,
+`hitEnemy`, `killEnemy`, `hurtPlayer`, `placePlayer`, `snapshot`, `footnote(text)`, `notes()`, `giveItem`, `demoInventory`,
+`openInventory`, `openSklep`, `openKiosk`, `setTheme`, `setOrientation`, `setSteering`, `setLeftHanded`, `setSettings(patch)`,
+`controls`, `dropPotwierdzenie(dist)`, `heldPotwierdzenia`, `setHeldPotwierdzenia(n)`, `usePotwierdzenie`, `exportArchive()`,
+`importArchive(text)`, `joystick(dx, dy)`, `pause`, `resume`, `endTicket`, `resumeTicket`, `character`, `startBase(seed?)`,
+`station(name)`, `acceptTicket`, `walkToExit`, `openTunnel`, `enterTunnel`, `returnFromTunnel`, `tapUltimate`,
+`ultimatePad() {ready, off, inked, hidden}`, `keepOut()`, `setLevel(n)`, `fillMeter(v=1)`, `setMeterUi(v)`, `castUltimate`,
+`ultimateInfo()`, `setSpecialization(id|null)`, `loadoutInfo()`, `aimCast`, `holdPad`, `releasePad`, `itemGallery(mode)`,
+`setCampaignView(v|null)`, `showCard(kind)`, `priority()`, `spor.{answer, info}`,
+`hero.{cast(slot, aim?), installSkill, openAssign, assignPad, setParagraph(skillId, n, force=true), info, levelUp, grantXp,
+requestUpdate, openUpdate, pickUpdate, die, givePermission}`, `enemies.{spawnFamily, spawnBoss, spawnPack, spawnNamed, hit,
+clear, list}`, `content.{list, put(kind, {seal, dist, dy}), tap, open, seal, buffs}`, `quests.{offers, active,
+accept(idOrKind), drop, finish, report, happen, done}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
+DOM hooks: `[data-pause=...]`, `[data-desk=...]`, `[data-roster=new|open|karta|remove|back]`, `.rs-case[data-case]
+[data-hero]`, `[data-profile=name|karta]`, `.card-skip`, `.spor-reply[data-reply]`.
+`npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot`: 390x844 @2x and 844x390 into `shots/`
+(`SHOT_PORT`, `SHOT_OUT`). Per-domain shots, each with SHOT_PORT/SHOT_OUT/SHOT_DIR in its header: `scripts/shot-{base,
+tunnel,pause,attacks,enemies,heroes,items,aim (4195),skills (4197),loadout (4198),s2 (4182),s3 (4183),s4 (4184),s5 (4185),
+recovery (4176),s6 (4186),s7 (4187),s8,elite-packs (4188),s10-content (4183),s10-quests (4188)}.mjs`. Port 4190 is unsafe
+in Chromium. `npm run smoke` (`SMOKE_PORT` 4191) plays a ticket with real buttons: creation form, base, desk, ticket, exit,
+run (header clear of the note row, no bubble under a pad or note, the update line clear in tap/joystick x both hands),
+fight, update (3b assign, 2b/3c paragraphs, 3d ultimate), inventory, pause, Zakończ, bookmark resume, two tunnels, boss,
+Spór (5a), death, landscape joystick, 6c campaign, 6e skills, 6f loadout, 6g S5 settings and recovery, 6h roster and
+archive, item marks, S9 elites and Sklep stamps, S10 content and quests, then 5 s of frame times with 40 enemies
+(`PERF_MAX_MS`, `SMOKE_UNCAPPED`). Milestone gates: `npm run e2e:m1` (`M1_PORT` 4177: every hero x orientation, loadout and
+ultimate), `npm run e2e:m2` (`M2_PORT` 4192, `M2_ONLY`: roster, nine planets at Niski, cards, teczka, packs, named elites,
+a side ticket, finale, free travel, reload, 40-enemy perf). All exit 1 on a failed check or page error.
