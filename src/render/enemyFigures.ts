@@ -277,6 +277,22 @@ function addWash(under: SVGGElement, e: Enemy, hw: number, H: number, feet: numb
 
 // ---------- the figure ----------
 
+/**
+ * The caption under an elite: its affix adjective, or for a named elite the recorded name in two serif lines
+ * (split after the comma: "Monit Zbiorczy," / "nieodebrany od 2019").
+ */
+function eliteCaption(e: Enemy, asm: Assembly, feet: number): SVGTextElement[] {
+  const style = `${FONT.serif}; fill: var(--ink); stroke: none`;
+  const name = rtOf(e).named?.name;
+  if (!name || !e.elite) return [el('text', { x: 0, y: n2(feet + 19), 'text-anchor': 'middle', 'font-size': readableUnits(12, 12), style }, [e.elite ? eliteWord(e.elite.affix, asm.body) : ''])];
+  const cut = name.indexOf(', ');
+  const lines = cut > 0 ? [name.slice(0, cut + 1), name.slice(cut + 2)] : [name];
+  const size = [readableUnits(12, 12), readableUnits(11)];
+  return lines.map((line, i) =>
+    el('text', { x: 0, y: n2(feet + 19 + i * ((size[1] ?? 11) + 1)), 'text-anchor': 'middle', 'font-size': size[i] ?? 11, 'data-part': 'named', style: i === 0 ? style : `${style}; font-style: italic` }, [line]),
+  );
+}
+
 function buildFigure(e: Enemy, g: SVGGElement): FigState {
   g.replaceChildren();
   const asm = assemblyOf(e);
@@ -318,8 +334,12 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   } else if (e.elite) {
     over.append(
       el('path', { d: `M${n2(-hw)} ${n2(feet + 3)}Q0 ${n2(feet + 6)} ${n2(hw)} ${n2(feet + 2.5)}M${n2(-hw + 5)} ${n2(feet + 6)}Q0 ${n2(feet + 8.5)} ${n2(hw - 4)} ${n2(feet + 5.5)}`, 'stroke-width': 1.1 }),
-      el('text', { x: 0, y: n2(feet + 19), 'text-anchor': 'middle', 'font-size': readableUnits(12, 12), style: `${FONT.serif}; fill: var(--ink); stroke: none` }, [eliteWord(e.elite.affix, asm.body)]),
+      ...eliteCaption(e, asm, feet),
     );
+  } else if (rtOf(e).packOf !== undefined) {
+    // A pack minion: a short square bracket under the feet, the mark a clerk draws to group lines of one entry.
+    const w = Math.min(hw * 0.6, 9);
+    over.append(el('path', { 'data-part': 'pack', d: `M${n2(-w)} ${n2(feet + 2)}V${n2(feet + 5.5)}H${n2(w)}V${n2(feet + 2)}`, 'stroke-width': 1 }));
   }
   g.append(under, fig, over);
   g.dataset['tier'] = String(e.tier);
