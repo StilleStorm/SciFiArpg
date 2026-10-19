@@ -110,7 +110,9 @@ Progress is recorded here, one line per slice:
 
 - S2 done: 75 paragraphs (§1–3 on every skill) with the patch engine and unlock schedule (+6/+14 or permission), the update form offers paragraphs, Konfiguracja at the desk and the pause sheet, pad § tag; voice pass; DESIGN §10.2 paragraph rule relaxed to match the data.
 
-**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S3.
+- S3 done: Argument meter (rebuttal/kill/Spór fills, drain), first ultimate per hero with §1–3 (Pełny cykl, Przekazanie, Zebranie, Mapa ostateczna, Decyzja Komisji), stamp pad hidden below level 12, HUD Argument line, five ultimate recipes, running-area outline; look fixes: claim bubbles capped at two and hushed under stamps, stamps placed off the hero; voice pass.
+
+**Next pickup:** `/pickup` then `/automode`; the next slice is PRODUCTION.md S4.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
