@@ -34,7 +34,7 @@
   align-items: center;
   justify-content: center;
   font-style: italic;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1;
   pointer-events: none;
 }
@@ -281,4 +281,12 @@
 }
 :root[data-orient='landscape'] .loadout-sheet .ps-notes {
   min-height: 0;
+}
+
+/* The margin notes (Pauza, Tunel, Potw.) are slips pinned over the page: the circle is filled with paper, so the page's
+   frame, hatched edge or a figure passing under them does not run through the word. */
+.pause-btn svg > path:first-child,
+.tunnel-btn svg > path:first-child,
+.potw-btn svg > path:first-child {
+  fill: var(--paper);
 }
