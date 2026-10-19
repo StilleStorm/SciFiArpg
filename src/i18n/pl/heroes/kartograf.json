@@ -3,15 +3,15 @@
     "triangulacja": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Linia przebijająca. Obrażenia rosną z każdym przebitym."
+        "desc": "Linia przebijająca. Obrażenia rosną z każdym przebitym przeciwnikiem."
       },
       "2": {
-        "name": "Rozciągnięta",
+        "name": "Baza wydłużona",
         "desc": "Linia dłuższa o 50%, obrażenia mniejsze o 20%."
       },
       "3": {
-        "name": "Rozwarta",
-        "desc": "Dwie dodatkowe linie pod kątem 15°, egzystencjalne. Odnowienie dłuższe o 3 s."
+        "name": "Kąt rozwarty",
+        "desc": "Dwie dodatkowe linie pod kątem 15°. Wszystkie egzystencjalne. Odnowienie dłuższe o 3 s."
       }
     },
     "teren": {
@@ -20,12 +20,12 @@
         "desc": "Wskazany obszar czeka na weryfikację. Wygenerowane istnieją tam słabiej."
       },
       "2": {
-        "name": "Sporny",
-        "desc": "Obszar większy o 40%, trwa 4 s."
+        "name": "Obszar sporny",
+        "desc": "Obszar większy o 40%, trwa 4 s."
       },
       "3": {
-        "name": "Zalewowy",
-        "desc": "Obszar trwa 9 s. Odnowienie dłuższe o 4 s."
+        "name": "Teren zalewowy",
+        "desc": "Obszar trwa 9 s. Odnowienie dłuższe o 4 s."
       }
     },
     "korekta": {
@@ -34,12 +34,12 @@
         "desc": "Krótki skok. W miejscu startu zostaje błąd pomiaru."
       },
       "2": {
-        "name": "Z erratą",
-        "desc": "Skok dłuższy o 20%, błąd pomiaru trwa 8 s."
+        "name": "Errata",
+        "desc": "Skok dłuższy o 20%. Błąd pomiaru trwa 8 s."
       },
       "3": {
-        "name": "Podwójna",
-        "desc": "Bez wskazywania. Odnowienie krótsze o 4 s, błąd pomiaru trwa 2 s."
+        "name": "Pomiar na oko",
+        "desc": "Bez wskazywania. Odnowienie krótsze o 4 s, błąd pomiaru trwa 2 s."
       }
     },
     "skala": {
@@ -49,11 +49,11 @@
       },
       "2": {
         "name": "Skala 1:2",
-        "desc": "Skala trwa 8 s. Odnowienie dłuższe o 3 s."
+        "desc": "Skala trwa 8 s. Odnowienie dłuższe o 3 s."
       },
       "3": {
         "name": "Skala 2:1",
-        "desc": "Skala trwa 3 s. Odnowienie krótsze o 5 s. Kosztuje 5 racji."
+        "desc": "Skala trwa 3 s. Odnowienie krótsze o 5 s. Kosztuje 5 racji."
       }
     },
     "legenda": {
@@ -62,12 +62,12 @@
         "desc": "Ramka legendy. Zawarci w niej zostają objaśnieni błędnie."
       },
       "2": {
-        "name": "Skrócona",
+        "name": "Objaśnienia skrócone",
         "desc": "Ramka mniejsza o 35%, czas krótszy o połowę, obrażenia podwójne."
       },
       "3": {
-        "name": "Urzędowa",
-        "desc": "Legenda regulaminowa, obrażenia większe o 30%. Kosztuje 8 racji."
+        "name": "Wykaz urzędowy",
+        "desc": "Legenda regulaminowa, obrażenia większe o 30%. Kosztuje 8 racji."
       }
     }
   }

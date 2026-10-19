@@ -3,57 +3,57 @@
     "prosze": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Cel zablokowany na 1,5 sekundy. Rozmowa jest nagrywana."
+        "desc": "Cel zablokowany na 1,5 sekundy. Rozmowa jest nagrywana."
       },
       "2": {
-        "name": "Łączę",
-        "desc": "Zablokowany także najbliższy sąsiad celu. Blokada trwa 1 s."
+        "name": "Połączenie konferencyjne",
+        "desc": "Zablokowany zostaje także najbliższy sąsiad celu. Blokada trwa 1 s."
       },
       "3": {
-        "name": "Czas wydłużony",
-        "desc": "Oczekiwanie egzystencjalne, blokada 3 s. Odnowienie dłuższe o 4 s."
+        "name": "Oczekiwanie wydłużone",
+        "desc": "Oczekiwanie egzystencjalne. Blokada trwa 3 s. Odnowienie dłuższe o 4 s."
       }
     },
     "przekierowuje": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Stożek. Zgłoszeni zajmują się sobą przez 3 sekundy."
+        "desc": "Stożek. Zgłoszeni zajmują się sobą przez 3 sekundy."
       },
       "2": {
-        "name": "Do działu",
+        "name": "Dział właściwy",
         "desc": "Stożek trzykrotnie węższy, zasięg większy o 45%."
       },
       "3": {
-        "name": "Bez końca",
-        "desc": "Bez celowania. Trafieni dodatkowo wyciszeni na 2 s. Odnowienie dłuższe o 3 s."
+        "name": "Pętla przekierowań",
+        "desc": "Bez celowania. Trafieni są ponadto wyciszeni na 2 s. Odnowienie dłuższe o 3 s."
       }
     },
     "pomoc": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Częstsze argumenty nie do odparcia. Każde skreślenie przynosi gwiazdkę."
+        "desc": "Przez 6 sekund częstsze argumenty nie do odparcia. Każde skreślenie przynosi gwiazdkę."
       },
       "2": {
-        "name": "Dodatkowa",
-        "desc": "Premia trwa 9 s zamiast 6."
+        "name": "Pytanie dodatkowe",
+        "desc": "Premia trwa 9 s zamiast 6."
       },
       "3": {
-        "name": "Płatna",
-        "desc": "Premia trwa 3 s, odnowienie krótsze o 8 s. Kosztuje 6 racji."
+        "name": "Infolinia płatna",
+        "desc": "Premia trwa 3 s. Odnowienie krótsze o 8 s. Kosztuje 6 racji."
       }
     },
     "numer": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Numer sprawy na celu: przez 6 sekund wszyscy zajmują się nim mocniej."
+        "desc": "Numer sprawy na celu. Przez 6 sekund wszyscy zajmują się nim mocniej."
       },
       "2": {
-        "name": "Pilny",
-        "desc": "Numer trwa 3 s. Uderzenie stemplem mocniejsze o 60%."
+        "name": "Tryb pilny",
+        "desc": "Numer trwa 3 s. Uderzenie stemplem mocniejsze o 60%."
       },
       "3": {
-        "name": "Egzystencjalny",
-        "desc": "Numer egzystencjalny. Cel zgłoszony na 6 s. Odnowienie dłuższe o 3 s."
+        "name": "Sprawa egzystencjalna",
+        "desc": "Numer egzystencjalny. Cel zostaje zgłoszony na 6 s. Odnowienie dłuższe o 3 s."
       }
     },
     "rozlaczenie": {
@@ -62,12 +62,12 @@
         "desc": "Pierwszy na linii zostaje odrzucony daleko i zablokowany."
       },
       "2": {
-        "name": "Masowe",
-        "desc": "Linia czterokrotnie szersza. Blokada 1 s zamiast 2 s."
+        "name": "Awaria centrali",
+        "desc": "Linia czterokrotnie szersza. Blokada trwa 1 s zamiast 2."
       },
       "3": {
-        "name": "Formalne",
-        "desc": "Bez celowania, regulaminowe. Obrażenia większe o 40%. Kosztuje 8 racji."
+        "name": "Wypowiedzenie umowy",
+        "desc": "Rozłączenie regulaminowe, bez celowania. Obrażenia większe o 40%. Kosztuje 8 racji."
       }
     }
   }

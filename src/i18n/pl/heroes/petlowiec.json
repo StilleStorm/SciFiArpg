@@ -3,15 +3,15 @@
     "przybycie": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Kopia z innej pętli na 8 sekund. Najwyżej dwie."
+        "desc": "Kopia z innej pętli na 8 sekund. Najwyżej dwie."
       },
       "2": {
-        "name": "Wcześniejsze",
-        "desc": "Dwie kopie naraz, każda na 5 s."
+        "name": "Wyjazd grupowy",
+        "desc": "Dwie kopie naraz, każda na 5 s."
       },
       "3": {
-        "name": "Z bagażem",
-        "desc": "Kopia z bagażem: obrażenia większe o połowę, czas 6 s. Kosztuje 6 racji."
+        "name": "Nadbagaż",
+        "desc": "Kopia przybywa z bagażem: obrażenia większe o połowę, pobyt 6 s. Kosztuje 6 racji."
       }
     },
     "spor": {
@@ -20,26 +20,26 @@
         "desc": "Kopie się kłócą. Obszar egzystencjalny wokół każdej."
       },
       "2": {
-        "name": "Formalny",
-        "desc": "Spór regulaminowy. Trafieni zgłoszeni na 3 s."
+        "name": "Wymiana pism",
+        "desc": "Spór regulaminowy. Trafieni zostają zgłoszeni na 3 s."
       },
       "3": {
-        "name": "Zasadniczy",
-        "desc": "Spór mechaniczny, obrażenia większe o połowę. Odnowienie dłuższe o 3 s."
+        "name": "Rękoczyny",
+        "desc": "Spór mechaniczny, obrażenia większe o połowę. Odnowienie dłuższe o 3 s."
       }
     },
     "petla": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Powrót do miejsca i stanu racji sprzed 3 sekund."
+        "desc": "Powrót do miejsca i stanu racji sprzed 3 sekund."
       },
       "2": {
-        "name": "Dłuższa",
-        "desc": "Powrót do miejsca sprzed 5 s. Odnowienie dłuższe o 4 s."
+        "name": "Wersja archiwalna",
+        "desc": "Powrót do stanu sprzed 5 s. Odnowienie dłuższe o 4 s."
       },
       "3": {
-        "name": "Z zapisem",
-        "desc": "Powrót do miejsca sprzed 2 s. Odnowienie krótsze o 4 s. Kosztuje 4 racje."
+        "name": "Autozapis",
+        "desc": "Powrót do stanu sprzed 2 s. Odnowienie krótsze o 4 s. Kosztuje 4 racje."
       }
     },
     "juzBylo": {
@@ -48,26 +48,26 @@
         "desc": "Powtarza ostatnią umiejętność bez odnowienia."
       },
       "2": {
-        "name": "Częste",
-        "desc": "Odnowienie krótsze o 4 s. Kosztuje 5 racji."
+        "name": "Abonament",
+        "desc": "Odnowienie krótsze o 4 s. Kosztuje 5 racji."
       },
       "3": {
-        "name": "Już mówiłem",
-        "desc": "Powtarza ostatnią umiejętność dwukrotnie. Odnowienie dłuższe o 6 s."
+        "name": "Powtórzenie powtórzenia",
+        "desc": "Ostatnia umiejętność zostaje powtórzona dwukrotnie. Odnowienie dłuższe o 6 s."
       }
     },
     "start": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Kapsuła spada po 0,8 sekundy we wskazany punkt."
+        "desc": "Kapsuła spada po 0,8 sekundy we wskazany punkt."
       },
       "2": {
-        "name": "Natychmiastowy",
-        "desc": "Kapsuła spada po 0,2 s. Obrażenia mniejsze o 30%."
+        "name": "Odlot bez odprawy",
+        "desc": "Kapsuła spada po 0,2 s. Obrażenia mniejsze o 30%."
       },
       "3": {
-        "name": "Wieloetapowy",
-        "desc": "Lądowanie egzystencjalne, obszar większy o 30%. Odnowienie dłuższe o 4 s."
+        "name": "Lot wieloetapowy",
+        "desc": "Lądowanie egzystencjalne, obszar większy o 30%. Odnowienie dłuższe o 4 s."
       }
     }
   }

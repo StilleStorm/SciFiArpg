@@ -40,7 +40,7 @@
         },
         "2": {
           "name": "Zawór bezpieczeństwa",
-          "desc": "Piana pochłania o 20 obrażeń więcej."
+          "desc": "Piana pochłania o 20 obrażeń więcej."
         },
         "3": {
           "name": "Wyższe obroty",
@@ -48,7 +48,7 @@
         },
         "4": {
           "name": "Filtr kłaczków",
-          "desc": "Odzyskuje 0,6 racji na sekundę."
+          "desc": "Odzyskuje 0,6 racji na sekundę."
         },
         "5": {
           "name": "Wirnik zapasowy",
@@ -56,7 +56,7 @@
         },
         "6": {
           "name": "Pranie delikatne",
-          "desc": "Czas działania dłuższy o 25%. Każde skreślenie przywraca 2 punkty racji."
+          "desc": "Czas działania dłuższy o 25%. Każde skreślenie przywraca 2 punkty racji."
         }
       },
       "konsultant": {
@@ -70,7 +70,7 @@
         },
         "3": {
           "name": "W celu poprawy jakości",
-          "desc": "Szansa na argument nie do odparcia wyższa o 5 punktów."
+          "desc": "Szansa na argument nie do odparcia wyższa o 5 punktów."
         },
         "4": {
           "name": "Muzyka oczekiwania",
@@ -96,7 +96,7 @@
         },
         "3": {
           "name": "Niezgodność wersji",
-          "desc": "Szansa na argument nie do odparcia wyższa o 5 punktów."
+          "desc": "Szansa na argument nie do odparcia wyższa o 5 punktów."
         },
         "4": {
           "name": "Skrócony cykl",
@@ -104,7 +104,7 @@
         },
         "5": {
           "name": "Zapas tlenu",
-          "desc": "Odzyskuje 0,5 racji na sekundę."
+          "desc": "Odzyskuje 0,5 racji na sekundę."
         },
         "6": {
           "name": "Dodatkowa pętla",
@@ -134,7 +134,7 @@
         },
         "6": {
           "name": "Odczyt niezależny",
-          "desc": "Szansa na argument nie do odparcia wyższa o 6 punktów, obrażenia o 10%."
+          "desc": "Szansa na argument nie do odparcia wyższa o 6 punktów, obrażenia o 10%."
         }
       },
       "nalesnik": {
@@ -152,7 +152,7 @@
         },
         "4": {
           "name": "Przypływ",
-          "desc": "Odzyskuje 0,6 racji na sekundę."
+          "desc": "Odzyskuje 0,6 racji na sekundę."
         },
         "5": {
           "name": "Przedłużone rozpatrywanie",
@@ -248,7 +248,7 @@
   "konfiguracja": {
     "title": "Konfiguracja",
     "sub": "Brzmienie umiejętności, paragraf po paragrafie.",
-    "note": "Paragraf czynny oznaczono pieczęcią. Zmiana obowiązuje od następnego użycia umiejętności.",
+    "note": "Paragraf czynny oznaczono pieczęcią. Zmiana obowiązuje od następnego użycia.",
     "back": "Wróć",
     "deskLine": "Konfiguracja",
     "deskNote": "Paragrafy",
@@ -260,7 +260,7 @@
   },
   "pause": {
     "paragraphs": "Paragrafy",
-    "paragraphsNote": "Zmiana brzmienia umiejętności w trakcie zgłoszenia."
+    "paragraphsNote": "Brzmienie umiejętności można zmienić bez opuszczania zgłoszenia."
   },
   "pad": {
     "tag": "§{n}"
