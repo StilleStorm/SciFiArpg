@@ -18,11 +18,12 @@ the pads). While a tunnel holds a run, that RunState waits in `hold` (`createRun
 base-phase RunState is live; `Game.adopt(held)` makes the held one live again (page redrawn, entities synced with no
 draw-in). Other fields: four rng streams (`ai combat loot spawn`; every roll goes through them), `time`, `status`
 (`running | paused | dead`; sheets and forms use `paused`), `modal` (law sheets), `turning`, `pages`, `player`,
-`enemies projectiles pickups summons zones`, `law`, `hero` (`heroes/state.ts`), `victoryAt`, `tunnel?`.
+`enemies projectiles pickups summons zones`, `law`, `hero` (`heroes/state.ts`), `victoryAt`, `tunnel?`, `plan?`
+(`TicketPlan`, world/campaign.ts), `campaign?` (`CampaignState`, the character's, see "Campaign (S7)").
 `MetaState` (`save/save.ts`, SAVE_VERSION 3, localStorage `zgloszenie.meta`) holds settings, `stamps`, `runsCompleted`,
 the roster `characters: CharacterRecord[]` (`{id, name, character, bookmark?, history, archive}`), `sharedArchive` and
 `activeCharacterId?`. The active record is **mirrored** at the top level (`character` (`save/character.ts`), `bookmark`
-(`save/bookmark.ts`: ticketNumber, seed, pageIndex, lawId, clockS, planetName, pageCount), `history`, `heroId`), so the
+(`save/bookmark.ts`: ticketNumber, seed, pageIndex, lawId, clockS, planetName, pageCount, `plan?`), `history`, `heroId`), so the
 run flow reads and writes those as before; `syncActive` folds the mirror into its record, `withMirror` the reverse,
 `toStored` is what storage and the archive file get (no mirror). `migrate` reads v3 and v2 (a roster of one); loading
 never throws. Roster functions: see "Roster and archives (S6)".
@@ -71,6 +72,7 @@ after the boss fell (`canOpenUpdate`). In the base only the HUD tap opens it.
 - Hero: `skill:cast {slot, skill, free, aim}`, `ultimate:cast {heroId, ultimateId, x, y}`, `skill:fx` (kind, x, y, x2, y2, r), `summon:expired`, `player:levelup`, `update:ready`, `player:died`, `player:unsuspended`.
 - Presentation: `footnote {text}`, `footnote:added {n, text, correction}` (every printed footnote), `stamp {text, x, y, quiet?, away?}` (`quiet`: another recipe carries the thud, audio plays no stamp; `away`: a point it must not cover; `render/bindings.ts placeStamp` keeps every bus stamp inside `freeViewRect(camera, 'stamp')` and 80 units off `away`),
   `margin:note {text, x, y, ttl?}`, `law:trigger`, `law:ask`, `pickup:taken`.
+- Campaign: `campaign:advanced {from, to, finale}`, `case:closed` (both from `settleCampaign` on `run:ended 'ukonczono'`).
 - Recovery: `recovery:taken {healed, held}` (0 healed = kept), `recovery:used {auto, healed, held}`.
 - `Bus.recent(n = 10)`: the last events (ring of 40, minus `skill:aim`, `player:tap`, `enemy:miss`, `attack:started`) as
   `{name, payload}` text, for the bug dump.
@@ -368,3 +370,29 @@ click may carry `detail 0`, so detail is not an exemption. Hooks: `[data-roster=
 `.rs-case[data-case][data-hero]`, `[data-profile=name]`, `[data-desk=roster|archiwum]`, `.ar-sec[data-place]
 .ar-cell[data-uid]`, `.ar-move[data-to]`. Shots: `shot-s6.mjs` (4186, `dist-s6`, `shots-s6/`). Open: the hero note on
 archived uniques waits for legendary paragraphs.
+
+## Campaign (S7, PLAN 3.1/3.2/7)
+`world/campaign.ts` is the single owner of the priority table (`PRIORITIES`, `PRIORITY_IDS`, `DEFAULT_PRIORITY`,
+`priorityUnlocked`, `availablePriorities`, `clampPriority`; unlock 1/1/8/18; i18n `planets.priority.<id>.name|hint`), the
+nine planets (`PLANETS`, `planetDef(i)`, 0-based; `planets.pN.name|loc` is the only planet-name source, cards and the
+travel list included), the per-character `CampaignState {current, closed, finalTicket, caseClosed, extras, cards?}` and
+the plans: `nextCampaignPlan`, `extraPlan`, `travelList`, `travelPlan`, `defaultPlan` (next campaign ticket, or an extra
+after the case), `closeTicket` (pure), `toCampaign`, `toPlan`, `toCardsSeen`. `TicketPlan {kind: campaign|final|extra|travel,
+planet, priority, lawId}`. Scaling: `createRun(seed, {plan})` (or `resume.plan`) makes the ticket with
+`world/ticket.ts ticketForPlan` and sets `RunState.plan` + `mix`; `enemies/spawn.ts` scales by `planScale(s.plan)`
+(`families.ts setEnemyScale/enemyScaleOf/scaleStats`); `progression/xp.ts gainXp` × `xpMul`; `systems/loot.ts`
+`tierBonus += lootTierBonus`, stars × `starMul` (min 1), `dropLevel += ilvlBonus`. No plan = neutral (the random
+tickets of the test hook). The character: `Character.campaign?` (save/character.ts), copied to `RunState.campaign`.
+main.ts flow: `enterBase(over)` picks the plan (`over.plan` → held run's → bookmark's → `defaultPlan(campaign,
+'normalny', seed)`), sets `state.campaign`, shows the card (`ui/ticketModel.cardToShow` over `campaignViewOf(campaign,
+plan)`; seen cards go to `campaign.cards` and the save). `acceptNow(priority)` writes `clampPriority(priority, level)`
+onto `s.plan`. Ticket form (`ui/ticket.ts`, `open(info, {level, view})`): `onAccept(priority)`, `onTravel(planet,
+priority)`, `onExtra(priority)` → `takePlan` (leave a held run, re-lay the base with the new plan and the live
+campaign, accept at once). `bindCampaign(bus, () => game.state)` is registered after `bindTunnel` and before main's
+`run:ended` handler, so `settleRun` saves the advanced campaign; `settleCampaign` is once per plan object. Cards:
+`ui/cards.ts openCard(root, {kind: opening|chapter|rewritten, planetIndex}, {number, onDone})`, tap or `.card-skip`
+removes it (`.card-layer[data-card]`). Hooks: `setCampaignView(v|null)` (view only), `showCard(kind)`, `priority()`
+(`state.plan.priority`). Smoke leg 6c plays it (opening card, locked priorities, priority on the run, a won ticket closes
+planet 1 once and shows planet 2's chapter card, nine travel rows, travel → rewritten card). Shots: `shot-s7.mjs` (4187,
+`dist-s7`, `shots-s7/`). Open: `ilvlBase(planet)` waits for the S9 item level; `PlanetDef.baseLayouts` (base still by
+seed), planet mix in `pageTurn.planWaves` (only the trickle uses it) and boss scaling are data only.
