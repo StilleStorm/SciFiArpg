@@ -92,10 +92,40 @@ export function castUltimate(s: RunState, bus: Bus): boolean {
   run.active.push(u);
   const env = envOf(s, bus, def, u);
   def.cast(env);
-  bus.emit('stamp', { text: t(def.stampKey), x: p.x, y: p.y - 34, quiet: true }); // quiet: the ultimate recipe ends in its own thud
+  const text = t(def.stampKey);
+  const spot = ultStampSpot(s.enemies, p.x, p.y, text.length);
+  // never on the hero: beside him on the emptier side; render/bindings keeps it inside the view and off `away`
+  bus.emit('stamp', { text, x: spot.x, y: spot.y, quiet: true, away: { x: p.x, y: p.y } }); // quiet: the ultimate recipe ends in its own thud
   bus.emit('margin:note', { text: t(def.noteKey, { number: 1000 + (s.seed % 9000) }), x: p.x, y: p.y - p.r - 56 });
   bus.emit('ultimate:cast', { heroId: p.heroId, ultimateId: def.id, x: p.x, y: p.y });
   return true;
+}
+
+/**
+ * How far above or below the hero the ultimate's stamp may land (units): clear of his figure. Above is preferred (below are
+ * the thumbs and the pads): a spot below counts as half an enemy more crowded.
+ */
+export const ULT_STAMP_OFFSETS: readonly number[] = [-130, -190, -260, -330, 130, 190];
+
+/**
+ * Where the ultimate's stamp lands: above or below the hero (never on him), where the fewest enemies stand under the stamp's
+ * box (about 20 units a letter at 17 px Michroma, render/ink.ts stamp); a tie goes to the nearer spot above. Pure.
+ */
+export function ultStampSpot(enemies: readonly { x: number; y: number }[], x: number, y: number, letters: number): { x: number; y: number } {
+  const hw = (letters * 20 + 30) / 2 + 24;
+  const hh = 20 + 40;
+  let best = { x, y: y + (ULT_STAMP_OFFSETS[0] ?? -130) };
+  let bestN = Infinity;
+  for (const dy of ULT_STAMP_OFFSETS) {
+    const cy = y + dy;
+    let n = dy > 0 ? 0.5 : 0;
+    for (const e of enemies) if (Math.abs(e.x - x) < hw && Math.abs(e.y - cy) < hh) n++;
+    if (n < bestN) {
+      bestN = n;
+      best = { x, y: cy };
+    }
+  }
+  return best;
 }
 
 /** Per step: the meter drains out of combat, and what runs is ticked; at the end of its time it is ended and removed. */

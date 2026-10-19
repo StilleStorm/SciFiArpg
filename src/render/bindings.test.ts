@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { generateBase } from '../world/base';
 import { PAGE_H, PAGE_W } from '../world/pages';
-import { marginSpot } from './bindings';
+import { marginSpot, placeStamp } from './bindings';
 
 describe('the "margines" note', () => {
   it('sits just inside the wall of the page that is shown, the base page included', () => {
@@ -18,5 +18,23 @@ describe('the "margines" note', () => {
   it('defaults to the run page', () => {
     expect(marginSpot('r', 0, 100).x).toBeGreaterThan(PAGE_W / 2);
     expect(marginSpot('b', 0, 100).y).toBeGreaterThan(PAGE_H / 2);
+  });
+});
+
+describe('where a stamp lands', () => {
+  const view = { x0: 0, y0: 70, x1: 390, y1: 734 };
+  it('stays inside the view instead of running past an edge', () => {
+    const at = placeStamp(20, 60, 330, 41, view);
+    expect(at.x - 165).toBeGreaterThanOrEqual(view.x0);
+    expect(at.y - 20.5).toBeGreaterThanOrEqual(view.y0);
+  });
+  it('never covers the hero it must stay off, even when the edge pushes it back', () => {
+    const hero = { x: 195, y: 120 };
+    const at = placeStamp(195, 120 - 130, 330, 41, view, hero);
+    expect(Math.abs(at.y - hero.y)).toBeGreaterThanOrEqual(80);
+    expect(at.y).toBeGreaterThan(hero.y);
+  });
+  it('without a view it lands where it was asked', () => {
+    expect(placeStamp(5, 6, 100, 41, null)).toEqual({ x: 5, y: 6 });
   });
 });

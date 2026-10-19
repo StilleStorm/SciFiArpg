@@ -10,7 +10,7 @@ import { createRun, nextId, type RunState } from '../world/run';
 import { MAX_COPIES } from './numbers';
 import { patchFields, PATCH_FIELD_LIMIT, PATCH_KEYS, type ParagraphNo } from './paragraphs';
 import { HERO_IDS, heroById, type HeroId } from './registry';
-import { castUltimate, setUltimateParagraph, stepUltimates, ultimateActive, ultimateOf, ultimateSeconds, ultimateUnlocked } from './ultimate';
+import { castUltimate, setUltimateParagraph, stepUltimates, ultimateActive, ultimateOf, ultimateSeconds, ultimateUnlocked, ultStampSpot } from './ultimate';
 import { FIRST_ULTIMATE_LEVEL, MAX_ULT_RADIUS, MAX_ULT_S } from './ultimateDefs';
 import { heroStep } from './system';
 
@@ -412,5 +412,29 @@ describe('Decyzja Komisji', () => {
     expect(hpLost(e)).toBeGreaterThanOrEqual(10);
     expect(hpLost(e)).toBeLessThanOrEqual(20);
     expect(s.hero.ult?.active[0]?.left).toBeGreaterThan(4);
+  });
+});
+
+describe('the ultimate stamp', () => {
+  it('lands above or below the hero, never on him, on the side with fewer enemies', () => {
+    const hero = { x: 500, y: 500 };
+    const above = ultStampSpot([], hero.x, hero.y, 15);
+    expect(above.y).toBeLessThan(hero.y - 100);
+    const near = [0, 1, 2].map((i) => ({ x: 480 + i * 20, y: 370 }));
+    expect(ultStampSpot(near, hero.x, hero.y, 15).y).toBe(hero.y - 190); // clear of the row above, still above
+    const crowdAbove = [-130, -190, -260, -330].flatMap((dy) => [0, 1].map((i) => ({ x: 490 + i * 20, y: hero.y + dy })));
+    const spot = ultStampSpot(crowdAbove, hero.x, hero.y, 15);
+    expect(spot.y).toBeGreaterThan(hero.y + 100);
+  });
+
+  it('castUltimate stamps off the hero and names him as the point to stay off', () => {
+    const { s, bus, log } = scene('pralka', [[0, -130], [20, -130], [-20, -130]]);
+    s.player.level = FIRST_ULTIMATE_LEVEL;
+    s.player.meter = 1;
+    expect(castUltimate(s, bus)).toBe(true);
+    const st = log.find((l) => l.name === 'stamp')?.payload as GameEvents['stamp'] | undefined;
+    expect(st?.away).toEqual({ x: s.player.x, y: s.player.y });
+    expect(Math.abs((st?.y ?? s.player.y) - s.player.y)).toBeGreaterThanOrEqual(100);
+    expect(Math.abs((st?.y ?? 0) - (s.player.y - 130))).toBeGreaterThanOrEqual(60); // not on the row of enemies
   });
 });

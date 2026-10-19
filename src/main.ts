@@ -9,7 +9,7 @@ import { createInput } from './input';
 import { bindAsystent } from './narration';
 import { bindFx } from './render/bindings';
 import { bindTunnelFx } from './render/tunnelFx';
-import { createCamera } from './render/camera';
+import { createCamera, freeViewRect } from './render/camera';
 import { initInk } from './render/ink';
 import { installPaper } from './render/paper';
 import { createWobble, getStage, setTheme } from './render/stage';
@@ -343,7 +343,7 @@ function openStation(id: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat'): boolean 
 }
 bus.on('station:opened', (e) => void openStation(e.station));
 
-bindFx(bus, game.views, () => game.state?.page ?? null);
+bindFx(bus, game.views, () => game.state?.page ?? null, () => freeViewRect(camera, 'stamp'));
 bindPageTurn(bus, { stage, camera, views: game.views, getState: () => game.state, bounds });
 bindRunEvents(bus, () => game.state);
 // The tunnel closes itself on death, the end of the run and a page turn; both must hear `run:ended` before the handler below drops the state.

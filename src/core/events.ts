@@ -37,8 +37,11 @@ export interface GameEvents {
   footnote: { text: string };
   /** A footnote was printed with number `n`; `correction` = the Asystent's later correction of a wrong note (audio: typewriter key / carriage return). */
   'footnote:added': { n: number; text: string; correction: boolean };
-  /** A stamp on the page. `quiet`: another sound carries it (an ultimate's recipe ends in its own thud), audio does not play the stamp. */
-  stamp: { text: string; x: number; y: number; quiet?: boolean };
+  /**
+   * A stamp on the page. `quiet`: another sound carries it (an ultimate's recipe ends in its own thud), audio does not play the stamp.
+   * `away`: a point the stamp must not cover (the hero who cast it); render keeps every stamp inside the view.
+   */
+  stamp: { text: string; x: number; y: number; quiet?: boolean; away?: { x: number; y: number } };
   /** A short handwritten note in the margin next to world x, y (text is already translated). */
   'margin:note': { text: string; x: number; y: number; ttl?: number };
   'run:ended': { outcome: 'zgloszenie' | 'petla' | 'zawieszenie' | 'ukonczono' };
