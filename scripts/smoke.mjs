@@ -1328,6 +1328,70 @@ try {
   });
   check('sklep: six plates, the oferta and the adapter plate each carry a kind stamp', kinds.rows === 6 && kinds.kinds.length === 2, JSON.stringify(kinds));
 
+  // S10: a teczka is drawn, a tap (the boot-bound bus listener) walks the hero there and opens it; a seal walked onto
+  // stamps zwolnienie on RunState.buffs; the Karta osobowa from the HUD's Reputacja prints the stamp and closes back to the run
+  const content = await page.evaluate(async () => {
+    const g = window.__game;
+    const s = g.state();
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const raf = () => new Promise((r) => requestAnimationFrame(() => r(null)));
+    g.enemies.clear();
+    s.player.hp = s.player.hpMax = 1e9;
+    const folder = g.content.put('teczka', { dist: 140 });
+    await raf();
+    const drawn = document.querySelector(`#page [data-content="${folder}"]`) !== null;
+    g.content.tap(folder);
+    let opened = false;
+    for (let i = 0; i < 40 && !opened; i++) {
+      await sleep(100);
+      opened = g.content.list().some((c) => c.id === folder && c.state === 'opened');
+    }
+    const seal = g.content.put('pieczec', { seal: 'zwolnienie', dist: 120 });
+    const it = g.content.list().find((c) => c.id === seal);
+    if (it) s.player.target = { x: it.x, y: it.y };
+    let used = false;
+    for (let i = 0; i < 40 && !used; i++) {
+      await sleep(100);
+      used = g.content.list().some((c) => c.id === seal && c.state === 'used');
+    }
+    const onRun = (s.buffs ?? []).map((b) => b.id);
+    return { drawn, opened, used, onRun };
+  });
+  check('teczka: drawn on the page, a tap walks the hero there and opens it', content.drawn && content.opened, JSON.stringify(content));
+  check('pieczęć: walked onto, it stamps zwolnienie on RunState.buffs', content.used && content.onRun.includes('zwolnienie'), JSON.stringify(content));
+  await page.locator('.field.rep').first().click();
+  await page.locator('.os-sheet').waitFor({ state: 'visible', timeout: 3000 }).catch(() => undefined);
+  const card = await page.evaluate(() => ({
+    open: document.querySelector('.os-sheet') !== null,
+    stamp: [...document.querySelectorAll('.os-sheet .os-stamp')].some((n) => /ZWOLNIONO/.test(n.textContent ?? '')),
+  }));
+  await page.locator('.os-sheet .ps-close').first().click().catch(() => undefined);
+  await sleep(200);
+  const back = await page.evaluate(() => ({ open: document.querySelector('.os-sheet') !== null }));
+  check('karta osobowa: Reputacja on the HUD opens it with the seal stamp; Zamknij closes it', card.open && card.stamp && !back.open, JSON.stringify({ card, back }));
+  // S10: the base has the planet's clerk; his sheet opens from a tap; a side ticket taken, finished and reported pays its stars
+  await page.evaluate(() => window.__game.startBase());
+  await sleep(900);
+  const clerkDrawn = (await page.locator('[data-station=urzednik]').count()) === 1;
+  const clerkOpen = await page.evaluate(() => window.__game.station('urzednik'));
+  await page.locator('.npc-sheet').waitFor({ state: 'visible', timeout: 3000 }).catch(() => undefined);
+  const clerkLines = await page.locator('.npc-sheet .npc-line').count();
+  await page.locator('.npc-sheet .ps-close').first().click().catch(() => undefined);
+  await sleep(200);
+  check('urzędnik: drawn on the base page, a tap opens his sheet with three lines', clerkDrawn && clerkOpen && clerkLines === 3, JSON.stringify({ clerkDrawn, clerkOpen, clerkLines }));
+  const quest = await page.evaluate(() => {
+    const q = window.__game.quests;
+    const s = window.__game.state();
+    const stars0 = s.player.gwiazdki;
+    const done0 = q.done();
+    const id = q.accept('kill');
+    const taken = q.active().length;
+    if (id) q.finish(id);
+    const reported = id ? q.report(id) : false;
+    return { id, taken, reported, done: q.done() - done0, stars: s.player.gwiazdki - stars0, left: q.active().length };
+  });
+  check('side ticket: taken from the board, reported done, pays stars and leaves the list', quest.id !== null && quest.taken >= 1 && quest.reported && quest.done === 1 && quest.stars > 0 && quest.left === quest.taken - 1, JSON.stringify(quest));
+
   await page.evaluate(() => window.__game.start(12, { heroId: 'nalesnik' }));
   await sleep(1400);
   await settle(); // the regulamin sheet of a fresh run holds the clock until it is accepted
