@@ -383,6 +383,36 @@ try {
   await shot('04-run-start');
   const rh = await headerFits('#page text.t-head');
   check('portrait: the clause header of the first page is set inside the screen, two lines at most', rh.lines >= 1 && rh.lines <= 2 && rh.outside === 0, JSON.stringify(rh));
+  // the margin-note row (Potw., Tunel, Pauza) is measured from the DOM: the header at the page top, the claim bubbles and the
+  // stamps keep out from under it and from under the pads
+  const startAt = await page.evaluate(() => ({ x: window.__game.state().player.x, y: window.__game.state().player.y }));
+  await page.evaluate(() => window.__game.placePlayer(600, 90));
+  await sleep(1600);
+  const clear = await page.evaluate(() => {
+    const box = (n) => n.getBoundingClientRect();
+    const hit = (a, b) => a.left < b.right - 1 && a.right > b.left + 1 && a.top < b.bottom - 1 && a.bottom > b.top + 1;
+    const row = [...document.querySelectorAll('.pause-btn, .tunnel-btn, .potw-btn')].map(box).filter((r) => r.width > 0);
+    const furniture = [...row, ...[...document.querySelectorAll('#ui .pad')].map(box).filter((r) => r.width > 0)];
+    const head = [...document.querySelectorAll('#page text.t-head, #page text.t-head-top')].map((n) => {
+      const r = box(n);
+      // the glyphs, not the line box: about the font size above the baseline
+      const size = parseFloat(getComputedStyle(n).fontSize) * (r.height / (n.getBBox().height || 1));
+      return { left: r.left, right: r.right, bottom: r.bottom, top: r.bottom - size };
+    });
+    const bubbles = [...document.querySelectorAll('#world .bubble:not(.bubble-off)')].map(box).filter((r) => r.width > 0);
+    return {
+      row: row.length,
+      headUnder: head.filter((h) => row.some((r) => hit(h, r))).length,
+      head: head.length,
+      bubbles: bubbles.length,
+      bubblesUnder: bubbles.filter((b) => furniture.some((r) => hit(b, r))).length,
+      measured: window.__game.keepOut()?.row !== null,
+    };
+  });
+  check('the page header at the top of the page is clear of the Potw./Tunel/Pauza row (measured from the DOM)', clear.row === 3 && clear.head >= 2 && clear.headUnder === 0 && clear.measured, JSON.stringify(clear));
+  check('no claim bubble shown under a pad or a margin note', clear.bubblesUnder === 0, JSON.stringify(clear));
+  await page.evaluate((p) => window.__game.placePlayer(p.x, p.y), startAt);
+  await sleep(600);
   const notesInRun = await page.evaluate(() => window.__game.notes());
   const lastBase = notesInBase.at(-1);
   const kept = lastBase !== undefined && notesInRun.some((n) => n.n === lastBase.n && n.text === lastBase.text);
@@ -424,6 +454,27 @@ try {
   check('a level up queues the update and does not open the form', queued?.status === 'running' && queued.pending > (before?.pending ?? 0), `pending ${queued?.pending}`);
   await sleep(250);
   check('the HUD shows the "aktualizacja dostepna" line', await page.locator('.hud .upd').isVisible());
+  // the update line never lies under a pad or a margin note, in every arrangement (the left-handed portrait with the
+  // joystick hangs the Załączniki pad under the HUD on the left, where the line hung)
+  const updClear = [];
+  const settings0 = await page.evaluate(() => ({ ...window.__game.meta().settings }));
+  for (const [steer, lefty] of [['tap', false], ['tap', true], ['joystick', false], ['joystick', true]]) {
+    await page.evaluate(([st, l]) => {
+      window.__game.setSteering(st);
+      window.__game.setLeftHanded(l);
+    }, [steer, lefty]);
+    await sleep(120);
+    updClear.push(
+      await page.evaluate((label) => {
+        const u = document.querySelector('.hud .upd').getBoundingClientRect();
+        const hit = (b) => b.width > 0 && u.left < b.right && u.right > b.left && u.top < b.bottom && u.bottom > b.top;
+        const under = [...document.querySelectorAll('#ui .pad, .pause-btn, .tunnel-btn, .potw-btn')].filter((n) => hit(n.getBoundingClientRect()));
+        return { label, under: under.map((n) => n.className), onScreen: u.left >= 0 && u.right <= window.innerWidth };
+      }, `${steer}${lefty ? '-lefty' : ''}`),
+    );
+  }
+  await page.evaluate((st) => window.__game.setSettings({ ...st, steeringTouched: st.steeringTouched === true }), settings0);
+  check('the "aktualizacja dostepna" line is clear of the pads and notes in portrait, tap and joystick, both hands', updClear.every((u) => u.under.length === 0 && u.onScreen), JSON.stringify(updClear));
   await shot('06-update-available');
   await page.locator('.hud .upd').click();
   await page.locator('.sheet:not(.hidden) .entry').first().waitFor({ state: 'visible', timeout: 3000 });

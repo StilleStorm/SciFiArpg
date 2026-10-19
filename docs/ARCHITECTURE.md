@@ -103,13 +103,22 @@ attributes; `drawIn: false` skips the draw-in (a redrawn page). Layers: `#page` 
 base stations; no filter) -> `#world` (entities; wobble filter re-seeded every 500 ms) -> `#fx` (blots, strikes, stamps,
 margin notes) -> `#ui`. `render/bindings.ts bindFx(bus, views, page, view, damageNumbers)`: the margin note sits inside the page shown
 (`marginSpot(side, x, y, page)`). Headers: `obstacles.ts drawHeader/headerBox/wrapLines`; `headerFor(s, view?)`,
-`baseHeaderFor(s, view?)` take `portraitSpan(camera)` so in portrait the header fits the visible span, two lines,
-cut after a whole sentence. Camera (`render/camera.ts`): at least 390 wide, 700 tall in portrait, 520 in landscape;
+`baseHeaderFor(s, frame?)` take `headerFrame(camera)` = `{view?: portraitSpan, avoid?: headerKeepOut}`: in portrait the header
+fits the visible span, two lines, cut after a whole sentence; `headerBox(page, view, avoidExit, avoid, topChars)` narrows it
+beside the margin-note row when the form line and 240 units still fit (landscape), else sets it below the row (portrait). Camera (`render/camera.ts`): at least 390 wide, 700 tall in portrait, 520 in landscape;
 `bounds` follow the page shown. Ink: `drawIn, eraseOut, strike, blot, stamp, marginNote, tapMark` (`render/ink.ts`);
 paint only via `render/wash.ts washGroup`. No gradients, glow, shadows; red only for stamps, strikes, Racja. `stampsOnPage()` counts fx-layer
 stamps until they fade. Claim bubbles (`render/bubbleFocus.ts`, game.ts render): `pickBubbles` shows at most `BUBBLE_CAP 2` (bosses, elites,
 then nearest within 260 or in the 1.2 s new grace), none while `stampsOnPage() > 0`; hidden ones stay in the DOM (strikes kept); a shown one is
-shifted inward (`shiftInto`) to stay inside `freeViewRect(camera)` (the view minus HUD and footnote band).
+moved by `avoidBoxes` (render/keepOut.ts) inside `freeViewRect(camera)` and off `keepOutBlocks(camera)` and the bubbles placed
+before it this frame (`bubblePlaced`). Stamps: `placeStamp(x, y, w, h, view, away?, blocks)` (bindFx 6th argument = blocks).
+Keep-out (`render/keepOut.ts`, measured by `ui/keepOut.ts watchLayout(ui)`): `screenLayout()` = `{w, h, top, bottom, blocks, row}`
+in css px from the DOM (HUD bottom and footnote band when they span the width, else blocks; pads, the update line, the
+Potw./Tunel/Pauza notes; `row` = the notes as the run shows them + a pad in their corner). Re-measured lazily after a resize,
+an `<html>` data-orient/data-steer/style change, a layout class change in #ui (paint-only tokens ignored) or a HUD/foot resize;
+pending observer records are read synchronously, so a page drawn right after the HUD is shown sees the new layout. Never fixed
+pixels; the insets in camera.ts are only the fallback before a measurement (tests). World text that must read on a phone uses
+`readableUnits(units, minPx=11)` (elite word, boss name, margin notes). The swept sheet of a page turn drops its bubbles.
 `render/attackFx.ts` turns `attack:started` into transform-only poses. `render/ultFx.ts createUltFx(fx).frame(s)` (game.ts
 render) outlines each running ultimate with an `r` as a dotted `.ult-area` circle in #fx at its `x, y`, erased when it ends. Sheets share `ui/sheet.ts`; every `#ui` button
 is at least 44 x 44.
@@ -119,7 +128,8 @@ is at least 44 x 44.
 `input.ts`: `held()` (tap mode), `steer()` (joystick), `setEnabled`, `setMode`, `setLeftHanded`, `inject`. Joystick:
 the first pointer on the steering half owns the stick; a quick tap (<260 ms, <10 px) calls `onTap(x, y, false)`, which
 opens the footnote history when it lands on the slip (the slip has `pointer-events: none` in joystick mode, so a thumb
-landing on it steers) and otherwise only reaches the kiosk. Skill pads cast on `pointerdown`.
+landing on it steers) and otherwise only reaches the kiosk. Skill pads cast on `pointerdown`. Portrait + joystick puts Załączniki
+under the HUD (right; left when left-handed, then the update line hangs under the pad). The notes' circles are paper-filled.
 
 ## Audio (`audio/`, DESIGN 14)
 Web Audio only, synthesized; `audio/bindings.ts` is the one place events meet sounds; nothing exists before the first
@@ -139,13 +149,14 @@ words are bound to the next with U+00A0 by `t()`. No user-facing strings in `.ts
 `setLeftHanded`, `setSettings(patch)`, `controls`, `dropPotwierdzenie(dist)`, `heldPotwierdzenia`,
 `setHeldPotwierdzenia(n)`, `usePotwierdzenie`, `exportArchive()`, `importArchive(text)` (as a confirmed import), `joystick(dx, dy)`, `pause`, `resume`, `endTicket`, `resumeTicket`, `character`,
 `startBase(seed?)`, `station(name)`, `acceptTicket`, `walkToExit`, `openTunnel`, `enterTunnel`, `returnFromTunnel`,
-`tapUltimate`, `ultimatePad() {ready, off, inked, hidden}`, `setLevel(n)`, `fillMeter(v=1)`, `setMeterUi(v)`, `castUltimate`,
+`tapUltimate`, `ultimatePad() {ready, off, inked, hidden}`, `keepOut()` (the measured screen layout), `setLevel(n)`, `fillMeter(v=1)`, `setMeterUi(v)`, `castUltimate`,
 `ultimateInfo() {meter, ready, active, paragraph}`, `setSpecialization(id|null)`, `loadoutInfo() {pads, categories, specialization, capstone, advice}`, `hero.{cast, installSkill, openAssign, assignPad, setParagraph, levelUp, grantXp, requestUpdate, openUpdate, pickUpdate, die, givePermission}`,
 `enemies.{spawnFamily, spawnBoss, hit, clear, list}`, `audio.{renderProfile, renderSfx, music, contextState, ...}`.
 `npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot` (390x844 @2x and 844x390 into `shots/`);
 per-domain shots `scripts/shot-{base,tunnel,pause,attacks,enemies,heroes,items,aim,skills,loadout,s2,s3,s4,s5,recovery}.mjs` (each with its own
 SHOT_PORT/SHOT_OUT/SHOT_DIR, usage in the header). `npm run smoke` plays a ticket with real buttons: profile, base
-(HUD, margin note, update from the HUD line), desk, ticket, exit, run, fight, update, inventory, pause, Zakończ,
+(HUD, margin note, update from the HUD line), desk, ticket, exit, run (header clear of the note row, no bubble under a pad or note,
+the update line clear in tap/joystick x both hands), fight, update, inventory, pause, Zakończ,
 the Argument meter and an ultimate (3d), bookmark resume, two tunnels and the return, boss, death, a landscape joystick leg (two touches, the footnote slip), the S4 leg (6f: desk loadout -> run -> reload, the chart), the S5 leg (6g: damage numbers, text size, drop ->
 heal, full -> held, tap use, auto-use, the pause bug line, export -> import equality),
 then 5 s of frame times with 40 enemies (`PERF_MAX_MS`, `SMOKE_UNCAPPED`); exit 1 on any failed check or page error.
