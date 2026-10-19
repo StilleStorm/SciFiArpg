@@ -15,6 +15,7 @@
     "new-hero": "node scripts/new-hero.mjs",
     "shot": "vite build --outDir ${SHOT_OUT:-dist} && node scripts/shot.mjs",
     "smoke": "vite build && node scripts/smoke.mjs",
+    "e2e:m1": "vite build --outDir dist-m1 && node scripts/e2e-milestone-1.mjs",
     "render-audio": "vite build --outDir ${AUDIO_OUT:-dist} && node scripts/render-audio.mjs"
   },
   "devDependencies": {
