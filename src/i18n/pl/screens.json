@@ -56,7 +56,6 @@
     "history": "Historia zgłoszeń",
     "emptyHistory": "Brak zgłoszeń. Każde zostanie zarejestrowane.",
     "newTicket": "Nowe zgłoszenie",
-    "openRoster": "Wykaz spraw",
     "resume": "Wznów zgłoszenie nr {number}",
     "resumeNote": "{planet}, strona {page}. Zgłoszenie zostanie przekazane innemu konsultantowi.",
     "tunnelWaiting": "Zgłoszenie nr {number} czeka na stronie {page}.",
@@ -222,7 +221,9 @@
     "report": "Zgłoś problem z grą",
     "reportNote": "Do schowka zostanie skopiowany krótki zapis stanu: wersja, profil, planeta, strona, ostatnie zdarzenia, ustawienia.",
     "reported": "Zapis stanu skopiowano do schowka. Prosimy dołączyć go do zgłoszenia.",
-    "reportFailed": "Schowek odmówił przyjęcia zapisu. Zgłoszenie można złożyć bez niego."
+    "reportFailed": "Schowek odmówił przyjęcia zapisu. Zgłoszenie można złożyć bez niego.",
+    "exit": "Wyjdź",
+    "exitNote": "Do wykazu spraw, gdzie zmienia się postać. Postać, wyposażenie i miejsce w zgłoszeniu zostaną zapisane."
   },
   "loadout": {
     "title": "Umiejętności",

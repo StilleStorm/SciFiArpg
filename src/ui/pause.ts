@@ -1,6 +1,6 @@
 /**
  * Pause (DESIGN 2, 4.1). Two pieces: the margin note "Pauza" that hangs on the HUD, and the pause sheet, a printed form
- * with up to five lines: Wznów, Ustawienia, Umiejętności, Konfiguracja, Zakończ zgłoszenie. The sheet owns no rules: it only calls back. The router
+ * with up to seven lines: Wznów, Ustawienia, Umiejętności, Konfiguracja, Zgłoś problem, Zakończ zgłoszenie, Wyjdź. The sheet owns no rules: it only calls back. The router
  * (main.ts) pauses the game, shows the sheet, opens the settings in place and takes the run to the base.
  */
 import { createRng } from '../core/rng';
@@ -56,6 +56,8 @@ export interface PauseHandlers {
   /** The line "Konfiguracja": the loadout form (pads, ultimate, paragraphs, specialization; run and base). */
   onParagraphs?(): void;
   onEnd(): void;
+  /** "Wyjdź": the character (and a bookmark in a run) is saved and the roster of case files opens (run and base). */
+  onExit?(): void;
   /** "Zgłoś problem z grą": copy the state dump; the line is offered while this returns true (the setting `bugButton`). */
   onReport?(): void;
   showReport?(): boolean;
@@ -104,6 +106,7 @@ export function createPauseSheet(root: HTMLElement, handlers: PauseHandlers): Pa
       if (paragraphs) lines.append(line(t('forms.pause.paragraphs'), t('forms.pause.paragraphsNote'), paragraphs, 'paragraphs'));
       if (handlers.onReport && handlers.showReport?.() !== false) lines.append(line(t('screens.pause.report'), t('screens.pause.reportNote'), handlers.onReport, 'report'));
       if (!info.base) lines.append(line(t('screens.pause.end'), t('screens.pause.endNote'), handlers.onEnd, 'end'));
+      if (handlers.onExit) lines.append(line(t('screens.pause.exit'), t('screens.pause.exitNote'), handlers.onExit, 'exit'));
       made.scroll.append(lines);
       made.note(t('screens.pause.hold'));
       sheet = made;

@@ -10,6 +10,13 @@ const OUT = process.env.SHOT_OUT ?? 'dist-s6';
 const SHOTS = process.env.SHOT_DIR ?? 'shots-s6';
 const BASE = `http://127.0.0.1:${PORT}/SciFiArpg/`;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** The roster of case files: close a sheet over the base, then Pauza and Wyjdź. */
+async function toRoster(page) {
+  await page.locator('.ps-close').locator('visible=true').first().click({ timeout: 800 }).catch(() => undefined);
+  await page.evaluate(() => window.__game.pause());
+  await page.locator('[data-pause=exit]').click({ timeout: 3000 });
+}
 mkdirSync(SHOTS, { recursive: true });
 
 async function waitForServer(url, ms = 20000) {
@@ -122,7 +129,7 @@ try {
     check(`${prefix}: closing the archive shows the desk again`, (await page.locator('.desk-sheet:not(.hidden)').count()) === 1);
 
     // ---- roster from the desk, a second case file ----
-    await page.locator('[data-desk=roster]').click();
+    await toRoster(page);
     await page.locator('.roster .rs-case').first().waitFor();
     await sleep(300);
     await shot('roster-one');
@@ -156,7 +163,7 @@ try {
     await sleep(200);
 
     // ---- roster with two, switch back, separate progress ----
-    await page.locator('[data-desk=roster]').click();
+    await toRoster(page);
     await page.locator('.roster .rs-case').nth(1).waitFor();
     await sleep(300);
     await shot('roster-two');
@@ -170,7 +177,7 @@ try {
     // ---- Karta uprawnien of a file, then delete with the confirmation ----
     await page.evaluate(() => window.__game.station('biurko'));
     await sleep(400);
-    await page.locator('[data-desk=roster]').click();
+    await toRoster(page);
     await page.locator('.roster .rs-case').nth(1).waitFor();
     await page.locator('.rs-case:not([data-hero=pralka]) [data-roster=karta]').click();
     await page.locator('.kt-sheet').waitFor();

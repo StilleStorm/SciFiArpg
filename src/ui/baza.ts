@@ -11,8 +11,6 @@ import './base.css';
 export interface BazaHandlers {
   /** "Nowe zgłoszenie": the ticket form opens as a sheet over the base. */
   onNewTicket(): void;
-  /** "Wykaz spraw": back to the roster, to open another case file. */
-  onOpenRoster(): void;
   /** Take up the ticket that was left unfinished (Zakończ, or the app was closed during a run): the exit of the base leads back into it. */
   onResume(bookmark: Bookmark): void;
   /** "Wróć do zgłoszenia": back through the service tunnel into the held run (only offered while a run is held). */
@@ -93,13 +91,9 @@ export function createBaza(root: HTMLElement, handlers: BazaHandlers): Baza {
     scroll.replaceChildren();
     const heroName = meta.heroId ? t(`screens.profile.${meta.heroId}`) : t('screens.baza.noHero');
 
-    const change = h('button', 'link-btn', t('screens.baza.openRoster'));
-    change.type = 'button';
-    change.dataset['desk'] = 'roster';
-    change.addEventListener('click', handlers.onOpenRoster);
     const caseName = rosterStore().activeName();
     const file = h('div', 'trow');
-    file.append(h('label', '', t('screens.baza.case')), h('span', 'tval', caseName ? t('screens.baza.caseNo', { name: caseName }) : t('screens.baza.noHero')), change);
+    file.append(h('label', '', t('screens.baza.case')), h('span', 'tval', caseName ? t('screens.baza.caseNo', { name: caseName }) : t('screens.baza.noHero')));
     const profile = h('div', 'trow');
     profile.append(h('label', '', t('screens.baza.hero')), h('span', 'tval', heroName));
     const stars = h('div', 'trow');

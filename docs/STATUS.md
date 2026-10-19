@@ -74,6 +74,12 @@ joystick/tap steering (§2), editorial rules (§12.1).
   wrong-name labels are margin notes at the global 11 px; a bigger size would need a size field on
   margin:note (render/ink.ts).
 
+- Fifth round (2026-10-19, M2 build): the desk's Nowe zgłoszenie was painted over by the sheet's "c.d. poniżej"
+  strip (it hung from the notes' rule across the pinned action), so no main ticket could be taken and the exit stayed
+  locked; the strip now ends at the body's edge. The roster moved from the desk ("Wykaz spraw") to the pause sheet as
+  "Wyjdź" (run and base; saves the character and a bookmark). Side tickets from the board still do not open the exit
+  by design: the exit note names the desk.
+
 ## Open feedback wanted from the player
 - Real-phone frame rate with a crowd; tap accuracy; joystick feel once it lands.
 - Sound levels: music is −12 dB under SFX by design; the sliders' comfortable values become

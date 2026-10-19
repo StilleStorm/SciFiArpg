@@ -24,6 +24,13 @@ const UA =
 const ORIENTS = { portrait: { width: 390, height: 844 }, landscape: { width: 844, height: 390 } };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/** The roster of case files: close a sheet over the base, then Pauza and Wyjdź. */
+async function toRoster(page) {
+  await page.locator('.ps-close').locator('visible=true').first().click({ timeout: 800 }).catch(() => undefined);
+  await page.evaluate(() => window.__game.pause());
+  await page.locator('[data-pause=exit]').click({ timeout: 3000 });
+}
+
 mkdirSync(SHOTS, { recursive: true });
 const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--outDir', OUT, '--port', String(PORT), '--strictPort', '--host', '127.0.0.1'], { stdio: 'ignore' });
 const stop = () => server.kill('SIGTERM');
@@ -219,7 +226,7 @@ async function leg(browser, orient) {
 
   // ---- a second case file, separate progress, back to the first ----
   await ev(() => window.__game.station('biurko'));
-  await page.locator('[data-desk=roster]').click({ timeout: 3000 });
+  await toRoster(page);
   await page.locator('.roster .rs-case').first().waitFor({ state: 'visible', timeout: 3000 });
   await shot('03-roster-list');
   await page.locator('[data-roster=new]').click({ timeout: 3000 });
@@ -234,7 +241,7 @@ async function leg(browser, orient) {
   check('a second case file joins the roster at level 1, nothing closed, and becomes active', c2.files === 2 && c2.active !== c1.active && c2.level === 1 && c2.closed === 0, JSON.stringify(c2));
   await skipCard(800);
   await ev(() => window.__game.station('biurko'));
-  await page.locator('[data-desk=roster]').click({ timeout: 3000 });
+  await toRoster(page);
   await page.locator(`.roster .rs-case[data-case="${c1.active}"] [data-roster=open]`).click({ timeout: 3000 });
   await waitScreen('baza');
   await sleep(500);

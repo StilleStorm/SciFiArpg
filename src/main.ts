@@ -140,10 +140,6 @@ let shop: SklepHandle | null = null;
 
 const baza = createBaza(stage.ui, {
   onNewTicket: () => openSheet('ticket'),
-  onOpenRoster: () => {
-    rosterFrom = 'baza';
-    go('profile'); // go() settles the live base and any held run into this file first (settleForRoster)
-  },
   onReturn: () => returnFromTunnel(),
   onResume: () => resumeTicket(),
   onImport: (next) => importSave(next),
@@ -163,7 +159,7 @@ const onVolumeSet = (which: 'music' | 'sfx'): void => {
 };
 // The settings live in the pause sheet only: Wróć returns to the sheet.
 const pauseSettings = createSettings(stage.ui, onSettingsChange, () => closePauseSettings(), onVolumeSet);
-const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onSkills: () => openPauseSkills(), onParagraphs: () => openKonfig('pause'), onEnd: () => endTicket(), onReport: () => reportProblem(), showReport: () => meta.settings.bugButton !== false });
+const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onSkills: () => openPauseSkills(), onParagraphs: () => openKonfig('pause'), onEnd: () => endTicket(), onExit: () => exitToRoster(), onReport: () => reportProblem(), showReport: () => meta.settings.bugButton !== false });
 const ticket = createTicket(stage.ui, {
   onAccept: (priority) => acceptNow(priority),
   onTravel: (planet, priority) => takePlan((c, seed) => travelPlan(c, planet, priority, seed), priority),
@@ -767,6 +763,13 @@ function clearPause(): void {
   pauseSettings.hide();
   pauseSheet.close();
   loop.resume(); // a run held in the tunnel is not stepped (it is not the live state), so the loop always runs
+}
+
+/** Wyjdź on the pause sheet: the roster of case files; go() settles the live base or run and any held run into this file first (settleForRoster). */
+function exitToRoster(): void {
+  if (!live()) return;
+  rosterFrom = 'baza';
+  go('profile');
 }
 
 /** Zakończ zgłoszenie: the character and a bookmark are saved, the run is dropped, back to the base. */

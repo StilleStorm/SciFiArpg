@@ -50,10 +50,12 @@ export function createSheet(root: HTMLElement, opts: SheetOptions): Sheet {
     const bottom = scroll.getBoundingClientRect().bottom;
     // the strip hangs from the notes' rule (their top border) up to the edge, across the gap between body and notes
     const rule = notes.getBoundingClientRect().top;
-    const edge = cutEdge(lineBoxes(scroll, bottom), Math.min(bottom, rule - CUE_ROOM));
-    const tall = Math.round(rule - edge);
+    // a pinned action between the body and the notes (the desk's Nowe zgłoszenie) stays uncovered: the strip then ends at the body's edge
+    const foot = scroll.nextElementSibling === notes ? rule : bottom;
+    const edge = cutEdge(lineBoxes(scroll, bottom), Math.min(bottom, foot - CUE_ROOM));
+    const tall = Math.round(foot - edge);
     more.style.height = `${tall}px`;
-    more.style.top = `${-tall - 1}px`;
+    more.style.top = `${Math.round(edge - rule) - 1}px`;
     more.style.paddingTop = `${Math.max(0, tall - CUE_ROOM)}px`;
   };
   const cue = (): void => {

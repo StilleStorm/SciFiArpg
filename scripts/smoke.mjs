@@ -16,6 +16,13 @@ const BASE = `http://127.0.0.1:${PORT}/SciFiArpg/`;
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** The roster of case files: close a sheet over the base, then Pauza and Wyjdź. */
+async function toRoster(page) {
+  await page.locator('.ps-close').locator('visible=true').first().click({ timeout: 800 }).catch(() => undefined);
+  await page.evaluate(() => window.__game.pause());
+  await page.locator('[data-pause=exit]').click({ timeout: 3000 });
+}
 const shotOf = (p, name) => p.screenshot({ path: `${SHOTS}/${name}.png` });
 
 mkdirSync(SHOTS, { recursive: true });
@@ -1730,13 +1737,13 @@ try {
   const rHeld = await page.evaluate(() => window.__game.enterTunnel());
   await sleep(500);
   await page.evaluate(() => window.__game.station('biurko'));
-  await page.locator('[data-desk=roster]').click({ timeout: 3000 });
+  await toRoster(page);
   await page.locator('.roster .rs-case').first().waitFor({ state: 'visible', timeout: 3000 });
   const r1 = await page.evaluate(() => {
     const g = window.__game;
     return { screen: g.screen(), state: g.state() === null, bm: g.meta().bookmark?.ticketNumber ?? null, back: g.returnFromTunnel(), files: document.querySelectorAll('.roster .rs-case').length, active: document.querySelector('.roster .rs-case.active')?.dataset.case ?? null };
   });
-  check('the roster opens from the desk over a held run: the run is settled with a bookmark, nothing stays live or held', r0.opened && rHeld && r1.screen === 'profile' && r1.state && r1.bm === r0.ticket && !r1.back && r1.files >= 1 && r1.active !== null, JSON.stringify({ r0, rHeld, r1 }));
+  check('the roster opens from Wyjdź on the pause sheet over a held run: the run is settled with a bookmark, nothing stays live or held', r0.opened && rHeld && r1.screen === 'profile' && r1.state && r1.bm === r0.ticket && !r1.back && r1.files >= 1 && r1.active !== null, JSON.stringify({ r0, rHeld, r1 }));
   await shot('21-roster');
   await page.locator('[data-roster=new]').click({ timeout: 3000 });
   await page.locator('button.choose').locator('visible=true').first().waitFor({ timeout: 3000 });
@@ -1749,7 +1756,7 @@ try {
   });
   check('a new case file starts at level 1 with an empty bag and no bookmark, and becomes the active one', r2.screen === 'baza' && r2.files === r1.files + 1 && r2.active !== r1.active && r2.level === 1 && r2.bag === 0 && !r2.bm, JSON.stringify(r2));
   await page.evaluate(() => window.__game.station('biurko'));
-  await page.locator('[data-desk=roster]').click({ timeout: 3000 });
+  await toRoster(page);
   await page.locator(`.roster .rs-case[data-case="${r1.active}"] [data-roster=open]`).click({ timeout: 3000 });
   await page.waitForFunction(() => window.__game.screen() === 'baza', null, { timeout: 5000 }).catch(() => undefined);
   await sleep(500);
