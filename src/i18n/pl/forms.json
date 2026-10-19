@@ -27,7 +27,8 @@
     "tag": {
       "skill": "Umiejętność, {type}",
       "passive": "Cecha",
-      "stat": "Parametr"
+      "stat": "Parametr",
+      "paragraph": "Paragraf"
     },
     "skillRank": "{skill}, ulepszenie {rank}",
     "skillRankDesc": "Obrażenia i obszar większe, czas działania dłuższy, odnowienie krótsze.",
@@ -204,6 +205,9 @@
       "button": "Przycisk {n}",
       "later": "Później",
       "note": "Dotychczasowa umiejętność zostanie zdjęta z przycisku i pozostanie zainstalowana. Odnawia się nadal."
+    },
+    "paragraph": {
+      "title": "{skill}, paragraf {n}: {name}"
     }
   },
   "death": {
@@ -240,5 +244,25 @@
       "go": "Rozumiem",
       "appealed": "Odwołanie rozpatrzono pozytywnie. Przyczyny nie podano."
     }
+  },
+  "konfiguracja": {
+    "title": "Konfiguracja",
+    "sub": "Brzmienie umiejętności, paragraf po paragrafie.",
+    "note": "Paragraf czynny oznaczono pieczęcią. Zmiana obowiązuje od następnego użycia umiejętności.",
+    "back": "Wróć",
+    "deskLine": "Konfiguracja",
+    "deskNote": "Paragrafy",
+    "section": "§ {n}",
+    "active": "Czynny",
+    "lockedAt": "od poziomu {level}",
+    "notInstalled": "Umiejętność nie została jeszcze zainstalowana.",
+    "boxLabel": "Paragraf {n}, {name}"
+  },
+  "pause": {
+    "paragraphs": "Paragrafy",
+    "paragraphsNote": "Zmiana brzmienia umiejętności w trakcie zgłoszenia."
+  },
+  "pad": {
+    "tag": "§{n}"
   }
 }

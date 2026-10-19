@@ -3,7 +3,8 @@
  * one may "wymagac uprawnien", one problem report per run rerolls the three.
  */
 import { DAMAGE_TYPES, type DamageType } from '../combat/damage';
-import { heroDef, type SkillIndex } from '../heroes/defs';
+import { heroDef, SKILL_INDICES, type SkillIndex } from '../heroes/defs';
+import { isInstalled } from '../heroes/loadout';
 import type { HeroId } from '../heroes';
 import { heroById } from '../heroes/registry';
 import { neutralMods, type Mods, type OfferEntry, type UpdateOffer } from '../heroes/state';
@@ -11,13 +12,14 @@ import { recomputeStats } from '../items/stats';
 import { t } from '../i18n';
 import type { Rng } from '../core/rng';
 import type { RunState } from '../world/run';
+import { isParagraphUnlocked, paragraphLevel, paragraphsOf, runParagraph, runProgress, setRunParagraph } from './paragraphs';
 
 export type Family = 'urzadzenia' | 'powiadomienia' | 'wygenerowane';
 export const FAMILIES: readonly Family[] = ['urzadzenia', 'powiadomienia', 'wygenerowane'];
 
 export interface UpgradeDef {
   id: string;
-  kind: 'skill' | 'passive' | 'stat';
+  kind: 'skill' | 'passive' | 'stat' | 'paragraph';
   /** Skills: the hero's skill index (0..4), not a pad. */
   slot?: SkillIndex;
   /** How many times it can be taken (skills: 3 ranks). */
@@ -63,11 +65,29 @@ export function poolFor(heroId: HeroId): UpgradeDef[] {
   return [...skillEntries(), ...passives, ...STATS];
 }
 
-export function upgradeById(heroId: HeroId, id: string): UpgradeDef | undefined {
-  return poolFor(heroId).find((u) => u.id === id);
+/**
+ * Offer ids of a paragraph entry: `para:<skill index>:<n>`. They live on the offer only: picking one makes the paragraph the
+ * active one (progression/paragraphs.ts setRunParagraph), nothing goes into `upgrades`, and the save keeps it as the active paragraph.
+ */
+export const paraId = (skill: SkillIndex, n: 2 | 3): string => `para:${skill}:${n}`;
+
+/** Parse `para:<skill>:<n>` (skill 0..4, n 2 or 3); null for every other id. */
+export function parseParagraphId(id: string): { skill: SkillIndex; n: 2 | 3 } | null {
+  const m = /^para:([0-4]):([23])$/.exec(id);
+  return m ? { skill: Number(m[1]) as SkillIndex, n: Number(m[2]) as 2 | 3 } : null;
 }
 
-const WEIGHT = { skill: 3, passive: 2, stat: 2 } as const;
+/** Paragraph entries are not in the pool: the offer builds them. */
+function paragraphDef(id: string): UpgradeDef | undefined {
+  const p = parseParagraphId(id);
+  return p ? { id, kind: 'paragraph', slot: p.skill, maxRank: 1 } : undefined;
+}
+
+export function upgradeById(heroId: HeroId, id: string): UpgradeDef | undefined {
+  return poolFor(heroId).find((u) => u.id === id) ?? paragraphDef(id);
+}
+
+const WEIGHT = { skill: 3, passive: 2, stat: 2, paragraph: 3 } as const;
 
 /** The family a given entry at a given rank needs, if any. Skill rank 3 and each hero's last passive are gated. The 4th and 5th skill's first rank wants the family in its SkillDef (DESIGN 10.1). */
 export function requirementOf(def: UpgradeDef, rank: number, heroId?: HeroId): Family | undefined {
@@ -109,11 +129,11 @@ function isGated(heroId: HeroId, e: OfferEntry): boolean {
 }
 
 /** Draw `count` entries, weighted, without repeats, at most one of them gated ("wymaga uprawnien"). */
-export function drawEntries(heroId: HeroId, pool: readonly OfferEntry[], rng: Rng, count = 3): OfferEntry[] {
+export function drawEntries(heroId: HeroId, pool: readonly OfferEntry[], rng: Rng, count = 3, already: readonly OfferEntry[] = []): OfferEntry[] {
   const left = [...pool];
   const picked: OfferEntry[] = [];
   while (picked.length < count && left.length > 0) {
-    const gated = picked.some((e) => isGated(heroId, e));
+    const gated = picked.some((e) => isGated(heroId, e)) || already.some((e) => isGated(heroId, e));
     const ok = left.filter((e) => !(gated && isGated(heroId, e)));
     if (ok.length === 0) break;
     const total = ok.reduce((a, e) => a + weightOf(heroId, e), 0);
@@ -133,13 +153,75 @@ export function drawEntries(heroId: HeroId, pool: readonly OfferEntry[], rng: Rn
   return picked;
 }
 
+/** The entries a level-up leads with, by priority; `pickFeature` takes the first non-empty list (pure, tested). */
+export interface FeatureCandidates {
+  /** A skill not installed yet (4th / 5th) whose permission is held (a stamped one stays in the common pool). */
+  newSkill: readonly OfferEntry[];
+  /** Paragraphs that open at the level the form installs (paragraphEntries). */
+  paragraph: readonly OfferEntry[];
+}
+
+export function pickFeature(c: FeatureCandidates): OfferEntry | null {
+  return c.newSkill[0] ?? c.paragraph[0] ?? null;
+}
+
+/** The level a form installs: the oldest queued one (several queued forms open one after another). */
+export const offerVersion = (s: RunState): number => s.player.level - Math.max(1, s.hero.pendingLevels) + 1;
+
+/**
+ * Paragraphs that open at the level this form installs (DESIGN 10.2: "the newly unlocked paragraph"), open to the character and
+ * not already active; skill order. One the player passes over stays switchable in Konfiguracja and is not offered again.
+ */
+export function paragraphEntries(s: RunState, version = offerVersion(s)): OfferEntry[] {
+  const heroId = s.player.heroId;
+  const skills = heroDef(heroId).skills;
+  const progress = runProgress(s);
+  const out: OfferEntry[] = [];
+  for (const n of [2, 3] as const) {
+    for (const skill of SKILL_INDICES) {
+      const id = skills[skill].id;
+      if (!isInstalled(s, skill) || paragraphLevel(heroId, id, n) !== version) continue;
+      if (isParagraphUnlocked(progress, id, n) && runParagraph(s, skill) !== n) out.push({ id: paraId(skill, n), rank: 1, locked: false });
+    }
+  }
+  return out;
+}
+
+function featureOf(s: RunState): OfferEntry | null {
+  const all = availableEntries(s);
+  const fresh = all.filter((e) => (e.id === 'skill4' || e.id === 'skill5') && e.rank === 1 && !e.locked); // a skill that still wants its permission stays in the common pool
+  return pickFeature({ newSkill: fresh, paragraph: paragraphEntries(s) });
+}
+
+const isFiller = (heroId: HeroId, e: OfferEntry): boolean => {
+  const kind = upgradeById(heroId, e.id)?.kind;
+  return kind === 'passive' || kind === 'stat';
+};
+
+/**
+ * Compose the three choices (pure): the lead entry (the newly unlocked skill or paragraph) when there is one, then
+ * two passive/stat entries; a missing lead or a short pool is topped up from whatever else is available.
+ */
+export function composeOffer(heroId: HeroId, feature: OfferEntry | null, pool: readonly OfferEntry[], rng: Rng, avoid: readonly string[] = []): OfferEntry[] {
+  if (!feature) return drawEntries(heroId, pool, rng);
+  const lead = [feature];
+  const rest = pool.filter((e) => e.id !== feature.id);
+  const fillers = rest.filter((e) => isFiller(heroId, e));
+  const fresh = fillers.filter((e) => !avoid.includes(e.id));
+  const two = drawEntries(heroId, fresh.length >= 2 ? fresh : fillers, rng, 2, feature.locked ? lead : []);
+  const out = [...lead, ...two];
+  if (out.length < 3) out.push(...drawEntries(heroId, rest.filter((e) => !out.some((o) => o.id === e.id)), rng, 3 - out.length, out));
+  return out;
+}
+
 /** Roll an offer for the player's current level. `salt` makes a reroll differ; `avoid` are ids to skip if possible. */
 export function rollOffer(s: RunState, salt = 0, avoid: readonly string[] = []): UpdateOffer {
   const all = availableEntries(s);
-  const fresh = all.filter((e) => !avoid.includes(e.id));
-  const pool = fresh.length >= 3 ? fresh : all;
   const rng = s.rng.fork(`update:${s.player.level}:${salt}`);
-  return { entries: drawEntries(s.player.heroId, pool, rng), level: s.player.level };
+  const feature = featureOf(s);
+  if (feature) return { entries: composeOffer(s.player.heroId, feature, all, rng, avoid), level: s.player.level };
+  const fresh = all.filter((e) => !avoid.includes(e.id));
+  return { entries: drawEntries(s.player.heroId, fresh.length >= 3 ? fresh : all, rng), level: s.player.level };
 }
 
 /** Open the form: roll the offer for this level and keep it on the run. */
@@ -211,7 +293,10 @@ export function confirmUpdate(s: RunState, id: string): boolean {
   const offer = s.hero.offer;
   const entry = offer?.entries.find((e) => e.id === id);
   if (!entry) return false;
-  if (!applyUpgrade(s, id)) return false;
+  const para = parseParagraphId(id);
+  if (para) {
+    if (!setRunParagraph(s, heroDef(s.player.heroId).skills[para.skill].id, para.n)) return false; // the picked paragraph is the active one
+  } else if (!applyUpgrade(s, id)) return false;
   s.hero.offer = null;
   return true;
 }
@@ -257,6 +342,18 @@ export function entryView(s: RunState, entry: OfferEntry): EntryView {
       title: fresh ? t('forms.update.newSkill', { skill: t(sk.nameKey) }) : t('forms.update.skillRank', { skill: t(sk.nameKey), rank: ROMAN[entry.rank] ?? String(entry.rank) }),
       desc: fresh ? t(sk.descKey) : t('forms.update.skillRankDesc'),
       tag: t('forms.update.tag.skill', { type: t(`heroes.types.${sk.type}`) }),
+    };
+  }
+  if (def.kind === 'paragraph') {
+    const p = parseParagraphId(def.id);
+    if (!p) return { ...base, title: entry.id, desc: '', tag: '' };
+    const sk = heroDef(heroId).skills[p.skill];
+    const para = paragraphsOf(heroId, sk.id)[p.n - 1];
+    return {
+      ...base,
+      title: t('forms.update.paragraph.title', { skill: t(sk.nameKey), n: p.n, name: para ? t(para.nameKey) : '' }),
+      desc: para ? t(para.descKey) : '',
+      tag: t('forms.update.tag.paragraph'),
     };
   }
   if (def.kind === 'passive') {
