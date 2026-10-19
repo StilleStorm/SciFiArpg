@@ -20,6 +20,7 @@ import { createRun, type RunOptions, type RunState } from './world/run';
 import { createHeroLayer, type HeroLayer } from './heroes/layer';
 import { heroBuilders, wrapEnemyBuilder } from './render/heroFigures';
 import { bindHeroFx, zoneBuilder } from './render/heroFx';
+import { createUltFx } from './render/ultFx';
 import { createExitReveal } from './render/exitReveal';
 import { updateBubbleFocus } from './render/bubbleFocus';
 
@@ -57,6 +58,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
   });
   const hero = createHeroLayer({ root: stage.ui, bus, views, input, getState: () => state });
   bindHeroFx(bus, stage.fx);
+  const ultFx = createUltFx(stage.fx);
   bindEnemyFx(bus);
   const exits = createExitReveal(stage.page);
   const sim = createSim(bus);
@@ -186,6 +188,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       animMs += dtSec * 1000; // the base has no clock (s.time stays 0 there), so its figures animate on this one
       collect(s);
       hero.frame(s);
+      ultFx.frame(s);
       if (s.phase === 'base') baseView?.frame(s);
       else {
         baseView = null; // the exit walked through: the base drawing went with the old sheet
