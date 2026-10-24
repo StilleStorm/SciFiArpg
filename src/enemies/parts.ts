@@ -3,6 +3,7 @@
  * hatching, small parts, no fills except hatch and ink dots. See partsBase.ts for the frames.
  */
 import { BOSS_BODIES } from './partsBosses';
+import { FACE_FIGURES } from './anomalia/faces/figures';
 import { DEVICE_BODIES, DEVICE_DECOS, DEVICE_HEADS, DEVICE_LEGS } from './partsDevices';
 import { GENERATED_BODIES, GENERATED_DECOS } from './partsGenerated';
 import { NOTICE_BODIES, NOTICE_DECOS } from './partsNotices';
@@ -11,14 +12,14 @@ import type { FamilyId } from './ids';
 
 export * from './partsBase';
 
-export const BODIES: readonly BodyPart[] = [...DEVICE_BODIES, ...NOTICE_BODIES, ...GENERATED_BODIES, ...BOSS_BODIES];
+export const BODIES: readonly BodyPart[] = [...DEVICE_BODIES, ...NOTICE_BODIES, ...GENERATED_BODIES, ...BOSS_BODIES, ...FACE_FIGURES];
 export const LEGS: readonly LegPart[] = DEVICE_LEGS;
 export const HEADS: readonly HeadPart[] = DEVICE_HEADS;
 export const DECOS: readonly DecoPart[] = [...DEVICE_DECOS, ...NOTICE_DECOS, ...GENERATED_DECOS];
 
 /** Bodies a family draws from when assembling at random (bosses excluded). */
 export function bodiesOf(family: FamilyId): BodyPart[] {
-  return BODIES.filter((b) => b.family === family && !b.boss);
+  return BODIES.filter((b) => b.family === family && !b.boss && !b.figure);
 }
 
 export function decosOf(family: FamilyId): DecoPart[] {

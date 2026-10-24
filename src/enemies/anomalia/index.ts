@@ -13,6 +13,7 @@ import type { Bus } from '../../core/events';
 import type { Enemy } from '../../entities/types';
 import type { HeroId } from '../../heroes';
 import type { RunState } from '../../world/run';
+import { ALL_FACES } from './faces';
 
 export interface AnomaliaFace {
   heroId: HeroId;
@@ -49,3 +50,5 @@ export const faceKeys = (heroId: HeroId) => ({
   reply: (type: DamageType) => `story.finale.face.${heroId}.spor.reply.${type}`,
   end: `story.finale.face.${heroId}.end`,
 });
+
+for (const f of ALL_FACES) registerFace(f);

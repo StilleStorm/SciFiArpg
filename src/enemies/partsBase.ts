@@ -79,6 +79,8 @@ export interface BodyPart {
   /** Chance that a head sits on this body. */
   headChance: number;
   boss?: BossId;
+  /** One of the Anomalia's five faces (enemies/anomalia/faces/figures.ts): never picked by the random assembly. */
+  figure?: true;
 }
 
 export interface LegPart {
