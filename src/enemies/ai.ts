@@ -13,6 +13,7 @@ import { attack } from '../systems/combat';
 import { aggroMul } from '../world/laws';
 import { resolveMove } from '../world/pages';
 import type { RunState } from '../world/run';
+import { isAnomalia } from './anomalia/state';
 import { assemble, assembleBoss, serialOf } from './assemble';
 import { tickBoss } from './bosses';
 import {
@@ -187,6 +188,8 @@ interface Meetings {
 const meetings = new WeakMap<RunState, Meetings>();
 
 function meet(s: RunState, e: Enemy, bus: Bus): void {
+  // the Anomalia's bodies have their own notes (the duel of footnotes, the face's and phase 3's meet): no family or boss first-meet
+  if (isAnomalia(e)) return;
   let m = meetings.get(s);
   if (!m) {
     m = { keys: new Set(), last: -99 };

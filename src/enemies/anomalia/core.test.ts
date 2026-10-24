@@ -456,6 +456,11 @@ describe('phase 3: existence and the closing stamp', () => {
     expect(c.s.enemies).not.toContain(e);
     const stamps = names(c, 'stamp').map((l) => (l.payload as { text: string }).text);
     expect(stamps).toEqual([t('story.finale.phase3.stamp')]);
+    // on clean paper above the desk (clear of its drawing), with the desk as the point to keep away from when the view has no room above
+    const sp = names(c, 'stamp')[0]?.payload as { x: number; y: number; away?: { x: number; y: number } };
+    const desk = deskOf(c.s.page);
+    expect(desk.y - sp.y).toBeGreaterThanOrEqual(80);
+    expect(sp.away).toEqual(desk);
     const n = c.notes();
     const tail = n.slice(-3);
     expect(tail).toEqual([t('story.finale.phase3.close'), t('story.finale.hero.konsultant'), t('story.finale.footnote')]);
@@ -550,5 +555,27 @@ describe('the test hook helpers', () => {
     const other = { ...c.body() } as Enemy;
     expect(anomaliaHit(c.s, other, 17)).toBe(17);
     expect(rtOf(other)).toBeTruthy();
+  });
+});
+
+describe('first-meet notes in the finale', () => {
+  it('prints no family or boss first-meet note for the Anomalia: the duel of footnotes replaces them', () => {
+    const c = finale('konsultant', 7);
+    const e = c.body();
+    c.s.player.x = e.x - 60;
+    c.s.player.y = e.y + 40;
+    for (let form = 0; form < 3; form++) {
+      c.seconds(3);
+      advanceStage(c.s, c.bus);
+      const b = c.body();
+      c.s.player.x = b.x - 60;
+      c.s.player.y = b.y + 40;
+    }
+    c.seconds(3);
+    const meets = [
+      ...['urzadzenia', 'powiadomienia', 'wygenerowane'].map((f) => t(`enemies.family.${f}.meet`)),
+      ...['prototyp', 'weryfikacja', 'hipoteza'].map((b) => t(`enemies.boss.${b}.meet`)),
+    ];
+    expect(c.notes().filter((n) => meets.includes(n))).toEqual([]);
   });
 });

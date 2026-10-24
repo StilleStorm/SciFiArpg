@@ -2464,6 +2464,21 @@ try {
       await sleep(150);
       const stamped = end.stamp || (await ev(() => [...document.querySelectorAll('text, div, span')].some((x) => x.childElementCount === 0 && /SPRAWĘ ZAMKNIĘTO/.test(x.textContent ?? ''))));
       check(`S15 ${hero}: the closing stamp SPRAWĘ ZAMKNIĘTO falls once`, end.ok && end.info?.stage === 'done' && stamped, JSON.stringify({ ok: end.ok, stage: end.info?.stage, stamped }));
+      // the stamp is read on clean paper: no bubble speaks over it, it lies clear of the desk's drawing; the final footnote is alone and whole on the slip
+      const atStamp = await ev(() => {
+        const st = [...document.querySelectorAll('#fx text.t-stamp')].find((x) => /SPRAWĘ ZAMKNIĘTO/.test(x.textContent ?? ''))?.parentElement?.querySelector('.stamp-frame rect')?.getBoundingClientRect();
+        const desk = document.querySelector('[data-station="biurko"]')?.getBoundingClientRect();
+        const bubbles = [...document.querySelectorAll('#world .bubble')].filter((b) => b.childElementCount > 0 && Number(getComputedStyle(b).opacity) > 0.05 && !b.classList.contains('bubble-off')).length;
+        const list = document.querySelector('.foot .fn-list');
+        const ln = list?.querySelector('.fn:last-child');
+        const fr = document.querySelector('.foot')?.getBoundingClientRect();
+        const lr = ln?.getBoundingClientRect();
+        const offDesk = st && desk ? st.bottom <= desk.top + 4 || st.top >= desk.bottom - 4 : null;
+        return { st: st && [Math.round(st.top), Math.round(st.bottom)], desk: desk && [Math.round(desk.top), Math.round(desk.bottom)], bubbles, offDesk, notes: list?.children.length ?? 0, finalLast: /Zgłoszenie czeka na rozpatrzenie\.$/.test(ln?.textContent ?? ''), whole: !!(fr && lr && ln && lr.top >= fr.top - 1 && lr.bottom <= fr.bottom + 1 && ln.scrollHeight <= ln.clientHeight + 1) };
+      });
+      check(`S15 ${hero}: at the closing stamp no bubble speaks, the stamp lies off the desk's drawing, the final footnote is alone and whole on the run's slip`, atStamp.bubbles === 0 && atStamp.offDesk !== false && atStamp.notes === 1 && atStamp.finalLast && atStamp.whole, JSON.stringify(atStamp));
+      const meets = await ev(() => window.__game.notes().filter((n) => /^Napotkano (Prototyp|Weryfikację|Hipotezę|urządzenia|powiadomienia|istoty)/.test(n.text)).map((n) => n.text.slice(0, 24)));
+      check(`S15 ${hero}: no first-meet note for the Anomalia's bodies (the duel of footnotes replaces them)`, meets.length === 0, JSON.stringify(meets));
       await ev(() => window.__game.advance(3.5));
       await fp.waitForFunction(() => window.__game.screen() === 'baza', null, { timeout: 5000 }).catch(() => undefined);
       await sleep(300);
