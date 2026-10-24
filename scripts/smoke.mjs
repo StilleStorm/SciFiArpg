@@ -1934,6 +1934,128 @@ try {
     await cctx.close();
   }
 
+  // ---------- 6d. planet 1 content (S12): opening page, clerk, side tickets, location pages, the boss with its variant line and Spór ----------
+  {
+    const pctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await pctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const pp = await pctx.newPage();
+    pp.on('pageerror', (e) => problems.push(`S12 pageerror: ${e.message}`));
+    pp.on('console', (m) => {
+      if (m.text().includes('Service Worker registration blocked')) return;
+      if (m.type() === 'error' || m.type() === 'warning') problems.push(`S12 console.${m.type()}: ${m.text()}`);
+    });
+    const ev = (fn, arg) => pp.evaluate(fn, arg);
+    await pp.goto(BASE, { waitUntil: 'load' });
+    await pp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await pp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await pp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+    await pp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
+    const open = await ev(() => {
+      const l = document.querySelector('.card-layer');
+      return { kind: l?.dataset.card ?? null, text: l?.textContent ?? '', plan: window.__game.state()?.plan ?? null };
+    });
+    check('S12 opening page: the card of a new case file carries the story text, no key and no placeholder', open.kind === 'opening' && open.plan?.planet === 0 && open.text.length > 60 && !/story\.|screens\.cards|\[brak/i.test(open.text), JSON.stringify({ kind: open.kind, len: open.text.length, head: open.text.slice(0, 80) }));
+    await shotOf(pp, 'S12-opening');
+    await pp.locator('.card-layer .card-skip').click({ timeout: 3000 });
+    await pp.waitForFunction(() => !document.querySelector('.card-layer'), null, { timeout: 4000 }).catch(() => undefined);
+    await sleep(600);
+    const base = await ev(() => {
+      const s = window.__game.state();
+      return { screen: window.__game.screen(), planet: s?.plan?.planet, clerk: document.querySelectorAll('[data-station=urzednik]').length, offers: window.__game.quests.offers().map((o) => o.id) };
+    });
+    check('S12 planet 1 base: the clerk is drawn and the board carries the h:p1 side tickets', base.screen === 'baza' && base.planet === 0 && base.clerk === 1 && base.offers.filter((id) => id.startsWith('h:p1:')).length === 3, JSON.stringify(base));
+    await ev(() => window.__game.station('urzednik'));
+    await pp.locator('.npc-sheet').waitFor({ state: 'visible', timeout: 3000 });
+    const clerk = await ev(() => ({ lines: document.querySelectorAll('.npc-sheet .npc-line').length, text: document.querySelector('.npc-sheet')?.textContent ?? '' }));
+    check('S12 the clerk of planet 1: his sheet shows three story lines, no key', clerk.lines === 3 && !/story\.p1/.test(clerk.text) && clerk.text.length > 80, JSON.stringify({ lines: clerk.lines, head: clerk.text.slice(0, 100) }));
+    await shotOf(pp, 'S12-clerk');
+    await pp.locator('.npc-sheet .ps-close').first().click().catch(() => undefined);
+    await sleep(200);
+    await ev(() => window.__game.station('tablica'));
+    await pp.locator('[data-bq=accept]').first().waitFor({ state: 'visible', timeout: 3000 });
+    const shown = await ev(() => [...document.querySelectorAll('[data-bq=accept]')].map((b) => b.getAttribute('data-quest')));
+    const qid = shown[0];
+    await pp.locator('[data-bq=accept]').first().click();
+    await sleep(200);
+    const stars0 = await ev(() => window.__game.state().player.gwiazdki);
+    const q = await ev((id) => {
+      const g = window.__game;
+      const fin = g.quests.finish(id);
+      return { fin, reported: g.quests.report(id), stars: g.state().player.gwiazdki };
+    }, qid);
+    check('S12 side ticket h:p1:* is listed on the board, taken, finished, reported and pays stars', qid === 'h:p1:a' && shown.filter((id) => id.startsWith('h:p1:')).length === 3 && q.fin && q.reported && q.stars > stars0, JSON.stringify({ shown, stars0, q }));
+    await pp.locator('.ps-close').locator('visible=true').first().click({ timeout: 800 }).catch(() => undefined);
+    await sleep(200);
+    // pages of every location type of the planet, then the boss
+    await ev(() => window.__game.start(33, { plan: { kind: 'campaign', planet: 0, priority: 'niski', lawId: 'grawitacja' }, pageCount: 4 }));
+    await sleep(700);
+    for (let k = 0; k < 4 && (await ev(() => window.__game.state()?.modal ?? null)); k++) {
+      await pp.locator('.pop-wrap .form-btn, .pop-wrap button').locator('visible=true').first().click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(400);
+    }
+    const types = new Set();
+    const shotDone = new Set();
+    const pagesInfo = [];
+    const nPages = await ev(() => window.__game.state().pages.length);
+    for (let i = 0; i < nPages; i++) {
+      if (i > 0) {
+        await ev((k) => {
+          window.__game.state().enemies.length = 0;
+          window.__game.turnTo(k);
+        }, i);
+        await pp.waitForFunction((k) => window.__game.state()?.pageIndex === k && !window.__game.state().turning, i, { timeout: 6000 }).catch(() => undefined);
+        await sleep(500);
+      }
+      const info = await ev(() => {
+        const s = window.__game.state();
+        const props = [...document.querySelectorAll('#page [data-obstacle="prop"]')];
+        return { i: s.pageIndex, loc: s.page.location ?? null, props: props.length, drawn: props.filter((n) => n.childElementCount > 0).length };
+      });
+      pagesInfo.push(info);
+      if (info.loc) {
+        types.add(info.loc);
+        if (!shotDone.has(info.loc) && info.i < nPages - 1) {
+          shotDone.add(info.loc);
+          await shotOf(pp, `S12-${info.loc}`);
+        }
+      }
+    }
+    check('S12 pages: both planet-1 location types (przedmiescie, magazyn) appear on the run, each drawn with props', types.has('przedmiescie') && types.has('magazyn') && pagesInfo.filter((p) => p.loc && p.props > 0).length >= 2 && pagesInfo.every((p) => p.props === p.drawn), JSON.stringify(pagesInfo));
+    await pp.waitForFunction(() => window.__game.state()?.enemies.some((e) => e.boss), null, { timeout: 8000 }).catch(() => undefined);
+    await sleep(600);
+    const boss = await ev(() => {
+      const b = window.__game.state().enemies.find((e) => e.boss);
+      const v = document.querySelector('[data-part=variant]');
+      return b ? { id: b.id, family: b.family, hp: b.hpMax, variant: v?.textContent ?? null } : null;
+    });
+    check('S12 boss: Prototyp has 260 racja and the variant line under its name', boss !== null && boss.hp === 260 && boss.variant === 'Prototyp, seria 1, egzemplarz pokazowy', JSON.stringify(boss));
+    await shotOf(pp, 'S12-boss');
+    if (boss) {
+      let first = null;
+      for (let i = 0; i < 50 && !first; i++) {
+        const info = await ev(() => window.__game.spor.info());
+        if (info?.open && info.phase === 1) first = info;
+        else await sleep(200);
+      }
+      const bub = await ev(() => document.querySelector('.bubble.comment')?.textContent ?? '');
+      const reps = await ev(() => [...document.querySelectorAll('.spor-reply')].map((n) => n.textContent ?? ''));
+      check('S12 Spór: the planet comment (story.p1.boss.spor1) is posted with three replies, as text, not as keys', first !== null && first.commentKey === 'story.p1.boss.spor1.comment' && first.replies.every((r) => r.textKey.startsWith('story.p1.boss.spor1.reply.')) && bub.length > 10 && !/story\./.test(bub) && reps.length === 3 && reps.every((r) => r.length > 2 && !/story\./.test(r)), JSON.stringify({ key: first?.commentKey, bub, reps }));
+      await shotOf(pp, 'S12-spor');
+      if (first) {
+        await ev(() => (window.__game.state().player.hp = window.__game.state().player.hpMax));
+        await pp.click(`.spor-reply[data-reply="${first.correct}"]`);
+        await sleep(250);
+        const won = await ev(() => window.__game.spor.info());
+        check('S12 Spór: the right reply to the planet comment opens the x2 window', won !== null && won.window > 0 && won.open === false, won ? won.window.toFixed(2) : 'none');
+      }
+    }
+    await pctx.close();
+  }
+
   // ---------- 7. frame time with 40 enemies ----------
   // a fresh run: the death slip of the step above may still hold the old one
   await page.evaluate(() => window.__game.start(11, { pageCount: 5, lawId: 'grawitacja' }));

@@ -1,9 +1,9 @@
 // Milestone 2 (Campaign frame, slices S6-S10) end-to-end gate, in portrait and in landscape, on a fresh profile each:
 // title -> roster (the first case file is created with a hero pick) -> opening card skipped -> a second case file on the roster
-// and back to the first (separate progress) -> for each of the nine planets in sequence at priority Niski: the chapter card
+// and back to the first (separate progress) -> for each of the the campaign planets in sequence at priority Niski: the chapter card
 // skipped with one tap, the ticket sheet (priority picker, its own planet), accept, run, a teczka opened for an item, a pack and a
 // named elite on three planets (item level read off the drops), a side ticket from the board, the planet closed (victory) ->
-// the return ticket to planet 1 (finale) -> the case closed -> nine planets offered for free travel, a real tap on one ->
+// the return ticket to planet 1 (finale) -> the case closed -> the campaign planets offered for free travel, a real tap on one ->
 // reload: the campaign is kept per character -> 40 enemies, 5 s of frame times.
 // Usage: npm run e2e:m2 (builds into dist-m2 first). Env: M2_PORT (4192), M2_OUT (dist-m2), M2_DIR (shots-m2),
 // M2_ONLY ("portrait" or "landscape"), PERF_MAX_MS (fail above this average frame time).
@@ -22,6 +22,7 @@ const BASE = `http://127.0.0.1:${PORT}/SciFiArpg/`;
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 const ORIENTS = { portrait: { width: 390, height: 844 }, landscape: { width: 844, height: 390 } };
+const LAST = 3; // CAMPAIGN_LAST in src/world/campaign.ts
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** The roster of case files: close a sheet over the base, then Pauza and Wyjdź. */
@@ -195,6 +196,7 @@ async function leg(browser, orient) {
   }
 
   async function closeInRun() {
+    await settle();
     await ev(() => {
       const s = window.__game.state();
       s.victoryAt = s.time;
@@ -249,13 +251,13 @@ async function leg(browser, orient) {
   check('the first file is open again on planet 1', c3.active === c1.active && c3.plan?.planet === 0, JSON.stringify(c3));
   await skipCard(800);
 
-  // ---- nine planets in sequence at Niski ----
+  // ---- the campaign planets in sequence at Niski ----
   const planets = [];
   const levelsByPlanet = [];
   let chapterSkips = 0;
   let sideDone = 0;
-  const ELITE_ON = new Set([2, 5, 8]);
-  for (let p = 0; p < 9; p++) {
+  const ELITE_ON = new Set([1, 2]);
+  for (let p = 0; p < LAST; p++) {
     tag = `${orient} planet ${p + 1}`;
     if (p > 0) {
       const kind = await skipCard();
@@ -264,7 +266,7 @@ async function leg(browser, orient) {
     }
     const base = await ev(() => ({ screen: window.__game.screen(), plan: window.__game.state()?.plan ?? null, layer: !!document.querySelector('.card-layer'), offers: window.__game.quests.offers().length }));
     check('the base holds the campaign ticket of this planet, no card in the way, the board has side tickets', base.screen === 'baza' && base.plan?.kind === 'campaign' && base.plan?.planet === p && !base.layer && base.offers >= 1, JSON.stringify(base));
-    if (p === 0 || p === 5) {
+    if (p === 0 || p === LAST - 1) {
       const q = await ev(() => {
         const g = window.__game;
         const s = g.state();
@@ -293,16 +295,16 @@ async function leg(browser, orient) {
       const m = window.__game.meta();
       return { screen: window.__game.screen(), campaign: m.character?.campaign ?? null, plan: window.__game.state()?.plan ?? null, history: m.history.length };
     });
-    if (p < 8) {
+    if (p < LAST - 1) {
       check('the ticket closes this planet once; the save holds it; the next planet is the next ticket', closed && after.campaign?.closed?.join() === Array.from({ length: p + 1 }, (_, i) => i).join() && after.campaign?.current === p + 1 && after.plan?.planet === p + 1 && after.history === p + 1, JSON.stringify(after));
     } else {
-      check('planet 9 closed: the return ticket to planet 1 is on the desk (finale)', closed && after.campaign?.closed?.length === 9 && after.campaign?.finalTicket === true && !after.campaign?.caseClosed && after.plan?.kind === 'final' && after.plan?.planet === 0, JSON.stringify(after));
+      check(`planet ${LAST} closed: the return ticket to planet 1 is on the desk (finale)`, closed && after.campaign?.closed?.length === LAST && after.campaign?.finalTicket === true && !after.campaign?.caseClosed && after.plan?.kind === 'final' && after.plan?.planet === 0, JSON.stringify(after));
     }
   }
   tag = orient;
-  check('nine different planets were on the ticket forms', new Set(planets).size === 9, planets.join(' | '));
-  check('every chapter card (planets 2-9) was skipped by a tap', chapterSkips === 8, String(chapterSkips));
-  check('items scale: the item level on the last planet is above the first', levelsByPlanet[8] > levelsByPlanet[0] && levelsByPlanet[0] > 0, levelsByPlanet.join(','));
+  check('different planets were on the ticket forms', new Set(planets).size === LAST, planets.join(' | '));
+  check('every chapter card (later planets) was skipped by a tap', chapterSkips === LAST - 1, String(chapterSkips));
+  check('items scale: the item level on the last planet is above the first', levelsByPlanet[LAST - 1] > levelsByPlanet[0] && levelsByPlanet[0] > 0, levelsByPlanet.join(','));
   check('both side tickets paid', sideDone === 2, String(sideDone));
 
   // ---- the return ticket, the case closed, free travel ----
@@ -327,20 +329,20 @@ async function leg(browser, orient) {
   await page.locator('.ticket-sheet .tk-travel').waitFor({ state: 'visible', timeout: 4000 });
   const rows = await ev(() => document.querySelectorAll('.ticket-sheet .tk-travel-row[data-planet]').length);
   await shot('06-free-travel');
-  await page.locator('.ticket-sheet .tk-travel-row[data-planet="4"] button').click({ timeout: 3000 });
+  await page.locator(`.ticket-sheet .tk-travel-row[data-planet="${LAST - 1}"] button`).click({ timeout: 3000 });
   await sleep(1000);
   const trav = await ev(() => {
     const s = window.__game.state();
     return { screen: window.__game.screen(), plan: s?.plan ?? null, accepted: s?.phase === 'base' && s?.pageIndex === 0, sheet: !!document.querySelector('.ticket-sheet') };
   });
   await skipCard(1200);
-  check('free travel offers nine planets; a tap on planet 5 accepts a travel ticket there', rows === 9 && trav.plan?.kind === 'travel' && trav.plan?.planet === 4 && trav.accepted && !trav.sheet, JSON.stringify({ rows, trav }));
+  check('free travel offers the campaign planets; a tap on the last planet accepts a travel ticket there', rows === LAST && trav.plan?.kind === 'travel' && trav.plan?.planet === LAST - 1 && trav.accepted && !trav.sheet, JSON.stringify({ rows, trav }));
   await ev(() => window.__game.walkToExit());
   check('the travel ticket runs', await waitScreen('run', 8000));
   await sleep(500);
   await settle();
   const trun = await playRun(false);
-  check('travel on planet 5 keeps the same content: a teczka opens for an item', trun.teczka === 1, JSON.stringify(trun));
+  check('travel on the last planet keeps the same content: a teczka opens for an item', trun.teczka === 1, JSON.stringify(trun));
   check('the travel ticket closes without touching the campaign', (await closeInRun()) && (await ev(() => window.__game.meta().character?.campaign?.caseClosed === true)));
   await sleep(500);
 
@@ -355,7 +357,7 @@ async function leg(browser, orient) {
   });
   const first = saved.find((c) => c.id === c1.active);
   const second = saved.find((c) => c.id !== c1.active);
-  check('after a reload: two files, the first has all nine planets and the case closed, the second is untouched', saved.length === 2 && first?.closed === 9 && first?.caseClosed === true && second?.closed === 0 && second?.caseClosed === false, JSON.stringify(saved));
+  check('after a reload: two files, the first has all campaign planets and the case closed, the second is untouched', saved.length === 2 && first?.closed === LAST && first?.caseClosed === true && second?.closed === 0 && second?.caseClosed === false, JSON.stringify(saved));
 
   // ---- 40 enemies, 5 s of frame times ----
   tag = orient;

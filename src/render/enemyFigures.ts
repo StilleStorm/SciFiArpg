@@ -330,14 +330,15 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   over.append(bubble, markers);
   if (boss) {
     over.append(
-      el('text', { x: 0, y: n2(boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: none` }, [t(`enemies.boss.${boss}.name`).toLocaleUpperCase('pl')]),
+      el('text', { x: 0, y: n2(boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [t(`enemies.boss.${boss}.name`).toLocaleUpperCase('pl')]),
     );
     const variant = bossVariantLine(e);
     if (variant) {
       // the planet's variant of the boss (STORY 8.0): a line of its own under the name, in the narration hand with a paper halo
       const nameY = boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16;
+      const size = readableUnits(11);
       over.append(
-        el('text', { x: 0, y: n2(nameY + 14), 'text-anchor': 'middle', 'font-size': readableUnits(11), 'data-part': 'variant', style: `${FONT.serif}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [t(variant)]),
+        el('text', { x: 0, y: n2(nameY + size + 4), 'text-anchor': 'middle', 'font-size': size, 'data-part': 'variant', style: `${FONT.serif}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [t(variant)]),
       );
     }
   } else if (e.elite) {
