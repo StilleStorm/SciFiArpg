@@ -153,7 +153,7 @@
         "reply": {
           "mechaniczny": "Większy znaczy wolniejszy.",
           "regulaminowy": "Zaległości podlegają archiwizacji, nie przechowywaniu. Archiwum jest w bazie.",
-          "egzystencjalny": "Zaległość nie jest częścią. Nie można nią być."
+          "egzystencjalny": "Zaległość jest brakiem. Brak nie zajmuje miejsca."
         }
       }
     }
@@ -166,7 +166,7 @@
         "3": "Zjawisko lokalne: urządzenia w trakcie aktualizacji. Po usunięciu zjawiska zgłoszenie zostanie eskalowane, czyli przepisane na większy formularz."
       },
       "hero": {
-        "pralka": "Aktualizacja nie pyta urządzenia o zgodę. U mnie też od tego się zaczęło.",
+        "pralka": "Aktualizacja nie pyta urządzenia o zgodę. U mnie też tak się zaczęło.",
         "konsultant": "Eskalacja oznacza przełożonego. Przełożony oznacza dłuższą muzykę.",
         "petlowiec": "Większy formularz wypełniłem w poprzedniej pętli. Odrzucono go z wyprzedzeniem.",
         "kartograf": "Oddział Komisji figuruje na mapie. Mapa jest w aktualizacji. Do jej zakończenia położenie oddziału jest przybliżone.",

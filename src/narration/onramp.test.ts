@@ -40,6 +40,14 @@ describe('on-ramp', () => {
     b.on.tick(WALK_AFTER_S + 1);
     expect(b.said).toHaveLength(0);
   });
+  it('words the walk note for the steering in force', () => {
+    const bus = createBus();
+    const said: string[] = [];
+    const on = bindOnramp(bus, { say: (x) => (said.push(x), said.length), getState: () => stateAt(0, 0), firstTicket: () => true, steering: () => 'tap' });
+    on.tick(WALK_AFTER_S + 0.1);
+    expect(said).toEqual([t('narration.onramp.walkTap')]);
+    expect(t('narration.onramp.walkTap')).not.toBe(t('narration.onramp.walk'));
+  });
   it('is silent once the file has a Historia entry', () => {
     const { bus, said, on } = setup(false);
     on.tick(10);

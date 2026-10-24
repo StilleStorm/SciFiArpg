@@ -19,6 +19,8 @@ export interface OnrampDeps {
   getState(): RunState | null;
   /** True while the file has no Historia entry. */
   firstTicket(): boolean;
+  /** The steering in force: the walk note says a hold-and-drag or a tap. Absent = joystick. */
+  steering?(): 'joystick' | 'tap';
 }
 
 export interface Onramp {
@@ -35,7 +37,8 @@ export function bindOnramp(bus: Bus, deps: OnrampDeps): Onramp {
   const speak = (step: OnrampStep): void => {
     if (said.has(step) || !deps.firstTicket()) return;
     said.add(step);
-    deps.say(t(`narration.onramp.${step}`));
+    const key = step === 'walk' && deps.steering?.() === 'tap' ? 'walkTap' : step;
+    deps.say(t(`narration.onramp.${key}`));
   };
 
   bus.on('run:started', () => {

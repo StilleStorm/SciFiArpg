@@ -561,7 +561,7 @@ const printNote = (text: string, correction = false): number => {
   bus.emit('footnote:added', { n, text, correction });
   return n;
 };
-const asystent = bindAsystent(bus, { say: printNote, getState: () => game.state, firstTicket: () => meta.history.length === 0 });
+const asystent = bindAsystent(bus, { say: printNote, getState: () => game.state, firstTicket: () => meta.history.length === 0, steering: () => effectiveSteering(meta.settings, currentOrient()) });
 bus.on('footnote', (e) => printNote(e.text, e.correction === true)); // the finale's duel of footnotes prints its corrections as corrections
 // Sound: the bindings are the only place where events meet sounds (src/audio/bindings.ts).
 const audio = createAudio(bus, { getState: () => game.state, freeze: (ms) => loop.freeze(ms) });

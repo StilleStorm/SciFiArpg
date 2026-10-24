@@ -153,7 +153,7 @@
   },
   "law_reverse_start": {
     "ok": [
-      "Godzina 17:00. Czas płynie wstecz. Wrogowie zostali o tym poinformowani."
+      "Godzina 17:00. Czas płynie wstecz. Przeciwnicy zostali o tym poinformowani."
     ],
     "bad": [
       "Czas płynie wstecz od dwudziestu minut."
@@ -169,10 +169,11 @@
     ]
   },
   "onramp": {
-    "walk": "Przemieszczanie: dotknij strony lub przytrzymaj kciuk po lewej stronie. Zgłoszenie nie obejmuje miejsc, do których nie dotarto.",
-    "attack": "Najbliższe urządzenie zostaje zaatakowane z urzędu. Zgłaszający nie musi go wskazywać.",
-    "rebut": "Zarzut przekreślono. Zarzut przekreśla się odpowiedzią tego samego rodzaju, co on sam. Inne odpowiedzi także zostaną rozpatrzone, lecz słabiej.",
-    "update": "Aktualizacja jest gotowa. Dotknij napisu o aktualizacji i wybierz jedną nowość. Pozostałe zostaną usunięte.",
-    "potw": "Potwierdzenie przyjęto. Przy pełnej racji zostaje w aktach i można je wykorzystać dotknięciem w marginesie."
+    "walk": "Przemieszczanie: przytrzymaj kciuk na stronie i przesuń go w kierunku celu. Miejsca, do których nie dotarto, nie są objęte zgłoszeniem.",
+    "walkTap": "Przemieszczanie: dotknij miejsca na stronie, do którego należy się udać. Miejsca, do których nie dotarto, nie są objęte zgłoszeniem.",
+    "attack": "Najbliższe urządzenie atakuje się z urzędu. Wskazywać go nie trzeba.",
+    "rebut": "Tezę przekreślono. Tezę przekreśla się odpowiedzią tego samego rodzaju. Odpowiedź innego rodzaju jest nie na temat i liczy się zwyczajnie.",
+    "update": "Aktualizacja czeka. Dotknij napisu „aktualizacja dostępna” i wybierz jedną nowość. Pozostałe zostaną usunięte w przyszłej wersji.",
+    "potw": "Potwierdzenie przyjęto. Przy pełnej racji trafia do akt. Wykorzystuje się je dotknięciem notatki „Potw.” na marginesie."
   }
 }

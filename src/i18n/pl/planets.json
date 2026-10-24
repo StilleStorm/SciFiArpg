@@ -16,7 +16,7 @@
   },
   "priority": {
     "niski": { "name": "Niski", "hint": "Zgłoszenie zostanie rozpatrzone w wolnej chwili. Przeciwnicy również." },
-    "normalny": { "name": "Normalny", "hint": "Standardowy tryb rozpatrywania." },
+    "normalny": { "name": "Normalny", "hint": "Standardowy tryb rozpatrywania. Odstępstwa zgłasza się osobno." },
     "wysoki": { "name": "Wysoki", "hint": "Zgłoszenie oznaczono jako pilne. Pilność dotyczy także przeciwników." },
     "krytyczny": { "name": "Krytyczny", "hint": "Zgłoszenie krytyczne. Gwarancji nie udzielamy." }
   }

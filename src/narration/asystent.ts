@@ -112,6 +112,8 @@ export interface AsystentDeps {
   getState(): RunState | null;
   /** True while the file has no Historia entry: the on-ramp notes (narration/onramp.ts) are written. Absent = never. */
   firstTicket?(): boolean;
+  /** The steering in force, for the on-ramp's walk note. */
+  steering?(): 'joystick' | 'tap';
 }
 
 export interface Asystent {
@@ -136,7 +138,7 @@ export function bindAsystent(bus: Bus, deps: AsystentDeps): Asystent {
   let fromBase = false;
   let idle = 0;
   const families = new Set<string>();
-  const onramp = bindOnramp(bus, { say: (text) => deps.say(text), getState: deps.getState, firstTicket: () => deps.firstTicket?.() ?? false });
+  const onramp = bindOnramp(bus, { say: (text) => deps.say(text), getState: deps.getState, firstTicket: () => deps.firstTicket?.() ?? false, steering: () => deps.steering?.() ?? 'joystick' });
 
   const fresh = (seed: number, k: string): void => {
     narrator = createNarrator(createRng(seed).fork('narration'), deps.say);
