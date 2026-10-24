@@ -21,6 +21,9 @@ export const REPLY_HEAD_START = 0.1;
 /** How far wearing it down thins it out, on top of the replies. */
 export const WEAR_THINNING = 0.35;
 
+/** How far above the desk's centre the closing stamp lands: past the desk's top edge (52), the struck stations' "skreślono" and half the stamp. */
+export const STAMP_ABOVE_DESK = 140;
+
 const clampE = (v: number): number => Math.min(1, Math.max(EXISTENCE_FLOOR, v));
 
 /** The existence it should have now: the replies' share minus what the wear takes. */
@@ -59,7 +62,8 @@ export function tickLast(s: RunState, bus: Bus, f: Finale, e: Enemy): boolean {
  */
 export function closeCase(s: RunState, bus: Bus, f: Finale, e: Enemy): void {
   f.stage = 'done';
-  bus.emit('stamp', { text: t('story.finale.phase3.stamp'), x: e.x, y: e.y - 60 });
+  // on clean paper above the desk, not over its hatching; where the view has no room above it (landscape), below it (`away`: clear of the desk)
+  bus.emit('stamp', { text: t('story.finale.phase3.stamp'), x: f.desk.x, y: f.desk.y - STAMP_ABOVE_DESK, away: { x: f.desk.x, y: f.desk.y } });
   silenceSpor(s, e);
   killEnemy(s, bus, e);
   bus.emit('footnote', { text: t('story.finale.phase3.close') });

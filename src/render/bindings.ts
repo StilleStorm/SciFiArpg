@@ -96,7 +96,10 @@ export function bindFx(
   bus.on('player:hit', (e) => hitBlot(e.x, e.y, e.crit));
   bus.on('enemy:died', (e) => {
     const g = views.detach(e.id);
-    if (g) strike(g);
+    if (!g) return;
+    // the struck do not speak: a detached figure is no longer patched, so its bubbles (claim, Spór comment) would linger over the stamp
+    for (const b of g.querySelectorAll('.bubble')) b.classList.add('bubble-off');
+    strike(g);
   });
   bus.on('page:edge', (e) => {
     const m = marginSpot(e.side, e.x, e.y, page() ?? RUN_PAGE);

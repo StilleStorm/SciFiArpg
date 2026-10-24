@@ -1,4 +1,5 @@
 import { t } from '../i18n';
+import { tween } from '../render/tween';
 import { h } from './dom';
 import { openPopup, type Popup } from './popup';
 
@@ -6,6 +7,11 @@ const VISIBLE = 3;
 const HISTORY = 10;
 /** A note longer than this (characters) is shown whole: the slip grows upward for it until the next note (only the finale's closing note is). */
 export const LONG_NOTE = 200;
+/**
+ * How long a long note is alone on the slip (ms): notes printed meanwhile (the unique picked up after the finale's stamp) wait and
+ * are printed after it, so the long one is read whole and last. They are in the history sheet at once.
+ */
+export const LONG_HOLD_MS = 12000;
 /** A click this soon after the history opened is the tail of the tap that opened it. */
 const OPEN_GUARD_MS = 350;
 
@@ -41,6 +47,9 @@ export function createFootnotes(root: HTMLElement): Footnotes {
   const log: { n: number; text: string }[] = [];
   let count = 0;
   let sheet: Popup | null = null;
+  /** A long note is alone on the slip until this tween (render frames, no game state) lets the notes that waited for it through; its cancel. */
+  let held: (() => void) | null = null;
+  const waiting: { n: number; text: string }[] = [];
 
   const line = (n: number, text: string): HTMLElement => {
     const p = h('p', 'fn');
@@ -70,19 +79,43 @@ export function createFootnotes(root: HTMLElement): Footnotes {
   // the print size (settings) zooms the list and grows the slip: refit then too
   if (typeof ResizeObserver !== 'undefined') new ResizeObserver(queuePrune).observe(list);
 
+  const show = (n: number, text: string): void => {
+    const p = line(n, text);
+    p.classList.add('fresh');
+    p.addEventListener('animationend', queuePrune, { once: true }); // measured again once the note has settled
+    const long = text.length > LONG_NOTE;
+    el.classList.toggle('fn-long', long);
+    if (long) {
+      list.replaceChildren(p); // alone, whole, and the last thing read
+      held = tween(1, () => undefined, { delay: LONG_HOLD_MS, done: () => release(true) });
+    } else {
+      list.append(p);
+      while (list.children.length > VISIBLE) list.firstElementChild?.remove();
+    }
+    queuePrune();
+  };
+  /** End the hold: print what waited (`print`), or drop it (a new slip). */
+  function release(print: boolean): void {
+    held?.();
+    held = null;
+    const w = waiting.splice(0);
+    if (!print) return;
+    for (const x of w) {
+      // a long note among them holds the slip again: the rest wait for it in turn
+      if (held === null) show(x.n, x.text);
+      else waiting.push(x);
+    }
+  }
+
   const fn: Footnotes = {
     el,
     add(text) {
       count++;
       log.push({ n: count, text });
       if (log.length > 60) log.shift();
-      const p = line(count, text);
-      p.classList.add('fresh');
-      el.classList.toggle('fn-long', text.length > LONG_NOTE);
-      p.addEventListener('animationend', queuePrune, { once: true }); // measured again once the note has settled
-      list.append(p);
-      while (list.children.length > VISIBLE) list.firstElementChild?.remove();
-      queuePrune();
+      // a long note is being read: what comes meanwhile (the unique picked up after the finale's stamp) waits its turn; it is in the history at once
+      if (held) waiting.push({ n: count, text });
+      else show(count, text);
       return count;
     },
     reset() {
@@ -90,6 +123,7 @@ export function createFootnotes(root: HTMLElement): Footnotes {
       log.length = 0;
       list.replaceChildren();
       el.classList.remove('fn-long');
+      release(false);
       sheet?.close();
     },
     closeHistory() {
