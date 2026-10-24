@@ -6,6 +6,7 @@ import type { Camera } from './render/camera';
 import { bindEnemyFx, enemyBuilder } from './render/enemyFigures';
 import { createViews, type Views } from './render/view';
 import { groundBuilders } from './render/figures';
+import { drawFinalePage } from './render/finale';
 import { drawPage } from './render/obstacles';
 import { drawBase, type BaseView } from './render/stations';
 import { questPlanet } from './world/quests';
@@ -20,6 +21,7 @@ import { createSim } from './systems/step';
 import { installItems } from './items/install';
 import { createRun, type RunOptions, type RunState } from './world/run';
 import { createHeroLayer, type HeroLayer } from './heroes/layer';
+import './enemies/anomalia/register'; // the five faces of the Anomalia, after the heroes (enemies/anomalia/state.ts says why)
 import { heroBuilders, wrapEnemyBuilder } from './render/heroFigures';
 import { bindHeroFx, zoneBuilder } from './render/heroFx';
 import { createUltFx } from './render/ultFx';
@@ -90,6 +92,13 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
     bounds.h = page.h;
   };
 
+  /** Draw the run page into the #page layer: the finale's one page is the base again, struck through (render/finale.ts). */
+  const drawRunPage = (s: RunState): void => {
+    const header = headerFor(s, headerFrame(camera));
+    if (s.plan?.kind === 'final' && s.page.base) drawFinalePage(stage.page, s.page, header, s.plan.planet);
+    else drawPage(stage.page, s.page, header);
+  };
+
   const game: Game = {
     get state() {
       return state;
@@ -128,7 +137,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       fitBounds(s.page);
       camera.snap(s.player.x, s.player.y);
       camera.apply();
-      drawPage(stage.page, s.page, headerFor(s, headerFrame(camera)));
+      drawRunPage(s);
       views.sync(collect(s), s.time * 1000, { drawIn: false }); // they were on the page all along: no drawing in again
     },
     start(seed, opts) {
@@ -151,7 +160,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       baseView = null;
       camera.snap(s.player.x, s.player.y);
       camera.apply();
-      drawPage(stage.page, s.page, headerFor(s, headerFrame(camera)));
+      drawRunPage(s);
       input.setEnabled(true);
       bus.emit('run:started', { seed });
       bus.emit('stamp', { text: t('ui.run.stamp'), x: s.player.x, y: s.player.y - 120 });

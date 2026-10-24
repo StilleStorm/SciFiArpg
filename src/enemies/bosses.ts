@@ -17,6 +17,7 @@ import { BOSS_OF, FAMILY_DEFS, FAMILY_IDS, type BossId, type FamilyId } from './
 import { makeEnemy } from './make';
 import { newRt, rtOf } from './runtime';
 import { placeEnemy } from './spawn';
+import { tickAnomalia } from './anomalia/core';
 
 /** Seconds on the hydrant squares needed to block Weryfikacja, and how long the block lasts. */
 export const GRID_NEED_S = 2;
@@ -172,6 +173,7 @@ export function spawnBoss(s: RunState, family: FamilyId | string): Enemy | null 
 
 /** Per step for a boss (called from the enemy AI, before it moves). */
 export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
+  if (!tickAnomalia(s, e, bus, dt)) return; // the Anomalia of the finale (enemies/anomalia/core.ts) runs its own phases; its first-phase forms go on below
   const rt = rtOf(e);
   const p = s.player;
   const boss = BOSS_OF[e.family];

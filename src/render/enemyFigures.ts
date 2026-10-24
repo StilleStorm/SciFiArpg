@@ -8,6 +8,7 @@ import { createRng } from '../core/rng';
 import type { Bus } from '../core/events';
 import type { Enemy } from '../entities/types';
 import { ENEMY_SCALE, assemble, assembleBoss, layoutAssembly, type Assembly, type Layout } from '../enemies/assemble';
+import { captionKeyOf, faceDrawing, faceHeroOf, facePartsOf, wearsOwnBody } from '../enemies/anomalia/state';
 import { CONFIRM_R, GRID_CELL, GRID_NEED_S, CONFIRM_NEED_S, bossVariantArm, bossVariantLine, gridCellCenter } from '../enemies/bosses';
 import { BOSS_OF, ELITE_SCALE, eliteWord } from '../enemies/families';
 import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsBase';
@@ -67,11 +68,17 @@ interface FigState {
   opacitySig: string;
   progressSig: string;
   hiddenLeg: boolean;
+  /** Planeta Nieistniejaca (finale phase 2): one arc per sector of the body, solid where measured; the mask last written. */
+  partArcs: SVGPathElement[];
+  partsMask: number;
 }
 
 const states = new WeakMap<SVGGElement, FigState>();
 
 function assemblyOf(e: Enemy): Assembly {
+  const hero = faceHeroOf(e); // the Anomalia in the hero's own face (phase 2 of the finale)
+  const face = hero ? faceDrawing(hero, e.seed) : null;
+  if (face) return face;
   return e.boss ? assembleBoss(BOSS_OF[e.family], e.seed) : assemble(e.seed, e.family, e.tier);
 }
 
@@ -167,18 +174,18 @@ function buildBubble(e: Enemy, top: number): SVGGElement {
 /** The boss's Spor comment: a second bubble stacked above the claim's, two lines at most (DESIGN 5.4). */
 const COMMENT_MAX = 26;
 const COMMENT_MAX_LANDSCAPE = 20;
-function buildComment(e: Enemy, bubbleTop: number, key: string): SVGGElement {
+function buildComment(e: Enemy, bubbleTop: number, key: string, params?: Record<string, string | number>): SVGGElement {
   const claim = e.claim ? bubbleBox(wrapClaim(t(e.claim.textKey))) : { w: 0, h: 0 };
   if (currentViewSize().w > currentViewSize().h) {
     // landscape shows only ~520 units of height: a stack of two bubbles would run off the top of the screen, so the comment
     // stands beside the claim at the same height, on the side away from the HUD form (right; left when left-handed, the form moves to the right), narrower
-    const text = t(key);
+    const text = t(key, params);
     const w = bubbleBox(wrapClaim(text, COMMENT_MAX_LANDSCAPE)).w;
     const side = document.querySelector('.lefty') ? -1 : 1;
     return bubbleOf(e, bubbleTop, bubbleTop, text, key, COMMENT_MAX_LANDSCAPE, 'bubble comment', side * (claim.w / 2 + 8 + w / 2));
   }
   // the claim bubble's top edge, then 10 units for the comment's tail; both scale about the same tail point
-  return bubbleOf(e, bubbleTop - 10 - claim.h, bubbleTop, t(key), key, COMMENT_MAX, 'bubble comment');
+  return bubbleOf(e, bubbleTop - 10 - claim.h, bubbleTop, t(key, params), key, COMMENT_MAX, 'bubble comment');
 }
 
 /** One speech bubble: a patch of clean paper with a tail at `top`, italic Garamond, scaled about `pivot` when the camera zooms out. */
@@ -343,7 +350,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   const boss = e.boss ? BOSS_OF[e.family] : null;
   addWash(under, e, hw, H, feet);
   if (boss === 'weryfikacja') buildGrid(under, e);
-  if (boss === 'hipoteza') buildRing(under, e);
+  if (boss === 'hipoteza' && !wearsOwnBody(e)) buildRing(under, e);
 
   const bubbleTop = boss === 'weryfikacja' ? Math.min(top, -GRID_CELL * 1.5 - 2) : top;
   const bubble = buildBubble(e, bubbleTop);
@@ -351,7 +358,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   over.append(bubble, markers);
   if (boss) {
     over.append(
-      el('text', { x: 0, y: n2(boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [t(`enemies.boss.${boss}.name`).toLocaleUpperCase('pl')]),
+      el('text', { x: 0, y: n2(boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [t(captionKeyOf(e) ?? `enemies.boss.${boss}.name`).toLocaleUpperCase('pl')]),
     );
     const variant = bossVariantLine(e);
     if (variant) {
@@ -374,6 +381,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
     over.append(el('path', { 'data-part': 'pack', d: `M${n2(-w)} ${n2(feet + 2)}V${n2(feet + 5.5)}H${n2(w)}V${n2(feet + 2)}`, 'stroke-width': 1 }));
   }
   g.append(under, fig, over);
+  const partArcs = facePartsOf(e) ? measuredArcs(g, e, hw) : [];
   g.dataset['tier'] = String(e.tier);
   const st: FigState = {
     asm,
@@ -408,6 +416,8 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
     opacitySig: '',
     progressSig: '',
     hiddenLeg: false,
+    partArcs,
+    partsMask: -1,
   };
   if (e.claim?.struck) strikeBubble(bubble, false);
   states.set(g, st);
@@ -419,6 +429,8 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
 /** What the bus said about each boss's comment; the figure's patch turns it into a bubble (bindEnemyFx fills it). */
 interface CommentCmd {
   key: string;
+  /** What the comment's text interpolates (`spor:posted.params`). */
+  params?: Record<string, string | number>;
   struck: boolean;
   closed: 'answered' | 'expired' | 'died' | null;
 }
@@ -448,7 +460,7 @@ function syncComment(e: Enemy, st: FigState): void {
       comments.delete(e.id);
       return;
     }
-    st.comment = buildComment(e, st.bubbleTop, c.key);
+    st.comment = buildComment(e, st.bubbleTop, c.key, c.params);
     st.commentKey = c.key;
     st.commentStruck = false;
     st.commentLeaving = false;
@@ -670,7 +682,51 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
   }
 
   syncStatusMarkers(st.markers, e.statuses, { hw: st.hw, top: st.top, feet: st.feet });
-  if (e.boss) syncBossProgress(e, st);
+  if (e.boss && !wearsOwnBody(e)) syncBossProgress(e, st);
+  if (st.partArcs.length > 0) syncMeasured(e, st);
+}
+
+// ---------- the measured sectors of Planeta Nieistniejaca (finale phase 2) ----------
+
+/**
+ * One arc per sector of the body, around it, in the surveyor's hand: dotted while the sector is unmeasured (a blow there does
+ * nothing), solid with a tick once the laser has measured it. Sector k covers atan2 from -pi + (k-1) * 2pi/n (faces/planeta.ts
+ * `partAt`); the group is not mirrored with the figure, so the arcs stay where the sectors are on the page.
+ */
+function measuredArcs(g: SVGGElement, e: Enemy, hw: number): SVGPathElement[] {
+  const n = Math.max(1, (facePartsOf(e)?.length ?? 1) - 1);
+  const r = Math.max(e.r, hw) + 6;
+  const gap = 0.07;
+  const grp = el('g', { 'data-part': 'measured', fill: 'none' });
+  const arcs: SVGPathElement[] = [];
+  for (let k = 0; k < n; k++) {
+    const a0 = -Math.PI + (k * 2 * Math.PI) / n + gap;
+    const a1 = -Math.PI + ((k + 1) * 2 * Math.PI) / n - gap;
+    const am = (a0 + a1) / 2;
+    const d =
+      `M${n2(r * Math.cos(a0))} ${n2(r * Math.sin(a0))}A${n2(r)} ${n2(r)} 0 0 1 ${n2(r * Math.cos(a1))} ${n2(r * Math.sin(a1))}` +
+      `M${n2((r - 4) * Math.cos(am))} ${n2((r - 4) * Math.sin(am))}L${n2((r + 4) * Math.cos(am))} ${n2((r + 4) * Math.sin(am))}`;
+    const p = el('path', { d, 'stroke-width': 1, 'stroke-dasharray': '1.5 5' });
+    arcs.push(p);
+    grp.append(p);
+  }
+  g.append(grp);
+  return arcs;
+}
+
+function syncMeasured(e: Enemy, st: FigState): void {
+  const parts = facePartsOf(e);
+  if (!parts) return;
+  let mask = 0;
+  for (let k = 1; k < parts.length; k++) if (parts[k]) mask |= 1 << (k - 1);
+  if (mask === st.partsMask) return;
+  st.partsMask = mask;
+  st.partArcs.forEach((p, k) => {
+    const real = (mask & (1 << k)) !== 0;
+    p.setAttribute('stroke-width', real ? '2.6' : '1'); // measured: a firm surveyor's line, unmeasured: a dotted guess
+    if (real) p.removeAttribute('stroke-dasharray');
+    else p.setAttribute('stroke-dasharray', '1.5 5');
+  });
 }
 
 export const enemyBuilder: Builder<Enemy> = {
@@ -690,7 +746,7 @@ export function bindEnemyFx(bus: Bus): () => void {
   const rng = createRng(0xe4e);
   const offs = [
     bus.on('enemy:offTopic', (ev) => marginNote(t('combat.offTopic'), ev.x + 6, ev.y - 34, rng.range(-6, 4), 1100)),
-    bus.on('spor:posted', (ev) => comments.set(ev.id, { key: ev.commentKey, struck: false, closed: null })),
+    bus.on('spor:posted', (ev) => comments.set(ev.id, { key: ev.commentKey, ...(ev.params ? { params: ev.params } : {}), struck: false, closed: null })),
     bus.on('spor:answered', (ev) => {
       const c = comments.get(ev.id);
       if (c && ev.right) c.struck = true;

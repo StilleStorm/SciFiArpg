@@ -10,6 +10,7 @@ import type { Enemy, Player } from '../entities/types';
 import { resolveMove } from '../world/pages';
 import { sporMul } from '../combat/spor';
 import type { RunState } from '../world/run';
+import { anomaliaHit } from './anomalia/gate';
 import { POUFNY_DMG_MUL, hasAffix, ownsAffix } from './elites';
 import { rtOf } from './runtime';
 
@@ -33,7 +34,7 @@ export function modifyDamage(
   amount: number,
   crit: boolean,
   type: DamageType | undefined,
-  s?: Pick<RunState, 'spor'>,
+  s?: RunState,
 ): { amount: number; crit: boolean } {
   if (amount <= 0) return { amount, crit };
   let a = amount;
@@ -63,7 +64,9 @@ export function modifyDamage(
     if (hasAffix(defender, 'poufny') && !answered) a *= POUFNY_DMG_MUL; // confidential: only an answer to the claim goes through whole
   }
   a *= statusDamageTakenMul(defender);
-  return { amount: Math.max(1, Math.round(a)), crit: c };
+  const out = Math.max(1, Math.round(a));
+  // the Anomalia (STORY 3): no blow ends a stage, a face may refuse it (enemies/anomalia/gate.ts)
+  return { amount: defender.kind === 'enemy' && s ? anomaliaHit(s, defender, out) : out, crit: c };
 }
 
 /** Move an enemy to a random spot 140-200 units away (elite domniemany). */

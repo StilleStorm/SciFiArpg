@@ -9,6 +9,7 @@ import { applyLaw, neutralLaw, type LawFlags, type LawId } from './laws';
 import type { Tunnel } from './tunnel';
 import { ticketForPlan, ticketForSeed, type TicketInfo } from './ticket';
 import { applyPlanetGates } from './gate';
+import { finalePage } from './finale';
 import { mixForPlanet, planetDef, type CampaignState, type TicketPlan } from './campaign';
 import type { QuestState } from './quests';
 import type { ActiveBuff } from './contentKinds';
@@ -112,7 +113,9 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
   const pageCount = opts.pageCount ?? opts.resume?.pageCount;
   if (lawId) ticket.lawId = lawId;
   if (pageCount) ticket.pageCount = pageCount;
-  const pages = generateRunPages(rng, ticket.pageCount, plan ? planetDef(plan.planet).locations : undefined, plan ? planetDef(plan.planet).locationSplit : undefined);
+  const final = plan?.kind === 'final'; // the finale is one page: planet 1's base, struck (world/finale.ts)
+  if (final) ticket.pageCount = 1;
+  const pages = final ? [finalePage(seed)] : generateRunPages(rng, ticket.pageCount, plan ? planetDef(plan.planet).locations : undefined, plan ? planetDef(plan.planet).locationSplit : undefined);
   if (plan) applyPlanetGates(pages, planetDef(plan.planet).gates);
   const runPage = pages[0] ?? generateRunPages(rng, 1)[0];
   if (!runPage) throw new Error('no page');

@@ -17,6 +17,8 @@ export const MEASURED_S = 7;
 /** Inner disc (part 0) as a fraction of the body's radius, and how far past the body a line still counts. */
 export const CENTRE_FRAC = 0.38;
 export const REACH_FRAC = 1.25;
+/** Seconds between two "Istnieję w nawigacji" margin notes (the laser measures about once a second; the bubble already says it). */
+export const NOTE_EVERY = 5;
 
 interface St {
   /** Seconds each part stays real. */
@@ -24,8 +26,10 @@ interface St {
   claim: Claim | undefined;
   unsub: (() => void) | null;
   marks: number;
+  /** Run time of the last margin note. */
+  noteAt: number;
 }
-const store = faceStore<St>(() => ({ left: new Float64Array(PARTS), claim: undefined, unsub: null, marks: 0 }));
+const store = faceStore<St>(() => ({ left: new Float64Array(PARTS), claim: undefined, unsub: null, marks: 0, noteAt: -99 }));
 
 /** Which part a world point is on, or -1 when it is off the body altogether. Part 0 is the centre, 1..6 the sectors. */
 export function partAt(e: Enemy, x: number, y: number): number {
@@ -66,15 +70,19 @@ export const planeta: AnomaliaFace = {
   heroId: KARTOGRAF,
   sporAnswer: 'mechaniczny',
   figure: FIGURE_IDS.planeta,
-  start(_s: RunState, e, bus) {
+  start(s: RunState, e, bus) {
     const st = store.get(e);
     st.left.fill(0);
     st.marks = 0;
+    st.noteAt = -99;
     st.claim = setFaceClaim(e, KARTOGRAF, 'mechaniczny');
     st.unsub?.();
     st.unsub = bus.on('attack:started', (a) => {
       if (a.attacker !== 'player' || !a.laser) return;
-      if (measure(e, a.laser.sx, a.laser.sy, a.laser.ex, a.laser.ey) > 0) sayLine(bus, KARTOGRAF, e.x, e.y - 100);
+      if (measure(e, a.laser.sx, a.laser.sy, a.laser.ex, a.laser.ey) > 0 && s.time - st.noteAt >= NOTE_EVERY) {
+        st.noteAt = s.time;
+        sayLine(bus, KARTOGRAF, e.x, e.y - 100);
+      }
     });
   },
   tick(_s, e, _bus, dt) {
@@ -84,6 +92,7 @@ export const planeta: AnomaliaFace = {
   damageMul(_s, e, x, y) {
     return isReal(e, partAt(e, x, y)) ? 1 : 0;
   },
+  parts: realParts,
   done: (_s, e) => hpFraction(e) <= FACE_END_FRACTION,
   stop(_s, e) {
     const st = store.get(e);

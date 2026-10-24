@@ -15,6 +15,8 @@ import { uniqueNote } from '../items/uniques';
 import { rollPotwierdzenie, takePotwierdzenie, tickRecovery } from './recovery';
 import type { DropSource, Item, ItemTier } from '../items/types';
 import { nextId, type RunState } from '../world/run';
+import { isRetired } from '../enemies/anomalia/state';
+import { finalUnique } from '../world/finale';
 import type { PriorityId } from '../world/campaign';
 
 interface DropTable {
@@ -115,13 +117,13 @@ export function dropLoot(s: RunState, x: number, y: number, source: DropSource):
     let tier: ItemTier;
     if (source === 'boss' && i === 0) {
       // The first boss drop is always at least rzadki; the final ticket's boss always hands over a unique.
-      // SEAM: ITEMS 6.2 wants the final boss's unique to be one not yet archived (needs the archive's unique list in RunState).
+      // the final ticket's boss hands over a unique the character has not archived yet (world/finale.ts finalUnique)
       const unique = s.plan?.kind === 'final' || rng.chance(Math.min(1, BOSS_UNIQUE_CHANCE * (priority === 'krytyczny' ? 2 : 1)));
       tier = unique ? 'unikatowy' : 'rzadki';
     } else {
       tier = rollDropTier(rng, DROP_TIER_WEIGHTS[source], priority, law.lootTierBonus);
     }
-    const item = rollItem(rng, { level, source, tier });
+    const item = (source === 'boss' && i === 0 && tier === 'unikatowy' && s.plan?.kind === 'final' ? finalUnique(s, rng, level) : null) ?? rollItem(rng, { level, source, tier });
     dropItemPickup(s, x, y, item);
     if (law.lootPairs) {
       const twin = rollItem(rng, { level, tier: TIER_DOWN[item.tier], ...(item.uniqueId ? {} : { slot: item.slot }) });
@@ -216,6 +218,7 @@ export function bindLoot(bus: Bus, getState: () => RunState | null): void {
   bus.on('enemy:died', (e) => {
     const s = getState();
     if (!s) return;
+    if (isRetired(s, e.id)) return; // a body of the Anomalia that was struck and left: nothing falls (enemies/anomalia)
     const tier = e.tier ?? 'common';
     dropLoot(s, e.x, e.y, tier);
     const named = claimNamedDrop(s, e.id);

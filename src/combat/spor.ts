@@ -28,6 +28,8 @@ export interface SporPrompt {
   replies: readonly [SporReply, SporReply, SporReply];
   /** Index into `replies` of the one that matches the comment. */
   correct: 0 | 1 | 2;
+  /** Values the comment's text interpolates (the finale's `{number}`); absent for the family tables. */
+  params?: Record<string, string | number>;
 }
 
 export interface SporState {
@@ -99,12 +101,8 @@ export function storyEntry(planet: number | undefined, boss: BossId, phase: 1 | 
   return { commentKey: `${base}.comment`, answer: answers[phase - 1] ?? 'mechaniczny', replies: [reply(a ?? 'mechaniczny'), reply(b ?? 'regulaminowy'), reply(c ?? 'egzystencjalny')] };
 }
 
-/**
- * The prompt of a boss and phase, the three replies shuffled with `rng`; `correct` points at the one that answers the comment.
- * With a `planet` that has its own comments (`storyEntry`) they replace the family's.
- */
-export function promptFor(boss: BossId, phase: 1 | 2, rng: Rng, planet?: number): SporPrompt {
-  const src = storyEntry(planet, boss, phase) ?? SPOR_PROMPTS[boss][phase - 1] ?? SPOR_PROMPTS[boss][0];
+/** The three replies of an entry shuffled with `rng`; `correct` points at the one that answers the comment. */
+export function promptFromEntry(src: SporEntry, rng: Rng): SporPrompt {
   const list = [...src.replies];
   for (let i = list.length - 1; i > 0; i--) {
     const j = rng.int(0, i);
@@ -121,6 +119,14 @@ export function promptFor(boss: BossId, phase: 1 | 2, rng: Rng, planet?: number)
   const at = replies.findIndex((r) => r.type === src.answer);
   const correct: 0 | 1 | 2 = at === 1 ? 1 : at === 2 ? 2 : 0;
   return { commentKey: src.commentKey, replies, correct };
+}
+
+/**
+ * The prompt of a boss and phase, the three replies shuffled with `rng`; `correct` points at the one that answers the comment.
+ * With a `planet` that has its own comments (`storyEntry`) they replace the family's.
+ */
+export function promptFor(boss: BossId, phase: 1 | 2, rng: Rng, planet?: number): SporPrompt {
+  return promptFromEntry(storyEntry(planet, boss, phase) ?? SPOR_PROMPTS[boss][phase - 1] ?? SPOR_PROMPTS[boss][0], rng);
 }
 
 const sporOf = (s: RunState): SporState => {
@@ -152,6 +158,26 @@ export function postSpor(s: RunState, bus: Bus, boss: Enemy, phase: 1 | 2): bool
   sp.ttl = SPOR_TTL_S;
   bus.emit('spor:posted', { id: boss.id, phase, commentKey: prompt.commentKey, replies: prompt.replies.map((r) => r.textKey) });
   return true;
+}
+
+/**
+ * The finale's own comment (enemies/anomalia/core.ts): `prompt` is posted by `boss` as if it were its comment of `phase`. A body
+ * of the Anomalia never also posts the family's comments, so this marks the boss as done. A prompt still up is replaced.
+ */
+export function postPromptSpor(s: RunState, bus: Bus, boss: Enemy, phase: 1 | 2, prompt: SporPrompt): void {
+  const sp = sporOf(s);
+  sp.answered[boss.id] = 2;
+  close(sp, bus, 'expired');
+  sp.prompt = prompt;
+  sp.bossId = boss.id;
+  sp.phase = phase;
+  sp.ttl = SPOR_TTL_S;
+  bus.emit('spor:posted', { id: boss.id, phase, commentKey: prompt.commentKey, replies: prompt.replies.map((r) => r.textKey), ...(prompt.params ? { params: prompt.params } : {}) });
+}
+
+/** The boss will post no comment of the family's table (a body of the Anomalia that argues in the story's words or not at all). */
+export function silenceSpor(s: RunState, boss: Enemy): void {
+  sporOf(s).answered[boss.id] = 2;
 }
 
 /**

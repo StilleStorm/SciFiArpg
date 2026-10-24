@@ -34,7 +34,8 @@ export interface GameEvents {
   'enemy:died': { id: number; x: number; y: number; tier?: 'common' | 'elite' | 'boss'; family?: 'urzadzenia' | 'powiadomienia' | 'wygenerowane' };
   'pickup:taken': { id: number; number: number };
   'page:edge': { x: number; y: number; side: Side };
-  footnote: { text: string };
+  /** `correction`: the Asystent corrects an earlier note (printed with the carriage-return sound, like the corrections of wrong notes); the finale's phase 1 uses it. */
+  footnote: { text: string; correction?: boolean };
   /** A footnote was printed with number `n`; `correction` = the Asystent's later correction of a wrong note (audio: typewriter key / carriage return). */
   'footnote:added': { n: number; text: string; correction: boolean };
   /**
@@ -85,7 +86,7 @@ export interface GameEvents {
   /** A boss fell (also reported through enemy:died). */
   'boss:died': { id: number; family: 'urzadzenia' | 'powiadomienia' | 'wygenerowane'; x: number; y: number };
   /** A boss posted a comment (DESIGN 5.4, combat/spor.ts): `commentKey` and the three reply keys (the types are in `RunState.spor.prompt`). */
-  'spor:posted': { id: number; phase: 1 | 2; commentKey: string; replies: string[] };
+  'spor:posted': { id: number; phase: 1 | 2; commentKey: string; replies: string[]; params?: Record<string, string | number> };
   /** The player picked reply `index` of the prompt; `right` = it matched the comment. */
   'spor:answered': { id: number; index: number; right: boolean };
   /** The prompt is gone: answered (right or wrong), run out of time (also when a later phase replaced it), or the boss fell. */

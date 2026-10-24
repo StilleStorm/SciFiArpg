@@ -291,7 +291,7 @@ function drawSquare(r: Rng): SVGGElement {
   return g;
 }
 
-function drawStation(st: Station, planet: number): SVGGElement {
+export function drawStation(st: Station, planet: number): SVGGElement {
   const r = createRng(977 + Math.round(st.x) * 31 + Math.round(st.y)).fork(st.id);
   const seed = Math.round(st.x * 13 + st.y * 7);
   const body = ((): SVGGElement => {
@@ -314,7 +314,7 @@ function drawStation(st: Station, planet: number): SVGGElement {
   return g;
 }
 
-function drawProp(p: BaseProp): SVGGElement {
+export function drawProp(p: BaseProp): SVGGElement {
   const r = createRng(p.seed);
   const body = ((): SVGGElement => {
     switch (p.kind) {

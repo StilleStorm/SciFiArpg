@@ -6,8 +6,8 @@ import type { Enemy } from '../../../entities/types';
 import { t } from '../../../i18n';
 import type { HeroId } from '../../../heroes';
 
-/** Phase 2 is over for a face once the Anomalia is down to this fraction of its racja (the core may end it earlier). */
-export const FACE_END_FRACTION = 0.4;
+/** Phase 2 is over once the Anomalia is down to this fraction of its racja: the core's threshold (`../state.ts`), one number for both. */
+export { FACE_END_FRACTION } from '../state';
 
 export const hpFraction = (e: Enemy): number => (e.hpMax > 0 ? e.hp / e.hpMax : 0);
 
@@ -23,9 +23,12 @@ export function restoreClaim(e: Enemy, before: Claim | undefined): void {
   else delete e.claim;
 }
 
+/** How long the face's margin line stays (ms: `margin:note.ttl` is in milliseconds). */
+export const SAY_TTL_MS = 2400;
+
 /** The face's line as a note in the margin next to the Anomalia (a sober way to show the mechanic fired). */
 export function sayLine(bus: Bus, heroId: HeroId, x: number, y: number): void {
-  bus.emit('margin:note', { text: t(`story.finale.face.${heroId}.line`), x, y, ttl: 2.4 });
+  bus.emit('margin:note', { text: t(`story.finale.face.${heroId}.line`), x, y, ttl: SAY_TTL_MS });
 }
 
 /** A per-enemy store; `get` creates it on first use. State never lives on RunState. */

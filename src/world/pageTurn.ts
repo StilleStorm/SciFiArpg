@@ -21,6 +21,7 @@ import { easeIn, tween } from '../render/tween';
 import type { Views } from '../render/view';
 import { pageEntryAll } from '../items/absurd';
 import { recomputeStats } from '../items/stats';
+import { startFinale } from './finale';
 import { gateKey, gateLiftKey, stepGate } from './gate';
 import { canLeave, onPageEntered } from './laws';
 import { atExit } from './pages';
@@ -86,6 +87,10 @@ export function entryView(s: RunState): { x0: number; y0: number; x1: number; y1
 /** Fill the current page (and, on the last page, put the boss on it). Clears `s.populate`. */
 export function populatePage(s: RunState, bus: Bus): void {
   s.populate = false;
+  if (s.plan?.kind === 'final') {
+    startFinale(s, bus); // the finale has no waves: the Anomalia takes the desk (enemies/anomalia/core.ts)
+    return;
+  }
   const r = s.rngs.spawn;
   const waves = planWaves(s);
   // an 'elite' gate: its one named elite is put first, in view of the entry and clear of the barrier corner (enemies/spawn.ts)
@@ -193,7 +198,7 @@ export function bindRunEvents(bus: Bus, getState: () => RunState | null): () => 
     const s = getState();
     if (!s || s.victoryAt !== null) return;
     s.victoryAt = s.time + 2.8;
-    bus.emit('stamp', { text: t('screens.victoryStamp'), x: e.x, y: e.y - 60 });
+    if (s.plan?.kind !== 'final') bus.emit('stamp', { text: t('screens.victoryStamp'), x: e.x, y: e.y - 60 }); // the final ticket's stamp is the case's own (phase 3)
   });
 }
 

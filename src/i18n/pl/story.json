@@ -341,6 +341,7 @@
       }
     },
     "phase3": {
+      "name": "Asystent w wersji 0.9",
       "meet": "Anomalia istnieje w stopniu, w jakim zgłoszenie uznaje się za otwarte. Zgłoszenie jest otwarte od trzech planet.",
       "spor": {
         "comment": "Zgłoszenie jest otwarte. Dopóki jest otwarte, jestem potrzebny.",

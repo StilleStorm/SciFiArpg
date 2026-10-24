@@ -31,6 +31,11 @@ export interface AnomaliaFace {
   stop(s: RunState, e: Enemy, bus: Bus): void;
   /** Part-library id of the face's figure (enemies/parts*), drawn while phase 2 runs. */
   figure: string;
+  /**
+   * Optional: which parts of the body are real now, part 0 the centre and 1..n equal sectors by angle from the left (atan2 + pi),
+   * for the renderer (render/enemyFigures.ts draws a solid arc where real, a dotted one elsewhere). Planeta Nieistniejaca.
+   */
+  parts?(e: Enemy): readonly boolean[];
 }
 
 const FACES = new Map<HeroId, AnomaliaFace>();

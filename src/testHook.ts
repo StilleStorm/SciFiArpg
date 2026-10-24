@@ -40,6 +40,7 @@ import { createContentHook, type ContentHook } from './world/content';
 import { createQuestHook, type QuestHook } from './world/quests';
 import { gateHolds, installGate, type GateKind } from './world/gate';
 import { redrawGate } from './render/obstacles';
+import { createFinaleHook, type FinaleHook } from './enemies/anomalia/hook';
 
 export interface GateHook {
   /** Put a gate on the current run page (default) or page `opts.page`; the barrier is drawn at once. False without an exit or when one is there already. */
@@ -143,6 +144,8 @@ export interface GameHook {
   quests: QuestHook;
   /** Page gates (world/gate.ts), the fixture of S11a: no real planet carries one yet. */
   gate: GateHook;
+  /** The finale (S15, enemies/anomalia/hook.ts): start the final ticket for a hero, read its stage, skip to a phase. */
+  finale: FinaleHook;
   /**
    * Save the orientation setting and ask for the lock where there is one. The layout itself follows the window:
    * in a browser test change the viewport (`page.setViewportSize`) to flip `data-orient`.
@@ -192,7 +195,7 @@ export interface GameHook {
   acceptTicket(): boolean;
   /** Show the ticket form and the cards as for another campaign state (null: the real one). */
   setCampaignView(v: CampaignView | null): void;
-  showCard(kind: 'opening' | 'chapter' | 'rewritten'): void;
+  showCard(kind: 'opening' | 'chapter' | 'rewritten' | 'finale'): void;
   /** The priority chosen on the ticket accepted last. */
   priority(): PriorityId;
   /**
@@ -231,7 +234,7 @@ export interface HookDeps {
   acceptTicket(): boolean;
   /** Show the ticket form and the cards as for another campaign state (null: the real one). */
   setCampaignView(v: CampaignView | null): void;
-  showCard(kind: 'opening' | 'chapter' | 'rewritten'): void;
+  showCard(kind: 'opening' | 'chapter' | 'rewritten' | 'finale'): void;
   /** The priority chosen on the ticket accepted last. */
   priority(): PriorityId;
   /** The footnotes as printed (ui/footnotes.ts `recent`). */
@@ -319,6 +322,7 @@ export function installTestHook(deps: HookDeps): void {
     },
     enemies: createEnemyHook(() => game.state, deps.bus),
     spor: createSporHook(() => game.state, deps.bus),
+    finale: createFinaleHook({ getState: () => game.state, bus: deps.bus, start: (seed, opts) => deps.go('run', seed, opts), step: () => game.update(1 / 60) }),
     audio: createAudioHook(),
     content: createContentHook(() => game.state, deps.bus),
     quests: createQuestHook(() => game.state, deps.bus),
