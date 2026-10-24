@@ -2375,6 +2375,115 @@ try {
     await qctx.close();
   }
 
+  // ---------- 6j. the finale (S15): the return card, then per hero the three phases through the hook, the stamp, the case closed ----------
+  {
+    const fctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await fctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const fp = await fctx.newPage();
+    fp.on('pageerror', (e) => problems.push(`S15 pageerror: ${e.message}`));
+    fp.on('console', (m) => {
+      if (m.text().includes('Service Worker registration blocked')) return;
+      if (m.type() === 'error' || m.type() === 'warning') problems.push(`S15 console.${m.type()}: ${m.text()}`);
+    });
+    const ev = (fn, arg) => fp.evaluate(fn, arg);
+    await fp.goto(BASE, { waitUntil: 'load' });
+    await fp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await fp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await fp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+    await fp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
+    await fp.locator('.card-layer .card-paper').first().click({ timeout: 3000 });
+    await sleep(300);
+    // the return ticket on the desk: its own red card once, PRZEPISANO, the three lines of story.finale.card
+    const card = await ev(() => {
+      const h = window.__game;
+      h.setCampaignView({ planetIndex: 0, closed: [0, 1, 2], caseClosed: false, finale: true });
+      h.startBase();
+      const c = document.querySelector('.card-layer');
+      const stamp = c?.querySelector('.card-stamp')?.getBoundingClientRect();
+      const last = [...(c?.querySelectorAll('.card-line') ?? [])].pop()?.getBoundingClientRect();
+      return c
+        ? { kind: c.dataset.card, red: c.classList.contains('rewritten'), stamp: c.querySelector('.card-stamp')?.textContent, title: c.querySelector('.card-title')?.textContent, lines: c.querySelectorAll('.card-line').length, text: c.textContent, clear: stamp && last ? stamp.top >= last.bottom - 2 : false }
+        : null;
+    });
+    check('S15 return card: the final ticket base shows its red card (Bilet powrotny, PRZEPISANO, three story lines, the stamp clear of the text)', card !== null && card.kind === 'finale' && card.red && card.stamp === 'PRZEPISANO' && /Planeta Dwudziesta Trzecia/.test(card.title ?? '') && card.lines === 3 && /Asystent w\s+wersji 0\.9/.test(card.text) && card.clear, JSON.stringify(card && { kind: card.kind, stamp: card.stamp, title: card.title, lines: card.lines, clear: card.clear }));
+    await shotOf(fp, 'S15-return-card');
+    await ev(() => {
+      document.querySelector('.card-layer .card-paper')?.click();
+      window.__game.setCampaignView(null);
+    });
+    // the caption under each hero's face (story.finale.face.<hero>.name, upper case as the boss captions are)
+    const faceName = { pralka: 'SERWISANT AUTORYZOWANY', konsultant: 'KIEROWNIK KOLEJKI', petlowiec: 'WĘZEŁ', kartograf: 'PLANETA NIEISTNIEJĄCA', nalesnik: 'OBSERWATORIUM' };
+    const heroes = Object.keys(faceName);
+    for (const hero of heroes) {
+      const begun = await ev((id) => {
+        const h = window.__game;
+        const s = h.finale.start(id, { lawId: 'parzystosc', seed: 5 });
+        if (!s) return null;
+        s.player.hp = s.player.hpMax = 1e9;
+        return { info: h.finale.info(), screen: h.screen(), struck: document.querySelectorAll('#page [data-struck]').length, exit: s.page.exit ?? null };
+      }, hero);
+      check(`S15 ${hero}: the final ticket is one struck base page, the Anomalia at the desk in its first form`, begun !== null && begun.info?.stage === 'form' && begun.info.heroId === hero && begun.screen === 'run' && begun.struck >= 4, JSON.stringify(begun && { stage: begun.info?.stage, struck: begun.struck, screen: begun.screen }));
+      await ev(() => window.__game.advance(4));
+      await sleep(250);
+      const p1 = await ev(() => {
+        const h = window.__game;
+        const notes = h.notes().map((n) => n.text);
+        return { key: h.spor.info()?.commentKey ?? null, bubble: [...document.querySelectorAll('.bubble.comment')].map((b) => b.textContent ?? '').join(' '), number: h.state().ticket.number, old: notes.some((x) => /^Zjawisko lokalne: urządzenie/.test(x)), fix: notes.some((x) => /^Sprostowanie: nie jest to zjawisko lokalne/.test(x)) };
+      });
+      check(`S15 ${hero}: phase 1 posts its Spór comment with the ticket number filled in, and the old note is followed by its correction`, p1.key === 'story.finale.phase1.spor.comment' && p1.bubble.includes(String(p1.number)) && !p1.bubble.includes('{') && p1.old && p1.fix, JSON.stringify({ key: p1.key, bubble: p1.bubble.slice(0, 40), old: p1.old, fix: p1.fix }));
+      const face = await ev(() => {
+        const h = window.__game;
+        const ok = h.finale.skipTo('face');
+        h.advance(2);
+        return { ok, info: h.finale.info() };
+      });
+      await sleep(400);
+      const faceDom = await ev((id) => {
+        const g = document.querySelector(`[data-kind=enemy][data-id="${id}"]`);
+        return { caption: [...(g?.querySelectorAll('text') ?? [])].map((x) => x.textContent ?? '').filter((x) => /^[A-ZĄĆĘŁŃÓŚŹŻ ]{5,}$/.test(x)), measured: document.querySelectorAll('[data-part=measured] path').length };
+      }, face.info?.id);
+      check(`S15 ${hero}: phase 2 wears the hero's own face (its figure, its caption${hero === 'kartograf' ? ', six measuring arcs' : ''})`, face.ok && face.info?.stage === 'face' && faceDom.caption.includes(faceName[hero]) && faceDom.measured === (hero === 'kartograf' ? 6 : 0), JSON.stringify({ stage: face.info?.stage, caption: faceDom.caption, measured: faceDom.measured }));
+      await shotOf(fp, `S15-face-${hero}`);
+      const last = await ev(() => {
+        const h = window.__game;
+        const ok = h.finale.skipTo('last');
+        h.advance(1);
+        return { ok, info: h.finale.info() };
+      });
+      check(`S15 ${hero}: phase 3 is the existence finish (a coefficient on the body)`, last.ok && last.info?.stage === 'last' && typeof last.info.existence === 'number', JSON.stringify(last.info));
+      const end = await ev(() => {
+        const h = window.__game;
+        const ok = h.finale.skipTo('end');
+        const stamp = [...document.querySelectorAll('#world text, #ui div, #ui span')].some((x) => x.childElementCount === 0 && /SPRAWĘ ZAMKNIĘTO/.test(x.textContent ?? ''));
+        return { ok, stamp, info: h.finale.info() };
+      });
+      await sleep(150);
+      const stamped = end.stamp || (await ev(() => [...document.querySelectorAll('text, div, span')].some((x) => x.childElementCount === 0 && /SPRAWĘ ZAMKNIĘTO/.test(x.textContent ?? ''))));
+      check(`S15 ${hero}: the closing stamp SPRAWĘ ZAMKNIĘTO falls once`, end.ok && end.info?.stage === 'done' && stamped, JSON.stringify({ ok: end.ok, stage: end.info?.stage, stamped }));
+      await ev(() => window.__game.advance(3.5));
+      await fp.waitForFunction(() => window.__game.screen() === 'baza', null, { timeout: 5000 }).catch(() => undefined);
+      await sleep(300);
+      const closed = await ev(() => {
+        const h = window.__game;
+        const s = h.state();
+        const last = h.notes().slice(-1)[0]?.text ?? '';
+        const foot = document.querySelector('.foot');
+        const fr = foot?.getBoundingClientRect();
+        const ln = foot?.querySelector('.fn:last-child');
+        const lr = ln?.getBoundingClientRect();
+        return { screen: h.screen(), phase: s?.phase, c: s?.campaign, plan: s?.plan?.kind, finalNote: /^Sprawę zamknięto prawidłowo/.test(last), whole: !!(fr && lr && ln && lr.top >= fr.top - 1 && lr.bottom <= fr.bottom + 1 && ln.scrollHeight <= ln.clientHeight + 1) };
+      });
+      check(`S15 ${hero}: back on the base the final footnote is printed again and shown whole on the slip`, closed.finalNote && closed.whole, JSON.stringify({ finalNote: closed.finalNote, whole: closed.whole }));
+      check(`S15 ${hero}: the case is closed and the endgame opens on the base (caseClosed, no final ticket, extras on the desk)`, closed.screen === 'baza' && closed.phase === 'base' && closed.c?.caseClosed === true && closed.c.finalTicket === false && [0, 1, 2].every((n) => closed.c.closed.includes(n)) && closed.plan !== 'final', JSON.stringify({ screen: closed.screen, c: closed.c && { closed: closed.c.closed, finalTicket: closed.c.finalTicket, caseClosed: closed.c.caseClosed }, plan: closed.plan }));
+      await ev(() => document.querySelector('.card-layer .card-paper')?.click());
+    }
+    await fctx.close();
+  }
+
   // ---------- 7. frame time with 40 enemies ----------
   // a fresh run: the death slip of the step above may still hold the old one
   await page.evaluate(() => window.__game.start(11, { pageCount: 5, lawId: 'grawitacja' }));
