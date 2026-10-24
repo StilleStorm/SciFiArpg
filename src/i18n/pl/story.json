@@ -255,7 +255,7 @@
         },
         "hipoteza": {
           "old": "Wnioskodawca istnieje według 87% użytkowników. Pozostałe 13% zapytano ponownie.",
-          "new": "Sprostowanie: pozostałych nie pytano ani razu. Wnioskodawca istnieje w aktach, co w Komisji wystarcza."
+          "new": "Sprostowanie: pozostałych nie pytano ani razu. Wnioskodawca istnieje w aktach, co dla Komisji wystarcza."
         }
       },
       "spor": {
@@ -277,7 +277,7 @@
           "comment": "Twoje zgłoszenie jest dla nas ważne. Pozostań na linii. Numer w kolejce: jeden.",
           "reply": {
             "mechaniczny": "Linię przerywa się przecięciem kabla. Kabli jest sto.",
-            "regulaminowy": "Rozmowa jest nagrywana. Nagranie wykaże, że w kolejce jest jedna osoba i jest nią kierownik.",
+            "regulaminowy": "Rozmowa jest nagrywana. Nagranie wykaże, że w kolejce stoi wyłącznie kierownik.",
             "egzystencjalny": "Kolejka bez końca nie ma początku, więc nikt w niej nie stoi."
           }
         },
@@ -354,12 +354,12 @@
       "stamp": "SPRAWĘ ZAMKNIĘTO",
       "close": "Asystenta w wersji 0.9 wycofano. Wycofanie odnotowano. Tym razem je wykonano."
     },
-    "footnote": "Sprawę zamknięto prawidłowo. Planeta przydzielona była zgodna z aktami. Niezgodne były akta. Asystent w wersji 0.9 przesunął opisy planet o jedną pozycję i każdy opis dotyczył planety następnej. Błędowi nadano numer zgłoszenia. Zgłoszenie czeka na rozpatrzenie.",
+    "footnote": "Sprawę zamknięto prawidłowo. Planety były prawidłowe. Akta również, o jedną pozycję dalej: Asystent w wersji 0.9 przesunął opisy, więc każdy dotyczył planety następnej. Błędowi nadano numer zgłoszenia. Zgłoszenie czeka na rozpatrzenie.",
     "hero": {
       "pralka": "Program zakończono. Wniosek o osobowość w toku. Planetę przyjmuję.",
       "konsultant": "Dziękuję za rozmowę. Czy mogę jeszcze w czymś pomóc. Nikt nie odpowiada, więc nie.",
       "petlowiec": "Sprawę zamknięto po raz pierwszy. Pamiętam, że już się to zdarzyło.",
-      "kartograf": "Planeta istnieje. Naniesiono. Mapa zgadza się z planetą. Akta pozostają do poprawy.",
+      "kartograf": "Planeta istnieje. Naniesiono ją na mapę. Mapa zgadza się z planetą. Akta pozostają do poprawy.",
       "nalesnik": "Sprawę zamknięto. Mój wniosek nadal odłożony. Jest teraz najstarszym dokumentem Komisji i podlega ochronie."
     }
   }
