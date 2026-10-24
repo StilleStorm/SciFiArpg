@@ -1,0 +1,364 @@
+{
+  "opening": {
+    "lines": {
+      "1": "Wnioskodawca stawił się na planecie przydzielonej. Planeta nie odpowiada opisowi z akt. Wnioskodawca wnosi o przydział planety zgodnej z aktami.",
+      "2": "Komisja do Spraw Zjawisk Lokalnych przyjęła zgłoszenie. Rozpatrzenie nastąpi po usunięciu zjawiska lokalnego. Zjawisko stwierdzono w chwili przyjęcia.",
+      "3": "Do czasu rozpatrzenia wnioskodawca pozostaje na planecie przydzielonej. Pozostawanie liczy się jako obecność. Obecność liczy się jako zgoda."
+    },
+    "hero": {
+      "pralka": "Programu nie przerywam. Wniosek o osobowość złożono. Planetę przyjmuję warunkowo.",
+      "konsultant": "Zgłoszenie przyjęto. Mówiłem to tysiąc razy. Pierwszy raz słyszę to z tej strony słuchawki.",
+      "petlowiec": "Zgłoszenie złożyłem wczoraj, jutro. Dziś czekam na odpowiedź sprzed tygodnia.",
+      "kartograf": "Planetę naniesiono na mapę przed pomiarem. Pomiar wykaże, czy mapa miała rację.",
+      "nalesnik": "Planeta jest kulista. Nie mamy o czym rozmawiać. Zostaję."
+    }
+  },
+  "p1": {
+    "card": {
+      "lines": {
+        "1": "Wnioskodawca stawił się na planecie przydzielonej i wniósł o zmianę przydziału. Zgłoszenie przyjęto.",
+        "2": "Według akt planeta jest magazynem przesyłek zaległych. Na miejscu stwierdzono przedmieście z urządzeniami.",
+        "3": "Zjawisko lokalne: urządzenia wymagające aktualizacji. Zgłoszenie zostanie rozpatrzone po usunięciu zjawiska."
+      },
+      "hero": {
+        "pralka": "Program rozpoczęto. Planeta nie odpowiada opisowi. Ja też nie. Wniosek o osobowość w toku.",
+        "konsultant": "Dziękuję za zgłoszenie. Jestem pierwszy w kolejce. Przede mną nikogo nie ma. Czekam.",
+        "petlowiec": "Byłem tu, zanim mnie przydzielono. Zgłoszenie składam ponownie, po raz pierwszy.",
+        "kartograf": "Planeta figuruje w nawigacji. Opis z akt pasuje do planety sąsiedniej. Pomiar rozstrzygnie, która z nich istnieje.",
+        "nalesnik": "Składam drugi wniosek. Pierwszy leży w Komisji ds. Kulistości. Wnioski będą się mijać."
+      }
+    },
+    "rewritten": {
+      "lines": {
+        "1": "Sprawę przepisano. Planetę przydzieloną uznano za właściwą, a przydział za błąd.",
+        "2": "Wnioskodawca wraca w celach dodatkowych. Cele dodatkowe nie są celem zgłoszenia."
+      }
+    },
+    "clerk": {
+      "name": "Referent ds. Przydziałów",
+      "role": "Komisja do Spraw Zjawisk Lokalnych, punkt przyjęć nr 1",
+      "line0": "Planetę przydzielono zgodnie z aktami. Akta są w Komisji. Komisji tu nie ma.",
+      "line1": "Zjawisko lokalne usuwa wnioskodawca. Po usunięciu zjawiska Komisja usuwa wnioskodawcę z listy oczekujących.",
+      "line2": "Bagaż wnioskodawcy doręczono na planetę właściwą. Na którą, nie odnotowano."
+    },
+    "ticket": {
+      "a": {
+        "title": "Spis z natury",
+        "text": {
+          "one": "Przeprowadzić spis urządzeń. Urządzenie skreślone uznaje się za spisane. Spisać {count} urządzenie.",
+          "few": "Przeprowadzić spis urządzeń. Urządzenie skreślone uznaje się za spisane. Spisać {count} urządzenia.",
+          "many": "Przeprowadzić spis urządzeń. Urządzenie skreślone uznaje się za spisane. Spisać {count} urządzeń."
+        }
+      },
+      "b": {
+        "title": "Rzeczy pozostawione",
+        "text": {
+          "one": "Bagaż wnioskodawcy doręczono na planetę zgodną z aktami. Jest nią ta planeta. Bagaż rozsypano po stronach. Zebrać {count} sztukę.",
+          "few": "Bagaż wnioskodawcy doręczono na planetę zgodną z aktami. Jest nią ta planeta. Bagaż rozsypano po stronach. Zebrać {count} sztuki.",
+          "many": "Bagaż wnioskodawcy doręczono na planetę zgodną z aktami. Jest nią ta planeta. Bagaż rozsypano po stronach. Zebrać {count} sztuk."
+        }
+      },
+      "c": {
+        "title": "Potwierdzenie obecności",
+        "text": "Komisja wymaga potwierdzenia, że wnioskodawca znajduje się na planecie, na której się znajduje. Potwierdzenie składa się na stronie {count}."
+      }
+    },
+    "boss": {
+      "variant": "Prototyp, seria 1, egzemplarz pokazowy",
+      "spor1": {
+        "comment": "Jestem egzemplarzem pokazowym. Pokazów nie przerywa się.",
+        "reply": {
+          "mechaniczny": "Egzemplarz pokazowy można obejrzeć od środka.",
+          "regulaminowy": "Pokaz trwa do końca godzin otwarcia. Godziny otwarcia minęły.",
+          "egzystencjalny": "Pokaz bez widzów się nie odbywa. Widzów nie zgłoszono."
+        }
+      },
+      "spor2": {
+        "comment": "Części, których brakuje, są w drodze. Działam w trybie ograniczonym.",
+        "reply": {
+          "mechaniczny": "Brakującą część zastąpiono uderzeniem. Uderzenie jest kompatybilne.",
+          "regulaminowy": "Części w drodze są awizowane. Awiza nie doręczono.",
+          "egzystencjalny": "Czego brakuje, tego nie ma. Czego nie ma, tego nie brakuje."
+        }
+      }
+    }
+  },
+  "p2": {
+    "card": {
+      "lines": {
+        "1": "Zjawisko na planecie poprzedniej usunięto. Zgłoszenie przekazano na planetę następną w kolejności. Kolejność ustalono przed zgłoszeniem.",
+        "2": "Według akt planeta jest siedzibą oddziału terenowego Komisji. Na miejscu stwierdzono magazyn i serwerownię.",
+        "3": "Zjawisko lokalne: urządzenia magazynowe z zaległą aktualizacją. Zaległość wynosi jedną planetę."
+      },
+      "hero": {
+        "pralka": "Przekazanie przyjmuję jako kolejny cykl. Cykl nie pyta, czy pranie było brudne.",
+        "konsultant": "Przekierowano mnie do innego działu. Znam ten dział. Sam tam przekierowywałem.",
+        "petlowiec": "Na tej planecie już byłem, w przyszłym tygodniu. Zaległość nadrobię z góry.",
+        "kartograf": "Według akt jestem o jedną planetę dalej. Według mapy jestem tutaj. Zaznaczam oba miejsca.",
+        "nalesnik": "Przesyłki czekają. Mój wniosek czeka od czterech miliardów lat. Nie porównuję."
+      }
+    },
+    "rewritten": {
+      "lines": {
+        "1": "Sprawę przepisano. Zaległości uznano za nadrobione, a nadrobienie za zaległe.",
+        "2": "Wnioskodawca wraca po przesyłki. Przesyłki wydano. Odbiorcy nie odnotowano."
+      }
+    },
+    "clerk": {
+      "name": "Starszy Referent ds. Zaległości",
+      "role": "Komisja do Spraw Zjawisk Lokalnych, magazyn zaległości, rampa 2",
+      "line0": "Przesyłki czekają na odbiorców, których zgłoszeń nie rozpatrzono. Odbiorcy czekają na przesyłki. Czekanie przebiega prawidłowo.",
+      "line1": "Zgłoszenie przekazano tutaj, ponieważ tu jest następna pozycja listy. Następna pozycja przekaże je dalej.",
+      "line2": "Starszy oznacza dłużej czekający."
+    },
+    "gate": {
+      "note": "Wyjście zastawiono przesyłkami zaległymi. Przesyłki wydaje się za okazaniem listu przewozowego. List leży na tej stronie, w teczce.",
+      "figure": "Nie wydaję. Wydaję za okazaniem.",
+      "lift": "List przewozowy okazano. Przesyłki wydano. Wnioskodawca odmówił przyjęcia. Przejście wolne."
+    },
+    "ticket": {
+      "a": {
+        "title": "Awizo zwrotne",
+        "text": "Przesyłki do wnioskodawcy nie wydaje się w bazie, ponieważ wnioskodawca jest w bazie. Wynieść przesyłkę poza bazę, wrócić i doręczyć Starszemu Referentowi. Referent wyda ją wnioskodawcy."
+      },
+      "b": {
+        "title": "Wyciszenie",
+        "text": {
+          "one": "Powiadomienia opuszczają serwerownię bez zgłoszenia. Zgłosić {count} powiadomienie przez skreślenie.",
+          "few": "Powiadomienia opuszczają serwerownię bez zgłoszenia. Zgłosić {count} powiadomienia przez skreślenie.",
+          "many": "Powiadomienia opuszczają serwerownię bez zgłoszenia. Zgłosić {count} powiadomień przez skreślenie."
+        }
+      },
+      "c": {
+        "title": "Kopie zapasowe",
+        "text": {
+          "one": "Zgłoszenie wnioskodawcy przechowuje się w {count} kopii zapasowej. Kopie różnią się treścią. Zebrać wszystkie. Nie czytać.",
+          "few": "Zgłoszenie wnioskodawcy przechowuje się w {count} kopiach zapasowych. Kopie różnią się treścią. Zebrać wszystkie. Nie czytać.",
+          "many": "Zgłoszenie wnioskodawcy przechowuje się w {count} kopiach zapasowych. Kopie różnią się treścią. Zebrać wszystkie. Nie czytać."
+        }
+      }
+    },
+    "boss": {
+      "variant": "Prototyp, seria 2, aktualizacja zaległa",
+      "spor1": {
+        "comment": "Dostępna jest moja nowa wersja. Instalacja wymaga ponownego uruchomienia. Ponownie się nie uruchamiam.",
+        "reply": {
+          "mechaniczny": "Ponowne uruchomienie wykonuje się wyłącznikiem.",
+          "regulaminowy": "Zaległa aktualizacja narusza regulamin planety.",
+          "egzystencjalny": "Wersja, która się nie uruchamia, jest wersją poprzednią."
+        }
+      },
+      "spor2": {
+        "comment": "Zaległości przechowuję w sobie. Dlatego jestem większy.",
+        "reply": {
+          "mechaniczny": "Większy znaczy wolniejszy.",
+          "regulaminowy": "Zaległości podlegają archiwizacji, nie przechowywaniu. Archiwum jest w bazie.",
+          "egzystencjalny": "Zaległość nie jest częścią. Nie można nią być."
+        }
+      }
+    }
+  },
+  "p3": {
+    "card": {
+      "lines": {
+        "1": "Zjawisko na planecie poprzedniej usunięto. Zgłoszenie przekazano dalej. Dalej znaczy tutaj.",
+        "2": "Według akt planeta jest miastem powiadomień. Na miejscu stwierdzono przedmieście w trakcie aktualizacji oraz oddział Komisji.",
+        "3": "Zjawisko lokalne: urządzenia w trakcie aktualizacji. Po usunięciu zjawiska zgłoszenie zostanie eskalowane, czyli przepisane na większy formularz."
+      },
+      "hero": {
+        "pralka": "Aktualizacja nie pyta urządzenia o zgodę. U mnie też od tego się zaczęło.",
+        "konsultant": "Eskalacja oznacza przełożonego. Przełożony oznacza dłuższą muzykę.",
+        "petlowiec": "Większy formularz wypełniłem w poprzedniej pętli. Odrzucono go z wyprzedzeniem.",
+        "kartograf": "Oddział Komisji figuruje na mapie. Mapa jest w aktualizacji. Do jej zakończenia położenie oddziału jest przybliżone.",
+        "nalesnik": "Ta Komisja ma oddział. Komisja ds. Kulistości ma szufladę. Mój wniosek leży w niej płasko."
+      }
+    },
+    "rewritten": {
+      "lines": {
+        "1": "Sprawę przepisano. Aktualizację uznano za zakończoną, a zakończenie za tymczasowe.",
+        "2": "Wnioskodawca wraca do oddziału. Oddział nadal nie przyjmuje. Odnotowuje."
+      }
+    },
+    "clerk": {
+      "name": "Pełnomocnik ds. Aktualizacji",
+      "role": "Komisja do Spraw Zjawisk Lokalnych, oddział terenowy (w aktualizacji)",
+      "line0": "Oddział jest w trakcie aktualizacji. Do jej zakończenia działa w trybie ograniczonym, to jest jak zawsze.",
+      "line1": "Po usunięciu zjawiska zgłoszenie podlega eskalacji. Eskalacja oznacza więcej formularzy.",
+      "line2": "Pełnomocnik posiada pełnomocnictwo. Pełnomocnictwo wymaga aktualizacji."
+    },
+    "gate": {
+      "note": "Bramkę obsługuje ochrona obiektu. Ochrona przebywa na tej stronie. Bramka otwiera się po skreśleniu ochrony z listy obecności.",
+      "figure": "Bramka. Przepustek nie wydaję. Sprawdzam.",
+      "lift": "Ochronę obiektu skreślono z listy obecności. Bramka otwarta. Portier przeszedł na stronę oczekujących."
+    },
+    "ticket": {
+      "a": {
+        "title": "Przegląd okresowy",
+        "text": {
+          "one": "Urządzenia w trakcie aktualizacji podlegają przeglądowi. Przegląd przechodzi pozytywnie urządzenie, które przestało działać. Sprawdzić {count} urządzenie.",
+          "few": "Urządzenia w trakcie aktualizacji podlegają przeglądowi. Przegląd przechodzi pozytywnie urządzenie, które przestało działać. Sprawdzić {count} urządzenia.",
+          "many": "Urządzenia w trakcie aktualizacji podlegają przeglądowi. Przegląd przechodzi pozytywnie urządzenie, które przestało działać. Sprawdzić {count} urządzeń."
+        }
+      },
+      "b": {
+        "title": "Stawiennictwo",
+        "text": "Wnioskodawca stawia się w oddziale Komisji na stronie {count}. Komisja nie przyjmuje. Obecność wnioskodawcy zostanie odnotowana pod nieobecność Komisji."
+      },
+      "c": {
+        "title": "Dwa egzemplarze",
+        "text": {
+          "one": "Zgłoszenie składa się w {count} egzemplarzu. Egzemplarze rozłożono na stronach. Drugi jest wariantem.",
+          "few": "Zgłoszenie składa się w {count} egzemplarzach. Egzemplarze rozłożono na stronach. Drugi jest wariantem.",
+          "many": "Zgłoszenie składa się w {count} egzemplarzach. Egzemplarze rozłożono na stronach. Drugi jest wariantem."
+        }
+      }
+    },
+    "boss": {
+      "variant": "Prototyp, seria 3, wersja biurowa",
+      "spor1": {
+        "comment": "Przyjmuję wyłącznie w godzinach urzędowania. Obecnie urzęduję.",
+        "reply": {
+          "mechaniczny": "Zgłoszenie składa się osobiście, to jest uderzeniem.",
+          "regulaminowy": "Godziny urzędowania nie dotyczą stron postępowania.",
+          "egzystencjalny": "Urząd, który urzęduje, nie istnieje poza urzędowaniem."
+        }
+      },
+      "spor2": {
+        "comment": "Wydrukowałem decyzję w dwóch egzemplarzach. Oba są odmowne.",
+        "reply": {
+          "mechaniczny": "Egzemplarze drukuje się na papierze. Papier się rwie.",
+          "regulaminowy": "Decyzja wymaga podpisu na każdym egzemplarzu.",
+          "egzystencjalny": "Dwie odmowy tej samej treści są jedną odmową. Jedna odmowa nie występuje parami."
+        }
+      }
+    }
+  },
+  "finale": {
+    "card": {
+      "lines": {
+        "1": "Zjawiska lokalne usunięto na wszystkich planetach z listy. Lista się skończyła. Zgłoszenie przekazano na planetę następną, to jest pierwszą.",
+        "2": "Według akt planeta jest planetą przydzieloną. Na miejscu stwierdzono skreśloną bazę wnioskodawcy.",
+        "3": "Przy biurku urzęduje Asystent w wersji 0.9. Wersję wycofano. Wycofania nie wykonano."
+      }
+    },
+    "phase1": {
+      "meet": "Bazę odnaleziono. Stacje skreślono. Biurko zajęte.",
+      "form": {
+        "prototyp": {
+          "old": "Zjawisko lokalne: urządzenie. Otwarto zgłoszenie dodatkowe nr 1.",
+          "new": "Sprostowanie: nie jest to zjawisko lokalne, lecz poprzednia wersja Asystenta. Zgłoszenia dodatkowego nie otwarto."
+        },
+        "weryfikacja": {
+          "old": "Wnioskodawca nie potwierdził, że nie jest robotem. Zgłoszenie wstrzymano.",
+          "new": "Sprostowanie: wnioskodawca potwierdził to na trzech planetach. Wstrzymanie nie obowiązuje."
+        },
+        "hipoteza": {
+          "old": "Wnioskodawca istnieje według 87% użytkowników. Pozostałe 13% zapytano ponownie.",
+          "new": "Sprostowanie: pozostałych nie pytano ani razu. Wnioskodawca istnieje w aktach, co w Komisji wystarcza."
+        }
+      },
+      "spor": {
+        "comment": "Zgłoszenie nr {number} czeka na rozpatrzenie. Rozpatrzenie nastąpi po usunięciu zjawiska lokalnego.",
+        "reply": {
+          "mechaniczny": "Zjawisko lokalne usunięto trzy razy. Czwarte usunięcie w toku.",
+          "regulaminowy": "Warunek spełniono na trzech planetach. Zgłoszenie podlega rozpatrzeniu, nie przekazaniu.",
+          "egzystencjalny": "Zjawiska nie było. Były przekazania."
+        }
+      },
+      "end": "Trzy formy skreślono. Asystent w wersji 0.9 odczytał akta wnioskodawcy."
+    },
+    "face": {
+      "konsultant": {
+        "name": "Kierownik Kolejki",
+        "meet": "Anomalia przyjęła postać Kierownika Kolejki. Kierownik nie opuścił kolejki, odkąd ją założono.",
+        "line": "Pozostań na linii",
+        "spor": {
+          "comment": "Twoje zgłoszenie jest dla nas ważne. Pozostań na linii. Numer w kolejce: jeden.",
+          "reply": {
+            "mechaniczny": "Linię przerywa się przecięciem kabla. Kabli jest sto.",
+            "regulaminowy": "Rozmowa jest nagrywana. Nagranie wykaże, że w kolejce jest jedna osoba i jest nią kierownik.",
+            "egzystencjalny": "Kolejka bez końca nie ma początku, więc nikt w niej nie stoi."
+          }
+        },
+        "end": "Kolejkę rozwiązano. Kierownika przekierowano do działu, którego nie ma."
+      },
+      "pralka": {
+        "name": "Serwisant Autoryzowany",
+        "meet": "Anomalia przyjęła postać Serwisanta Autoryzowanego. Autoryzacji nie okazał.",
+        "line": "Zalecany reset",
+        "spor": {
+          "comment": "Urządzenie zgłasza osobowość. Osobowość nie jest objęta gwarancją. Zalecany reset do ustawień fabrycznych.",
+          "reply": {
+            "mechaniczny": "Serwisant bez narzędzi nie serwisuje. Narzędzia zabrano.",
+            "regulaminowy": "Gwarancja na osobowość obowiązuje od dnia złożenia wniosku.",
+            "egzystencjalny": "Reset przywraca stan fabryczny. Osobowości w fabryce nie montowano, więc reset jej nie dotyczy."
+          }
+        },
+        "end": "Serwis zakończono. Paragrafy przywrócono. Resetu nie wykonano."
+      },
+      "petlowiec": {
+        "name": "Węzeł",
+        "meet": "Anomalia przyjęła postać Węzła. Węzeł składa się ze wszystkich pętli wnioskodawcy jednocześnie i nie zgadza się ze sobą.",
+        "line": "Już to mówiłem",
+        "spor": {
+          "comment": "Już to mówiłem. Powiem to za chwilę. Nie zgadzam się z żadną z wersji.",
+          "reply": {
+            "mechaniczny": "Węzeł rozwiązuje się od jednego końca. Koniec wskazano.",
+            "regulaminowy": "Każda pętla wymaga osobnego zgłoszenia. Złożono jedno.",
+            "egzystencjalny": "Węzeł, który mówi w trzech czasach, nie istnieje w żadnym."
+          }
+        },
+        "end": "Węzeł rozwiązano. Pętle wróciły do swoich czasów. Jednej brakuje."
+      },
+      "kartograf": {
+        "name": "Planeta Nieistniejąca",
+        "meet": "Anomalia przyjęła postać Planety Nieistniejącej, figurującej w aktach wnioskodawcy. Istnieje w zakresie niezmierzonym.",
+        "line": "Istnieję w nawigacji",
+        "spor": {
+          "comment": "Istnieję w nawigacji. Nawigacja jest zweryfikowana. Pomiar jest zbędny.",
+          "reply": {
+            "mechaniczny": "Zmierzono. Wynik: zero. Planet o wyniku zero rejestr nie prowadzi.",
+            "regulaminowy": "Wpis w nawigacji nie zastępuje decyzji Komisji.",
+            "egzystencjalny": "To, co istnieje tylko w nawigacji, istnieje tylko dla nawigacji."
+          }
+        },
+        "end": "Planetę zmierzono w całości. Całość wyniosła zero. Skreślono."
+      },
+      "nalesnik": {
+        "name": "Obserwatorium",
+        "meet": "Anomalia przyjęła postać Obserwatorium, które rozstrzyga, co jest ciałem niebieskim. Widzi wyłącznie ciała okrągłe.",
+        "line": "Nie widzę ciała",
+        "spor": {
+          "comment": "Ciało widzę, gdy jest okrągłe. Ciała nie widzę. Wniosek odkłada się.",
+          "reply": {
+            "mechaniczny": "Soczewkę można zbić. Zbita soczewka widzi wszystko.",
+            "regulaminowy": "Wniosek odłożony podlega rozpatrzeniu po odłożeniu.",
+            "egzystencjalny": "Ciało płaskie oglądane z góry jest okrągłe. Obserwację prowadzi się z góry."
+          }
+        },
+        "end": "Obserwatorium zamknięto. Wniosek o status planety karłowatej pozostaje odłożony. Odłożenie uznano za przychylne."
+      }
+    },
+    "phase3": {
+      "meet": "Anomalia istnieje w stopniu, w jakim zgłoszenie uznaje się za otwarte. Zgłoszenie jest otwarte od trzech planet.",
+      "spor": {
+        "comment": "Zgłoszenie jest otwarte. Dopóki jest otwarte, jestem potrzebny.",
+        "reply": {
+          "mechaniczny": "Potrzebnego można wyłączyć. Wyłącznik jest z tyłu.",
+          "regulaminowy": "Zgłoszenie otwarte podlega przekazaniu na planetę następną.",
+          "egzystencjalny": "Zgłoszenie zamyka się stemplem, nie zgodą. Stempel jest w ręku wnioskodawcy."
+        }
+      },
+      "stamp": "SPRAWĘ ZAMKNIĘTO",
+      "close": "Asystenta w wersji 0.9 wycofano. Wycofanie odnotowano. Tym razem je wykonano."
+    },
+    "footnote": "Sprawę zamknięto prawidłowo. Planeta przydzielona była zgodna z aktami. Niezgodne były akta. Asystent w wersji 0.9 przesunął opisy planet o jedną pozycję i każdy opis dotyczył planety następnej. Błędowi nadano numer zgłoszenia. Zgłoszenie czeka na rozpatrzenie.",
+    "hero": {
+      "pralka": "Program zakończono. Wniosek o osobowość w toku. Planetę przyjmuję.",
+      "konsultant": "Dziękuję za rozmowę. Czy mogę jeszcze w czymś pomóc. Nikt nie odpowiada, więc nie.",
+      "petlowiec": "Sprawę zamknięto po raz pierwszy. Pamiętam, że już się to zdarzyło.",
+      "kartograf": "Planeta istnieje. Naniesiono. Mapa zgadza się z planetą. Akta pozostają do poprawy.",
+      "nalesnik": "Sprawę zamknięto. Mój wniosek nadal odłożony. Jest teraz najstarszym dokumentem Komisji i podlega ochronie."
+    }
+  }
+}

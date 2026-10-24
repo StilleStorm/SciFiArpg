@@ -1,8 +1,8 @@
 {
-  "_todo": "TODO-story: nazwy planet to tymczasowe oznaczenia do slice'u S11.",
-  "p1": { "name": "Planeta Dwudziesta Trzecia (Nieprzyjemna)", "loc": "Planecie Dwudziestej Trzeciej" },
-  "p2": { "name": "Planeta Czterdziesta Siódma (Zaktualizowana)", "loc": "Planecie Czterdziestej Siódmej" },
-  "p3": { "name": "Planeta Trzynasta (Niekompletna)", "loc": "Planecie Trzynastej" },
+  "_todo": "TODO-story: nazwy planet p4–p9 to tymczasowe oznaczenia do slice'ów S22 i S25.",
+  "p1": { "name": "Planeta Dwudziesta Trzecia (Przydzielona)", "loc": "Planecie Dwudziestej Trzeciej" },
+  "p2": { "name": "Planeta Dwudziesta Czwarta (Zaległa)", "loc": "Planecie Dwudziestej Czwartej" },
+  "p3": { "name": "Planeta Dwudziesta Piąta (Zaktualizowana)", "loc": "Planecie Dwudziestej Piątej" },
   "p4": { "name": "Planeta Dziewiąta (Przekierowana)", "loc": "Planecie Dziewiątej" },
   "p5": { "name": "Planeta Pięćdziesiąta Pierwsza (Pilna)", "loc": "Planecie Pięćdziesiątej Pierwszej" },
   "p6": { "name": "Planeta Trzydziesta Druga (Wielokrotna)", "loc": "Planecie Trzydziestej Drugiej" },
