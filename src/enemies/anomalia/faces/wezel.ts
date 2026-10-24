@@ -93,7 +93,7 @@ export const wezel: AnomaliaFace = {
     st.used++;
     st.rewinds++;
     st.count = 0; // the page starts being written again from here
-    sayLine(bus, PETLOWIEC, e.x, e.y - 90);
+    sayLine(bus, e, PETLOWIEC, e.x, e.y - 90);
   },
   damageMul: () => 1,
   done: (_s, e) => hpFraction(e) <= FACE_END_FRACTION,

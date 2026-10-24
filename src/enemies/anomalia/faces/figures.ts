@@ -7,17 +7,6 @@ import { box, circ, ell, hatchRect, mergeArt, pl, poly, rectPath, type Art, type
 
 const f1 = (n: number): string => String(Math.round(n * 10) / 10);
 
-/** A circle drawn as `n` short arcs with gaps: the dotted line of what does not quite exist. */
-function dashCircle(cx: number, cy: number, r: number, n: number, fill = 0.62): string {
-  let d = '';
-  for (let i = 0; i < n; i++) {
-    const a0 = (i / n) * Math.PI * 2;
-    const a1 = a0 + (Math.PI * 2 * fill) / n;
-    d += `M${f1(cx + Math.cos(a0) * r)} ${f1(cy + Math.sin(a0) * r)}A${f1(r)} ${f1(r)} 0 0 1 ${f1(cx + Math.cos(a1) * r)} ${f1(cy + Math.sin(a1) * r)}`;
-  }
-  return d;
-}
-
 /** A cable hanging from (x0, y0) to (x1, y1) with a sag. */
 const cable = (x0: number, y0: number, x1: number, y1: number, sag: number): string =>
   `M${f1(x0)} ${f1(y0)}Q${f1((x0 + x1) / 2)} ${f1((y0 + y1) / 2 + sag)} ${f1(x1)} ${f1(y1)}`;
@@ -157,25 +146,30 @@ function wezelLegs(_v: number, phase: 0 | 1): string[] {
   return [`M-10 0C${f1(-14 + k)} 6 ${f1(-6 - k)} 12 ${f1(-12 + k)} 18`, `M10 0C${f1(14 - k)} 6 ${f1(6 + k)} 12 ${f1(12 - k)} 18`, `M0 0C${f1(k)} 7 ${f1(-k)} 13 ${f1(k * 0.5)} 20`];
 }
 
-// ---------- Planeta Nieistniejąca: a dotted sphere with contour lines and a flag ----------
+// ---------- Planeta Nieistniejąca: a surveyed disc with contour lines and a flag ----------
 
+/**
+ * Solid strokes throughout, drawn in the thin pen (the figure is drawn twice the size of the others): the outline, the contour
+ * lines of the terrain, two closed contour rings, a flag. What does not exist yet is shown by the measuring arcs around it
+ * (render/enemyFigures.ts `measuredArcs`: dotted while unmeasured, firm once the laser has measured the sector), not by the body.
+ */
 function planetaArt(): Art {
   return {
-    line:
-      dashCircle(0, -48, 46, 22) +
-      // contour lines of a terrain that has not been surveyed
-      'M-34-62C-22-72-6-66 2-72C14-76 28-68 36-58' +
-      'M-42-44C-28-54-14-40 0-48C14-56 30-42 42-48' +
-      'M-40-30C-26-38-14-26 2-34C16-42 28-30 38-36',
+    line: circ(0, -48, 46),
     thin:
-      dashCircle(0, -48, 30, 16, 0.5) +
-      dashCircle(-6, -50, 15, 9, 0.5) +
-      'M-26-20C-10-26 6-18 24-24' +
+      // contour lines across the terrain
+      'M-38-66C-24-74-8-66 2-72C14-78 28-70 38-62' +
+      'M-44-48C-30-56-14-42 0-50C14-58 30-44 44-50' +
+      'M-42-32C-28-40-14-28 2-36C16-44 28-32 40-36' +
+      'M-30-14C-12-20 6-12 28-18' +
+      // two closed contour rings: a hill and a hollow
+      'M-26-58C-22-66-6-66-4-58C-2-50-22-48-26-58Z' +
+      'M10-42C14-48 28-46 28-40C28-34 12-34 10-42Z' +
       // a survey flag stuck where nobody has been
-      pl(26, -92, 26, -104) +
-      poly(26, -104, 38, -100, 26, -96),
-    hatch: poly(-30, -22, -12, -26, 8, -22, 24, -26, 30, -22, 22, -16, -22, -16),
-    ink: circ(-14, -52, 1.1) + circ(8, -58, 1.1) + circ(18, -40, 1.1),
+      pl(24, -92, 24, -110) +
+      poly(24, -110, 38, -106, 24, -102),
+    hatch: poly(-30, -18, -12, -22, 8, -18, 24, -22, 30, -18, 22, -10, -22, -10),
+    ink: circ(-15, -58, 1.1) + circ(19, -40, 1.1) + circ(4, -64, 1.1) + circ(24, -92, 1.2),
   };
 }
 
@@ -256,6 +250,6 @@ export const FACE_FIGURES: readonly BodyPart[] = [
   figure(FIGURE_IDS.kierownik, 92, 90, kierownikArt(), KIEROWNIK_HIPS, kierownikLegs, 25),
   figure(FIGURE_IDS.serwisant, 112, 72, serwisantArt(), SERWISANT_HIPS, serwisantLegs, 22),
   figure(FIGURE_IDS.wezel, 74, 70, wezelArt(), [-10, 0, 10], wezelLegs, 20),
-  figure(FIGURE_IDS.planeta, 96, 106, planetaArt(), [], undefined, 0, 0.8),
+  figure(FIGURE_IDS.planeta, 96, 110, planetaArt(), [], undefined, 0),
   figure(FIGURE_IDS.obserwatorium, 112, 100, obserwatoriumArt(), [-16, 0, 16], obserwatoriumLegs, 30),
 ];

@@ -65,7 +65,7 @@ function strip(s: RunState, st: St, bus: Bus, e: Enemy): boolean {
   para[i] = 1;
   patch[i] = undefined;
   st.strips++;
-  sayLine(bus, PRALKA, e.x, e.y - 90);
+  sayLine(bus, e, PRALKA, e.x, e.y - 90);
   return true;
 }
 

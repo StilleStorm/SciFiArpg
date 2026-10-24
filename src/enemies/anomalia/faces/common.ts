@@ -26,8 +26,15 @@ export function restoreClaim(e: Enemy, before: Claim | undefined): void {
 /** How long the face's margin line stays (ms: `margin:note.ttl` is in milliseconds). */
 export const SAY_TTL_MS = 2400;
 
-/** The face's line as a note in the margin next to the Anomalia (a sober way to show the mechanic fired). */
-export function sayLine(bus: Bus, heroId: HeroId, x: number, y: number): void {
+/** True when the Anomalia's own bubble already says the face's line (its claim, struck or not: the words stay legible): a margin echo would only repeat it. */
+export const bubbleSaysLine = (e: Enemy, heroId: HeroId): boolean => e.claim?.textKey === `story.finale.face.${heroId}.line`;
+
+/**
+ * The face's line as a note in the margin next to the Anomalia (a sober way to show the mechanic fired), only while its bubble does
+ * not already say it: two copies of one line read as a stacked label.
+ */
+export function sayLine(bus: Bus, e: Enemy, heroId: HeroId, x: number, y: number): void {
+  if (bubbleSaysLine(e, heroId)) return;
   bus.emit('margin:note', { text: t(`story.finale.face.${heroId}.line`), x, y, ttl: SAY_TTL_MS });
 }
 

@@ -322,6 +322,9 @@ function staplerArm(hw: number, y: number): SVGGElement {
   return g;
 }
 
+/** Height of the Planeta's name above its feet, in the figure's own units (faces/figures.ts: the shaded rim is 10..22 up). */
+const PLANET_NAME_UP = 27;
+
 function buildFigure(e: Enemy, g: SVGGElement): FigState {
   g.replaceChildren();
   const asm = assemblyOf(e);
@@ -348,7 +351,8 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   }
 
   const boss = e.boss ? BOSS_OF[e.family] : null;
-  addWash(under, e, hw, H, feet);
+  // the Planeta's measuring arcs are its tell: no stain under them, the outline and the arcs stay sharp on clean paper
+  if (!facePartsOf(e)) addWash(under, e, hw, H, feet);
   if (boss === 'weryfikacja') buildGrid(under, e);
   if (boss === 'hipoteza' && !wearsOwnBody(e)) buildRing(under, e);
 
@@ -357,13 +361,15 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   const markers = el('g', { 'data-part': 'markers' });
   over.append(bubble, markers);
   if (boss) {
+    // the Planeta is a map: its name is written on it, above the shaded rim, like a map's title (under its feet it fell among the pads)
+    const nameAt = boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : facePartsOf(e) ? feet - PLANET_NAME_UP * sc : feet + 16;
     over.append(
-      el('text', { x: 0, y: n2(boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [t(captionKeyOf(e) ?? `enemies.boss.${boss}.name`).toLocaleUpperCase('pl')]),
+      el('text', { x: 0, y: n2(nameAt), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [t(captionKeyOf(e) ?? `enemies.boss.${boss}.name`).toLocaleUpperCase('pl')]),
     );
     const variant = bossVariantLine(e);
     if (variant) {
       // the planet's variant of the boss (STORY 8.0): a line of its own under the name, in the narration hand with a paper halo
-      const nameY = boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16;
+      const nameY = nameAt;
       const size = readableUnits(11);
       over.append(
         el('text', { x: 0, y: n2(nameY + size + 4), 'text-anchor': 'middle', 'font-size': size, 'data-part': 'variant', style: `${FONT.serif}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [t(variant)]),
@@ -741,11 +747,31 @@ export const enemyBuilder: Builder<Enemy> = {
 
 // ---------- events to marks ----------
 
+/** Half the width of "nie na temat" in the margin hand, units (a little over, so the note clears the outline). */
+const OFF_TOPIC_HALF_W = 44;
+
+/**
+ * Where "nie na temat" goes: beside the figure, level with its middle, never on it (on a boss it hid the head and the bubble).
+ * The side toward the middle of the view, so it is not cut at the edge. Read once per note from the figure's state, never per frame.
+ */
+function offTopicSpot(id: number, x: number, y: number): { x: number; y: number } {
+  const g = document.querySelector<SVGGElement>(`[data-kind="enemy"][data-id="${id}"]`);
+  const st = g ? states.get(g) : undefined;
+  if (!st) return { x: x + 6, y: y - 34 };
+  const vb = g?.ownerSVGElement?.viewBox.baseVal;
+  const mid = vb && vb.width > 0 ? vb.x + vb.width / 2 : x;
+  const side = x > mid ? -1 : 1;
+  return { x: x + side * (st.hw + 10 + OFF_TOPIC_HALF_W), y: y + (st.top + st.feet) / 2 };
+}
+
 /** Marginal notes and stamps that belong to enemies: "nie na temat", "ESKALACJA". Returns an unsubscribe. */
 export function bindEnemyFx(bus: Bus): () => void {
   const rng = createRng(0xe4e);
   const offs = [
-    bus.on('enemy:offTopic', (ev) => marginNote(t('combat.offTopic'), ev.x + 6, ev.y - 34, rng.range(-6, 4), 1100)),
+    bus.on('enemy:offTopic', (ev) => {
+      const at = offTopicSpot(ev.id, ev.x, ev.y);
+      marginNote(t('combat.offTopic'), at.x, at.y, rng.range(-6, 4), 1100);
+    }),
     bus.on('spor:posted', (ev) => comments.set(ev.id, { key: ev.commentKey, ...(ev.params ? { params: ev.params } : {}), struck: false, closed: null })),
     bus.on('spor:answered', (ev) => {
       const c = comments.get(ev.id);

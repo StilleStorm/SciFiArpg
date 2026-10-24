@@ -77,7 +77,7 @@ export const kierownik: AnomaliaFace = {
       st.holding = true;
       st.t = HOLD_S;
       applyStatus(s.player, 'wyciszony', HOLD_S, e.id);
-      sayLine(bus, KONSULTANT, e.x, e.y - 90);
+      sayLine(bus, e, KONSULTANT, e.x, e.y - 90);
       return;
     }
     const to = transferPoint(s, e);

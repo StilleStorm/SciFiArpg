@@ -68,7 +68,7 @@ export const obserwatorium: AnomaliaFace = {
       pinExistence(e, EDGE_EXISTENCE, 0.4);
       if (s.time - st.noteAt >= NOTE_EVERY) {
         st.noteAt = s.time;
-        sayLine(bus, NALESNIK, e.x, e.y - 100);
+        sayLine(bus, e, NALESNIK, e.x, e.y - 100);
       }
     } else if (st.edge) {
       rt.dmgMult = st.dmg;

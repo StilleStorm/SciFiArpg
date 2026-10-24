@@ -81,7 +81,7 @@ export const planeta: AnomaliaFace = {
       if (a.attacker !== 'player' || !a.laser) return;
       if (measure(e, a.laser.sx, a.laser.sy, a.laser.ex, a.laser.ey) > 0 && s.time - st.noteAt >= NOTE_EVERY) {
         st.noteAt = s.time;
-        sayLine(bus, KARTOGRAF, e.x, e.y - 100);
+        sayLine(bus, e, KARTOGRAF, e.x, e.y - 100);
       }
     });
   },

@@ -6,16 +6,16 @@ import type { Enemy } from '../../../entities/types';
 import { HERO_IDS, type HeroId } from '../../../heroes';
 import { t } from '../../../i18n';
 import { createRun, type RunState } from '../../../world/run';
-import { layoutAssembly } from '../../assemble';
+import { ENEMY_SCALE, layoutAssembly } from '../../assemble';
 import { bodiesOf, bodyById } from '../../parts';
 import { rtOf } from '../../runtime';
 import { faceFor, faceKeys } from '../index';
-import { faceAssembly } from './assembly';
-import { FACE_END_FRACTION } from './common';
+import { faceAssembly, faceAssemblyOf } from './assembly';
+import { bubbleSaysLine, FACE_END_FRACTION, sayLine } from './common';
 import { FACE_FIGURES, FIGURE_IDS } from './figures';
 import { HOLD_S, HOLD_WAIT_S, TRANSFER_MIN_DIST, transfersOf } from './kierownik';
 import { edgeOnOf, EDGE_EXISTENCE, EDGE_DAMAGE_MUL } from './obserwatorium';
-import { isReal, MEASURED_S, partAt } from './planeta';
+import { isReal, MEASURED_S, partAt, REACH_FRAC } from './planeta';
 import { RING_N, REWIND_BELOW, ringSizeOf, rewindsOf } from './wezel';
 import { STRIP_S, STRIP_WAIT_S, strippedOf, stripsOf } from './serwisant';
 
@@ -67,11 +67,45 @@ describe('registry and figures', () => {
       expect(f && bodyById(f.figure)).toBeDefined();
       const asm = faceAssembly(id);
       expect(asm).not.toBeNull();
-      if (asm) expect(layoutAssembly(asm).layers[0]?.art.line?.length).toBeGreaterThan(150);
+      const art = asm ? layoutAssembly(asm).layers[0]?.art : undefined;
+      expect((art?.line?.length ?? 0) + (art?.thin?.length ?? 0)).toBeGreaterThan(150);
     }
     for (const fam of ['urzadzenia', 'powiadomienia', 'wygenerowane'] as const) {
       expect(bodiesOf(fam).some((b) => b.figure)).toBe(false);
     }
+  });
+});
+
+describe('figure sizes', () => {
+  it('draws the Węzeł and the Planeta larger than the rest, the Planeta solid, its sectors reaching its drawn edge', () => {
+    const base = faceAssemblyOf(FIGURE_IDS.obserwatorium);
+    const wezelA = faceAssemblyOf(FIGURE_IDS.wezel);
+    const planetaA = faceAssemblyOf(FIGURE_IDS.planeta);
+    expect(wezelA.scale).toBeCloseTo(base.scale * 1.45, 5);
+    expect(planetaA.scale).toBeCloseTo(base.scale * 2, 5);
+    expect(planetaA.dotted).toBe(0);
+    // the drawn disc is 46 units of the body frame; with the reach of a measuring line it is covered whole
+    const drawn = 46 * planetaA.scale * ENEMY_SCALE;
+    expect(planetaA.radius * REACH_FRAC).toBeGreaterThanOrEqual(drawn);
+    expect(planetaA.radius).toBeLessThan(drawn);
+  });
+});
+
+describe('the face line as a margin echo', () => {
+  it('is not written while the bubble says the same line (struck or not), and is when the bubble says something else', () => {
+    const { s, e, bus } = setup('petlowiec');
+    const notes: string[] = [];
+    bus.on('margin:note', (n) => notes.push(n.text));
+    faceFor('petlowiec')?.start(s, e, bus);
+    expect(bubbleSaysLine(e, 'petlowiec')).toBe(true);
+    sayLine(bus, e, 'petlowiec', e.x, e.y);
+    expect(notes).toEqual([]);
+    if (e.claim) e.claim.struck = true;
+    sayLine(bus, e, 'petlowiec', e.x, e.y);
+    expect(notes).toEqual([]);
+    e.claim = { textKey: 'story.finale.face.konsultant.line', type: 'mechaniczny' };
+    sayLine(bus, e, 'petlowiec', e.x, e.y);
+    expect(notes).toHaveLength(1);
   });
 });
 
