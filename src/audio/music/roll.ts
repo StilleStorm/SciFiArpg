@@ -44,6 +44,7 @@ const VOICE_OF: Record<ObstacleKind, Voice> = {
   clip: 'tick',
   kiosk: 'bell',
   gate: 'tick',
+  prop: 'pluck',
 };
 
 /** Pitch range of the roll in scale degrees: two repeats of the scale. */

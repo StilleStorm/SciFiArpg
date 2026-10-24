@@ -112,12 +112,12 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
   const pageCount = opts.pageCount ?? opts.resume?.pageCount;
   if (lawId) ticket.lawId = lawId;
   if (pageCount) ticket.pageCount = pageCount;
-  const pages = generateRunPages(rng, ticket.pageCount);
+  const pages = generateRunPages(rng, ticket.pageCount, plan ? planetDef(plan.planet).locations : undefined);
   if (plan) applyPlanetGates(pages, planetDef(plan.planet).gates);
   const runPage = pages[0] ?? generateRunPages(rng, 1)[0];
   if (!runPage) throw new Error('no page');
   const phase = opts.phase ?? 'run';
-  const page = phase === 'base' ? generateBase(seed) : runPage;
+  const page = phase === 'base' ? generateBase(seed, plan?.planet) : runPage;
   const state: RunState = {
     seed,
     rng,
@@ -152,7 +152,7 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
     ...(plan ? { plan: { ...plan, lawId: ticket.lawId }, mix: mixForPlanet(plan.planet) } : {}),
   };
   if (phase === 'base') {
-    state.base = createBaseState(layoutForSeed(seed), opts.resume ?? null);
+    state.base = createBaseState(layoutForSeed(seed, plan?.planet), opts.resume ?? null);
     if (opts.resume) state.pageIndex = Math.min(pages.length - 1, Math.max(0, opts.resume.pageIndex)); // the exit leads to the open quest
   }
   applyHero(state.player, heroDef(opts.heroId ?? DEFAULT_HERO_ID));

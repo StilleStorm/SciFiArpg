@@ -20,6 +20,7 @@ import { markRewritten } from './save/history';
 import { bugDump, copyText, deviceInfo, requestPersistence } from './save/export';
 import { loadMeta, saveMeta, type Settings } from './save/save';
 import { installTestHook } from './testHook';
+import './world/planets'; // planet modules register clerks, tickets, locations and boss variants
 import { createBaza } from './ui/baza';
 import { createBoard, type BoardQuests } from './ui/board';
 import { createFootnotes } from './ui/footnotes';
@@ -192,7 +193,7 @@ function showCard(number: number, force?: 'opening' | 'chapter' | 'rewritten'): 
     s.campaign = { ...cloneCampaign(s.campaign ?? newCampaign()), cards: markShown(seen, spec) };
     if (meta.character) save(withCharacter(meta, s)); // a case file keeps it; a bare test start keeps it on the state only
   }
-  cardUi = openCard(stage.ui, spec, { number, onDone: () => (cardUi = null) });
+  cardUi = openCard(stage.ui, spec, { number, ...(meta.heroId ? { heroId: meta.heroId } : {}), onDone: () => (cardUi = null) });
 }
 
 /**

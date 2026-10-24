@@ -3,6 +3,8 @@ import type { Rng } from '../core/rng';
 import { dist, type Vec } from '../core/vec';
 import type { BasePageInfo, StationId } from './base';
 import type { PageGate } from './gate';
+import type { LocationType } from './campaign';
+import { locationSpec, propColliders, propSpec } from './planets/locations';
 import { CONTENT, EVENT_IDS, SEAL_IDS, type EventId, type PageContent } from './contentKinds';
 
 export const PAGE_W = 1200;
@@ -16,7 +18,7 @@ export interface Circle {
   r: number;
 }
 
-export type ObstacleKind = 'blot' | 'ring' | 'torn' | 'note' | 'qr' | 'sticky' | 'clip' | 'kiosk' | 'gate';
+export type ObstacleKind = 'blot' | 'ring' | 'torn' | 'note' | 'qr' | 'sticky' | 'clip' | 'kiosk' | 'gate' | 'prop';
 
 export interface Obstacle {
   kind: ObstacleKind;
@@ -31,6 +33,8 @@ export interface Obstacle {
   colliders: Circle[];
   /** Base page only: this obstacle is the collider of a station or a prop (world/base.ts); the page drawing skips it. */
   station?: StationId | 'prop';
+  /** Kind 'prop' only: the id of the location prop (world/planets/locations.ts); `size` is its width. */
+  variant?: string;
 }
 
 export type Corner = 'tl' | 'tr' | 'bl' | 'br';
@@ -67,6 +71,8 @@ export interface Page {
   hasKiosk: boolean;
   /** Only the walkable base page of a planet has this (world/base.ts): layout, stations, props, the hole's place. */
   base?: BasePageInfo;
+  /** The location type this page is drawn as (a planet's `locations`); absent = the generic obstacles. */
+  location?: LocationType;
   /** A story lock on the exit corner (world/gate.ts): the obstacle of kind 'gate' stays until its condition holds. */
   gate?: PageGate;
   /** Teczki, pieczęcie and the event of this page (world/contentKinds.ts); placed from the seed, mutated by world/content.ts. Absent on the base page. */
@@ -79,6 +85,8 @@ export interface PagePlan {
   count: number;
   /** The corner the player arrives from; null for page 0 (bottom middle). */
   entryCorner: Corner | null;
+  /** The location type of the page (see `pickLocations`); absent = generic obstacles. */
+  location?: LocationType;
 }
 
 /** The player turns the page when this close to the folded corner. */
@@ -87,8 +95,10 @@ export const EXIT_RADIUS = 100;
 export const FOLD = 70;
 export const CORNERS: readonly Corner[] = ['tl', 'tr', 'bl', 'br'];
 
-export function colliders(o: Pick<Obstacle, 'kind' | 'x' | 'y' | 'size' | 'rot'>): Circle[] {
+export function colliders(o: Pick<Obstacle, 'kind' | 'x' | 'y' | 'size' | 'rot' | 'variant'>): Circle[] {
   switch (o.kind) {
+    case 'prop':
+      return propColliders(o.variant, o.x, o.y, o.size);
     case 'blot':
       return [{ x: o.x, y: o.y, r: o.size * 0.85 }];
     case 'ring':
@@ -228,8 +238,38 @@ export function generatePage(rng: Rng, plan: PagePlan = DEFAULT_PLAN): Page {
     }
   }
 
+  const spec = locationSpec(plan.location);
+  if (spec) {
+    // a location page: flat marks first (under everything), then props along the type's streets or aisles, a few plain blots and rings between
+    for (const id of spec.flat) {
+      const p = propSpec(id);
+      if (!p) continue;
+      for (let i = 0; i < 2; i++) {
+        const o: Obstacle = { kind: 'prop', variant: id, x: r.range(220, PAGE_W - 220), y: r.range(260, PAGE_H - 260), size: r.range(p.size[0], p.size[1]), rot: 0, seed: r.int(1, 1e6), colliders: [] };
+        obstacles.unshift(o);
+      }
+    }
+    const solid = spec.props.filter((p) => !spec.flat.includes(p.id));
+    const lanes = spec.layout === 'rows' ? [330, 620, 910, 1200] : [270, 600, 930];
+    const target = obstacles.length + r.int(7, 10);
+    let placed = 0;
+    for (let guard = 0; obstacles.length < target && guard++ < 600; ) {
+      const lane = r.pick(lanes);
+      const at = spec.layout === 'rows' ? { x: r.range(110, PAGE_W - 110), y: lane + r.range(-40, 40) } : { x: lane + r.range(-36, 36), y: r.range(110, PAGE_H - 110) };
+      const p = r.chance(0.2) ? undefined : (solid[placed % solid.length] ?? r.pick(solid));
+      const ring = r.chance(0.4);
+      const o: Obstacle = p
+        ? { kind: 'prop', variant: p.id, ...at, size: r.range(p.size[0], p.size[1]), rot: 0, seed: r.int(1, 1e6), colliders: [] }
+        : { kind: ring ? 'ring' : 'blot', ...at, size: ring ? r.range(56, 70) : r.range(26, 46), rot: r.range(-0.5, 0.5), seed: r.int(1, 1e6), colliders: [] };
+      o.colliders = colliders(o);
+      if (clearOf(o, 70)) {
+        obstacles.push(o);
+        if (p) placed++;
+      }
+    }
+  }
   const kinds: ObstacleKind[] = ['ring', 'qr', 'note', 'sticky', 'blot', 'clip', 'blot', 'blot', 'ring', 'blot'];
-  const want = r.int(6, 9) + (hasKiosk ? 1 : 0);
+  const want = spec ? 0 : r.int(6, 9) + (hasKiosk ? 1 : 0);
   let guard = 0;
   let n = 0;
   while (obstacles.length < want && guard++ < 500) {
@@ -276,6 +316,7 @@ export function generatePage(rng: Rng, plan: PagePlan = DEFAULT_PLAN): Page {
     exit,
     hasKiosk,
     content,
+    ...(spec && plan.location ? { location: plan.location } : {}),
   };
 }
 
@@ -359,12 +400,35 @@ export function placeContent(r: Rng, site: ContentSite): PageContent[] {
   return out;
 }
 
+/**
+ * The location type of each page of a run on a planet whose types are `locations` (from `PlanetDef.locations`), by seed: the
+ * first page is the first type, the boss page the last, the pages between draw from the list (the first type twice as often),
+ * and a type no page drew is put on the middle page, so every type of the planet is seen on a run. Own stream: no other roll moves.
+ */
+export function pickLocations(rng: Rng, count: number, locations: readonly LocationType[]): LocationType[] {
+  const first = locations[0];
+  const lastType = locations[locations.length - 1];
+  if (!first || !lastType || count < 1) return [];
+  const r = rng.fork('locations');
+  const pool: LocationType[] = [...locations, first];
+  const out: LocationType[] = Array.from({ length: count }, (_, i) => (i === 0 ? first : i === count - 1 ? lastType : r.pick(pool)));
+  const middle = Math.floor(count / 2);
+  for (const type of locations) {
+    if (out.includes(type) || count < locations.length) continue;
+    const at = middle > 0 && middle < count - 1 ? middle : 1;
+    out[at] = type;
+  }
+  return out;
+}
+
 /** All pages of a run, linked: page i+1 is entered through the corner opposite to page i's exit. */
-export function generateRunPages(rng: Rng, count: number): Page[] {
+export function generateRunPages(rng: Rng, count: number, locations?: readonly LocationType[]): Page[] {
   const pages: Page[] = [];
   let entryCorner: Corner | null = null;
+  const where = locations ? pickLocations(rng, count, locations) : [];
   for (let i = 0; i < count; i++) {
-    const page = generatePage(rng, { index: i, count, entryCorner });
+    const location = where[i];
+    const page = generatePage(rng, { index: i, count, entryCorner, ...(location ? { location } : {}) });
     pages.push(page);
     if (page.exit) entryCorner = OPPOSITE_CORNER[page.exit.corner];
   }

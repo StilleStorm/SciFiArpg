@@ -84,6 +84,12 @@ export function clampPriority(id: PriorityId, level: number): PriorityId {
 // ---------- planets ----------
 
 export const PLANET_COUNT = 9;
+/**
+ * The campaign's last planet, 1-based (STORY 2): the return ticket to planet 1 is issued when this one is closed. 3 at the MVP
+ * (Akt I), 6 after Akt II, 9 after Akt III. A character whose case was closed at a shorter length is reopened when the constant
+ * rises (`toCampaign`, `CampaignState.reopened`).
+ */
+export const CAMPAIGN_LAST = 3;
 export type Act = 1 | 2 | 3;
 export type LocationType = 'miasto' | 'przedmiescie' | 'magazyn' | 'serwerownia' | 'jaskinia' | 'rownina' | 'wyzyna' | 'biuro' | 'centrum' | 'archiwum';
 /** Sets hosted by a planet (ITEMS 4.1); null while a planet hosts none. Placeholder assignment until the set slice. */
@@ -207,7 +213,7 @@ export function enemyScaleFor(planetIdx: number, priority: PriorityId): EnemySca
 // ---------- tickets ----------
 
 /**
- * campaign: the next planet of the sequence. final: the return ticket to planet 1 after planet 9 (the finale).
+ * campaign: the next planet of the sequence. final: the return ticket to planet 1 after planet CAMPAIGN_LAST (the finale).
  * extra: a zgloszenie dodatkowe (random planet, random clause) after the case. travel: free travel to a closed planet.
  */
 export type TicketKind = 'campaign' | 'final' | 'extra' | 'travel';
@@ -243,7 +249,7 @@ export interface CampaignState {
   current: number;
   /** Planets whose ticket was closed, in order. */
   closed: number[];
-  /** Planet 9 is closed and the return ticket to planet 1 is the next one (the finale flag). */
+  /** Planet CAMPAIGN_LAST is closed and the return ticket to planet 1 is the next one (the finale flag). */
   finalTicket: boolean;
   /** The final ticket was closed: the Komisja opened case 48214; extras and free travel are open. */
   caseClosed: boolean;
@@ -251,6 +257,12 @@ export interface CampaignState {
   extras: number;
   /** Title cards already shown to this character (ui/cards.ts); absent = none, so older saves load. */
   cards?: CardsSeen;
+  /**
+   * The case was closed at a shorter campaign than `CAMPAIGN_LAST` and `toCampaign` reopened it: the red card "Sprawę wznowiono" is due
+   * at the desk (STORY 2). Set once on load, cleared by whoever shows the card.
+   * SEAM: the card (kind, lines, stamp) needs voice keys and `ui/cards.ts`/main.ts wiring; nothing shows it yet (needed at S24, when the constant rises to 6).
+   */
+  reopened?: true;
 }
 
 /** The opening page once; a chapter card once per planet; a rewritten card once per planet, kept as -1 - planet. */
@@ -282,9 +294,22 @@ export function toCampaign(raw: unknown): CampaignState {
   const r = raw as Record<string, unknown>;
   const closed: number[] = [];
   if (Array.isArray(r['closed'])) for (const v of r['closed']) if (isPlanetIndex(v) && !closed.includes(v)) closed.push(v);
-  const caseClosed = r['caseClosed'] === true;
-  const finalTicket = !caseClosed && r['finalTicket'] === true;
-  const current = clampInt(r['current'], 0, PLANET_COUNT - 1, closed.length === 0 ? 0 : Math.min(PLANET_COUNT - 1, closed.length));
+  let caseClosed = r['caseClosed'] === true;
+  let finalTicket = !caseClosed && r['finalTicket'] === true;
+  let current = clampInt(r['current'], 0, PLANET_COUNT - 1, closed.length === 0 ? 0 : Math.min(PLANET_COUNT - 1, closed.length));
+  let reopened = r['reopened'] === true;
+  const next = closed.length;
+  if ((caseClosed || finalTicket) && next < CAMPAIGN_LAST) {
+    // the constant rose after this save: the return ticket was issued too early (or the case closed), the campaign goes on
+    reopened = reopened || caseClosed;
+    caseClosed = false;
+    finalTicket = false;
+    current = next;
+  } else if (!caseClosed && !finalTicket && current >= CAMPAIGN_LAST) {
+    // a save from a longer campaign than the constant says: the return ticket is the next one (damage that points past it is pulled back)
+    if (next >= CAMPAIGN_LAST) finalTicket = true;
+    else current = CAMPAIGN_LAST - 1;
+  }
   return {
     current: finalTicket || caseClosed ? 0 : current,
     closed,
@@ -292,6 +317,7 @@ export function toCampaign(raw: unknown): CampaignState {
     caseClosed,
     extras: clampInt(r['extras'], 0, 1e6, 0),
     ...(r['cards'] !== undefined ? { cards: toCardsSeen(r['cards']) } : {}),
+    ...(reopened ? { reopened: true as const } : {}),
   };
 }
 
@@ -325,11 +351,11 @@ export function nextCampaignPlan(c: CampaignState, priority: PriorityId, seed: n
   return { kind: 'campaign', planet: c.current, priority, lawId: lawForPlanet(c.current, seed) };
 }
 
-/** A zgloszenie dodatkowe: random planet, random clause, both pure functions of the seed. Null before the case is closed. */
+/** A zgloszenie dodatkowe: random planet of the campaign so far (`CAMPAIGN_LAST`), random clause, both pure functions of the seed. Null before the case is closed. */
 export function extraPlan(c: CampaignState, priority: PriorityId, seed: number): TicketPlan | null {
   if (!c.caseClosed) return null;
   const r = createRng(seed).fork('extra');
-  return { kind: 'extra', planet: r.int(0, PLANET_COUNT - 1), priority, lawId: r.pick(ALL_LAWS) };
+  return { kind: 'extra', planet: r.int(0, CAMPAIGN_LAST - 1), priority, lawId: r.pick(ALL_LAWS) };
 }
 
 /** Planets reachable from the desk for free: after the case, every closed planet (all nine), at the character's current level. */
@@ -352,7 +378,7 @@ export interface CampaignOutcome {
 }
 
 /**
- * The ticket `plan` was closed. A campaign ticket for the current planet closes it and moves on; planet 9 issues the
+ * The ticket `plan` was closed. A campaign ticket for the current planet closes it and moves on; planet `CAMPAIGN_LAST` issues the
  * return ticket to planet 1; the final ticket closes the case. Extras and travel change nothing but the extras count.
  * Never mutates its argument.
  */
@@ -360,7 +386,7 @@ export function closeTicket(c: CampaignState, plan: TicketPlan): CampaignOutcome
   const next = cloneCampaign(c);
   if (plan.kind === 'campaign' && !c.caseClosed && !c.finalTicket && plan.planet === c.current) {
     if (!next.closed.includes(plan.planet)) next.closed.push(plan.planet);
-    if (plan.planet >= PLANET_COUNT - 1) {
+    if (plan.planet >= CAMPAIGN_LAST - 1) {
       next.finalTicket = true;
       next.current = 0;
       return { campaign: next, advanced: { from: plan.planet, to: 0, finale: true }, caseClosed: false };

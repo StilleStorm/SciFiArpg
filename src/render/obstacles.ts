@@ -4,6 +4,7 @@ import { CONTENT, type PageContent, type SealId, type Teczka, type Pieczec, type
 import { FOLD, type Obstacle, type Page, type PageExit } from '../world/pages';
 import { t } from '../i18n';
 import { blobPoints, dotPath, el, n2, polyline, smoothClosed, wobblyCircle } from './svg';
+import { drawProp } from './locations';
 import { STAIN_HUES, washGroup } from './wash';
 
 const solid = (node: SVGElement, fill: string): void => {
@@ -509,6 +510,9 @@ export function drawPage(layer: SVGGElement, page: Page, header?: PageHeader): S
         break;
       case 'gate':
         ink.append(tagObstacle(drawGate(o, r), o.kind));
+        break;
+      case 'prop':
+        ink.append(tagObstacle(drawProp(o, r), o.kind));
         break;
     }
   }

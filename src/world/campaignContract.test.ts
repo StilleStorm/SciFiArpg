@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CAMPAIGN_LAST,
   PLANET_COUNT,
   PRIORITY_IDS,
   closeTicket,
@@ -41,12 +42,12 @@ describe('campaign contract (tester)', () => {
 
   it('walking the whole sequence closes each planet exactly once', () => {
     let c = newCampaign();
-    for (let i = 0; i < PLANET_COUNT; i++) {
+    for (let i = 0; i < CAMPAIGN_LAST; i++) {
       expect(nextCampaignPlan(c, 'normalny', 5)?.planet).toBe(i);
       c = closeTicket(c, plan(i)).campaign;
       expect(closeTicket(c, plan(i)).campaign.closed).toEqual(c.closed);
     }
-    expect([...c.closed].sort((a, b) => a - b)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    expect([...c.closed].sort((a, b) => a - b)).toEqual([0, 1, 2]);
     expect(travelList(newCampaign())).toEqual([]);
   });
 

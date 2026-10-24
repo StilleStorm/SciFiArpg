@@ -8,7 +8,7 @@ import { createRng } from '../core/rng';
 import type { Bus } from '../core/events';
 import type { Enemy } from '../entities/types';
 import { ENEMY_SCALE, assemble, assembleBoss, layoutAssembly, type Assembly, type Layout } from '../enemies/assemble';
-import { CONFIRM_R, GRID_CELL, GRID_NEED_S, CONFIRM_NEED_S, gridCellCenter } from '../enemies/bosses';
+import { CONFIRM_R, GRID_CELL, GRID_NEED_S, CONFIRM_NEED_S, bossVariantLine, gridCellCenter } from '../enemies/bosses';
 import { BOSS_OF, ELITE_SCALE, eliteWord } from '../enemies/families';
 import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsBase';
 import { rtOf } from '../enemies/runtime';
@@ -332,6 +332,14 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
     over.append(
       el('text', { x: 0, y: n2(boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: none` }, [t(`enemies.boss.${boss}.name`).toLocaleUpperCase('pl')]),
     );
+    const variant = bossVariantLine(e);
+    if (variant) {
+      // the planet's variant of the boss (STORY 8.0): a line of its own under the name, in the narration hand with a paper halo
+      const nameY = boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : feet + 16;
+      over.append(
+        el('text', { x: 0, y: n2(nameY + 14), 'text-anchor': 'middle', 'font-size': readableUnits(11), 'data-part': 'variant', style: `${FONT.serif}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [t(variant)]),
+      );
+    }
   } else if (e.elite) {
     over.append(
       el('path', { d: `M${n2(-hw)} ${n2(feet + 3)}Q0 ${n2(feet + 6)} ${n2(hw)} ${n2(feet + 2.5)}M${n2(-hw + 5)} ${n2(feet + 6)}Q0 ${n2(feet + 8.5)} ${n2(hw - 4)} ${n2(feet + 5.5)}`, 'stroke-width': 1.1 }),

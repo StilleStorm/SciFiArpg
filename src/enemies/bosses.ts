@@ -48,6 +48,32 @@ export const BOSSES: Record<BossId, BossDef> = {
   hipoteza: { hp: 260, speed: 46, dmgMin: 6, dmgMax: 9, pewnoscSiebie: 80, upor: 40, attackRange: 42, attackCooldown: 1.3, claimType: 'mechaniczny' },
 };
 
+/**
+ * A planet's variant of its family boss (STORY 4, 8.0): a line printed under the boss's name and one data change (racja here).
+ * A planet module registers it (`world/planets/p1.ts`); the Spor comments of the variant are `combat/spor.ts`.
+ */
+export interface BossVariant {
+  boss: BossId;
+  /** i18n key of the line under the name. */
+  lineKey: string;
+  /** The racja the variant has instead of `BOSSES[boss].hp`. */
+  hp: number;
+}
+
+const VARIANTS = new Map<number, BossVariant>();
+const variantLines = new WeakMap<object, string>();
+
+/** Register the boss variant of a planet (0-based index). */
+export function registerBossVariant(planet: number, v: BossVariant): void {
+  VARIANTS.set(planet, v);
+}
+
+/** The variant a planet gives its boss, if one is registered. */
+export const bossVariantOf = (planet: number | undefined): BossVariant | undefined => (planet === undefined ? undefined : VARIANTS.get(planet));
+
+/** The key of the variant line under this boss's name, or undefined for a plain family boss. */
+export const bossVariantLine = (e: object): string | undefined => variantLines.get(e);
+
 export const bossIdOf = (e: Enemy): BossId | null => (e.boss ? BOSS_OF[e.family] : null);
 
 /** World position of the center of grid cell `i` (0..8, row-major) of a Weryfikacja. */
@@ -64,7 +90,7 @@ export function onHydrant(grid: { cells: [number, number]; cx: number; cy: numbe
 }
 
 /** Turn a freshly made enemy into the family's boss. */
-export function makeBoss(id: number, x: number, y: number, seed: number, family: FamilyId, spawnRng: { int(a: number, b: number): number }): Enemy {
+export function makeBoss(id: number, x: number, y: number, seed: number, family: FamilyId, spawnRng: { int(a: number, b: number): number }, planet?: number): Enemy {
   const boss = BOSS_OF[family];
   const def = BOSSES[boss];
   const e = makeEnemy(id, x, y, seed, family);
@@ -74,7 +100,10 @@ export function makeBoss(id: number, x: number, y: number, seed: number, family:
   e.defect = undefined;
   e.escalateIn = undefined;
   e.r = asm.radius;
-  e.hp = e.hpMax = def.hp;
+  const variant = bossVariantOf(planet);
+  const mine = variant && variant.boss === boss ? variant : undefined;
+  e.hp = e.hpMax = mine ? mine.hp : def.hp;
+  if (mine) variantLines.set(e, mine.lineKey);
   e.speed = def.speed;
   e.attackRange = def.attackRange;
   e.attackCooldown = def.attackCooldown;
@@ -105,7 +134,7 @@ export function makeBoss(id: number, x: number, y: number, seed: number, family:
 
 /** Put a boss at (x, y) without any placement checks (tests, screenshots). */
 export function placeBoss(s: RunState, family: FamilyId, x: number, y: number): Enemy {
-  const e = makeBoss(nextId(s), x, y, s.rngs.spawn.int(1, 1e6), family, s.rngs.spawn);
+  const e = makeBoss(nextId(s), x, y, s.rngs.spawn.int(1, 1e6), family, s.rngs.spawn, s.plan?.planet);
   rtOf(e).sporAt = s.time + SPOR_FIRST_S;
   s.enemies.push(e);
   return e;
@@ -120,7 +149,7 @@ export function spawnBoss(s: RunState, family: FamilyId | string): Enemy | null 
     const x = r.range(260, s.page.w - 260);
     const y = r.range(260, s.page.h * 0.6);
     if (Math.hypot(x - s.player.x, y - s.player.y) < 420) continue;
-    const e = makeBoss(nextId(s), x, y, r.int(1, 1e6), fam, r);
+    const e = makeBoss(nextId(s), x, y, r.int(1, 1e6), fam, r, s.plan?.planet);
     const before = { x: e.x, y: e.y };
     resolveMove(s.page, e, e.r + 80);
     if (Math.hypot(e.x - before.x, e.y - before.y) > 1) continue;

@@ -15,6 +15,7 @@ import { createRng } from '../core/rng';
 import { dist, type Vec } from '../core/vec';
 import { t } from '../i18n';
 import type { Bookmark } from '../save/bookmark';
+import { planetDef } from './campaign';
 import { atExit, colliders, PAGE_INSET, type Circle, type Corner, type Obstacle, type ObstacleKind, type Page } from './pages';
 import type { RunState } from './run';
 
@@ -173,9 +174,10 @@ const SPECS: Record<BaseLayout, LayoutSpec> = {
   },
 };
 
-/** Which layout a planet seed gets. */
-export function layoutForSeed(seed: number): BaseLayout {
-  return createRng(seed).fork('base-layout').pick(BASE_LAYOUTS);
+/** Which layout a planet seed gets: out of the planet's `baseLayouts` when the planet is known, else any of the three. */
+export function layoutForSeed(seed: number, planet?: number): BaseLayout {
+  const pool = planet === undefined ? BASE_LAYOUTS : planetDef(planet).baseLayouts;
+  return createRng(seed).fork('base-layout').pick(pool.length > 0 ? pool : BASE_LAYOUTS);
 }
 
 /** Colliders of a station or a prop, relative to its centre. */
@@ -293,8 +295,8 @@ const DECOR_KINDS: readonly ObstacleKind[] = ['ring', 'blot', 'sticky', 'clip', 
  * obstacles flagged with `station` (so the walls and colliders of `resolveMove` apply to them), which the drawing skips
  * and draws itself (`render/stations.ts`).
  */
-export function generateBase(seed: number): Page {
-  const layout = layoutForSeed(seed);
+export function generateBase(seed: number, planet?: number): Page {
+  const layout = layoutForSeed(seed, planet);
   const spec = SPECS[layout];
   const r = createRng(seed).fork('base');
   const jit = r.fork('jitter');

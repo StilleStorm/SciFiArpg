@@ -3,6 +3,8 @@ import { createRng, type Rng } from '../core/rng';
 import type { Enemy } from '../entities/types';
 import { BOSS_OF, type BossId } from '../enemies/families';
 import { t } from '../i18n';
+import { planetDef } from '../world/campaign';
+import { hasStory } from '../world/planets/storyKeys';
 import { applyDamage } from '../systems/combat';
 import type { RunState } from '../world/run';
 import { DAMAGE_TYPES, type DamageType } from './damage';
@@ -75,9 +77,32 @@ export const SPOR_PROMPTS: Record<BossId, readonly [SporEntry, SporEntry]> = {
   hipoteza: [entry('hipoteza', 1, 'egzystencjalny'), entry('hipoteza', 2, 'mechaniczny')],
 };
 
-/** The prompt of a boss and phase, the three replies shuffled with `rng`; `correct` points at the one that answers the comment. */
-export function promptFor(boss: BossId, phase: 1 | 2, rng: Rng): SporPrompt {
-  const src = SPOR_PROMPTS[boss][phase - 1] ?? SPOR_PROMPTS[boss][0];
+/**
+ * Which reply type answers the comment of each phase on a planet (0-based index), when the planet's boss argues in its own
+ * words (`story.p<N>.boss.spor1|spor2.*`, STORY 8.x). A planet without an entry here, or whose keys are not written, uses the family table.
+ */
+export const STORY_ANSWERS: Readonly<Record<number, readonly [DamageType, DamageType]>> = {
+  0: ['regulaminowy', 'mechaniczny'],
+};
+
+/** The planet's own comment of a phase, or null when the planet has none (then the family's applies). */
+export function storyEntry(planet: number | undefined, boss: BossId, phase: 1 | 2): SporEntry | null {
+  if (planet === undefined) return null;
+  const answers = STORY_ANSWERS[planet];
+  if (!answers || planetDef(planet).boss !== boss) return null;
+  const base = `story.p${planet + 1}.boss.spor${phase}`;
+  if (!hasStory(`p${planet + 1}.boss.spor${phase}.comment`)) return null;
+  const reply = (type: DamageType): SporReply => ({ textKey: `${base}.reply.${type}`, type });
+  const [a, b, c] = DAMAGE_TYPES;
+  return { commentKey: `${base}.comment`, answer: answers[phase - 1] ?? 'mechaniczny', replies: [reply(a ?? 'mechaniczny'), reply(b ?? 'regulaminowy'), reply(c ?? 'egzystencjalny')] };
+}
+
+/**
+ * The prompt of a boss and phase, the three replies shuffled with `rng`; `correct` points at the one that answers the comment.
+ * With a `planet` that has its own comments (`storyEntry`) they replace the family's.
+ */
+export function promptFor(boss: BossId, phase: 1 | 2, rng: Rng, planet?: number): SporPrompt {
+  const src = storyEntry(planet, boss, phase) ?? SPOR_PROMPTS[boss][phase - 1] ?? SPOR_PROMPTS[boss][0];
   const list = [...src.replies];
   for (let i = list.length - 1; i > 0; i--) {
     const j = rng.int(0, i);
@@ -117,7 +142,7 @@ export function postSpor(s: RunState, bus: Bus, boss: Enemy, phase: 1 | 2): bool
   if ((sp.answered[boss.id] ?? 0) >= phase) return false;
   sp.answered[boss.id] = phase;
   // a stream of its own, so the shuffle never moves another system's rolls
-  const prompt = promptFor(BOSS_OF[boss.family], phase, createRng(s.seed ^ Math.imul(boss.id, 0x9e3779b1)).fork(`spor${phase}`));
+  const prompt = promptFor(BOSS_OF[boss.family], phase, createRng(s.seed ^ Math.imul(boss.id, 0x9e3779b1)).fork(`spor${phase}`), s.plan?.planet);
   close(sp, bus, 'expired');
   sp.prompt = prompt;
   sp.bossId = boss.id;
