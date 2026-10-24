@@ -187,6 +187,7 @@
       "line2": "Pełnomocnik posiada pełnomocnictwo. Pełnomocnictwo wymaga aktualizacji."
     },
     "gate": {
+      "elite": "Ochrona Obiektu",
       "note": "Bramkę obsługuje ochrona obiektu. Ochrona przebywa na tej stronie. Bramka otwiera się po skreśleniu ochrony z listy obecności.",
       "figure": "Bramka. Przepustek nie wydaję. Sprawdzam.",
       "lift": "Ochronę obiektu skreślono z listy obecności. Bramka otwarta. Portier przeszedł na stronę oczekujących."
