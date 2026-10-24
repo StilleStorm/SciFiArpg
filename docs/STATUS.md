@@ -143,7 +143,9 @@ Progress is recorded here, one line per slice:
 
 - S13 done: planet 2 built (serwerownia location, 8 drawings on a `corridors` layout; magazyn gained stos/awizo/kolejka, shown on planet 1 too; `locationSplit` steers magazyn to pages 1–2 and serwerownia to page 3 and the boss page), clerk, side tickets h:p2:a-c, boss variant 360 racja with its Spór (egzystencjalny, regulaminowy), the P2 gate on page 2 (parcel wall keyed to one forced teczka "list przewozowy", the Magazynier's line on tap, struck and drawn away on the lift), `PlanetDef.headline` (first campaign ticket on an unclosed planet prints it; travel/extra roll the pool), free travel capped at `CAMPAIGN_LAST` (smoke 6c, ticket.ts rows), smoke leg 6e. New key `screens.base.plate.cisza` (voice: light check at the M3 pass). Look: the HUD pads partly cover corner exits incl. the gate (existing, S28).
 
-**Next pickup:** S14 (planet 3 content on the S12 frames; P3 gate a forced named elite "Ochrona Obiektu" on page 4, STORY §8.3/§8.5.4).
+- S14 done: planet 3 built (biuro location with partitioned rooms and its drawings, three new przedmieście props, split przedmieście 1–2 / serwerownia 3 / biuro 4–5 + boss), clerk Pełnomocnik ds. Aktualizacji, side tickets h:p3:a-c (c pinned at n 2 for its text), boss variant seria 3 wersja biurowa (attackRange 60, stapler arm), Spór answers [mechaniczny, egzystencjalny], a named-elite gate kind (page 4 always spawns one named elite "Ochrona Obiektu", `story.p3.gate.elite`; turnstile struck, Portier sits), smoke leg 6f. Report reports/S14-builder-planet-3.md. Side effects: planet 4 lists biuro so it gets the room layout; planet 1 przedmieście pages differ per seed (more props). Look: HUD pads over the turnstile/Portier in landscape (existing corner-exit item, S28); the Portier tap is unit-tested only.
+
+**Next pickup:** S15 (Anomalia: shared phases and the five faces).
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).

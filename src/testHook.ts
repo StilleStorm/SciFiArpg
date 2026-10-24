@@ -45,7 +45,7 @@ export interface GateHook {
   /** Put a gate on the current run page (default) or page `opts.page`; the barrier is drawn at once. False without an exit or when one is there already. */
   set(kind: GateKind, opts?: { page?: number; id?: string; need?: number }): boolean;
   /** The gate of the current page: whether it holds, its obstacle and colliders, the distance of the player from the exit. Null without a gate. */
-  info(): { kind: GateKind; holds: boolean; obstacle: boolean; colliders: number; dist: number; look: string | null; figure: boolean; keyTeczka: boolean } | null;
+  info(): { kind: GateKind; holds: boolean; obstacle: boolean; colliders: number; dist: number; look: string | null; figure: boolean; keyTeczka: boolean; elite: number | null } | null;
   /** Stand 260 units from the blocked corner on its diagonal and run one step: the footnote naming the condition is written. */
   approach(): boolean;
   /** Walk toward the exit corner for `seconds` of game time: how close the player got and whether the page turned. */
@@ -336,7 +336,7 @@ export function installTestHook(deps: HookDeps): void {
         const g = s?.page.gate;
         if (!s || !g) return null;
         const o = s.page.obstacles.find((p) => p.kind === 'gate');
-        return { kind: g.kind, holds: gateHolds(s, g), obstacle: o !== undefined, colliders: o?.colliders.length ?? 0, dist: s.page.exit ? dist(s.player, s.page.exit) : -1, look: g.look ?? null, figure: g.figure !== undefined, keyTeczka: g.keyTeczka === true };
+        return { kind: g.kind, holds: gateHolds(s, g), obstacle: o !== undefined, colliders: o?.colliders.length ?? 0, dist: s.page.exit ? dist(s.player, s.page.exit) : -1, look: g.look ?? null, figure: g.figure !== undefined, keyTeczka: g.keyTeczka === true, elite: g.eliteId ?? null };
       },
       approach() {
         const s = game.state;

@@ -105,7 +105,7 @@ priority (re-accepts), free travel and extras (`takePlan` re-lays the base). `ma
 `base:exit`. **Page gates** (`world/gate.ts`): `Page.gate?: PageGate {kind: boss|teczka|quest, id?, need?, key?}` (from
 `PlanetDef.gates`, none yet; fixture `__game.gate.*`) adds an obstacle of kind `gate` (an inked arc of colliders over the exit
 corner, `render/obstacles.ts drawGate/redrawGate`); `tickPageTurn` calls `stepGate` (lifts when the condition holds, writes
-`screens.base.gate.<kind>` as a footnote near the corner); `bindGates` opens a boss gate on `boss:died`. Stations open on a tap on their
+`screens.base.gate.<kind>` as a footnote near the corner); `bindGates` opens a boss gate on `boss:died`. Kind `elite` (planet 3, `PlanetDef.gates` page 3): `enemies/spawn.ts spawnGateElite` (called first by `populatePage`) puts the page's one forced named elite, fixed name `story.p3.gate.elite`, reachable and clear of the gate corner, and sets `PageGate.eliteId`; `bindGates` sets `PageGate.slain` on `elite:slain` with that id; no other named elite is rolled on a page with this gate. Look `turnstile` + a figure: on the lift the arm is struck and the figure sits on a waiting chair (`render/obstacles.ts`). `PlanetDef.locationSplit` may be an array of cuts (planet 3: `[2, 3]`); location layout `rooms` (biuro). Stations open on a tap on their
 drawing or label (`Game.onTap` emits `station:opened`; targets >= 44 css px at any zoom); walking into them does nothing.
 `render/stations.ts drawBase` returns `BaseView {frame(s), unlock(header)}`; `game.ts` passes `planet: questPlanet(s)`.
 HUD in the base: the page field reads "Baza" + the layout word, Tunel and Potw. notes and skill pads hidden

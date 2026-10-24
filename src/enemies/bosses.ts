@@ -58,10 +58,15 @@ export interface BossVariant {
   lineKey: string;
   /** The racja the variant has instead of `BOSSES[boss].hp`. */
   hp: number;
+  /** The reach of its blows instead of `BOSSES[boss].attackRange` (planet 3: 60, an arm with a stapler). */
+  attackRange?: number;
+  /** The one part drawn on the variant (render/enemyFigures.ts); the body stays. */
+  arm?: 'stapler';
 }
 
 const VARIANTS = new Map<number, BossVariant>();
 const variantLines = new WeakMap<object, string>();
+const variantArms = new WeakMap<object, 'stapler'>();
 
 /** Register the boss variant of a planet (0-based index). */
 export function registerBossVariant(planet: number, v: BossVariant): void {
@@ -73,6 +78,9 @@ export const bossVariantOf = (planet: number | undefined): BossVariant | undefin
 
 /** The key of the variant line under this boss's name, or undefined for a plain family boss. */
 export const bossVariantLine = (e: object): string | undefined => variantLines.get(e);
+
+/** The extra arm drawn on this boss's variant, if its variant has one. */
+export const bossVariantArm = (e: object): 'stapler' | undefined => variantArms.get(e);
 
 export const bossIdOf = (e: Enemy): BossId | null => (e.boss ? BOSS_OF[e.family] : null);
 
@@ -104,8 +112,9 @@ export function makeBoss(id: number, x: number, y: number, seed: number, family:
   const mine = variant && variant.boss === boss ? variant : undefined;
   e.hp = e.hpMax = mine ? mine.hp : def.hp;
   if (mine) variantLines.set(e, mine.lineKey);
+  if (mine?.arm) variantArms.set(e, mine.arm);
   e.speed = def.speed;
-  e.attackRange = def.attackRange;
+  e.attackRange = mine?.attackRange ?? def.attackRange;
   e.attackCooldown = def.attackCooldown;
   e.attackTimer = 1;
   e.damageType = FAMILY_DEFS[family].damageType;

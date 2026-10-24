@@ -1,7 +1,7 @@
 /**
  * Page gates (S11a, DESIGN 4): a story lock is terrain, never the base exit. A page may carry a `gate`: a drawn obstacle
  * (an inked barrier across the exit corner, kind 'gate') that stays until its condition holds. Kinds: 'boss' (the boss of the
- * page is beaten), 'teczka' (teczki have been taken), 'quest' (a side ticket is done, by id). Pure data and functions here;
+ * page is beaten), 'teczka' (teczki have been taken), 'quest' (a side ticket is done, by id), 'elite' (the page's forced named elite is slain, planet 3). Pure data and functions here;
  * `pageTurn.ts tickPageTurn` applies the results (lift, footnote, redraw). Data comes from `PlanetDef.gates` (none yet) or
  * `installGate` (the test hook's fixture).
  */
@@ -15,7 +15,7 @@ import { colliders, PAGE_H, PAGE_W, type Obstacle, type Page } from './pages';
 import { questsOf } from './quests';
 import type { RunState } from './run';
 
-export type GateKind = 'boss' | 'teczka' | 'quest';
+export type GateKind = 'boss' | 'teczka' | 'quest' | 'elite';
 
 export interface PageGate {
   kind: GateKind;
@@ -28,11 +28,15 @@ export interface PageGate {
   /** teczka: the page carries one forced "key" folder (`placeKeyTeczka`) and only its opening lifts the gate, not any folder. */
   keyTeczka?: boolean;
   /** How the barrier is drawn: absent = the hatched tape band; 'parcels' = a wall of parcels two deep with a gap for the figure. */
-  look?: 'parcels';
+  look?: 'parcels' | 'turnstile';
   /** The i18n key of the footnote written when the gate lifts; default `screens.base.gate.lifted`. */
   liftKey?: string;
   /** A figure standing at the gap (render/npc.ts primitive, `look` seeds it): a tap writes the one line `key` as a footnote. */
   figure?: { look: number; key: string };
+  /** elite: the id of the page's forced named elite (`spawnGateElite`, set when the page is populated); the gate holds until it is slain. */
+  eliteId?: number;
+  /** elite: set when that elite was slain (`bindGates`, event `elite:slain`). */
+  slain?: boolean;
   /** boss: set when the page's boss fell (`bindGates`). */
   beaten?: boolean;
   /** Run time before which the footnote is not written again. */
@@ -81,6 +85,8 @@ export function gateHolds(s: RunState, g: PageGate): boolean {
       return teczkiTaken(s) < (g.need ?? 1);
     case 'quest':
       return !questsOf(s).log.includes(g.id ?? '');
+    case 'elite':
+      return g.slain !== true;
   }
 }
 
@@ -177,8 +183,17 @@ export function stepGate(s: RunState): 'lifted' | 'note' | null {
 
 /** The boss of the gated page fell: the 'boss' gate of the page it fell on opens. Returns the unbind function. */
 export function bindGates(bus: Bus, getState: () => RunState | null): () => void {
-  return bus.on('boss:died', () => {
+  const offBoss = bus.on('boss:died', () => {
     const g = getState()?.page.gate;
     if (g?.kind === 'boss') g.beaten = true;
   });
+  // the forced named elite of an 'elite' gate was slain (only that one: another named elite does not count)
+  const offElite = bus.on('elite:slain', (ev) => {
+    const g = getState()?.page.gate;
+    if (g?.kind === 'elite' && g.eliteId === ev.id) g.slain = true;
+  });
+  return () => {
+    offBoss();
+    offElite();
+  };
 }

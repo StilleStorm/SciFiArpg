@@ -8,7 +8,7 @@ import { createRng } from '../core/rng';
 import type { Bus } from '../core/events';
 import type { Enemy } from '../entities/types';
 import { ENEMY_SCALE, assemble, assembleBoss, layoutAssembly, type Assembly, type Layout } from '../enemies/assemble';
-import { CONFIRM_R, GRID_CELL, GRID_NEED_S, CONFIRM_NEED_S, bossVariantLine, gridCellCenter } from '../enemies/bosses';
+import { CONFIRM_R, GRID_CELL, GRID_NEED_S, CONFIRM_NEED_S, bossVariantArm, bossVariantLine, gridCellCenter } from '../enemies/bosses';
 import { BOSS_OF, ELITE_SCALE, eliteWord } from '../enemies/families';
 import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsBase';
 import { rtOf } from '../enemies/runtime';
@@ -294,6 +294,27 @@ function eliteCaption(e: Enemy, asm: Assembly, feet: number): SVGTextElement[] {
   );
 }
 
+/**
+ * The one part of the planet 3 variant of Prototyp (STORY 8.3, attackRange 60): an extra arm out of the body's side that ends in a
+ * stapler, jaw a little open, one staple on the paper beneath it. Ink and hatching, drawn over the figure; the body is untouched.
+ */
+function staplerArm(hw: number, y: number): SVGGElement {
+  const g = el('g', { 'data-part': 'arm' });
+  const x0 = hw * 0.85;
+  g.append(
+    el('path', { d: `M${n2(x0)} ${n2(y)}Q${n2(x0 + 12)} ${n2(y - 9)} ${n2(x0 + 24)} ${n2(y - 3)}L${n2(x0 + 40)} ${n2(y + 4)}`, 'stroke-width': 2 }),
+    el('circle', { cx: n2(x0 + 24), cy: n2(y - 3), r: 2.4, 'stroke-width': 1.3 }),
+  );
+  const sx = x0 + 38;
+  const sy = y + 4;
+  // the stapler: a hatched base, the upper jaw on a hinge, the open mouth between them, one staple fallen out
+  const base = el('path', { d: `M${n2(sx)} ${n2(sy)}h26v6h-26Z`, 'stroke-width': 1.5, fill: 'url(#hatch)' });
+  const jaw = el('path', { d: `M${n2(sx)} ${n2(sy - 2)}l25 -9l1 6l-26 6Z`, 'stroke-width': 1.5 });
+  jaw.style.fill = 'var(--paper)';
+  g.append(base, jaw, el('path', { d: `M${n2(sx + 27)} ${n2(sy + 9)}h5v2h-5Z`, 'stroke-width': 1 }));
+  return g;
+}
+
 function buildFigure(e: Enemy, g: SVGGElement): FigState {
   g.replaceChildren();
   const asm = assemblyOf(e);
@@ -341,6 +362,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
         el('text', { x: 0, y: n2(nameY + size + 4), 'text-anchor': 'middle', 'font-size': size, 'data-part': 'variant', style: `${FONT.serif}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [t(variant)]),
       );
     }
+    if (bossVariantArm(e) === 'stapler') over.append(staplerArm(hw, feet - H * 0.42));
   } else if (e.elite) {
     over.append(
       el('path', { d: `M${n2(-hw)} ${n2(feet + 3)}Q0 ${n2(feet + 6)} ${n2(hw)} ${n2(feet + 2.5)}M${n2(-hw + 5)} ${n2(feet + 6)}Q0 ${n2(feet + 8.5)} ${n2(hw - 4)} ${n2(feet + 5.5)}`, 'stroke-width': 1.1 }),

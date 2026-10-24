@@ -141,7 +141,7 @@ describe('planet 2: the gate on page 2', () => {
     }
     // planet 1 and the planet without a gate carry none
     expect(createRun(3, { plan: plan(0), pageCount: 4 }).pages.some((p) => p.gate)).toBe(false);
-    expect(createRun(3, { plan: plan(2), pageCount: 4 }).pages.some((p) => p.gate)).toBe(false);
+    expect(createRun(3, { plan: plan(3), pageCount: 4 }).pages.some((p) => p.gate)).toBe(false);
   });
 
   it('lifts only when that teczka is opened, not another one; the lift has its own footnote', () => {

@@ -11,7 +11,7 @@ import { FAMILY_IDS, type FamilyId } from '../enemies/ids';
 import { t } from '../i18n';
 import { openKiosk } from '../economy/kiosk';
 import { spawnBoss } from '../enemies/bosses';
-import { spawnEntryWave, spawnWave } from '../enemies/spawn';
+import { spawnEntryWave, spawnGateElite, spawnWave } from '../enemies/spawn';
 import { currentViewSize, headerFrame, viewRect, type Camera } from '../render/camera';
 import { drawIn, stamp } from '../render/ink';
 import { drawPage, redrawGate, type PageHeader } from '../render/obstacles';
@@ -88,6 +88,8 @@ export function populatePage(s: RunState, bus: Bus): void {
   s.populate = false;
   const r = s.rngs.spawn;
   const waves = planWaves(s);
+  // an 'elite' gate: its one named elite is put first, in view of the entry and clear of the barrier corner (enemies/spawn.ts)
+  spawnGateElite(s, entryView(s));
   // The first wave stands in view of the entry (at least 3 enemies, none closer than 180 units).
   const first = waves.shift();
   if (first) spawnEntryWave(s, first.family, first.count, entryView(s));

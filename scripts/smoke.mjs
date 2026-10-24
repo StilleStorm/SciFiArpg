@@ -2218,6 +2218,163 @@ try {
     await qctx.close();
   }
 
+  // ---------- 6f. planet 3 content (S14): chapter card, clerk, the turnstile gate on page 4 held by a named elite, biuro, the boss variant ----------
+  {
+    const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await qctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const qp = await qctx.newPage();
+    qp.on('pageerror', (e) => problems.push(`S14 pageerror: ${e.message}`));
+    qp.on('console', (m) => {
+      if (m.text().includes('Service Worker registration blocked')) return;
+      if (m.type() === 'error' || m.type() === 'warning') problems.push(`S14 console.${m.type()}: ${m.text()}`);
+    });
+    const ev = (fn, arg) => qp.evaluate(fn, arg);
+    await qp.goto(BASE, { waitUntil: 'load' });
+    await qp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await qp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 });
+    await sleep(500);
+    // the case file stands at planet 3: planets 1 and 2 closed
+    await ev(() => {
+      const m = window.__game.meta();
+      window.__game.setMeta({ ...m, character: { ...m.character, campaign: { current: 2, closed: [0, 1], finalTicket: false, caseClosed: false, extras: 0, cards: { opening: true, chapters: [] } } } });
+      window.__game.startBase(5);
+    });
+    await sleep(900);
+    const card = await ev(() => {
+      const l = document.querySelector('.card-layer');
+      return { kind: l?.dataset.card ?? null, text: l?.textContent ?? '', planet: window.__game.state()?.plan?.planet, law: window.__game.state()?.plan?.lawId };
+    });
+    check('S14 chapter card: planet 3 carries its story text, no key and no placeholder; the first ticket prints the headline clause Parzystość', card.kind === 'chapter' && card.planet === 2 && card.law === 'parzystosc' && /Dwudziest/.test(card.text) && !/story\.|screens\.cards|\[brak/i.test(card.text), JSON.stringify({ kind: card.kind, planet: card.planet, law: card.law, head: card.text.slice(0, 90) }));
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 }).catch(() => undefined);
+    await sleep(500);
+    const base = await ev(() => ({ planet: window.__game.state()?.plan?.planet, clerk: document.querySelectorAll('[data-station=urzednik]').length, offers: window.__game.quests.offers().map((o) => o.id) }));
+    check('S14 planet 3 base: the clerk is drawn and the board carries the three h:p3 side tickets', base.planet === 2 && base.clerk === 1 && base.offers.filter((id) => id.startsWith('h:p3:')).length === 3, JSON.stringify(base));
+    await ev(() => window.__game.station('urzednik'));
+    await qp.locator('.npc-sheet').waitFor({ state: 'visible', timeout: 3000 });
+    const clerk = await ev(() => ({ lines: document.querySelectorAll('.npc-sheet .npc-line').length, text: document.querySelector('.npc-sheet')?.textContent ?? '' }));
+    check('S14 the clerk of planet 3: Pełnomocnik ds. Aktualizacji, three story lines, no key', clerk.lines === 3 && /Aktualizacji/.test(clerk.text) && !/story\.p3/.test(clerk.text), JSON.stringify({ lines: clerk.lines, head: clerk.text.slice(0, 100) }));
+    await qp.locator('.npc-sheet .ps-close').first().click().catch(() => undefined);
+    await sleep(200);
+
+    // the run: pages 1-2 przedmiescie, page 3 serwerownia, pages 4-5 biuro; the gate on page 4
+    await ev(() => window.__game.start(41, { plan: { kind: 'campaign', planet: 2, priority: 'niski', lawId: 'grawitacja' }, pageCount: 5 }));
+    await sleep(700);
+    for (let k = 0; k < 4 && (await ev(() => window.__game.state()?.modal ?? null)); k++) {
+      await qp.locator('.pop-wrap .form-btn, .pop-wrap button').locator('visible=true').first().click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(400);
+    }
+    const turn = async (k) => {
+      await ev((n) => {
+        window.__game.state().enemies.length = 0;
+        window.__game.turnTo(n);
+      }, k);
+      await qp.waitForFunction((n) => window.__game.state()?.pageIndex === n && !window.__game.state().turning, k, { timeout: 6000 }).catch(() => undefined);
+      await sleep(500);
+    };
+    const locs = await ev(() => window.__game.state().pages.map((q) => q.location));
+    check('S14 pages: przedmiescie, przedmiescie, serwerownia, biuro, biuro', locs.join() === 'przedmiescie,przedmiescie,serwerownia,biuro,biuro', JSON.stringify(locs));
+    const props = await ev(() => {
+      const s = window.__game.state();
+      const nodes = [...document.querySelectorAll('#page [data-obstacle="prop"]')];
+      return { props: nodes.length, drawn: nodes.filter((n) => n.childElementCount > 0).length, kinds: [...new Set(s.page.obstacles.filter((o) => o.kind === 'prop').map((o) => o.variant))] };
+    });
+    check('S14 page 1: a przedmiescie with every prop drawn', props.props >= 6 && props.props === props.drawn, JSON.stringify(props));
+    await turn(3);
+    const gate0 = await ev(() => {
+      const s = window.__game.state();
+      const named = window.__game.enemies.list().filter((e) => e.named);
+      return {
+        loc: s.page.location,
+        info: window.__game.gate.info(),
+        wall: document.querySelectorAll('#page [data-obstacle=gate][data-gate-look=turnstile]').length,
+        arm: document.querySelectorAll('#page [data-turnstile-arm]').length,
+        figure: document.querySelectorAll('#page [data-gate-figure]').length,
+        named: named.map((e) => e.named),
+        props: [...document.querySelectorAll('#page [data-obstacle="prop"]')].filter((n) => n.childElementCount > 0).length,
+      };
+    });
+    check('S14 gate: page 4 is a biuro with a turnstile, a Portier and exactly one named elite, Ochrona Obiektu', gate0.loc === 'biuro' && gate0.info?.kind === 'elite' && gate0.info.holds && gate0.info.look === 'turnstile' && gate0.info.figure && gate0.wall === 1 && gate0.arm === 1 && gate0.figure === 1 && gate0.named.length === 1 && gate0.named[0] === 'Ochrona Obiektu' && gate0.props >= 6, JSON.stringify(gate0));
+    // another named elite slain (the hook forces one): it does not count for the gate
+    const held = await ev(() => {
+      const h = window.__game;
+      const id = h.state().page.gate?.eliteId ?? null;
+      h.advance(0.1);
+      const other = h.enemies.spawnNamed('urzadzenia');
+      if (other !== null) h.enemies.hit(other, 'mechaniczny', 99999);
+      h.advance(0.2);
+      return { holds: h.gate.info()?.holds ?? null, id, other, alive: h.enemies.list().some((e) => e.id === id) };
+    });
+    check('S14 gate: another named elite slain leaves the turnstile standing; the gate elite is still alive', held.holds === true && typeof held.id === 'number' && held.alive, JSON.stringify(held));
+    // at the blocked corner the Asystent names the condition (the elite stays in the room)
+    await ev(() => {
+      const h = window.__game;
+      const e = h.state().page.exit;
+      h.state().player.suspended = true;
+      h.placePlayer(e.x + (e.corner[1] === 'l' ? 200 : -200), e.y + (e.corner[0] === 't' ? 200 : -200));
+      h.advance(0.1);
+    });
+    await sleep(500);
+    const noted = await ev(() => window.__game.notes().map((n) => n.text));
+    check('S14 gate: at the blocked corner the Asystent names the condition (ochrona obiektu, on this page)', noted.some((x) => /ochrona obiektu/i.test(x) && /Bramk/.test(x)), JSON.stringify(noted.slice(-3)));
+    await shotOf(qp, 'S14-gate-before');
+    // slay the gate elite (the hook hits it as a plain damage type): the gate lifts
+    await ev(() => {
+      const h = window.__game;
+      const id = h.state().page.gate?.eliteId;
+      h.enemies.hit(id, 'mechaniczny', 99999);
+      h.advance(0.2);
+    });
+    await sleep(600); // the kill's level opens a sheet first: the lift is written on the next running step, after the sheet is put away
+    if (await qp.locator('.sheet:not(.hidden) .entry').first().isVisible().catch(() => false)) {
+      await qp.locator('.sheet:not(.hidden) .entry').first().click({ timeout: 2000 }).catch(() => undefined);
+      await qp.locator('.sheet:not(.hidden) .install').click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(300);
+      await qp.locator('.sheet.assigning:not(.hidden) .report.later').click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(300);
+    }
+    await sleep(500);
+    const lifted = await ev(() => {
+      const h = window.__game;
+      return { info: h.gate.info(), page: h.state().page.gate === undefined, notes: h.notes().map((n) => n.text) };
+    });
+    check('S14 gate: when Ochrona Obiektu is slain the gate lifts and the lift footnote is the planet own (Portier)', lifted.info === null && lifted.page && lifted.notes.some((x) => /Portier przeszedł na stronę oczekujących/.test(x)) && !lifted.notes.some((x) => /Przejście odblokowano/.test(x)), JSON.stringify(lifted.notes.slice(-2)));
+    await sleep(350);
+    await shotOf(qp, 'S14-gate-lifting');
+    await sleep(2800);
+    const after = await ev(() => ({ wall: document.querySelectorAll('#page [data-obstacle=gate]').length, arm: document.querySelectorAll('#page [data-turnstile-arm]').length, walking: document.querySelectorAll('#page [data-gate-figure]').length, seated: document.querySelectorAll('#page [data-gate-seated]').length, chair: document.querySelectorAll('#page [data-gate-chair]').length }));
+    check('S14 gate: the turnstile is struck and gone, the Portier sits on a waiting chair instead of walking off', after.wall === 0 && after.arm === 0 && after.walking === 0 && after.seated === 1 && after.chair === 1, JSON.stringify(after));
+    await shotOf(qp, 'S14-gate-after');
+
+    await ev(() => { window.__game.state().player.suspended = false; });
+    await turn(4);
+    await qp.waitForFunction(() => window.__game.state()?.enemies.some((e) => e.boss), null, { timeout: 8000 }).catch(() => undefined);
+    await sleep(600);
+    const boss = await ev(() => {
+      const b = window.__game.state().enemies.find((e) => e.boss);
+      const v = document.querySelector('[data-part=variant]');
+      return b ? { hp: b.hpMax, range: b.attackRange, loc: window.__game.state().page.location, variant: v?.textContent ?? null, arm: document.querySelectorAll('[data-part=arm]').length } : null;
+    });
+    check('S14 boss: Prototyp on the biuro hall has attackRange 60, the variant line and its one extra arm', boss !== null && boss.range === 60 && boss.loc === 'biuro' && boss.variant === 'Prototyp, seria 3, wersja biurowa' && boss.arm === 1, JSON.stringify(boss));
+    await shotOf(qp, 'S14-boss');
+    if (boss) {
+      let first = null;
+      for (let i = 0; i < 50 && !first; i++) {
+        const info = await ev(() => window.__game.spor.info());
+        if (info?.open && info.phase === 1) first = info;
+        else await sleep(200);
+      }
+      check('S14 Spór: the planet 3 comment (story.p3.boss.spor1) is posted and the right reply is the mechaniczny one', first !== null && first.commentKey === 'story.p3.boss.spor1.comment' && first.replies[first.correct].textKey.endsWith('.mechaniczny'), JSON.stringify({ key: first?.commentKey, right: first ? first.replies[first.correct].textKey : null }));
+    }
+    await qctx.close();
+  }
+
   // ---------- 7. frame time with 40 enemies ----------
   // a fresh run: the death slip of the step above may still hold the old one
   await page.evaluate(() => window.__game.start(11, { pageCount: 5, lawId: 'grawitacja' }));

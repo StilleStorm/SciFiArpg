@@ -5,7 +5,8 @@ import { FOLD, type Obstacle, type Page, type PageExit } from '../world/pages';
 import { t } from '../i18n';
 import { blobPoints, dotPath, el, n2, polyline, smoothClosed, wobblyCircle } from './svg';
 import { drawProp } from './locations';
-import { strike } from './ink';
+import { drawIn, strike } from './ink';
+import { drawChair } from './locations/biuro';
 import { drawNpc } from './npc';
 import { tween, easeIn } from './tween';
 import { gateFigureAt } from '../world/gate';
@@ -472,28 +473,136 @@ function drawParcelWall(o: Obstacle, r: Rng): SVGGElement {
   return g;
 }
 
+/**
+ * A turnstile across the exit corner (planet 3's gate): hatched posts along the barrier arc joined by two rails, and at the
+ * diagonal a tripod turnstile (a hatched column with three bars, `data-turnstile-arm`) beside the gap where the Portier stands.
+ * Drawn in the frame of the top-left corner, mirrored for the others.
+ */
+function drawTurnstileWall(o: Obstacle, r: Rng): SVGGElement {
+  const fx = o.x < 600 ? 1 : -1;
+  const fy = o.y < 800 ? 1 : -1;
+  const g = el('g', { transform: `translate(${n2(o.x)} ${n2(o.y)}) scale(${fx} ${fy})` });
+  const at = (a: number): Vec => ({ x: Math.cos(a) * o.size, y: Math.sin(a) * o.size });
+  const post = (a: number, h: number): void => {
+    const p = at(a);
+    const pts = [{ x: p.x - 6, y: p.y }, { x: p.x + 6, y: p.y }, { x: p.x + 6, y: p.y - h }, { x: p.x - 6, y: p.y - h }].map((q) => ({ x: q.x + r.range(-0.8, 0.8), y: q.y + r.range(-0.8, 0.8) }));
+    g.append(el('path', { d: polyline(pts, true), fill: 'url(#hatch)', 'stroke-width': 1.7 }));
+  };
+  const rail = (a0: number, a1: number, h: number): void => {
+    const steps = Math.max(2, Math.round((a1 - a0) / 0.06));
+    const pts = Array.from({ length: steps + 1 }, (_, i) => {
+      const p = at(a0 + ((a1 - a0) * i) / steps);
+      return { x: p.x + r.range(-0.6, 0.6), y: p.y - h + r.range(-0.6, 0.6) };
+    });
+    g.append(el('path', { d: polyline(pts, false), 'stroke-width': 1.4 }));
+  };
+  const left = [0.1, 0.3, 0.5];
+  const right = [1.36, 1.54];
+  for (const a of [...left, ...right]) post(a, 40);
+  rail(0.1, 0.5, 30);
+  rail(0.1, 0.5, 16);
+  rail(1.36, 1.54, 30);
+  rail(1.36, 1.54, 16);
+  // the turnstile: two end posts, the hatched column between them and the arm with its three bars
+  const a0 = 1.05;
+  const c = at(a0);
+  post(a0 - 0.2, 46);
+  post(a0 + 0.2, 46);
+  rail(a0 + 0.2, 1.36, 30);
+  rail(0.5, 0.64, 30);
+  const arm = el('g', { 'data-turnstile-arm': '1' });
+  const col = [{ x: c.x - 8, y: c.y + 4 }, { x: c.x + 8, y: c.y + 4 }, { x: c.x + 8, y: c.y - 52 }, { x: c.x - 8, y: c.y - 52 }];
+  arm.append(el('path', { d: polyline(col, true), fill: 'url(#hatch)', 'stroke-width': 1.8 }));
+  const top = { x: c.x, y: c.y - 44 };
+  const bar = (dx: number, dy: number): void => {
+    arm.append(el('path', { d: polyline([top, { x: top.x + dx, y: top.y + dy }], false), 'stroke-width': 2.2 }), el('circle', { cx: n2(top.x + dx), cy: n2(top.y + dy), r: 2.4, 'stroke-width': 1.4 }));
+  };
+  bar(-30, -3);
+  bar(30, -3);
+  bar(0, 24);
+  g.append(arm);
+  return g;
+}
+
 /** The figure at the gap of a gated page: the standing clerk of render/npc.ts, a little smaller. */
-function drawGateFigure(look: number, at: { x: number; y: number }): SVGGElement {
+function drawGateFigure(look: number, at: { x: number; y: number }, seat?: { x: number; y: number }): SVGGElement {
   const def = { id: 'gate-figure', nameKey: '', roleKey: '', lineKeys: [], look };
   const g = el('g', { transform: `translate(${n2(at.x)} ${n2(at.y)}) scale(0.85)`, 'data-gate-figure': '1', 'data-x': n2(at.x), 'data-y': n2(at.y) });
+  if (seat) {
+    g.setAttribute('data-seat-x', n2(seat.x));
+    g.setAttribute('data-seat-y', n2(seat.y));
+  }
   g.append(drawNpc(def));
   return g;
+}
+
+/** Where the Portier sits when the turnstile is struck: on a waiting chair on the page side of the barrier, along the top or bottom wall. */
+function portierSeat(page: Page): { x: number; y: number } | undefined {
+  const e = page.exit;
+  if (!e) return undefined;
+  const fx = e.x < 600 ? 1 : -1;
+  const fy = e.y < 800 ? 1 : -1;
+  return { x: e.x + fx * Math.cos(0.32) * 225, y: e.y + fy * Math.sin(0.32) * 225 };
 }
 
 /** The drawings of the gate of a page: the barrier (tape band or parcel wall) and, when the gate has one, its figure. */
 function gateDrawings(o: Obstacle, page: Page): SVGElement[] {
   const r = createRng(o.seed);
   const parcels = o.variant === 'parcels';
-  const wall = tagObstacle(parcels ? drawParcelWall(o, r) : drawGate(o, r), o.kind);
-  if (parcels) wall.setAttribute('data-gate-look', 'parcels');
+  const turnstile = o.variant === 'turnstile';
+  const wall = tagObstacle(parcels ? drawParcelWall(o, r) : turnstile ? drawTurnstileWall(o, r) : drawGate(o, r), o.kind);
+  if (parcels || turnstile) wall.setAttribute('data-gate-look', o.variant ?? '');
   const out: SVGElement[] = [wall];
   const at = gateFigureAt(page);
-  if (at && page.gate?.figure) out.push(drawGateFigure(page.gate.figure.look, at));
+  if (at && page.gate?.figure) out.push(drawGateFigure(page.gate.figure.look, at, turnstile ? portierSeat(page) : undefined));
   return out;
 }
 
 /** The gate has lifted: a parcel wall is struck through and drawn away, its figure walks toward the corner and off the page, the tape band just goes. */
 function liftedGate(n: Element, page: Page): void {
+  if (n.getAttribute('data-gate-look') === 'turnstile' && n instanceof SVGGElement) {
+    // the arm of the turnstile is struck through (the red strike), the posts are rubbed out behind it
+    const arm = n.querySelector('[data-turnstile-arm]');
+    if (arm instanceof SVGGElement) {
+      // `strike` reads the box of the group through its own transform only: the arm moves into a wrapper that carries the wall's
+      const wrap = el('g', { transform: n.getAttribute('transform') ?? '' });
+      wrap.append(arm);
+      n.after(wrap);
+      try {
+        strike(wrap);
+      } catch {
+        wrap.remove(); // the ink layer is not up (a hook before the first frame)
+      }
+    }
+    tween(700, (p) => n.setAttribute('opacity', String(1 - p)), { delay: 1100, done: () => n.remove() });
+    return;
+  }
+  if (n instanceof SVGGElement && n.hasAttribute('data-gate-figure') && n.hasAttribute('data-seat-x')) {
+    // the Portier does not walk off: he crosses to the waiting chairs and sits down
+    const x = Number(n.getAttribute('data-x'));
+    const y = Number(n.getAttribute('data-y'));
+    const sx = Number(n.getAttribute('data-seat-x'));
+    const sy = Number(n.getAttribute('data-seat-y'));
+    const chair = drawChair(sx, sy + 6, page.index * 7 + 11);
+    chair.setAttribute('data-gate-chair', '1');
+    n.parentElement?.insertBefore(chair, n);
+    try {
+      drawIn(chair, 500);
+    } catch {
+      /* no ink layer yet */
+    }
+    n.removeAttribute('data-gate-figure');
+    n.setAttribute('data-gate-seated', '1');
+    tween(
+      1500,
+      (p) => {
+        const sit = Math.max(0, p - 0.7) / 0.3;
+        n.setAttribute('transform', `translate(${n2(x + (sx - x) * p)} ${n2(y + (sy - y) * p + sit * 8)}) scale(0.85 ${n2(0.85 - sit * 0.1)})`);
+      },
+      { ease: easeIn, delay: 500 },
+    );
+    return;
+  }
   if (n.getAttribute('data-gate-look') === 'parcels' && n instanceof SVGGElement) {
     try {
       strike(n);

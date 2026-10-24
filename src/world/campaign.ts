@@ -123,8 +123,11 @@ export interface PlanetDef {
   gates?: readonly PlanetGate[];
   /** The clause the planet's first campaign ticket prints (STORY 8.5.3); absent = `lawPool[0]`. Later tickets roll the pool. */
   headline?: LawId;
-  /** Location picker: the first this-many pages are `locations[0]`, the rest (and the boss page) the last type; absent = the seeded pick. */
-  locationSplit?: number;
+  /**
+   * Location picker: the first this-many pages are `locations[0]`, the rest (and the boss page) the last type; absent = the seeded pick.
+   * An array is several cuts: `[2, 3]` = pages below 2 are `locations[0]`, below 3 `locations[1]`, the rest the last type (planet 3).
+   */
+  locationSplit?: number | readonly number[];
 }
 
 const mix = (urzadzenia: number, powiadomienia: number, wygenerowane: number): Record<FamilyId, number> => ({ urzadzenia, powiadomienia, wygenerowane });
@@ -179,7 +182,25 @@ export const PLANETS: readonly PlanetDef[] = [
       },
     ],
   },
-  { ...planet(2, 1, 'urzadzenia', mix(0.5, 0.2, 0.3), ['ciasteczka', 'parzystosc', 'grawitacja', 'wymagana-aktualizacja'], ['miasteczko', 'wioska'], ['serwerownia', 'przedmiescie', 'biuro'], 'serwis', [5, 5]), headline: 'parzystosc' },
+  {
+    ...planet(2, 1, 'urzadzenia', mix(0.5, 0.2, 0.3), ['ciasteczka', 'parzystosc', 'grawitacja', 'wymagana-aktualizacja'], ['miasteczko', 'wioska'], ['przedmiescie', 'serwerownia', 'biuro'], 'serwis', [5, 5]),
+    headline: 'parzystosc',
+    // pages 1-2 przedmiescie, page 3 serwerownia, pages 4-5 (the boss page) biuro (STORY 8.3)
+    locationSplit: [2, 3],
+    // page 4: the exit corner behind a turnstile with a Portier; it holds until the page's named elite "Ochrona Obiektu" is slain (planets/p3.ts)
+    gates: [
+      {
+        page: 3,
+        gate: {
+          kind: 'elite',
+          look: 'turnstile',
+          key: 'story.p3.gate.note',
+          liftKey: 'story.p3.gate.lift',
+          figure: { look: 33, key: 'story.p3.gate.figure' },
+        },
+      },
+    ],
+  },
   planet(3, 2, 'powiadomienia', mix(0.3, 0.55, 0.15), ['godziny-konsultanta', 'weryfikacja-dwuetapowa', 'nie-przeszkadzac'], ['miasteczko', 'ladowisko'], ['miasto', 'biuro'], 'ostatnia-mila', [5, 6]),
   planet(4, 2, 'powiadomienia', mix(0.2, 0.6, 0.2), ['godziny-konsultanta', 'oplata-serwisowa', 'nie-przeszkadzac'], ['miasteczko'], ['centrum', 'miasto'], null, [5, 6]),
   planet(5, 2, 'powiadomienia', mix(0.15, 0.55, 0.3), ['weryfikacja-dwuetapowa', 'oplata-serwisowa', 'godziny-konsultanta'], ['miasteczko', 'wioska'], ['centrum', 'serwerownia', 'archiwum'], 'infolinia', [5, 6]),

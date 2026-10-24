@@ -60,7 +60,7 @@ describe('planet 1: base layout and locations', () => {
       expect(drawingsOf(type).sort()).toEqual([...ids].sort());
       for (const p of spec?.props ?? []) expect(propColliders(p.id, 0, 0, p.size[0]).length === 0, p.id).toBe(spec?.flat.includes(p.id) === true);
     }
-    expect(Object.keys(LOCATIONS).sort()).toEqual(['magazyn', 'przedmiescie', 'serwerownia']);
+    expect(Object.keys(LOCATIONS).sort()).toEqual(['biuro', 'magazyn', 'przedmiescie', 'serwerownia']);
   });
 
   it('pages are given a type by seed: the first the first type, the boss page the last, and every type is seen', () => {
@@ -86,8 +86,8 @@ describe('planet 1: base layout and locations', () => {
     const variants = new Set<string>();
     for (const page of s.pages) for (const o of page.obstacles) if (o.kind === 'prop' && o.variant) variants.add(o.variant);
     expect(variants.size).toBeGreaterThanOrEqual(6);
-    // planet 4's types (miasto, biuro) have no drawings yet: its pages stay the generic ones
-    const other = createRun(11, { plan: plan(3) });
+    // planet 5's types (centrum, miasto) have no drawings yet: its pages stay the generic ones
+    const other = createRun(11, { plan: plan(4) });
     expect(other.pages.some((p) => p.obstacles.some((o) => o.kind === 'prop'))).toBe(false);
     expect(other.pages.every((p) => p.location === undefined)).toBe(true);
     expect(createRun(11).pages.every((p) => p.location === undefined)).toBe(true);
@@ -117,7 +117,7 @@ describe('planet 1: the boss', () => {
     expect(e.hp).toBe(260);
     expect(bossVariantLine(e)).toBe('story.p1.boss.variant');
     expect(known('story.p1.boss.variant')).toBe(true);
-    const plain = placeBoss(createRun(5, { plan: plan(2) }), 'urzadzenia', 300, 300);
+    const plain = placeBoss(createRun(5, { plan: plan(3) }), 'urzadzenia', 300, 300);
     expect(plain.hpMax).toBe(300);
     expect(bossVariantLine(plain)).toBeUndefined();
     expect(placeBoss(createRun(5), 'urzadzenia', 300, 300).hpMax).toBe(300);
@@ -133,7 +133,7 @@ describe('planet 1: the boss', () => {
       expect(new Set(p.replies.map((r) => r.type)).size).toBe(3);
     }
     expect(promptFor('prototyp', 1, createRng(3)).commentKey).toBe('enemies.boss.prototyp.spor1.comment');
-    expect(promptFor('prototyp', 1, createRng(3), 2).commentKey).toBe('enemies.boss.prototyp.spor1.comment');
+    expect(promptFor('prototyp', 1, createRng(3), 3).commentKey).toBe('enemies.boss.prototyp.spor1.comment');
     expect(storyEntry(0, 'weryfikacja', 1)).toBeNull();
   });
 });

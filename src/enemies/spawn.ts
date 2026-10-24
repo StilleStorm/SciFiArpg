@@ -6,6 +6,7 @@ import type { Bus, GameEvents } from '../core/events';
 import type { Vec } from '../core/vec';
 import type { Enemy } from '../entities/types';
 import { t } from '../i18n';
+import { reachableCells } from '../world/base';
 import { resolveMove } from '../world/pages';
 import { nextId, type RunState } from '../world/run';
 import { ELITE_IDS, FAMILY_IDS, makeMix, pickFamily, setEnemyScale, type EliteId, type FamilyId, type MissionMix } from './families';
@@ -31,6 +32,8 @@ export interface SpawnOpts {
   elite?: EliteId;
   /** Two or three affixes and a recorded name instead of one affix (named elite). Needs `elite` or a rolled elite. */
   makeNamed?: boolean;
+  /** The fixed name of a named elite instead of a rolled one (the elite of an 'elite' gate, planet 3). */
+  name?: string;
   /** Force (true) or forbid (false) the leader's pack of 2-4 minions. */
   pack?: boolean;
   /** Ring around `around` the enemies are placed on. */
@@ -76,10 +79,11 @@ export function trackElite(s: RunState, e: Enemy): void {
 /** The leader's affix list after the roll: one affix, or two to three plus a name when it becomes a named elite. */
 function eliteOpts(s: RunState, base: SpawnOpts, rolled: EliteId): MakeOpts {
   const r = s.rngs.spawn;
-  const named = base.makeNamed ?? (base.elite === undefined && namedAllowed(s) && r.chance(NAMED_CHANCE));
+  // the page of an 'elite' gate carries exactly one named elite, the forced one (`spawnGateElite`): none is rolled besides it
+  const named = base.makeNamed ?? (base.elite === undefined && s.page.gate?.kind !== 'elite' && namedAllowed(s) && r.chance(NAMED_CHANCE));
   if (!named) return { elite: rolled };
   const affixes = [rolled, ...pickNamedAffixes(r).filter((a) => a !== rolled)].slice(0, r.chance(0.5) ? 2 : 3);
-  return { elite: rolled, affixes, named: generateName(r) };
+  return { elite: rolled, affixes, named: base.name ?? generateName(r) };
 }
 
 /** Put the leader's minions around it: 2-4 of its family and tier, no elite of their own, sharing its aura. Returns them. */
@@ -151,6 +155,41 @@ function placeElite(s: RunState, family: FamilyId, x: number, y: number, tier: n
   }
   const pack = o.pack ?? (o.elite === undefined && s.rngs.spawn.chance(PACK_CHANCE));
   return pack ? [leader, ...spawnPack(s, leader)] : [leader];
+}
+
+/**
+ * The forced named elite of an 'elite' gate (world/gate.ts, planet 3): one named elite with the fixed name `story.p3.gate.elite`
+ * instead of a rolled one, otherwise the S9 machinery (2-3 affixes, the record, the guaranteed drop on its death). Placed on a
+ * cell the player can walk to from the entry, clear of obstacles, well away from the exit corner (the barrier), preferably inside
+ * `view` (what the camera shows on entry). Not under Parzystosc's doubling: it is placed directly. Returns it, or null when the
+ * page has no such gate, the elite was placed already, or no spot was found.
+ */
+export function spawnGateElite(s: RunState, view?: Rect): Enemy | null {
+  const g = s.page.gate;
+  if (!g || g.kind !== 'elite' || g.eliteId !== undefined || g.slain) return null;
+  const r = s.rngs.spawn;
+  const page = s.page;
+  const cells = reachableCells(page, page.entry, 20).filter(
+    (c) =>
+      Math.hypot(c.x - page.entry.x, c.y - page.entry.y) > 230 &&
+      (!page.exit || Math.hypot(c.x - page.exit.x, c.y - page.exit.y) > 440) &&
+      c.x > 100 && c.y > 100 && c.x < page.w - 100 && c.y < page.h - 100 &&
+      page.obstacles.every((o) => o.colliders.every((q) => Math.hypot(c.x - q.x, c.y - q.y) > q.r + 70)),
+  );
+  const seen = view ? cells.filter((c) => inRect(c, { x0: view.x0 + 60, y0: view.y0 + 60, x1: view.x1 - 60, y1: view.y1 - 60 })) : [];
+  const pool = seen.length > 0 ? seen : cells;
+  const tier = s.ticket.family === 'powiadomienia' ? 1 : pageTier(s);
+  for (let tries = 0; tries < 40 && pool.length > 0; tries++) {
+    const c = pool[r.int(0, pool.length - 1)];
+    if (!c) continue;
+    const got = placeElite(s, s.ticket.family, c.x, c.y, tier, r.pick(ELITE_IDS), { makeNamed: true, name: t('story.p3.gate.elite'), pack: false });
+    const leader = got[0];
+    if (leader) {
+      g.eliteId = leader.id;
+      return leader;
+    }
+  }
+  return null;
 }
 
 /** The mission's tier for a family: Powiadomienia start at 1, the others rise with the page. */

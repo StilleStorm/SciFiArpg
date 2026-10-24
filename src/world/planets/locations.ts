@@ -14,13 +14,16 @@ export interface PropSpec {
   body: readonly (readonly [number, number, number])[];
 }
 
-export type LocationLayout = 'rows' | 'aisles' | 'corridors';
+export type LocationLayout = 'rows' | 'aisles' | 'corridors' | 'rooms';
 
 export interface LocationSpec {
   /** rows: props stand along horizontal streets; aisles: along vertical aisles; corridors: columns of `wall` props make narrow parallel corridors. */
   layout: LocationLayout;
   /** corridors only: the prop id that forms the walls of the corridors. */
   wall?: string;
+  /** rooms only: `wall` is the horizontal partition (cut by doorways, its gaps), `wallSide` the vertical one, `row` the prop set out in rows (desks). */
+  wallSide?: string;
+  row?: string;
   props: readonly PropSpec[];
   /** Flat marks put on the page first, under everything (ids of props with an empty body). */
   flat: readonly string[];
@@ -41,6 +44,10 @@ const PRZEDMIESCIE: LocationSpec = {
     P('krasnal', [40, 52], [[0, 0, 0.42]]),
     P('dzwonek', [36, 46], [[0, 0, 0.42]]),
     P('kraweznik', [92, 124], [[-0.32, 0, 0.17], [0, 0, 0.17], [0.32, 0, 0.17]]),
+    // planet 3 (S14)
+    P('lodowka', [58, 76], [[0, -0.15, 0.4], [0, 0.45, 0.2]]),
+    P('drzwi', [96, 116], [[-0.25, 0, 0.2], [0.25, 0, 0.2]]),
+    P('linijka', [120, 150], [[0.37, 0, 0.1]]),
   ],
 };
 
@@ -80,11 +87,37 @@ const SERWEROWNIA: LocationSpec = {
   ],
 };
 
+/**
+ * Biuro (STORY 8.3): the regional office. Rooms cut by partitions (ruled rectangles) with doorways as gaps; desks in rows, filing
+ * cabinets, a water cooler, a hatched plant, a photocopier, a row of waiting chairs, a numbered ticket dispenser, a clock on a post.
+ * The boss page is an open-plan hall: partitions only along its lower edge, the middle left clear for the boss.
+ */
+const BIURO: LocationSpec = {
+  layout: 'rooms',
+  wall: 'przepierzenie',
+  wallSide: 'przepierzenie-boczne',
+  row: 'biurko',
+  flat: [],
+  props: [
+    P('przepierzenie', [150, 170], [[-0.375, 0, 0.1], [-0.125, 0, 0.1], [0.125, 0, 0.1], [0.375, 0, 0.1]]),
+    P('przepierzenie-boczne', [46, 52], [[0, -1, 0.34], [0, -0.33, 0.34], [0, 0.33, 0.34], [0, 1, 0.34]]),
+    P('biurko', [96, 120], [[-0.25, 0, 0.2], [0.25, 0, 0.2]]),
+    P('kartoteka', [50, 60], [[0, -0.45, 0.4], [0, 0.45, 0.4]]),
+    P('dystrybutor', [34, 42], [[0, 0, 0.45]]),
+    P('roslina', [44, 56], [[0, 0, 0.42]]),
+    P('kserokopiarka', [80, 100], [[-0.22, 0, 0.3], [0.22, 0, 0.3]]),
+    P('krzesla', [120, 150], [[-0.36, 0, 0.1], [-0.12, 0, 0.1], [0.12, 0, 0.1], [0.36, 0, 0.1]]),
+    P('numerek', [38, 48], [[0, 0, 0.42]]),
+    P('zegar', [40, 50], [[0, 0, 0.4]]),
+  ],
+};
+
 /** The types that have props. Planets 2 and 3 add theirs (serwerownia, biuro, ...) here. */
 export const LOCATIONS: Partial<Record<LocationType, LocationSpec>> = {
   przedmiescie: PRZEDMIESCIE,
   magazyn: MAGAZYN,
   serwerownia: SERWEROWNIA,
+  biuro: BIURO,
 };
 
 export const locationSpec = (type: LocationType | undefined): LocationSpec | undefined => (type ? LOCATIONS[type] : undefined);

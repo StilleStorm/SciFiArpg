@@ -4,7 +4,7 @@ import { dist, type Vec } from '../core/vec';
 import type { BasePageInfo, StationId } from './base';
 import type { PageGate } from './gate';
 import type { LocationType } from './campaign';
-import { locationSpec, propColliders, propSpec } from './planets/locations';
+import { locationSpec, propColliders, propSpec, type PropSpec } from './planets/locations';
 import { CONTENT, EVENT_IDS, SEAL_IDS, type EventId, type PageContent } from './contentKinds';
 
 export const PAGE_W = 1200;
@@ -267,12 +267,80 @@ export function generatePage(rng: Rng, plan: PagePlan = DEFAULT_PLAN): Page {
         }
       }
     }
+    if (spec.layout === 'rooms') {
+      // rooms cut by partitions: horizontal runs with two doorways (a gap where a segment is left out), vertical walls with one; the boss page
+      // is an open-plan hall (one run along its lower edge), its middle kept clear. Desks stand in rows; the rest are scattered with room to pass.
+      const wallH = propSpec(spec.wall);
+      const wallV = propSpec(spec.wallSide);
+      const deskP = propSpec(spec.row);
+      const mk = (p: PropSpec, x: number, y: number, size?: number): Obstacle => {
+        const o: Obstacle = { kind: 'prop', variant: p.id, x, y, size: size ?? r.range(p.size[0], p.size[1]), rot: 0, seed: r.int(1, 1e6), colliders: [] };
+        o.colliders = colliders(o);
+        return o;
+      };
+      const lines = last ? [1200] : [r.int(520, 600), r.int(1040, 1120)];
+      if (wallH) {
+        for (const ly of lines) {
+          const n = 7;
+          const seg = (PAGE_W - 120) / n;
+          const doors = new Set<number>();
+          while (doors.size < 2) doors.add(r.int(1, n - 2));
+          for (let i = 0; i < n; i++) {
+            if (doors.has(i)) continue;
+            const o = mk(wallH, 60 + (i + 0.5) * seg, ly + r.range(-4, 4), seg + 4);
+            if (clearOf(o, 20)) obstacles.push(o);
+          }
+        }
+      }
+      if (wallV) {
+        const bounds = last ? [1200, PAGE_H - 50] : [50, ...lines, PAGE_H - 50];
+        for (let b = 0; b + 1 < bounds.length; b++) {
+          if (!last && b > 0 && r.chance(0.25)) continue;
+          const top = (bounds[b] ?? 0) + 30;
+          const span = (bounds[b + 1] ?? 0) - 30 - top;
+          const count = Math.max(1, Math.round(span / 150));
+          const door = count >= 3 ? r.int(0, count - 1) : -1;
+          const x = r.range(380, 820);
+          for (let i = 0; i < count; i++) {
+            if (i === door) continue;
+            const o = mk(wallV, x + r.range(-5, 5), top + ((i + 0.5) * span) / count, r.range(wallV.size[0], wallV.size[1]));
+            if (clearOf(o, 20)) obstacles.push(o);
+          }
+        }
+      }
+      // props may stand here: everywhere on a room page; on the boss page only the strip above the partition and the lower room and the side bands
+      const allowed = (x: number, y: number): boolean => !last || y > 1045 || x < 235 || x > 965;
+      const rowsAt = last ? [1070, 1340] : [r.range(250, 400), r.range(700, 850), r.range(1200, 1350)];
+      if (deskP) {
+        for (const ry of rowsAt) {
+          if (!last && r.chance(0.3)) continue;
+          const x0 = r.range(150, 700);
+          const m = r.int(2, 3);
+          for (let i = 0; i < m; i++) {
+            const o = mk(deskP, x0 + i * 125, ry + r.range(-6, 6), r.range(deskP.size[0], deskP.size[1]));
+            if (allowed(o.x, o.y) && clearOf(o, 25)) obstacles.push(o);
+          }
+        }
+      }
+      const solid = spec.props.filter((q) => q.id !== spec.wall && q.id !== spec.wallSide && q.id !== spec.row);
+      const target = obstacles.length + (last ? r.int(5, 7) : r.int(9, 12));
+      let placed = 0;
+      for (let guard = 0; obstacles.length < target && guard++ < 700; ) {
+        const q = solid[(placed + plan.index * 4) % solid.length];
+        if (!q) break;
+        const o = mk(q, r.range(110, PAGE_W - 110), r.range(110, PAGE_H - 110));
+        if (allowed(o.x, o.y) && clearOf(o, 100)) {
+          obstacles.push(o);
+          placed++;
+        }
+      }
+    }
     // corridors: small things stand in the two side corridors only; the middle one (the boss's) is kept clear
     const solid = spec.props.filter((p) => !spec.flat.includes(p.id) && p.id !== spec.wall);
     const lanes = spec.layout === 'rows' ? [330, 620, 910, 1200] : spec.layout === 'corridors' ? [340, 860] : [270, 600, 930];
     const target = obstacles.length + (spec.layout === 'corridors' ? r.int(4, 6) : r.int(7, 10));
     let placed = 0;
-    for (let guard = 0; obstacles.length < target && guard++ < 600; ) {
+    for (let guard = 0; spec.layout !== 'rooms' && obstacles.length < target && guard++ < 600; ) {
       const lane = r.pick(lanes);
       const at = spec.layout === 'rows' ? { x: r.range(110, PAGE_W - 110), y: lane + r.range(-40, 40) } : { x: lane + r.range(-36, 36), y: r.range(110, PAGE_H - 110) };
       const p = r.chance(0.2) ? undefined : (solid[(placed + plan.index * 4) % solid.length] ?? r.pick(solid));
@@ -424,12 +492,14 @@ export function placeContent(r: Rng, site: ContentSite): PageContent[] {
  * first page is the first type, the boss page the last, the pages between draw from the list (the first type twice as often),
  * and a type no page drew is put on the middle page, so every type of the planet is seen on a run. Own stream: no other roll moves.
  */
-export function pickLocations(rng: Rng, count: number, locations: readonly LocationType[], split?: number): LocationType[] {
+export function pickLocations(rng: Rng, count: number, locations: readonly LocationType[], split?: number | readonly number[]): LocationType[] {
   const first = locations[0];
   const lastType = locations[locations.length - 1];
   if (!first || !lastType || count < 1) return [];
   // a planet that fixes the order (`PlanetDef.locationSplit`): the first `split` pages are the first type, the rest the last
-  if (split !== undefined) return Array.from({ length: count }, (_, i) => (i < split ? first : lastType));
+  if (typeof split === 'number') return Array.from({ length: count }, (_, i) => (i < split ? first : lastType));
+  // several cuts: page i is the type of the first cut it is below, else the last type
+  if (split !== undefined) return Array.from({ length: count }, (_, i) => locations[split.findIndex((cut) => i < cut)] ?? lastType);
   const r = rng.fork('locations');
   const pool: LocationType[] = [...locations, first];
   const out: LocationType[] = Array.from({ length: count }, (_, i) => (i === 0 ? first : i === count - 1 ? lastType : r.pick(pool)));
@@ -443,7 +513,7 @@ export function pickLocations(rng: Rng, count: number, locations: readonly Locat
 }
 
 /** All pages of a run, linked: page i+1 is entered through the corner opposite to page i's exit. */
-export function generateRunPages(rng: Rng, count: number, locations?: readonly LocationType[], split?: number): Page[] {
+export function generateRunPages(rng: Rng, count: number, locations?: readonly LocationType[], split?: number | readonly number[]): Page[] {
   const pages: Page[] = [];
   let entryCorner: Corner | null = null;
   const where = locations ? pickLocations(rng, count, locations, split) : [];

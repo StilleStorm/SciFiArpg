@@ -156,4 +156,58 @@ function kraweznik(o: Obstacle, r: Rng): SVGGElement {
   return k.g;
 }
 
-registerDrawings('przedmiescie', { trawnik, zywoplot, plot, skrzynka, kosiarka, antena, krasnal, dzwonek, kraweznik });
+/** A smart fridge on a porch: two boards and a step under a tall two-door body, a screen on the door, a handle, a cord to nowhere. */
+function lodowka(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-48, 78], [48, 78], [54, 94], [-54, 94]], { fill: 'hatch', w: 1.7, jit: 0.6 });
+  k.path('M-30 78v16M0 78v16M30 78v16', { w: 0.7 });
+  k.shape([[-34, -92], [34, -92], [34, 78], [-34, 78]], { fill: 'paper', w: 2.2, jit: 0.7 });
+  k.shape([[34, -92], [42, -84], [42, 86], [34, 78]], { fill: 'hatch', w: 1.4, jit: 0.3 });
+  k.path('M-34 -16H34', { w: 1.5 });
+  k.shape([[-20, -78], [20, -78], [20, -50], [-20, -50]], { w: 1.2, jit: 0.4 });
+  k.dots([[-12, -68, 1.3], [-4, -68, 1.3], [4, -68, 1.3], [12, -68, 1.3], [-12, -58, 1.3], [0, -58, 1.3]]);
+  k.line(24, -40, 24, -26, 2.4);
+  k.line(24, 4, 24, 28, 2.4);
+  k.path('M-34 70Q-48 72 -46 60T-60 52', { w: 1 });
+  return k.g;
+}
+
+/** A door drawn twice: shut in solid ink, and the same door ajar in dots. The house has not decided which. */
+function drzwi(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  // frame and the shut door
+  k.shape([[-46, -80], [-4, -80], [-4, 80], [-46, 80]], { w: 1.6, jit: 0.5 });
+  k.shape([[-42, -76], [-8, -76], [-8, 80], [-42, 80]], { fill: 'paper', w: 2, jit: 0.5 });
+  k.path('M-38 -66H-12V-20H-38ZM-38 -10H-12V40H-38Z', { w: 0.9 });
+  k.disc(-14, 8, 2.4, { fill: 'ink', w: 1 });
+  // the same door, open, dotted
+  k.shape([[4, -80], [46, -80], [46, 80], [4, 80]], { w: 1.6, jit: 0.5 });
+  const open = k.path('M6 -76L34 -68V90L6 80Z', { w: 1.6 });
+  open.setAttribute('stroke-dasharray', '1.5 4');
+  open.setAttribute('stroke-linecap', 'round');
+  const panels = k.path('M12 -58L28 -54V-24L12 -28ZM12 -14L28 -10V30L12 26Z', { w: 0.9 });
+  panels.setAttribute('stroke-dasharray', '1.2 3.5');
+  panels.setAttribute('stroke-linecap', 'round');
+  k.line(-52, 84, 50, 84, 1.3);
+  return k.g;
+}
+
+/** A progress ruler lying on a lawn: a hatched patch, a ruler with ticks, the bar filled to the last hair and not to the end. */
+function linijka(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-50, -22], [50, -24], [52, 24], [-49, 22]], { fill: 'hatch', w: 1.1, jit: 1.2 });
+  k.shape([[-44, -9], [44, -9], [44, 9], [-44, 9]], { fill: 'paper', w: 1.9, jit: 0.4 });
+  let ticks = '';
+  for (let i = 0; i <= 20; i++) {
+    const x = -44 + i * 4.4;
+    ticks += `M${x.toFixed(1)} 9v${i % 5 === 0 ? -7 : -3.5}`;
+  }
+  k.path(ticks, { w: 0.7 });
+  k.shape([[-44, -9], [37, -9], [37, -3], [-44, -3]], { fill: 'hatch', w: 0.8, jit: 0.2 });
+  k.line(37.5, -14, 37.5, 14, 1.6);
+  k.path('M34 -14h7', { w: 1.2 });
+  k.mark('99', 36, -17, 9);
+  return k.g;
+}
+
+registerDrawings('przedmiescie', { trawnik, zywoplot, plot, skrzynka, kosiarka, antena, krasnal, dzwonek, kraweznik, lodowka, drzwi, linijka });
