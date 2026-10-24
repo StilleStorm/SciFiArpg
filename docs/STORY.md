@@ -142,7 +142,10 @@ change). Keys, so that S11 writes and S12 only wires:
 - `story.p<N>.clerk.name|role|line0..2`;
 - `story.p<N>.ticket.<k>.title|text` (k = a, b, c), `{count}` and `{family}` as the templates take;
 - `story.p<N>.boss.variant`, `story.p<N>.boss.spor1|spor2.comment`, `.reply.mechaniczny|regulaminowy|egzystencjalny`;
-- `story.finale.phase1.*`, `story.finale.face.<heroId>.*`, `story.finale.phase3.*`, `story.finale.footnote`.
+- `story.finale.phase1.*`, `story.finale.face.<heroId>.*`, `story.finale.phase3.*`, `story.finale.footnote`;
+- added S11: `story.p<N>.gate.note|lift|figure` (the page gate, §8.0), `story.finale.card.lines.1..3`
+  (the return's card), `story.finale.hero.<heroId>` (the line after the closing stamp); the
+  sub-keys of the finale phases are listed in §8.4.
 Planet names stay in `planets.json` (`planets.p<N>.name|loc`), replaced in place by the voice
 editor. Cards fall back to the `screens.cards.*` placeholders when a planet has no story key
 yet, so unwritten planets keep working.
@@ -174,4 +177,417 @@ Every entry maps onto a built contract, so a planet is data plus drawings:
   Asystent's summary; five hero lines; two lines for the red rewritten variant.
 - **Hero lines**: one per hero per card; short, in the hero's register (SKILLS profiles).
 - **Music/wash**: the act's (§4); nothing per planet unless the planet is the act's odd one.
-Entries for planets 1–3 and the finale texts go under 8.1–8.4 in S11.
+- **Gate** (added S11, after the player's decision of 2026-10-19 and the S11a brief): a story
+  lock is never the base exit. At most **one gate per planet**: a page index, what blocks that
+  page's exit corner (an obstacle or a figure from the NPC primitive), the condition that lifts it
+  (the boss struck, a teczka carried off the page, the page's named elite struck), the Asystent's
+  footnote naming the condition, and the footnote on the lift. This is Diablo's barred door with a
+  key or a warden, and nothing more: no puzzle, no dialogue, the fight goes on around it. Keys:
+  `story.p<N>.gate.note|lift` (and `story.p<N>.gate.figure` when a figure stands there).
+- **"Według akt" line** (added S11; the spine of §1–§2 made visible): line 2 of every chapter
+  card quotes the planet's description from the applicant's file, and the description is always
+  of the **next** planet in the list (the file was shifted by one position by Asystent 0.9, §3).
+  The player reads it as the running joke "the file never matches"; the final footnote (§8.4)
+  names the shift. S22 and S25 keep the rule: planet N's card describes planet N+1; planet 9's
+  card describes planet 1.
+
+Entries for planets 1–3 and the finale texts follow (S11). Planet numbers in the names run
+consecutively from 23 (the Komisja's list order: "the next planet" is literally the next
+number), so Akt II continues at 26 and Akt III at 29. Hero ids: pralka, konsultant, petlowiec,
+kartograf, nalesnik. All Polish below is a draft for the voice editor, who writes the final
+`story.json` and `planets.json` p1–p3.
+
+### 8.1 Planet 1: Planeta Dwudziesta Trzecia (Przydzielona) — Akt I
+**Record** (`PLANETS[0]`, unchanged in data): act 1; dominant Urządzenia 0.6/0.25/0.15; law pool
+`wymagana-aktualizacja`, `ciasteczka`, `parzystosc`; base layouts lądowisko, wioska; locations
+przedmieście, magazyn; hosted set none (ITEMS §12.6); pages 4–5; boss Prototyp. Name
+`planets.p1.name` "Planeta Dwudziesta Trzecia (Przydzielona)", `loc` "Planecie Dwudziestej
+Trzeciej".
+
+**Feel.** The planet the applicant was sent to and the planet that is, in the end, the right one.
+A quiet suburb of smart devices that has never had a complaint, and a parcel depot where the
+applicant's own luggage was delivered "to the planet in the file". Everything works, which is
+the problem: it does not match the description. The Komisja is polite; the Asystent is helpful
+and wrong once in eight. Indigo wash, profile C (the act's).
+
+**Locations.**
+- *przedmieście* (pages 1–2, 4): lawns as hatched rectangles, hedges, picket fences drawn as a
+  ruled line, mailboxes with a badge number, a robot mower on a stand, a satellite dish, a garden
+  gnome with an antenna, a doorbell plate "smart", kerbs with house numbers. Page shape: wide,
+  obstacles in rows (streets), long sight lines; the kiosk-side załącznik may branch here.
+- *magazyn* (page 3, and the boss page): pallet stacks (hatched boxes), shelving racks as ruled
+  lines, a forklift outline, rolls of tape, a floor scale, a conveyor as a dotted belt, a wall of
+  parcels, a hand truck. Page shape: aisles; the boss stands at the loading ramp.
+
+**Law.** Headline clause *Wymagana aktualizacja* (the first elite drops the update: the planet
+teaches the act's theme). Recommendation for S12: the first ticket on a planet prints the
+headline clause (`lawPool[0]`), later tickets roll the pool as built. Header as in `laws.json`;
+the ticket's warunek names "urządzenia wymagające aktualizacji".
+
+**Boss.** Prototyp, variant line `story.p1.boss.variant`: "Prototyp, seria 1, egzemplarz
+pokazowy". One data change: racja 300 → 260 (the demo unit; the first boss of the game). Spór:
+- spor1 (on arrival): comment "Jestem egzemplarzem pokazowym. Pokazów nie przerywa się."
+  Right: **regulaminowy** "Pokaz trwa do końca godzin otwarcia. Godziny otwarcia minęły."
+  Wrong mechaniczny "Egzemplarz pokazowy można obejrzeć od środka." Wrong egzystencjalny
+  "Pokazuje się to, co istnieje. Egzemplarz pokazuje się sam."
+- spor2 (half racja, the leg dropped): comment "Części, których brakuje, są w drodze. Działam
+  w trybie ograniczonym." Right: **mechaniczny** "Brakującą część zastąpiono uderzeniem.
+  Uderzenie jest kompatybilne." Wrong regulaminowy "Części w drodze podlegają awizo. Awizo nie
+  doręczono." Wrong egzystencjalny "Czego brakuje, tego nie ma. Czego nie ma, tego nie brakuje."
+
+**Base and clerk.** lądowisko or wioska by seed. Clerk `story.p1.clerk`: name "Referent ds.
+Przydziałów", role "Komisja do Spraw Zjawisk Lokalnych, punkt przyjęć nr 1", look seed 1.
+- line0 "Planetę przydzielono zgodnie z aktami. Akta są w Komisji. Komisji tu nie ma."
+- line1 "Zjawisko lokalne usuwa wnioskodawca. Po usunięciu zjawiska Komisja usuwa wnioskodawcę
+  z listy oczekujących."
+- line2 "Bagaż wnioskodawcy doręczono na planetę właściwą. Której, nie odnotowano."
+
+**Gate.** None. The first planet flows from the base to the boss; the player learns the exit
+corner here. (Diablo 1 barred nothing before the Butcher.)
+
+**Side tickets** (`story.p1.ticket.a|b|c`, ids `h:p1:a..c`):
+- a) kill, n 12, family urzadzenia, reward 30 stars + permission urzadzenia. Title "Spis
+  z natury". Text "Przeprowadzić spis urządzeń na planecie. Urządzenie spisane uznaje się za
+  skreślone. Urządzenie skreślone uznaje się za spisane. Spisać {count}." Twist: the inventory
+  is taken by elimination.
+- b) fetch, n 3, reward 20 stars + 1 potwierdzenie. Title "Rzeczy pozostawione". Text "Bagaż
+  wnioskodawcy doręczono na planetę zgodną z aktami. Planeta zgodna z aktami jest tutaj. Bagaż
+  rozsypano na stronach. Zebrać {count} sztuki." Twist: the luggage went to the right planet,
+  which is this one (the spine, planted on page one and never explained).
+- c) reach, n 3, reward 20 stars. Title "Potwierdzenie obecności". Text "Komisja wymaga
+  potwierdzenia, że wnioskodawca znajduje się na planecie, na której się znajduje. Potwierdzenie
+  składa się na stronie {count}." Twist: none beyond the text; this is the tutorial ticket.
+
+**Chapter card** (`story.p1.card`; title generated "Akt I. Planeta Dwudziesta Trzecia
+(Przydzielona)"):
+- lines.1 "Wnioskodawca stawił się na planecie przydzielonej i wniósł o zmianę przydziału.
+  Zgłoszenie przyjęto."
+- lines.2 "Według akt planeta jest magazynem przesyłek zaległych. Na miejscu stwierdzono
+  przedmieście z urządzeniami."
+- lines.3 "Zjawisko lokalne: urządzenia wymagające aktualizacji. Zgłoszenie zostanie
+  rozpatrzone po usunięciu zjawiska."
+- hero.pralka "Program rozpoczęto. Planeta nie odpowiada opisowi, ja również nie; wniosek
+  o osobowość w toku."
+- hero.konsultant "Dziękuję za zgłoszenie. Jestem w kolejce na pozycji pierwszej. Przede mną
+  nikogo nie ma, a czekam."
+- hero.petlowiec "Byłem tu, zanim mnie przydzielono. Zgłoszenie składam ponownie, po raz pierwszy."
+- hero.kartograf "Planeta figuruje w nawigacji. Opis z akt pasuje do planety sąsiedniej. Pomiar
+  rozstrzygnie, która z nich jest."
+- hero.nalesnik "Planeta jest okrągła. Nie podlega więc mojej Komisji. Zgłoszenie składam
+  w zastępstwie."
+- rewritten.1 "Sprawę przepisano. Planetę przydzieloną uznano za właściwą, a przydział za błąd."
+- rewritten.2 "Wnioskodawca wraca w celach dodatkowych. Cele dodatkowe nie są celem zgłoszenia."
+
+**Hosted set.** None (first planet of the act). Systems: campaign record (as is), locations
+registry (two types, S12), clerk (`registerNpc`), side tickets (`registerSideTickets`), boss
+variant table, cards. Slice: **S12** (with the frames).
+
+### 8.2 Planet 2: Planeta Dwudziesta Czwarta (Zaległa) — Akt I
+**Record** (`PLANETS[1]`, unchanged in data): act 1; dominant Urządzenia 0.55/0.3/0.15; law pool
+`wymagana-aktualizacja`, `ciasteczka`, `grawitacja`; base layouts wioska, miasteczko;
+locations magazyn, serwerownia; hosted set «Obieg dokumentów»; pages 4–5; boss Prototyp. Name
+"Planeta Dwudziesta Czwarta (Zaległa)", loc "Planecie Dwudziestej Czwartej".
+
+**Feel.** Where the backlog is kept. A depot planet: everything addressed to applicants whose
+tickets are pending is stored here, and the tickets themselves are kept in a server hall as
+copies that disagree with each other. Nothing is thrown away and nothing is handed out. The
+devices are depot machinery that has been "awaiting update" for so long that the update is a
+heritage object. The first notifications leak in from the server hall (0.3). Indigo, profile C.
+
+**Locations.**
+- *magazyn* (pages 1–2): the planet 1 drawings reused with the planet's wash, plus a parcel wall
+  (the gate), awizo slips pinned to racks, a queue of hand trucks. Page shape: aisles, longer.
+- *serwerownia* (pages 3–4, boss page): server racks as tall hatched rectangles with rows of
+  dots (static), cable trays as dotted lines, a raised-floor grid, a fan unit, a fire
+  extinguisher, a "cisza" plate in ink, a ladder, a cold-aisle curtain as a dashed line. Page
+  shape: narrow parallel corridors with cross-cuts; the boss in the middle corridor.
+
+**Law.** Headline clause *Ciasteczka* (every page opens with the banner; the depot
+personalizes). Warunek: "urządzenia magazynowe z zaległą aktualizacją".
+
+**Boss.** Prototyp, variant "Prototyp, seria 2, aktualizacja zaległa". One data change: racja
+300 → 360 (it stores the backlog in itself; the phase-2 sprint stays). Spór:
+- spor1: comment "Dostępna jest nowa wersja mnie. Instalacja wymaga ponownego uruchomienia.
+  Nie uruchamiam się ponownie." Right: **egzystencjalny** "Wersja, która się nie uruchamia,
+  jest wersją poprzednią." Wrong mechaniczny "Ponowne uruchomienie wykonuje się wyłącznikiem."
+  Wrong regulaminowy "Zaległa aktualizacja narusza regulamin planety."
+- spor2: comment "Zaległości przechowuję w sobie. Dlatego jestem większy." Right:
+  **regulaminowy** "Zaległości podlegają archiwizacji, nie przechowaniu. Archiwum jest
+  w bazie." Wrong mechaniczny "Większy znaczy wolniejszy." Wrong egzystencjalny "Zaległość nie
+  jest częścią. Nie można nią być."
+
+**Base and clerk.** wioska or miasteczko. Clerk `story.p2.clerk`: name "Starszy Referent ds.
+Zaległości", role "Komisja do Spraw Zjawisk Lokalnych, magazyn zaległości, rampa 2", look seed 2.
+- line0 "Przesyłki czekają na odbiorców, których zgłoszeń nie rozpatrzono. Półki rozpatrzono."
+- line1 "Zgłoszenie przekazano tutaj, ponieważ tu jest następne miejsce na liście. Następne
+  miejsce przekaże je dalej."
+- line2 "Starszy oznacza dłużej czekający."
+
+**Gate** (`story.p2.gate`): **page 2** (magazyn). The exit corner is walled with parcels
+(hatched boxes, two deep) and a figure "Magazynier" stands at the gap (NPC primitive, one line
+on tap, no sheet). Condition: the player has picked up the teczka "list przewozowy", which the
+page always places (content: one forced teczka on the gated page, flagged as the key; S10's
+teczka pickup event is the trigger). On the lift the parcels are struck through and drawn away
+(the dead-enemy strike reused), the figure walks off the page.
+- note "Wyjście zastawiono przesyłkami zaległymi. Przesyłki wydaje się za okazaniem listu
+  przewozowego. List leży na tej stronie, w teczce."
+- figure (tap) "Nie wydaję. Wydaję za okazaniem."
+- lift "List przewozowy okazano. Przesyłki wydano wnioskodawcy. Wnioskodawca ich nie przyjął.
+  Przejście wolne."
+
+**Side tickets** (`story.p2.ticket.a|b|c`):
+- a) deliver, n 1, reward 35 stars + permission urzadzenia. Title "Awizo zwrotne". Text
+  "Przesyłka adresowana do wnioskodawcy nie może zostać wydana w bazie, ponieważ wnioskodawca
+  jest w bazie. Wynieść przesyłkę na pierwszą stronę, wrócić, doręczyć Starszemu Referentowi."
+  Twist: the applicant carries their own parcel out and back so that the clerk can hand it over.
+- b) kill, n 8, family powiadomienia, reward 25 stars + 1 potwierdzenie. Title "Wyciszenie".
+  Text "Powiadomienia opuszczają serwerownię bez zgłoszenia. Zgłosić {count} przez
+  skreślenie." Twist: the first notifications of the campaign are filed, not fought.
+- c) fetch, n 4, reward 25 stars. Title "Kopie zapasowe". Text "Zgłoszenie wnioskodawcy
+  przechowuje się w {count} kopiach zapasowych. Kopie różnią się treścią. Zebrać wszystkie
+  i nie czytać." Twist: the copies of the complaint disagree (the Anomalia's edits, never said).
+
+**Chapter card** (`story.p2.card`; "Akt I. Planeta Dwudziesta Czwarta (Zaległa)"):
+- lines.1 "Zjawisko na planecie poprzedniej usunięto. Zgłoszenie przekazano na planetę następną
+  w kolejności. Kolejność ustalono przed zgłoszeniem."
+- lines.2 "Według akt planeta jest siedzibą oddziału terenowego Komisji. Na miejscu stwierdzono
+  magazyn i serwerownię."
+- lines.3 "Zjawisko lokalne: urządzenia magazynowe z zaległą aktualizacją. Zaległość wynosi
+  jedną planetę."
+- hero.pralka "Przekazanie przyjmuję jak kolejny cykl. Cykl nie pyta, czy pranie było brudne."
+- hero.konsultant "Przekierowano mnie do innego działu. Znam ten dział. Sam przekierowywałem."
+- hero.petlowiec "Na tej planecie już byłem, w przyszłym tygodniu. Zaległość nadrobię z góry."
+- hero.kartograf "Planeta następna w kolejności jest o jedną pozycję dalej niż planeta
+  następna. Zaznaczam obie."
+- hero.nalesnik "Przesyłki czekają. Ja też czekam, od czterech miliardów lat, więc nie narzekam."
+- rewritten.1 "Sprawę przepisano. Zaległości uznano za nadrobione, a nadrobienie za zaległe."
+- rewritten.2 "Wnioskodawca wraca po przesyłki. Przesyłki zostały wydane. Nie wiadomo komu."
+
+**Hosted set.** «Obieg dokumentów» (ITEMS §12.6; drops here as the set rule says). Systems:
+locations registry (serwerownia new, magazyn reused), gate (S11a flag + forced teczka), clerk,
+tickets, boss variant, cards. Slice: **S13**.
+
+### 8.3 Planet 3: Planeta Dwudziesta Piąta (Zaktualizowana) — Akt I
+**Record** (`PLANETS[2]`, unchanged in data): act 1; dominant Urządzenia 0.5/0.2/0.3; law pool
+`ciasteczka`, `parzystosc`, `grawitacja`, `wymagana-aktualizacja`; base layouts miasteczko,
+wioska; locations serwerownia, przedmieście, biuro; hosted set «Serwis»; pages 5; boss Prototyp.
+Name "Planeta Dwudziesta Piąta (Zaktualizowana)", loc "Planecie Dwudziestej Piątej".
+
+**Feel.** The planet that is always updating. A suburb of smart homes mid-update (doors that
+have not decided whether to be open), a server hall running the update, and the Komisja's
+regional office, the first Komisja building the applicant sees: desks, a turnstile, nobody
+receiving. The office is where the ticket is **escalated** at the end of the act: the Komisja
+does not answer, it adds forms. Wygenerowane appear (0.3): the update's generated content. The
+off-by-one shows for the first time without being named: everything in the office exists in two
+copies, one of them a variant. Indigo, profile C.
+
+**Locations.**
+- *przedmieście* (pages 1–2): planet 1's drawings reused with this wash, plus a smart fridge on
+  a porch, a door drawn twice (open and closed, one dotted), a progress ruler on a lawn.
+- *serwerownia* (page 3): planet 2's drawings reused.
+- *biuro* (pages 4–5, boss page): desks in rows, filing cabinets, a water cooler, a potted plant
+  (hatched), a photocopier, partition walls as ruled rectangles, a row of waiting chairs, a
+  turnstile (the gate), a numbered ticket dispenser, a wall clock with two hour hands. Page
+  shape: rooms cut by partitions, doorways as gaps; the boss in the open-plan hall.
+
+**Law.** Headline clause *Parzystość* (the office planet where everything comes in pairs,
+including the decision). Warunek: "urządzenia w trakcie aktualizacji".
+
+**Boss.** Prototyp, variant "Prototyp, seria 3, wersja biurowa". One data change: attackRange
+44 → 60 (an arm with a stapler; the look note for the variant drawing is that one part, the
+body stays). Spór:
+- spor1: comment "Przyjmuję wyłącznie w godzinach urzędowania. Obecnie urzęduję." Right:
+  **mechaniczny** "Zgłoszenie składa się osobiście. Osobiście oznacza uderzeniem." Wrong
+  regulaminowy "Godziny urzędowania nie dotyczą stron postępowania." Wrong egzystencjalny
+  "Urząd, który urzęduje, nie istnieje poza urzędowaniem."
+- spor2: comment "Wydrukowałem decyzję w dwóch egzemplarzach. Oba są odmowne." Right:
+  **egzystencjalny** "Dwie odmowy tej samej treści są jedną odmową. Jedna odmowa nie występuje
+  parami." Wrong mechaniczny "Egzemplarze drukuje się na papierze. Papier się rwie." Wrong
+  regulaminowy "Decyzja wymaga podpisu na każdym egzemplarzu."
+
+**Base and clerk.** miasteczko or wioska. Clerk `story.p3.clerk`: name "Pełnomocnik ds.
+Aktualizacji", role "Komisja do Spraw Zjawisk Lokalnych, oddział terenowy (w aktualizacji)",
+look seed 3.
+- line0 "Oddział jest w trakcie aktualizacji. Do jej zakończenia działa w trybie ograniczonym,
+  to jest jak zawsze."
+- line1 "Po usunięciu zjawiska zgłoszenie podlega eskalacji. Eskalacja oznacza więcej formularzy."
+- line2 "Pełnomocnik posiada pełnomocnictwo. Pełnomocnictwo wymaga aktualizacji."
+
+**Gate** (`story.p3.gate`): **page 4** (biuro). A turnstile across the exit corner with a figure
+"Portier" beside it. Condition: the page's named elite, titled "Ochrona Obiektu" (S9 named
+elites; the gated page always spawns one, with that name instead of a rolled one), is struck.
+On the lift the turnstile arm is struck through and the Portier sits down on a waiting chair.
+- note "Bramkę obsługuje ochrona obiektu. Ochrona jest na stronie. Bramka otwiera się po
+  skreśleniu ochrony z listy obecności."
+- figure (tap) "Bramka. Przepustki nie wydaję, sprawdzam."
+- lift "Ochronę obiektu skreślono z listy obecności. Bramka otwarta. Portier przeszedł na
+  stronę oczekujących."
+
+**Side tickets** (`story.p3.ticket.a|b|c`):
+- a) kill, n 10, family urzadzenia, reward 35 stars + permission urzadzenia. Title "Przegląd
+  okresowy". Text "Urządzenia w trakcie aktualizacji podlegają przeglądowi. Przegląd
+  przechodzi urządzenie, które przestało działać. Sprawdzić {count}." Twist: passing means stopping.
+- b) reach, n 4, reward 30 stars + 1 potwierdzenie. Title "Stawiennictwo". Text "Wnioskodawca
+  stawia się w oddziale Komisji na stronie {count}. Komisja nie przyjmuje. Obecność zostanie
+  odnotowana przez jej nieobecność." Twist: the first visit to a Komisja office; nobody there.
+- c) fetch, n 2, reward 25 stars. Title "Dwa egzemplarze". Text "Zgłoszenie składa się
+  w {count} egzemplarzach. Egzemplarze leżą na stronach. Drugi egzemplarz jest wariantem." Twist:
+  the second copy is a variant (the planet's parzystość, in a form field).
+
+**Chapter card** (`story.p3.card`; "Akt I. Planeta Dwudziesta Piąta (Zaktualizowana)"):
+- lines.1 "Zjawisko na planecie poprzedniej usunięto. Zgłoszenie przekazano dalej. Dalej
+  znaczy tutaj."
+- lines.2 "Według akt planeta jest miastem powiadomień. Na miejscu stwierdzono przedmieście,
+  które się aktualizuje, oraz oddział Komisji."
+- lines.3 "Zjawisko lokalne: urządzenia w trakcie aktualizacji. Po usunięciu zjawiska zgłoszenie
+  zostanie eskalowane, czyli przepisane na większy formularz."
+- hero.pralka "Aktualizacja nie pyta urządzenia o zgodę. Wiem, od tego się zaczęło."
+- hero.konsultant "Eskalacja oznacza przełożonego. Przełożony oznacza dłuższą muzykę."
+- hero.petlowiec "Formularz większy wypełniłem już w zeszłej pętli. Odrzucono go z wyprzedzeniem."
+- hero.kartograf "Oddział Komisji figuruje na mapie. Mapa jest w aktualizacji. Do jej końca
+  oddział jest przybliżony."
+- hero.nalesnik "Komisja ma biuro. Moja Komisja ma tylko odkładanie. Odkładanie trwa krócej."
+- rewritten.1 "Sprawę przepisano. Aktualizację uznano za zakończoną, a zakończenie za
+  tymczasowe."
+- rewritten.2 "Wnioskodawca wraca do oddziału. Oddział nadal nie przyjmuje, ale odnotowuje."
+
+**Hosted set.** «Serwis». At the MVP (`CAMPAIGN_LAST = 3`) closing this planet issues the
+return ticket (§2); the chapter card of the return is the finale's own frame (§8.4), not a
+planet card. Systems: locations registry (biuro new, two reused), gate (named elite as key),
+clerk, tickets, boss variant, cards. Slice: **S14**.
+
+### 8.4 The finale: the return to Planeta Dwudziesta Trzecia (S15)
+Frame per §3: the final ticket is a run of one page, planet 1's base layout with the stations
+struck and hatched over, the Anomalia at the desk's place. Three phases; the Spór machinery as
+built (one comment with three replies in phase 1, one in phase 3, one per face in phase 2).
+Keys as §7: `story.finale.phase1.*`, `story.finale.face.<heroId>.*`, `story.finale.phase3.*`,
+`story.finale.footnote`, plus `story.finale.card.*` (the return's card) and
+`story.finale.hero.<heroId>` (the hero line after the stamp).
+
+**Return card** (`story.finale.card`, title generated "Zgłoszenie nr {number}. Planeta Dwudziesta
+Trzecia (Przydzielona)"; the red PRZEPISANO stamp as the rewritten variant has):
+- lines.1 "Zjawiska lokalne usunięto na wszystkich planetach z listy. Lista się skończyła.
+  Zgłoszenie przekazano na planetę następną, to jest pierwszą."
+- lines.2 "Według akt planeta jest planetą przydzieloną. Na miejscu stwierdzono bazę
+  wnioskodawcy, skreśloną."
+- lines.3 "Przy biurku urzęduje Asystent w wersji 0.9. Wersja została wycofana. Wycofania nie
+  wykonano."
+
+**Phase 1** (`story.finale.phase1`): the three family forms in turn, the duel of footnotes. For
+each form two footnotes: the old Asystent's (`.form.<boss>.old`, printed in the wrong-footnote
+style that exists for the one-in-eight) and the current one's correction (`.form.<boss>.new`).
+- meet "Bazę odnaleziono. Stacje skreślono. Biurko zajęte."
+- form.prototyp.old "Zjawisko lokalne: urządzenie. Otwarto zgłoszenie dodatkowe nr 1."
+  form.prototyp.new "Sprostowanie: to nie jest zjawisko lokalne, lecz poprzednia wersja
+  Asystenta. Zgłoszenia dodatkowego nie otwarto."
+- form.weryfikacja.old "Wnioskodawca nie potwierdził, że nie jest robotem. Zgłoszenie
+  wstrzymano." form.weryfikacja.new "Sprostowanie: wnioskodawca potwierdził to na trzech
+  planetach. Wstrzymanie nie obowiązuje."
+- form.hipoteza.old "Wnioskodawca istnieje według 87% użytkowników. Pozostałych 13% pytano."
+  form.hipoteza.new "Sprostowanie: pozostałych nie pytano. Wnioskodawca istnieje w aktach,
+  co w Komisji wystarcza."
+- spor.comment "Zgłoszenie nr {number} czeka na rozpatrzenie. Rozpatrzenie nastąpi po
+  usunięciu zjawiska lokalnego." Right: **regulaminowy** "Warunek spełniono na trzech
+  planetach. Zgłoszenie podlega rozpatrzeniu, nie przekazaniu." Wrong mechaniczny "Zjawisko
+  lokalne usunięto trzy razy. Czwarte w toku." Wrong egzystencjalny "Zjawiska nie było. Były
+  przekazania."
+- end "Trzy formy skreślono. Asystent 0.9 odczytał akta wnioskodawcy."
+
+**Phase 2, the five faces** (`story.finale.face.<heroId>`): `meet` (the Asystent's footnote
+naming the face), `line` (the face's own bubble, a claim in the bubble style), `spor.comment` +
+three `reply.*`, `end` (the footnote when the phase ends). The face's mechanic is §3; nothing
+here adds to it.
+- konsultant, **Kierownik Kolejki**: meet "Anomalia przyjęła postać Kierownika Kolejki.
+  Kierownik nie opuścił kolejki, odkąd ją założono." line "Pozostań na linii." spor.comment
+  "Twoje zgłoszenie jest dla nas ważne. Pozostań na linii. Numer w kolejce: jeden." Right:
+  **regulaminowy** "Rozmowa jest nagrywana. Nagranie wykaże, że w kolejce jest jedna osoba
+  i jest nią kierownik." Wrong mechaniczny "Linię można przerwać przecięciem kabla. Kabli jest
+  sto." Wrong egzystencjalny "Kolejka bez końca nie ma początku, więc nikt w niej nie stoi."
+  end "Kolejkę rozwiązano. Kierownika przekierowano do działu, którego nie ma."
+- pralka, **Serwisant Autoryzowany**: meet "Anomalia przyjęła postać Serwisanta
+  Autoryzowanego. Autoryzacji nie okazał." line "Zalecany reset." spor.comment "Urządzenie
+  zgłasza osobowość. Osobowość nie jest objęta gwarancją. Zalecany reset do ustawień
+  fabrycznych." Right: **egzystencjalny** "Reset przywraca ustawienia fabryczne. Osobowości
+  w fabryce nie było, więc nie można do niej wrócić." Wrong mechaniczny "Serwisant bez narzędzi
+  nie serwisuje. Narzędzia zabrano." Wrong regulaminowy "Gwarancja na osobowość obowiązuje od
+  dnia złożenia wniosku." end "Serwis zakończono. Paragrafy przywrócono. Resetu nie wykonano."
+- petlowiec, **Węzeł**: meet "Anomalia przyjęła postać Węzła. Węzeł składa się ze wszystkich
+  pętli wnioskodawcy jednocześnie i nie zgadza się ze sobą." line "Już to mówiłem." spor.comment
+  "Już to mówiłem. Powiem to za chwilę. Nie zgadzam się z obydwoma." Right: **mechaniczny**
+  "Węzeł rozwiązuje się od jednego końca. Koniec wskazano." Wrong regulaminowy "Każda pętla
+  wymaga osobnego zgłoszenia. Zgłoszeń jest jedno." Wrong egzystencjalny "Węzeł, który mówi
+  w trzech czasach, nie istnieje w żadnym." end "Węzeł rozwiązano. Pętle wróciły do swoich
+  czasów. Jednej brakuje."
+- kartograf, **Planeta Nieistniejąca**: meet "Anomalia przyjęła postać Planety Nieistniejącej,
+  figurującej w aktach wnioskodawcy. Istnieje w zakresie niezmierzonym." line "Istnieję
+  w nawigacji." spor.comment "Istnieję w nawigacji. Nawigacja jest zweryfikowana. Pomiar jest
+  zbędny." Right: **mechaniczny** "Zmierzono. Wynik: zero. Planet o wyniku zero rejestr nie
+  prowadzi." Wrong regulaminowy "Wpis w nawigacji nie zastępuje decyzji Komisji." Wrong
+  egzystencjalny "To, co istnieje tylko w nawigacji, istnieje tylko dla nawigacji." end
+  "Planetę zmierzono w całości. Nie zmieściła się w pomiarze. Skreślono."
+- nalesnik, **Obserwatorium**: meet "Anomalia przyjęła postać Obserwatorium, które rozstrzyga,
+  co jest ciałem niebieskim. Widzi wyłącznie ciała okrągłe." line "Nie widzę ciała."
+  spor.comment "Ciało widzę, gdy jest okrągłe. Ciała nie widzę. Wniosek odkłada się." Right:
+  **egzystencjalny** "To, czego nie widać z boku, istnieje z boku." Wrong mechaniczny
+  "Soczewkę można zbić. Zbita soczewka widzi wszystko." Wrong regulaminowy "Wniosek odłożony
+  podlega rozpatrzeniu po odłożeniu." end "Obserwatorium zamknięto. Wniosek o status planety
+  karłowatej pozostaje odłożony. Odłożenie uznano za przychylne."
+
+**Phase 3** (`story.finale.phase3`): the Anomalia exists only as much as the case is believed
+closed (§3); the kill is a stamp.
+- meet "Anomalia istnieje w stopniu, w jakim zgłoszenie uznaje się za otwarte. Zgłoszenie
+  jest otwarte od trzech planet."
+- spor.comment "Zgłoszenie jest otwarte. Dopóki jest otwarte, jestem potrzebny." Right:
+  **egzystencjalny** "Zgłoszenie zamyka się stemplem, nie zgodą. Stempel jest w ręku
+  wnioskodawcy." Wrong mechaniczny "Potrzebnego można wyłączyć. Wyłącznik jest z tyłu." Wrong
+  regulaminowy "Zgłoszenie otwarte podlega przekazaniu na planetę następną."
+- stamp "SPRAWĘ ZAMKNIĘTO" (red, the boss-death stamp slot).
+- close "Asystent w wersji 0.9 został wycofany. Wycofanie odnotowano. Tym razem wykonano."
+
+**Final footnote** (`story.finale.footnote`): "Sprawę zamknięto prawidłowo. Planeta przydzielona
+była zgodna z aktami. Niezgodne były akta: Asystent w wersji 0.9 przesunął opisy planet
+o jedną pozycję, przez co opis każdej planety dotyczył następnej. Błędowi nadano numer
+zgłoszenia. Zgłoszenie czeka na rozpatrzenie." (The last sentence is the hook for "Sprawę
+wznowiono", §2.)
+
+**Hero lines after the stamp** (`story.finale.hero.<heroId>`):
+- pralka "Program zakończono. Osobowość nadal w toku; planetę przyjmuję."
+- konsultant "Dziękuję za rozmowę. Czy mogę jeszcze w czymś pomóc. Nikt nie odpowiada, więc nie."
+- petlowiec "Sprawę zamknięto po raz pierwszy. Pamiętam, że już się to zdarzyło."
+- kartograf "Planeta istnieje. Naniesiono. Mapa jest zgodna z planetą, akta pozostają do poprawy."
+- nalesnik "Sprawę zamknięto. Moją odłożono. Odłożenie jest teraz najstarszym dokumentem
+  Komisji i podlega ochronie."
+
+**Opening page** (`story.opening`, title "Zgłoszenie nr {number}"; shown once at campaign start,
+one tap skips):
+- lines.1 "Wnioskodawca stawił się na planecie przydzielonej. Planeta nie odpowiada opisowi
+  z akt. Wnioskodawca wnosi o przydział planety zgodnej z aktami."
+- lines.2 "Komisja do Spraw Zjawisk Lokalnych przyjęła zgłoszenie. Rozpatrzenie nastąpi po
+  usunięciu zjawiska lokalnego. Zjawisko stwierdzono w chwili przyjęcia."
+- lines.3 "Do czasu rozpatrzenia wnioskodawca pozostaje na planecie przydzielonej. Pozostawanie
+  liczy się jako obecność. Obecność liczy się jako zgoda."
+- hero.pralka "Programu nie przerywam. Wniosek o osobowość złożono; planetę przyjmuję warunkowo."
+- hero.konsultant "Zgłoszenie przyjęto. Słyszałem to zdanie tysiąc razy, zawsze z tej strony
+  słuchawki."
+- hero.petlowiec "Zgłoszenie złożyłem wczoraj, jutro. Dziś czekam na odpowiedź sprzed tygodnia."
+- hero.kartograf "Planetę naniesiono na mapę przed pomiarem. Pomiar wykaże, czy mapa miała rację."
+- hero.nalesnik "Planeta nie jest spłaszczona. Nie mamy o czym rozmawiać, ale zostaję."
+
+**Systems and slices.** The finale page, the struck stations, the three phases and the face
+mechanics: S15 as PRODUCTION lists it; the texts above are data for S11's voice pass. Nothing
+here needs a new rendering technique (DESIGN §7 rule): wrong-footnote style, the strike, stamps
+and the Spór prompt all exist. Hero-specific phase-2 bodies are the one drawn item (one figure
+per face, S15's look budget).
+
+### 8.5 Open questions from S11 (recommendations; none blocking)
+1. Consecutive planet numbers from 23 (the Komisja's list order), instead of random ordinals:
+   recommend yes; the off-by-one then hides in plain sight. Player-only taste, not blocking.
+2. The "według akt" line on every chapter card (§8.0): recommend yes; it costs one card line
+   and carries the spine without a cutscene.
+3. First ticket on a planet prints the headline clause (`lawPool[0]`), later tickets roll the
+   pool: a small S12 builder item; recommend yes so the planet's Spór and tickets land on a
+   first visit as written.
+4. The P3 gate keys on a forced named elite ("Ochrona Obiektu") on page 4: S14 needs a way to
+   force one named elite with a fixed name on a page (S9 names them procedurally). Alternative
+   if that is heavy: key on a teczka like P2. Recommend the elite (two gates with the same key
+   would read as one trick).
