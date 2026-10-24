@@ -235,7 +235,7 @@ Forbidden: other planets' data, the rest of src/ui/**, src/i18n/** (voice owns s
 Deliverables: (1) two or three location types with ≥6 new drawings each, chosen per page. (2) base layout from the record + planet 1's clerk. (3) 2–3 hand-written side tickets live. (4) chapter card, opening page and hero lines live for planet 1, placeholders elsewhere. (5) boss variant with its Spór comments. (6) `CAMPAIGN_LAST` with a test that closing planet 3 issues the return ticket. Shots: `SHOT_PORT=4192 SHOT_OUT=dist-s12 SHOT_DIR=shots-s12` (each location, the base with the clerk, the card, the boss with its variant line).
 Voice: no (done in S11; light milestone pass). Look: yes. Tester leg: opening page → planet 1 base → clerk → side ticket → pages of each location → boss with its comments. Estimate: 1.3M (the frames; S13 and S14 are lighter for it).
 
-### S13 Planet 2 content — as S12 for planet 2 without the frames (own src/world/planets/p2.ts and its drawings; `SHOT_PORT=4193`). Estimate: 1.0M.
+### S13 Planet 2 content — as S12 for planet 2 without the frames (own src/world/planets/p2.ts and its drawings; `SHOT_PORT=4193`). Plus two S12 leftovers in src/world/campaign.ts and src/testHook.ts: the first ticket on a planet prints its headline clause `lawPool[0]`, later tickets roll the pool (STORY §8.5.3); free travel lists only planets 1..`CAMPAIGN_LAST` (update smoke leg 6c, which still closes nine planets and expects nine rows). Estimate: 1.0M.
 ### S14 Planet 3 content — as S13 for planet 3 (own src/world/planets/p3.ts; `SHOT_PORT=4194`). Estimate: 1.0M.
 
 ### S15 Anomalia: shared phases and the five faces
@@ -297,7 +297,7 @@ Builder brief `przystanki`. Own: src/world/stops.ts (new: placement, registratio
 ## M5 Akt II (planets 4–6)
 ### S22 Story plan Akt II (no builder) — as S11 for planets 4–6 (`story` then `voice` appending to src/i18n/pl/story.json). Story review decides whether a new enemy family or one act event is introduced here (parked if it needs the player); the player's answer on boss bodies (STATUS "Needs the player") decides whether S24 draws a new body for planet 6. Estimate: 0.4M.
 ### S23 Planets 4 and 5 — two builders in parallel, `src/world/planets/p4.ts`, `p5.ts`, own drawings, boss variants (`SHOT_PORT=4184/4185`). Estimate: 1.4M.
-### S24 Planet 6 and Akt II systems — builder `planet-6` plus builder `akt2-enemies` (new elite affixes/family if decided; Akt II laws' remaining mechanics; `CAMPAIGN_LAST` to 6 with the "Sprawę wznowiono" card for MVP saves). `SHOT_PORT=4186/4187`. Estimate: 1.5M.
+### S24 Planet 6 and Akt II systems — builder `planet-6` plus builder `akt2-enemies` (new elite affixes/family if decided; Akt II laws' remaining mechanics; `CAMPAIGN_LAST` to 6 with the "Sprawę wznowiono" card for MVP saves: S12 left only the `CampaignState.reopened` flag set on load, so add the red card kind and its trigger in src/ui/cards.ts + main.ts, story keys from `voice`). `SHOT_PORT=4186/4187`. Estimate: 1.5M.
 M5 end: e2e Akt II; look; story review; push.
 
 ## M6 Akt III (planets 7–9)
@@ -307,7 +307,7 @@ M5 end: e2e Akt II; look; story review; push.
 M6 end: e2e Akt III + finale; look; story review; push.
 
 ## M7 Polish and release
-### S28 Polish bucket — builder `render-polish` (landscape clause header top centre, Odwirowanie knockback, appeal-form drawing, cookie-banner paper, simpler Wygenerowane drawings, "Muzyka na czekanie, utwór nr N" line; the M1/M2 look leftovers listed in STATUS "Open polish": the tags, sups, HUD field labels and drawn plate labels still under 11 px, the landscape footnote box out of the play area, the inventory card footnote behind the buttons, the landscape desk scroll) plus builder `audio-polish` (sounds for enemy:miss / offTopic / gwiazdki pickup / elite:named / elite:slain, stereo panning). `SHOT_PORT=4193/4194`. Estimate: 1.4M.
+### S28 Polish bucket — builder `render-polish` (landscape clause header top centre, Odwirowanie knockback, appeal-form drawing, cookie-banner paper, simpler Wygenerowane drawings, "Muzyka na czekanie, utwór nr N" line; the M1/M2 look leftovers listed in STATUS "Open polish": the tags, sups, HUD field labels and drawn plate labels still under 11 px, the landscape footnote box out of the play area, the inventory card footnote behind the buttons, the landscape desk scroll; from the S12 look pass (reports/S12-look.md): the chapter card's Pomiń tap target (~37×12 px) and its 10 px "UWAGA WNIOSKODAWCY" label, the clerk sheet's Zamknij hit area (~15 px), bubbles overprinting each other and clipped by the HUD and the footnote box, the orange outline on the selected Spór card, props under the Potw./Tunel buttons) plus builder `audio-polish` (sounds for enemy:miss / offTopic / gwiazdki pickup / elite:named / elite:slain, stereo panning). `SHOT_PORT=4193/4194`. Estimate: 1.4M.
 ### S29 Phone feedback and desktop — builder `feedback-bucket` (items parked under "Needs the player" that the player answered) plus builder `desktop` (WASD, mouse aim mode). Estimate: 1.2M.
 ### S30 Release prep — Cloudflare hosting + cloud save design, Play Store TWA assets, privacy policy text, assetlinks: needs the player (parked until they say go). Estimate: 0.8M.
 
