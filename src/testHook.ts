@@ -38,6 +38,19 @@ import type { CampaignView } from './ui/ticketModel';
 import type { PriorityId } from './world/campaign';
 import { createContentHook, type ContentHook } from './world/content';
 import { createQuestHook, type QuestHook } from './world/quests';
+import { gateHolds, installGate, type GateKind } from './world/gate';
+import { redrawGate } from './render/obstacles';
+
+export interface GateHook {
+  /** Put a gate on the current run page (default) or page `opts.page`; the barrier is drawn at once. False without an exit or when one is there already. */
+  set(kind: GateKind, opts?: { page?: number; id?: string; need?: number }): boolean;
+  /** The gate of the current page: whether it holds, its obstacle and colliders, the distance of the player from the exit. Null without a gate. */
+  info(): { kind: GateKind; holds: boolean; obstacle: boolean; colliders: number; dist: number } | null;
+  /** Stand 260 units from the blocked corner on its diagonal and run one step: the footnote naming the condition is written. */
+  approach(): boolean;
+  /** Walk toward the exit corner for `seconds` of game time: how close the player got and whether the page turned. */
+  push(seconds: number): { dist: number; turned: boolean; page: number };
+}
 
 export interface GameHook {
   /** Start a run from a seed (default 1) and show the run screen. */
@@ -128,6 +141,8 @@ export interface GameHook {
   content: ContentHook;
   /** Side tickets (world/quests.ts): the board's offers, taking, finishing and reporting one. */
   quests: QuestHook;
+  /** Page gates (world/gate.ts), the fixture of S11a: no real planet carries one yet. */
+  gate: GateHook;
   /**
    * Save the orientation setting and ask for the lock where there is one. The layout itself follows the window:
    * in a browser test change the viewport (`page.setViewportSize`) to flip `data-orient`.
@@ -168,12 +183,12 @@ export interface GameHook {
   character(): Character | null;
   /**
    * The base page of a planet (DESIGN 4.1) for `seed` (default: the next ticket's planet), as `go('baza')` shows it: a
-   * walkable page with the stations, no enemies, the exit locked. Returns the state.
+   * walkable page with the stations, no enemies, the exit open. Returns the state.
    */
   startBase(seed?: number): RunState;
   /** Walk up to a station and tap it: its sheet opens ('biurko' the desk, 'kiosk' the Sklep, 'tablica' the settings, 'paczkomat' a footnote). */
   station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik'): boolean;
-  /** "Akceptuję regulamin" without the sheet: the exit of the base opens. False outside the base. */
+  /** The ticket form's button without the sheet: the plan on the desk is accepted again (the exit is open anyway). False outside the base. */
   acceptTicket(): boolean;
   /** Show the ticket form and the cards as for another campaign state (null: the real one). */
   setCampaignView(v: CampaignView | null): void;
@@ -181,8 +196,8 @@ export interface GameHook {
   /** The priority chosen on the ticket accepted last. */
   priority(): PriorityId;
   /**
-   * Put the player into the exit of the base page and run one step: when the exit is open the page turn to the first page of
-   * the run starts (the run begins). Returns whether the turn started; a locked exit only answers with its note.
+   * Put the player into the exit of the base page and run one step: the page turn to the first page of
+   * the run (or the bookmarked page) starts (the run begins). Returns whether the turn started.
    */
   walkToExit(): boolean;
   /** Plain-data snapshot for assertions. */
@@ -307,6 +322,49 @@ export function installTestHook(deps: HookDeps): void {
     audio: createAudioHook(),
     content: createContentHook(() => game.state, deps.bus),
     quests: createQuestHook(() => game.state, deps.bus),
+    gate: {
+      set(kind, opts = {}) {
+        const s = game.state;
+        const page = s?.pages[opts.page ?? s.pageIndex];
+        if (!s || !page) return false;
+        const ok = installGate(page, { kind, ...(opts.id ? { id: opts.id } : {}), ...(opts.need ? { need: opts.need } : {}) });
+        if (ok && page === s.page) redrawGate(page);
+        return ok;
+      },
+      info() {
+        const s = game.state;
+        const g = s?.page.gate;
+        if (!s || !g) return null;
+        const o = s.page.obstacles.find((p) => p.kind === 'gate');
+        return { kind: g.kind, holds: gateHolds(s, g), obstacle: o !== undefined, colliders: o?.colliders.length ?? 0, dist: s.page.exit ? dist(s.player, s.page.exit) : -1 };
+      },
+      approach() {
+        const s = game.state;
+        const e = s?.page.exit;
+        if (!s || !e || s.phase !== 'run') return false;
+        const k = 260 / Math.SQRT2;
+        s.player.x = e.x + (e.corner[1] === 'l' ? k : -k);
+        s.player.y = e.y + (e.corner[0] === 't' ? k : -k);
+        s.player.target = null;
+        s.enemies.length = 0;
+        game.update(1 / 60);
+        return true;
+      },
+      push(seconds) {
+        const s = game.state;
+        const e = s?.page.exit;
+        if (!s || !e) return { dist: -1, turned: false, page: -1 };
+        const from = s.pageIndex;
+        s.enemies.length = 0;
+        s.player.target = { x: e.x, y: e.y };
+        for (let i = 0; i < Math.round(seconds * 60) && s.pageIndex === from; i++) {
+          s.enemies.length = 0;
+          if (!s.player.target) s.player.target = { x: e.x, y: e.y };
+          game.update(1 / 60);
+        }
+        return { dist: dist(s.player, e), turned: s.pageIndex !== from || s.turning, page: s.pageIndex };
+      },
+    },
     turnTo(index) {
       const s = game.state;
       if (!s || s.turning) return;

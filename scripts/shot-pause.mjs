@@ -156,16 +156,16 @@ try {
       screen: window.__game.screen(),
       bookmark: window.__game.meta().bookmark ?? null,
       character: window.__game.character(),
-      line: document.querySelector('.resume-btn')?.textContent ?? null,
+      line: document.querySelector('.open-line')?.textContent ?? null,
       sheet: !!document.querySelector('.pause-sheet'),
     }));
     check(`${prefix}: Zakończ goes to the base with a bookmark and the character saved`, base.screen === 'baza' && base.bookmark?.pageIndex === before.page && base.character !== null && !base.sheet, JSON.stringify(base.bookmark));
-    check(`${prefix}: the base offers "Wznów zgłoszenie nr ..." at the top`, typeof base.line === 'string' && base.line.includes(String(before.number)), base.line ?? 'none');
+    check(`${prefix}: the desk says "zgłoszenie nr ... otwarto z urzędu"`, typeof base.line === 'string' && base.line.includes(String(before.number)) && /otwarto\s+z\s+urzędu/.test(base.line), base.line ?? 'none');
     await shot('baza-resume');
 
     // ---- resume: same page index, racja full, the reassignment footnote ----
-    await page.locator('.resume-btn').click();
-    await sleep(500);
+    await page.evaluate(() => document.querySelector('.desk-sheet .ps-close')?.click());
+    await sleep(400);
     await page.evaluate(() => window.__game.walkToExit()); // the exit of the base leads straight to the bookmarked page
     await sleep(2200);
     const after = await page.evaluate(() => {

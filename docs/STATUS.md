@@ -136,7 +136,10 @@ Progress is recorded here, one line per slice:
 
 - **M2 Campaign frame complete** (2026-10-19): e2e:m2 green in both orientations (nine planets at Niski, roster, cards, items, elites, content, quests, return ticket, free travel); look fixes (HUD circles 48 px, bubble de-dup, drying blots, paper outlines, 11 px sheet text); ARCHITECTURE folded to under 300 lines; story plan review adjusted S12–S18, S28.
 
-**Next pickup:** Automode paused by the player after M2. Next: `/pickup` then `/automode`; the next slice is PRODUCTION.md S11 (story plan for Akt I, no builder), then S11a (open exit).
+- S11 done: STORY §8.1–8.5 for planets 1–3 (23 Przydzielona, 24 Zaległa, 25 Zaktualizowana), the Anomalia finale and the opening page; gates: P2 page 2 parcel wall (teczka), P3 page 4 turnstile (named elite); final Polish in `src/i18n/pl/story.json`, planets.json p1–p3 named. Open for S12–S14 (reports/S11-story.md, S11-voice.md): the planet 1 clerk shares its name with `screens.npc.referent`; ticket p3.c "Dwa egzemplarze" breaks if n changes; the phase-3 right answer is marked existential but reads as regulamin; S14 needs a fixed-name forced elite for the P3 gate (fallback a teczka).
+- S11a done: the base exit is never locked; the base opens with the plan accepted (last priority, default Normalny); a bookmark is the exit's destination ("otwarto z urzędu" on the desk); Nowe zgłoszenie over a bookmark asks first; the form applies changes with "Zatwierdź zmiany"; page gates (`src/world/gate.ts`: boss / teczka / quest, an ink barrier over the exit corner, the Asystent names the condition; `PlanetDef.gates`, none set yet); e2e:m1 two stale legs fixed. Voice pass on the new screens.base keys still due (fold into the S12 voice step).
+
+**Next pickup:** Automode paused by the player after M2. Next: `/pickup` then `/automode`; the next slice is PRODUCTION.md S12 (planet 1 content and the story frames; set the P2/P3 gates in S13/S14 from STORY §8.2–8.3).
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).

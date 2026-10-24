@@ -46,8 +46,8 @@ function row(label: string, value: string, extra = ''): HTMLElement {
 
 /**
  * The ticket header as a sheet over the base page: number, planet, the regulamin clause, the dominant family, an
- * estimate, one button. Declining shows the same form again with a note. Accepting stamps the form and opens the exit of
- * the base page (main.ts). The form scrolls in its own area, so it fits a page 390 px high.
+ * estimate, the priority, one button. The exit of the base is already open; the button stamps the form and re-accepts the plan
+ * at the chosen priority (main.ts), travel and extras re-lay the base. The form scrolls in its own area, so it fits a page 390 px high.
  */
 export function createTicket(root: HTMLElement, handlers: TicketHandlers): TicketScreen {
   let sheet: Sheet | null = null;
@@ -103,13 +103,13 @@ export function createTicket(root: HTMLElement, handlers: TicketHandlers): Ticke
     return box;
   }
 
-  function render(info: TicketInfo, ctx: TicketContext, declined: boolean): void {
+  function render(info: TicketInfo, ctx: TicketContext): void {
     if (!sheet) return;
     const body = h('div', 'ticket');
     const stampSvg = el('svg', { class: 'ticket-stamp', viewBox: '0 0 320 90', 'aria-hidden': 'true' });
     const stampLayer = el('g', {});
     stampSvg.append(stampLayer);
-    const accept = h('button', 'start', t('screens.ticket.accept'));
+    const accept = h('button', 'start', t('screens.base.ticketApply'));
     accept.type = 'button';
     accept.addEventListener('click', () => {
       if (busy) return;
@@ -123,12 +123,6 @@ export function createTicket(root: HTMLElement, handlers: TicketHandlers): Ticke
         },
       });
     });
-    const decline = h('button', 'link-btn', t('screens.ticket.decline'));
-    decline.type = 'button';
-    decline.addEventListener('click', () => {
-      if (busy) return;
-      render(info, ctx, true);
-    });
     const art = el('svg', { class: 'ticket-art', viewBox: '-100 -65 200 130', filter: 'url(#wobble-cover)', 'aria-hidden': 'true' });
     art.append(drawPlanet(info.planet));
     const form = h('div', 'tform');
@@ -140,13 +134,13 @@ export function createTicket(root: HTMLElement, handlers: TicketHandlers): Ticke
       row(t('screens.ticket.family'), t(`screens.family.${info.family}`)),
       row(t('screens.ticket.pages'), t('screens.ticket.pagesValue', { count: info.pageCount })),
     );
-    form.append(priorityBlock(ctx, () => render(info, ctx, declined)));
+    form.append(priorityBlock(ctx, () => render(info, ctx)));
     const travel = travelBlock(ctx, handlers);
     if (travel) form.append(travel);
     const actions = h('div', 'tk-actions');
-    actions.append(accept, decline, stampSvg);
+    actions.append(accept, stampSvg);
     const side = h('div', 'tk-side');
-    side.append(art, h('p', 'eta', t('screens.ticket.eta')), declined ? h('p', 'declined', t('screens.ticket.declined')) : h('p', 'declined empty', ''));
+    side.append(art, h('p', 'eta', t('screens.ticket.eta')));
     body.append(form, side, actions);
     const keep = sheet.scroll.scrollTop;
     sheet.scroll.replaceChildren(body);
@@ -167,7 +161,7 @@ export function createTicket(root: HTMLElement, handlers: TicketHandlers): Ticke
         },
       });
       sheet.el.classList.add('ticket-sheet');
-      render(info, ctx, false);
+      render(info, ctx);
     },
     close() {
       sheet?.remove();

@@ -14,13 +14,14 @@ import { spawnBoss } from '../enemies/bosses';
 import { spawnEntryWave, spawnWave } from '../enemies/spawn';
 import { currentViewSize, headerFrame, viewRect, type Camera } from '../render/camera';
 import { drawIn, stamp } from '../render/ink';
-import { drawPage, type PageHeader } from '../render/obstacles';
+import { drawPage, redrawGate, type PageHeader } from '../render/obstacles';
 import type { Stage } from '../render/stage';
 import { el, n2 } from '../render/svg';
 import { easeIn, tween } from '../render/tween';
 import type { Views } from '../render/view';
 import { pageEntryAll } from '../items/absurd';
 import { recomputeStats } from '../items/stats';
+import { gateKey, stepGate } from './gate';
 import { canLeave, onPageEntered } from './laws';
 import { atExit } from './pages';
 import type { RunState } from './run';
@@ -110,6 +111,7 @@ export function populatePage(s: RunState, bus: Bus): void {
 /**
  * The player walked out of the base through the unlocked exit: the run proper begins. The clock starts (at the bookmarked
  * time when a ticket is being resumed, with the footnote that another consultant took it over), the base state goes away.
+ * The exit of the base is always open: with a bookmark it leads to the bookmarked page (`RunState.pageIndex`), else to the first.
  */
 export function beginRun(s: RunState, bus: Bus): void {
   const resume = s.base?.resume ?? null;
@@ -166,7 +168,15 @@ export function tickPageTurn(s: RunState, bus: Bus): void {
 
   if (kioskReached(s)) openKiosk();
 
-  if (s.page.exit && s.pageIndex < s.pageCount - 1 && atExit(s.page, s.player)) {
+  // a gated page keeps its exit corner behind a drawn barrier until the condition holds (world/gate.ts)
+  const gate = s.page.gate;
+  const gated = stepGate(s);
+  if (gated === 'lifted') {
+    redrawGate(s.page);
+    bus.emit('footnote', { text: t('screens.base.gate.lifted') });
+  } else if (gated === 'note' && gate) bus.emit('footnote', { text: t(gateKey(gate)) });
+
+  if (!s.page.gate && s.page.exit && s.pageIndex < s.pageCount - 1 && atExit(s.page, s.player)) {
     if (canLeave(s, bus)) {
       s.turning = true;
       s.player.target = null;

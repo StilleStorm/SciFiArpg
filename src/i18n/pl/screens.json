@@ -29,9 +29,6 @@
       "many": "{count} stron"
     },
     "eta": "Szacowany czas rozpatrzenia: 12 minut",
-    "accept": "Akceptuję regulamin",
-    "decline": "Nie akceptuję",
-    "declined": "Aby kontynuować, zaakceptuj regulamin.",
     "stamp": "Zgłoszenie przyjęto",
     "act": "Etap",
     "actValue": "Akt {act}",
@@ -56,8 +53,6 @@
     "history": "Historia zgłoszeń",
     "emptyHistory": "Brak zgłoszeń. Każde zostanie zarejestrowane.",
     "newTicket": "Nowe zgłoszenie",
-    "resume": "Wznów zgłoszenie nr {number}",
-    "resumeNote": "{planet}, strona {page}. Zgłoszenie zostanie przekazane innemu konsultantowi.",
     "tunnelWaiting": "Zgłoszenie nr {number} czeka na stronie {page}.",
     "tunnelNote": "Stronę pozostawiono w stanie, w jakim ją opuszczono. Przeciwników również.",
     "tunnelReturn": "Wróć do zgłoszenia",
@@ -261,8 +256,19 @@
       "quests": "Zgłoszenia do wykonania",
       "questsNote": "Zgłoszenia pobiera się z tablicy. Wykonanie zgłasza się na tablicy. Kolejność dowolna, termin nieokreślony."
     },
-    "exitNote": "wymaga zgłoszenia",
-    "exitLocked": "Przejście wymaga zgłoszenia. Zgłoszenia przyjmuje biurko.",
+    "ticketApply": "Zatwierdź zmiany",
+    "deskOpen": "Zgłoszenie nr {number} otwarto z urzędu.",
+    "deskOpenNote": "{planet}, strona {page}. Wyjście z bazy prowadzi na tę stronę. Zgłoszenie zostanie przekazane innemu konsultantowi.",
+    "dropTitle": "Nowe zgłoszenie",
+    "dropBody": "Zgłoszenie nr {number} jest otwarte. Nowe zgłoszenie zamknie je bez rozpatrzenia. Przywrócenia nie przewidziano.",
+    "dropConfirm": "Porzuć i zacznij nowe",
+    "dropCancel": "Zostaw otwarte",
+    "gate": {
+      "boss": "Przejście zablokowano do rozpatrzenia sprawy z udziałem osoby decyzyjnej. Osoba decyzyjna jest na tej stronie.",
+      "teczka": "Przejście zablokowano do czasu dołączenia teczki. Teczki leżą na stronach.",
+      "quest": "Przejście zablokowano do czasu wykonania zgłoszenia z tablicy. Tablica jest w bazie.",
+      "lifted": "Przejście odblokowano. Warunek uznano za spełniony."
+    },
     "paczkomatClosed": "Paczkomat nieczynny. Przesyłki w drodze. Kod odbioru zostanie wysłany po odbiorze.",
     "station": {
       "biurko": "Biurko",

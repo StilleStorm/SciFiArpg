@@ -139,11 +139,13 @@ async function leg(browser, heroId, orient, measure) {
   await page.locator('button.choose').locator('visible=true').first().click();
   await page.waitForFunction(() => window.__game.screen() === 'baza', null, { timeout: 8000 }).catch(() => undefined);
   await sleep(700);
+  await page.locator('.card-layer .card-skip').click({ timeout: 2500 }).catch(() => undefined); // the opening page of the first base
+  await sleep(400);
   const base0 = await ev(() => {
     const s = window.__game.state();
-    return { screen: window.__game.screen(), phase: s?.phase, hero: s?.player.heroId, accepted: s?.base.accepted };
+    return { screen: window.__game.screen(), phase: s?.phase, hero: s?.player.heroId, open: s?.pageIndex === 0 && document.querySelector('#page [data-exit-base]') !== null && !document.querySelector('#page .base-exit-note') };
   });
-  check('the chosen hero stands in the base, the exit is locked', base0.screen === 'baza' && base0.phase === 'base' && base0.hero === heroId && !base0.accepted, JSON.stringify(base0));
+  check('the chosen hero stands in the base, the exit is open', base0.screen === 'baza' && base0.phase === 'base' && base0.hero === heroId && base0.open, JSON.stringify(base0));
 
   // ---- desk Konfiguracja: a pad, a column, a paragraph ----
   await ev(() => window.__game.setSteering('tap'));
@@ -214,9 +216,9 @@ async function leg(browser, heroId, orient, measure) {
   await sleep(300);
   await clickText('Nowe zgłoszenie');
   await sleep(600);
-  await clickText('Akceptuję regulamin');
+  await clickText('Zatwierdź zmiany');
   await sleep(1800);
-  check('accepting the ticket unlocks the exit', (await screen()) === 'baza' && (await ev(() => window.__game.state().base.accepted)));
+  check('the ticket form re-accepts the plan, the exit stays open', (await screen()) === 'baza' && (await ev(() => window.__game.state().phase === 'base' && !document.querySelector('.ticket-sheet'))));
   await ev(() => window.__game.walkToExit());
   await sleep(1800);
   await settle();
@@ -356,17 +358,23 @@ async function leg(browser, heroId, orient, measure) {
   });
   await page.waitForFunction(() => window.__game.screen() === 'baza', null, { timeout: 8000 }).catch(() => undefined);
   await sleep(400);
+  // the enemies to keep are those standing when the run was held (the hero's copies may have felled some on the way to the hole)
+  await ev(() => {
+    window.__keepIds = window.__keep.enemies.map((e) => e.id).sort().join();
+    window.__keepKills = window.__keep.kills;
+  });
   const inBase = await ev(() => ({ screen: window.__game.screen(), phase: window.__game.state()?.phase, held: window.__keep.status, other: window.__keep !== window.__game.state(), time: window.__keep.time }));
   check('walking onto the hole holds the run and opens the base', inBase.screen === 'baza' && inBase.phase === 'base' && inBase.held === 'paused' && inBase.other, JSON.stringify(inBase));
   await ev(() => window.__game.station('biurko'));
   await sleep(500);
   await page.locator('.tunnel-return').tap({ timeout: 3000 });
   await sleep(1400);
+  // a copy of the hero may fell one of the held enemies in the 1.4 s since the return: the kills account for it
   const back = await ev(() => {
     const s = window.__game.state();
     return { screen: window.__game.screen(), status: s.status, same: window.__keep === s, time: s.time, tunnel: s.tunnel ?? null, held: window.__game.heldPotwierdzenia(), level: s.player.level, spec: s.hero.spec ?? null, enemies: s.enemies.length };
   });
-  check('the return button puts the same run back: clock moves on, hole closed, slips, level and enemies kept', back.screen === 'run' && back.status === 'running' && back.same && back.time > inBase.time && back.time - inBase.time < 3 && back.tunnel === null && back.held === 2 && back.level >= 12 && back.spec === kfSpec && (await ev(() => window.__keepIds.split(',').every((id) => window.__game.state().enemies.some((e) => String(e.id) === id)))), JSON.stringify({ ...back, was: inBase.time }));
+  check('the return button puts the same run back: clock moves on, hole closed, slips, level and enemies kept', back.screen === 'run' && back.status === 'running' && back.same && back.time > inBase.time && back.time - inBase.time < 3 && back.tunnel === null && back.held === 2 && back.level >= 12 && back.spec === kfSpec && (await ev(() => { const s = window.__game.state(); const gone = window.__keepIds.split(',').filter((id) => !s.enemies.some((e) => String(e.id) === id)).length; return gone <= s.kills - window.__keepKills; })), JSON.stringify({ ...back, was: inBase.time }));
   await shot('09-tunnel-back');
 
   // ---- boss -> base ----

@@ -2,6 +2,7 @@ import type { Side } from '../core/events';
 import type { Rng } from '../core/rng';
 import { dist, type Vec } from '../core/vec';
 import type { BasePageInfo, StationId } from './base';
+import type { PageGate } from './gate';
 import { CONTENT, EVENT_IDS, SEAL_IDS, type EventId, type PageContent } from './contentKinds';
 
 export const PAGE_W = 1200;
@@ -15,7 +16,7 @@ export interface Circle {
   r: number;
 }
 
-export type ObstacleKind = 'blot' | 'ring' | 'torn' | 'note' | 'qr' | 'sticky' | 'clip' | 'kiosk';
+export type ObstacleKind = 'blot' | 'ring' | 'torn' | 'note' | 'qr' | 'sticky' | 'clip' | 'kiosk' | 'gate';
 
 export interface Obstacle {
   kind: ObstacleKind;
@@ -66,6 +67,8 @@ export interface Page {
   hasKiosk: boolean;
   /** Only the walkable base page of a planet has this (world/base.ts): layout, stations, props, the hole's place. */
   base?: BasePageInfo;
+  /** A story lock on the exit corner (world/gate.ts): the obstacle of kind 'gate' stays until its condition holds. */
+  gate?: PageGate;
   /** Teczki, pieczęcie and the event of this page (world/contentKinds.ts); placed from the seed, mutated by world/content.ts. Absent on the base page. */
   content?: PageContent[];
 }
@@ -127,6 +130,15 @@ export function colliders(o: Pick<Obstacle, 'kind' | 'x' | 'y' | 'size' | 'rot'>
         { x: o.x, y: o.y - o.size * 0.3, r: o.size * 0.42 },
         { x: o.x, y: o.y + o.size * 0.28, r: o.size * 0.42 },
       ];
+    case 'gate': {
+      // a barrier arc across the exit corner (o.x, o.y), o.size the radius, from one wall to the other
+      const fx = o.x < PAGE_W / 2 ? 1 : -1;
+      const fy = o.y < PAGE_H / 2 ? 1 : -1;
+      return [0, 1, 2, 3, 4].map((i) => {
+        const a = (i / 4) * (Math.PI / 2);
+        return { x: o.x + fx * Math.cos(a) * o.size, y: o.y + fy * Math.sin(a) * o.size, r: 28 };
+      });
+    }
     case 'torn': {
       const fx = o.x <= 0 ? 1 : -1;
       const fy = o.y <= 0 ? 1 : -1;

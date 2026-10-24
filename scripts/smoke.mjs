@@ -275,11 +275,9 @@ try {
   await page.locator('.card-layer .card-skip').click({ timeout: 3000 }); // S7: the opening page of the first base is skipped with its button
   const baseSt = await page.evaluate(() => {
     const s = window.__game.state();
-    return { screen: window.__game.screen(), phase: s.phase, enemies: s.enemies.length, time: s.time, locked: !s.base.accepted, layout: s.base.layout };
+    return { screen: window.__game.screen(), phase: s.phase, enemies: s.enemies.length, time: s.time, pageIndex: s.pageIndex, layout: s.base.layout, open: document.querySelector('#page [data-exit-base]') !== null, note: document.querySelector('#page .base-exit-note') !== null, sheet: document.querySelector('.sheet:not(.hidden)') !== null };
   });
-  check('after the profile the walkable base page is up: no enemies, the clock still, the exit locked', baseSt.screen === 'baza' && baseSt.phase === 'base' && baseSt.enemies === 0 && baseSt.time === 0 && baseSt.locked, JSON.stringify(baseSt));
-  const lockedTurn = await page.evaluate(() => window.__game.walkToExit());
-  check('walking into the locked exit does not turn the page', lockedTurn === false && (await page.evaluate(() => window.__game.state().phase)) === 'base');
+  check('after the profile the walkable base page is up: no enemies, the clock still, the exit open with no ticket step and no "wymaga zgłoszenia" note', baseSt.screen === 'baza' && baseSt.phase === 'base' && baseSt.enemies === 0 && baseSt.time === 0 && baseSt.pageIndex === 0 && baseSt.open && !baseSt.note && !baseSt.sheet, JSON.stringify(baseSt));
   const place = await page.evaluate(() => {
     const v = document.querySelector('.hud .field.place .val');
     const b = v?.parentElement;
@@ -371,10 +369,10 @@ try {
   await clickText('Nowe zgłoszenie');
   await sleep(600);
   await shot('03-ticket');
-  await clickText('Akceptuję regulamin');
+  await clickText('Zatwierdź zmiany');
   await sleep(1800);
-  await shot('03b-base-unlocked');
-  check('accepting the ticket unlocks the exit and keeps the player in the base', (await screen()) === 'baza' && (await page.evaluate(() => window.__game.state().base.accepted)));
+  await shot('03b-base-open');
+  check('the ticket form re-accepts the plan and keeps the player in the base, the exit open', (await screen()) === 'baza' && (await page.evaluate(() => window.__game.state().phase === 'base' && !document.querySelector('.ticket-sheet') && document.querySelector('#page [data-exit-base]') !== null)));
   const headerFits = (sel) =>
     page.evaluate((q) => {
       const lines = [...document.querySelectorAll(q)];
@@ -816,14 +814,20 @@ try {
   check("Zakończ goes to 'baza'", (await screen()) === 'baza', await screen());
   await page.evaluate(() => window.__game.station('biurko'));
   await sleep(500);
-  const resumeLine = await page.locator('.resume-btn').textContent({ timeout: 3000 }).catch(() => null);
-  check('the base offers "Wznów zgłoszenie nr ..." at the top', typeof resumeLine === 'string' && resumeLine.includes('Wznów zgłoszenie nr'), String(resumeLine));
+  const openLine = await page.locator('.open-line').textContent({ timeout: 3000 }).catch(() => null);
+  check('the desk says the ticket was opened ex officio (no resume button; the exit leads into it)', typeof openLine === 'string' && /otwarto\s+z\s+urzędu/.test(openLine) && (await page.locator('.desk-sheet .resume-btn').count()) === 0, String(openLine));
   await shot('08c-baza-resume');
   const saved = await page.evaluate(() => ({ bookmark: window.__game.meta().bookmark ?? null, character: window.__game.character() }));
   check('the bookmark and the character were saved', saved.bookmark?.pageIndex === pzBefore?.page && saved.character !== null, JSON.stringify(saved.bookmark));
-  await page.locator('.resume-btn').click({ timeout: 3000 });
-  await sleep(600);
-  check('Wznów zgłoszenie unlocks the exit of the base, the run has not started yet', (await page.evaluate(() => ({ phase: window.__game.state().phase, acc: window.__game.state().base.accepted }))).phase === 'base');
+  const atBase = await page.evaluate(() => ({ phase: window.__game.state().phase, page: window.__game.state().pageIndex, resume: window.__game.state().base?.resume?.pageIndex ?? null }));
+  check('the base is entered with the bookmark as its destination, the run has not started yet', atBase.phase === 'base' && atBase.page === saved.bookmark?.pageIndex && atBase.resume === saved.bookmark?.pageIndex, JSON.stringify(atBase));
+  await clickText('Nowe zgłoszenie');
+  await sleep(500);
+  await clickText('Zostaw otwarte');
+  await sleep(300);
+  check('Nowe zgłoszenie over an open ticket asks first; leaving it open keeps the bookmark', await page.evaluate(() => window.__game.meta().bookmark !== undefined && window.__game.state().base?.resume != null));
+  await page.locator('.desk-sheet .ps-close').first().click({ timeout: 1500 }).catch(() => undefined);
+  await sleep(300);
   await page.evaluate(() => window.__game.walkToExit());
   await sleep(2000);
   await settle();
@@ -1010,7 +1014,7 @@ try {
   await sleep(500);
   await clickText('Nowe zgłoszenie');
   await sleep(500);
-  await clickText('Akceptuję regulamin');
+  await clickText('Zatwierdź zmiany');
   await sleep(1500);
   await page.evaluate(() => window.__game.walkToExit());
   await sleep(2000);
@@ -1793,6 +1797,32 @@ try {
   await sleep(300);
   await page.locator('.desk-sheet .ps-close').first().click({ timeout: 1500 }).catch(() => undefined);
 
+  // ---------- 6b'. a page gate (S11a): a drawn barrier over the exit corner until its condition holds ----------
+  {
+    await page.evaluate(() => window.__game.start(11, { pageCount: 4 }));
+    await sleep(900);
+    const gset = await page.evaluate(() => ({ set: window.__game.gate.set('teczka'), info: window.__game.gate.info(), drawn: document.querySelector('#page [data-obstacle="gate"]') !== null }));
+    check('a gate fixture puts a drawn barrier on the exit corner of the page', gset.set && gset.info?.holds === true && gset.info.obstacle && gset.drawn, JSON.stringify(gset));
+    await page.evaluate(() => window.__game.gate.approach());
+    await sleep(300);
+    await shot('gate-held');
+    const held = await page.evaluate(() => ({ push: window.__game.gate.push(6), notes: window.__game.notes().map((n) => n.text).join(' ') }));
+    check('the barrier holds: the player cannot reach the corner, the page does not turn, the Asystent names the condition', !held.push.turned && held.push.dist > 100 && held.notes.includes('teczki'), JSON.stringify(held));
+    const lifted = await page.evaluate(() => {
+      const s = window.__game.state();
+      const c = { kind: 'teczka', id: 901, x: 300, y: 300, seed: 3, opened: true };
+      s.page.content = [...(s.page.content ?? []), c];
+      window.__game.advance(0.2);
+      return { gate: window.__game.gate.info(), drawn: document.querySelector('#page [data-obstacle="gate"]') !== null, notes: window.__game.notes().map((n) => n.text).join(' ') };
+    });
+    check('once a teczka is taken the gate lifts: obstacle and drawing gone, a footnote says so', lifted.gate === null && !lifted.drawn && lifted.notes.includes('odblokowano'), JSON.stringify(lifted));
+    const through = await page.evaluate(() => window.__game.gate.push(8));
+    check('and the exit corner turns the page', through.turned, JSON.stringify(through));
+    await sleep(900);
+    await page.evaluate(() => window.__game.startBase());
+    await sleep(500);
+  }
+
   // ---------- 6c. the campaign (S7): opening card, priority, a closed ticket moves the planet on, free travel ----------
   {
     const cctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
@@ -1858,7 +1888,7 @@ try {
     await sleep(900);
     const trav = await cp.evaluate(() => {
       const s = window.__game.state();
-      return { rows: 0, screen: window.__game.screen(), plan: s?.plan ?? null, accepted: s?.base?.accepted ?? false, card: document.querySelector('.card-layer')?.dataset.card ?? null, sheet: !!document.querySelector('.ticket-sheet') };
+      return { rows: 0, screen: window.__game.screen(), plan: s?.plan ?? null, accepted: s?.phase === 'base' && s?.pageIndex === 0, card: document.querySelector('.card-layer')?.dataset.card ?? null, sheet: !!document.querySelector('.ticket-sheet') };
     });
     trav.rows = rows;
     check('campaign: after the case nine planets are offered; travel to planet 5 accepts a travel ticket there and shows the rewritten card', rows === 9 && trav.screen === 'baza' && trav.plan?.kind === 'travel' && trav.plan?.planet === 4 && trav.accepted && trav.card === 'rewritten' && !trav.sheet, JSON.stringify(trav));

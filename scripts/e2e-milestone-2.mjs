@@ -135,7 +135,7 @@ async function leg(browser, orient) {
     await page.locator('.ticket-sheet .tk-prio[data-priority=niski]').click({ timeout: 2000 });
     const on = await ev(() => document.querySelector('.ticket-sheet .tk-prio.on')?.dataset.priority ?? '');
     await page.locator('.ticket-sheet button.start').click({ timeout: 2000 });
-    await page.waitForFunction(() => window.__game.state()?.base?.accepted === true, null, { timeout: 6000 }).catch(() => undefined);
+    await page.waitForFunction(() => !document.querySelector('.ticket-sheet'), null, { timeout: 6000 }).catch(() => undefined);
     await ev(() => window.__game.walkToExit());
     const inRun = await waitScreen('run', 8000);
     await sleep(500);
@@ -331,7 +331,7 @@ async function leg(browser, orient) {
   await sleep(1000);
   const trav = await ev(() => {
     const s = window.__game.state();
-    return { screen: window.__game.screen(), plan: s?.plan ?? null, accepted: s?.base?.accepted ?? false, sheet: !!document.querySelector('.ticket-sheet') };
+    return { screen: window.__game.screen(), plan: s?.plan ?? null, accepted: s?.phase === 'base' && s?.pageIndex === 0, sheet: !!document.querySelector('.ticket-sheet') };
   });
   await skipCard(1200);
   check('free travel offers nine planets; a tap on planet 5 accepts a travel ticket there', rows === 9 && trav.plan?.kind === 'travel' && trav.plan?.planet === 4 && trav.accepted && !trav.sheet, JSON.stringify({ rows, trav }));

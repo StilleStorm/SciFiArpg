@@ -13,7 +13,7 @@ the base page (`openSheet`, one history entry), not screens; cards (`ui/cards.ts
 `RunState` (`world/run.ts`, `createRun(seed, opts)`) is the one live state; `phase: 'base' | 'run'`. The base is the same
 object as the run it becomes: `createRun(seed, {phase: 'base'})` holds `page` = the base page (900 x 700,
 `world/base.ts generateBase`), `base` (`BaseState`: layout, accepted, resume bookmark) and `pageIndex` = the run page the
-exit leads to. Walking through the unlocked exit (`world/pageTurn.ts enterPage` -> `beginRun`) flips the phase, deletes
+exit leads to. Walking through the exit (always open; `world/pageTurn.ts enterPage` -> `beginRun`) flips the phase, deletes
 `base`, starts the clock and emits `run:started`. In the base: no clock, laws, spawns, fights, bookmark or `heroStep`
 (`heroBaseStep` only cools the pads and opens a queued update the HUD line asked for; `castSkill` ignores the pads). While
 a tunnel holds a run, that RunState waits in `hold` (`createRunHold`, never copied) and a second, base-phase RunState is
@@ -96,8 +96,16 @@ fell (`canOpenUpdate`). In the base only the HUD tap opens it.
   text, for the bug dump.
 
 ## The base page, stations, the tunnel, pause and save (DESIGN 4.1)
-`world/base.ts`: three layouts from the seed, stations (`tapStation`, `stationReached`, `tickBase` emits the locked-exit
-note), `acceptTicket(s, bookmark?)`, `exitLocked`, `bookmarkAllowed`, `arrivalKey`. Stations open on a tap on their
+`world/base.ts`: three layouts from the seed, stations (`tapStation`, `stationReached`), `tickBase` (the exit is never locked:
+it emits `base:exit`, then `page:turn`), `acceptTicket(s, bookmark?)` (re-accepts the plan / points the exit at a bookmark; no
+`accepted` flag), `bookmarkAllowed`, `arrivalKey`. The base is entered with the plan already open at the last chosen priority
+(default Normalny); a saved bookmark is the destination of the exit (`createRun(..., {phase:'base', resume})` sets `pageIndex`),
+the desk shows "zgłoszenie otwarto z urzędu" and "Nowe zgłoszenie" (asks, drops the bookmark). The ticket form only changes
+priority (re-accepts), free travel and extras (`takePlan` re-lays the base). `main.ts` settles a run held in the tunnel on
+`base:exit`. **Page gates** (`world/gate.ts`): `Page.gate?: PageGate {kind: boss|teczka|quest, id?, need?, key?}` (from
+`PlanetDef.gates`, none yet; fixture `__game.gate.*`) adds an obstacle of kind `gate` (an inked arc of colliders over the exit
+corner, `render/obstacles.ts drawGate/redrawGate`); `tickPageTurn` calls `stepGate` (lifts when the condition holds, writes
+`screens.base.gate.<kind>` as a footnote near the corner); `bindGates` opens a boss gate on `boss:died`. Stations open on a tap on their
 drawing or label (`Game.onTap` emits `station:opened`; targets >= 44 css px at any zoom); walking into them does nothing.
 `render/stations.ts drawBase` returns `BaseView {frame(s), unlock(header)}`; `game.ts` passes `planet: questPlanet(s)`.
 HUD in the base: the page field reads "Baza" + the layout word, Tunel and Potw. notes and skill pads hidden
@@ -268,7 +276,7 @@ Hero sounds from `heroById(id).sounds`; ultimates `pralkaUlt, konsUlt, petlUlt, 
 `openInventory`, `openSklep`, `openKiosk`, `setTheme`, `setOrientation`, `setSteering`, `setLeftHanded`, `setSettings(patch)`,
 `controls`, `dropPotwierdzenie(dist)`, `heldPotwierdzenia`, `setHeldPotwierdzenia(n)`, `usePotwierdzenie`, `exportArchive()`,
 `importArchive(text)`, `joystick(dx, dy)`, `pause`, `resume`, `endTicket`, `resumeTicket`, `character`, `startBase(seed?)`,
-`station(name)`, `acceptTicket`, `walkToExit`, `openTunnel`, `enterTunnel`, `returnFromTunnel`, `tapUltimate`,
+`station(name)`, `acceptTicket`, `walkToExit`, `gate.{set(kind, opts), info, approach, push(s)}`, `openTunnel`, `enterTunnel`, `returnFromTunnel`, `tapUltimate`,
 `ultimatePad() {ready, off, inked, hidden}`, `keepOut()`, `setLevel(n)`, `fillMeter(v=1)`, `setMeterUi(v)`, `castUltimate`,
 `ultimateInfo()`, `setSpecialization(id|null)`, `loadoutInfo()`, `aimCast`, `holdPad`, `releasePad`, `itemGallery(mode)`,
 `setCampaignView(v|null)`, `showCard(kind)`, `priority()`, `spor.{answer, info}`,

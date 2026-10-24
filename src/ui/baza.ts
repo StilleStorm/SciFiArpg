@@ -1,5 +1,4 @@
 import { t } from '../i18n';
-import type { Bookmark } from '../save/bookmark';
 import { describeMeta, downloadArchive, parseArchive, pickArchive } from '../save/export';
 import type { MetaState } from '../save/save';
 import { rosterStore } from './rosterStore';
@@ -11,8 +10,6 @@ import './base.css';
 export interface BazaHandlers {
   /** "Nowe zgłoszenie": the ticket form opens as a sheet over the base. */
   onNewTicket(): void;
-  /** Take up the ticket that was left unfinished (Zakończ, or the app was closed during a run): the exit of the base leads back into it. */
-  onResume(bookmark: Bookmark): void;
   /** "Wróć do zgłoszenia": back through the service tunnel into the held run (only offered while a run is held). */
   onReturn?(): void;
   /** An archive file was read and the player confirmed: this save replaces the stored one (main.ts saves and applies it). */
@@ -29,7 +26,7 @@ export interface TunnelWait {
 }
 
 export interface Baza {
-  /** The desk sheet over the base page: profile, resume, "Nowe zgłoszenie" (the history is on the notice board). */
+  /** The desk sheet over the base page: profile, the open quest note, "Nowe zgłoszenie" (the history is on the notice board). */
   open(meta: MetaState): void;
   close(): void;
   isOpen(): boolean;
@@ -111,11 +108,9 @@ export function createBaza(root: HTMLElement, handlers: BazaHandlers): Baza {
     }
     const mark = waiting ? undefined : meta.bookmark;
     if (mark) {
-      const resume = h('button', 'resume-btn', t('screens.baza.resume', { number: mark.ticketNumber }));
-      resume.type = 'button';
-      resume.addEventListener('click', () => handlers.onResume(mark));
-      const block = h('div', 'resume-line');
-      block.append(resume, h('p', 'resume-note', t('screens.baza.resumeNote', { planet: mark.planetName, page: mark.pageIndex + 1 })));
+      // the unfinished ticket is the open quest: the exit of the base leads into it, no button needed (S11a)
+      const block = h('div', 'resume-line open-line');
+      block.append(h('p', 'tunnel-wait', t('screens.base.deskOpen', { number: mark.ticketNumber })), h('p', 'resume-note', t('screens.base.deskOpenNote', { planet: mark.planetName, page: mark.pageIndex + 1 })));
       left.append(block);
     }
     const archive = h('div', 'archive');
@@ -136,7 +131,25 @@ export function createBaza(root: HTMLElement, handlers: BazaHandlers): Baza {
     const actions = h('div', 'desk-actions');
     const fresh = h('button', 'start', t('screens.baza.newTicket'));
     fresh.type = 'button';
-    fresh.addEventListener('click', handlers.onNewTicket);
+    fresh.addEventListener('click', () => {
+      if (!mark) return handlers.onNewTicket();
+      // dropping the open quest is asked first
+      confirm?.close();
+      confirm = openPopup(root, {
+        title: t('screens.base.dropTitle'),
+        body: [t('screens.base.dropBody', { number: mark.ticketNumber })],
+        buttons: [
+          {
+            label: t('screens.base.dropConfirm'),
+            onClick: () => {
+              confirm?.close();
+              handlers.onNewTicket();
+            },
+          },
+          { label: t('screens.base.dropCancel'), quiet: true, onClick: () => confirm?.close() },
+        ],
+      });
+    });
     actions.append(fresh);
     scroll.after(actions);
   };

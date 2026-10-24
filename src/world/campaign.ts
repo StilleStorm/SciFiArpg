@@ -10,6 +10,7 @@ import type { Bus } from '../core/events';
 import { createRng } from '../core/rng';
 import { BOSS_OF, type BossId, type FamilyId } from '../enemies/ids';
 import type { BaseLayout } from './base';
+import type { PlanetGate } from './gate';
 import type { LawId } from './laws';
 import type { MissionMix } from '../enemies/families';
 
@@ -112,6 +113,8 @@ export interface PlanetDef {
   pages: readonly [number, number];
   /** The character level the planet is balanced for at Normalny. */
   levelHint: number;
+  /** Story locks on pages of its runs (world/gate.ts); none on the real planets yet. */
+  gates?: readonly PlanetGate[];
 }
 
 const mix = (urzadzenia: number, powiadomienia: number, wygenerowane: number): Record<FamilyId, number> => ({ urzadzenia, powiadomienia, wygenerowane });

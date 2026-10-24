@@ -102,7 +102,7 @@ try {
   console.log('layouts', JSON.stringify(layoutSeeds));
   check('three layouts are found among the first seeds', Object.keys(layoutSeeds).length === 3);
 
-  // the note beside the locked dog-ear: 13 px Garamond italic in full ink, and what happens to it when the exit unlocks
+  // the exit is always open (S11a): the dog-ear is drawn at once, no "wymaga zgłoszenia" note, no strike-through
   {
     const { ctx, page } = await open({ width: 390, height: 844 });
     await page.evaluate((sd) => window.__game.startBase(sd), layoutSeeds.ladowisko ?? 1);
@@ -112,22 +112,9 @@ try {
       window.__game.placePlayer(e.x + (e.corner[1] === 'l' ? 200 : -200), e.y - 150);
     });
     await sleep(1400);
-    const note = await page.evaluate(() => {
-      const t = document.querySelector('#page .base-exit-note text');
-      if (!t) return null;
-      const cs = getComputedStyle(t);
-      const r = t.getBoundingClientRect();
-      return { text: t.textContent, family: cs.fontFamily, style: cs.fontStyle, px: parseFloat(cs.fontSize) * t.getScreenCTM().a, fill: cs.fill, opacity: cs.opacity, h: r.height, w: r.width };
-    });
-    check('exit note: the note is there, Garamond italic, about 13 px on the screen, full ink', note !== null && /garamond/i.test(note.family) && note.style === 'italic' && Math.abs(note.px - 13) < 0.8 && note.opacity === '1', JSON.stringify(note));
-    await page.screenshot({ path: `${SHOTS}/note-locked.png` });
-    await page.evaluate(() => window.__game.acceptTicket());
-    await sleep(330);
-    await page.screenshot({ path: `${SHOTS}/note-struck.png` });
-    await sleep(1600);
-    const after = await page.evaluate(() => ({ shown: getComputedStyle(document.querySelector('#page .base-exit-note')).display !== 'none', open: document.querySelector('#page .base-exit g:nth-child(2)')?.style.display === '' }));
-    check('exit note: after the unlock the note is gone and the dog-ear is open', !after.shown && after.open, JSON.stringify(after));
-    await page.screenshot({ path: `${SHOTS}/note-gone.png` });
+    const exit = await page.evaluate(() => ({ note: document.querySelector('#page .base-exit-note') !== null, open: document.querySelector('#page .base-exit') !== null, word: document.querySelector('#page .base-exit text')?.textContent ?? '' }));
+    check('exit: the open dog-ear is drawn at once with its word, and no locked note exists', exit.open && !exit.note && exit.word.length > 0, JSON.stringify(exit));
+    await page.screenshot({ path: `${SHOTS}/exit-always-open.png` });
     await ctx.close();
   }
 
@@ -138,7 +125,7 @@ try {
     const state = () =>
       page.evaluate(() => {
         const s = window.__game.state();
-        return s && { screen: window.__game.screen(), phase: s.phase, status: s.status, enemies: s.enemies.length, time: s.time, x: s.player.x, y: s.player.y, layout: s.base?.layout ?? null, pageIndex: s.pageIndex, locked: s.base ? !s.base.accepted : null };
+        return s && { screen: window.__game.screen(), phase: s.phase, status: s.status, enemies: s.enemies.length, time: s.time, x: s.player.x, y: s.player.y, layout: s.base?.layout ?? null, pageIndex: s.pageIndex, open: s.base ? document.querySelector('#page .base-exit') !== null : null };
       });
     const overflow = () =>
       page.evaluate(() => {
@@ -154,7 +141,7 @@ try {
       await page.evaluate((sd) => window.__game.startBase(sd), seed);
       await sleep(1700);
       const st = await state();
-      check(`${prefix}: ${layout}: the base is up, no enemies, the clock stands, the exit is locked`, st.screen === 'baza' && st.phase === 'base' && st.enemies === 0 && st.time === 0 && st.locked === true, JSON.stringify(st));
+      check(`${prefix}: ${layout}: the base is up, no enemies, the clock stands, the exit is open`, st.screen === 'baza' && st.phase === 'base' && st.enemies === 0 && st.time === 0 && st.open === true, JSON.stringify(st));
       const hud = await page.evaluate(() => ({ label: document.querySelector('.hud-row + .hud-row .field:last-child label')?.textContent, value: document.querySelector('.hud-row + .hud-row .field:last-child .val')?.textContent, tunnelHidden: document.querySelector('.tunnel-btn')?.classList.contains('hidden'), padsHidden: ['s1', 's2', 's3'].every((c) => getComputedStyle(document.querySelector(`.pad.${c}`)).display === 'none'), inv: getComputedStyle(document.querySelector('.pad.inv')).display !== 'none' }));
       check(`${prefix}: ${layout}: the HUD says Baza and the kind of place, the Tunel note and the skill pads are put away`, hud.label === 'Baza' && hud.value === { ladowisko: 'lądowisko', wioska: 'wioska', miasteczko: 'miasteczko' }[layout] && hud.tunnelHidden && hud.padsHidden && hud.inv, JSON.stringify(hud));
       await shot(layout);
@@ -231,10 +218,10 @@ try {
     await page.evaluate(() => window.__game.station('biurko'));
     await sleep(500);
     await shot('desk');
-    check(`${prefix}: the desk offers Nowe zgłoszenie, Wznów zgłoszenie and Zmień profil, and carries no history`, await page.evaluate(() => {
+    check(`${prefix}: the desk offers Nowe zgłoszenie, says the open ticket was opened ex officio, and offers Zmień profil, and carries no history`, await page.evaluate(() => {
       const d = document.querySelector('.desk-sheet');
       const txt = d?.textContent ?? '';
-      return !!d && txt.includes('Nowe zgłoszenie') && txt.includes('Wznów zgłoszenie') && txt.includes('Zmień profil') && d.querySelector('.hist-entry') === null && !txt.includes('Historia zgłoszeń');
+      return !!d && txt.includes('Nowe zgłoszenie') && /otwarto\s+z\s+urzędu/.test(txt) && txt.includes('Zmień profil') && d.querySelector('.hist-entry') === null && !txt.includes('Historia zgłoszeń');
     }));
     const ov = await overflow();
     check(`${prefix}: the desk sheet fits the screen, its buttons are on the page and at least 44 px tall`, ov && ov.bottom <= ov.h + 1 && ov.right <= ov.w + 1 && ov.buttons.every((b) => b.bottom <= ov.h && b.top >= 0 && b.h >= 43), JSON.stringify(ov));
@@ -257,25 +244,11 @@ try {
     await shot('ticket');
     const ov2 = await overflow();
     check(`${prefix}: the ticket sheet fits the screen`, ov2 && ov2.bottom <= ov2.h + 1 && ov2.right <= ov2.w + 1, JSON.stringify(ov2));
-    await page.locator('.ticket-sheet .link-btn').click();
-    await sleep(500);
-    check(`${prefix}: declining shows the note and keeps the exit locked`, (await page.evaluate(() => document.querySelector('.ticket-sheet .declined')?.textContent ?? '')).includes('zaakceptuj') && (await state()).locked === true);
     await page.evaluate(() => document.querySelector('.ps-close').click()); // Zamknij on the ticket goes back to the desk
     await sleep(300);
     check(`${prefix}: Zamknij on the ticket returns to the desk`, await page.evaluate(() => document.querySelector('.desk-sheet') !== null));
     await page.evaluate(() => document.querySelector('.ps-close').click());
     await sleep(300);
-    // stand beside the exit and look at the dashed dog-ear
-    await page.evaluate(() => {
-      const e = window.__game.state().page.exit;
-      window.__game.placePlayer(e.x + (e.corner[1] === 'l' ? 170 : -170), e.y - 120);
-    });
-    await sleep(1300);
-    await shot('exit-locked');
-    const lockedTurn = await page.evaluate(() => window.__game.walkToExit());
-    await sleep(300);
-    check(`${prefix}: walking into the locked exit does not turn the page`, lockedTurn === false && (await state()).phase === 'base');
-    await shot('exit-locked-note');
     // the ticket is accepted at the desk, as in play: the clause header is printed where the player is looking (portrait)
     await page.evaluate(() => {
       const st = window.__game.state().page.base.stations.find((x) => x.id === 'biurko');
@@ -286,12 +259,12 @@ try {
     await sleep(300);
     await page.getByText('Nowe zgłoszenie', { exact: false }).locator('visible=true').first().click();
     await sleep(500);
-    await page.getByText('Akceptuję regulamin', { exact: false }).locator('visible=true').first().click();
+    await page.getByText('Zatwierdź zmiany', { exact: false }).locator('visible=true').first().click();
     await sleep(350);
     await shot('ticket-stamp');
     await sleep(1900);
-    const acc = await page.evaluate(() => ({ sheet: document.querySelector('.ps') !== null, accepted: window.__game.state().base.accepted, header: document.querySelector('#page .base-header')?.textContent ?? '', solid: document.querySelector('#page .base-exit g:nth-child(2)')?.style.display ?? 'x' }));
-    check(`${prefix}: accepting stamps, opens the exit and prints the clause header on the base page`, !acc.sheet && acc.accepted && acc.header.includes('Zgłoszenie nr') && acc.solid === '', JSON.stringify(acc));
+    const acc = await page.evaluate(() => ({ sheet: document.querySelector('.ps') !== null, header: document.querySelector('#page .base-header')?.textContent ?? '', solid: document.querySelector('#page .base-exit g:nth-child(2)')?.style.display ?? 'x' }));
+    check(`${prefix}: the form stamps, closes, and the base page prints the clause header`, !acc.sheet && acc.header.includes('Zgłoszenie nr') && acc.solid === '', JSON.stringify(acc));
     await shot('header');
     await page.evaluate(() => {
       const e = window.__game.state().page.exit;

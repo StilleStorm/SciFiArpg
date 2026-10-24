@@ -8,7 +8,8 @@ import { generateRunPages, type Page } from './pages';
 import { applyLaw, neutralLaw, type LawFlags, type LawId } from './laws';
 import type { Tunnel } from './tunnel';
 import { ticketForPlan, ticketForSeed, type TicketInfo } from './ticket';
-import { mixForPlanet, type CampaignState, type TicketPlan } from './campaign';
+import { applyPlanetGates } from './gate';
+import { mixForPlanet, planetDef, type CampaignState, type TicketPlan } from './campaign';
 import type { QuestState } from './quests';
 import type { ActiveBuff } from './contentKinds';
 
@@ -96,7 +97,7 @@ export interface RunOptions {
   resume?: Bookmark;
   /** The saved character to play: gear, purse, level, updates (save/character.ts), applied before the stats are computed. */
   character?: Character;
-  /** 'base' starts in the walkable base page of the planet (the exit is locked until the ticket is accepted); default 'run'. */
+  /** 'base' starts in the walkable base page of the planet (the exit is always open; a bookmark points it at the bookmarked page); default 'run'. */
   phase?: 'base' | 'run';
   /** Planet, priority and clause from the campaign; the ticket is made from it (ticketForPlan) and the enemies scale with it. */
   plan?: TicketPlan;
@@ -112,6 +113,7 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
   if (lawId) ticket.lawId = lawId;
   if (pageCount) ticket.pageCount = pageCount;
   const pages = generateRunPages(rng, ticket.pageCount);
+  if (plan) applyPlanetGates(pages, planetDef(plan.planet).gates);
   const runPage = pages[0] ?? generateRunPages(rng, 1)[0];
   if (!runPage) throw new Error('no page');
   const phase = opts.phase ?? 'run';
@@ -149,7 +151,10 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
     phase,
     ...(plan ? { plan: { ...plan, lawId: ticket.lawId }, mix: mixForPlanet(plan.planet) } : {}),
   };
-  if (phase === 'base') state.base = createBaseState(layoutForSeed(seed), opts.resume ?? null);
+  if (phase === 'base') {
+    state.base = createBaseState(layoutForSeed(seed), opts.resume ?? null);
+    if (opts.resume) state.pageIndex = Math.min(pages.length - 1, Math.max(0, opts.resume.pageIndex)); // the exit leads to the open quest
+  }
   applyHero(state.player, heroDef(opts.heroId ?? DEFAULT_HERO_ID));
   applyLaw(state, ticket.lawId);
   if (opts.character) applyCharacter(state, opts.character);

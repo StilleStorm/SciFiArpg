@@ -407,6 +407,41 @@ function drawStains(page: Page): SVGGElement {
 }
 
 /** Mark an obstacle drawing so tools (shots, the smoke) can find it in the #page layer. */
+/**
+ * A page gate (world/gate.ts): a band of hatched ink across the exit corner, from wall to wall, with stapled cross-strokes
+ * like a strip of sealing tape. Drawn in the frame of the top-left corner, mirrored for the others.
+ */
+function drawGate(o: Obstacle, r: Rng): SVGGElement {
+  const fx = o.x < 600 ? 1 : -1;
+  const fy = o.y < 800 ? 1 : -1;
+  const g = el('g', { transform: `translate(${n2(o.x)} ${n2(o.y)}) scale(${fx} ${fy})` });
+  const ro = o.size + 22;
+  const ri = o.size - 22;
+  const steps = 14;
+  const arc = (rad: number, from: number): Vec[] =>
+    Array.from({ length: steps + 1 }, (_, i) => {
+      const a = ((from === 0 ? i : steps - i) / steps) * (Math.PI / 2);
+      return { x: Math.cos(a) * rad + r.range(-1.4, 1.4), y: Math.sin(a) * rad + r.range(-1.4, 1.4) };
+    });
+  const outline = [...arc(ro, 0), ...arc(ri, 1)];
+  g.append(el('path', { d: polyline(outline, true), fill: 'url(#hatch)', 'stroke-width': 1.9 }));
+  const ticks: string[] = [];
+  for (let i = 1; i < 8; i++) {
+    const a = (i / 8) * (Math.PI / 2) + r.range(-0.03, 0.03);
+    ticks.push(`M${n2(Math.cos(a) * (ri - 4))} ${n2(Math.sin(a) * (ri - 4))}L${n2(Math.cos(a + 0.05) * (ro + 4))} ${n2(Math.sin(a + 0.05) * (ro + 4))}`);
+  }
+  g.append(el('path', { d: ticks.join(''), 'stroke-width': 1.3 }));
+  return g;
+}
+
+/** Draw the gate of the current page again (a hook put one there), or erase it when the page has none. */
+export function redrawGate(page: Page): void {
+  if (typeof document === 'undefined') return;
+  document.querySelectorAll('#page [data-obstacle="gate"]').forEach((n) => n.remove());
+  const o = page.obstacles.find((p) => p.kind === 'gate');
+  if (o) document.querySelector('#page [data-page-ink]')?.append(tagObstacle(drawGate(o, createRng(o.seed)), o.kind));
+}
+
 function tagObstacle(g: SVGElement, kind: string): SVGElement {
   g.setAttribute('data-obstacle', kind);
   return g;
@@ -471,6 +506,9 @@ export function drawPage(layer: SVGGElement, page: Page, header?: PageHeader): S
         break;
       case 'kiosk':
         ink.append(tagObstacle(drawKiosk(o, r), o.kind));
+        break;
+      case 'gate':
+        ink.append(tagObstacle(drawGate(o, r), o.kind));
         break;
     }
   }

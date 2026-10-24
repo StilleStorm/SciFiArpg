@@ -15,7 +15,7 @@ import { initInk } from './render/ink';
 import { installPaper } from './render/paper';
 import { createWobble, getStage, setTheme } from './render/stage';
 import { tickTweens } from './render/tween';
-import { bindAutosave, savable, settleRun, withBookmark, withCharacter } from './save/autosave';
+import { bindAutosave, savable, settleRun, withBookmark, withCharacter, withoutBookmark } from './save/autosave';
 import { markRewritten } from './save/history';
 import { bugDump, copyText, deviceInfo, requestPersistence } from './save/export';
 import { loadMeta, saveMeta, type Settings } from './save/save';
@@ -56,6 +56,7 @@ import { bindQuests, cloneQuests, completeQuest, dropQuest, questPlanet, questsO
 import { bindLaws, lawHooks } from './world/laws';
 import { PAGE_H, PAGE_W } from './world/pages';
 import { bindPageTurn, bindRunEvents } from './world/pageTurn';
+import { bindGates } from './world/gate';
 import type { RunOptions, RunState } from './world/run';
 import { bindTunnel, carryPurse, closeFor, closeTunnel, createRunHold, cutBaseHole, fateOfHeldRun, openTunnel, type LeaveAction } from './world/tunnel';
 import { TICKET_BASE } from './world/ticket';
@@ -139,9 +140,8 @@ let sheetHolds = false;
 let shop: SklepHandle | null = null;
 
 const baza = createBaza(stage.ui, {
-  onNewTicket: () => openSheet('ticket'),
+  onNewTicket: () => newTicket(),
   onReturn: () => returnFromTunnel(),
-  onResume: () => resumeTicket(),
   onImport: (next) => importSave(next),
   onClose: () => closeSheet(),
 });
@@ -208,6 +208,19 @@ function takePlan(make: (c: CampaignState, seed: number) => TicketPlan | null, p
   leave('newTicket'); // a run held in the tunnel is given up first, as the accept button does
   enterBase({ seed: s.seed, number: s.ticket.number, plan, ...(s.campaign ? { campaign: s.campaign } : {}) });
   acceptNow(priority);
+}
+
+/**
+ * "Nowe zgłoszenie" on the desk: the exit of the base leads into the open (bookmarked) quest, so a new ticket first drops
+ * the bookmark (the desk asked), lays the base out again, then opens the form for the priority, travel and extras.
+ */
+function newTicket(): void {
+  if (screen === 'baza' && meta.bookmark && !hold.peek()) {
+    save(withoutBookmark(meta));
+    closeSheet();
+    enterBase();
+  }
+  openSheet('ticket');
 }
 
 /** The walkable screens: the base page and the run. */
@@ -349,7 +362,9 @@ function enterBase(over: { seed?: number; number?: number; plan?: TicketPlan; ca
   const resume = b && !held && !over.plan && b.seed === seed ? b : undefined;
   // The plan on the desk: the held run's, the bookmarked one, a travel/extra choice, or the campaign's next ticket.
   const campaign = over.campaign ? cloneCampaign(over.campaign) : meta.character?.campaign ? toCampaign(meta.character.campaign) : newCampaign();
-  const plan = over.plan ?? held?.plan ?? resume?.plan ?? (held || resume ? undefined : defaultPlan(campaign, DEFAULT_PRIORITY, seed));
+  // The base is entered with the plan already open (the exit is never locked): at the last priority chosen on the form, default Normalny.
+  const priority = clampPriority(ticket.priority(), meta.character?.level ?? 1);
+  const plan = over.plan ?? held?.plan ?? resume?.plan ?? (held || resume ? undefined : defaultPlan(campaign, priority, seed));
   const state = game.start(seed, {
     ...(plan ? { plan } : {}),
     phase: 'base',
@@ -482,12 +497,14 @@ function closeSheet(): void {
   syncHistory('ticket', 'baza');
 }
 
-/** "Akceptuję regulamin": a run held in the tunnel is given up, the exit of the base opens, the clause header is printed. */
+/**
+ * The ticket form's button: the plan on the desk is accepted again at the chosen priority. The exit of the base was open
+ * already; a run held in the tunnel is given up when the player walks out (`base:exit`), not here.
+ */
 function acceptNow(priority?: PriorityId): boolean {
   unlockAudio(); // the accept button is the natural unlock (DESIGN 14.5); any first tap also unlocks
   const s = game.state;
   if (screen !== 'baza' || !s || s.phase !== 'base') return false;
-  leave('newTicket');
   if (s.plan) s.plan = { ...s.plan, priority: clampPriority(priority ?? ticket.priority(), s.player.level) };
   if (!acceptTicket(s)) return false;
   bus.emit('ticket:accepted');
@@ -514,6 +531,8 @@ bindFx(
 );
 bindPageTurn(bus, { stage, camera, views: game.views, getState: () => game.state, bounds });
 bindRunEvents(bus, () => game.state);
+bindGates(bus, () => game.state); // a boss of a gated page opens it (world/gate.ts)
+bus.on('base:exit', () => leave('newTicket')); // walking out of the base starts a ticket: a run held in the tunnel is settled first
 // The tunnel closes itself on death, the end of the run and a page turn; both must hear `run:ended` before the handler below drops the state.
 bindTunnel(bus, () => game.state);
 // A completed ticket closes its planet in the character's campaign before the handler below saves the character.

@@ -88,9 +88,6 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
     bounds.w = page.w;
     bounds.h = page.h;
   };
-  bus.on('ticket:accepted', () => {
-    if (state?.phase === 'base') baseView?.unlock(baseHeaderFor(state, headerFrame(camera)));
-  });
 
   const game: Game = {
     get state() {
@@ -142,10 +139,10 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       stage.fx.replaceChildren();
       fitBounds(s.page);
       if (s.phase === 'base' && s.base) {
-        // The base page of the planet: stations, no enemies, a locked exit. The run starts when the exit is walked through.
-        baseView = drawBase(stage.page, s.page, { accepted: false, header: null, planet: questPlanet(s) }); // the planet's own clerk
+        // The base page of the planet: stations, no enemies, an open exit. The run starts when the exit is walked through.
         camera.snap(s.player.x, s.player.y);
         camera.apply();
+        baseView = drawBase(stage.page, s.page, { header: baseHeaderFor(s, headerFrame(camera)), planet: questPlanet(s) }); // the planet's own clerk
         input.setEnabled(true);
         bus.emit('base:entered', { layout: s.base.layout, seed, number: s.ticket.number }); // the Asystent writes the arrival note
         return s;

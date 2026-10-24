@@ -63,13 +63,10 @@ try {
   await wait(2200);
   await shot('title');
 
-  // ticket screen: the run start, then the declined note
+  // ticket form (the base exit is always open; the form changes priority, travel, extras)
   await page.evaluate(() => window.__game.go('ticket'));
   await wait(700);
   await shot('ticket');
-  await page.click('.ticket .link-btn');
-  await wait(500);
-  await shot('ticket-declined');
 
   await page.evaluate(() => window.__game.start(7, { lawId: 'parzystosc', pageCount: 5 }));
   await wait(1500);

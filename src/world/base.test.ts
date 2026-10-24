@@ -20,7 +20,6 @@ import {
   acceptTicket,
   arrivalKey,
   bookmarkAllowed,
-  exitLocked,
   generateBase,
   layoutForSeed,
   reachableCells,
@@ -201,7 +200,7 @@ describe('stations: a tap opens them, walking into them does not', () => {
   });
 });
 
-describe('the exit lock', () => {
+describe('the exit is always open', () => {
   const standInExit = (s: RunState): void => {
     const e = s.page.exit;
     if (!e) throw new Error('no exit');
@@ -209,32 +208,34 @@ describe('the exit lock', () => {
     s.player.y = e.y + (e.corner[0] === 't' ? 40 : -40);
   };
 
-  it('stays locked until a ticket is accepted: standing in it writes a note, not a page turn', () => {
+  it('a fresh base needs no ticket step: standing in the exit turns the page to the first page of the run', () => {
     const s = base();
     const bus = createBus();
-    const log = record(bus, ['page:turn', 'margin:note']);
+    const log = record(bus, ['page:turn', 'margin:note', 'base:exit']);
     expect(s.phase).toBe('base');
-    expect(exitLocked(s)).toBe(true);
-    standInExit(s);
-    tickBase(s, bus, 1 / 60);
-    expect(s.turning).toBe(false);
-    expect(log.map((l) => l.name)).toEqual(['margin:note']);
-    tickBase(s, bus, 1 / 60); // the note is not repeated at once
-    expect(log).toHaveLength(1);
-    expect((log[0]?.payload as { text: string }).text).toBe(t('screens.base.exitLocked'));
-  });
-
-  it('opens when the ticket is accepted and the page turn leads to the first page of the run', () => {
-    const s = base();
-    const bus = createBus();
-    const log = record(bus, ['page:turn']);
-    expect(acceptTicket(s)).toBe(true);
-    expect(acceptTicket(s)).toBe(false); // once
-    expect(exitLocked(s)).toBe(false);
+    expect(s.pageIndex).toBe(0);
     standInExit(s);
     tickBase(s, bus, 1 / 60);
     expect(s.turning).toBe(true);
-    expect(log).toEqual([{ name: 'page:turn', payload: { from: -1, to: 0 } }]);
+    expect(log).toEqual([
+      { name: 'base:exit', payload: undefined },
+      { name: 'page:turn', payload: { from: -1, to: 0 } },
+    ]);
+  });
+
+  it('accepting again (the form) keeps the exit open and leaves the destination alone', () => {
+    const s = base();
+    expect(acceptTicket(s)).toBe(true);
+    expect(acceptTicket(s)).toBe(true); // any number of times
+    expect(s.pageIndex).toBe(0);
+  });
+
+  it('a bookmarked base is born pointing at the bookmarked page, with no accept at all', () => {
+    const run = createRun(7, { pageCount: 5 });
+    run.pageIndex = 2;
+    const s = base(7, { resume: bookmarkOf(run) });
+    expect(s.pageIndex).toBe(2);
+    expect(s.base?.resume?.pageIndex).toBe(2);
   });
 
   it('with a bookmark the exit leads straight to the bookmarked page, and the run starts at its clock', () => {
@@ -260,7 +261,7 @@ describe('the exit lock', () => {
     expect(String((log[3]?.payload as { text: string }).text)).toContain(String(s.ticket.number));
   });
 
-  it('refuses a ticket outside the base', () => {
+  it('refuses to accept outside the base', () => {
     expect(acceptTicket(createRun(7))).toBe(false);
   });
 });

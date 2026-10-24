@@ -91,12 +91,8 @@ export interface BasePageInfo {
 /** The base part of the run state (`RunState.base`, present while `phase` is 'base'). */
 export interface BaseState {
   layout: BaseLayout;
-  /** "Akceptuję regulamin" (or "Wznów zgłoszenie") was pressed: the exit is open. */
-  accepted: boolean;
   /** A bookmarked ticket the exit leads back into: the page index is `RunState.pageIndex`, the clock is restored on entry. */
   resume: Bookmark | null;
-  /** Seconds until the next "wymaga zgłoszenia" note may be written. */
-  noteCooldown: number;
 }
 
 // ---------- layouts ----------
@@ -407,21 +403,17 @@ export function generateBase(seed: number): Page {
 // ---------- the state of the base ----------
 
 export function createBaseState(layout: BaseLayout, resume: Bookmark | null): BaseState {
-  return { layout, accepted: false, resume, noteCooldown: 0 };
+  return { layout, resume };
 }
 
-/** The exit of the base page is locked until a ticket is accepted. */
-export const exitLocked = (s: RunState): boolean => s.phase === 'base' && s.base?.accepted !== true;
-
 /**
- * "Akceptuję regulamin" or "Wznów zgłoszenie": the exit opens. With a bookmark the exit leads to the bookmarked page and
- * the clock is restored on entry (`pageTurn.ts` `enterPage`); without, to the first page. False outside the base or when
- * the ticket was already accepted.
+ * The exit of the base is never locked: the base is entered with its ticket accepted. This (re)accepts the plan on the desk
+ * (the form's button, a change of priority) or points the exit at a bookmark: with `resume` the exit leads to the
+ * bookmarked page and the clock is restored on entry (`pageTurn.ts` `enterPage`); without, to the first page. False outside the base.
  */
-export function acceptTicket(s: RunState, resume: Bookmark | null = null): boolean {
+export function acceptTicket(s: RunState, resume: Bookmark | null = s.base?.resume ?? null): boolean {
   const b = s.base;
-  if (s.phase !== 'base' || !b || b.accepted) return false;
-  b.accepted = true;
+  if (s.phase !== 'base' || !b) return false;
   b.resume = resume;
   s.pageIndex = resume ? Math.min(s.pages.length - 1, Math.max(0, resume.pageIndex)) : 0;
   return true;
@@ -453,20 +445,15 @@ export function stationAt(page: Page, x: number, y: number, zoom = 1): Station |
 }
 
 /** Per step in the base: watch the exit. No clock, no laws, no spawns. */
-export function tickBase(s: RunState, bus: Bus, dt: number): void {
+export function tickBase(s: RunState, bus: Bus, _dt: number): void {
   const b = s.base;
   if (s.phase !== 'base' || !b || s.turning) return;
-  b.noteCooldown = Math.max(0, b.noteCooldown - dt);
   const page = s.page;
   if (!page.exit || !atExit(page, s.player)) return;
-  if (b.accepted) {
-    s.turning = true;
-    s.player.target = null;
-    bus.emit('page:turn', { from: -1, to: s.pageIndex });
-  } else if (b.noteCooldown <= 0) {
-    b.noteCooldown = 4;
-    bus.emit('margin:note', { text: t('screens.base.exitLocked'), x: s.player.x, y: s.player.y - 34, ttl: 1800 });
-  }
+  s.turning = true;
+  s.player.target = null;
+  bus.emit('base:exit'); // main.ts settles a run held in the tunnel, as starting another ticket does
+  bus.emit('page:turn', { from: -1, to: s.pageIndex });
 }
 
 // ---------- the Asystent's arrival note ----------

@@ -19,7 +19,6 @@ import { drawIn } from './ink';
 import { drawNpc } from './npc';
 import { drawHeader, drawPage, type PageHeader } from './obstacles';
 import { dotPath, el, n2, polyline, wobblyCircle, wobblyLine } from './svg';
-import { easeOut, tween } from './tween';
 import { washGroup, type WashHue } from './wash';
 
 type Pt = [number, number];
@@ -341,11 +340,10 @@ function drawProp(p: BaseProp): SVGGElement {
 // ---------- the exit ----------
 
 /**
- * The folded corner of the base page, in the frame of the top-left corner (mirrored by the caller). Locked: only the
- * perforation of a fold, dashed, as if the corner could be folded and was not. Open: the real dog-ear of the run's
- * pages with its pen arrow.
+ * The folded corner of the base page, in the frame of the top-left corner (mirrored by the caller): the real dog-ear of the
+ * run's pages with its pen arrow. The exit of the base is never locked.
  */
-function exitShapes(page: Page, seed: number): { locked: SVGGElement; open: SVGGElement; at: Vec; fx: number; fy: number } {
+function exitShapes(page: Page, seed: number): { open: SVGGElement; at: Vec } {
   const exit = page.exit;
   if (!exit) throw new Error('base page without an exit');
   const r = createRng(seed);
@@ -355,13 +353,6 @@ function exitShapes(page: Page, seed: number): { locked: SVGGElement; open: SVGG
   const pad = page.inset + 5;
   const j = (): number => r.range(-1.6, 1.6);
   const frame = (): SVGGElement => el('g', { transform: `translate(${n2(exit.x)} ${n2(exit.y)}) scale(${fx} ${fy})` });
-
-  const locked = frame();
-  const dashed = (d: string, w: number): SVGPathElement => el('path', { d, 'stroke-width': w, 'stroke-dasharray': '7 6' });
-  locked.append(
-    dashed(`M${n2(a + pad)} ${n2(-pad)}L${n2(-pad)} ${n2(a + pad)}`, 1.4),
-    dashed(poly([[a + pad, -pad], [a * 0.5 + j(), a * 0.5 + j()], [-pad, a + pad], [a + pad + j(), a + pad + j()]], true), 1.1),
-  );
 
   const open = frame();
   const hole = el('path', { d: poly([[-pad, -pad], [a + pad, -pad], [-pad, a + pad]], true) });
@@ -375,68 +366,7 @@ function exitShapes(page: Page, seed: number): { locked: SVGGElement; open: SVGG
   const arrow = el('g', { transform: `translate(${n2(a * 0.62)} ${n2(a * 0.62)}) rotate(-135)` });
   arrow.append(el('path', { d: 'M-16 0H16M6-7L17 0L6 7', 'stroke-width': 2.2 }));
   open.append(hole, flap, back, crease, arrow);
-  return { locked, open, at: { x: exit.x + fx * (a + pad + 75), y: exit.y + fy * 30 }, fx, fy };
-}
-
-// ---------- the note beside the locked dog-ear ----------
-
-/** The handwritten note is set in EB Garamond italic at this size on the screen (the group is scaled by 1 / zoom). */
-export const EXIT_NOTE_PX = 13;
-/** The note is drawn in screen pixels from this point of the fold: (28, 42) in the corner's frame, on the line x + y = FOLD. */
-const NOTE_FOLD: Pt = [28, 42];
-
-interface ExitNote {
-  g: SVGGElement;
-  /** The translation to the fold; the zoom scale follows it. */
-  base: string;
-  word: SVGTextElement;
-  /** The red strike that crosses it out when the exit unlocks (pathLength 1, drawn by dash offset). */
-  struck: SVGPathElement;
-}
-
-/**
- * "wymaga zgłoszenia" written in the margin beside the dashed fold, with a small pen arrow pointing at it. Full ink, upright
- * on the page whichever corner the exit is in: the arrow and the text run inward from the fold (`fx` is +1 for a left corner).
- */
-function exitNote(page: Page, fx: number, text: string): ExitNote {
-  const exit = page.exit;
-  if (!exit) throw new Error('base page without an exit');
-  const fy = exit.corner[0] === 't' ? 1 : -1;
-  const base = `translate(${n2(exit.x + fx * NOTE_FOLD[0])} ${n2(exit.y + fy * NOTE_FOLD[1])})`;
-  const g = el('g', { class: 'base-exit-note', transform: base });
-  const arrow = el('path', { d: `M${34 * fx} 3Q${20 * fx} -4 ${5 * fx} 0M${11 * fx} -4.5L${5 * fx} 0L${11.5 * fx} 4`, 'stroke-width': 1.5 });
-  const word = el('text', { class: 't-note', x: 40 * fx, y: 4, 'text-anchor': fx > 0 ? 'start' : 'end' }, [text]);
-  word.style.fontSize = `${EXIT_NOTE_PX}px`;
-  word.style.fill = 'var(--ink)';
-  word.style.opacity = '1';
-  // a thin edge of bare paper keeps the hand legible where the note crosses a prop or the hatching
-  word.style.stroke = 'var(--paper)';
-  word.style.strokeWidth = '3px';
-  word.style.paintOrder = 'stroke';
-  const struck = el('path', { d: '', pathLength: 1, 'stroke-width': 1.8 });
-  struck.style.stroke = 'var(--accent)';
-  struck.style.strokeDasharray = '1 2';
-  struck.style.strokeDashoffset = '1';
-  struck.style.display = 'none';
-  g.append(arrow, word, struck);
-  return { g, base, word, struck };
-}
-
-/** Cross the note out in red, then let it fade while the dog-ear draws itself in. */
-function strikeNote(n: ExitNote, fx: number, seed: number): void {
-  let len = n.word.textContent?.length ? n.word.textContent.length * 5.8 : 90;
-  try {
-    const measured = n.word.getComputedTextLength();
-    if (measured > 0) len = measured;
-  } catch {
-    /* not laid out: the estimate stands */
-  }
-  const x0 = 40 * fx - 4 * fx;
-  const x1 = 40 * fx + (len + 4) * fx;
-  n.struck.setAttribute('d', wobblyLine(createRng(seed), x0, 5, x1, -3, 5, 1.2));
-  n.struck.style.display = '';
-  tween(240, (p) => (n.struck.style.strokeDashoffset = String(1 - p)), { ease: easeOut });
-  tween(500, (p) => (n.g.style.opacity = String(1 - p)), { delay: 380, done: () => (n.g.style.display = 'none') });
+  return { open, at: { x: exit.x + fx * (a + pad + 75), y: exit.y + fy * 30 } };
 }
 
 // ---------- the header ----------
@@ -449,8 +379,6 @@ const drawBaseHeader = (page: Page, header: PageHeader): SVGGElement => drawHead
 export interface BaseView {
   /** Every rendered frame: the margin-note labels come up near a station and go down again. */
   frame(s: RunState): void;
-  /** The ticket was accepted: the exit is drawn solid and the clause header is printed. */
-  unlock(header: PageHeader): void;
   /** The group the base was drawn into (for the page-turn sweep). */
   readonly ink: SVGGElement;
 }
@@ -482,20 +410,15 @@ function makeLabel(id: StationId2, x: number, y: number, text: string): Label {
   return { id, g, x, y, shown: true };
 }
 
-/** The note keeps its 13 px on the screen: its group (translated to the fold) is scaled by 1 / zoom. */
-const placeNote = (n: ExitNote, zoom: number): void => {
-  n.g.setAttribute('transform', `${n.base} scale(${n2(1 / Math.max(0.2, zoom))})`);
-};
-
 const placeLabel = (l: Label, zoom: number): void => {
   l.g.setAttribute('transform', `translate(${n2(l.x)} ${n2(l.y)}) scale(${n2(1 / Math.max(0.2, zoom))})`);
 };
 
 /**
- * Draw the base page into the #page layer: paper, frame, the decor, then the props and stations, the exit (dashed while
- * the ticket is not accepted) and the labels. `accepted` and `header` draw the unlocked state at once (a held run's base).
+ * Draw the base page into the #page layer: paper, frame, the decor, then the props and stations, the open exit, the clause
+ * header and the labels.
  */
-export function drawBase(layer: SVGGElement, page: Page, opts: { accepted: boolean; header: PageHeader | null; /** 0-based planet of the plan (game.ts passes `questPlanet(s)`); picks the clerk `npcAt(planet)`. */ planet?: number }): BaseView {
+export function drawBase(layer: SVGGElement, page: Page, opts: { header: PageHeader | null; /** 0-based planet of the plan (game.ts passes `questPlanet(s)`); picks the clerk `npcAt(planet)`. */ planet?: number }): BaseView {
   const info = page.base;
   if (!info || !page.exit) throw new Error('drawBase needs a base page');
   const decorOnly: Page = { ...page, obstacles: page.obstacles.filter((o) => o.station === undefined), exit: null };
@@ -508,37 +431,10 @@ export function drawBase(layer: SVGGElement, page: Page, opts: { accepted: boole
   ink.append(props, stations);
 
   const exit = exitShapes(page, 977 + page.w);
-  const exitWord = el('text', { class: 't-note', x: n2(exit.at.x), y: n2(exit.at.y), 'text-anchor': 'middle', 'font-size': 16 });
+  const exitWord = el('text', { class: 't-note', x: n2(exit.at.x), y: n2(exit.at.y), 'text-anchor': 'middle', 'font-size': 16 }, [t('ui.exit.next')]);
   const exitG = el('g', { class: 'base-exit', 'data-exit-base': '1' });
-  const note = exitNote(page, exit.fx, t('screens.base.exitNote'));
-  exitG.append(exit.locked, exit.open, exitWord, note.g);
+  exitG.append(exit.open, exitWord);
   ink.append(exitG);
-
-  let unlocked = false;
-  let headerG: SVGGElement | null = null;
-  const lock = (): void => {
-    exit.open.style.display = 'none';
-    exit.locked.style.display = '';
-    exitWord.textContent = '';
-    note.g.style.display = '';
-    note.g.style.opacity = '1';
-  };
-  const unlockNow = (animate: boolean): void => {
-    unlocked = true;
-    exit.locked.style.display = 'none';
-    exit.open.style.display = '';
-    exitWord.textContent = t('ui.exit.next');
-    note.g.style.display = 'none';
-    if (animate) {
-      note.g.style.display = '';
-      strikeNote(note, exit.fx, 977 + page.w);
-      drawIn(exit.open, 520);
-      exitWord.style.opacity = '0';
-      tween(400, (p) => (exitWord.style.opacity = String(p)), { delay: 300 });
-    }
-  };
-  lock();
-  if (opts.accepted) unlockNow(false);
 
   const labels: Label[] = info.stations.map((st) => makeLabel(st.id, st.x, st.y + LABEL_DY[st.id], labelText(st.id)));
   const tunel = makeLabel('tunel', info.hole.x, info.hole.y + TUNEL_DY, t('screens.base.station.tunel').toLocaleUpperCase('pl-PL'));
@@ -554,17 +450,16 @@ export function drawBase(layer: SVGGElement, page: Page, opts: { accepted: boole
     if (z === lastZoom) return;
     lastZoom = z;
     for (const l of labels) placeLabel(l, z);
-    placeNote(note, z);
   };
   place();
 
-  const showHeader = (header: PageHeader, animate: boolean): void => {
+  let headerG: SVGGElement | null = null;
+  const showHeader = (header: PageHeader): void => {
     headerG?.remove();
     headerG = drawBaseHeader(page, header);
     ink.append(headerG);
-    if (animate) drawIn(headerG, 600);
   };
-  if (opts.accepted && opts.header) showHeader(opts.header, false);
+  if (opts.header) showHeader(opts.header);
 
   // the stations draw themselves in when the page is first shown
   drawIn(props, 500);
@@ -587,11 +482,6 @@ export function drawBase(layer: SVGGElement, page: Page, opts: { accepted: boole
         tunel.shown = hole !== undefined;
         tunel.g.style.display = tunel.shown ? '' : 'none';
       }
-    },
-    unlock(header) {
-      if (unlocked) return;
-      unlockNow(true);
-      showHeader(header, true);
     },
   };
 }

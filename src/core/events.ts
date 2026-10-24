@@ -111,8 +111,10 @@ export interface GameEvents {
   'recovery:taken': { healed: number; held: number };
   /** A held potwierdzenie was used, by the player's tap or automatically before a hit (`auto`). */
   'recovery:used': { auto: boolean; healed: number; held: number };
-  /** "Akceptuję regulamin" (or "Wznów zgłoszenie") was pressed in the base: the exit of the base page is unlocked. */
+  /** The plan on the desk was (re)accepted (the ticket form's button, a change of priority, travel). The base exit is always open. */
   'ticket:accepted': undefined;
+  /** The player walked into the always-open exit of the base, just before `page:turn` (main.ts settles a run held in the tunnel). */
+  'base:exit': undefined;
   /** A campaign planet was closed (world/campaign.ts settleCampaign): `to` is the next planet (0-based); `finale` = planet 9 was closed and the return ticket to planet 1 is next. */
   'campaign:advanced': { from: number; to: number; finale: boolean };
   /** The final ticket was closed: the case is closed, extras and free travel are open. */
