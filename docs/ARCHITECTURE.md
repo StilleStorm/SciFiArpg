@@ -80,11 +80,11 @@ fell (`canOpenUpdate`). In the base only the HUD tap opens it.
   second | death | end | page}` (the first three are taped).
 - Combat: `attack:started {attackerId, attacker, x, y, tx, ty, ranged, laser?}`, `player:hit`, `enemy:hit|miss`,
   `enemy:died {id, x, y, tier?, family?}`, `boss:died`, `boss:phase`, `enemy:rebutted|offTopic|escalated`.
-- Spór: `spor:posted {id, phase, commentKey, replies}`, `spor:answered {id, index, right}`, `spor:closed {id, reason:
+- Spór: `spor:posted {id, phase, commentKey, replies, params?}` (`params` interpolate the comment: the finale's `{number}`), `spor:answered {id, index, right}`, `spor:closed {id, reason:
   answered | expired | died}`.
 - Hero: `skill:cast {slot, skill, free, aim}`, `ultimate:cast {heroId, ultimateId, x, y}`, `skill:fx {kind, x, y, x2, y2,
   r}`, `summon:expired`, `player:levelup`, `update:ready`, `player:died`, `player:unsuspended`.
-- Presentation: `footnote {text}`, `footnote:added {n, text, correction}`, `stamp {text, x, y, quiet?, away?}` (`quiet`:
+- Presentation: `footnote {text, correction?}` (main prints `correction` as a correction), `footnote:added {n, text, correction}`, `stamp {text, x, y, quiet?, away?}` (`quiet`:
   audio plays no thud; `away`: a point it must not cover), `margin:note {text, x, y, ttl?}`, `law:trigger`, `law:ask`,
   `pickup:taken`.
 - Campaign: `campaign:advanced {from, to, finale}`, `case:closed` (both from `settleCampaign` on `run:ended 'ukonczono'`).
@@ -206,7 +206,8 @@ is the only planet-name source), `CampaignState {current, closed, finalTicket, c
 shows the card (`ui/ticketModel.cardToShow`); `acceptNow(priority)`; ticket form `ui/ticket.ts open(info, {level, view})`
 (`onAccept`, `onTravel`, `onExtra` -> `takePlan`). `bindCampaign(bus, () => game.state)` is bound after `bindTunnel` and
 before main's `run:ended`; `settleCampaign` once per plan object. Cards `ui/cards.ts openCard(root, {kind:
-opening|chapter|rewritten, planetIndex}, {number, onDone})` (`.card-layer[data-card]`, `.card-skip`; text TODO-story until S11).
+opening|chapter|rewritten|finale, planetIndex}, {number, onDone})` (`.card-layer[data-card]`, `.card-skip`); `finale` = the
+return ticket's red card (`story.finale.card.lines.*`, PRZEPISANO), once per character (`CardsSeen.finale`).
 Page content: `world/contentKinds.ts` (`SEALS` six, `CONTENT`, `paragraphsFree(buffs)`, `waivePrice(patch)`),
 `world/content.ts` (`contentPre`, `tickContent`, `grantSeal`, `activeBuffs`, `effectsOf`); `pages.placeContent` puts 0–2
 teczki, 0–1 seal, 0–1 event (never page 1 or the boss page); `bindContent(bus, getState)` bound once at boot;
@@ -294,14 +295,28 @@ in Chromium. `npm run smoke` (`SMOKE_PORT` 4191) plays a ticket with real button
 run (header clear of the note row, no bubble under a pad or note, the update line clear in tap/joystick x both hands),
 fight, update (3b assign, 2b/3c paragraphs, 3d ultimate), inventory, pause, Zakończ, bookmark resume, two tunnels, boss,
 Spór (5a), death, landscape joystick, 6c campaign, 6e skills, 6f loadout, 6g S5 settings and recovery, 6h roster and
-archive, item marks, S9 elites and Sklep stamps, S10 content and quests, then 5 s of frame times with 40 enemies
+archive, item marks, S9 elites and Sklep stamps, S10 content and quests, S12-S14 planets, 6j S15 finale, then 5 s of frame times with 40 enemies
 (`PERF_MAX_MS`, `SMOKE_UNCAPPED`). Milestone gates: `npm run e2e:m1` (`M1_PORT` 4177: every hero x orientation, loadout and
 ultimate), `npm run e2e:m2` (`M2_PORT` 4192, `M2_ONLY`: roster, nine planets at Niski, cards, teczka, packs, named elites,
 a side ticket, finale, free travel, reload, 40-enemy perf). All exit 1 on a failed check or page error.
 
 ## Anomalia (S15; STORY 3, 8.4; `enemies/anomalia/`)
-`index.ts` is the contract: `AnomaliaFace {heroId, sporAnswer, start, tick, damageMul(s,e,x,y), done, stop, figure}`,
-`registerFace`, `faceFor(heroId)`, `faceKeys(heroId)`. Core (`core.ts`, `phase1.ts`, `phase3.ts`) runs phase 1 (three
-family forms), calls the hero's face for phase 2, then phase 3 (existence coefficient, the closing stamp, `caseClosed`).
-`world/finale.ts` builds the one-page final run on planet 1's struck base. Faces live in `faces/<face>.ts`, state in a
-WeakMap per enemy.
+Final ticket = `TicketPlan.kind 'final'`: `createRun` makes one page, `world/finale.ts finalePage(seed)` (planet 1's base
+layout for the seed, no exit, stations struck by `render/finale.ts`, no waves); `populatePage` calls `startFinale` ->
+`core.ts beginFinale`. Each stage is its own boss-sized body at the desk (`bodies.ts makeBody/swapBody`: the old body is
+struck by an `enemy:died` of tier common, no loot, `isRetired`; `boss:phase` on each change). `tickBoss` calls
+`tickAnomalia` first. Phase 1 (`phase1.ts`): the three family boss forms; footnote duel old/new (`footnote {correction}`).
+Phase 2: the hero's face. Phase 3 (`phase3.ts`): existence from right Spór replies; at racja 1 the stamp, `killEnemy`
+(the unique from `finalUnique`), close/hero/final notes; `run:ended ukonczono` 2.8 s later closes the case
+(`settleCampaign`); main prints `story.finale.footnote` again on the base (a note > `ui/footnotes LONG_NOTE` grows the slip).
+Spór: one comment per stage through `combat/spor.ts postPromptSpor(s, bus, boss, phase, prompt)` (`prompt.params`).
+Hits: `hooks.modifyDamage` -> `gate.ts anomaliaHit` (no blow below racja 1; phase 2 x `face.damageMul` at `bodyPoint`;
+phase 3 not divided by its existence). One end threshold `state.ts FACE_END_FRACTION` (0.4).
+Faces: `index.ts` contract `AnomaliaFace {heroId, sporAnswer, start, tick, damageMul(s,e,x,y), done, stop, figure,
+parts?(e)}` (`parts`: real parts, drawn as solid/dotted arcs by `render/enemyFigures.ts`; Planeta), `registerFace`,
+`faceFor`, `faceKeys`; one face per hero in `faces/<face>.ts`, state in a WeakMap per enemy, text `story.finale.face.<hero>.*`.
+**Boot order**: the registry reaches the hero registry at load; only `game.ts` imports `register.ts` (fills the lookup in
+`state.ts`), everything else reads faces through `state.ts` (`faceOf`, `faceDrawing`, `facePartsOf`, `captionKeyOf`,
+`wearsOwnBody`); `lint:rules` (`anomalia-boot-order`) rejects a value import of `anomalia/index|register|faces/*` elsewhere.
+Hook `__game.finale {start(heroId?, {seed, priority, lawId}), info(), skipTo('face'|'last'|'end')}`. Smoke leg 6j: the
+return card, then per hero three phases -> stamp -> case closed on the base. Shots `scripts/shot-s15.mjs` (SHOT_PORT 4196).
