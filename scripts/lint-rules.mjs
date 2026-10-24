@@ -80,6 +80,24 @@ for (const f of files) {
   }
 }
 
+// Rule: boot order of the Anomalia (S15). The face registry (`enemies/anomalia/index.ts`, `faces/*`, `register.ts`) reaches the hero
+// registry at load time; a static import of it from the combat, systems or render code loads it while the heroes are still being
+// evaluated and the app dies at boot. Outside `enemies/anomalia/` only `game.ts` imports `register.ts`; everyone else reads the faces
+// through `anomalia/state.ts`. Type-only imports are fine; `faces/figures.ts` is plain path data (parts.ts appends it).
+{
+  const FACE_REG = /^\s*import\s+(?!type\b)(?:[^;]*from\s+)?'[^']*anomalia(?:\/index|\/register|\/faces(?:\/(?!figures')[\w]+)?)?'/;
+  for (const f of files) {
+    if (!f.endsWith('.ts') || isTest(f)) continue;
+    const rel = relative(ROOT, f);
+    if (rel.startsWith('src/enemies/anomalia/')) continue;
+    readFileSync(f, 'utf8').split('\n').forEach((raw, i) => {
+      if (!FACE_REG.test(raw)) return;
+      if (rel === 'src/game.ts' && /anomalia\/register'/.test(raw)) return;
+      report(f, i + 1, 'anomalia-boot-order', raw);
+    });
+  }
+}
+
 if (findings.length) {
   console.log(`lint-rules: ${findings.length} finding(s)\n` + findings.join('\n'));
   process.exit(1);

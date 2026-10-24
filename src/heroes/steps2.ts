@@ -7,6 +7,7 @@ import { applyStatus, getStatus } from '../combat/status';
 import type { Bus } from '../core/events';
 import type { Enemy, Summon, Zone } from '../entities/types';
 import { t } from '../i18n';
+import { isAnomalia } from '../enemies/anomalia/state';
 import { recomputeStats } from '../items/stats';
 import { knockback } from '../systems/combat';
 import { resolveMove } from '../world/pages';
@@ -111,7 +112,8 @@ export function bindNumerBonus(bus: object & Pick<Bus, 'on'>): void {
     const n = s?.hero.numer;
     if (!s || !n || n.id !== ev.id || s.time >= n.until) return;
     const e = s.enemies.find((x) => x.id === ev.id);
-    if (e) e.hp -= ev.amount * NUMER_BONUS;
+    // the Anomalia's bodies never fall to a blow (enemies/anomalia/gate.ts): the bonus stops at its last racja too
+    if (e) e.hp -= isAnomalia(e) ? Math.min(ev.amount * NUMER_BONUS, Math.max(0, e.hp - 1)) : ev.amount * NUMER_BONUS;
   });
 }
 
