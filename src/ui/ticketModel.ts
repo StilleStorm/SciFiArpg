@@ -36,7 +36,8 @@ export function campaignViewOf(c: CampaignState, plan?: TicketPlan): CampaignVie
 export const actOf = (planetIndex: number): 1 | 2 | 3 => (planetIndex < 3 ? 1 : planetIndex < 6 ? 2 : 3);
 export const ACT_ROMAN = ['I', 'II', 'III'] as const;
 
-export type CardKind = 'opening' | 'chapter' | 'rewritten';
+/** `finale`: the return ticket's card (STORY 8.4), red with the PRZEPISANO stamp like the rewritten one. */
+export type CardKind = 'opening' | 'chapter' | 'rewritten' | 'finale';
 
 export interface CardSpec {
   kind: CardKind;
@@ -50,6 +51,7 @@ export interface CardSpec {
 export function cardToShow(view: CampaignView, seen: CardsSeen, ticketsFiled: number): CardSpec | null {
   const planetIndex = Math.min(Math.max(view.planetIndex, 0), PLANET_COUNT - 1);
   if (!seen.opening && ticketsFiled === 0) return { kind: 'opening', planetIndex };
+  if (view.finale) return seen.finale ? null : { kind: 'finale', planetIndex };
   if (view.caseClosed && view.closed.includes(planetIndex)) {
     return seen.chapters.includes(-1 - planetIndex) ? null : { kind: 'rewritten', planetIndex };
   }
@@ -59,6 +61,7 @@ export function cardToShow(view: CampaignView, seen: CardsSeen, ticketsFiled: nu
 
 /** Record a card as shown. A rewritten card is remembered as -1 - planetIndex so it shows once per planet too. */
 export function markShown(seen: CardsSeen, card: CardSpec): CardsSeen {
+  if (card.kind === 'finale') return { ...seen, finale: true };
   if (card.kind === 'opening') return { opening: true, chapters: [...seen.chapters, ...(seen.chapters.includes(card.planetIndex) ? [] : [card.planetIndex])] };
   const key = card.kind === 'rewritten' ? -1 - card.planetIndex : card.planetIndex;
   return seen.chapters.includes(key) ? seen : { ...seen, chapters: [...seen.chapters, key] };

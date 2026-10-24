@@ -4,6 +4,8 @@ import { openPopup, type Popup } from './popup';
 
 const VISIBLE = 3;
 const HISTORY = 10;
+/** A note longer than this (characters) is shown whole: the slip grows upward for it until the next note (only the finale's closing note is). */
+export const LONG_NOTE = 200;
 /** A click this soon after the history opened is the tail of the tap that opened it. */
 const OPEN_GUARD_MS = 350;
 
@@ -76,6 +78,7 @@ export function createFootnotes(root: HTMLElement): Footnotes {
       if (log.length > 60) log.shift();
       const p = line(count, text);
       p.classList.add('fresh');
+      el.classList.toggle('fn-long', text.length > LONG_NOTE);
       p.addEventListener('animationend', queuePrune, { once: true }); // measured again once the note has settled
       list.append(p);
       while (list.children.length > VISIBLE) list.firstElementChild?.remove();
@@ -86,6 +89,7 @@ export function createFootnotes(root: HTMLElement): Footnotes {
       count = 0;
       log.length = 0;
       list.replaceChildren();
+      el.classList.remove('fn-long');
       sheet?.close();
     },
     closeHistory() {

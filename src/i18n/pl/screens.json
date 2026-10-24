@@ -307,12 +307,14 @@
     "kind": {
       "opening": "Strona otwierająca",
       "chapter": "Karta rozdziału",
-      "rewritten": "Przepisano"
+      "rewritten": "Przepisano",
+      "finale": "Bilet powrotny"
     },
     "stamp": "PRZEPISANO",
     "act": "Akt {act}",
     "title": "{act}. {planet}",
     "openingTitle": "Zgłoszenie nr {number}",
+    "finaleTitle": "Zgłoszenie nr {number}. {planet}",
     "openingLines": {
       "1": "TODO-story: Komisja przyjęła zgłoszenie i przypisała je do planety.",
       "2": "TODO-story: Sytuację opisano urzędowo, bez przymiotników.",

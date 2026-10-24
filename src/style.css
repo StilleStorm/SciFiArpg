@@ -290,6 +290,18 @@ button {
   font-size: 15px;
   line-height: 19px;
 }
+/* a lone long note (the finale's closing footnote, ui/footnotes.ts LONG_NOTE) grows the slip upward until the next note is printed */
+.foot.paper.fn-long,
+:root[data-orient='landscape'] .foot.paper.fn-long {
+  height: auto;
+  max-height: 50vh;
+}
+.foot.fn-long .fn-list {
+  flex: none;
+}
+.foot.fn-long .fn:last-child {
+  max-height: none;
+}
 .foot::before {
   content: '';
   position: absolute;

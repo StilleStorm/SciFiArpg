@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { newCampaign } from '../world/campaign';
+import { newCampaign, toCardsSeen } from '../world/campaign';
 import { actOf, campaignViewOf, cardToShow, markShown, noCardsSeen, startOfCampaign } from './ticketModel';
 
 describe('campaign view', () => {
@@ -41,6 +41,16 @@ describe('cards', () => {
     expect(c?.kind).toBe('rewritten');
     seen = markShown(seen, c ?? { kind: 'rewritten', planetIndex: 1 });
     expect(cardToShow(view, seen, 9)).toBeNull();
+  });
+  it('the return ticket shows its own card once, and the seen mark survives a load', () => {
+    let seen = { opening: true, chapters: [0, 1, 2] };
+    const view = campaignViewOf({ ...newCampaign(), closed: [0, 1, 2], finalTicket: true }, { kind: 'final', planet: 0, priority: 'normalny', lawId: 'ciasteczka' });
+    const c = cardToShow(view, seen, 3);
+    expect(c).toEqual({ kind: 'finale', planetIndex: 0 });
+    seen = markShown(seen, c ?? { kind: 'finale', planetIndex: 0 });
+    expect(cardToShow(view, seen, 3)).toBeNull();
+    expect(toCardsSeen(JSON.parse(JSON.stringify(seen))).finale).toBe(true);
+    expect(toCardsSeen({ opening: true, chapters: [] }).finale).toBeUndefined();
   });
   it('acts', () => {
     expect([0, 2, 3, 5, 6, 8].map(actOf)).toEqual([1, 1, 2, 2, 3, 3]);

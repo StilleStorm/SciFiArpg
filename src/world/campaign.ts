@@ -323,6 +323,8 @@ export interface CampaignState {
 export interface CardsSeen {
   opening: boolean;
   chapters: number[];
+  /** The return ticket's card (STORY 8.4, `story.finale.card`) was shown; absent in older saves. */
+  finale?: true;
 }
 
 export const noCardsSeen = (): CardsSeen => ({ opening: false, chapters: [] });
@@ -332,7 +334,7 @@ export function toCardsSeen(raw: unknown): CardsSeen {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return noCardsSeen();
   const r = raw as Record<string, unknown>;
   const chapters = Array.isArray(r['chapters']) ? r['chapters'].filter((n): n is number => Number.isInteger(n) && (n as number) >= -PLANET_COUNT && (n as number) < PLANET_COUNT) : [];
-  return { opening: r['opening'] === true, chapters: [...new Set(chapters)] };
+  return { opening: r['opening'] === true, chapters: [...new Set(chapters)], ...(r['finale'] === true ? { finale: true as const } : {}) };
 }
 
 export function newCampaign(): CampaignState {

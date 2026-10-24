@@ -690,6 +690,10 @@
 .card-layer.rewritten .card-title {
   border-bottom-color: var(--accent);
 }
+/* the red cards carry the stamp in the bottom-right corner: room under the hint so it never lands on the last line (S15: the return card has three) */
+.card-layer.rewritten .card-hint {
+  margin-bottom: 22px;
+}
 .card-stamp {
   position: absolute;
   right: 18px;

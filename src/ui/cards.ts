@@ -9,6 +9,7 @@ import './base.css';
 /** Where the story file keeps the lines of a card (`story.<lines>.1..n`, `story.<hero>.<heroId>`); null for a planet with no story keys. */
 function storySource(spec: CardSpec): { lines: string; hero: string | undefined } | null {
   if (spec.kind === 'opening') return { lines: 'opening.lines', hero: 'opening.hero' };
+  if (spec.kind === 'finale') return { lines: 'finale.card.lines', hero: undefined };
   const n = spec.planetIndex + 1;
   if (spec.kind === 'rewritten') return { lines: `p${n}.rewritten.lines`, hero: undefined };
   return { lines: `p${n}.card.lines`, hero: `p${n}.card.hero` };
@@ -16,6 +17,8 @@ function storySource(spec: CardSpec): { lines: string; hero: string | undefined 
 
 /** Lines per card kind (3 or 4 for the finished cards; the story slice may add a fourth). */
 const LINE_COUNT = { openingLines: 3, chapterLines: 3, rewrittenLines: 2 } as const;
+/** The placeholder lines of each kind (shown where the story file has no line). */
+const LINE_KEY = { opening: 'openingLines', chapter: 'chapterLines', rewritten: 'rewrittenLines', finale: 'chapterLines' } as const;
 
 export interface CardOptions {
   /** The ticket number the opening page is filed under. */
@@ -39,7 +42,7 @@ export interface CardHandle {
  * stray tap on the base below is still a tap on the base.
  */
 export function openCard(root: HTMLElement, spec: CardSpec, opts: CardOptions): CardHandle {
-  const rewritten = spec.kind === 'rewritten';
+  const rewritten = spec.kind === 'rewritten' || spec.kind === 'finale'; // the return's card is the red rewritten frame with its own lines
   const layer = h('div', `card-layer${rewritten ? ' rewritten' : ''}`);
   layer.dataset.card = spec.kind;
   const paper = h('div', 'card-paper');
@@ -49,9 +52,11 @@ export function openCard(root: HTMLElement, spec: CardSpec, opts: CardOptions): 
   const title =
     spec.kind === 'opening'
       ? t('screens.cards.openingTitle', { number: opts.number })
-      : t('screens.cards.title', { act: t('screens.cards.act', { act: ACT_ROMAN[actNo - 1] ?? 'I' }), planet });
+      : spec.kind === 'finale'
+        ? t('screens.cards.finaleTitle', { number: opts.number, planet })
+        : t('screens.cards.title', { act: t('screens.cards.act', { act: ACT_ROMAN[actNo - 1] ?? 'I' }), planet });
   const head = h('h2', 'card-title', title);
-  const lineKey = spec.kind === 'opening' ? 'openingLines' : rewritten ? 'rewrittenLines' : 'chapterLines';
+  const lineKey = LINE_KEY[spec.kind];
   const lines = h('div', 'card-lines');
   const src = storySource(spec);
   let live = false;

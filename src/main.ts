@@ -182,7 +182,7 @@ const campaignView = (): CampaignView => {
 let cardUi: CardHandle | null = null;
 
 /** The opening page or the chapter card of a new ticket's base, shown once per character (kept in its campaign); a tap removes it. */
-function showCard(number: number, force?: 'opening' | 'chapter' | 'rewritten'): void {
+function showCard(number: number, force?: 'opening' | 'chapter' | 'rewritten' | 'finale'): void {
   const s = game.state;
   const view = campaignView();
   const seen = s?.campaign?.cards ?? noCardsSeen();
@@ -562,7 +562,7 @@ const printNote = (text: string, correction = false): number => {
   return n;
 };
 const asystent = bindAsystent(bus, { say: printNote, getState: () => game.state });
-bus.on('footnote', (e) => printNote(e.text));
+bus.on('footnote', (e) => printNote(e.text, e.correction === true)); // the finale's duel of footnotes prints its corrections as corrections
 // Sound: the bindings are the only place where events meet sounds (src/audio/bindings.ts).
 const audio = createAudio(bus, { getState: () => game.state, freeze: (ms) => loop.freeze(ms) });
 // The kiosk's office hours are decided by the clause (economy/hours.ts keeps the decision).
@@ -575,7 +575,11 @@ bus.on('run:ended', (e) => {
   save(settleRun(meta, s, e.outcome)); // Historia entry, the character as it ended, the bookmark torn up
   game.stop();
   nextSeed = freshSeed(); // the next ticket is another planet
+  const caseClosed = e.outcome === 'ukonczono' && s.plan?.kind === 'final';
   go('baza');
+  // the final footnote (STORY 8.4) is printed again on the base it returns to: the run's slip is cleared with the new ticket, and the note
+  // is the one the player is meant to read at leisure (its last sentence is the hook for "Sprawę wznowiono")
+  if (caseClosed) printNote(t('story.finale.footnote'));
 });
 
 const loop = createLoop({
