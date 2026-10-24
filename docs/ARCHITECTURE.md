@@ -298,3 +298,10 @@ archive, item marks, S9 elites and Sklep stamps, S10 content and quests, then 5 
 (`PERF_MAX_MS`, `SMOKE_UNCAPPED`). Milestone gates: `npm run e2e:m1` (`M1_PORT` 4177: every hero x orientation, loadout and
 ultimate), `npm run e2e:m2` (`M2_PORT` 4192, `M2_ONLY`: roster, nine planets at Niski, cards, teczka, packs, named elites,
 a side ticket, finale, free travel, reload, 40-enemy perf). All exit 1 on a failed check or page error.
+
+## Anomalia (S15; STORY 3, 8.4; `enemies/anomalia/`)
+`index.ts` is the contract: `AnomaliaFace {heroId, sporAnswer, start, tick, damageMul(s,e,x,y), done, stop, figure}`,
+`registerFace`, `faceFor(heroId)`, `faceKeys(heroId)`. Core (`core.ts`, `phase1.ts`, `phase3.ts`) runs phase 1 (three
+family forms), calls the hero's face for phase 2, then phase 3 (existence coefficient, the closing stamp, `caseClosed`).
+`world/finale.ts` builds the one-page final run on planet 1's struck base. Faces live in `faces/<face>.ts`, state in a
+WeakMap per enemy.
