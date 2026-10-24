@@ -167,5 +167,12 @@
       "Użycie umiejętności wygenerowało hałas. Otoczenie hałas odnotowało.",
       "Tryb „nie przeszkadzać” nie obejmuje umiejętności."
     ]
+  },
+  "onramp": {
+    "walk": "Przemieszczanie: dotknij strony lub przytrzymaj kciuk po lewej stronie. Zgłoszenie nie obejmuje miejsc, do których nie dotarto.",
+    "attack": "Najbliższe urządzenie zostaje zaatakowane z urzędu. Zgłaszający nie musi go wskazywać.",
+    "rebut": "Zarzut przekreślono. Zarzut przekreśla się odpowiedzią tego samego rodzaju, co on sam. Inne odpowiedzi także zostaną rozpatrzone, lecz słabiej.",
+    "update": "Aktualizacja jest gotowa. Dotknij napisu o aktualizacji i wybierz jedną nowość. Pozostałe zostaną usunięte.",
+    "potw": "Potwierdzenie przyjęto. Przy pełnej racji zostaje w aktach i można je wykorzystać dotknięciem w marginesie."
   }
 }

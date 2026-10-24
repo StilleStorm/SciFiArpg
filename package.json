@@ -17,7 +17,9 @@
     "smoke": "vite build && node scripts/smoke.mjs",
     "e2e:m1": "vite build --outDir dist-m1 && node scripts/e2e-milestone-1.mjs",
     "e2e:m2": "vite build --outDir dist-m2 && node scripts/e2e-milestone-2.mjs",
-    "render-audio": "vite build --outDir ${AUDIO_OUT:-dist} && node scripts/render-audio.mjs"
+    "e2e:m3": "vite build --outDir dist-m3 && node scripts/e2e-milestone-3.mjs",
+    "render-audio": "vite build --outDir ${AUDIO_OUT:-dist} && node scripts/render-audio.mjs",
+    "balance": "vite build --outDir ${BAL_OUT:-dist-balance} && node scripts/balance-report.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.64.1",

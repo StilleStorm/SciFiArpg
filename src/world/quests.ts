@@ -12,6 +12,7 @@ import type { Bus } from '../core/events';
 import { createRng } from '../core/rng';
 import type { FamilyId } from '../enemies/ids';
 import { FAMILY_IDS } from '../enemies/ids';
+import { QUEST_STARS } from '../balance/loot';
 import { earnStars } from '../economy/stars';
 import { t } from '../i18n';
 import { HELD_CAP } from '../systems/recovery';
@@ -121,7 +122,7 @@ export function proceduralOffer(planet: number, epoch: number, slot: number): Qu
     family = r.chance(0.65) ? def.dominant : r.pick(FAMILY_IDS);
   } else if (kind === 'fetch') n = Math.round(r.int(4, 7) * Math.min(2, scale));
   else if (kind === 'reach') n = Math.max(2, Math.min(def.pages[0], 2 + r.int(1, 2)));
-  const stars = Math.round((18 + 14 * p + n * (kind === 'reach' ? 6 : kind === 'deliver' ? 12 : 2)) / 5) * 5;
+  const stars = Math.round((QUEST_STARS.base + QUEST_STARS.perPlanet * p + n * (QUEST_STARS.perUnit[kind] ?? 2)) / 5) * 5;
   const reward: QuestReward = { stars };
   const extra = r.int(0, 5);
   if (extra === 0) reward.permission = def.dominant;

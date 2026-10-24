@@ -6,20 +6,10 @@
  */
 import type { Player } from '../entities/types';
 import type { RunState } from '../world/run';
+import { METER_COMBAT_R, METER_DRAIN_PER_S, METER_IDLE_S, METER_KILL, METER_KILL_BOSS, METER_KILL_ELITE, METER_REBUTTAL, METER_SPOR } from '../balance/meter';
 
-/** A rebuttal (the hit's type matched the standing claim). */
-export const METER_REBUTTAL = 0.08;
-/** A kill, by tier: slower than a rebuttal. */
-export const METER_KILL = 0.03;
-export const METER_KILL_ELITE = 0.06;
-export const METER_KILL_BOSS = 0.15;
-/** A correct Spor reply fills half of the meter. */
-export const METER_SPOR = 0.5;
-/** Out of combat the meter drains this much per second ... */
-export const METER_DRAIN_PER_S = 0.01;
-/** ... once no enemy has been within METER_COMBAT_R of the player for this many seconds. */
-export const METER_IDLE_S = 4;
-export const METER_COMBAT_R = 320;
+// the numbers live in balance/meter.ts (S16)
+export { METER_COMBAT_R, METER_DRAIN_PER_S, METER_IDLE_S, METER_KILL, METER_KILL_BOSS, METER_KILL_ELITE, METER_REBUTTAL, METER_SPOR };
 
 const EPS = 1e-9;
 

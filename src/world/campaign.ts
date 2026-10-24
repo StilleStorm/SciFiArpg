@@ -13,6 +13,7 @@ import type { BaseLayout } from './base';
 import type { PlanetGate } from './gate';
 import type { LawId } from './laws';
 import type { MissionMix } from '../enemies/families';
+import { PLANET_DMG_GROWTH, PLANET_HP_GROWTH, PRIORITY_ROWS } from '../balance/campaign';
 
 // ---------- priority ----------
 
@@ -55,11 +56,16 @@ const P = (id: PriorityId, unlockLevel: number, hp: number, dmg: number, tierShi
   ilvl,
 });
 
+const row = (id: PriorityId, unlockLevel: number): PriorityDef => {
+  const [hp, dmg, tierShift, eliteMul, xp, stars, lootTier, ilvl] = PRIORITY_ROWS[id]; // the numbers: balance/campaign.ts (S16)
+  return P(id, unlockLevel, hp, dmg, tierShift, eliteMul, xp, stars, lootTier, ilvl);
+};
+
 export const PRIORITIES: Record<PriorityId, PriorityDef> = {
-  niski: P('niski', 1, 0.8, 0.75, 0, 0.6, 0.8, 0.8, 0, -2),
-  normalny: P('normalny', 1, 1, 1, 0, 1, 1, 1, 0, 0),
-  wysoki: P('wysoki', 8, 1.35, 1.25, 0, 1.5, 1.4, 1.4, 1, 3),
-  krytyczny: P('krytyczny', 18, 1.8, 1.55, 1, 2.2, 2, 2, 1, 6),
+  niski: row('niski', 1),
+  normalny: row('normalny', 1),
+  wysoki: row('wysoki', 8),
+  krytyczny: row('krytyczny', 18),
 };
 
 export const priorityDef = (id: PriorityId): PriorityDef => PRIORITIES[id];
@@ -247,8 +253,8 @@ export function enemyScaleFor(planetIdx: number, priority: PriorityId): EnemySca
   const p = planetDef(planetIdx);
   const pr = PRIORITIES[priority];
   return {
-    hp: (1 + 0.12 * p.index) * pr.hp,
-    dmg: (1 + 0.08 * p.index) * pr.dmg,
+    hp: (1 + PLANET_HP_GROWTH * p.index) * pr.hp,
+    dmg: (1 + PLANET_DMG_GROWTH * p.index) * pr.dmg,
     tierOffset: p.act - 1 + pr.tierShift,
     eliteMul: pr.eliteMul,
   };

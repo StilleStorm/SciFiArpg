@@ -10,22 +10,11 @@ import type { Pickup, Player } from '../entities/types';
 import { t } from '../i18n';
 import type { DropSource } from '../items/types';
 import { nextId, type RunState } from '../world/run';
+import { AUTO_FLOOR, HEAL_SHARE, HELD_CAP, POTWIERDZENIE_DROP, REGEN_DELAY, REGEN_RATE, VACUUM_RADIUS } from '../balance/recovery';
 
-/** How many slips a character may hold. */
-export const HELD_CAP = 5;
-/** Share of the maximum racja one slip restores. */
-export const HEAL_SHARE = 0.25;
-/** A blow that would leave less racja than this share uses a held slip first. */
-export const AUTO_FLOOR = 0.15;
-/** Walking this close (plus the radii) pulls a slip in. */
-export const VACUUM_RADIUS = 90;
+// the numbers live in balance/recovery.ts (S16); re-exported so the readers keep their imports
+export { AUTO_FLOOR, HEAL_SHARE, HELD_CAP, POTWIERDZENIE_DROP, REGEN_DELAY, REGEN_RATE, VACUUM_RADIUS };
 export const VACUUM_SPEED = 240;
-/** Regeneration out of combat: share of the maximum per second, after this many seconds without a blow. */
-export const REGEN_RATE = 0.02;
-export const REGEN_DELAY = 4;
-
-/** Chance that a dead enemy of each tier leaves a slip. */
-export const POTWIERDZENIE_DROP: Record<DropSource, number> = { common: 0.1, elite: 0.5, boss: 1 };
 
 export const heldOf = (p: Player): number => p.potwierdzenia ?? 0;
 

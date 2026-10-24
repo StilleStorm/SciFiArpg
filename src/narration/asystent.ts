@@ -11,6 +11,7 @@ import { createRng, type Rng } from '../core/rng';
 import { t, type Params } from '../i18n';
 import narrationJson from '../i18n/pl/narration.json';
 import { arrivalKey } from '../world/base';
+import { bindOnramp } from './onramp';
 import { enemyInfo } from '../world/enemyInfo';
 import type { RunState } from '../world/run';
 
@@ -109,6 +110,8 @@ export interface AsystentDeps {
   /** Show a footnote and return its number (ui/footnotes.ts). `correction` marks the Asystent's correction of an earlier note. */
   say(text: string, correction?: boolean): number;
   getState(): RunState | null;
+  /** True while the file has no Historia entry: the on-ramp notes (narration/onramp.ts) are written. Absent = never. */
+  firstTicket?(): boolean;
 }
 
 export interface Asystent {
@@ -133,6 +136,7 @@ export function bindAsystent(bus: Bus, deps: AsystentDeps): Asystent {
   let fromBase = false;
   let idle = 0;
   const families = new Set<string>();
+  const onramp = bindOnramp(bus, { say: (text) => deps.say(text), getState: deps.getState, firstTicket: () => deps.firstTicket?.() ?? false });
 
   const fresh = (seed: number, k: string): void => {
     narrator = createNarrator(createRng(seed).fork('narration'), deps.say);
@@ -185,6 +189,7 @@ export function bindAsystent(bus: Bus, deps: AsystentDeps): Asystent {
   return {
     tick(dt) {
       narrator.tick(dt);
+      onramp.tick(dt);
       idle += dt;
       if (idle >= IDLE_S) {
         idle = -IDLE_S; // then at most one idle note per 80 s

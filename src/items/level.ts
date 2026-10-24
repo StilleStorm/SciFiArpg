@@ -4,6 +4,7 @@
  */
 import { ilvlBase, PRIORITIES, type PriorityId } from '../world/campaign';
 import type { ItemTier } from './types';
+import { TIER_BASE_MUL, TIER_BUDGET, TIER_PRICE_MUL } from '../balance/loot';
 
 export const ILVL_CAP = 40;
 export const ILVL_MIN = 1;
@@ -43,14 +44,8 @@ export const shopIlvl = (planet: number): number => clampIlvl(ilvlBase(planet) +
 export const ILVL_STEP = 0.06;
 export const ilvlScale = (ilvl: number): number => 1 + ILVL_STEP * (Math.max(ILVL_MIN, ilvl) - 1);
 
-/** Tier multiplier on the base stats before affixes (ITEMS 5.2). Uniques are hand-written; the number is only a ceiling for stat checks. */
-export const TIER_BASE_MUL: Record<ItemTier, number> = { zwykly: 1, nietypowy: 1.1, rzadki: 1.2, unikatowy: 1.6 };
-
-/** Effective budget against a zwykły, for tests and the audit (ITEMS 5.2, last column). */
-export const TIER_BUDGET: Record<ItemTier, number> = { zwykly: 1, nietypowy: 1.6, rzadki: 2.4, unikatowy: 2.9 };
-
-/** Shop price tier factor (ITEMS 7.1); uniques are never sold, the number is for the kiosk's cost curve only. */
-export const TIER_PRICE_MUL: Record<ItemTier, number> = { zwykly: 1, nietypowy: 2.5, rzadki: 6, unikatowy: 14 };
+// the tier multipliers (base stats ITEMS 5.2, budget, shop price ITEMS 7.1) live in balance/loot.ts (S16)
+export { TIER_BASE_MUL, TIER_BUDGET, TIER_PRICE_MUL };
 
 /** price1 * (1 + 0.1 * ilvl) * tier, before the service fee. */
 export const listPrice = (price1: number, ilvl: number, tier: ItemTier): number =>
