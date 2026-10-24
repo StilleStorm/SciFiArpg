@@ -21,7 +21,7 @@ import { easeIn, tween } from '../render/tween';
 import type { Views } from '../render/view';
 import { pageEntryAll } from '../items/absurd';
 import { recomputeStats } from '../items/stats';
-import { gateKey, stepGate } from './gate';
+import { gateKey, gateLiftKey, stepGate } from './gate';
 import { canLeave, onPageEntered } from './laws';
 import { atExit } from './pages';
 import type { RunState } from './run';
@@ -173,7 +173,7 @@ export function tickPageTurn(s: RunState, bus: Bus): void {
   const gated = stepGate(s);
   if (gated === 'lifted') {
     redrawGate(s.page);
-    bus.emit('footnote', { text: t('screens.base.gate.lifted') });
+    bus.emit('footnote', { text: t(gate ? gateLiftKey(gate) : 'screens.base.gate.lifted') });
   } else if (gated === 'note' && gate) bus.emit('footnote', { text: t(gateKey(gate)) });
 
   if (!s.page.gate && s.page.exit && s.pageIndex < s.pageCount - 1 && atExit(s.page, s.player)) {

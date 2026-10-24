@@ -60,7 +60,7 @@ describe('planet 1: base layout and locations', () => {
       expect(drawingsOf(type).sort()).toEqual([...ids].sort());
       for (const p of spec?.props ?? []) expect(propColliders(p.id, 0, 0, p.size[0]).length === 0, p.id).toBe(spec?.flat.includes(p.id) === true);
     }
-    expect(Object.keys(LOCATIONS).sort()).toEqual(['magazyn', 'przedmiescie']);
+    expect(Object.keys(LOCATIONS).sort()).toEqual(['magazyn', 'przedmiescie', 'serwerownia']);
   });
 
   it('pages are given a type by seed: the first the first type, the boss page the last, and every type is seen', () => {
@@ -104,7 +104,7 @@ describe('planet 1: base layout and locations', () => {
         expect(cells.some((c) => atExit(page, c)), `seed ${seed} page ${page.index} ${page.location}`).toBe(true);
       }
     }
-    const all = Object.values(LOCATIONS).flatMap((l) => l?.props.map((p) => p.id) ?? []);
+    const all = ['przedmiescie', 'magazyn'].flatMap((type) => locationSpec(type as 'magazyn')?.props.map((p) => p.id) ?? []);
     expect([...seen].sort()).toEqual([...all].sort());
   });
 });
@@ -117,7 +117,7 @@ describe('planet 1: the boss', () => {
     expect(e.hp).toBe(260);
     expect(bossVariantLine(e)).toBe('story.p1.boss.variant');
     expect(known('story.p1.boss.variant')).toBe(true);
-    const plain = placeBoss(createRun(5, { plan: plan(1) }), 'urzadzenia', 300, 300);
+    const plain = placeBoss(createRun(5, { plan: plan(2) }), 'urzadzenia', 300, 300);
     expect(plain.hpMax).toBe(300);
     expect(bossVariantLine(plain)).toBeUndefined();
     expect(placeBoss(createRun(5), 'urzadzenia', 300, 300).hpMax).toBe(300);
@@ -133,7 +133,7 @@ describe('planet 1: the boss', () => {
       expect(new Set(p.replies.map((r) => r.type)).size).toBe(3);
     }
     expect(promptFor('prototyp', 1, createRng(3)).commentKey).toBe('enemies.boss.prototyp.spor1.comment');
-    expect(promptFor('prototyp', 1, createRng(3), 1).commentKey).toBe('enemies.boss.prototyp.spor1.comment');
+    expect(promptFor('prototyp', 1, createRng(3), 2).commentKey).toBe('enemies.boss.prototyp.spor1.comment');
     expect(storyEntry(0, 'weryfikacja', 1)).toBeNull();
   });
 });

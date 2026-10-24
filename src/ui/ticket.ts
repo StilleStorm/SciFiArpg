@@ -6,7 +6,7 @@ import { tween } from '../render/tween';
 import type { TicketInfo } from '../world/ticket';
 import { h } from './dom';
 import { createSheet, type Sheet } from './sheet';
-import { clampPriority, DEFAULT_PRIORITY, planetDef, PRIORITIES, PRIORITY_IDS, priorityUnlocked, type PriorityId } from '../world/campaign';
+import { CAMPAIGN_LAST, clampPriority, DEFAULT_PRIORITY, planetDef, PRIORITIES, PRIORITY_IDS, priorityUnlocked, type PriorityId } from '../world/campaign';
 import { ACT_ROMAN, actOf, type CampaignView } from './ticketModel';
 import './base.css';
 
@@ -81,7 +81,8 @@ export function createTicket(root: HTMLElement, handlers: TicketHandlers): Ticke
     if (!ctx.view.caseClosed) return null;
     const box = h('div', 'tk-travel');
     box.append(h('h3', '', t('screens.ticket.travelTitle')), h('p', 'lead', t('screens.ticket.travelLead')));
-    for (const i of ctx.view.closed) {
+    // free travel offers the planets of the campaign so far (1..CAMPAIGN_LAST), as `travelList` does, whatever else a save has closed
+    for (const i of ctx.view.closed.filter((n) => n < CAMPAIGN_LAST)) {
       const r = h('div', 'tk-travel-row');
       r.dataset.planet = String(i);
       const go = h('button', '', t('screens.ticket.travelGo'));

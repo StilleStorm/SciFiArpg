@@ -5,6 +5,10 @@ import { FOLD, type Obstacle, type Page, type PageExit } from '../world/pages';
 import { t } from '../i18n';
 import { blobPoints, dotPath, el, n2, polyline, smoothClosed, wobblyCircle } from './svg';
 import { drawProp } from './locations';
+import { strike } from './ink';
+import { drawNpc } from './npc';
+import { tween, easeIn } from './tween';
+import { gateFigureAt } from '../world/gate';
 import { STAIN_HUES, washGroup } from './wash';
 
 const solid = (node: SVGElement, fill: string): void => {
@@ -435,12 +439,99 @@ function drawGate(o: Obstacle, r: Rng): SVGGElement {
   return g;
 }
 
-/** Draw the gate of the current page again (a hook put one there), or erase it when the page has none. */
+/**
+ * A wall of parcels (planet 2's gate): hatched and plain boxes two deep along the barrier arc, laid like bricks, tape across each,
+ * with a gap on the diagonal where the figure stands. Drawn in the frame of the top-left corner, mirrored for the others.
+ */
+function drawParcelWall(o: Obstacle, r: Rng): SVGGElement {
+  const fx = o.x < 600 ? 1 : -1;
+  const fy = o.y < 800 ? 1 : -1;
+  const g = el('g', { transform: `translate(${n2(o.x)} ${n2(o.y)}) scale(${fx} ${fy})` });
+  const box = (rad: number, a: number, w: number, h: number, hatch: boolean): void => {
+    const cx = Math.cos(a) * rad;
+    const cy = Math.sin(a) * rad;
+    const tx = -Math.sin(a);
+    const ty = Math.cos(a);
+    const nx = Math.cos(a);
+    const ny = Math.sin(a);
+    const at = (u: number, v: number): Vec => ({ x: cx + tx * u * w + nx * v * h + r.range(-1, 1), y: cy + ty * u * w + ny * v * h + r.range(-1, 1) });
+    const pts = [at(-0.5, -0.5), at(0.5, -0.5), at(0.5, 0.5), at(-0.5, 0.5)];
+    const p = el('path', { d: polyline(pts, true), 'stroke-width': 1.6 });
+    if (hatch) p.setAttribute('fill', 'url(#hatch)');
+    else p.style.fill = 'var(--paper)';
+    const a1 = at(0, -0.5);
+    const a2 = at(0, 0.5);
+    const b1 = at(-0.5, -0.1);
+    const b2 = at(0.5, -0.1);
+    g.append(p, el('path', { d: `M${n2(a1.x)} ${n2(a1.y)}L${n2(a2.x)} ${n2(a2.y)}M${n2(b1.x)} ${n2(b1.y)}L${n2(b2.x)} ${n2(b2.y)}`, 'stroke-width': 0.9 }));
+  };
+  const inner = o.size - 17;
+  const outer = o.size + 17;
+  for (let i = 0; i < 7; i++) if (i !== 3) box(inner, ((i + 0.5) / 7) * (Math.PI / 2), 36 + r.range(-3, 4), 30 + r.range(-2, 3), r.chance(0.35));
+  for (let i = 0; i < 7; i++) if (i !== 3) box(outer, ((i + 1) / 8) * (Math.PI / 2), 40 + r.range(-3, 4), 30 + r.range(-2, 3), r.chance(0.35));
+  return g;
+}
+
+/** The figure at the gap of a gated page: the standing clerk of render/npc.ts, a little smaller. */
+function drawGateFigure(look: number, at: { x: number; y: number }): SVGGElement {
+  const def = { id: 'gate-figure', nameKey: '', roleKey: '', lineKeys: [], look };
+  const g = el('g', { transform: `translate(${n2(at.x)} ${n2(at.y)}) scale(0.85)`, 'data-gate-figure': '1', 'data-x': n2(at.x), 'data-y': n2(at.y) });
+  g.append(drawNpc(def));
+  return g;
+}
+
+/** The drawings of the gate of a page: the barrier (tape band or parcel wall) and, when the gate has one, its figure. */
+function gateDrawings(o: Obstacle, page: Page): SVGElement[] {
+  const r = createRng(o.seed);
+  const parcels = o.variant === 'parcels';
+  const wall = tagObstacle(parcels ? drawParcelWall(o, r) : drawGate(o, r), o.kind);
+  if (parcels) wall.setAttribute('data-gate-look', 'parcels');
+  const out: SVGElement[] = [wall];
+  const at = gateFigureAt(page);
+  if (at && page.gate?.figure) out.push(drawGateFigure(page.gate.figure.look, at));
+  return out;
+}
+
+/** The gate has lifted: a parcel wall is struck through and drawn away, its figure walks toward the corner and off the page, the tape band just goes. */
+function liftedGate(n: Element, page: Page): void {
+  if (n.getAttribute('data-gate-look') === 'parcels' && n instanceof SVGGElement) {
+    try {
+      strike(n);
+    } catch {
+      n.remove(); // the ink layer is not up (a hook before the first frame)
+    }
+    return;
+  }
+  if (n instanceof SVGGElement && n.hasAttribute('data-gate-figure')) {
+    const x = Number(n.getAttribute('data-x'));
+    const y = Number(n.getAttribute('data-y'));
+    const e = page.exit;
+    const dx = e ? (e.x - x) * 0.9 : 0;
+    const dy = e ? (e.y - y) * 0.9 : 0;
+    tween(
+      1500,
+      (p) => {
+        n.setAttribute('transform', `translate(${n2(x + dx * p)} ${n2(y + dy * p)}) scale(0.85)`);
+        n.setAttribute('opacity', String(Math.max(0, 1 - Math.max(0, p - 0.45) / 0.55)));
+      },
+      { ease: easeIn, delay: 500, done: () => n.remove() },
+    );
+    return;
+  }
+  n.remove();
+}
+
+/** Draw the gate of the current page again (a hook put one there), or take it off the paper when the page has none (the lift). */
 export function redrawGate(page: Page): void {
   if (typeof document === 'undefined') return;
-  document.querySelectorAll('#page [data-obstacle="gate"]').forEach((n) => n.remove());
+  const old = [...document.querySelectorAll('#page [data-obstacle="gate"], #page [data-gate-figure]')];
   const o = page.obstacles.find((p) => p.kind === 'gate');
-  if (o) document.querySelector('#page [data-page-ink]')?.append(tagObstacle(drawGate(o, createRng(o.seed)), o.kind));
+  if (!o) {
+    for (const n of old) liftedGate(n, page);
+    return;
+  }
+  for (const n of old) n.remove();
+  document.querySelector('#page [data-page-ink]')?.append(...gateDrawings(o, page));
 }
 
 function tagObstacle(g: SVGElement, kind: string): SVGElement {
@@ -509,7 +600,7 @@ export function drawPage(layer: SVGGElement, page: Page, header?: PageHeader): S
         ink.append(tagObstacle(drawKiosk(o, r), o.kind));
         break;
       case 'gate':
-        ink.append(tagObstacle(drawGate(o, r), o.kind));
+        ink.append(...gateDrawings(o, page));
         break;
       case 'prop':
         ink.append(tagObstacle(drawProp(o, r), o.kind));

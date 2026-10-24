@@ -279,7 +279,8 @@
       "urzednik": "Referent"
     },
     "plate": {
-      "kiosk": "SKLEP"
+      "kiosk": "SKLEP",
+      "cisza": "CISZA"
     },
     "arrival": {
       "ladowisko": {

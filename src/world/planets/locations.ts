@@ -14,11 +14,13 @@ export interface PropSpec {
   body: readonly (readonly [number, number, number])[];
 }
 
-export type LocationLayout = 'rows' | 'aisles';
+export type LocationLayout = 'rows' | 'aisles' | 'corridors';
 
 export interface LocationSpec {
-  /** rows: props stand along horizontal streets; aisles: along vertical aisles. */
+  /** rows: props stand along horizontal streets; aisles: along vertical aisles; corridors: columns of `wall` props make narrow parallel corridors. */
   layout: LocationLayout;
+  /** corridors only: the prop id that forms the walls of the corridors. */
+  wall?: string;
   props: readonly PropSpec[];
   /** Flat marks put on the page first, under everything (ids of props with an empty body). */
   flat: readonly string[];
@@ -54,6 +56,27 @@ const MAGAZYN: LocationSpec = {
     P('tasmociag', [150, 190], [[-0.36, 0, 0.1], [-0.12, 0, 0.1], [0.12, 0, 0.1], [0.36, 0, 0.1]]),
     P('paczki', [110, 140], [[-0.3, 0, 0.19], [0, 0, 0.19], [0.3, 0, 0.19]]),
     P('wozek-reczny', [50, 64], [[0, 0, 0.42]]),
+    // planet 2 (S13)
+    P('stos', [96, 126], [[-0.28, 0.05, 0.2], [0.28, 0.05, 0.2], [0, -0.25, 0.2]]),
+    P('awizo', [120, 150], [[-0.32, 0, 0.14], [0, 0, 0.14], [0.32, 0, 0.14]]),
+    P('kolejka', [150, 190], [[-0.36, 0, 0.1], [-0.12, 0, 0.1], [0.12, 0, 0.1], [0.36, 0, 0.1]]),
+  ],
+};
+
+/** Serwerownia (STORY 8.2): columns of racks make narrow parallel corridors; the rest are small things in the aisles and flat marks on the floor. */
+const SERWEROWNIA: LocationSpec = {
+  layout: 'corridors',
+  wall: 'rack',
+  flat: ['siatka', 'koryto', 'kurtyna'],
+  props: [
+    P('rack', [50, 60], [[0, -1, 0.5], [0, 0, 0.5], [0, 1, 0.5]]),
+    P('wentylator', [70, 90], [[0, 0, 0.45]]),
+    P('gasnica', [30, 38], [[0, 0, 0.45]]),
+    P('drabina', [44, 56], [[0, -0.6, 0.45], [0, 0.6, 0.45]]),
+    P('cisza', [60, 76], [[0, 0, 0.4]]),
+    P('siatka', [150, 210], []),
+    P('koryto', [90, 120], []),
+    P('kurtyna', [150, 200], []),
   ],
 };
 
@@ -61,6 +84,7 @@ const MAGAZYN: LocationSpec = {
 export const LOCATIONS: Partial<Record<LocationType, LocationSpec>> = {
   przedmiescie: PRZEDMIESCIE,
   magazyn: MAGAZYN,
+  serwerownia: SERWEROWNIA,
 };
 
 export const locationSpec = (type: LocationType | undefined): LocationSpec | undefined => (type ? LOCATIONS[type] : undefined);

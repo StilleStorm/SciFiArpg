@@ -59,6 +59,8 @@ interface ContentBase {
 export interface Teczka extends ContentBase {
   kind: 'teczka';
   opened: boolean;
+  /** The folder a page gate is keyed to (world/gate.ts `keyTeczka`, e.g. the "list przewozowy" of planet 2): only its opening lifts that gate. */
+  key?: true;
 }
 
 export interface Pieczec extends ContentBase {

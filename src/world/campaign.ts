@@ -119,8 +119,12 @@ export interface PlanetDef {
   pages: readonly [number, number];
   /** The character level the planet is balanced for at Normalny. */
   levelHint: number;
-  /** Story locks on pages of its runs (world/gate.ts); none on the real planets yet. */
+  /** Story locks on pages of its runs (world/gate.ts); planet 2 has one (S13). */
   gates?: readonly PlanetGate[];
+  /** The clause the planet's first campaign ticket prints (STORY 8.5.3); absent = `lawPool[0]`. Later tickets roll the pool. */
+  headline?: LawId;
+  /** Location picker: the first this-many pages are `locations[0]`, the rest (and the boss page) the last type; absent = the seeded pick. */
+  locationSplit?: number;
 }
 
 const mix = (urzadzenia: number, powiadomienia: number, wygenerowane: number): Record<FamilyId, number> => ({ urzadzenia, powiadomienia, wygenerowane });
@@ -155,8 +159,27 @@ const planet = (
 /** Akt I: updates and cookies. Akt II: hours and two-factor. Akt III: existence and the rest (STORY 4). */
 export const PLANETS: readonly PlanetDef[] = [
   planet(0, 1, 'urzadzenia', mix(0.6, 0.25, 0.15), ['wymagana-aktualizacja', 'ciasteczka', 'parzystosc'], ['ladowisko', 'wioska'], ['przedmiescie', 'magazyn'], null, [4, 5]),
-  planet(1, 1, 'urzadzenia', mix(0.55, 0.3, 0.15), ['wymagana-aktualizacja', 'ciasteczka', 'grawitacja'], ['wioska', 'miasteczko'], ['magazyn', 'serwerownia'], 'obieg', [4, 5]),
-  planet(2, 1, 'urzadzenia', mix(0.5, 0.2, 0.3), ['ciasteczka', 'parzystosc', 'grawitacja', 'wymagana-aktualizacja'], ['miasteczko', 'wioska'], ['serwerownia', 'przedmiescie', 'biuro'], 'serwis', [5, 5]),
+  {
+    ...planet(1, 1, 'urzadzenia', mix(0.55, 0.3, 0.15), ['wymagana-aktualizacja', 'ciasteczka', 'grawitacja'], ['wioska', 'miasteczko'], ['magazyn', 'serwerownia'], 'obieg', [4, 5]),
+    headline: 'ciasteczka',
+    // pages 1-2 magazyn, page 3 and the boss page serwerownia (STORY 8.2)
+    locationSplit: 2,
+    // page 2: the exit corner walled with parcels, a Magazynier at the gap; the key is the one forced teczka "list przewozowy" (planets/p2.ts)
+    gates: [
+      {
+        page: 1,
+        gate: {
+          kind: 'teczka',
+          keyTeczka: true,
+          look: 'parcels',
+          key: 'story.p2.gate.note',
+          liftKey: 'story.p2.gate.lift',
+          figure: { look: 22, key: 'story.p2.gate.figure' },
+        },
+      },
+    ],
+  },
+  { ...planet(2, 1, 'urzadzenia', mix(0.5, 0.2, 0.3), ['ciasteczka', 'parzystosc', 'grawitacja', 'wymagana-aktualizacja'], ['miasteczko', 'wioska'], ['serwerownia', 'przedmiescie', 'biuro'], 'serwis', [5, 5]), headline: 'parzystosc' },
   planet(3, 2, 'powiadomienia', mix(0.3, 0.55, 0.15), ['godziny-konsultanta', 'weryfikacja-dwuetapowa', 'nie-przeszkadzac'], ['miasteczko', 'ladowisko'], ['miasto', 'biuro'], 'ostatnia-mila', [5, 6]),
   planet(4, 2, 'powiadomienia', mix(0.2, 0.6, 0.2), ['godziny-konsultanta', 'oplata-serwisowa', 'nie-przeszkadzac'], ['miasteczko'], ['centrum', 'miasto'], null, [5, 6]),
   planet(5, 2, 'powiadomienia', mix(0.15, 0.55, 0.3), ['weryfikacja-dwuetapowa', 'oplata-serwisowa', 'godziny-konsultanta'], ['miasteczko', 'wioska'], ['centrum', 'serwerownia', 'archiwum'], 'infolinia', [5, 6]),
@@ -226,8 +249,18 @@ export interface TicketPlan {
   lawId: LawId;
 }
 
-/** The clause of a planet for a seed (a pure pick from the planet's pool). */
-export function lawForPlanet(planetIdx: number, seed: number): LawId {
+/** The clause a planet's first campaign ticket prints (STORY 8.5.3): its `headline`, else `lawPool[0]`. */
+export function headlineOf(planetIdx: number): LawId {
+  const p = planetDef(planetIdx);
+  return p.headline ?? p.lawPool[0] ?? 'ciasteczka';
+}
+
+/**
+ * The clause of a planet for a seed. `first` (the character's first ticket on the planet) prints the headline; otherwise a pure
+ * pick from the planet's pool.
+ */
+export function lawForPlanet(planetIdx: number, seed: number, first = false): LawId {
+  if (first) return headlineOf(planetIdx);
   const pool = planetDef(planetIdx).lawPool;
   return createRng(seed).fork('plan-law').pick(pool);
 }
@@ -348,7 +381,8 @@ export function toPlan(raw: unknown, isLaw: (v: unknown) => v is LawId): TicketP
 export function nextCampaignPlan(c: CampaignState, priority: PriorityId, seed: number): TicketPlan | null {
   if (c.caseClosed) return null;
   if (c.finalTicket) return { kind: 'final', planet: 0, priority, lawId: lawForPlanet(0, seed) };
-  return { kind: 'campaign', planet: c.current, priority, lawId: lawForPlanet(c.current, seed) };
+  // a campaign ticket is the first on its planet until the planet is closed (a ticket that failed is issued again with the headline)
+  return { kind: 'campaign', planet: c.current, priority, lawId: lawForPlanet(c.current, seed, !c.closed.includes(c.current)) };
 }
 
 /** A zgloszenie dodatkowe: random planet of the campaign so far (`CAMPAIGN_LAST`), random clause, both pure functions of the seed. Null before the case is closed. */
@@ -358,9 +392,9 @@ export function extraPlan(c: CampaignState, priority: PriorityId, seed: number):
   return { kind: 'extra', planet: r.int(0, CAMPAIGN_LAST - 1), priority, lawId: r.pick(ALL_LAWS) };
 }
 
-/** Planets reachable from the desk for free: after the case, every closed planet (all nine), at the character's current level. */
+/** Planets reachable from the desk for free: after the case, every closed planet of the campaign so far (1..`CAMPAIGN_LAST`), at the character's current level. */
 export function travelList(c: CampaignState): number[] {
-  return c.caseClosed ? [...c.closed].sort((a, b) => a - b) : [];
+  return c.caseClosed ? c.closed.filter((i) => i < CAMPAIGN_LAST).sort((a, b) => a - b) : [];
 }
 
 /** Free travel to a closed planet; its clause is drawn from the planet's pool. Null when the planet is not on the list. */

@@ -249,14 +249,33 @@ export function generatePage(rng: Rng, plan: PagePlan = DEFAULT_PLAN): Page {
         obstacles.unshift(o);
       }
     }
-    const solid = spec.props.filter((p) => !spec.flat.includes(p.id));
-    const lanes = spec.layout === 'rows' ? [330, 620, 910, 1200] : [270, 600, 930];
-    const target = obstacles.length + r.int(7, 10);
+    const wallProp = propSpec(spec.wall);
+    if (wallProp && spec.layout === 'corridors') {
+      // narrow parallel corridors: four columns of tall props with cross-cuts (gaps) where a column breaks off
+      const half = Math.max(...wallProp.body.map(([, dy, rr]) => Math.abs(dy) + rr));
+      for (const x of [230, 450, 750, 970]) {
+        let y = 150;
+        while (y < PAGE_H - 150) {
+          const size = r.range(wallProp.size[0], wallProp.size[1]);
+          const o: Obstacle = { kind: 'prop', variant: wallProp.id, x: x + r.range(-6, 6), y: y + half * size, size, rot: 0, seed: r.int(1, 1e6), colliders: [] };
+          o.colliders = colliders(o);
+          if (r.chance(0.28)) y += r.range(150, 210);
+          else {
+            if (clearOf(o, 30)) obstacles.push(o);
+            y += 2 * half * size + r.range(90, 150);
+          }
+        }
+      }
+    }
+    // corridors: small things stand in the two side corridors only; the middle one (the boss's) is kept clear
+    const solid = spec.props.filter((p) => !spec.flat.includes(p.id) && p.id !== spec.wall);
+    const lanes = spec.layout === 'rows' ? [330, 620, 910, 1200] : spec.layout === 'corridors' ? [340, 860] : [270, 600, 930];
+    const target = obstacles.length + (spec.layout === 'corridors' ? r.int(4, 6) : r.int(7, 10));
     let placed = 0;
     for (let guard = 0; obstacles.length < target && guard++ < 600; ) {
       const lane = r.pick(lanes);
       const at = spec.layout === 'rows' ? { x: r.range(110, PAGE_W - 110), y: lane + r.range(-40, 40) } : { x: lane + r.range(-36, 36), y: r.range(110, PAGE_H - 110) };
-      const p = r.chance(0.2) ? undefined : (solid[placed % solid.length] ?? r.pick(solid));
+      const p = r.chance(0.2) ? undefined : (solid[(placed + plan.index * 4) % solid.length] ?? r.pick(solid));
       const ring = r.chance(0.4);
       const o: Obstacle = p
         ? { kind: 'prop', variant: p.id, ...at, size: r.range(p.size[0], p.size[1]), rot: 0, seed: r.int(1, 1e6), colliders: [] }
@@ -405,10 +424,12 @@ export function placeContent(r: Rng, site: ContentSite): PageContent[] {
  * first page is the first type, the boss page the last, the pages between draw from the list (the first type twice as often),
  * and a type no page drew is put on the middle page, so every type of the planet is seen on a run. Own stream: no other roll moves.
  */
-export function pickLocations(rng: Rng, count: number, locations: readonly LocationType[]): LocationType[] {
+export function pickLocations(rng: Rng, count: number, locations: readonly LocationType[], split?: number): LocationType[] {
   const first = locations[0];
   const lastType = locations[locations.length - 1];
   if (!first || !lastType || count < 1) return [];
+  // a planet that fixes the order (`PlanetDef.locationSplit`): the first `split` pages are the first type, the rest the last
+  if (split !== undefined) return Array.from({ length: count }, (_, i) => (i < split ? first : lastType));
   const r = rng.fork('locations');
   const pool: LocationType[] = [...locations, first];
   const out: LocationType[] = Array.from({ length: count }, (_, i) => (i === 0 ? first : i === count - 1 ? lastType : r.pick(pool)));
@@ -422,10 +443,10 @@ export function pickLocations(rng: Rng, count: number, locations: readonly Locat
 }
 
 /** All pages of a run, linked: page i+1 is entered through the corner opposite to page i's exit. */
-export function generateRunPages(rng: Rng, count: number, locations?: readonly LocationType[]): Page[] {
+export function generateRunPages(rng: Rng, count: number, locations?: readonly LocationType[], split?: number): Page[] {
   const pages: Page[] = [];
   let entryCorner: Corner | null = null;
-  const where = locations ? pickLocations(rng, count, locations) : [];
+  const where = locations ? pickLocations(rng, count, locations, split) : [];
   for (let i = 0; i < count; i++) {
     const location = where[i];
     const page = generatePage(rng, { index: i, count, entryCorner, ...(location ? { location } : {}) });

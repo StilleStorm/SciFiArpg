@@ -112,7 +112,7 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
   const pageCount = opts.pageCount ?? opts.resume?.pageCount;
   if (lawId) ticket.lawId = lawId;
   if (pageCount) ticket.pageCount = pageCount;
-  const pages = generateRunPages(rng, ticket.pageCount, plan ? planetDef(plan.planet).locations : undefined);
+  const pages = generateRunPages(rng, ticket.pageCount, plan ? planetDef(plan.planet).locations : undefined, plan ? planetDef(plan.planet).locationSplit : undefined);
   if (plan) applyPlanetGates(pages, planetDef(plan.planet).gates);
   const runPage = pages[0] ?? generateRunPages(rng, 1)[0];
   if (!runPage) throw new Error('no page');

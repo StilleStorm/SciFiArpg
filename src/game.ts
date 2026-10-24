@@ -13,6 +13,7 @@ import { freeViewRect, headerFrame, keepOutBlocks, viewZoom } from './render/cam
 import { stationAt } from './world/base';
 import { onPageEntered } from './world/laws';
 import { baseHeaderFor, headerFor, tapKiosk } from './world/pageTurn';
+import { tapGateFigure } from './world/gate';
 import { stampsOnPage, tapMark } from './render/ink';
 import type { Stage } from './render/stage';
 import { createSim } from './systems/step';
@@ -218,11 +219,13 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       if (!walk) {
         // Joystick mode: a quick tap only matters on the kiosk (the player steers there himself).
         if (tapKiosk(s, w.x, w.y)) bus.emit('player:tap', { x: w.x, y: w.y });
+        tapGateFigure(s, bus, w.x, w.y);
         return;
       }
       s.player.target = w;
       tapMark(w.x, w.y);
       tapKiosk(s, w.x, w.y);
+      tapGateFigure(s, bus, w.x, w.y);
       bus.emit('player:tap', { x: w.x, y: w.y });
     },
   };

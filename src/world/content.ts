@@ -395,7 +395,7 @@ export function tickContent(s: RunState, bus: Bus, dt: number): void {
 
 export interface ContentHook {
   /** Plain data about the objects of the page the player is on. */
-  list(): { id: number; kind: string; x: number; y: number; state: string; seal: string | null; event: string | null; progress: number }[];
+  list(): { id: number; kind: string; x: number; y: number; state: string; seal: string | null; event: string | null; progress: number; key?: true }[];
   /** Lay an object `dist` units (default 130) to the right of the player and `dy` below, and draw it; returns its id. A seal takes `seal`. */
   put(kind: 'teczka' | 'pieczec' | EventId, opts?: { seal?: SealId; dist?: number; dy?: number }): number | null;
   /** Tap the folder `id`, as the finger would (the player walks there; it opens on arrival). */
@@ -424,6 +424,7 @@ export function createContentHook(getState: () => RunState | null, bus: Bus): Co
         seal: c.kind === 'pieczec' ? c.seal : null,
         event: c.kind === 'zdarzenie' ? c.event : null,
         progress: c.kind === 'zdarzenie' ? c.progress : 0,
+        ...(c.kind === 'teczka' && c.key ? { key: true as const } : {}),
       })),
     put(kind, opts = {}) {
       const s = live();

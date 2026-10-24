@@ -155,4 +155,57 @@ function wozekReczny(o: Obstacle, r: Rng): SVGGElement {
   return k.g;
 }
 
-registerDrawings('magazyn', { palety, regal, wozek, tasma, waga, tasmociag, paczki, 'wozek-reczny': wozekReczny });
+/** A stack of parcels, pyramid-wise: three on the floor, two on them, one on top, a strap round the lot (planet 2, S13). */
+function stos(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  parcel(k, -48, 4, -16, 36);
+  parcel(k, -14, 4, 18, 36, 'hatch');
+  parcel(k, 20, 4, 50, 36);
+  parcel(k, -32, -26, 0, 4, 'hatch');
+  parcel(k, 2, -26, 34, 4);
+  parcel(k, -14, -52, 18, -26);
+  k.path('M-48 22H50', { w: 0.8 });
+  k.path('M-14 -52L-8 -58H24L18 -52', { fill: 'paper', w: 1.1 });
+  return k.g;
+}
+
+/** A shelving rack with awizo slips pinned to its uprights and shelves: small sheets, a pin each, a few lines of scrawl. */
+function awizo(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  for (const x of [-48, 48]) k.line(x, -40, x, 40, 2);
+  for (const y of [-20, 4, 28]) k.line(-48, y, 48, y, 1.6);
+  k.line(-48, 40, -40, 48, 1.2);
+  k.line(48, 40, 40, 48, 1.2);
+  const pins: [number, number, number][] = [];
+  for (const [x, y] of [[-36, -34], [-12, -36], [14, -33], [34, -37], [-30, -10], [4, -12], [28, -8], [-20, 14], [18, 16]] as const) {
+    if (!r.chance(0.85)) continue;
+    const tilt = r.range(-4, 4);
+    k.shape([[x - 8, y - 6 + tilt], [x + 8, y - 6 - tilt], [x + 8, y + 9], [x - 8, y + 9]], { fill: 'paper', w: 1, jit: 0.4 });
+    k.path(`M${x - 5} ${y}H${x + 5}M${x - 5} ${y + 3.4}H${x + 3}M${x - 5} ${y + 6.8}H${x + 5}`, { w: 0.6 });
+    pins.push([x, y - 4 + tilt * 0.3, 1.5]);
+  }
+  k.dots(pins);
+  parcel(k, -42, 10, -26, 28, 'hatch');
+  parcel(k, 30, 34, 44, 40);
+  return k.g;
+}
+
+/** A queue of hand trucks: four of them one behind the other, each with a parcel, nobody pushing. */
+function kolejka(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  for (let i = 0; i < 4; i++) {
+    const x = -42 + i * 26;
+    const h = r.range(-2, 2);
+    k.line(x, -34 + h, x, 28, 1.7);
+    k.line(x + 9, -34 + h, x + 9, 28, 1.7);
+    k.path(`M${x} ${-34 + h}Q${x + 4.5} ${-44 + h} ${x + 9} ${-34 + h}`, { w: 1.5 });
+    k.line(x, -10, x + 9, -10, 1);
+    k.shape([[x, 28], [x - 12, 28], [x - 12, 32], [x, 32]], { fill: 'hatch', w: 1.1, jit: 0.2 });
+    parcel(k, x - 12, 4 + h, x, 28, i % 2 === 0 ? 'paper' : 'hatch');
+    k.disc(x + 14, 30, 7, { fill: 'paper', w: 1.5 });
+    k.disc(x + 14, 30, 2.4, { w: 0.9 });
+  }
+  return k.g;
+}
+
+registerDrawings('magazyn', { palety, regal, wozek, tasma, waga, tasmociag, paczki, 'wozek-reczny': wozekReczny, stos, awizo, kolejka });

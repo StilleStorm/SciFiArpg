@@ -19,6 +19,7 @@ import {
   closeTicket,
   enemyScaleFor,
   extraPlan,
+  headlineOf,
   ilvlBase,
   lawForPlanet,
   newCampaign,
@@ -157,6 +158,29 @@ describe('progression', () => {
     expect([...seen].sort()).toEqual([0, 1, 2]);
     expect(closeTicket(c, extraPlan(c, 'normalny', 3) as TicketPlan).campaign.extras).toBe(1);
     expect(closeTicket(c, travelPlan(c, 1, 'normalny', 3) as TicketPlan).campaign.extras).toBe(0);
+  });
+
+  it('free travel lists only planets 1..CAMPAIGN_LAST, however many a save has closed', () => {
+    const all = { ...newCampaign(), caseClosed: true, closed: [8, 0, 5, 2, 1, 7, 3, 4, 6] };
+    expect(travelList(all)).toEqual([0, 1, 2]);
+    expect(travelPlan(all, CAMPAIGN_LAST, 'normalny', 1)).toBeNull();
+    expect(travelPlan(all, CAMPAIGN_LAST - 1, 'normalny', 1)?.kind).toBe('travel');
+  });
+
+  it('the first campaign ticket on a planet prints its headline clause, later tickets roll the pool', () => {
+    expect([0, 1, 2].map(headlineOf)).toEqual(['wymagana-aktualizacja', 'ciasteczka', 'parzystosc']);
+    for (let i = 3; i < PLANET_COUNT; i++) expect(headlineOf(i)).toBe(PLANETS[i]?.lawPool[0]);
+    for (let planet = 0; planet < CAMPAIGN_LAST; planet++) {
+      const c = { ...newCampaign(), current: planet, closed: Array.from({ length: planet }, (_, i) => i) };
+      for (let seed = 1; seed < 30; seed++) expect(nextCampaignPlan(c, 'normalny', seed)?.lawId).toBe(headlineOf(planet));
+    }
+    // travel and extras are never the first ticket: they roll the pool of the planet
+    const done = closeTicket(playThrough(), { kind: 'final', planet: 0, priority: 'normalny', lawId: 'ciasteczka' }).campaign;
+    const rolled = new Set<string>();
+    for (let seed = 1; seed < 60; seed++) rolled.add(travelPlan(done, 1, 'normalny', seed)?.lawId ?? '');
+    expect(rolled.size).toBeGreaterThan(1);
+    expect(lawForPlanet(1, 5, true)).toBe('ciasteczka');
+    expect(lawForPlanet(1, 5)).toBe(lawForPlanet(1, 5, false));
   });
 
   it('the clause of a plan is a pure pick from the planet pool', () => {

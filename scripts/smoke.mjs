@@ -1884,14 +1884,14 @@ try {
     await cp.locator('.ticket-sheet .tk-travel').waitFor({ state: 'visible', timeout: 3000 });
     const rows = await cp.evaluate(() => document.querySelectorAll('.ticket-sheet .tk-travel-row[data-planet]').length);
     await shotOf(cp, 'S7-campaign-travel');
-    await cp.locator('.ticket-sheet .tk-travel-row[data-planet="4"] button').click({ timeout: 2000 });
+    await cp.locator('.ticket-sheet .tk-travel-row[data-planet="1"] button').click({ timeout: 2000 });
     await sleep(900);
     const trav = await cp.evaluate(() => {
       const s = window.__game.state();
       return { rows: 0, screen: window.__game.screen(), plan: s?.plan ?? null, accepted: s?.phase === 'base' && s?.pageIndex === 0, card: document.querySelector('.card-layer')?.dataset.card ?? null, sheet: !!document.querySelector('.ticket-sheet') };
     });
     trav.rows = rows;
-    check('campaign: after the case nine planets are offered; travel to planet 5 accepts a travel ticket there and shows the rewritten card', rows === 9 && trav.screen === 'baza' && trav.plan?.kind === 'travel' && trav.plan?.planet === 4 && trav.accepted && trav.card === 'rewritten' && !trav.sheet, JSON.stringify(trav));
+    check('campaign: after the case planets 1..CAMPAIGN_LAST (three) are offered, not the nine closed; travel to planet 2 accepts a travel ticket there and shows the rewritten card', rows === 3 && trav.screen === 'baza' && trav.plan?.kind === 'travel' && trav.plan?.planet === 1 && trav.accepted && trav.card === 'rewritten' && !trav.sheet, JSON.stringify(trav));
     // enemies scale: the same family and seed, Niski on planet 1 against Krytyczny on planet 8
     const hpOf = async (plan) => {
       await cp.evaluate((pl) => window.__game.start(21, { plan: pl }), plan);
@@ -2054,6 +2054,168 @@ try {
       }
     }
     await pctx.close();
+  }
+
+  // ---------- 6e. planet 2 content (S13): chapter card, clerk, the parcel gate on page 2 and its key teczka, serwerownia, the boss variant ----------
+  {
+    const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await qctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const qp = await qctx.newPage();
+    qp.on('pageerror', (e) => problems.push(`S13 pageerror: ${e.message}`));
+    qp.on('console', (m) => {
+      if (m.text().includes('Service Worker registration blocked')) return;
+      if (m.type() === 'error' || m.type() === 'warning') problems.push(`S13 console.${m.type()}: ${m.text()}`);
+    });
+    const ev = (fn, arg) => qp.evaluate(fn, arg);
+    await qp.goto(BASE, { waitUntil: 'load' });
+    await qp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await qp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 });
+    await sleep(500);
+    // the case file stands at planet 2: planet 1 closed
+    await ev(() => {
+      const m = window.__game.meta();
+      window.__game.setMeta({ ...m, character: { ...m.character, campaign: { current: 1, closed: [0], finalTicket: false, caseClosed: false, extras: 0, cards: { opening: true, chapters: [] } } } });
+      window.__game.startBase(5);
+    });
+    await sleep(900);
+    const card = await ev(() => {
+      const l = document.querySelector('.card-layer');
+      return { kind: l?.dataset.card ?? null, text: l?.textContent ?? '', planet: window.__game.state()?.plan?.planet, law: window.__game.state()?.plan?.lawId };
+    });
+    check('S13 chapter card: planet 2 carries its story text, no key and no placeholder; the first ticket prints the headline clause Ciasteczka', card.kind === 'chapter' && card.planet === 1 && card.law === 'ciasteczka' && /Dwudziest/.test(card.text) && !/story\.|screens\.cards|\[brak/i.test(card.text), JSON.stringify({ kind: card.kind, planet: card.planet, law: card.law, head: card.text.slice(0, 90) }));
+    await shotOf(qp, 'S13-chapter');
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 }).catch(() => undefined);
+    await sleep(500);
+    const base = await ev(() => ({ planet: window.__game.state()?.plan?.planet, clerk: document.querySelectorAll('[data-station=urzednik]').length, offers: window.__game.quests.offers().map((o) => o.id) }));
+    check('S13 planet 2 base: the clerk is drawn and the board carries the three h:p2 side tickets', base.planet === 1 && base.clerk === 1 && base.offers.filter((id) => id.startsWith('h:p2:')).length === 3, JSON.stringify(base));
+    await ev(() => window.__game.station('urzednik'));
+    await qp.locator('.npc-sheet').waitFor({ state: 'visible', timeout: 3000 });
+    const clerk = await ev(() => ({ lines: document.querySelectorAll('.npc-sheet .npc-line').length, text: document.querySelector('.npc-sheet')?.textContent ?? '' }));
+    check('S13 the clerk of planet 2: Starszy Referent ds. Zaległości, three story lines, no key', clerk.lines === 3 && /Zaległości/.test(clerk.text) && !/story\.p2/.test(clerk.text), JSON.stringify({ lines: clerk.lines, head: clerk.text.slice(0, 100) }));
+    await shotOf(qp, 'S13-clerk');
+    await qp.locator('.npc-sheet .ps-close').first().click().catch(() => undefined);
+    await sleep(200);
+
+    // the run: page 1 magazyn, page 2 magazyn with the parcel gate
+    await ev(() => window.__game.start(41, { plan: { kind: 'campaign', planet: 1, priority: 'niski', lawId: 'grawitacja' }, pageCount: 4 }));
+    await sleep(700);
+    for (let k = 0; k < 4 && (await ev(() => window.__game.state()?.modal ?? null)); k++) {
+      await qp.locator('.pop-wrap .form-btn, .pop-wrap button').locator('visible=true').first().click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(400);
+    }
+    const turn = async (k) => {
+      await ev((n) => {
+        window.__game.state().enemies.length = 0;
+        window.__game.turnTo(n);
+      }, k);
+      await qp.waitForFunction((n) => window.__game.state()?.pageIndex === n && !window.__game.state().turning, k, { timeout: 6000 }).catch(() => undefined);
+      await sleep(500);
+    };
+    await turn(1);
+    const gate0 = await ev(() => {
+      const s = window.__game.state();
+      return {
+        loc: s.page.location,
+        info: window.__game.gate.info(),
+        wall: document.querySelectorAll('#page [data-obstacle=gate][data-gate-look=parcels]').length,
+        figure: document.querySelectorAll('#page [data-gate-figure]').length,
+        keys: window.__game.content.list().filter((c) => c.key).length,
+      };
+    });
+    check('S13 gate: page 2 is a magazyn with a parcel wall, a Magazynier at the gap and exactly one key teczka', gate0.loc === 'magazyn' && gate0.info?.kind === 'teczka' && gate0.info.holds && gate0.info.look === 'parcels' && gate0.info.figure && gate0.info.keyTeczka && gate0.wall === 1 && gate0.figure === 1 && gate0.keys === 1, JSON.stringify(gate0));
+    await ev(() => window.__game.gate.approach());
+    await sleep(500);
+    const noted = await ev(() => window.__game.notes().map((n) => n.text));
+    check('S13 gate: at the blocked corner the Asystent names the condition (the list przewozowy, in a teczka on this page)', noted.some((x) => /listu przewozowego/.test(x) && /Wyjście zastawiono/.test(x)), JSON.stringify(noted.slice(-3)));
+    await shotOf(qp, 'S13-gate-before');
+    // a real tap on the figure writes its one line
+    await ev(() => {
+      const h = window.__game;
+      h.state().player.suspended = true;
+      const e = h.state().page.exit;
+      h.placePlayer(e.x + (e.corner[1] === 'l' ? 180 : -180), e.y + (e.corner[0] === 't' ? 180 : -180));
+    });
+    await sleep(1400);
+    const fig = await ev(() => {
+      const r = document.querySelector('#page [data-gate-figure]')?.getBoundingClientRect();
+      return r ? { x: r.x + r.width / 2, y: r.y + r.height / 2 } : null;
+    });
+    if (fig) await qp.touchscreen.tap(fig.x, fig.y);
+    await sleep(500);
+    const figNote = await ev(() => window.__game.notes().map((n) => n.text));
+    check('S13 gate: a tap on the Magazynier writes his one line as a footnote, no sheet', fig !== null && figNote.some((x) => /Nie wydaję\. Wydaję za okazaniem\./.test(x)) && !(await qp.locator('.npc-sheet').count()), JSON.stringify({ fig, last: figNote.slice(-2) }));
+    await ev(() => { window.__game.state().player.suspended = false; });
+    // another folder opened does not lift it; the key folder does
+    const other = await ev(() => {
+      const h = window.__game;
+      const id = h.content.put('teczka');
+      h.content.open(id);
+      h.advance(0.2);
+      return { holds: h.gate.info()?.holds ?? null };
+    });
+    check('S13 gate: any other teczka opened leaves the parcel wall standing', other.holds === true, JSON.stringify(other));
+    const lifted = await ev(() => {
+      const h = window.__game;
+      const key = h.content.list().find((c) => c.key);
+      h.content.open(key.id);
+      h.advance(0.2);
+      return { info: h.gate.info(), page: h.state().page.gate === undefined, notes: h.notes().map((n) => n.text) };
+    });
+    check('S13 gate: opening the list przewozowy lifts it and the lift footnote is the planet own', lifted.info === null && lifted.page && lifted.notes.some((x) => /List przewozowy okazano/.test(x)) && !lifted.notes.some((x) => /Przejście odblokowano/.test(x)), JSON.stringify(lifted.notes.slice(-2)));
+    await sleep(350);
+    await shotOf(qp, 'S13-gate-lifting');
+    await sleep(2600);
+    const after = await ev(() => ({ wall: document.querySelectorAll('#page [data-obstacle=gate]').length, figure: document.querySelectorAll('#page [data-gate-figure]').length }));
+    check('S13 gate: the parcels are struck through and drawn away, the figure walks off the page', after.wall === 0 && after.figure === 0, JSON.stringify(after));
+    await shotOf(qp, 'S13-gate-after');
+
+    // serwerownia: page 3, props drawn; the boss page
+    await turn(2);
+    const hall = await ev(() => {
+      const s = window.__game.state();
+      const props = [...document.querySelectorAll('#page [data-obstacle="prop"]')];
+      const kinds = new Set(s.page.obstacles.filter((o) => o.kind === 'prop').map((o) => o.variant));
+      return { loc: s.page.location, props: props.length, drawn: props.filter((n) => n.childElementCount > 0).length, kinds: [...kinds] };
+    });
+    check('S13 page 3: a serwerownia, every prop drawn (racks in corridors)', hall.loc === 'serwerownia' && hall.props >= 12 && hall.props === hall.drawn && hall.kinds.includes('rack'), JSON.stringify(hall));
+    await ev(() => {
+      const h = window.__game;
+      h.state().player.suspended = true;
+      const racks = h.state().page.obstacles.filter((q) => q.variant === 'rack');
+      const mid = racks.sort((a, b) => Math.abs(a.y - 800) - Math.abs(b.y - 800))[0];
+      if (mid) h.placePlayer(mid.x + 150, mid.y + 40);
+    });
+    await sleep(900);
+    await shotOf(qp, 'S13-serwerownia');
+    await ev(() => { window.__game.state().player.suspended = false; });
+    await turn(3);
+    await qp.waitForFunction(() => window.__game.state()?.enemies.some((e) => e.boss), null, { timeout: 8000 }).catch(() => undefined);
+    await sleep(600);
+    const boss = await ev(() => {
+      const b = window.__game.state().enemies.find((e) => e.boss);
+      const v = document.querySelector('[data-part=variant]');
+      return b ? { family: b.family, hp: b.hpMax, loc: window.__game.state().page.location, variant: v?.textContent ?? null } : null;
+    });
+    check('S13 boss: Prototyp on the last serwerownia page has 360 racja and the variant line under its name', boss !== null && boss.hp === 360 && boss.loc === 'serwerownia' && boss.variant === 'Prototyp, seria 2, aktualizacja zaległa', JSON.stringify(boss));
+    await shotOf(qp, 'S13-boss');
+    if (boss) {
+      let first = null;
+      for (let i = 0; i < 50 && !first; i++) {
+        const info = await ev(() => window.__game.spor.info());
+        if (info?.open && info.phase === 1) first = info;
+        else await sleep(200);
+      }
+      const bub = await ev(() => document.querySelector('.bubble.comment')?.textContent ?? '');
+      check('S13 Spór: the planet 2 comment (story.p2.boss.spor1) is posted as text, and the right reply is the egzystencjalny one', first !== null && first.commentKey === 'story.p2.boss.spor1.comment' && /nowa wersja/.test(bub) && first.replies[first.correct].textKey.endsWith('.egzystencjalny'), JSON.stringify({ key: first?.commentKey, bub, right: first ? first.replies[first.correct].textKey : null }));
+    }
+    await qctx.close();
   }
 
   // ---------- 7. frame time with 40 enemies ----------
