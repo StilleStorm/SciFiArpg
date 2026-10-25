@@ -1800,6 +1800,46 @@ try {
   }
   await shot('16b-every-hero-cast');
 
+  // ---------- 6e3. S19: every ultimate of Pralka and Konsultant (the slot's and ultimates 2 and 3) in all three paragraphs casts, runs and ends ----------
+  for (const [i, h] of [
+    { id: 'pralka', ults: ['pelnyCykl', 'uznanieOsobowosci', 'reklamacja'] },
+    { id: 'konsultant', ults: ['przekazanie', 'koniecKolejki', 'ankieta'] },
+  ].entries()) {
+    await page.evaluate((a) => window.__game.start(50 + a.i, { heroId: a.id }), { i, id: h.id });
+    await sleep(300);
+    if (await page.evaluate(() => window.__game.state().modal === 'cookies')) await page.locator('.cookie button').last().click({ timeout: 3000 });
+    const res = await page.evaluate((ults) => {
+      const g = window.__game;
+      const s = g.state();
+      const out = [];
+      s.player.hp = s.player.hpMax = 1e9;
+      s.hero.pendingLevels = 0;
+      g.setLevel(40);
+      for (const u of ults) {
+        for (const n of [1, 2, 3]) {
+          g.enemies.clear();
+          g.placePlayer(600, 800);
+          g.hero.spawn(6);
+          for (const e of s.enemies) e.hp = e.hpMax = 1e9;
+          s.hero.ultimateId = u;
+          s.hero.ult = { para: n, active: [], idle: 0 };
+          s.law.botTime = 0; // the page's law (the bot answers for a few seconds) forbids casts; the ultimate itself is what this leg asks about
+          s.player.statuses.length = 0; // the previous cast's crowd may have laid a status on him: this leg asks whether the ultimate itself casts
+          g.fillMeter(1);
+          const cast = g.castUltimate();
+          const during = g.ultimateInfo();
+          g.advance(1);
+          g.advance(9);
+          const after = g.ultimateInfo();
+          const why = cast ? undefined : { st: s.player.statuses.map((x) => x.kind), modal: s.modal, status: s.status, phase: s.phase, bot: s.law.botTime, lvl: s.player.level, ready: g.ultimateInfo().ready, act: g.ultimateInfo().active };
+          out.push({ u, n, cast, why, ran: during.active.includes(u), ended: after.active.length === 0, meter: after.meter });
+        }
+      }
+      return out;
+    }, h.ults);
+    check(`${h.id}: all three ultimates cast and end with § 1, § 2 and § 3`, res.length === 9 && res.every((r) => r.cast && r.ran && r.ended && r.meter === 0), JSON.stringify(res.filter((r) => !(r.cast && r.ran && r.ended && r.meter === 0))));
+  }
+
   // ---------- 6e2. S19: Konsultant's Wstrzymanie oplat cuts the in-run kiosk's service fee (20% -> 14% after three asks) ----------
   {
     await page.evaluate(() => window.__game.start(41, { heroId: 'konsultant' }));
