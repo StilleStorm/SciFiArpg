@@ -15,6 +15,8 @@ Nothing outside `src/heroes/<id>/` may write a hero id (lint rule `hero-id-liter
 | `quirk.ts` (optional) | `quirk: HeroQuirk` | `onHit`, `tick`: the passive. Flags without behaviour are `traits` in `def.ts` instead. |
 | `index.ts` | `hero: HeroModule` | Assembles the above. |
 
+A filled hero (S19) lists ten or eleven skills in `def.ts` (the first five unchanged), one `pads.ts` glyph and one `sounds.ts` recipe each, three `ultimates`, ten `passives` (7 is the `rule`), and keeps what its skills leave running in its own folder (`pralka/running.ts`, ticked from `quirk.tick`). See ARCHITECTURE.md "Filled heroes".
+
 Shared, not per hero: `defs.ts` (types), `aim.ts`, `helpers.ts`, `numbers.ts` (numbers of skills 4 and 5), `state.ts` (`HeroRun`), `system.ts` (the per-step system),
 `steps2.ts`, `layer.ts`, `loadout.ts`, `hook.ts`, `auto.ts`, `cast.ts`, `figureKit.ts`, `poseKit.ts`, `build.ts`, `primitives/`.
 

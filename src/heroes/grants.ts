@@ -11,11 +11,11 @@ import type { Player } from '../entities/types';
 import { setSkillPatches } from '../items/sets';
 import type { ItemGrant } from '../items/types';
 import type { RunState } from '../world/run';
-import { HEROES, heroDef, type SkillDef, type SkillIndex } from './defs';
+import { HEROES, heroDef, skillAt, type SkillDef, type SkillIndex } from './defs';
 import type { ParagraphNo, ParagraphPatch } from './paragraphs';
 import { heroById, type HeroId } from './registry';
 
-/** The index of skill `skillId` among the hero's five, or -1 when the hero does not have it. */
+/** The index of skill `skillId` among the hero's skills, or -1 when the hero does not have it. */
 export function skillIndexOf(heroId: HeroId, skillId: string): number {
   return heroDef(heroId).skills.findIndex((k) => k.id === skillId);
 }
@@ -82,10 +82,10 @@ export function patchAt(s: RunState, i: SkillIndex): ParagraphPatch | undefined 
   let patch = own;
   const carried = itemParagraphOf(p, i);
   if (carried > (s.hero.para?.[i] ?? 1)) {
-    const item = heroById(p.heroId).paragraphs[heroDef(p.heroId).skills[i].id]?.list[carried - 1]?.patch;
+    const item = heroById(p.heroId).paragraphs[skillAt(heroDef(p.heroId), i).id]?.list[carried - 1]?.patch;
     if (item) patch = item;
   }
-  for (const extra of setSkillPatches(p, heroDef(p.heroId).skills[i].id)) patch = layPatch(patch, extra);
+  for (const extra of setSkillPatches(p, skillAt(heroDef(p.heroId), i).id)) patch = layPatch(patch, extra);
   return patch;
 }
 

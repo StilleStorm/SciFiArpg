@@ -2,6 +2,6 @@
 import type { HeroSounds } from '../module';
 
 export const sounds: HeroSounds = {
-  skills: ['pralkaSpin', 'pralkaFoam', 'pralkaDrag', 'pralkaDrum', 'pralkaPersona'],
-  ultimate: 'pralkaUlt',
+  skills: ['pralkaSpin', 'pralkaFoam', 'pralkaDrag', 'pralkaDrum', 'pralkaPersona', 'pralkaRinse', 'pralkaSteam', 'pralkaEco', 'pralkaSwitch', 'pralkaPump'],
+  ultimate: { pelnyCykl: 'pralkaUlt', uznanieOsobowosci: 'pralkaPersonUlt', reklamacja: 'pralkaClaimUlt' },
 };

@@ -4,11 +4,16 @@ import type { FamilyId } from '../enemies/ids';
 import type { HeroId } from './registry';
 import type { ParagraphPatch } from './paragraphs';
 
-/** A skill of the hero (0..4) and a pad (0..2); `HeroRun.pads` says which skill each pad fires (DESIGN 10.1). */
-export type SkillIndex = 0 | 1 | 2 | 3 | 4;
+/**
+ * A skill of the hero (0..10: five at the start, a filled hero has 10 or 11, S19) and a pad (0..2); `HeroRun.pads` says which skill
+ * each pad fires (DESIGN 10.1). `SKILL_INDICES` is the whole range: ask `skillIndicesOf(def)` for the skills a hero actually has.
+ */
+export type SkillIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 export type PadSlot = 0 | 1 | 2;
 export const PAD_SLOTS: readonly PadSlot[] = [0, 1, 2];
-export const SKILL_INDICES: readonly SkillIndex[] = [0, 1, 2, 3, 4];
+export const SKILL_INDICES: readonly SkillIndex[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+/** The five slots every hero has, then any number more (an array of per-skill data stays five long until a skill past the fifth writes to it). */
+export type Slots<T> = [T, T, T, T, T, ...T[]];
 
 /** How a skill is aimed (DESIGN 5.6): by itself, by a direction, or by a point. */
 export type AimMode = 'auto' | 'kierunek' | 'wskazanie';
@@ -81,8 +86,15 @@ export interface HeroDef {
   traits?: HeroTraits;
   /** i18n key of the Asystent's remark on this hero chosen for the first time (heroes/chosen.ts). */
   chosenNoteKey?: string;
-  skills: readonly [SkillDef, SkillDef, SkillDef, SkillDef, SkillDef];
+  /** The first five are the original kit (0..2 always installed, 3 and 4 through permissions); a filled hero (S19) lists up to eleven. */
+  skills: readonly [SkillDef, SkillDef, SkillDef, SkillDef, SkillDef, ...SkillDef[]];
 }
+
+/** The skill `i` of the hero; a hero with fewer skills answers its first (callers go through `skillIndicesOf`, so it is never asked for). */
+export const skillAt = (def: Pick<HeroDef, 'skills'>, i: SkillIndex): SkillDef => def.skills[i] ?? def.skills[0];
+
+/** The indices of the skills the hero has (5 for the original kit, 10 or 11 for a filled hero). */
+export const skillIndicesOf = (def: Pick<HeroDef, 'skills'>): SkillIndex[] => SKILL_INDICES.filter((i) => i < def.skills.length);
 
 // The five heroes live in src/heroes/<id>/def.ts; the registry (heroes/registry.ts) lists them.
 export { HEROES, HERO_IDS, heroDef } from './registry';

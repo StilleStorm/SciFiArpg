@@ -3,7 +3,7 @@
 // casts skills and the ultimate whenever ready, takes the first free update, answers the Spor correctly, takes side tickets of
 // the planet and reports them when ready. It is a competent but plain player, so the numbers are a yardstick, not a forecast.
 // Usage: npm run balance (builds into dist-balance). Env: BAL_RUNS (runs per hero, default 6; 20 is the full pass), BAL_HEROES (comma list), BAL_PLANET
-// (0-based planet, default 0), BAL_PRIORITY (default normalny), BAL_PORT (4197), BAL_OUT (dist-balance), BAL_JSON (write raw rows).
+// (0-based planet, default 0), BAL_AIM (auto = every pad on the auto aim, the S16 bot; nearest = aimed at the nearest enemy; claim = aimed at the enemy whose claim the skill rebuts), BAL_LOADOUT (skill ids for pads 1, 2, 3, put there once installed; default: the pads as the game starts them), BAL_PRIORITY (default normalny), BAL_PORT (4197), BAL_OUT (dist-balance), BAL_JSON (write raw rows).
 // Heroes play side by side; one run is about 5 s of wall time, so 6 runs per hero take about a minute (BAL_RUNS=20: three to four).
 import { spawn } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
@@ -14,6 +14,8 @@ const RUNS = Number(process.env.BAL_RUNS ?? 6);
 const PLANET = Number(process.env.BAL_PLANET ?? 0);
 const PRIORITY = process.env.BAL_PRIORITY ?? 'normalny';
 const PORT = Number(process.env.BAL_PORT ?? 4197);
+const AIM = process.env.BAL_AIM ?? 'nearest';
+const LOADOUT = (process.env.BAL_LOADOUT ?? '').split(',').filter(Boolean);
 const OUT = process.env.BAL_OUT ?? 'dist-balance';
 const HEROES = (process.env.BAL_HEROES ?? 'pralka,konsultant,petlowiec,kartograf,nalesnik').split(',');
 const URL = `http://127.0.0.1:${PORT}/SciFiArpg/`;
@@ -31,7 +33,7 @@ for (let i = 0; i < 100; i++) {
 }
 
 /** One whole ticket, played in the page. Returns the row. */
-async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode, finaleLevel }) {
+async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode, finaleLevel, aim, loadout }) {
   const g = window.__game;
   const LAWS = { 0: 'wymagana-aktualizacja' };
   const lawId = LAWS[planet] ?? undefined;
@@ -233,9 +235,34 @@ async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode,
       const c = g.spor.info().correct;
       if (c !== null) g.spor.answer(c);
     }
+    if (loadout.length > 0) {
+      // BAL_LOADOUT (S19): the skills the bot wants on pads 1, 2, 3, by id; each goes on its pad as soon as it is installed
+      const info = g.hero.info();
+      loadout.forEach((id, slot) => {
+        const k = info.skillIds.indexOf(id);
+        if (k >= 0 && (k <= 2 || (info.ranks[k] ?? 0) > 0) && info.pads[slot] !== k) g.hero.assignPad(slot + 1, k);
+      });
+    }
     const near = s.enemies.filter((e) => Math.hypot(e.x - p.x, e.y - p.y) < 420);
     if (near.length > 0) {
-      for (const slot of [1, 2, 3]) if (g.hero.cast(slot, { kind: 'auto' })) row.casts++;
+      // BAL_AIM=auto casts every pad on the auto aim (the S16 bot). nearest (S19): a kierunek skill gets the direction to the nearest
+      // enemy, a wskazanie skill that enemy's position. claim: the same, but the enemy whose standing claim the skill rebuts comes first
+      // (a thumb that reads the bubbles). An auto skill is always the auto cast.
+      const info = aim !== 'auto' ? g.hero.info() : null;
+      const byDist = near.slice().sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y));
+      for (const slot of [1, 2, 3]) {
+        let aimed = { kind: 'auto' };
+        if (info && byDist[0]) {
+          const k = info.pads[slot - 1];
+          const mode = info.aims[k];
+          const type = info.types[k];
+          const target = (aim === 'claim' ? byDist.find((e) => e.claim && !e.claim.struck && e.claim.type === type) : undefined) ?? byDist[0];
+          const d = Math.hypot(target.x - p.x, target.y - p.y) || 1;
+          if (mode === 'kierunek') aimed = { kind: 'kierunek', dx: (target.x - p.x) / d, dy: (target.y - p.y) / d };
+          else if (mode === 'wskazanie') aimed = { kind: 'wskazanie', x: target.x, y: target.y };
+        }
+        if (g.hero.cast(slot, aimed)) row.casts++;
+      }
     }
     if (g.castUltimate()) row.ults++;
     if (step % 150 === 0 && s.time - equipAt > 10 && p.inventory.length > 0) {
@@ -328,7 +355,7 @@ async function playHero(heroId) {
   await page.waitForFunction(() => !!window.__game, null, { timeout: 15000 });
   for (let i = 0; i < RUNS; i++) {
     const seed = process.env.BAL_SEED ? Number(process.env.BAL_SEED) + i : 9100 + i * 131 + ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'].indexOf(heroId) * 7;
-    const row = await page.evaluate(playTicket, { heroId, seed, planet: PLANET, priority: PRIORITY, wallMs: Number(process.env.BAL_RUN_MS ?? 100000), trace: !!process.env.BAL_TRACE, mode: process.env.BAL_MODE ?? 'ticket', finaleLevel: Number(process.env.BAL_LEVEL ?? (process.env.BAL_MODE === 'finale' ? 12 : 1)) });
+    const row = await page.evaluate(playTicket, { aim: AIM, loadout: LOADOUT, heroId, seed, planet: PLANET, priority: PRIORITY, wallMs: Number(process.env.BAL_RUN_MS ?? 100000), trace: !!process.env.BAL_TRACE, mode: process.env.BAL_MODE ?? 'ticket', finaleLevel: Number(process.env.BAL_LEVEL ?? (process.env.BAL_MODE === 'finale' ? 12 : 1)) });
     if (process.env.BAL_VERBOSE) console.log(`${heroId} #${i} won=${row.won} t=${row.tEnd}s wall=${((Date.now() - t0) / 1000).toFixed(0)}s lvl=${row.level} deaths=${row.deaths} pages=${row.pages} dbg=${JSON.stringify(row.dbg ?? null).slice(0, 700)}`);
     rows.push(row);
     await page.evaluate(() => window.__game.go('baza')).catch(() => undefined);

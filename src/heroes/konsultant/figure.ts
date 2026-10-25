@@ -1,7 +1,8 @@
 /** The Konsultant's drawing and his auto-attack animation: the throwing arm, the ticket, the lash of the headset cable. */
 import { n2 } from '../../render/svg';
 import { easeOut } from '../../render/tween';
-import { hide, setPart, type DriveCtx, type FigureDef, type HeroFigure } from '../figureKit';
+import type { Summon, Zone } from '../../entities/types';
+import { circlePath, hide, setPart, type DriveCtx, type FigureDef, type HeroFigure } from '../figureKit';
 import { clamp01, keyframes, LASH_BACK_MS, LASH_OUT_MS, neutralPose, smooth, THROW_DEG, type HeroPose } from '../poseKit';
 
 /** a helpline consultant who left the queue, still wearing the headset and dragging the cable */
@@ -65,6 +66,59 @@ function drive({ e, p, pose, a, t, side, fx }: DriveCtx): void {
   fx.driveLash(a, pose, t, hand);
 }
 
+const f1 = (v: number): string => String(Math.round(v * 10) / 10);
+
+/**
+ * The things his skills leave on the page (S19), as strokes. A Formularz kontaktowy: the dotted rim of its area and a ruled form in the
+ * middle (a heading rule, three lines, a checkbox). Muzyka w sluchawce: the dotted rim and three arcs of a stave round him, with two notes.
+ * A recording on the floor (passive 9): a speech bubble with its tail.
+ */
+export function zoneParts(z: Zone): readonly string[] | null {
+  const r = z.r;
+  if (z.variant === 'formularz') {
+    const w = r * 0.62;
+    const h = r * 0.5;
+    return [
+      `~${circlePath(0, 0, r)}`,
+      `M${f1(-w)} ${f1(-h)}H${f1(w)}V${f1(h)}H${f1(-w)}Z`,
+      `M${f1(-w)} ${f1(-h * 0.45)}H${f1(w)}`,
+      `M${f1(-w * 0.8)} ${f1(h * 0.05)}H${f1(w * 0.8)}M${f1(-w * 0.8)} ${f1(h * 0.42)}H${f1(w * 0.3)}`,
+      `M${f1(w * 0.45)} ${f1(h * 0.28)}h${f1(w * 0.3)}v${f1(h * 0.3)}h${f1(-w * 0.3)}Z`,
+    ];
+  }
+  if (z.variant === 'stave') {
+    const arc = (k: number, from: number, to: number): string => {
+      const rr = r * k;
+      const a0 = (from * Math.PI) / 180;
+      const a1 = (to * Math.PI) / 180;
+      return `M${f1(Math.cos(a0) * rr)} ${f1(Math.sin(a0) * rr)}A${f1(rr)} ${f1(rr)} 0 0 1 ${f1(Math.cos(a1) * rr)} ${f1(Math.sin(a1) * rr)}`;
+    };
+    const note = (a: number, k: number): string => {
+      const x = Math.cos((a * Math.PI) / 180) * r * k;
+      const y = Math.sin((a * Math.PI) / 180) * r * k;
+      return `M${f1(x - 3)} ${f1(y)}a3 2.2 0 1 0 6 0a3 2.2 0 1 0-6 0M${f1(x + 3)} ${f1(y)}V${f1(y - 11)}`;
+    };
+    return [`~${circlePath(0, 0, r)}`, arc(0.6, -150, 60), arc(0.68, -150, 60), arc(0.76, -150, 60), note(-70, 0.68), note(20, 0.68)];
+  }
+  if (z.variant === 'nagranie') return ['M-15-10H15V5H5L-1 12V5H-15Z', 'M-10-5H10M-10 0H4'];
+  return null;
+}
+
+/** A chair (Przerwa techniczna) and a desk phone (Oddzwonimy), drawn about as high as the hero. */
+export function summonParts(e: Summon): readonly string[] | null {
+  if (e.variant === 'chair') return ['M-11-30V-1H11', 'M-11-1V17M11-1V17', 'M-11-17H9', 'M-14-1H14', '~M-16 20H16'];
+  if (e.variant === 'phone') {
+    return [
+      'M-21 6V-1.5Q-21-12-9-12H9Q21-12 21-1.5V6H12V0Q12-4.5 7.5-4.5H-7.5Q-12-4.5-12 0V6Z',
+      'M-24 9H24V18H-24Z',
+      'M-9 9V18M9 9V18',
+      '~M-15-19Q0-28 15-19',
+      '~M-22-27Q0-40 22-27', // the bell, drawn from the first moment: it is going to ring
+    ];
+  }
+  return null;
+}
+
 export const figure: HeroFigure = {
   def: figureDef,
   wash: { cx: 0, cy: -7, r: 20, seed: 0x4802 },
@@ -72,4 +126,6 @@ export const figure: HeroFigure = {
   attackMs: 230,
   pose,
   drive,
+  zoneParts,
+  summonParts,
 };

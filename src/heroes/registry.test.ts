@@ -18,7 +18,7 @@ describe('registry', () => {
     }
   });
 
-  it('every hero has a cast for each of its five skills, and no cast without a skill', () => {
+  it('every hero has a cast for each of its skills (five, or ten once filled), and no cast without a skill', () => {
     for (const m of HEROES.map((d) => heroById(d.id))) {
       const ids = m.def.skills.map((s) => s.id);
       expect(Object.keys(m.casts).sort(), m.def.id).toEqual([...ids].sort());
@@ -35,20 +35,27 @@ describe('registry', () => {
     }
   });
 
-  it('the sounds of the heroes are audio recipes, five distinct per hero', () => {
+  it('the sounds of the heroes are audio recipes, one distinct per skill', () => {
     for (const id of HERO_ID_LIST) {
-      const five = heroById(id).sounds.skills;
-      expect(new Set(five).size, id).toBe(5);
-      for (const n of five) expect(RECIPES[n], `${id} ${n}`).toBeDefined();
+      const m = heroById(id);
+      const names = m.sounds.skills;
+      expect(names.length, id).toBe(m.def.skills.length);
+      expect(new Set(names).size, id).toBe(names.length);
+      for (const n of names) expect(RECIPES[n], `${id} ${n}`).toBeDefined();
+      const ults = m.sounds.ultimate;
+      if (typeof ults === 'object') {
+        expect(Object.keys(ults).sort(), id).toEqual((m.ultimates ?? []).map((u) => u.id).sort());
+        for (const n of Object.values(ults)) expect(RECIPES[n], `${id} ${n}`).toBeDefined();
+      }
     }
   });
 
-  it('every hero has five pad glyphs and six passives, the last one gated by a permission', () => {
+  it('every hero has a pad glyph per skill and at least six passives, the sixth gated by a permission', () => {
     for (const id of HERO_ID_LIST) {
       const m = heroById(id);
-      expect(m.pads, id).toHaveLength(5);
+      expect(m.pads, id).toHaveLength(m.def.skills.length);
       for (const g of m.pads) expect(g.length, id).toBeGreaterThan(0);
-      expect(m.passives, id).toHaveLength(6);
+      expect(m.passives.length, id).toBeGreaterThanOrEqual(6);
       expect(m.passives[5]?.requires, id).toBeDefined();
       expect(WASH_HUES, id).toContain(m.figure.hue);
     }

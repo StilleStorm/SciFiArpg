@@ -16,7 +16,7 @@
  * (one per category) is advice, never enforced; a capstone is granted only for the one chosen column, and only while >= 2 of the
  * equipped pad skills belong to it; at a cast the capstone patch is laid on its skill (`withCapstone`, called by heroes/skills.ts `fire`).
  */
-import { heroDef, PAD_SLOTS, SKILL_INDICES, type SkillDef, type SkillIndex } from './defs';
+import { heroDef, PAD_SLOTS, SKILL_INDICES, skillAt, type SkillDef, type SkillIndex } from './defs';
 import { patchAt, withPatchAt } from './grants';
 import type { ParagraphPatch } from './paragraphs';
 import { heroById, HERO_IDS, type HeroId } from './registry';
@@ -71,14 +71,14 @@ export const specializationOf = (heroId: HeroId, id: string): Specialization | u
 
 export const ultimatesOf = (heroId: HeroId): string[] => (heroById(heroId).ultimates ?? []).map((u) => u.id);
 
-/** Skills 1..3 are always open; the 4th and 5th once an update gave them a rank (as progression/paragraphs.ts). */
+/** Skills 1..3 are always open; the others once an update gave them a rank (as progression/paragraphs.ts). */
 export const isSkillUnlocked = (c: Pick<LoadoutView, 'upgrades'>, i: SkillIndex): boolean => i <= 2 || (c.upgrades[`skill${i + 1}`] ?? 0) > 0;
 
 export const unlockedSkills = (c: Pick<LoadoutView, 'upgrades'>): SkillIndex[] => SKILL_INDICES.filter((i) => isSkillUnlocked(c, i));
 
 const padIds = (c: LoadoutView): string[] => {
   const skills = heroDef(c.heroId).skills;
-  return c.pads.filter((i) => isSkillUnlocked(c, i)).map((i) => skills[i].id);
+  return c.pads.filter((i) => isSkillUnlocked(c, i)).map((i) => skillAt({ skills }, i).id);
 };
 
 /** How many of the equipped (unlocked) pad skills belong to the column. */
@@ -114,7 +114,7 @@ const ADVISED: readonly SkillCategory[] = ['podstawowa', 'ofensywna', 'obronna',
 /** The rule of three is advice: when two pads hold the same category, the categories no pad holds. Otherwise nothing is missing. */
 export function loadoutAdvice(c: Pick<LoadoutView, 'heroId' | 'pads'>): SkillCategory[] {
   const skills = heroDef(c.heroId).skills;
-  const cats = PAD_SLOTS.map((p) => categoryOf(skills[c.pads[p]]));
+  const cats = PAD_SLOTS.map((p) => categoryOf(skillAt({ skills }, c.pads[p])));
   if (new Set(cats).size === cats.length) return [];
   return ADVISED.filter((k) => !cats.includes(k));
 }
@@ -148,7 +148,7 @@ export function mergeCapstone(base: ParagraphPatch | undefined, cap: CapstonePat
 export function withCapstone<T>(s: RunState, skill: SkillIndex, fn: (patch: ParagraphPatch | undefined) => T): T {
   const base = patchAt(s, skill); // the run's paragraph, a worn unique's and the sets' (heroes/grants.ts)
   const cap = runCapstone(s);
-  if (!cap || cap.capstone.skill !== heroDef(s.player.heroId).skills[skill].id) return fn(base);
+  if (!cap || cap.capstone.skill !== skillAt(heroDef(s.player.heroId), skill).id) return fn(base);
   const merged = mergeCapstone(base, cap.capstone.patch);
   return withPatchAt(skill, merged, () => fn(merged));
 }

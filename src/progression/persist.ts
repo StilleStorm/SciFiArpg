@@ -20,15 +20,15 @@ export interface ProgressData {
   permissions: string[];
   /** Levels gained whose update form was not filled in yet. */
   pendingLevels: number;
-  /** Which skill (0..4) each of the three pads fires (DESIGN 10.1); saves from before the 4th and 5th skill have [0, 1, 2]. */
+  /** Which skill (0..10) each of the three pads fires (DESIGN 10.1); saves from before the 4th and 5th skill have [0, 1, 2]. */
   pads: [SkillIndex, SkillIndex, SkillIndex];
 }
 
 export const DEFAULT_PADS: readonly [SkillIndex, SkillIndex, SkillIndex] = [0, 1, 2];
 
-/** Read the three pads leniently: anything that is not three skill indexes (0..4) becomes the default. Duplicates are left to `fixPads`. */
+/** Read the three pads leniently: anything that is not three skill indexes (0..10) becomes the default. Duplicates are left to `fixPads`. */
 export function padsFrom(v: unknown): [SkillIndex, SkillIndex, SkillIndex] {
-  const ok = (x: unknown): x is SkillIndex => typeof x === 'number' && Number.isInteger(x) && x >= 0 && x <= 4;
+  const ok = (x: unknown): x is SkillIndex => typeof x === 'number' && Number.isInteger(x) && x >= 0 && x <= 10;
   if (Array.isArray(v) && v.length === 3 && ok(v[0]) && ok(v[1]) && ok(v[2])) return [v[0], v[1], v[2]];
   return [...DEFAULT_PADS];
 }

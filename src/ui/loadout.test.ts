@@ -5,12 +5,13 @@ import { createRun } from '../world/run';
 import { loadoutRows } from './loadout';
 
 describe('loadoutRows', () => {
-  it('lists five skills; the fourth and fifth are greyed with their permission until an update installs them', () => {
+  it('lists the hero\'s skills; the fourth and fifth are greyed with their permission until an update installs them', () => {
     const s = createRun(3, { heroId: 'pralka' });
     const rows = loadoutRows(s);
-    expect(rows).toHaveLength(5);
-    expect(rows.map((r) => r.installed)).toEqual([true, true, true, false, false]);
-    expect(rows.map((r) => r.pad)).toEqual([0, 1, 2, null, null]);
+    expect(rows).toHaveLength(10); // five, and the five of S19
+    expect(rows.map((r) => r.installed)).toEqual([true, true, true, false, false, false, false, false, false, false]);
+    expect(rows.map((r) => r.pad)).toEqual([0, 1, 2, null, null, null, null, null, null, null]);
+    expect(rows.slice(5).every((r) => r.requires === null)).toBe(true); // the later skills open by level, no permission
     expect(rows[0]?.rank).toBe('—');
     expect(rows[3]?.requires).toContain('urządzenia');
     expect(rows[4]?.requires).toContain('wygenerowane');

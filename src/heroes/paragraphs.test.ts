@@ -65,7 +65,7 @@ describe('the 75 paragraphs', () => {
         expect(list.map((p) => patchFields(p.patch) > 0)).toEqual([false, true, true]);
       }
     }
-    expect(count).toBe(75);
+    expect(count).toBe(HERO_IDS.reduce((n, id) => n + heroById(id).def.skills.length * 3, 0));
   });
 
   it('every § 3 carries a price: a longer cooldown, racja, a shorter or weaker skill', () => {

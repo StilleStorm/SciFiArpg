@@ -2,6 +2,7 @@
 import { createRng } from '../core/rng';
 import type { Bus } from '../core/events';
 import type { Summon, Zone } from '../entities/types';
+import { heroById, HERO_IDS } from '../heroes/registry';
 import { t } from '../i18n';
 import { setStroke } from './attackFx';
 import { drawIn, eraseOut, marginNote } from './ink';
@@ -60,6 +61,20 @@ function wetStrokes(x: number, y: number, r: number, count: number, toward?: { x
     const len = pen.range(5, 9);
     const tilt = pen.range(-0.6, 0.6) + Math.PI / 2; // droplets run down the page
     d += `M${n2(cx)} ${n2(cy)}q${n2(Math.cos(tilt) * len * 0.5 + 2)} ${n2(Math.sin(tilt) * len * 0.5)} ${n2(Math.cos(tilt) * len)} ${n2(Math.sin(tilt) * len)}`;
+  }
+  return d;
+}
+
+/** Wavy strokes rising from the floor of a circle (x, y, r): the steam of Program 90. */
+function steamStrokes(x: number, y: number, r: number): string {
+  let d = '';
+  const count = Math.max(3, Math.round(r / 22));
+  for (let i = 0; i < count; i++) {
+    const cx = x + pen.range(-r, r) * 0.7;
+    const cy = y + pen.range(-0.1, 0.5) * r;
+    const h = pen.range(14, 24);
+    const w = pen.range(3, 5);
+    d += `M${n2(cx)} ${n2(cy)}q${n2(w)} ${n2(-h * 0.25)} 0 ${n2(-h * 0.5)}t0 ${n2(-h * 0.5)}`;
   }
   return d;
 }
@@ -173,6 +188,22 @@ export function bindHeroFx(bus: Bus, layer: SVGGElement): void {
         eraseOut(g, 420, 520, () => wrap.remove());
         break;
       }
+      case 'steam': {
+        // Program 90: a dotted ring and wavy strokes of steam rising out of the drum's floor (S19)
+        sketch(layer, circleAround(e.x, e.y, e.r), { dash: '2 5', ms: 220, hold: 500 });
+        sketch(layer, steamStrokes(e.x, e.y, e.r), { ms: 260, hold: 520, width: 1.3 });
+        break;
+      }
+      case 'puddle': {
+        // Odpompowanie: a hatched puddle with a wavy rim and the swirl of the drain at its centre (S19)
+        const g = el('g', {});
+        const rim = smoothClosed(blobPoints(pen, e.x, e.y, e.r, 14, 0.07));
+        g.append(el('path', { d: rim }), el('path', { d: rim, fill: 'url(#hatch)', stroke: 'none', 'fill-opacity': 0.6 }), el('path', { d: spiral(e.x, e.y, e.r * 0.22), 'stroke-width': 1.2 }));
+        layer.append(g);
+        drawIn(g, 240);
+        eraseOut(g, 420, 1000, () => g.remove());
+        break;
+      }
       case 'capsule': {
         // Odlozony start: the capsule stands where it landed, in a dotted ring of the area it struck
         const g = el('g', { transform: `translate(${n2(e.x)} ${n2(e.y + 12)}) scale(1.35)` });
@@ -190,6 +221,16 @@ export function bindHeroFx(bus: Bus, layer: SVGGElement): void {
 // ---------- zones ----------
 
 const HOURGLASS = 'M-6-9H6M-6 9H6M-5-9C-5-2-1-1 0 0C-1 1-5 2-5 9M5-9C5-2 1-1 0 0C1 1 5 2 5 9M-2.5 8H2.5M0 1V6';
+
+/** Strokes of a hero-drawn thing (heroes/figureKit.ts `zoneParts`, `summonParts`): "~" in front draws a stroke dotted. */
+export function appendParts(g: SVGGElement, parts: readonly string[]): void {
+  for (const d of parts) {
+    const dotted = d.startsWith('~');
+    const path = el('path', { d: dotted ? d.slice(1) : d });
+    if (dotted) path.setAttribute('stroke-dasharray', '2 4');
+    g.append(path);
+  }
+}
 
 export const zoneBuilder: Builder<Zone> = {
   create(z) {
@@ -215,6 +256,11 @@ export const zoneBuilder: Builder<Zone> = {
         el('path', { d: 'M0-23L11-20L0-17Z', fill: 'url(#hatch)', stroke: 'none' }),
         el('path', { d: 'M-5 4Q0 6.5 5 4M-3 6.5H3', 'stroke-width': 1.1 }),
       );
+      return g;
+    }
+    const drawn = HERO_IDS.map((id) => heroById(id).figure.zoneParts?.(z) ?? null).find((x) => x !== null);
+    if (drawn) {
+      appendParts(g, drawn);
       return g;
     }
     if (z.variant === 'numer') return buildCaseNumber(g, z);

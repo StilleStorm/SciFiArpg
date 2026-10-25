@@ -57,6 +57,22 @@
         "6": {
           "name": "Pranie delikatne",
           "desc": "Czas działania dłuższy o 25%. Każde skreślenie przywraca 2 punkty racji."
+        },
+        "7": {
+          "name": "Błąd programu",
+          "desc": "Co dziesiąte trafienie w Pralkę uruchamia losową umiejętność bez odnowienia. Cecha stała, nie zajmuje miejsca."
+        },
+        "8": {
+          "name": "Wersja 1.1",
+          "desc": "Błąd programu następuje co siódme trafienie, nie co dziesiąte."
+        },
+        "9": {
+          "name": "Gwarancja",
+          "desc": "Raz na stronę, gdy racja spadnie poniżej 20%, pojawia się piana pochłaniająca 40 obrażeń."
+        },
+        "10": {
+          "name": "Bęben pełny",
+          "desc": "Każdy przeciwnik przyciągnięty Wirowaniem dodaje 4% do następnego Otwarcia bębna lub Programu 90°, najwyżej 24%."
         }
       },
       "konsultant": {
@@ -83,6 +99,22 @@
         "6": {
           "name": "Eskalacja do przełożonego",
           "desc": "Obrażenia większe o 15%, obszar o 10%."
+        },
+        "7": {
+          "name": "Dostęp do systemu",
+          "desc": "Zawsze włączona. Przedmioty weryfikuje dwa razy szybciej, a wady urządzeń widzi od razu."
+        },
+        "8": {
+          "name": "Numerek",
+          "desc": "Przeciwnicy, którym nada status, dostają numer. Każdy zgon w kolejności numerów dodaje 3% szansy na argument nie do odparcia, najwyżej 15%."
+        },
+        "9": {
+          "name": "Połączenie nagrywane",
+          "desc": "Zablokowany przeciwnik, który zginie, zostawia na ziemi swój dymek na 3 s. Następny, który na niego wejdzie, przejmuje tezę."
+        },
+        "10": {
+          "name": "Wstrzymanie opłat",
+          "desc": "Każde użycie „Czy mogę jeszcze w czymś pomóc” obniża opłaty w kiosku o 10% do końca wyprawy, najwyżej o 30%."
         }
       },
       "petlowiec": {
@@ -273,6 +305,8 @@
     "capNone": "Nie wybrano kolumny.",
     "ultTitle": "Argument ostateczny",
     "ultLocked": "Argument ostateczny otwiera się na poziomie {level}.",
+    "ultPick": "Wybierz",
+    "ultPickLabel": "Ustaw „{name}” jako argument ostateczny",
     "adviceMissing": "Zalecenie niewiążące: kategorie na padach się powtarzają. Nieobecne: {missing}.",
     "adviceOk": "Kategorie na padach się nie powtarzają. Uwag brak.",
     "cue": "Dalsza część formularza poniżej",

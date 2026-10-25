@@ -33,9 +33,9 @@ describe('hero definitions', () => {
   it('has five heroes with five typed skills each (the 4th and 5th gated by a permission) and no mana', () => {
     expect(HEROES.map((h) => h.id)).toEqual(['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik']);
     for (const h of HEROES) {
-      expect(h.skills).toHaveLength(5);
+      expect(h.skills.length).toBeGreaterThanOrEqual(5); // 5 for the original kit, 10 or 11 once a hero is filled (S19)
       expect(h.skills.slice(0, 3).every((sk) => sk.requires === undefined)).toBe(true);
-      expect(h.skills.slice(3).every((sk) => sk.requires !== undefined)).toBe(true);
+      expect(h.skills.slice(3, 5).every((sk) => sk.requires !== undefined)).toBe(true);
       for (const sk of h.skills) {
         expect(sk.cooldown).toBeGreaterThan(0);
         expect(['mechaniczny', 'regulaminowy', 'egzystencjalny']).toContain(sk.type);

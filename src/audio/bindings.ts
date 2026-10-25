@@ -44,9 +44,14 @@ export const LAW_SOUNDS: Record<string, SfxName> = {
   'code:accepted': 'stamp',
 };
 
-/** The sound of hero `id`'s ultimate (`HeroModule.sounds.ultimate`); undefined for a hero without one. */
-export function ultimateSound(id: HeroId): SfxName | undefined {
-  return heroById(id).sounds.ultimate;
+/**
+ * The sound of hero `id`'s ultimate `ultimateId` (`HeroModule.sounds.ultimate`): a hero with one recipe plays it for every
+ * ultimate; a hero with a name per ultimate id plays that one, else its first (an id not yet given a recipe). Undefined: none.
+ */
+export function ultimateSound(id: HeroId, ultimateId: string): SfxName | undefined {
+  const u = heroById(id).sounds.ultimate;
+  if (typeof u !== 'object') return u;
+  return u[ultimateId] ?? Object.values(u)[0];
 }
 
 /** After this many exceptions the sound is switched off for the session; the game never depends on it. */
@@ -178,13 +183,14 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
     if (!hero) return;
     const gain = (e.free ? 0.85 : 1) * (1 + Math.min(0.2, fxRadius / 500));
     fxRadius = 0;
-    play(heroById(hero).sounds.skills[e.skill], { gain });
+    const name = heroById(hero).sounds.skills[e.skill];
+    if (name) play(name, { gain });
   });
 
   // the ultimate: the hero's own long recipe (body, then the stamp thud at the end); the page ducks under it like under a kill
   on('ultimate:cast', (e) => {
     if (!HERO_IDS.includes(e.heroId as HeroId)) return;
-    const name = ultimateSound(e.heroId as HeroId);
+    const name = ultimateSound(e.heroId as HeroId, e.ultimateId);
     if (!name) return;
     play(name);
     duck();

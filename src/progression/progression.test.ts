@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { createBus } from '../core/events';
 import { createRun, type RunState } from '../world/run';
 import type { HeroId } from '../heroes';
+import { heroDef } from '../heroes/defs';
+import { heroById } from '../heroes/registry';
 import { applyUpgrade, availableEntries, confirmUpdate, entryView, openOffer, poolFor, reroll, requirementOf, rollOffer, upgradeById } from './update';
 import { gainXp, xpForKill, xpToNext, xpTotalFor } from './xp';
 
@@ -40,12 +42,12 @@ describe('level curve', () => {
 });
 
 describe('the upgrade pool', () => {
-  it.each(['pralka', 'konsultant', 'petlowiec', 'kartograf'] as const)('%s: 5 skills x 3 ranks, 6 passives and stat upgrades', (id) => {
+  it.each(['pralka', 'konsultant', 'petlowiec', 'kartograf'] as const)('%s: its skills x 3 ranks, its passives (not the rule) and stat upgrades', (id) => {
     const pool = poolFor(id);
     const skills = pool.filter((u) => u.kind === 'skill');
-    expect(skills).toHaveLength(5);
+    expect(skills).toHaveLength(heroDef(id).skills.length);
     expect(skills.every((u) => u.maxRank === 3)).toBe(true);
-    expect(pool.filter((u) => u.kind === 'passive')).toHaveLength(6);
+    expect(pool.filter((u) => u.kind === 'passive')).toHaveLength(heroById(id).passives.filter((p) => !p.rule).length);
     expect(pool.filter((u) => u.kind === 'stat').length).toBeGreaterThanOrEqual(6);
     expect(new Set(pool.map((u) => u.id)).size).toBe(pool.length);
   });

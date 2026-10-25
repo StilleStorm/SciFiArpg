@@ -114,7 +114,7 @@ try {
         radius: [...document.querySelectorAll('.kf-sheet *')].filter((n) => parseFloat(getComputedStyle(n).borderTopLeftRadius) > 0).length,
       };
     });
-    check(`${prefix}: Konfiguracja lists five skills, boxes of at least 44 px, one stamp per installed skill`, kf.rows === 5 && kf.small === 0 && kf.active === 3 && kf.radius === 0, JSON.stringify(kf));
+    check(`${prefix}: Konfiguracja lists ten skills (Pralka, S19), boxes of at least 44 px, one stamp per installed skill`, kf.rows === 10 && kf.small === 0 && kf.active === 3 && kf.radius === 0, JSON.stringify(kf));
     await page.locator('.kf-row[data-skill="1"] .kf-box[data-n="2"]').click();
     await sleep(300);
     const act = await page.evaluate(() => window.__game.state().hero.para?.[1]);

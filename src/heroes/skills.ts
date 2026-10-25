@@ -9,7 +9,7 @@ import { t } from '../i18n';
 import { paragraphsFree, waivePrice } from '../world/contentKinds';
 import type { RunState } from '../world/run';
 import { AUTO_AIM, fitAim, resolveAim, takeQueuedAim, type Aim, type ResolvedAim } from './aim';
-import { heroDef, type PadSlot, type SkillIndex } from './defs';
+import { heroDef, skillAt, type PadSlot, type SkillIndex } from './defs';
 import { cooldownOf } from './helpers';
 import { applyParagraph, withCast, type ParagraphPatch } from './paragraphs';
 import { heroById } from './registry';
@@ -37,7 +37,7 @@ export function castSkill(s: RunState, bus: Bus, slot: PadSlot, free = false, ai
   const skill = s.hero.pads[slot];
   if (s.law.botTime || isStunned(p)) return false; // the bot hours: skills do nothing, no cooldown is spent
   if (!free) {
-    if (s.hero.cd[skill] > 0) return false;
+    if ((s.hero.cd[skill] ?? 0) > 0) return false;
     if (isSilenced(p)) {
       if (s.time - s.hero.silenceNoteAt > 1.5) {
         s.hero.silenceNoteAt = s.time;
@@ -61,7 +61,7 @@ export function fire(s: RunState, bus: Bus, skill: SkillIndex, slot: PadSlot, fr
 /** The body of `fire`, with the patch of the skill as it is cast (the paragraph, and the capstone if it belongs to this skill). */
 function cast(s: RunState, bus: Bus, skill: SkillIndex, slot: PadSlot, free: boolean, aim: Aim | undefined, patch: ParagraphPatch | undefined): boolean {
   const def = heroDef(s.player.heroId);
-  const sk = applyParagraph(def.skills[skill], patch); // the active paragraph, laid on the data (heroes/paragraphs.ts)
+  const sk = applyParagraph(skillAt(def, skill), patch); // the active paragraph, laid on the data (heroes/paragraphs.ts)
   const fn = heroById(def.id).casts[sk.id];
   if (!fn) return false;
   const aimed = fitAim(sk, aim ?? AUTO_AIM);

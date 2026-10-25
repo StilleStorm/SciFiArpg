@@ -1,17 +1,17 @@
 /** Which skills are installed and which sit on the three pads (DESIGN 10.1). Pure functions on the run state. */
 import type { RunState } from '../world/run';
-import { heroDef, PAD_SLOTS, SKILL_INDICES, type PadSlot, type SkillDef, type SkillIndex } from './defs';
+import { heroDef, PAD_SLOTS, SKILL_INDICES, skillAt, type PadSlot, type SkillDef, type SkillIndex } from './defs';
 import { patchAt, rankOf } from './grants';
 import { applyParagraph } from './paragraphs';
 import { mergeCapstone, runCapstone } from './specializations';
 
-/** Skills 1..3 are always installed; the 4th and 5th once an update gave them a rank. */
+/** Skills 1..3 are always installed; the others once an update gave them a rank (or a worn unique does). */
 export const isInstalled = (s: RunState, i: SkillIndex): boolean => i <= 2 || rankOf(s, i) > 0; // a worn unique unlocks its skill (ITEMS 12.2)
 
 export const installedSkills = (s: RunState): SkillIndex[] => SKILL_INDICES.filter((i) => isInstalled(s, i));
 
 /** Skill `i` as it is cast now: the base data with the active paragraph laid on (heroes/paragraphs.ts). Pads and previews read this, not `def.skills`. */
-export const effectiveSkill = (s: RunState, i: SkillIndex): SkillDef => applyParagraph(heroDef(s.player.heroId).skills[i], patchAt(s, i));
+export const effectiveSkill = (s: RunState, i: SkillIndex): SkillDef => applyParagraph(skillAt(heroDef(s.player.heroId), i), patchAt(s, i));
 
 /**
  * The skill pad `slot` fires, as the pad previews it: the active paragraph and, when it belongs to this skill, the capstone
@@ -19,7 +19,7 @@ export const effectiveSkill = (s: RunState, i: SkillIndex): SkillDef => applyPar
  */
 export function padSkill(s: RunState, slot: PadSlot): SkillDef {
   const i = s.hero.pads[slot];
-  const sk = heroDef(s.player.heroId).skills[i];
+  const sk = skillAt(heroDef(s.player.heroId), i);
   const cap = runCapstone(s);
   if (!cap || cap.capstone.skill !== sk.id) return effectiveSkill(s, i);
   return applyParagraph(sk, mergeCapstone(patchAt(s, i), cap.capstone.patch));

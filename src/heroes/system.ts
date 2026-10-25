@@ -244,6 +244,7 @@ function stepZones(s: RunState, bus: Bus, dt: number): void {
       s.zones.splice(i, 1);
       continue;
     }
+    if (z.own) continue; // its hero's quirk steps it (heroes/<id>/quirk.ts)
     if (z.variant === 'wniosek') {
       stepFlag(s, bus, z, dt);
       continue;

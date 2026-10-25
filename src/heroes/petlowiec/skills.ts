@@ -5,7 +5,7 @@ import type { RunState } from '../../world/run';
 import { radiusOf, terenCentre, type Aim } from '../aim';
 import { cast } from '../cast';
 import { fireAuto } from '../auto';
-import type { HeroDef, SkillIndex } from '../defs';
+import { skillAt, type HeroDef, type SkillIndex } from '../defs';
 import { areaOf, countOf, durationOf, nearestEnemy, patchOf, power, skillDamage } from '../helpers';
 import { padOf } from '../loadout';
 import type { SkillFn } from '../module';
@@ -71,7 +71,7 @@ const COPY_CASTABLE: ReadonlySet<string> = new Set(['wirowanie', 'prosze', 'prze
 
 /** A copy casts `skill` from where it stands (a point aim moves with it); the skills a copy cannot cast are skipped. */
 function castFrom(s: RunState, bus: Bus, def: HeroDef, skill: SkillIndex, aim: Aim, at: { x: number; y: number }): void {
-  const sk = def.skills[skill];
+  const sk = skillAt(def, skill);
   const fn = COPY_CASTABLE.has(sk.id) ? heroById(def.id).casts[sk.id] : undefined;
   if (!fn) return;
   const p = s.player;

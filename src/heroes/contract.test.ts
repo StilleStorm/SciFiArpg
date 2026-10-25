@@ -10,7 +10,7 @@ import { createEnemy, createPickup } from '../entities/factory';
 import { recomputeStats } from '../items/stats';
 import { createRun, nextId, type RunState } from '../world/run';
 import type { Aim } from './aim';
-import { HEROES, type SkillIndex } from './defs';
+import { HEROES, skillAt, type SkillIndex } from './defs';
 import { assignPad } from './loadout';
 import { castSkill } from './skills';
 import { heroStep } from './system';
@@ -43,7 +43,7 @@ function recorder(): Recorded {
 }
 
 /** Fixed scene: nine enemies at fixed offsets (one nearly dead), two pickups, a warm history of the hero's position for Petla. */
-function scene(heroId: HeroId, bus: Bus): RunState {
+function scene(heroId: HeroId, bus: Bus, rankedSkill?: SkillIndex): RunState {
   const s = createRun(SEED, { heroId });
   s.enemies.length = 0;
   s.page.obstacles.length = 0;
@@ -67,6 +67,7 @@ function scene(heroId: HeroId, bus: Bus): RunState {
   s.pickups.push(createPickup(nextId(s), p.x - 120, p.y, 1, undefined, 1));
   s.pickups.push(createPickup(nextId(s), p.x + 20, p.y + 260, 2, undefined, 1));
   for (const i of [3, 4] as const) s.hero.ranks[i] = 1;
+  if (rankedSkill !== undefined && rankedSkill > 4) s.hero.ranks[rankedSkill] = 1; // a skill past the fifth (S19): installed for its own replay only, so the older keys stay byte-identical
   tick(s, bus, 1.5);
   p.x = 640;
   p.y = 810;
@@ -109,13 +110,13 @@ function digest(s: RunState): unknown {
 function replay(): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const def of HEROES) {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < def.skills.length; i++) {
       const skill = i as SkillIndex;
       for (const [aimName, aim] of Object.entries(AIMS)) {
         const variants = def.id === 'petlowiec' ? ['plain', 'copy'] : ['plain'];
         for (const variant of variants) {
           const { events, bus } = recorder();
-          const s = scene(def.id, bus);
+          const s = scene(def.id, bus, skill);
           if (variant === 'copy') {
             assignPad(s, 0, 0);
             castSkill(s, bus, 0, false, AIMS['auto']);
@@ -134,7 +135,7 @@ function replay(): Record<string, unknown> {
           const castEvents = JSON.parse(JSON.stringify(events, round));
           events.length = 0;
           tick(s, bus, 2.5);
-          out[`${def.id}.${def.skills[skill].id}.${aimName}.${variant}`] = {
+          out[`${def.id}.${skillAt(def, skill).id}.${aimName}.${variant}`] = {
             result,
             castEvents,
             afterCast,

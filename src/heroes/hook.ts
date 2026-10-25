@@ -9,7 +9,7 @@ import { nextId } from '../world/run';
 import { mountProfile } from '../ui/profile';
 import type { Aim } from './aim';
 import { castSkill } from './skills';
-import { heroDef } from './defs';
+import { heroDef, skillAt, skillIndicesOf, type SkillIndex } from './defs';
 import { assignPad } from './loadout';
 import type { ParagraphNo } from './paragraphs';
 import { setRunParagraph } from '../progression/paragraphs';
@@ -17,12 +17,12 @@ import { setRunParagraph } from '../progression/paragraphs';
 export interface HeroHook {
   /** Fire skill 1, 2 or 3 now (same as the pad). Returns false on cooldown or if nothing happened. */
   cast(slot: 1 | 2 | 3, aim?: Aim): boolean;
-  /** Give the permission the skill wants and install its first rank (skill index 3 or 4); the pads stay as they are. False when it was not installed. */
-  installSkill(index: 3 | 4): boolean;
-  /** Install skill 3 or 4 if needed and show the update form's step "Przypisz do przycisku" at once; the form closes itself on a choice. */
-  openAssign(index: 3 | 4): boolean;
+  /** Give the permission the skill wants and install its first rank (skill index 3 and up); the pads stay as they are. False when it was not installed. */
+  installSkill(index: Exclude<SkillIndex, 0 | 1 | 2>): boolean;
+  /** Install the skill (index 3 and up) if needed and show the update form's step "Przypisz do przycisku" at once; the form closes itself on a choice. */
+  openAssign(index: Exclude<SkillIndex, 0 | 1 | 2>): boolean;
   /** Put skill `index` on pad 1..3 (heroes/loadout.ts assignPad). */
-  assignPad(pad: 1 | 2 | 3, index: 0 | 1 | 2 | 3 | 4): boolean;
+  assignPad(pad: 1 | 2 | 3, index: SkillIndex): boolean;
   /** Switch the paragraph (1..3) of the skill with this id (e.g. 'wirowanie') for the next cast. `force` skips the unlock schedule (tests, shots). False when refused. */
   setParagraph(skillId: string, n: ParagraphNo, force?: boolean): boolean;
   /** Add a permission token (a family id: 'urzadzenia', 'powiadomienia', 'wygenerowane'). */
@@ -61,6 +61,10 @@ export interface HeroHook {
     paragraphs: number[];
     /** The skill ids by SkillIndex (what `setParagraph` takes). */
     skillIds: string[];
+    /** The aim mode of each skill by SkillIndex (the balance bot aims by it). */
+    aims: string[];
+    /** The damage type of each skill by SkillIndex (the balance bot reads claims by it). */
+    types: string[];
     permissions: string[];
     offer: string[];
     status: string;
@@ -69,10 +73,10 @@ export interface HeroHook {
 
 export function createHeroHook(game: Game, bus: Bus): HeroHook {
   const q = <T extends Element>(sel: string): T | null => document.querySelector<T>(sel);
-  const install = (index: 3 | 4): boolean => {
+  const install = (index: Exclude<SkillIndex, 0 | 1 | 2>): boolean => {
     const s = game.state;
     if (!s) return false;
-    const need = heroDef(s.player.heroId).skills[index].requires;
+    const need = skillAt(heroDef(s.player.heroId), index).requires;
     if (need && !s.player.permissions.includes(need)) s.player.permissions.push(need);
     return (s.hero.ranks[index] ?? 0) > 0 || applyUpgrade(s, `skill${index + 1}`);
   };
@@ -158,15 +162,17 @@ export function createHeroHook(game: Game, bus: Bus): HeroHook {
         heroId: s.player.heroId,
         level: s.player.level,
         xp: s.player.xp,
-        cd: [...s.hero.cd],
+        cd: skillIndicesOf(heroDef(s.player.heroId)).map((i) => s.hero.cd[i] ?? 0), // one per skill (the arrays are five long until a later skill writes)
         shield: s.player.shield,
         suspended: s.player.suspended,
         summons: s.summons.length,
         zones: s.zones.length,
-        ranks: [...s.hero.ranks],
+        ranks: skillIndicesOf(heroDef(s.player.heroId)).map((i) => s.hero.ranks[i] ?? 0),
         pads: [...s.hero.pads],
-        paragraphs: [...(s.hero.para ?? [1, 1, 1, 1, 1])],
+        paragraphs: skillIndicesOf(heroDef(s.player.heroId)).map((i) => s.hero.para?.[i] ?? 1),
         skillIds: heroDef(s.player.heroId).skills.map((k) => k.id),
+        aims: heroDef(s.player.heroId).skills.map((k) => k.aim),
+        types: heroDef(s.player.heroId).skills.map((k) => k.type),
         permissions: [...s.player.permissions],
         offer: s.hero.offer ? s.hero.offer.entries.map((e) => e.id) : [],
         status: s.status,

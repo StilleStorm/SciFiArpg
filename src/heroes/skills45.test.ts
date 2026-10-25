@@ -636,7 +636,7 @@ describe('Nalesnik', () => {
 });
 
 describe('all ten through their pads', () => {
-  const defs: [HeroDef, SkillIndex][] = [];
+  const defs: [HeroDef, 3 | 4][] = [];
   for (const h of HEROES) for (const i of [3, 4] as const) defs.push([h, i]);
   it.each(defs.map(([h, i]) => [h.id, i, h.skills[i].id] as const))('%s skill %i (%s) casts through a pad when there is a target', (heroId, i) => {
     const s = run(heroId);

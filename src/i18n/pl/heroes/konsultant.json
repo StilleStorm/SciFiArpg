@@ -69,6 +69,76 @@
         "name": "Wypowiedzenie umowy",
         "desc": "Rozłączenie regulaminowe, bez celowania. Obrażenia większe o 40%. Kosztuje 8 racji."
       }
+    },
+    "zgloszenie": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Zgłoszenie trafia w cel i odbija się do następnego w promieniu 90."
+      },
+      "2": {
+        "name": "Zgłoszenie zbiorcze",
+        "desc": "Trzy zgłoszenia w wachlarzu, każde za połowę obrażeń. Bez odbicia. Odnowienie dłuższe o 1 s."
+      },
+      "3": {
+        "name": "Zgłoszenie pilne",
+        "desc": "Obrażenia egzystencjalne, większe o 30%. Bez odbicia. Odnowienie dłuższe o 2 s."
+      }
+    },
+    "formularz": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Formularz o promieniu 60 leży 3 sekundy. Stojący na nim są spowolnieni i otrzymują obrażenia."
+      },
+      "2": {
+        "name": "Formularz techniczny",
+        "desc": "Obrażenia mechaniczne. Pierwszy na formularzu zostaje zablokowany na 1 s. Odnowienie dłuższe o 2 s."
+      },
+      "3": {
+        "name": "Pole obowiązkowe",
+        "desc": "Nikt z formularza nie wyjdzie przez 1,5 s. Obrażenia o połowę mniejsze. Odnowienie dłuższe o 3 s."
+      }
+    },
+    "muzyka": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Przez 4 s przeciwnicy w promieniu 120 zwalniają, a Konsultant przyjmuje o 30% mniej obrażeń."
+      },
+      "2": {
+        "name": "Występ na żywo",
+        "desc": "Obrażenia egzystencjalne, promień 180, ale tylko 15% mniej obrażeń. Odnowienie dłuższe o 2 s."
+      },
+      "3": {
+        "name": "Cisza w słuchawce",
+        "desc": "Muzyka trwa 2 s. Przeciwnicy w promieniu 120 zostają wyciszeni."
+      }
+    },
+    "przerwaTechniczna": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Konsultant cofa się o 120. Krzesło w jego miejscu zajmuje pobliskich przez 2 s."
+      },
+      "2": {
+        "name": "Przerwa przedłużona",
+        "desc": "Cofnięcie o 80. Krzesło stoi 4 s. Odnowienie dłuższe o 3 s."
+      },
+      "3": {
+        "name": "Z winy klienta",
+        "desc": "Obrażenia regulaminowe. Krzesło oddaje 0,6 obrażeń na sekundę każdemu, kto go dotknie. Odnowienie dłuższe o 2 s."
+      }
+    },
+    "oddzwonimy": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Telefon dzwoni po 3 s. Przeciwnicy w promieniu 110 podchodzą, po czym otrzymują 1,2 obrażeń."
+      },
+      "2": {
+        "name": "Oddzwonimy w ciągu 24 godzin",
+        "desc": "Dzwoni po 1 s, w promieniu 80. Odnowienie dłuższe o 4 s."
+      },
+      "3": {
+        "name": "Z innego numeru",
+        "desc": "Obrażenia mechaniczne. Najbliższy przeciwnik zostaje odrzucony o 120. Kosztuje 6 racji."
+      }
     }
   },
   "ult": {
@@ -89,6 +159,46 @@
         "3": {
           "name": "Przekazanie bez uwag",
           "desc": "Przekazanie trwa 8 s, bez obrażeń. Każdy zgon przeciwnika w tym czasie daje gwiazdkę. Kosztuje 5 racji."
+        }
+      }
+    },
+    "koniecKolejki": {
+      "name": "Koniec kolejki",
+      "desc": "Przeciwnicy w pobliżu, którzy noszą jego status, ustawiają się w kolejce przed Konsultantem i są rozłączani jeden po drugim w ciągu 2 sekund, z odrzuceniem. Gdy nikt nie nosi statusu, do kolejki trafiają najbliżsi.",
+      "stamp": "ROZŁĄCZONO",
+      "note": "Rozpoczęto zamykanie kolejki. Prosimy nie rozłączać się.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Kolejka zamknięta po kolei, od najbliższego."
+        },
+        "2": {
+          "name": "Kolejka odwrotna",
+          "desc": "Rozłączany jest najpierw najdalszy. Obrażenia większe o 38%. Kosztuje 6 racji."
+        },
+        "3": {
+          "name": "Rozłączenie formalne",
+          "desc": "Obrażenia regulaminowe. Bez odrzucenia; rozłączeni zostają zablokowani na 3 s. Kosztuje 5 racji."
+        }
+      }
+    },
+    "ankieta": {
+      "name": "Ankieta",
+      "desc": "Tam, gdzie stoi najwięcej przeciwników, rozkłada się formularz ankiety o promieniu 160. Stojący na nim są zablokowani na 2 sekundy, oceniając rozmowę, po czym otrzymują obrażenia. Każdy zgon na formularzu daje jedną gwiazdkę więcej.",
+      "stamp": "OCENIONO",
+      "note": "Ankieta rozpoczęta. Prosimy o ocenę rozmowy.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Ankieta podstawowa. Prosimy o ocenę rozmowy."
+        },
+        "2": {
+          "name": "Ankieta skrócona",
+          "desc": "Promień 100, obrażenia o połowę większe. Kosztuje 4 racji."
+        },
+        "3": {
+          "name": "Ankieta obowiązkowa",
+          "desc": "Obrażenia regulaminowe. Przeciwnicy w promieniu 220 zostają wciągnięci na formularz. Kosztuje 5 racji."
         }
       }
     }
@@ -115,5 +225,36 @@
         "desc": "„Czy mogę jeszcze w czymś pomóc” trwa o 25% dłużej."
       }
     }
+  },
+  "skill6": {
+    "name": "Zgłoszenie przyjęte",
+    "pad": "Zgłoszenie",
+    "desc": "Zgłoszenie trafia w cel i odbija się do następnego w pobliżu. Obrażenia regulaminowe."
+  },
+  "skill7": {
+    "name": "Formularz kontaktowy",
+    "pad": "Formularz",
+    "desc": "Formularz leży na stronie przez 3 sekundy. Stojący na nim są spowolnieni i otrzymują obrażenia."
+  },
+  "skill8": {
+    "name": "Muzyka w słuchawce",
+    "pad": "Muzyka",
+    "desc": "Przez 4 sekundy w pobliżu gra muzyka oczekiwania: przeciwnicy zwalniają, a Konsultant przyjmuje o 30% mniej obrażeń."
+  },
+  "skill9": {
+    "name": "Przerwa techniczna",
+    "pad": "Przerwa",
+    "desc": "Konsultant cofa się o 120. W miejscu, gdzie stał, zostaje krzesło, które przez 2 sekundy zajmuje wszystkich w pobliżu."
+  },
+  "skill10": {
+    "name": "Oddzwonimy",
+    "pad": "Oddzwonimy",
+    "desc": "Postawiony telefon dzwoni po 3 sekundach. Przeciwnicy w pobliżu podchodzą do aparatu, po czym otrzymują obrażenia."
+  },
+  "note": {
+    "zgloszenie": "Zgłoszenie przyjęte. Prosimy o cierpliwość.",
+    "formularz": "Pola oznaczone gwiazdką są obowiązkowe. Gwiazdki brak.",
+    "przerwa": "Przerwa techniczna. Prosimy zająć miejsce. Miejsce jest zajęte.",
+    "oddzwonimy": "Oddzwonimy w ciągu 24 godzin roboczych. Doba robocza trwa godzinę."
   }
 }

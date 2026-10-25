@@ -58,19 +58,22 @@ describe('recipes follow DESIGN 14', () => {
     expect(hiss?.gain).toBeLessThan(0.12);
   });
 
-  it('every hero has five distinct skill sounds, all combat recipes, twenty-five in all', () => {
+  it('every hero has distinct skill sounds (five, ten once filled), all combat recipes, none shared between heroes', () => {
     const all = new Set<string>();
+    let count = 0;
     for (const h of HERO_IDS) {
-      const five = heroById(h).sounds.skills;
-      expect(five).toHaveLength(5);
-      expect(new Set(five).size, h).toBe(5);
-      for (const n of five) {
+      const names = heroById(h).sounds.skills;
+      expect(names.length).toBeGreaterThanOrEqual(5);
+      expect(new Set(names).size, h).toBe(names.length);
+      for (const n of names) {
         expect(recipes[n]?.combat, n).toBe(true);
         expect(validateRecipe(n, recipes[n] as Recipe), n).toEqual([]);
         all.add(n);
+        count++;
       }
     }
-    expect(all.size).toBe(5 * HERO_IDS.length);
+    expect(all.size).toBe(count);
+    expect(count).toBeGreaterThanOrEqual(5 * HERO_IDS.length);
   });
 
   it('the fourth and fifth skills each have their own recipe, with a body and no raw tone', () => {
@@ -91,9 +94,22 @@ describe('recipes follow DESIGN 14', () => {
   });
 
   it('every hero has its own ultimate recipe: a combat sound with a body, a sub, a tail and a late stamp thud, no raw tone', () => {
-    const own = ['pralkaUlt', 'konsUlt', 'petlUlt', 'kartoUlt', 'nalesUlt'];
-    expect(new Set(HERO_IDS.map((h) => ultimateSound(h))).size).toBe(HERO_IDS.length);
-    for (const h of HERO_IDS) expect(own).toContain(ultimateSound(h) ?? '');
+    const own = [
+      ...['pralkaUlt', 'konsUlt', 'petlUlt', 'kartoUlt', 'nalesUlt'],
+      ...['pralkaPersonUlt', 'pralkaClaimUlt', 'konsUltQueue', 'konsUltSurvey'],
+    ];
+    const first = (h: (typeof HERO_IDS)[number]): string => heroById(h).ultimates?.[0]?.id ?? '';
+    expect(new Set(HERO_IDS.map((h) => ultimateSound(h, first(h)))).size).toBe(HERO_IDS.length);
+    // every ultimate of every hero has a recipe of its own hero; a hero with a name per id (S19) gives each ultimate its own
+    for (const h of HERO_IDS) {
+      const ids = (heroById(h).ultimates ?? []).map((u) => u.id);
+      const names = ids.map((u) => ultimateSound(h, u) ?? '');
+      for (const n of names) expect(own, `${h}`).toContain(n);
+      if (typeof heroById(h).sounds.ultimate === 'object') expect(new Set(names).size, h).toBe(ids.length);
+    }
+    expect(ultimateSound('pralka', 'uznanieOsobowosci')).toBe('pralkaPersonUlt');
+    expect(ultimateSound('konsultant', 'ankieta')).toBe('konsUltSurvey');
+    expect(ultimateSound('konsultant', 'nieznany')).toBe('konsUlt');
     for (const n of own) {
       const r = recipes[n] as Recipe;
       expect(r.combat, n).toBe(true);

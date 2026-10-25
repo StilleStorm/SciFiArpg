@@ -106,9 +106,13 @@ export function bindFx(
     marginNote(t('ui.ink.margin'), m.x, m.y, -4);
   });
   bus.on('stamp', (e) => {
-    const { w, h } = stampSize(e.text);
-    const at = placeStamp(e.x, e.y, w, h, view(), e.away, blocks());
-    stamp(e.text, at.x, at.y);
+    // a long text (REKLAMACJA PRZYJETA, S19) would run off a phone's width at 17: the type is cut down until the stamp fits the view
+    const v = view();
+    let size = 17;
+    if (v) while (size > 11 && stampSize(e.text, size).w > v.x1 - v.x0 - 2 * STAMP_MX - 16) size--;
+    const { w, h } = stampSize(e.text, size);
+    const at = placeStamp(e.x, e.y, w, h, v, e.away, blocks());
+    stamp(e.text, at.x, at.y, size < 17 ? { fontSize: size } : {});
   });
   bus.on('margin:note', (e) => marginNote(e.text, e.x, e.y, jitter.range(-5, 3), e.ttl));
 }

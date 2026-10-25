@@ -51,6 +51,9 @@ export interface KartaColumn {
 }
 
 export interface KartaUltimate {
+  /** The ultimate's id and whether the loadout holds it now (S19: a hero has three). */
+  id?: string;
+  chosen?: boolean;
   name: string;
   level: number;
   state: NodeState;
@@ -63,6 +66,8 @@ export interface KartaModel {
   heroName: string;
   level: number;
   ultimate: KartaUltimate | null;
+  /** Every ultimate of the hero in level order, the chosen one marked (empty for a hero without one). */
+  ultimates: KartaUltimate[];
   columns: KartaColumn[];
   /** The passives: no column names them, so they are printed in a band under the columns. */
   band: KartaNode[];
@@ -128,7 +133,7 @@ function passiveNode(input: KartaInput, n: number): KartaNode | null {
   const c = input.progress;
   const def = heroById(c.heroId).passives[n - 1];
   if (!def) return null;
-  const taken = (c.upgrades[`passive${n}`] ?? 0) > 0;
+  const taken = def.rule === true || (c.upgrades[`passive${n}`] ?? 0) > 0; // the rule is always on
   const gated = !taken && def.requires !== undefined && !c.permissions.includes(def.requires);
   return {
     id: `passive:${n}`,
@@ -172,6 +177,15 @@ export function kartaModel(input: KartaInput): KartaModel {
   const columns = specs.map((sp, i) => column(input, sp, i + 1, active));
   const all = heroById(heroId).ultimates;
   const ult = all?.find((u) => u.id === input.ultimate) ?? all?.[0];
+  const asNode = (u: NonNullable<typeof ult>): KartaUltimate => ({
+    id: u.id,
+    chosen: u.id === ult?.id,
+    name: t(u.nameKey),
+    level: u.level,
+    state: c.level >= u.level ? 'granted' : 'gated',
+    note: c.level >= u.level ? '' : t('forms.karta.fromLevel', { level: u.level }),
+    paragraphs: u.list.map((p) => t(p.nameKey)),
+  });
   const ultimate: KartaUltimate | null = ult
     ? {
         name: t(ult.nameKey),
@@ -186,7 +200,7 @@ export function kartaModel(input: KartaInput): KartaModel {
     const node = passiveNode(input, n);
     if (node) band.push(node);
   }
-  return { heroId, heroName: t(heroDef(heroId).nameKey), level: c.level, ultimate, columns, band };
+  return { heroId, heroName: t(heroDef(heroId).nameKey), level: c.level, ultimate, ultimates: (all ?? []).map(asNode), columns, band };
 }
 
 /** A run as chart input (the desk). */
@@ -264,10 +278,11 @@ export function openKarta(root: HTMLElement, input: KartaInput, onBack: () => vo
   sheet.note(t('forms.karta.note'));
   sheet.note(t('forms.karta.noteGate'));
   const body = h('div', 'kt-body');
-  if (model.ultimate) {
-    const u = model.ultimate;
+  // the ultimates: the one in the slot stands first, as `data-node=ult`; the others (S19) follow, level order
+  const shown = model.ultimates.length > 1 ? [...model.ultimates].sort((a, b) => Number(b.chosen === true) - Number(a.chosen === true) || a.level - b.level) : model.ultimate ? [model.ultimate] : [];
+  shown.forEach((u, k) => {
     const band = h('div', `kt-ult ${u.state}`);
-    band.dataset['node'] = 'ult';
+    band.dataset['node'] = k === 0 ? 'ult' : `ult:${u.id ?? k}`;
     band.dataset['state'] = u.state;
     const text = h('div', 'kt-ulttext');
     const utag = h('span', 'kt-tag');
@@ -277,7 +292,7 @@ export function openKarta(root: HTMLElement, input: KartaInput, onBack: () => vo
     if (u.state === 'granted') band.append(stampSvg(t('forms.karta.approved'), 14, -3));
     else band.append(h('span', 'kt-gate', t('forms.karta.none')), h('span', 'kt-need', u.note));
     body.append(band);
-  }
+  });
   const cols = h('div', 'kt-cols');
   for (const col of model.columns) cols.append(columnEl(col));
   body.append(cols);

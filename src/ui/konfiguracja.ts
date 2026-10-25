@@ -6,7 +6,8 @@
  * with `setRunParagraph`, and writes the loadout through ui/konfLoadout.ts (`commitLoadout`, which ends in heroes/specializations.ts
  * `setLoadout`). Categories, columns and the capstone come from heroes/specializations.ts.
  */
-import { heroDef, PAD_SLOTS, SKILL_INDICES, type PadSlot, type SkillIndex } from '../heroes/defs';
+import { heroDef, PAD_SLOTS, skillAt, skillIndicesOf, type PadSlot, type SkillIndex } from '../heroes/defs';
+import { heroById } from '../heroes/registry';
 import { effectiveSkill, isInstalled } from '../heroes/loadout';
 import { setUltimateParagraph, ultimateOf, ultRun } from '../heroes/ultimate';
 import { t } from '../i18n';
@@ -84,8 +85,8 @@ export function konfiguracjaRows(s: RunState): KonfRow[] {
   const heroId = s.player.heroId;
   const def = heroDef(heroId);
   const progress = runProgress(s);
-  return SKILL_INDICES.map((skill) => {
-    const sk = def.skills[skill];
+  return skillIndicesOf(def).map((skill) => {
+    const sk = skillAt(def, skill);
     const installed = isInstalled(s, skill);
     const active = runParagraph(s, skill);
     const views = paragraphsOf(heroId, sk.id);
@@ -107,6 +108,32 @@ export function konfiguracjaUltimate(s: RunState): KonfUltimate | null {
   const active = ultRun(s).para;
   const boxes = def.list.map((p): KonfBox => ({ n: p.n, name: t(p.nameKey), desc: t(p.descKey), state: locked ? 'locked' : p.n === active ? 'active' : 'open', level: def.level }));
   return { name: t(def.nameKey), type: t(`heroes.types.${def.type}`), level: def.level, locked, desc: t(def.descKey), boxes };
+}
+
+/** One of the hero's ultimates as the chooser lists it (S19: a hero has three, at levels 12 / 24 / 36). */
+export interface KonfUltChoice {
+  id: string;
+  name: string;
+  type: string;
+  level: number;
+  locked: boolean;
+  /** The one the loadout holds now (the others can be picked once their level has come). */
+  chosen: boolean;
+  desc: string;
+}
+
+/** Every ultimate of the hero, in level order, with the chosen one marked. */
+export function konfiguracjaUltimates(s: RunState): KonfUltChoice[] {
+  const cur = ultimateOf(s);
+  return (heroById(s.player.heroId).ultimates ?? []).map((u) => ({
+    id: u.id,
+    name: t(u.nameKey),
+    type: t(`heroes.types.${u.type}`),
+    level: u.level,
+    locked: s.player.level < u.level,
+    chosen: u.id === cur?.id,
+    desc: t(u.descKey),
+  }));
 }
 
 /** The three columns with how many of their skills stand on the pads, the chosen one, and whether its capstone is in force. */
@@ -311,6 +338,29 @@ export function openKonfiguracja(root: HTMLElement, s: RunState, onBack: () => v
         rowEl.append(boxes, desc);
       }
       list.append(rowEl);
+    }
+    for (const c of konfiguracjaUltimates(s)) {
+      if (c.chosen) continue;
+      // another ultimate of the hero: its level opens it, a tap puts it in the slot
+      const other = h('div', `kf-ultrow other${c.locked ? ' off' : ''}`);
+      other.dataset['skill'] = `ult:${c.id}`;
+      const oh = h('div', 'kf-head');
+      const oid = h('div', 'kf-id');
+      oid.append(h('span', 'kf-name', c.name), h('span', 'kf-type', `${c.type} · ${t(categoryNameKey('ostateczna'))}`));
+      oh.append(oid);
+      if (!c.locked) {
+        const pick = h('button', 'kf-ultpick', t('forms.konfiguracja.ultPick'));
+        pick.type = 'button';
+        pick.dataset['ultimate'] = c.id;
+        pick.setAttribute('aria-label', t('forms.konfiguracja.ultPickLabel', { name: c.name }));
+        pick.addEventListener('click', () => {
+          commitLoadout(s, { ultimate: c.id });
+          draw();
+        });
+        oh.append(pick);
+      }
+      other.append(oh, h('p', c.locked ? 'kf-off' : 'kf-desc', c.locked ? t('forms.konfiguracja.ultLocked', { level: c.level }) : c.desc));
+      list.append(other);
     }
     // advisory only: the rule of three is recommended, not enforced
     const missing = loadoutAdvice(viewOf(s));

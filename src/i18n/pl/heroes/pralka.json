@@ -69,6 +69,76 @@
         "name": "Odwołanie",
         "desc": "Odczyt regulaminowy, obszar większy o 20%. Kosztuje 10 racji."
       }
+    },
+    "plukanie": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Strumień o promieniu 70 na najbliższego, a gdy nikogo nie ma, wokół Pralki. Spłukuje z niej jeden status."
+      },
+      "2": {
+        "name": "Płukanie wtórne",
+        "desc": "Strumień egzystencjalny. Trafieni zostają zgłoszeni na 2 s. Odnowienie dłuższe o 2 s."
+      },
+      "3": {
+        "name": "Płukanie ekspresowe",
+        "desc": "Odnowienie krótsze o 1 s, obrażenia mniejsze o jedną trzecią. Co trzecie płukanie przywraca gotowość Wirowania."
+      }
+    },
+    "program90": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Strefa pary pod Pralką na 3 s. Pralka pracuje wolniej o 30%."
+      },
+      "2": {
+        "name": "Program 60°",
+        "desc": "Strefa trwa 5 s, obrażenia na sekundę mniejsze o ponad jedną trzecią. Pralka nie zwalnia."
+      },
+      "3": {
+        "name": "Gotowanie",
+        "desc": "Para egzystencjalna. Kto opuści strefę, otrzymuje jeszcze jedno uderzenie. Kosztuje 5 racji."
+      }
+    },
+    "trybOszczedny": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Przez 4 s o 40% mniej obrażeń, ruch wolniejszy o 30%. Trafienia w Pralkę liczą się podwójnie dla błędu programu."
+      },
+      "2": {
+        "name": "Tryb nocny",
+        "desc": "Trwa 6 s, obrażenia mniejsze o 25%. Pralka nie zwalnia."
+      },
+      "3": {
+        "name": "Tryb serwisowy",
+        "desc": "Tryb regulaminowy. Przez 2 s żaden status jej nie dotyczy. Odnowienie dłuższe o 4 s."
+      }
+    },
+    "zmianaProgramu": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Ostatnio użyta umiejętność jest znów gotowa. Zmiana kosztuje 10 racji."
+      },
+      "2": {
+        "name": "Cykl powtórzony",
+        "desc": "Ostatnia umiejętność uruchamia się jeszcze raz, od razu. Odnowienie dłuższe o 4 s."
+      },
+      "3": {
+        "name": "Zmiana bez opłat",
+        "desc": "Zmiana mechaniczna, bez kosztu racji. Odnowienie dłuższe o 6 s."
+      }
+    },
+    "odpompowanie": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Kałuża o promieniu 100 na 5 s. Kto w niej stoi, czeka na weryfikację. Łupy zsuwają się do brzegu."
+      },
+      "2": {
+        "name": "Odpływ wąski",
+        "desc": "Kałuża mechaniczna o promieniu 60. Kto w niej stoi, co sekundę otrzymuje obrażenia."
+      },
+      "3": {
+        "name": "Odpływ całkowity",
+        "desc": "Kałuża egzystencjalna. Wciąga do środka z siłą 20 na sekundę. Kosztuje 6 racji."
+      }
     }
   },
   "ult": {
@@ -89,6 +159,46 @@
         "3": {
           "name": "Program intensywny",
           "desc": "Cykl skrócony do 3 s, obrażenia na sekundę podwójne, promień 140. Kosztuje 8 racji."
+        }
+      }
+    },
+    "uznanieOsobowosci": {
+      "name": "Uznanie osobowości",
+      "desc": "Przez 6 s Pralka jest osobą: żaden status jej nie dotyczy, upór ma większy o 30. Kto stoi w promieniu 160, traci rację co sekundę, a wygenerowane istnieją najwyżej w 30%.",
+      "stamp": "OSOBA",
+      "note": "Wniosek nr {number} rozpatrzono pozytywnie na czas rozpatrzenia.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Sześć sekund osobowości. Co sekundę 0,8 uderzenia w każdego w promieniu 160."
+        },
+        "2": {
+          "name": "Wersja podpisana",
+          "desc": "Osobowość trwa 8 s, obrażenia na sekundę mniejsze o ponad jedną trzecią."
+        },
+        "3": {
+          "name": "Uznanie warunkowe",
+          "desc": "Obrażenia regulaminowe, 4 s, na sekundę prawie dwa razy większe. Pralka nie może się ruszyć. Kosztuje 6 racji."
+        }
+      }
+    },
+    "reklamacja": {
+      "name": "Reklamacja",
+      "desc": "Każdy przeciwnik na stronie zostaje zgłoszony na 8 s i otrzymuje jedno uderzenie. Reklamacja nie dotyczy tych, których tu nie ma.",
+      "stamp": "REKLAMACJA PRZYJĘTA",
+      "note": "Reklamacja nr {number} przyjęta. Zasadność zostanie rozpatrzona.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Wszyscy na stronie zgłoszeni na 8 s. Jedno uderzenie regulaminowe."
+        },
+        "2": {
+          "name": "Reklamacja z blokadą",
+          "desc": "Uderzenie mechaniczne. Trzech najbliższych zablokowanych na 2 s."
+        },
+        "3": {
+          "name": "Reklamacja odrzucona",
+          "desc": "Uderzenie egzystencjalne, dwa razy większe, tylko w tych, których teza jeszcze stoi. Kosztuje 6 racji."
         }
       }
     }
@@ -115,5 +225,33 @@
         "desc": "„Otwarcie bębna” zadaje o 20% więcej obrażeń."
       }
     }
-  }
+  },
+  "skill6": {
+    "name": "Płukanie",
+    "pad": "Płukanie",
+    "desc": "Strumień na najbliższego, a gdy nikogo nie ma, wokół Pralki. Spłukuje z niej jeden status."
+  },
+  "skill7": {
+    "name": "Program 90°",
+    "pad": "Program",
+    "desc": "Pod Pralką powstaje strefa pary na 3 s. Kto w niej stoi, traci rację co pół sekundy. Pralka pracuje wolniej."
+  },
+  "skill8": {
+    "name": "Tryb oszczędny",
+    "pad": "Oszczędnie",
+    "desc": "Przez 4 s o 40% mniej obrażeń i wolniejszy ruch. Trafienia w Pralkę liczą się podwójnie dla błędu programu."
+  },
+  "skill9": {
+    "name": "Zmiana programu",
+    "pad": "Zmiana",
+    "desc": "Ostatnio użyta umiejętność jest znów gotowa. Zmiana kosztuje 10 racji."
+  },
+  "skill10": {
+    "name": "Odpompowanie",
+    "pad": "Odpompowanie",
+    "desc": "Kałuża we wskazanym miejscu na 5 s. Kto w niej stoi, czeka na weryfikację. Łupy zsuwają się do brzegu."
+  },
+  "gwarancjaNote": "Gwarancja obowiązuje raz na stronę. Piana wydana bez pokwitowania.",
+  "zmianaNote": "Program zmieniono. Poprzedniego programu nie zakończono.",
+  "odpompowanieNote": "Wodę odpompowano. Dokąd, nie podano."
 }

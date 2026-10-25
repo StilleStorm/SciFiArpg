@@ -72,6 +72,13 @@ const GEOMETRY: Record<string, Geometry> = {
   start: { autoRange: () => 260, reach: () => 260, radius: (s) => START_R * areaOf(s, 4) },
   legenda: { autoRange: () => 260, reach: () => 260, radius: (s) => LEGENDA_R * areaOf(s, 4) },
   ksiezyc: { autoRange: () => DEFAULT_RANGE, reach: (s) => KSIEZYC_ORBIT * areaOf(s, 4), radius: () => 0 },
+  // S19: the Konsultant's skills 6 to 10 (indices 5 to 9): a ticket 260 away, a form of 60 within 300, a step back of 120, a phone of 110 within 300
+  zgloszenie: { autoRange: () => 260, reach: () => 0, radius: () => 0 },
+  formularz: { autoRange: () => 300, reach: () => 300, radius: (s) => 60 * areaOf(s, 6) },
+  przerwaTechniczna: { autoRange: () => DEFAULT_RANGE, reach: () => 120, radius: () => 0 },
+  oddzwonimy: { autoRange: () => 300, reach: () => 300, radius: (s) => 110 * areaOf(s, 9) },
+  // S19: Pralka's Odpompowanie (skill 10, index 9): a puddle of 100 at a point up to 260 away
+  odpompowanie: { autoRange: () => 260, reach: () => 260, radius: (s) => 100 * areaOf(s, 9) },
 };
 
 /** The arrow length (kierunek) or the farthest point (wskazanie) of a skill; 0 for an auto skill. */
@@ -238,7 +245,7 @@ export function previewOf(s: RunState, skill: SkillDef, aim: Aim): AimPreview | 
     const a = fitAim(skill, aim);
     return a.kind === 'wskazanie' ? { kind: 'circle', x: a.x, y: a.y, r } : null;
   }
-  if (skill.id === 'teren' || skill.id === 'wniosek' || skill.id === 'start' || skill.id === 'legenda') {
+  if (skill.id === 'teren' || skill.id === 'wniosek' || skill.id === 'start' || skill.id === 'legenda' || skill.id === 'odpompowanie' || skill.id === 'formularz' || skill.id === 'oddzwonimy') {
     const c = terenCentre(s, skill, aim);
     return { kind: 'circle', x: c.x, y: c.y, r };
   }

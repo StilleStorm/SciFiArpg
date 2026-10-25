@@ -116,7 +116,7 @@ try {
         radius: [...document.querySelectorAll('.loadout-sheet *')].filter((n) => parseFloat(getComputedStyle(n).borderTopLeftRadius) > 0).length,
       };
     });
-    check(`${prefix}: the loadout lists five rows, one greyed, skill 4 on pad 2`, lo.rows === 5 && lo.off === 1 && lo.on.includes('3:2'), JSON.stringify(lo));
+    check(`${prefix}: the loadout lists ten rows (Pralka, S19), six greyed, skill 4 on pad 2`, lo.rows === 10 && lo.off === 6 && lo.on.includes('3:2'), JSON.stringify(lo));
     check(`${prefix}: no rounded corners in the loadout`, lo.radius === 0, String(lo.radius));
     // tap skill 1 onto pad 2 (swaps with skill 4: it goes to pad ... off the pads when skill 1 was on pad 1)
     await page.locator('.lo-row[data-skill="0"] .lo-pad[data-pad="2"]').click();
@@ -145,7 +145,7 @@ try {
     await sleep(300);
     await page.screenshot({ path: `${SHOTS}/base-loadout.png` });
     const st = await page.evaluate(() => ({ phase: window.__game.state().phase, rows: document.querySelectorAll('.loadout-sheet .lo-row').length, off: document.querySelectorAll('.loadout-sheet .lo-row.off').length }));
-    check('base: the loadout opens from the pause sheet there too', st.phase === 'base' && st.rows === 5 && st.off === 1, JSON.stringify(st));
+    check('base: the loadout opens from the pause sheet there too', st.phase === 'base' && st.rows === 10 && st.off === 6, JSON.stringify(st));
     await ctx.close();
   }
 

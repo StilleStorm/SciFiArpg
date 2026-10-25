@@ -154,7 +154,7 @@ describe('the pad assignment (DESIGN 10.1)', () => {
     expect(s.hero.pads).toEqual([0, 1, 2]);
   });
 
-  it.each([null, 'x', 7, [0, 1], [0, 1, 2, 3], [0, 1, 9], [0, 1, 1.5], [-1, 1, 2], ['0', 1, 2], { 0: 0 }])('an invalid pads value (%j) reads as [0, 1, 2]', (bad) => {
+  it.each([null, 'x', 7, [0, 1], [0, 1, 2, 3], [0, 1, 11], [0, 1, 1.5], [-1, 1, 2], ['0', 1, 2], { 0: 0 }])('an invalid pads value (%j) reads as [0, 1, 2]', (bad) => {
     expect(toCharacter({ ...emptyCharacter('pralka'), pads: bad })?.pads).toEqual([0, 1, 2]);
   });
 

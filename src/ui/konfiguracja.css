@@ -254,6 +254,20 @@
 .kf-pad:not(.on):active {
   border-width: 3px;
 }
+.kf-ultpick {
+  flex: none;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 12px;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 14px;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+}
+.kf-ultpick:active {
+  border-width: 3px;
+}
 .kf-ultrow .kf-name {
   font-family: var(--title);
   font-size: 12px;

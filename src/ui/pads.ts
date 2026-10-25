@@ -1,6 +1,6 @@
 import type { Bus } from '../core/events';
 import { createRng } from '../core/rng';
-import { heroDef, PAD_SLOTS, type HeroId, type PadSlot, type SkillDef, type SkillIndex } from '../heroes';
+import { heroDef, PAD_SLOTS, skillAt, type HeroId, type PadSlot, type SkillDef, type SkillIndex } from '../heroes';
 import { padSkill } from '../heroes/loadout';
 import { withCapstone } from '../heroes/specializations';
 import { DEFAULT_HERO_ID, heroById } from '../heroes/registry';
@@ -114,10 +114,10 @@ let shownPads: readonly [SkillIndex, SkillIndex, SkillIndex] = [0, 1, 2];
 function drawPad(heroId: HeroId, slot: PadSlot, sk: SkillIndex): void {
   const n = nodes[slot];
   if (!n) return;
-  const def = heroDef(heroId).skills[sk];
+  const def = skillAt(heroDef(heroId), sk);
   n.word.textContent = t(def.padKey);
   n.btn.setAttribute('aria-label', t(def.nameKey));
-  drawGlyph(n.glyph, heroById(heroId).pads[sk]);
+  drawGlyph(n.glyph, heroById(heroId).pads[sk] ?? []);
   n.last = -2; // the ring is redrawn for the skill that is here now
 }
 

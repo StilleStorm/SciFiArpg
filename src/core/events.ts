@@ -60,7 +60,7 @@ export interface GameEvents {
   /** The player tapped the page at world x, y. */
   'player:tap': { x: number; y: number };
   /** A hero skill fired: `slot` is the pad (0..2), `skill` the hero's skill index (0..4, DESIGN 10.1); free = fired by the Pralka quirk without cooldown. */
-  'skill:cast': { slot: 0 | 1 | 2; skill: 0 | 1 | 2 | 3 | 4; free: boolean; aim?: { kind: 'auto' | 'kierunek' | 'wskazanie'; dx: number; dy: number; x: number; y: number } };
+  'skill:cast': { slot: 0 | 1 | 2; skill: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10; free: boolean; aim?: { kind: 'auto' | 'kierunek' | 'wskazanie'; dx: number; dy: number; x: number; y: number } };
   /** An ultimate was cast (combat/meter.ts castUltimate): the hero, the ultimate's id and where it was cast; audio/bindings.ts plays the hero's ultimate recipe. */
   'ultimate:cast': { heroId: string; ultimateId: string; x: number; y: number };
   /** A pad is held and dragged (DESIGN 5.6): the aim as it would fire now (direction and point both filled); pads.ts emits it on every change. */
@@ -70,7 +70,7 @@ export interface GameEvents {
   /** The appeal form was filed: the shadowban is lifted. */
   'player:unsuspended': undefined;
   /** A skill wants a sketch on the page (render/heroFx.ts draws it): from (x, y) to (x2, y2) or with radius r. */
-  'skill:fx': { kind: 'swirl' | 'foam' | 'cone' | 'ring' | 'line' | 'blink' | 'dash' | 'drum' | 'wet' | 'section' | 'cut' | 'tide' | 'capsule'; x: number; y: number; x2: number; y2: number; r: number };
+  'skill:fx': { kind: 'swirl' | 'foam' | 'cone' | 'ring' | 'line' | 'blink' | 'dash' | 'drum' | 'wet' | 'section' | 'cut' | 'tide' | 'capsule' | 'steam' | 'puddle'; x: number; y: number; x2: number; y2: number; r: number };
   /** A hit matched the enemy's claim: the bubble is struck through (enemies/claims in systems/combat.ts). */
   'enemy:rebutted': { id: number };
   /** First hit of another type than the claim on this enemy ("nie na temat"). */

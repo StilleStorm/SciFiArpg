@@ -3,7 +3,7 @@
  * one may "wymagac uprawnien", one problem report per run rerolls the three.
  */
 import { DAMAGE_TYPES, type DamageType } from '../combat/damage';
-import { heroDef, SKILL_INDICES, type SkillIndex } from '../heroes/defs';
+import { heroDef, skillAt, skillIndicesOf, type SkillIndex } from '../heroes/defs';
 import { isInstalled } from '../heroes/loadout';
 import type { HeroId } from '../heroes';
 import { heroById } from '../heroes/registry';
@@ -12,7 +12,7 @@ import { recomputeStats } from '../items/stats';
 import { t } from '../i18n';
 import type { Rng } from '../core/rng';
 import type { RunState } from '../world/run';
-import { isParagraphUnlocked, paragraphLevel, paragraphsOf, runParagraph, runProgress, setRunParagraph } from './paragraphs';
+import { isParagraphUnlocked, paragraphLevel, paragraphsOf, runParagraph, runProgress, setRunParagraph, skillLevelOf } from './paragraphs';
 
 export type Family = 'urzadzenia' | 'powiadomienia' | 'wygenerowane';
 export const FAMILIES: readonly Family[] = ['urzadzenia', 'powiadomienia', 'wygenerowane'];
@@ -20,7 +20,7 @@ export const FAMILIES: readonly Family[] = ['urzadzenia', 'powiadomienia', 'wyge
 export interface UpgradeDef {
   id: string;
   kind: 'skill' | 'passive' | 'stat' | 'paragraph';
-  /** Skills: the hero's skill index (0..4), not a pad. */
+  /** Skills: the hero's skill index (0..10), not a pad. */
   slot?: SkillIndex;
   /** How many times it can be taken (skills: 3 ranks). */
   maxRank: number;
@@ -36,14 +36,17 @@ export interface UpgradeDef {
 
 const SKILL_FAMILY: readonly Family[] = ['urzadzenia', 'powiadomienia', 'wygenerowane'];
 
-const skillEntries = (): UpgradeDef[] =>
-  ([0, 1, 2, 3, 4] as const).map((slot) => ({
+const skillEntries = (heroId: HeroId): UpgradeDef[] =>
+  skillIndicesOf(heroDef(heroId)).map((slot) => ({
     id: `skill${slot + 1}`,
     kind: 'skill' as const,
     slot,
     maxRank: 3,
-    // skills 1..3: the third rank is the one that wants a permission; skills 4..5: the first (requirementOf)
+    // skills 1..3: the third rank is the one that wants a permission; skills 4..5: the first (requirementOf); skills 6.. (S19): none
   }));
+
+/** The first skill index whose first rank opens by the hero's level (`SkillParagraphs.level`); skills 4 and 5 keep their permission gate. */
+export const LEVELLED_FROM = 5;
 
 
 const STATS: UpgradeDef[] = [
@@ -55,14 +58,16 @@ const STATS: UpgradeDef[] = [
   { id: 'gwiazdki', kind: 'stat', maxRank: 3, mods: { gwiazdki: 1 } },
 ];
 
-/** Every entry the hero can ever be offered: 5 skills x 3 ranks, 6 passives, the stat upgrades. */
+/** Every entry the hero can ever be offered: its skills (5 to 11) x 3 ranks, its passives, the stat upgrades. A passive marked `rule` is the hero's rule, always on, and is not an entry. */
 export function poolFor(heroId: HeroId): UpgradeDef[] {
-  const passives = heroById(heroId).passives.map((p, i): UpgradeDef => {
+  const passives: UpgradeDef[] = [];
+  heroById(heroId).passives.forEach((p, i) => {
+    if (p.rule) return;
     const def: UpgradeDef = { id: `passive${i + 1}`, kind: 'passive', maxRank: 1, mods: p.mods, n: i + 1 };
     if (p.requires) def.requires = p.requires;
-    return def;
+    passives.push(def);
   });
-  return [...skillEntries(), ...passives, ...STATS];
+  return [...skillEntries(heroId), ...passives, ...STATS];
 }
 
 /**
@@ -71,9 +76,9 @@ export function poolFor(heroId: HeroId): UpgradeDef[] {
  */
 export const paraId = (skill: SkillIndex, n: 2 | 3): string => `para:${skill}:${n}`;
 
-/** Parse `para:<skill>:<n>` (skill 0..4, n 2 or 3); null for every other id. */
+/** Parse `para:<skill>:<n>` (skill 0..10, n 2 or 3); null for every other id. */
 export function parseParagraphId(id: string): { skill: SkillIndex; n: 2 | 3 } | null {
-  const m = /^para:([0-4]):([23])$/.exec(id);
+  const m = /^para:(\d|10):([23])$/.exec(id);
   return m ? { skill: Number(m[1]) as SkillIndex, n: Number(m[2]) as 2 | 3 } : null;
 }
 
@@ -93,7 +98,7 @@ const WEIGHT = { skill: 3, passive: 2, stat: 2, paragraph: 3 } as const;
 export function requirementOf(def: UpgradeDef, rank: number, heroId?: HeroId): Family | undefined {
   if (def.kind === 'skill') {
     const slot = def.slot ?? 0;
-    if (slot >= 3) return rank <= 1 && heroId ? heroDef(heroId).skills[slot].requires : undefined;
+    if (slot >= 3) return rank <= 1 && heroId ? skillAt(heroDef(heroId), slot).requires : undefined;
     return rank >= 3 ? SKILL_FAMILY[slot] : undefined;
   }
   return def.requires;
@@ -110,9 +115,12 @@ function takenRank(s: RunState, id: string): number {
 /** Entries that can still be taken, each with the rank it would install. */
 export function availableEntries(s: RunState): OfferEntry[] {
   const out: OfferEntry[] = [];
+  const hero = heroDef(s.player.heroId);
   for (const def of poolFor(s.player.heroId)) {
     const rank = takenRank(s, def.id) + 1;
     if (rank > def.maxRank) continue;
+    // a skill past the fifth is first offered at the level its paragraphs list (SKILLS.md "Lvl"); a worn unique may have installed it already
+    if (def.kind === 'skill' && rank === 1 && (def.slot ?? 0) >= LEVELLED_FROM && s.player.level < skillLevelOf(s.player.heroId, skillAt(hero, def.slot ?? 0).id)) continue;
     out.push({ id: def.id, rank, locked: !hasPermission(s, requirementOf(def, rank, s.player.heroId)) });
   }
   return out;
@@ -174,12 +182,12 @@ export const offerVersion = (s: RunState): number => s.player.level - Math.max(1
  */
 export function paragraphEntries(s: RunState, version = offerVersion(s)): OfferEntry[] {
   const heroId = s.player.heroId;
-  const skills = heroDef(heroId).skills;
+  const def = heroDef(heroId);
   const progress = runProgress(s);
   const out: OfferEntry[] = [];
   for (const n of [2, 3] as const) {
-    for (const skill of SKILL_INDICES) {
-      const id = skills[skill].id;
+    for (const skill of skillIndicesOf(def)) {
+      const id = skillAt(def, skill).id;
       if (!isInstalled(s, skill) || paragraphLevel(heroId, id, n) !== version) continue;
       if (isParagraphUnlocked(progress, id, n) && runParagraph(s, skill) !== n) out.push({ id: paraId(skill, n), rank: 1, locked: false });
     }
@@ -189,7 +197,7 @@ export function paragraphEntries(s: RunState, version = offerVersion(s)): OfferE
 
 function featureOf(s: RunState): OfferEntry | null {
   const all = availableEntries(s);
-  const fresh = all.filter((e) => (e.id === 'skill4' || e.id === 'skill5') && e.rank === 1 && !e.locked); // a skill that still wants its permission stays in the common pool
+  const fresh = all.filter((e) => /^skill([4-9]|1[01])$/.test(e.id) && e.rank === 1 && !e.locked); // a skill that still wants its permission stays in the common pool
   return pickFeature({ newSkill: fresh, paragraph: paragraphEntries(s) });
 }
 
@@ -295,18 +303,20 @@ export function confirmUpdate(s: RunState, id: string): boolean {
   if (!entry) return false;
   const para = parseParagraphId(id);
   if (para) {
-    if (!setRunParagraph(s, heroDef(s.player.heroId).skills[para.skill].id, para.n)) return false; // the picked paragraph is the active one
+    if (!setRunParagraph(s, skillAt(heroDef(s.player.heroId), para.skill).id, para.n)) return false; // the picked paragraph is the active one
   } else if (!applyUpgrade(s, id)) return false;
   s.hero.offer = null;
   return true;
 }
 
 /**
- * The skill (3 or 4) that an update just installed: its rank went from 0 to above 0 between the two `ranks` arrays.
+ * The skill (index 3 or more) that an update just installed: its rank went from 0 to above 0 between the two `ranks` arrays.
  * Null for every other update. The form then asks which pad the new skill goes on (DESIGN 10.1).
  */
+const SKILL_INDICES_FROM_3: readonly SkillIndex[] = [3, 4, 5, 6, 7, 8, 9, 10];
+
 export function newSkillOf(before: readonly number[], after: readonly number[]): SkillIndex | null {
-  for (const i of [3, 4] as const) if ((before[i] ?? 0) === 0 && (after[i] ?? 0) > 0) return i;
+  for (const i of SKILL_INDICES_FROM_3) if ((before[i] ?? 0) === 0 && (after[i] ?? 0) > 0) return i;
   return null;
 }
 
@@ -335,7 +345,7 @@ export function entryView(s: RunState, entry: OfferEntry): EntryView {
   const base = { id: entry.id, locked: !hasPermission(s, fam), requires };
   if (!def) return { ...base, title: entry.id, desc: '', tag: '' };
   if (def.kind === 'skill' && def.slot !== undefined) {
-    const sk = heroDef(heroId).skills[def.slot];
+    const sk = skillAt(heroDef(heroId), def.slot);
     const fresh = def.slot >= 3 && entry.rank <= 1; // a new skill: its own name and description (DESIGN 10.1)
     return {
       ...base,
@@ -347,7 +357,7 @@ export function entryView(s: RunState, entry: OfferEntry): EntryView {
   if (def.kind === 'paragraph') {
     const p = parseParagraphId(def.id);
     if (!p) return { ...base, title: entry.id, desc: '', tag: '' };
-    const sk = heroDef(heroId).skills[p.skill];
+    const sk = skillAt(heroDef(heroId), p.skill);
     const para = paragraphsOf(heroId, sk.id)[p.n - 1];
     return {
       ...base,

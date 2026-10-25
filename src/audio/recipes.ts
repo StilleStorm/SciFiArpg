@@ -258,6 +258,42 @@ export const RECIPES = {
     noise(4300, 0.03, 0.22, { q: 2.2, delay: 0.3, role: 'tail' }),
     noise(4600, 0.03, 0.2, { q: 2.2, delay: 0.35, role: 'tail' }),
   ], 0.25, 7),
+  /** Pralka (S19), Płukanie: a splash on the page, a handful of drops. */
+  pralkaRinse: combat([
+    click(2600, 0.35),
+    thump(88, 0.1, 0.8, { pitchDrop: 0.35 }),
+    noise(3400, 0.32, 0.32, { q: 0.6, attack: 0.03, delay: 0.02, role: 'tail' }),
+    { ...click(1900, 0.2, { q: 2, decay: 0.01, role: 'tail' }), repeat: 7, spread: 0.3, delay: 0.1 },
+  ], 0.25, 7),
+  /** Pralka (S19), Program 90: the drum heats, a long hiss of steam. */
+  pralkaSteam: combat([
+    click(2200, 0.3),
+    thump(72, 0.16, 0.85, { pitchDrop: 0.3 }),
+    noise(6200, 0.65, 0.3, { q: 0.5, attack: 0.14, delay: 0.03, role: 'tail' }),
+    noise(1700, 0.5, 0.22, { q: 0.7, attack: 0.1, pitchDrop: -0.5, delay: 0.05, role: 'tail' }),
+  ], 0.3, 7),
+  /** Pralka (S19), Tryb oszczędny: a relay drops, the hum goes lower. */
+  pralkaEco: combat([
+    click(1500, 0.3),
+    thump(78, 0.18, 1.0, { pitchDrop: 0.3 }),
+    thump(64, 0.2, 0.7, { delay: 0.05, pitchDrop: 0.2 }),
+    noise(300, 0.32, 0.12, { q: 2, attack: 0.02, delay: 0.03, role: 'tail' }),
+  ], 0.3, 7),
+  /** Pralka (S19), Zmiana programu: the dial clicks round three notches. */
+  pralkaSwitch: combat([
+    click(3200, 0.45),
+    thump(100, 0.1, 0.8, { delay: 0.01 }),
+    click(2600, 0.35, { delay: 0.06 }),
+    click(3600, 0.35, { delay: 0.12 }),
+    noise(900, 0.14, 0.25, { q: 3, delay: 0.12, role: 'tail' }),
+  ], 0.25, 7),
+  /** Pralka (S19), Odpompowanie: a plunger pulled out of a puddle, the gurgle of the drain. */
+  pralkaPump: combat([
+    click(1700, 0.4),
+    thump(66, 0.2, 0.9, { pitchDrop: 0.5 }),
+    noise(240, 0.5, 0.42, { q: 1.5, attack: 0.05, pitchDrop: 0.6, delay: 0.04, role: 'tail' }),
+    { ...click(1200, 0.2, { q: 2, decay: 0.012, role: 'tail' }), repeat: 8, spread: 0.4, delay: 0.1 },
+  ], 0.3, 7),
   /** Konsultant: a hold-beep stab. */
   konsBeep: combat([
     click(2200, 0.4),
@@ -297,6 +333,48 @@ export const RECIPES = {
     thump(130, 0.05, 0.3, { delay: 0.26, role: 'tail' }),
     click(2200, 0.3, { delay: 0.26 }),
   ], 0.2, 7),
+  // ---------- Konsultant, skills 6 to 10 (S19) ----------
+  /** Konsultant: Zgłoszenie przyjęte, a ticket flicked off the pad, stamped on the target, and the second one a beat later. */
+  konsTicket: combat([
+    noise(3400, 0.05, 0.3, { q: 1.4, attack: 0.004 }),
+    click(2600, 0.45),
+    thump(96, 0.12, 0.9, { pitchDrop: 0.3 }),
+    click(2000, 0.35, { delay: 0.09 }),
+    thump(112, 0.08, 0.5, { delay: 0.09, pitchDrop: 0.2 }),
+    noise(1800, 0.06, 0.2, { q: 1.2, delay: 0.11, role: 'tail' }),
+  ], 0.15, 7),
+  /** Konsultant: Formularz kontaktowy, a form laid down flat and ruled with a pen. */
+  konsForm: combat([
+    noise(2400, 0.14, 0.3, { q: 0.8, attack: 0.04, pitchDrop: 0.4 }),
+    thump(84, 0.14, 0.9, { delay: 0.1, pitchDrop: 0.3 }),
+    noise(700, 0.05, 0.3, { q: 1, delay: 0.1 }),
+    { ...click(4200, 0.25, { decay: 0.01, role: 'tail' }), repeat: 7, spread: 0.25, delay: 0.16 },
+  ], 0.3, 7),
+  /** Konsultant: Muzyka w słuchawce, a low pluck and three plucked notes of the hold tune. */
+  konsMusic: combat([
+    thump(100, 0.14, 0.9, { pitchDrop: 0.2 }),
+    click(2400, 0.3),
+    pluck(880, 0.25, 0.22, { delay: 0.03, bright: 5000 }),
+    pluck(1108, 0.25, 0.2, { delay: 0.12, bright: 5000 }),
+    pluck(1318, 0.3, 0.2, { delay: 0.22, bright: 5000 }),
+    noise(1400, 0.2, 0.12, { q: 1, delay: 0.05, role: 'tail' }),
+  ], 0.4, 7),
+  /** Konsultant: Przerwa techniczna, a chair scraped back and set down. */
+  konsBreak: combat([
+    click(3000, 0.4),
+    thump(88, 0.13, 0.9, { pitchDrop: 0.3 }),
+    noise(500, 0.18, 0.4, { q: 1.6, attack: 0.01, pitchDrop: -1.2, delay: 0.02 }),
+    thump(120, 0.1, 0.6, { delay: 0.17, pitchDrop: 0.2 }),
+    click(1800, 0.35, { delay: 0.17 }),
+    noise(2200, 0.12, 0.18, { q: 0.8, delay: 0.2, role: 'tail' }),
+  ], 0.3, 7),
+  /** Konsultant: Oddzwonimy, a handset put down and the first trill of its bell. */
+  konsCallback: combat([
+    click(2400, 0.4),
+    thump(100, 0.14, 0.9, { pitchDrop: 0.25 }),
+    { ...pluck(1480, 0.05, 0.25, { bright: 6000, role: 'transient' }), repeat: 6, spread: 0.3, delay: 0.04 },
+    noise(1700, 0.08, 0.2, { q: 3, delay: 0.2, role: 'tail' }),
+  ], 0.3, 7),
   /** Petlowiec: two overlapping remarks. */
   petlRemarks: combat([
     click(2400, 0.3),
@@ -450,6 +528,30 @@ export const RECIPES = {
     thump(70, 0.2, 1.0, { delay: 0.74, pitchDrop: 0.25 }),
     noise(2600, 0.2, 0.3, { q: 0.8, attack: 0.02, delay: 0.76, role: 'tail' }),
   ], 1.2, 9),
+  /** Pralka, Uznanie osobowości: the application is typed, then OSOBA is stamped on her form. */
+  pralkaPersonUlt: combat([
+    click(3000, 0.45),
+    thump(84, 0.18, 0.95, { pitchDrop: 0.3 }),
+    thump(46, 0.35, 0.7, { delay: 0.002, pitchDrop: 0.1, role: 'sub' }),
+    noise(520, 0.6, 0.45, { q: 1.5, attack: 0.2, delay: 0.04, role: 'tail' }),
+    pluck(220, 0.6, 0.28, { delay: 0.1, bright: 900, role: 'tail' }),
+    { ...click(3800, 0.25, { decay: 0.008, role: 'tail' }), repeat: 11, spread: 0.45, delay: 0.18 },
+    click(2400, 0.5, { delay: 0.7 }),
+    thump(68, 0.2, 1.0, { delay: 0.7, pitchDrop: 0.25 }),
+    noise(2600, 0.2, 0.3, { q: 0.8, attack: 0.02, delay: 0.72, role: 'tail' }),
+  ], 1.2, 9),
+  /** Pralka, Reklamacja: a stack of forms stamped one after another, then REKLAMACJA PRZYJĘTA. */
+  pralkaClaimUlt: combat([
+    click(2800, 0.5),
+    thump(90, 0.17, 0.95, { pitchDrop: 0.3 }),
+    thump(50, 0.32, 0.65, { delay: 0.002, pitchDrop: 0.1, role: 'sub' }),
+    { ...thump(78, 0.09, 0.5, { pitchDrop: 0.2, delay: 0.1 }), repeat: 6, spread: 0.45 },
+    noise(1400, 0.5, 0.35, { q: 1, attack: 0.15, pitchDrop: -0.8, delay: 0.1, role: 'tail' }),
+    { ...click(2200, 0.3, { decay: 0.01, role: 'tail' }), repeat: 9, spread: 0.5, delay: 0.12 },
+    click(2200, 0.55, { delay: 0.76 }),
+    thump(66, 0.2, 1.0, { delay: 0.76, pitchDrop: 0.25 }),
+    noise(2400, 0.2, 0.3, { q: 0.8, attack: 0.02, delay: 0.78, role: 'tail' }),
+  ], 1.2, 9),
   /** Konsultant, Przekazanie do działu: a handset lifted, a transfer click, PRZEKAZANO stamped on the form. */
   konsUlt: combat([
     click(2600, 0.55),
@@ -461,6 +563,29 @@ export const RECIPES = {
     click(2200, 0.55, { delay: 0.62 }),
     thump(80, 0.2, 1.0, { delay: 0.64, pitchDrop: 0.25 }),
     noise(1500, 0.18, 0.32, { q: 0.8, delay: 0.66, role: 'tail' }),
+  ], 1.2, 9),
+  /** Konsultant, Koniec kolejki: the calls dropped one by one, then ROZŁĄCZONO stamped. */
+  konsUltQueue: combat([
+    click(2800, 0.5),
+    thump(100, 0.16, 0.95, { pitchDrop: 0.3 }),
+    thump(50, 0.3, 0.65, { delay: 0.02, pitchDrop: 0.1, role: 'sub' }),
+    { ...click(2000, 0.3, { decay: 0.01, role: 'tail' }), repeat: 8, spread: 0.5, delay: 0.1 },
+    { ...thump(90, 0.08, 0.4, { pitchDrop: 0.2 }), repeat: 5, spread: 0.45, delay: 0.1 },
+    noise(900, 0.4, 0.35, { q: 1.5, attack: 0.05, pitchDrop: 0.6, delay: 0.1, role: 'tail' }),
+    click(2200, 0.55, { delay: 0.7 }),
+    thump(78, 0.2, 1.0, { delay: 0.7, pitchDrop: 0.25 }),
+    noise(1500, 0.18, 0.3, { q: 0.8, delay: 0.72, role: 'tail' }),
+  ], 1.2, 9),
+  /** Konsultant, Ankieta: the form laid, five boxes ticked, OCENIONO stamped. */
+  konsUltSurvey: combat([
+    click(2600, 0.5),
+    thump(96, 0.17, 0.95, { pitchDrop: 0.3 }),
+    thump(48, 0.3, 0.65, { delay: 0.02, pitchDrop: 0.1, role: 'sub' }),
+    noise(2400, 0.2, 0.3, { q: 0.8, attack: 0.06, pitchDrop: 0.4, delay: 0.05, role: 'tail' }),
+    { ...click(3600, 0.3, { decay: 0.008, role: 'tail' }), repeat: 5, spread: 0.4, delay: 0.25 },
+    click(2300, 0.55, { delay: 0.78 }),
+    thump(74, 0.2, 1.0, { delay: 0.8, pitchDrop: 0.25 }),
+    noise(1300, 0.18, 0.3, { q: 0.8, delay: 0.82, role: 'tail' }),
   ], 1.2, 9),
   /** Pętlowiec, Zebranie wszystkich pętli: four arrivals one on another, five attendance ticks, OBECNI. */
   petlUlt: combat([

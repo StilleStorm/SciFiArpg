@@ -115,12 +115,13 @@ describe('audio bindings', () => {
     expect(duck).toHaveBeenCalledTimes(1);
   });
 
-  it('every hero maps slots 0..2 to its own three sounds', () => {
+  it('every hero maps its skills to its own sounds, one per skill index', () => {
     for (const hero of ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'] as const) {
       played.length = 0;
       const { bus } = setup(hero);
-      for (const skill of [0, 1, 2, 3, 4] as const) bus.emit('skill:cast', { slot: 0, skill, free: false });
-      expect(names()).toEqual([...heroById(hero).sounds.skills]);
+      const skills = heroById(hero).sounds.skills;
+      for (const skill of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const) if (skill < skills.length) bus.emit('skill:cast', { slot: 0, skill, free: false });
+      expect(names()).toEqual([...skills]);
     }
   });
 

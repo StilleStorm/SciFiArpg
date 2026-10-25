@@ -1,13 +1,13 @@
 /** The fourth and fifth skill (DESIGN 10.1): rank 1 wants a permission, ranks 2 and 3 are free, the form follows with the pad step. */
 import { describe, expect, it } from 'vitest';
-import { heroDef, type SkillIndex } from '../heroes/defs';
+import { heroDef } from '../heroes/defs';
 import type { HeroId } from '../heroes';
 import { t } from '../i18n';
 import { createRun, type RunState } from '../world/run';
 import { applyUpgrade, availableEntries, confirmUpdate, drawEntries, entryView, newSkillOf, poolFor, requirementOf, rollOffer, upgradeById } from './update';
 
 const HEROES: HeroId[] = ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'];
-const NEW: SkillIndex[] = [3, 4];
+const NEW: (3 | 4)[] = [3, 4];
 const run = (heroId: HeroId, seed = 3): RunState => createRun(seed, { heroId });
 
 describe('skills 4 and 5 in the pool', () => {

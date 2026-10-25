@@ -10,7 +10,7 @@ import { circlePath, hide, setPart, syncInner, type DriveFx, type FigureDef, typ
 import { heroById, type HeroId } from '../heroes/registry';
 import { t } from '../i18n';
 import { attackAt, driveHeroStroke, driveLash, driveLaser, scribblePath, setStroke, trackRemark } from './attackFx';
-import { buildMoon, patchMoon } from './heroFx';
+import { appendParts, buildMoon, patchMoon } from './heroFx';
 import { el, n2 } from './svg';
 import type { Builder } from './view';
 import { washGroup } from './wash';
@@ -200,6 +200,12 @@ export const playerBuilder: Builder<Player> = {
 export const summonBuilder: Builder<Summon> = {
   create: (e) => {
     if (e.variant === 'moon') return buildMoon(e);
+    const things = heroById(e.heroId).figure.summonParts?.(e);
+    if (things) {
+      const thing = el('g', { class: `summon-${e.variant}` });
+      appendParts(thing, things);
+      return thing;
+    }
     const opts: FigureOpts = { dotted: true, size: HERO_SCALE, wash: true, faint: true };
     if (e.variant === 'decoy') opts.caption = t('heroes.kartograf.decoy');
     return buildHeroFigure(e.heroId, opts);

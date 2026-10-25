@@ -23,27 +23,31 @@ export interface HeroQuirk {
   onHit?(s: RunState, bus: Bus): boolean;
   /** Every step of a run (heroes/system.ts). */
   tick?(s: RunState, bus: Bus): void;
+  /** The share (0..1) by which the kiosk's fee is cut while this run lasts (Konsultant, Wstrzymanie oplat); 0 or absent: none. Read through heroes/quirks.ts `priceCut` by both Sklep checkouts (base kiosk and in-run kiosk). */
+  priceCut?(s: RunState): number;
 }
 
 export interface HeroSounds {
   /** One sound per skill, by SkillIndex (audio/bindings.ts plays it on `skill:cast`). */
-  skills: readonly [SfxName, SfxName, SfxName, SfxName, SfxName];
+  skills: readonly [SfxName, SfxName, SfxName, SfxName, SfxName, ...SfxName[]];
   /** Played when the auto-attack starts. */
   autoStart?: SfxName;
-  /** The ultimate's recipe (audio/bindings.ts plays it on `ultimate:cast`; it ends in the stamp's thud). */
-  ultimate?: SfxName;
+  /** The ultimate's recipe (audio/bindings.ts plays it on `ultimate:cast`; it ends in the stamp's thud): one for a hero with one ultimate, or a name per ultimate id once it has three (S19, `ultimateSound`). */
+  ultimate?: SfxName | Readonly<Record<string, SfxName>>;
 }
 
 /**
- * The five pad glyphs, by SkillIndex (ui/pads.ts draws them). Each is a list of path strings centred on 0,0 inside a
+ * The pad glyphs (five, then one per further skill), by SkillIndex (ui/pads.ts draws them). Each is a list of path strings centred on 0,0 inside a
  * 52 x 52 box; a leading "~" draws that stroke dotted.
  */
-export type HeroPadGlyphs = readonly [readonly string[], readonly string[], readonly string[], readonly string[], readonly string[]];
+export type HeroPadGlyphs = readonly [readonly string[], readonly string[], readonly string[], readonly string[], readonly string[], ...(readonly string[])[]];
 
 /** One passive of the update form (progression/update.ts): its change to Mods, and the permission family it needs. */
 export interface HeroPassive {
   mods: Partial<Mods>;
   requires?: Family;
+  /** The hero's rule (passive 7): always on, outside the slots, so the update form never offers it. Its text is still `forms.update.passive.<id>.N`. */
+  rule?: true;
 }
 
 export interface HeroModule {
@@ -56,7 +60,7 @@ export interface HeroModule {
   paragraphs: Readonly<Record<string, SkillParagraphs>>;
   /** The pad glyphs of the five skills. */
   pads: HeroPadGlyphs;
-  /** The six passives the update form offers (`passive1..6`, text `forms.update.passive.<id>.N.{name,desc}`). */
+  /** The passives the update form offers (`passive1..6`, a filled hero has up to ten; `rule` marks the one that is always on), text `forms.update.passive.<id>.N.{name,desc}`. */
   passives: readonly HeroPassive[];
   quirk?: HeroQuirk;
   /** The ultimates, by level (12 / 24 / 36); S3 builds the first (heroes/ultimate.ts casts it). Text `heroes.<id>.ult.<ultimate>.*`. */

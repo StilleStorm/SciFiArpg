@@ -1,6 +1,6 @@
 /** AKTUALIZACJA as a typed form laid over the paused page. Dumb: it shows what it is given and calls back. */
 import { createRng } from '../core/rng';
-import { heroDef, PAD_SLOTS, type SkillIndex } from '../heroes';
+import { heroDef, PAD_SLOTS, skillAt, type SkillIndex } from '../heroes';
 import { assignPad, padSkill } from '../heroes/loadout';
 import { t } from '../i18n';
 import { stamp } from '../render/ink';
@@ -152,7 +152,7 @@ export function createUpdateForm(root: HTMLElement): UpdateForm {
       setStep(true);
       sheet.classList.remove('hidden');
       title.textContent = t('forms.update.assign.title');
-      assignLead.textContent = t('forms.update.assign.lead', { skill: t(heroDef(hero).skills[skill].nameKey) });
+      assignLead.textContent = t('forms.update.assign.lead', { skill: t(skillAt(heroDef(hero), skill).nameKey) });
       let closed = false;
       const finish = (): void => {
         if (closed) return;

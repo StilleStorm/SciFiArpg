@@ -4,11 +4,17 @@ import type { OfferEntry } from '../heroes/state';
 import { createRun, type RunState } from '../world/run';
 import { applyCharacter, serializeCharacter, toCharacter } from '../save/character';
 import { runParagraph, setRunParagraph } from './paragraphs';
-import { availableEntries, composeOffer, confirmUpdate, entryView, offerVersion, paragraphEntries, parseParagraphId, pickFeature, reroll, rollOffer } from './update';
+import { applyUpgrade, availableEntries, composeOffer, confirmUpdate, entryView, offerVersion, paragraphEntries, parseParagraphId, pickFeature, reroll, rollOffer } from './update';
 
 const run = (level: number, seed = 5): RunState => {
   const s = createRun(seed, { heroId: 'pralka' });
   s.player.level = level;
+  return s;
+};
+/** Pralka with every skill past the fifth installed (S19), so that no new skill leads the offer in front of a paragraph. */
+const settled = (level: number): RunState => {
+  const s = run(level);
+  for (const id of ['skill6', 'skill7', 'skill8', 'skill9', 'skill10']) applyUpgrade(s, id);
   return s;
 };
 const e = (id: string): OfferEntry => ({ id, rank: 1, locked: false });
@@ -61,7 +67,7 @@ describe('composeOffer', () => {
 
 describe('the offer on a level up', () => {
   it('carries a paragraph entry at level 7 and keeps it through the problem report', () => {
-    const s = run(7);
+    const s = settled(7);
     const offer = rollOffer(s, 0);
     expect(offer.entries).toHaveLength(3);
     expect(offer.entries[0]?.id).toBe('para:0:2');
@@ -80,7 +86,7 @@ describe('the offer on a level up', () => {
   });
 
   it('picking it makes the paragraph active without an upgrade record; the character save keeps it', () => {
-    const s = run(7);
+    const s = settled(7);
     s.hero.offer = rollOffer(s, 0);
     expect(confirmUpdate(s, 'para:0:2')).toBe(true);
     expect(runParagraph(s, 0)).toBe(2);
@@ -106,6 +112,6 @@ describe('the offer on a level up', () => {
     expect(parseParagraphId('para:2:3')).toEqual({ skill: 2, n: 3 });
     expect(parseParagraphId('para:2:1')).toBeNull();
     expect(parseParagraphId('skill1')).toBeNull();
-    expect(parseParagraphId('para:5:2')).toBeNull();
+    expect(parseParagraphId('para:11:2')).toBeNull();
   });
 });

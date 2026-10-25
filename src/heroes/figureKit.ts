@@ -3,6 +3,7 @@
  * (`Parts`), and the contract a hero's `figure.ts` fills in (`HeroFigure`). Types and tiny helpers only; the engine that
  * builds and patches the `<g>` is render/heroFigures.ts.
  */
+import type { Summon, Zone } from '../entities/types';
 import type { AttackAnim } from '../render/attackFx';
 import { n2 } from '../render/svg';
 import type { WashHue } from '../render/wash';
@@ -152,4 +153,11 @@ export interface HeroFigure {
   drive?(c: DriveCtx): void;
   /** Called every frame, attacking or not (the pancake rolls). */
   patch?(e: Walker, p: Parts, timeMs: number): void;
+  /**
+   * S19: strokes of a zone this hero's skills put on the page (a form, a stave, a recording), as path strings in the zone's own
+   * coordinates (centre 0,0; a leading "~" draws it dotted); null for every variant that is not this hero's. render/heroFx.ts asks each hero.
+   */
+  zoneParts?(z: Zone): readonly string[] | null;
+  /** S19: the same for a summon that is a thing, not a figure (a chair, a phone); render/heroFigures.ts asks the summon's hero. */
+  summonParts?(e: Summon): readonly string[] | null;
 }

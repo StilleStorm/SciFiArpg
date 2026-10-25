@@ -97,7 +97,7 @@ try {
       cue: document.querySelector('.kf-cue')?.classList.contains('on') ?? false,
       scrolls: (() => { const e = document.querySelector('.kf-sheet .ps-scroll'); return e.scrollHeight > e.clientHeight + 6; })(),
     }));
-    check(`${prefix}: six rows (five skills and the ultimate), four slots, three columns, a category on every row`, m.rows === 6 && m.slots === 4 && m.specs === 3 && m.cats.every((c) => /·/.test(c ?? '')), JSON.stringify(m));
+    check(`${prefix}: thirteen rows (ten skills, the ultimate in the slot and Pralka's two others), four slots, three columns, a category on every row`, m.rows === 13 && m.slots === 4 && m.specs === 3 && m.cats.every((c) => /·/.test(c ?? '')), JSON.stringify(m));
     check(`${prefix}: no rounded corners`, m.radius === 0);
     check(`${prefix}: a form taller than the window shows the scroll cue`, !m.scrolls || m.cue, `scrolls=${m.scrolls} cue=${m.cue}`);
     for (const sel of ['.kf-pad', '.kf-spec', '.kf-box:not(:disabled)', '.kf-back']) {

@@ -222,13 +222,13 @@
   },
   "loadout": {
     "title": "Umiejętności",
-    "sub": "Pięć pozycji. Na przyciskach mieszczą się trzy, pozostałe oczekują.",
+    "sub": "Wykaz pozycji. Na przyciskach mieszczą się trzy, pozostałe oczekują.",
     "notInstalled": "nie zainstalowano",
     "noRank": "—",
     "pad": "Przypisz do przycisku {n}",
     "padTaken": "Przypisano do przycisku {n}",
     "back": "Wróć",
-    "note": "Umiejętność zdjęta z przycisku odnawia się nadal. Czwartą i piątą umiejętność instaluje aktualizacja, po nadaniu uprawnień."
+    "note": "Umiejętność zdjęta z przycisku odnawia się nadal. Kolejne umiejętności instaluje aktualizacja: czwartą i piątą po nadaniu uprawnień, dalsze po osiągnięciu poziomu."
   },
   "base": {
     "header": "Zgłoszenie nr {number} · baza",
