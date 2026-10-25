@@ -20,7 +20,7 @@ import { heroStep } from '../system';
 import { castUltimate, setUltimateParagraph, ultimateActive, ultimateSeconds } from '../ultimate';
 import { MAX_ULT_RADIUS, MAX_ULT_S } from '../ultimateDefs';
 import { IX } from './numbers';
-import { distanceMul } from './quirk';
+import { distanceMul, misnamedSlow } from './quirk';
 import { kartState } from './state';
 
 const DT = 1 / 60;
@@ -613,6 +613,16 @@ describe('passives', () => {
     // the second of the family is not named again
     tick(s, bus, 1);
     expect(notes).toHaveLength(3);
+  });
+
+  it('7 with «Awaria» on (S20 integrator): the misnamed walk 20% slower, the rest and a set-less hero do not', () => {
+    const { s, bus, enemies } = scene([[100, 0], [160, 0]]);
+    tick(s, bus, 0.5);
+    expect(misnamedSlow(s, enemies[0]!)).toBe(1);
+    s.player.sets = { awaria: 3 };
+    expect(misnamedSlow(s, enemies[0]!)).toBeCloseTo(0.8, 5);
+    expect(misnamedSlow(s, enemies[1]!)).toBe(1);
+    expect(heroById('kartograf').quirk?.enemySpeedMul?.(s, enemies[0]!)).toBeCloseTo(0.8, 5);
   });
 
   it('7 names nobody out of sight and no boss', () => {

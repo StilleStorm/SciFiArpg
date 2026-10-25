@@ -257,7 +257,7 @@ describe('sets: the three-piece line names every live skill its patch reaches (S
       const line = t(`items.set.${set.id}.bonus3`);
       for (const id of Object.keys(set.skills3 ?? {})) {
         const key = skills.get(id);
-        if (key === undefined) continue; // dormant until its hero is filled (S20)
+        if (key === undefined) continue; // a skill no hero has (none since S20)
         const name = t(key).split(/[.,:]/)[0]?.trim() ?? '';
         expect(line, `${set.id}: ${id}`).toContain(name);
       }

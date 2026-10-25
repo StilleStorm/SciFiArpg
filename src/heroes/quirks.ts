@@ -25,5 +25,10 @@ export function dealtMul(s: RunState, target: Enemy): number {
   return heroById(s.player.heroId).quirk?.dealtMul?.(s, target) ?? 1;
 }
 
+/** The factor on the walking speed of enemy `e` from the hero's quirk (1 for every hero without one). */
+export function enemySpeedMul(s: RunState, e: Enemy): number {
+  return heroById(s.player.heroId).quirk?.enemySpeedMul?.(s, e) ?? 1;
+}
+
 export { HITS_PER_ERROR } from './pralka/quirk';
 export { ROUND_BELOW, ROUND_COOLDOWN_S, ROUND_S, ROUND_UPOR } from './nalesnik/quirk';

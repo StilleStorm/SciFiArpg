@@ -10,6 +10,7 @@ import { clamp } from '../core/vec';
 import type { Enemy, Grid } from '../entities';
 import { t } from '../i18n';
 import { attack } from '../systems/combat';
+import { enemySpeedMul } from '../heroes/quirks';
 import { aggroMul } from '../world/laws';
 import { resolveMove } from '../world/pages';
 import type { RunState } from '../world/run';
@@ -343,7 +344,7 @@ function tickEnemy(s: RunState, e: Enemy, grid: Grid<Enemy>, near: Enemy[], bus:
     }
   }
 
-  let speed = rt.baseSpeed * statusSpeedMul(e) * rt.speedMul * (rt.limped ? 0.6 : 1) * affixSpeedMul(e, SPONSOR_SPEED_MUL);
+  let speed = rt.baseSpeed * statusSpeedMul(e) * rt.speedMul * (rt.limped ? 0.6 : 1) * affixSpeedMul(e, SPONSOR_SPEED_MUL) * enemySpeedMul(s, e);
   if (rt.heatPhase === 'stall') speed = 0;
   let tx = e.x;
   let ty = e.y;

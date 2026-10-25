@@ -8,12 +8,13 @@
 import type { Bus } from '../../core/events';
 import type { Enemy } from '../../entities/types';
 import { t } from '../../i18n';
+import { hasEffect } from '../../items/sets';
 import type { RunState } from '../../world/run';
 import { enemiesWithin, skillDamage, touchStatus } from '../helpers';
 import type { HeroQuirk } from '../module';
 import { line, push } from '../primitives';
 import { taken } from './hits';
-import { BLAD_DAMAGE, BLAD_EVERY_S, NAME_SIGHT, ODLEGLOSC_MAX, ODLEGLOSC_STEP, ODNIESIENIA_PULL_EVERY_S, ODNIESIENIA_PULL_R, ODNIESIENIA_PULL_S } from './numbers';
+import { AWARIA_SLOW, BLAD_DAMAGE, BLAD_EVERY_S, NAME_SIGHT, ODLEGLOSC_MAX, ODLEGLOSC_STEP, ODNIESIENIA_PULL_EVERY_S, ODNIESIENIA_PULL_R, ODNIESIENIA_PULL_S } from './numbers';
 import { kartState, type KartState } from './state';
 
 /** Passive 8: the factor on a blow to `target`, 1% for every ten units of the line from him to it, at most 20%. */
@@ -125,6 +126,12 @@ function stepNames(s: RunState, bus: Bus, k: KartState): void {
   }
 }
 
+/** «Awaria», three pieces (ITEMS section 12): the rule doubles, so whoever he has named wrongly also walks 20% slower. */
+export function misnamedSlow(s: RunState, e: Enemy): number {
+  if (!hasEffect(s.player, 'regula-podwojona')) return 1;
+  return kartState(s).misnamed.has(e.id) ? AWARIA_SLOW : 1;
+}
+
 export const quirk: HeroQuirk = {
   tick(s, bus) {
     const k = kartState(s);
@@ -135,5 +142,6 @@ export const quirk: HeroQuirk = {
     stepDecoys(s, bus, k);
   },
   dealtMul: distanceMul,
+  enemySpeedMul: misnamedSlow,
 };
 

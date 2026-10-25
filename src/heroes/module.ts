@@ -28,6 +28,8 @@ export interface HeroQuirk {
   priceCut?(s: RunState): number;
   /** S20: the factor (1 = none) on every blow the player lands on `target` (Kartograf, Odleglosc w linii prostej); read through heroes/quirks.ts `dealtMul` by systems/combat.ts applyDamage. */
   dealtMul?(s: RunState, target: Enemy): number;
+  /** S20: the factor (1 = none) on the walking speed of enemy `e` (Kartograf, the «Awaria» rule: the misnamed walk 20% slower); read through heroes/quirks.ts `enemySpeedMul` by enemies/ai.ts. */
+  enemySpeedMul?(s: RunState, e: Enemy): number;
 }
 
 export interface HeroSounds {

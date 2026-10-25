@@ -43,6 +43,8 @@ export const ROZA_SHOW_S = 1.2;
 /** Passive 8, Odleglosc w linii prostej: a share per ten units to the target, and the most it gives. */
 export const ODLEGLOSC_STEP = 0.01;
 export const ODLEGLOSC_MAX = 0.2;
+/** «Awaria», three pieces: the walking speed of an enemy he has named wrongly (passive 7, the rule doubled). */
+export const AWARIA_SLOW = 0.8;
 
 /** Passive 9, Blad pomiaru: seconds a decoy lasts longer, the damage it deals to whoever touches it (of the roll), the seconds between two such blows. */
 export const BLAD_EXTRA_S = 2;
