@@ -180,7 +180,9 @@ Progress is recorded here, one line per slice:
 
 - S16b done (player verdict: finale too easy/short): FORM_HP_MUL 1.2→1.6, new FINALE_DMG_MUL 1.25 on every Anomalia body, REPLY_BITE 0.4→0.15; finale-mode bot (all heroes, n=100): win 87%→64–68%, ticket 142→225 s (seed 500), phases 91/35/16→126/62/37 s; `npm run balance` finale mode prints p1s/p2s/p3s. Left for S27: Pralka still wins 100% (her face is easy), Kartograf's Planeta face stalls the non-aiming bot (5–20% of runs hit the 300 s cap), phase 2 ranges ~10–290 s by face; S19's aiming bot re-measures.
 
-**Next pickup:** the MVP playtest by the player (questions under "Needs the player"); park the feedback here. Without new feedback, S17 (sets and legendary paragraphs, M4).
+- S17 done: six sets (2/3-piece bonuses, joint footnotes, paperclip mark x1.5 for ground legibility; pieces are rzadki + `setId`), ten paragraph uniques (+1/+2 ranks over the cap, unlock while worn per ITEMS §12.2, `rankOf`/`patchAt`/`withPatchAt`), hosted set per planet (ostatnia-mila moved to planet 5), boss set piece 35%, Sklep set offers 10%, won Spór lifts the tier ("Komisja przychyliła się"), archived unique notes its hero; integrator fixed capstone + worn paragraph and a stale `rollMul`; smoke leg for sets/unique; voice pass (p1 ticket c "Stwierdzenie obecności", phase-3 existential reply). Reports S17-*.md. Parked: elite zestaw drop column to S18 (shifts seeded rolls); uniques mapped to today's skills, set effects on S19/S20 skills dormant (S19 brief notes them); card numerals/§ at ~8 px and 43 px buttons are S28 items; vitest testTimeout 20 s (three world tests ~5 s under load).
+
+**Next pickup:** S18 (Reklamacja, sinks, paczkomat deliveries, `named` rank + elite zestaw column).
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).

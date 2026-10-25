@@ -17,16 +17,22 @@ import type { DropSource, Item, ItemTier } from '../items/types';
 import { nextId, type RunState } from '../world/run';
 import { isRetired } from '../enemies/anomalia/state';
 import { finalUnique } from '../world/finale';
-import type { PriorityId } from '../world/campaign';
-import { BOSS_UNIQUE_CHANCE, DROP_TIER_WEIGHTS, DROPS, PRIORITY_STAR_MUL, PRIORITY_TIER_SHIFT } from '../balance/loot';
+import { planetDef, type PriorityId } from '../world/campaign';
+import { makeSetPiece } from '../items/setPieces';
+import type { SetId } from '../items/types';
+import { BOSS_SET_CHANCE, BOSS_UNIQUE_CHANCE, DROP_TIER_WEIGHTS, DROPS, PRIORITY_STAR_MUL, PRIORITY_TIER_SHIFT, SHOP_SET_CHANCE } from '../balance/loot';
 
 // the numbers live in balance/loot.ts (S16); `DROPS` is ITEMS 6.1 and 6.5, the chance of a potwierdzenie per rank is
 // `POTWIERDZENIE_DROP` (balance/recovery.ts, rolled last)
-export { BOSS_UNIQUE_CHANCE, DROP_TIER_WEIGHTS, DROPS, PRIORITY_STAR_MUL, PRIORITY_TIER_SHIFT };
+export { BOSS_SET_CHANCE, BOSS_UNIQUE_CHANCE, DROP_TIER_WEIGHTS, DROPS, PRIORITY_STAR_MUL, PRIORITY_TIER_SHIFT, SHOP_SET_CHANCE };
 export type TierWeights = readonly [number, number, number, number];
-// SEAM: ITEMS 6.2 also gives 35% a zestaw piece of the planet's set (sets slice) and "Komisja przychyliła się" (a won Spór adds one tier to the best drop); both wait for their systems.
+// S17: the planet boss's first item is 35% a zestaw piece of the planet's set (a planet without one rolls nothing) and a won Spór lifts the
+// best drop one tier, "Komisja przychyliła się" (ITEMS 6.2): rzadki -> zestaw -> unikatowy, and on a planet without a set the second item
+// rises one tier (to rzadki at most) instead.
 
 const TIER_ORDER: readonly ItemTier[] = ['zwykly', 'nietypowy', 'rzadki', 'unikatowy'];
+/** One tier up for the second boss item when a won Spór has nothing above rzadki to give (no set on the planet): never past rzadki. */
+const TIER_UP: Record<ItemTier, ItemTier> = { zwykly: 'nietypowy', nietypowy: 'rzadki', rzadki: 'rzadki', unikatowy: 'unikatowy' };
 const TIER_DOWN: Record<ItemTier, ItemTier> = { zwykly: 'zwykly', nietypowy: 'zwykly', rzadki: 'nietypowy', unikatowy: 'rzadki' };
 
 const priorityOf = (s: RunState): PriorityId => s.plan?.priority ?? 'normalny';
@@ -83,17 +89,34 @@ export function dropLoot(s: RunState, x: number, y: number, source: DropSource):
   const level = dropLevel(s, source === 'boss');
   let items = table.guaranteed;
   if (items === 0 && rng.chance(Math.min(1, table.item * mul))) items = 1;
+  const hosted = source === 'boss' ? planetDef(s.plan?.planet ?? 0).hostedSet : null;
+  const won = source === 'boss' && s.sporWon === true;
+  let liftSecond = false;
   for (let i = 0; i < items; i++) {
     let tier: ItemTier;
+    let setId: SetId | null = null;
     if (source === 'boss' && i === 0) {
       // The first boss drop is always at least rzadki; the final ticket's boss always hands over a unique.
       // the final ticket's boss hands over a unique the character has not archived yet (world/finale.ts finalUnique)
-      const unique = s.plan?.kind === 'final' || rng.chance(Math.min(1, BOSS_UNIQUE_CHANCE * (priority === 'krytyczny' ? 2 : 1)));
+      let unique = s.plan?.kind === 'final' || rng.chance(Math.min(1, BOSS_UNIQUE_CHANCE * (priority === 'krytyczny' ? 2 : 1)));
+      if (!unique && hosted && rng.chance(Math.min(1, BOSS_SET_CHANCE * (priority === 'krytyczny' ? 2 : 1)))) setId = hosted;
+      if (won && !unique) {
+        // Komisja przychyliła się: the best drop is one tier higher
+        if (setId) {
+          setId = null;
+          unique = true;
+        } else if (hosted) setId = hosted;
+        else liftSecond = true;
+      }
       tier = unique ? 'unikatowy' : 'rzadki';
     } else {
       tier = rollDropTier(rng, DROP_TIER_WEIGHTS[source], priority, law.lootTierBonus);
+      if (liftSecond && i === 1) tier = TIER_UP[tier];
     }
-    const item = (source === 'boss' && i === 0 && tier === 'unikatowy' && s.plan?.kind === 'final' ? finalUnique(s, rng, level) : null) ?? rollItem(rng, { level, source, tier });
+    const item =
+      (setId ? makeSetPiece(rng, setId, level) : null) ??
+      (source === 'boss' && i === 0 && tier === 'unikatowy' && s.plan?.kind === 'final' ? finalUnique(s, rng, level) : null) ??
+      rollItem(rng, { level, source, tier });
     dropItemPickup(s, x, y, item);
     if (law.lootPairs) {
       const twin = rollItem(rng, { level, tier: TIER_DOWN[item.tier], ...(item.uniqueId ? {} : { slot: item.slot }) });
@@ -185,12 +208,17 @@ export function updateLoot(s: RunState, bus: Bus, dt: number): void {
 
 /** Subscribe to kills: drops and trial progress. Call once; `getState` returns the current run. */
 export function bindLoot(bus: Bus, getState: () => RunState | null): void {
+  bus.on('spor:answered', (e) => {
+    const s = getState();
+    if (s && e.right) s.sporWon = true;
+  });
   bus.on('enemy:died', (e) => {
     const s = getState();
     if (!s) return;
     if (isRetired(s, e.id)) return; // a body of the Anomalia that was struck and left: nothing falls (enemies/anomalia)
     const tier = e.tier ?? 'common';
     dropLoot(s, e.x, e.y, tier);
+    if (tier === 'boss' && s.sporWon === true) bus.emit('footnote', { text: t('items.loot.komisja') });
     const named = claimNamedDrop(s, e.id);
     if (named) dropGuaranteed(s, e.x, e.y, named.minTier);
     const fam = rollPermission(s, tier, e.family);

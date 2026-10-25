@@ -38,7 +38,7 @@ function storeFor(s: RunState): SklepState {
   const existing = perRun.get(s.pageIndex);
   if (existing) return existing;
   const fresh = createSklep();
-  restock(fresh, s.seed, s.pageIndex + 1, shopIlvl(planetOf(s)));
+  restock(fresh, s.seed, s.pageIndex + 1, shopIlvl(planetOf(s)), planetOf(s));
   perRun.set(s.pageIndex, fresh);
   return fresh;
 }

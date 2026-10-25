@@ -133,3 +133,9 @@
 :root[data-orient='landscape'] .ar-cell {
   min-height: 36px;
 }
+.ar-hero {
+  margin: 2px 0 0;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.25;
+}

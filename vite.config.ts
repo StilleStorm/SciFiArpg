@@ -4,7 +4,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig({
   base: '/SciFiArpg/',
   build: { target: 'es2022', sourcemap: false },
-  test: { environment: 'node', include: ['src/**/*.test.ts'] },
+  // the page-generation flood-fill tests take 4-5 s alone on a 4-core box; 5 s (the default) fails them under load
+  test: { environment: 'node', include: ['src/**/*.test.ts'], testTimeout: 20000 },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',

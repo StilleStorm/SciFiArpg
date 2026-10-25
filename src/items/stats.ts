@@ -3,6 +3,8 @@ import type { Rng } from '../core/rng';
 import type { Player } from '../entities/types';
 import { hitIgnoresItem } from './absurd';
 import { activeSets, refreshCompat, SET_BONUS } from './compat';
+import { setBonusStats, setSpeedBonus, wornSetCounts } from './sets';
+import { grantsOf } from './uniques';
 import { RESIST_KEY, SLOTS, addStats, emptyStats, mapStats, type Item, type StatBlock } from './types';
 
 /** The free version after its trial: -40%. */
@@ -14,7 +16,9 @@ export const isFreeLimited = (item: Item): boolean => item.freeVersion === true 
 export function effectiveStats(item: Item): StatBlock {
   if (item.blockedBy && !item.adapter) return emptyStats();
   const base = item.revealed ? item.actual : item.claimed;
-  return isFreeLimited(item) ? mapStats(base, (v) => Math.round(v * FREE_PENALTY)) : base;
+  const stats = isFreeLimited(item) ? mapStats(base, (v) => Math.round(v * FREE_PENALTY)) : base;
+  // «Awaria»: a worn piece's numbers are re-rolled by up to 15% on every page entry (items/setFx.ts sets `rollMul`)
+  return item.rollMul !== undefined && item.rollMul !== 1 ? mapStats(stats, (v) => Math.round(v * (item.rollMul ?? 1))) : stats;
 }
 
 /**
@@ -23,6 +27,10 @@ export function effectiveStats(item: Item): StatBlock {
  */
 export function recomputeStats(p: Player): void {
   refreshCompat(p.equipment);
+  const counts = wornSetCounts(p.equipment);
+  // «Awaria» re-rolls only worn, with all three pieces: a piece in the bag, or a set broken to two, reads its own numbers again
+  for (const item of p.inventory) delete item.rollMul;
+  if ((counts.awaria ?? 0) < 3) for (const slot of SLOTS) delete p.equipment[slot]?.rollMul;
   let sum = emptyStats();
   let weapon: Item | undefined;
   for (const slot of SLOTS) {
@@ -32,6 +40,16 @@ export function recomputeStats(p: Player): void {
     if (slot === 'bron' && !(item.blockedBy && !item.adapter)) weapon = item;
   }
   for (let i = activeSets(p.equipment).length; i > 0; i--) sum = addStats(sum, SET_BONUS);
+  // S17: the named sets (two pieces: stats, speed), what the worn uniques give the hero's skills; the three-piece effects read `p.sets`
+  if (Object.keys(counts).length) p.sets = counts;
+  else delete p.sets;
+  sum = addStats(sum, setBonusStats(counts));
+  const speed = setSpeedBonus(counts);
+  if (speed > 0) p.gearSpeed = 1 + speed;
+  else delete p.gearSpeed;
+  const grants = grantsOf(p.equipment);
+  if (grants.length) p.grants = grants;
+  else delete p.grants;
 
   const base = p.baseStats;
   const stats: Stats = {

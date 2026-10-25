@@ -11,6 +11,7 @@ import type { Enemy } from '../entities/types';
 import { heroDef } from '../heroes/registry';
 import type { CopySpec } from '../heroes/state';
 import { allItems, dropItem, type Item } from '../items';
+import { hasEffect } from '../items/sets';
 import { t } from '../i18n';
 import { resolveMove } from '../world/pages';
 import { nextId, type RunState } from '../world/run';
@@ -95,7 +96,7 @@ export function applyPetla(s: RunState, bus: Bus): void {
     const g = createSummon(nextId(s), copy.x, copy.y, {
       variant: 'ghost',
       heroId: copy.heroId,
-      ttl: GHOST_SECONDS,
+      ttl: hasEffect(p, 'regula-podwojona') ? GHOST_SECONDS * 2 : GHOST_SECONDS, // «Awaria», three pieces: the friendly copy stays 20 s
       damageType: copy.damageType,
       attackRange: copy.attackRange,
       attackCooldown: copy.attackCooldown,

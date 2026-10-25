@@ -13,8 +13,10 @@ export interface MarkSubject {
   tier: ItemTier;
   affixes: readonly string[];
   freeVersion?: boolean;
-  /** Reserved for zestaw (S10): a paperclip replaces the tier mark of a set piece. */
+  /** A paperclip replaces the tier mark of a set piece. */
   set?: boolean;
+  /** Items carry their set as an id (items/sets.ts); the paperclip is drawn for it too. */
+  setId?: string;
 }
 
 /** Marks that sit on the drawing itself, and marks that sit beside the plate number. */
@@ -51,23 +53,24 @@ export function affixMarks(item: MarkSubject): AffixMarkKind[] {
 export const groundMark = (item: MarkSubject): AffixMarkKind | null => affixMarks(item)[0] ?? null;
 
 const SEAL_RIBBON = 'M10.5 19L8.5 23M17.5 19L19.5 23';
-const CLIP = 'M-20-10V-18Q-20-22-16.5-22Q-13-22-13-18V-9Q-13-6.5-15.5-6.5Q-18-6.5-18-9V-16';
+// a gem paperclip, three nested bends, tilted a little: ink only, drawn in the corner where the other tier marks sit
+const CLIP = 'M-12.5-9V-19A3.5 3.5 0 0 1-5.5-19V-5A5.5 5.5 0 0 1-16.5-5V-17A1.8 1.8 0 0 1-12.9-17V-6';
 const THREAD = 'M-19 13Q-25-5-9-19Q9-26 20-8Q25 8 7 18Q-6 22-15 17';
 const THREAD_ENDS = 'M-15 17L-20 21Q-22 22-21 19M-15 17L-12 23Q-11 24-13 24';
 
 export type TierMarkKind = 'stamp' | 'thread' | 'seal' | 'clip';
 
 /** Which tier mark an item wears; null for zwykły. A set piece wears the paperclip whatever its tier. */
-export function tierMarkKind(item: Pick<MarkSubject, 'tier' | 'set'>): TierMarkKind | null {
-  if (item.set) return 'clip';
+export function tierMarkKind(item: Pick<MarkSubject, 'tier' | 'set' | 'setId'>): TierMarkKind | null {
+  if (item.set || item.setId) return 'clip';
   return { zwykly: null, nietypowy: 'stamp', rzadki: 'thread', unikatowy: 'seal' }[item.tier] as TierMarkKind | null;
 }
 
 /** The tier mark: a stamp (nietypowy), a thread (rzadki), a wax seal (unikatowy), a paperclip (zestaw). */
 export function buildTierMark(item: MarkSubject, sw = 1.5): SVGGElement | null {
   const g = el('g', { class: 'item-mark tier-mark', 'stroke-width': sw });
-  if (item.set) {
-    g.append(el('path', { d: CLIP }));
+  if (item.set || item.setId) {
+    g.append(el('path', { d: CLIP, fill: 'none', transform: 'translate(-16 -22) scale(1.5) translate(16 22) rotate(-14 -11 -11)' }));
     return g;
   }
   switch (item.tier) {

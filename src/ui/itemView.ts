@@ -28,11 +28,11 @@ export function captionNode(item: Item): HTMLElement {
 }
 
 /** One drawing in a square plate. */
-export function figure(item: Pick<Item, 'drawing'> & Partial<Pick<Item, 'tier' | 'affixes' | 'freeVersion'>>, px: number): HTMLElement {
+export function figure(item: Pick<Item, 'drawing'> & Partial<Pick<Item, 'tier' | 'affixes' | 'freeVersion' | 'setId'>>, px: number): HTMLElement {
   const f = h('span', 'pfig');
   f.style.width = `${px}px`;
   f.style.height = `${px}px`;
-  f.append(drawingSvg(item.drawing, item.tier ? { tier: item.tier, affixes: item.affixes ?? [], freeVersion: item.freeVersion } : undefined));
+  f.append(drawingSvg(item.drawing, item.tier ? { tier: item.tier, affixes: item.affixes ?? [], freeVersion: item.freeVersion, ...(item.setId ? { setId: item.setId } : {}) } : undefined));
   return f;
 }
 
@@ -85,7 +85,7 @@ export function reviewText(item: Item): string {
   return item.review ? reviewLine(item.review) : t('items.review.none');
 }
 
-export const tierWord = (item: Item): string => t(`items.tier.${item.tier}`);
+export const tierWord = (item: Item): string => t(item.setId ? 'items.tier.zestaw' : `items.tier.${item.tier}`);
 
 /** Hand-written difference between two numbers in the accent color. */
 export function deltaSpan(diff: number): HTMLElement | null {

@@ -12,7 +12,7 @@ export function movePlayer(s: RunState, bus: Bus, dt: number): void {
   const p = s.player;
   s.edgeCooldown = Math.max(0, s.edgeCooldown - dt);
   p.moving = false;
-  const speed = p.speed * statusSpeedMul(p); // do_weryfikacji halves it, zablokowany stops it
+  const speed = p.speed * (p.gearSpeed ?? 1) * statusSpeedMul(p); // do_weryfikacji halves it, zablokowany stops it; gearSpeed: a worn set (items/sets.ts)
   if (isStunned(p)) {
     p.stuck = 0;
     resolveMove(s.page, p, p.r);

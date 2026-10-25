@@ -8,6 +8,7 @@ import { capacityOf, caseTitle, errorText, ARCHIVE_PLACES, type ArchivePlace } f
 import type { Places, Result } from './rosterStore';
 import { h } from './dom';
 import { displayName, figure, shownStats, summary, tierWord } from './itemView';
+import { heroNote } from './itemSets';
 import { attachScrollCue } from './konfiguracja';
 import { createSheet, type Sheet } from './sheet';
 import './archive.css';
@@ -106,7 +107,8 @@ export function openArchive(root: HTMLElement, host: ArchiveHost, onClose: () =>
       refresh();
     });
     row.append(drop);
-    bar.append(line, row);
+    const hero = heroNote(item); // S17: which hero the paragraph of an archived unique concerns
+    bar.append(line, ...(hero ? [h('p', 'ar-hero', hero)] : []), row);
   }
 
   function refresh(): void {

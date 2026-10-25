@@ -20,6 +20,8 @@ import { claimIsHearsay } from '../items/absurd';
 import { drawingSvg } from '../render/itemDrawings';
 import type { RunState } from '../world/run';
 import { h } from './dom';
+import { equipNotes, paragraphBlock, setBlock } from './itemSets';
+import { wornSetCounts } from '../items/sets';
 import {
   ROW_KEYS,
   caption,
@@ -193,6 +195,7 @@ export function createInventorySheet(root: HTMLElement, host: InventoryHost, onC
       }
     }
     d.append(statsTable(item));
+    for (const extra of [setBlock(p, item), paragraphBlock(p, item)]) if (extra) d.append(extra); // S17: the set with its bonuses, the unique's paragraph
     if (item.likes || item.dislikes) {
       const tags = h('p', 'inv-line');
       const parts: string[] = [];
@@ -235,9 +238,11 @@ export function createInventorySheet(root: HTMLElement, host: InventoryHost, onC
       })));
     } else {
       buttons.append(mk(t('items.ui.equip'), () => act((pl) => {
+        const before = wornSetCounts(pl.equipment);
         const res = equipItem(pl, item);
         if (res.outcome !== 'ok') return;
         host.say(t('items.ui.worn2', { n: item.number }));
+        for (const line of equipNotes(pl, item, before)) host.say(line);
         if (res.clash) host.say(t('items.compat.clash', { a: item.number, b: res.clash.number, tag: t(`items.tag.${res.clash.tag}`) }));
         for (const set of res.newSets) {
           host.say(t('items.compat.set', { a: set.a.number, b: set.b.number, tag: t(`items.tag.${set.tag}`), bonus: SET_BONUS.pewnosc ?? 0 }));

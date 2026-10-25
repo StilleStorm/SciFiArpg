@@ -2,6 +2,7 @@ import type { Rng } from '../core/rng';
 import type { Player } from '../entities/types';
 import { t } from '../i18n';
 import { actualOverClaim } from './level';
+import { hasEffect } from './sets';
 import { recomputeStats } from './stats';
 import { STAT_KEYS, emptyStats, type Item, type ItemTier, type Review, type ReviewTruth, type StatBlock } from './types';
 
@@ -56,8 +57,9 @@ export function reviewLine(r: Review): string {
 }
 
 /** What the hero sets: 2 for the Konsultant. Trial progress per kill. */
-export function trialMultiplier(p: Pick<Player, 'trialSpeed'>): number {
-  return p.trialSpeed ?? 1;
+export function trialMultiplier(p: Pick<Player, 'trialSpeed' | 'sets'>): number {
+  const v = p.trialSpeed ?? 1;
+  return v > 1 && hasEffect(p, 'regula-podwojona') ? v * 1.5 : v; // «Awaria», three pieces: the Konsultant's rule doubles (2 becomes 3)
 }
 
 export type RevealKind = 'honest' | 'bought' | 'niedoceniony' | 'free';

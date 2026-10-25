@@ -59,8 +59,8 @@
         }
       },
       "c": {
-        "title": "Potwierdzenie obecności",
-        "text": "Komisja wymaga potwierdzenia, że wnioskodawca znajduje się na planecie, na której się znajduje. Potwierdzenie składa się na stronie {count}."
+        "title": "Stwierdzenie obecności",
+        "text": "Komisja wymaga stwierdzenia, że wnioskodawca znajduje się na planecie, na której się znajduje. Stwierdzenie sporządza się na stronie {count}."
       }
     },
     "boss": {
@@ -348,7 +348,7 @@
         "reply": {
           "mechaniczny": "Potrzebnego można wyłączyć. Wyłącznik jest z tyłu.",
           "regulaminowy": "Zgłoszenie otwarte podlega przekazaniu na planetę następną.",
-          "egzystencjalny": "Zgłoszenie zamyka się stemplem, nie zgodą. Stempel jest w ręku wnioskodawcy."
+          "egzystencjalny": "Zgłoszenie uznaje się za zamknięte. Potrzebny do zgłoszenia zamkniętego nie jest nikomu potrzebny, więc go nie ma."
         }
       },
       "stamp": "SPRAWĘ ZAMKNIĘTO",

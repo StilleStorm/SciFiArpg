@@ -13,6 +13,7 @@ import type { RunState } from '../world/run';
 import { anomaliaHit } from './anomalia/gate';
 import { POUFNY_DMG_MUL, hasAffix, ownsAffix } from './elites';
 import { rtOf } from './runtime';
+import { onSetHurt } from '../items/setFx';
 
 type Fighter = Player | Enemy;
 
@@ -88,6 +89,7 @@ export function teleportEnemy(s: RunState, e: Enemy): void {
 /** An enemy took a hit and lives: defects and affixes react. */
 export function onEnemyHurt(s: RunState, bus: Bus, e: Enemy, type: DamageType | undefined): void {
   void bus;
+  onSetHurt(s, e, type); // the Domniemanie set (items/setFx.ts)
   const rt = rtOf(e);
   rt.asleep = false;
   rt.hurtAt = s.time;

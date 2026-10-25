@@ -7,6 +7,12 @@ import { itemValue, rollItem } from '../items/generate';
 import { addItem, inventoryFull } from '../items/inventory';
 import type { Item, ItemTier, Slot } from '../items/types';
 import { SLOTS } from '../items/types';
+import { makeSetPiece } from '../items/setPieces';
+import { BASES_BY_ID } from '../items/bases';
+import { SETS_BY_ID } from '../items/sets';
+import type { SetId } from '../items/types';
+import { SHOP_SET_CHANCE } from '../balance/loot';
+import { planetDef } from '../world/campaign';
 import { spendStars } from './stars';
 
 /** Added at checkout, not shown in the price (footnote "Cena nie zawiera opłaty serwisowej."). */
@@ -89,14 +95,23 @@ export interface ListingOptions {
   /** Force the tier (stock rules); otherwise the shop's weights. */
   tier?: ItemTier;
   kind?: ListingKind;
+  /** The offer is a zestaw piece of this set (ITEMS 7.1); the piece whose slot is the listing's slot when the set has one. */
+  set?: SetId;
+}
+
+/** A piece of the set for the offer: the piece that goes in `slot` if the set has one, otherwise one at random. */
+function setOffer(rng: Rng, set: SetId, level: number, slot: Slot): Item | null {
+  const def = SETS_BY_ID.get(set);
+  const at = def?.pieces.findIndex((p) => BASES_BY_ID.get(p.baseId)?.slot === slot) ?? -1;
+  return makeSetPiece(rng, set, level, at >= 0 ? (at as 0 | 1 | 2) : undefined);
 }
 
 /** Make one listing. Whether it lies is decided here, with the current lie rate. */
 export function makeListing(rng: Rng, id: number, level: number, slot: Slot, rate: number, opts: ListingOptions = {}): Listing {
   const tier = opts.tier ?? shopTier(rng);
   const kind = opts.kind ?? 'plate';
-  let item = rollItem(rng, { tier, slot, level, shop: true });
-  if (kind === 'oferta') {
+  let item = (opts.set ? setOffer(rng, opts.set, level, slot) : null) ?? rollItem(rng, { tier, slot, level, shop: true });
+  if (kind === 'oferta' && !item.setId) {
     // "A rzadki with a g3 affix": reroll a few times until one of the lines is grade 3.
     for (let i = 0; i < 12 && !item.affixes.some((a) => AFFIXES_BY_ID.get(a)?.grade === 3); i++) item = rollItem(rng, { tier, slot, level, shop: true });
   }
@@ -123,10 +138,11 @@ export function makeListing(rng: Rng, id: number, level: number, slot: Slot, rat
  * New stock for a visit. Deterministic from (seed, visit key, updates). `level` is the item level of the band
  * (items/level.ts shopIlvl: the planet's band at page offset 1); ui/sklep.ts and economy/kiosk.ts pass shopIlvl(planet).
  */
-export function restock(state: SklepState, seed: number, visitKey: number, level: number): void {
+export function restock(state: SklepState, seed: number, visitKey: number, level: number, planet = 0): void {
   const rng = createRng(seed).fork(`sklep:${visitKey}:${state.updates}`);
   const slots = shuffled(rng, SLOTS);
   const rate = lieRate(state.updates, seed);
+  const hosted = planetDef(planet).hostedSet;
   const lowTiers = (): ItemTier => (rng.chance(0.5) ? 'zwykly' : 'nietypowy');
   const at = (i: number): Slot => slots[i % slots.length] ?? 'bron';
   const specs: { slot: Slot; opts: ListingOptions }[] = [
@@ -134,8 +150,8 @@ export function restock(state: SklepState, seed: number, visitKey: number, level
     { slot: at(1), opts: { tier: lowTiers() } },
     { slot: at(2), opts: { tier: lowTiers() } },
     { slot: at(3), opts: { tier: 'rzadki' } },
-    // SEAM: 10% of offers are a zestaw piece of the planet's set (sets slice); until then the offer is always the rzadki with a g3 affix.
-    { slot: at(4), opts: { tier: 'rzadki', kind: 'oferta' } },
+    // 10% of offers are a zestaw piece of the planet's set (ITEMS 7.1); a planet without a set rolls nothing, so its stock is unchanged
+    { slot: at(4), opts: { tier: 'rzadki', kind: 'oferta', ...(hosted && rng.chance(SHOP_SET_CHANCE) ? { set: hosted } : {}) } },
     { slot: at(0), opts: { tier: lowTiers(), kind: 'adapter' } },
   ];
   state.stock = specs.map((sp) => makeListing(rng, state.nextListingId++, level, sp.slot, rate, sp.opts));
@@ -191,12 +207,12 @@ export interface ReportResult {
 }
 
 /** "Zgłoś problem": after 3 reports the store updates and the lie rate changes (new stock too). */
-export function reportProblem(state: SklepState, seed: number, level: number): ReportResult {
+export function reportProblem(state: SklepState, seed: number, level: number, planet = 0): ReportResult {
   state.reports++;
   if (state.reports < REPORTS_TO_UPDATE) return { reports: state.reports, updated: false };
   state.reports = 0;
   state.updates++;
-  restock(state, seed, state.stockFor, level);
+  restock(state, seed, state.stockFor, level, planet);
   return { reports: 0, updated: true };
 }
 

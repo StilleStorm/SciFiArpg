@@ -5,6 +5,7 @@
  * already on another pad swaps with the one on the tapped pad) and redraws. The sheet owns no rules: heroes/loadout.ts does.
  */
 import { heroDef, PAD_SLOTS, SKILL_INDICES, type PadSlot, type SkillIndex } from '../heroes';
+import { rankOf } from '../heroes/grants';
 import { assignPad, effectiveSkill, isInstalled, padOf } from '../heroes/loadout';
 import { t } from '../i18n';
 import { roman } from '../progression/update';
@@ -32,7 +33,7 @@ export function loadoutRows(s: RunState): LoadoutRow[] {
   return SKILL_INDICES.map((index) => {
     const sk = def.skills[index];
     const installed = isInstalled(s, index);
-    const rank = s.hero.ranks[index] ?? 0;
+    const rank = rankOf(s, index);
     return {
       index,
       name: t(sk.nameKey),

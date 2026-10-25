@@ -17,7 +17,8 @@
     "zwykly": "zwykły",
     "nietypowy": "nietypowy",
     "rzadki": "rzadki",
-    "unikatowy": "unikatowy"
+    "unikatowy": "unikatowy",
+    "zestaw": "zestaw"
   },
   "tag": {
     "papier": "papier",
@@ -355,6 +356,15 @@
     "ciemny": "Nowość! Dodano tryb ciemny. Przedmiot jest w nim trudniejszy do znalezienia."
   },
   "unique": {
+    "paraMark": "§ {n}",
+    "ranks": {
+      "one": "Umiejętność „{skill}”: +{count} ulepszenie. Odblokowana na czas noszenia.",
+      "few": "Umiejętność „{skill}”: +{count} ulepszenia. Odblokowana na czas noszenia.",
+      "many": "Umiejętność „{skill}”: +{count} ulepszeń. Odblokowana na czas noszenia."
+    },
+    "concerns": "Paragraf dotyczy: {hero}.",
+    "notYours": "Paragraf dotyczy: {hero}. Dla pozostałych zgłaszających przedmiot jest tylko przedmiotem.",
+    "notYoursNote": "Paragraf nie dotyczy zgłaszającego.",
     "odmowa": {
       "name": "Pieczątka «Odmowa»",
       "desc": "Stempel kauczukowy z rękojeścią z drewna, którego nie zidentyfikowano.",
@@ -390,7 +400,112 @@
       "desc": "Pismo urzędowe z pieczątką. Pieczątka potwierdza pieczątkę.",
       "story": "Wystawione na wniosek rzeczy, która nie była pewna, czy istnieje. Poświadcza jej istnienie od daty wystawienia, nie wcześniej. Zaświadczenie odnaleziono. Wnioskodawcy nie.",
       "note": "Przedmiot unikatowy. Istnienie posiadacza poświadczono od dziś."
+    },
+    "program95": {
+      "name": "Pilot «Program 95°»",
+      "desc": "Pilot do pralki. Przyciski opisano ikonami, których pralka nie rozpoznaje.",
+      "story": "Pilot do pralki, której nie wyprodukowano. Przycisk 95° działa; pozostałe przyciski komentują. Instrukcja zaleca nie opuszczać pomieszczenia.",
+      "note": "Przedmiot unikatowy. Programu 94° nie przewidziano."
+    },
+    "pralnia": {
+      "name": "Kombinezon «Pralnia Zakładowa»",
+      "desc": "Kombinezon roboczy, prany tak często, że kolor jest już tylko domniemany.",
+      "story": "Egzemplarz z zakładu, który zamknięto za cykl. Identyfikator wskazuje numer, nie osobę. Delikatność jest wymogiem BHP.",
+      "note": "Przedmiot unikatowy. Prać osobno."
+    },
+    "oczekiwanie": {
+      "name": "Zegarek «Szacowany czas oczekiwania»",
+      "desc": "Zegarek na pasku z tworzywa. Wskazówka godzinowa jest ozdobna.",
+      "story": "Zegarek wskazuje czas oczekiwania zamiast godziny. Czas oczekiwania rośnie. Zegarek jest punktualny.",
+      "note": "Przedmiot unikatowy. Szacowany czas oczekiwania: dłuższy niż poprzednio."
+    },
+    "windykacja": {
+      "name": "Daszek «Dział windykacji»",
+      "desc": "Daszek z logo działu, którego nazwy nie podaje się na zewnątrz.",
+      "story": "Daszek z działu, do którego się nie dzwoni; on dzwoni. Rozłączenie następuje bez podniesienia głosu. Korony nie przewidziano.",
+      "note": "Przedmiot unikatowy. Zgłaszającego wezwano do zapłaty. Kwotę poda dział."
+    },
+    "przedwykonaniem": {
+      "name": "Faktura «Wystawiona przed wykonaniem usługi»",
+      "desc": "Faktura w trzech egzemplarzach. Żaden nie jest oryginałem.",
+      "story": "Faktura obejmuje usługę, która jeszcze nie nastąpiła. Termin płatności minął wczoraj. Odsetki nalicza się nadawcy.",
+      "note": "Przedmiot unikatowy. Termin płatności upłynął przed znalezieniem faktury."
+    },
+    "zapasowe": {
+      "name": "Szelki «Zapasowe»",
+      "desc": "Szelki z dwiema parami klamer. Obie pary są w użyciu.",
+      "story": "Szelki dla dwóch osób naraz, obu tych samych. Jedna para klamer jest z przyszłego tygodnia. Reklamacji nie uwzględniono, bo jeszcze nie wpłynęła.",
+      "note": "Przedmiot unikatowy w dwóch egzemplarzach. Drugi dostarczono z wyprzedzeniem."
+    },
+    "granica": {
+      "name": "Wskaźnik «Granica państwowa»",
+      "desc": "Wskaźnik teleskopowy ze znakiem, którego nie zarejestrowano.",
+      "story": "Wskaźnik wyznacza granicę państwa, którego nie wpisano do rejestru. Granica jest strzeżona. Państwo nie.",
+      "note": "Przedmiot unikatowy. Paszportów nie wydaje się."
+    },
+    "bladpomiaru": {
+      "name": "Polisa «Od błędu pomiaru»",
+      "desc": "Polisa w teczce, z załącznikiem, który jest teczką.",
+      "story": "Polisa obejmuje błędy pomiaru i ich skutki. Wyłączenia obejmują pomiary. Errata jest załącznikiem i wybucha.",
+      "note": "Przedmiot unikatowy. Wyłączenia odpowiedzialności obejmują niniejszy komunikat."
+    },
+    "masaplanety": {
+      "name": "Liczydło «Masa planety»",
+      "desc": "Liczydło drewniane o dwunastu rzędach. Rzędy są nierówne z założenia.",
+      "story": "Liczydło liczy masę ciała, które je nosi. Wynik rośnie z każdym użyciem. Koraliki nie dają się odsunąć.",
+      "note": "Przedmiot unikatowy. Koraliki policzyły posiadacza."
+    },
+    "atmosfera": {
+      "name": "Czepek «Atmosfera szczątkowa»",
+      "desc": "Czepek foliowy, jednorazowy, użyty więcej niż raz.",
+      "story": "Czepek foliowy utrzymuje atmosferę o grubości jednej warstwy. Pociski ślizgają się po niej zgodnie z fizyką. Fizyka nie została poinformowana.",
+      "note": "Przedmiot unikatowy. Atmosfera jest szczątkowa. Obowiązuje."
     }
+  },
+  "set": {
+    "head": "Zestaw «{name}»: założono {n} z {max}.",
+    "pieces2": "Dwa elementy:",
+    "pieces3": "Trzy elementy:",
+    "complete": "Zestaw «{name}» jest kompletny. Kompletność odnotowano.",
+    "obieg": {
+      "name": "Obieg dokumentów",
+      "bonus2": "Odporność regulaminowa +12%, pewność siebie +8.",
+      "bonus3": "Odparcie tezy regulaminowej oznacza przeciwnika jako zgłoszonego na 2 s.",
+      "note": "Dokumenty krążą zgodnie z procedurą. Procedura krąży z dokumentami."
+    },
+    "ostatnia-mila": {
+      "name": "Ostatnia mila",
+      "bonus2": "Upór +10, szybkość chodu +8%.",
+      "bonus3": "Umiejętność ruchu sięga dalej lub trwa dłużej: Odwirowanie, Pętla, Korekta, Orbita.",
+      "note": "Przesyłka doręczona. Odbiorca w drodze."
+    },
+    "serwis": {
+      "name": "Serwis",
+      "bonus2": "Odnowienie ataku krótsze o 8%.",
+      "bonus3": "Trafienie nie do odparcia umiejętnością podstawową kasuje jej odnowienie, nie częściej niż co 2 s.",
+      "note": "Usterkę usunięto. Usterki nie stwierdzono."
+    },
+    "infolinia": {
+      "name": "Infolinia",
+      "bonus2": "Nie do odparcia +4%, odporność egzystencjalna +6%.",
+      "bonus3": "Jedna umiejętność każdego zgłaszającego działa mocniej: Wirowanie, Muzyka w słuchawce, Uwaga, Pomiar, Księżyc.",
+      "note": "Rozmowa jest nagrywana. Nagranie zostało rozłączone."
+    },
+    "domniemanie": {
+      "name": "Domniemanie",
+      "bonus2": "Odporność egzystencjalna +10%. Pierwsze trafienie obniża przeciwnikowi wygenerowanemu współczynnik istnienia o 0,1.",
+      "bonus3": "Pierwsze trafienie egzystencjalne kieruje każdego przeciwnika do weryfikacji na 1 s.",
+      "note": "Zestaw istnieje według 87% użytkowników. Pozostali nie zostali zapytani."
+    },
+    "awaria": {
+      "name": "Awaria",
+      "bonus2": "Siła argumentu od +2 do +4.",
+      "bonus3": "Cecha zgłaszającego działa podwójnie. Na każdej stronie parametry elementów losuje się od nowa, w granicach 15% w obie strony.",
+      "note": "Zestaw działa. Przyczyny nie ustalono."
+    }
+  },
+  "loot": {
+    "komisja": "Komisja przychyliła się. Uzasadnienie udostępniono wyłącznie Komisji."
   },
   "review": {
     "line": {

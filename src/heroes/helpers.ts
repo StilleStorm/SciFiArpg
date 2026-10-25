@@ -6,6 +6,7 @@ import type { Enemy } from '../entities/types';
 import { applyDamage } from '../systems/combat';
 import type { RunState } from '../world/run';
 import type { SkillIndex } from './defs';
+import { patchAt, rankOf } from './grants';
 import { castStatus, type ParagraphPatch } from './paragraphs';
 import { playerDamageMul } from './shield';
 
@@ -15,19 +16,19 @@ export const RANK_DURATION = 0.15;
 export const RANK_COOLDOWN = 0.07;
 
 /** Damage multiplier of a skill (by SkillIndex, not pad): ranks and passives. */
-export const power = (s: RunState, slot: SkillIndex): number => (1 + RANK_DAMAGE * s.hero.ranks[slot]) * s.hero.mods.dmg * (patchOf(s, slot)?.dmg ?? 1);
-export const areaOf = (s: RunState, slot: SkillIndex): number => (1 + RANK_AREA * s.hero.ranks[slot]) * s.hero.mods.area * (patchOf(s, slot)?.area ?? 1);
-export const durationOf = (s: RunState, slot: SkillIndex): number => (1 + RANK_DURATION * s.hero.ranks[slot]) * s.hero.mods.duration * (patchOf(s, slot)?.dur ?? 1);
+export const power = (s: RunState, slot: SkillIndex): number => (1 + RANK_DAMAGE * rankOf(s, slot)) * s.hero.mods.dmg * (patchOf(s, slot)?.dmg ?? 1);
+export const areaOf = (s: RunState, slot: SkillIndex): number => (1 + RANK_AREA * rankOf(s, slot)) * s.hero.mods.area * (patchOf(s, slot)?.area ?? 1);
+export const durationOf = (s: RunState, slot: SkillIndex): number => (1 + RANK_DURATION * rankOf(s, slot)) * s.hero.mods.duration * (patchOf(s, slot)?.dur ?? 1);
 
 /** The patch of the active paragraph of skill `slot` (by SkillIndex), if it is not paragraph 1 (heroes/paragraphs.ts). */
-export const patchOf = (s: RunState, slot: SkillIndex): ParagraphPatch | undefined => s.hero.patch?.[slot];
+export const patchOf = (s: RunState, slot: SkillIndex): ParagraphPatch | undefined => patchAt(s, slot); // the run's paragraph plus a worn unique's and set's (heroes/grants.ts)
 /** Paragraph shape fields: multiplier of the half-angle / width of a cone or line, and the extra projectiles or copies. */
 export const widthOf = (s: RunState, slot: SkillIndex): number => patchOf(s, slot)?.width ?? 1;
 export const countOf = (s: RunState, slot: SkillIndex): number => patchOf(s, slot)?.count ?? 0;
 /** Multiplier of the length of a flight, throw or orbit that the paragraph sets (the reach of an aimed skill reads it through `SkillDef.patch`). */
 export const reachMulOf = (s: RunState, slot: SkillIndex): number => patchOf(s, slot)?.reach ?? 1;
 export const cooldownOf = (s: RunState, slot: SkillIndex, base: number): number =>
-  Math.max(1, base * s.hero.mods.cooldown * (1 - RANK_COOLDOWN * s.hero.ranks[slot]));
+  Math.max(1, base * s.hero.mods.cooldown * (1 - RANK_COOLDOWN * rankOf(s, slot)));
 
 export function avgDamage(s: RunState): number {
   return (s.player.stats.dmgMin + s.player.stats.dmgMax) / 2;

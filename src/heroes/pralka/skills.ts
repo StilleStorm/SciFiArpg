@@ -2,6 +2,7 @@
 import { t } from '../../i18n';
 import { reachOf, resolveDirection } from '../aim';
 import { cast, directionOf, firstCast } from '../cast';
+import { rankOf } from '../grants';
 import { areaOf, durationOf, power, skillDamage, touchStatus, widthOf } from '../helpers';
 import type { SkillFn } from '../module';
 import { BEBEN_DAMAGE, BEBEN_HALF, BEBEN_KNOCKBACK, BEBEN_VERIFY_S, FOAM_RADIUS, READING_R, READING_S, READING_UPOR } from '../numbers';
@@ -27,7 +28,7 @@ const wirowanie = cast(0, [
 /** Pranie wstepne: a foam shield for 5 s. Enemies that touch it are do_weryfikacji (heroes/system.ts). */
 const pranieWstepne = cast(1, [
   ({ c, s, p }) => {
-    shield(c, (30 + 4 * p.level + s.hero.mods.shield) * (1 + 0.25 * s.hero.ranks[1]), 5 * durationOf(s, 1));
+    shield(c, (30 + 4 * p.level + s.hero.mods.shield) * (1 + 0.25 * rankOf(s, 1)), 5 * durationOf(s, 1));
     fx(c, 'foam', p.x, p.y, FOAM_RADIUS);
   },
 ]);
@@ -36,7 +37,7 @@ const pranieWstepne = cast(1, [
 const odwirowanie = cast(2, [
   (e) => {
     const a = directionOf(e);
-    dash(e.c, { dx: a.dx, dy: a.dy, len: reachOf(e.s, e.sk), time: 0.22, kind: 'dash', drag: a.target ? a.target.id : null, rank: e.s.hero.ranks[2] });
+    dash(e.c, { dx: a.dx, dy: a.dy, len: reachOf(e.s, e.sk), time: 0.22, kind: 'dash', drag: a.target ? a.target.id : null, rank: rankOf(e.s, 2) });
   },
 ]);
 

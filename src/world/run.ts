@@ -76,6 +76,8 @@ export interface RunState {
   base?: BaseState;
   /** The boss argument (DESIGN 5.4, combat/spor.ts): the comment that is up, the x2 window; absent until a boss posts. */
   spor?: SporState;
+  /** A boss argument was answered right in this run: the planet boss's best drop is one tier higher, "Komisja przychyliła się" (systems/loot.ts, ITEMS 6.2). */
+  sporWon?: boolean;
   /** The planet, priority and clause of this ticket (world/campaign.ts); absent for the older random tickets, which scale nothing. */
   plan?: TicketPlan;
   /** The character's campaign (copied from the saved record by applyCharacter, written back by serializeCharacter). */

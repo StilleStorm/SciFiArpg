@@ -8,6 +8,7 @@ import { heroDef, type SkillIndex } from './defs';
 import { HERO_IDS } from './registry';
 import { padSkill } from './loadout';
 import { castSkill } from './skills';
+import { patchAt } from './grants';
 import {
   activeCapstone,
   categoryNameKey,
@@ -73,7 +74,7 @@ describe('the capstone rule', () => {
       let seen = 0;
       const bus = createBus();
       bus.on('skill:cast', () => {
-        seen = s.hero.patch?.[0]?.area ?? 1;
+        seen = patchAt(s, 0)?.area ?? 1; // what every helper inside the cast reads (heroes/grants.ts)
       });
       // the patch is visible to the cast itself: read it from inside by spying on the helper's input
       expect(castSkill(s, bus, 0)).toBe(true);

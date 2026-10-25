@@ -5,7 +5,7 @@ import type { Vec } from '../core/vec';
 import type { EnemyRt } from '../enemies/runtime';
 import type { DefectId, EliteId, FamilyId } from '../enemies/ids';
 import type { HeroId } from '../heroes';
-import type { Item, Slot } from '../items';
+import type { Item, ItemGrant, SetId, Slot } from '../items';
 
 /** What a hero gives before any equipment (items/stats.ts adds the gear). B3 sets it per hero. */
 export interface BaseStats {
@@ -91,6 +91,12 @@ export interface Player extends Fighter {
   potwierdzenia?: number;
   /** Run time (s) of the last blow that took racja; regen waits 4 s after it (systems/recovery.ts). */
   hurtAt?: number;
+  /** S17: worn set pieces per set that count (items/stats.ts recomputeStats; items/sets.ts). Absent = none. Never saved. */
+  sets?: Partial<Record<SetId, number>>;
+  /** S17: walking speed factor from worn sets (1 = none); systems/movement.ts multiplies by it. Never saved. */
+  gearSpeed?: number;
+  /** S17: what the worn uniques give the hero's skills (items/uniques.ts grantsOf; heroes/grants.ts reads it). Never saved. */
+  grants?: ItemGrant[];
 }
 
 export interface Enemy extends Fighter {

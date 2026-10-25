@@ -7,6 +7,19 @@ export const SLOTS: readonly Slot[] = ['bron', 'nakrycie', 'odziez', 'przyrzad',
 export type ItemTier = 'zwykly' | 'nietypowy' | 'rzadki' | 'unikatowy';
 export const ITEM_TIERS: readonly ItemTier[] = ['zwykly', 'nietypowy', 'rzadki', 'unikatowy'];
 
+/** The six sets (ITEMS 4.1); a set piece is a rzadki item with `setId` (S17), wearing the paperclip. */
+export type SetId = 'obieg' | 'ostatnia-mila' | 'serwis' | 'infolinia' | 'domniemanie' | 'awaria';
+
+/** What a worn unique gives its hero (ITEMS 4.2, 12.2): ranks on one skill and the paragraph of that skill. Resolved by heroes/grants.ts. */
+export interface ItemGrant {
+  uid: number;
+  uniqueId: string;
+  /** The skill id (`SkillDef.id`), not a hero id: the hero it concerns is the one that owns the skill. */
+  skill: string;
+  para: 2 | 3;
+  ranks: 1 | 2;
+}
+
 /** Where a drop came from; decides the tier weights. */
 export type DropSource = 'common' | 'elite' | 'boss';
 
@@ -100,6 +113,10 @@ export interface Item {
   /** A shop lie: same base, different roll. */
   variant?: boolean;
   uniqueId?: string;
+  /** S17: the set this piece belongs to (items/sets.ts); tier is rzadki. */
+  setId?: SetId;
+  /** S17 «Awaria»: the factor (0.85..1.15) the worn piece's numbers are scaled by until the next page entry (items/setFx.ts); dropped as soon as the set is no longer complete. */
+  rollMul?: number;
   /** S8: tier I-V of the affix magnitudes (ITEMS 3.2); absent on older items = I. */
   modTier?: 1 | 2 | 3 | 4 | 5;
   /** S8: stats without the +20% of "w wersji próbnej", restored when the trial period ends. */

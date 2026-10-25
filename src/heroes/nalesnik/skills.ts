@@ -1,6 +1,7 @@
 /** The casts of the Nalesnik, each a list of primitive calls (heroes/primitives). */
 import { radiusOf, reachOf, resolveDirection, terenCentre } from '../aim';
 import { cast } from '../cast';
+import { rankOf } from '../grants';
 import { areaOf, durationOf, power } from '../helpers';
 import type { SkillFn } from '../module';
 import { FLAG_S, GRAVITY_R, GRAVITY_S, ORBITA_TIME } from './steps';
@@ -12,7 +13,7 @@ import { syncMoonUpor } from '../steps2';
 const orbita = cast(0, [
   ({ c, s, sk, aim }) => {
     const a = resolveDirection(s, sk, aim);
-    dash(c, { dx: a.dx, dy: a.dy, len: reachOf(s, sk), time: ORBITA_TIME, kind: 'roll', rank: s.hero.ranks[0], face: true });
+    dash(c, { dx: a.dx, dy: a.dy, len: reachOf(s, sk), time: ORBITA_TIME, kind: 'roll', rank: rankOf(s, 0), face: true });
   },
 ]);
 

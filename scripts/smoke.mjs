@@ -779,6 +779,61 @@ try {
   );
   check('S8 marks: absurd-affix figures draw a small mark and the ground plates draw tier marks', gal.affix >= 4 && gal.ground === 15, JSON.stringify({ affix: gal.affix, ground: gal.ground }));
 
+  // ---------- 4a2. S17 sets and paragraph uniques: the card blocks, three pieces count, a worn unique grants ----------
+  await page.evaluate(() => {
+    const st = window.__game.state();
+    window.__s17keep = { eq: { ...st.player.equipment }, inv: [...st.player.inventory] }; // put back after, so the later legs see the demo gear
+    st.player.inventory.length = 0;
+    for (const k of Object.keys(st.player.equipment)) delete st.player.equipment[k]; // nothing worn that a piece could clash with
+    window.__game.giveNamed({ set: 'obieg', piece: 0 }, { wear: true });
+    window.__game.giveNamed({ set: 'obieg', piece: 1 }, { wear: true });
+    const third = window.__game.giveNamed({ set: 'obieg', piece: 2 }); // in the bag, opened first: its card shows the set block, two of three reached
+    const bag = st.player.inventory;
+    if (third) bag.unshift(...bag.splice(bag.indexOf(third), 1));
+  });
+  await page.locator('.pad.inv').click({ timeout: 2000 }).catch(() => undefined);
+  await sleep(500);
+  const setCard = await page.evaluate(() => ({
+    block: document.querySelector('.inv-plate.open .inv-set')?.textContent ?? '',
+    on: document.querySelectorAll('.inv-plate.open .inv-set-line.on').length,
+    off: document.querySelectorAll('.inv-plate.open .inv-set-line.off').length,
+    clips: document.querySelectorAll('.inv-worn .tier-mark path').length,
+    sets: window.__game.state().player.sets ?? {},
+  }));
+  check('S17: a set piece\'s card shows its set block, the two-piece line reached and the three-piece one not; two worn pieces count', setCard.block.length > 0 && !/items\.|undefined/.test(setCard.block) && setCard.on === 1 && setCard.off === 1 && setCard.sets.obieg === 2, JSON.stringify(setCard));
+  await page.locator('.ps-close').click({ timeout: 2000 }).catch(() => undefined);
+  await sleep(300);
+  const named = await page.evaluate(() => {
+    const st = window.__game.state();
+    st.player.inventory.length = 0; // the bag piece goes too, so the sheet opens the unique first
+    const ids = ['program95', 'oczekiwanie', 'granica', 'masaplanety', 'zapasowe'];
+    const u = ids.map((id) => window.__game.giveNamed({ unique: id })).find((x) => x !== null);
+    if (u) st.player.inventory.unshift(...st.player.inventory.splice(st.player.inventory.indexOf(u), 1));
+    return { unique: u?.uniqueId ?? null };
+  });
+  await page.locator('.pad.inv').click({ timeout: 2000 }).catch(() => undefined);
+  await sleep(500);
+  const paraCard = await page.evaluate(() => document.querySelector('.inv-plate.open .inv-para')?.textContent ?? '');
+  check('S17: a paragraph unique\'s card names its paragraph and the hero it concerns, no raw keys', paraCard.length > 0 && !/items\.|heroes\.|undefined/.test(paraCard), `${named.unique}: ${paraCard.slice(0, 120)}`);
+  await page.locator('.ps-close').click({ timeout: 2000 }).catch(() => undefined);
+  await sleep(300);
+  const worn = await page.evaluate((id) => {
+    const st = window.__game.state();
+    const piece = window.__game.giveNamed({ set: 'obieg', piece: 2 }, { wear: true });
+    const u = st.player.inventory.find((i) => i.uniqueId === id);
+    return { piece: piece !== null, sets: st.player.sets ?? {}, unique: !!u, status: st.status };
+  }, named.unique);
+  check('S17: the third piece worn completes the set (three counted), and the game runs on', worn.piece && worn.sets.obieg === 3 && worn.status === 'running', JSON.stringify(worn));
+  await page.evaluate(() => {
+    const st = window.__game.state();
+    const keep = window.__s17keep;
+    for (const k of Object.keys(st.player.equipment)) delete st.player.equipment[k];
+    st.player.inventory.length = 0;
+    st.player.inventory.push(...keep.inv);
+    Object.assign(st.player.equipment, keep.eq);
+    window.__game.recomputeStats();
+  });
+
   // ---------- 4b. pause, resume, Zakończ and the bookmark (DESIGN 4.1) ----------
   await settle();
   await page.evaluate(() => {

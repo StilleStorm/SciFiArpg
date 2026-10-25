@@ -226,7 +226,7 @@ Keep the six existing uniques (Pieczątka «Odmowa», Kabel (różny), egzemplar
 wersja ostateczna (3), Kask Ostatniej Mili, Słuchawki z redukcją rzeczywistości, Zaświadczenie
 o istnieniu) with stats only; they predate paragraphs and stay as the "plain" uniques, a third
 of the pool. Ten new uniques each carry **one paragraph of one skill** of one hero, active while
-equipped and usable without unlocking that paragraph (the skill itself must be unlocked; on a
+equipped and usable without unlocking that paragraph (superseded by §12.2: wearing it unlocks the skill too; on a
 different hero the item is stats only with the footnote "Paragraf nie dotyczy zgłaszającego").
 The paragraph is printed on the card as a § with a red underline. Stats are hand-written,
 roughly rzadki budget plus 20%.

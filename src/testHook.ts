@@ -6,7 +6,13 @@ import { addFootnote } from './ui/footnotes';
 import type { Enemy } from './entities';
 import type { Bus } from './core/events';
 import { applyDamage } from './systems/combat';
-import { createPotwierdzeniePickup } from './entities/factory';
+import { createPickup, createPotwierdzeniePickup } from './entities/factory';
+import { createRng } from './core/rng';
+import { addItem, equipItem } from './items/inventory';
+import { makeSetPiece } from './items/setPieces';
+import { recomputeStats } from './items/stats';
+import { UNIQUES_BY_ID, makeUnique } from './items/uniques';
+import type { SetId } from './items/types';
 import { HELD_CAP, heldOf, useHeld } from './systems/recovery';
 import { nextId } from './world/run';
 import { exportText, parseArchive } from './save/export';
@@ -91,6 +97,13 @@ export interface GameHook {
   notes(): { n: number; text: string }[];
   /** Put a rolled item of `tier` (default zwykly) into the inventory; returns it, or null when there is no run or no room. */
   giveItem(tier?: ItemTier | 'unikatowy', slot?: Slot): Item | null;
+  /**
+   * S17: put a named item into the inventory: piece 0..2 of a set (`{set, piece}`) or a paragraph unique (`{unique}`); `wear` puts it
+   * on, `ground` leaves it on the page beside the player instead. Returns it, or null when there is no run or no room.
+   */
+  giveNamed(what: { set: SetId; piece: 0 | 1 | 2 } | { unique: string }, opts?: { wear?: boolean; ground?: boolean }): Item | null;
+  /** Recompute the player's stats, sets and grants after a script changed `equipment` by hand. */
+  recomputeStats(): void;
   /** Mount a screenshot gallery of item figures over the screen (S8): tiers per slot, all 40 bases, absurd-affix marks, ground plates. */
   itemGallery(mode: 'tiers' | 'bases' | 'affixes' | 'ground'): void;
   /** Replace the inventory with six fixed items (two worn, one niekompatybilny, a unique, a free version). */
@@ -433,6 +446,29 @@ export function installTestHook(deps: HookDeps): void {
       const st = game.state;
       if (!st) return null;
       return giveRandomItem(st.player, st.nextItemNumber++, tier, Math.max(1, st.player.level + st.pageIndex), slot);
+    },
+    recomputeStats() {
+      if (game.state) recomputeStats(game.state.player);
+    },
+    giveNamed(what, opts) {
+      const st = game.state;
+      if (!st) return null;
+      const level = Math.max(1, st.player.level + st.pageIndex);
+      let item: Item | null = null;
+      if ('set' in what) item = makeSetPiece(createRng(0x5e7 + what.piece), what.set, level, what.piece);
+      else {
+        const def = UNIQUES_BY_ID.get(what.unique);
+        item = def ? makeUnique(def, 0x7000 + st.nextItemNumber, level) : null;
+      }
+      if (!item) return null;
+      item.number = st.nextItemNumber++;
+      if (opts?.ground) {
+        st.pickups.push(createPickup(nextId(st), st.player.x + 46, st.player.y - 10, item.number, item));
+        return item;
+      }
+      if (!addItem(st.player, item)) return null;
+      if (opts?.wear) equipItem(st.player, item);
+      return item;
     },
     itemGallery: mountGallery,
     demoInventory() {

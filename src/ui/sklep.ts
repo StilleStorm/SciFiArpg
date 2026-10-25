@@ -60,10 +60,10 @@ export function mountSklep(container: HTMLElement, meta: { runsCompleted: number
   const state = opts.state ?? loadSklep();
   const level = shopIlvl(opts.planet ?? 0);
   if (mode === 'base' && state.stockFor !== meta.runsCompleted) {
-    restock(state, BASE_STORE_SEED, meta.runsCompleted, level);
+    restock(state, BASE_STORE_SEED, meta.runsCompleted, level, opts.planet ?? 0);
     saveSklep(state);
   } else if (!state.stock.length) {
-    restock(state, BASE_STORE_SEED, meta.runsCompleted, level);
+    restock(state, BASE_STORE_SEED, meta.runsCompleted, level, opts.planet ?? 0);
   }
   const persist = (): void => {
     if (!opts.state) saveSklep(state);
@@ -231,7 +231,7 @@ export function mountSklep(container: HTMLElement, meta: { runsCompleted: number
     report.type = 'button';
     report.addEventListener('click', () => {
       if (!isOpen()) return askBot();
-      const res = reportProblem(state, BASE_STORE_SEED, level);
+      const res = reportProblem(state, BASE_STORE_SEED, level, opts.planet ?? 0);
       if (res.updated) {
         say(t('economy.sklep.updated', { version: `1.${state.updates}` }));
         checkout = null;

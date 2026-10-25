@@ -38,6 +38,10 @@ export const PRIORITY_TIER_SHIFT: Record<Priority, number> = { niski: -0.2, norm
 export const PRIORITY_STAR_MUL: Record<Priority, number> = { niski: 0.8, normalny: 1, wysoki: 1.3, krytyczny: 1.6 };
 /** The planet boss's first item: 12% a unique (doubled at Krytyczny). */
 export const BOSS_UNIQUE_CHANCE = 0.12;
+/** The planet boss's first item: 35% a zestaw piece of the planet's set (ITEMS 6.2); doubled at Krytyczny; none on a planet without a set. */
+export const BOSS_SET_CHANCE = 0.35;
+/** A shop offer is a zestaw piece of the planet's set this often (ITEMS 7.1); planets without a set always sell the plain offer. */
+export const SHOP_SET_CHANCE = 0.1;
 
 /** Tier multiplier on the base stats before affixes (ITEMS 5.2). */
 export const TIER_BASE_MUL: Record<Tier, number> = { zwykly: 1, nietypowy: 1.1, rzadki: 1.2, unikatowy: 1.6 };

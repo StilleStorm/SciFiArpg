@@ -8,6 +8,7 @@ import type { Enemy, Player } from '../entities/types';
 import type { RunState } from '../world/run';
 import { resolveDirection, type Aim } from './aim';
 import type { HeroDef, SkillDef, SkillIndex } from './defs';
+import { patchAt } from './grants';
 import { applyParagraph } from './paragraphs';
 import type { SkillFn } from './module';
 import type { Ctx } from './primitives';
@@ -29,7 +30,7 @@ export type Step = (e: CastEnv) => void | false;
 /** The skill `i` of the hero as the list of `steps`, run in order, with the active paragraph laid on its data (`env.sk`). */
 export function cast(i: SkillIndex, steps: readonly Step[]): SkillFn {
   return (s, bus, hero, aim) => {
-    const env: CastEnv = { c: { s, bus }, s, bus, p: s.player, hero, sk: applyParagraph(hero.skills[i], s.hero.patch?.[i]), i, aim };
+    const env: CastEnv = { c: { s, bus }, s, bus, p: s.player, hero, sk: applyParagraph(hero.skills[i], patchAt(s, i)), i, aim };
     for (const step of steps) if (step(env) === false) return false;
   };
 }

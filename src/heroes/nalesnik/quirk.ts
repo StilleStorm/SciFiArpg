@@ -1,10 +1,13 @@
 /** The Nalesnik's quirk, rownowaga hydrostatyczna: rounds up below a third of racja (and skims projectiles at full racja: heroes/shield.ts). */
 import { t } from '../../i18n';
+import { hasEffect } from '../../items/sets';
 import { recomputeStats } from '../../items/stats';
 import type { HeroQuirk } from '../module';
 
 /** Below this share of racja it rounds up (DESIGN 10, item 5). */
 export const ROUND_BELOW = 1 / 3;
+/** «Awaria», three pieces: rounds up below half (items/sets.ts). */
+export const ROUND_BELOW_AWARIA = 1 / 2;
 export const ROUND_S = 5;
 export const ROUND_COOLDOWN_S = 20;
 export const ROUND_UPOR = 20;
@@ -26,7 +29,7 @@ export const quirk: HeroQuirk = {
       recomputeStats(p);
       return;
     }
-    if (p.hp <= 0 || p.hp >= p.hpMax * ROUND_BELOW || s.time < h.roundReadyAt) return;
+    if (p.hp <= 0 || p.hp >= p.hpMax * (hasEffect(p, 'regula-podwojona') ? ROUND_BELOW_AWARIA : ROUND_BELOW) || s.time < h.roundReadyAt) return;
     p.round = true;
     h.roundUntil = s.time + ROUND_S;
     h.roundReadyAt = s.time + ROUND_COOLDOWN_S;

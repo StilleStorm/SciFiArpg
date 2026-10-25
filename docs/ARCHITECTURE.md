@@ -188,7 +188,7 @@ after the model, before an unwanted tail). StatBlock percentages `zasieg`, `temp
 `TIER_BASE_MUL/TIER_BUDGET/TIER_PRICE_MUL`, `listPrice`, `actualOverClaim`. Drops `systems/loot.ts`: `DROP_TIER_WEIGHTS`,
 `rollDropTier`, `dropLevel`, `dropGuaranteed`; `bindLoot` on `enemy:died`: `dropLoot` (potwierdzenie rolled last),
 `enemies/named.claimNamedDrop` -> `dropGuaranteed`, the permission card. Sklep `economy/sklep.ts restock(state, seed, visit,
-level)`: 3 low, 1 rzadki, 1 `oferta`, 1 `adapter` (`Listing.kind` as `.sk-kind` stamp); `mountSklep(..., {planet})`,
+level, planet)`: 3 low, 1 rzadki, 1 `oferta`, 1 `adapter` (`Listing.kind` as `.sk-kind` stamp); `mountSklep(..., {planet})`,
 `RollOptions.shop`. Elites: `ELITE_IDS` 10, `spawnElite(..., {makeNamed, pack})`, packs of 2–4, named elites
 (`enemies/named.ts`, one per two pages). Marks `render/itemMarks.ts`: `buildTierMark` (nietypowy stamp, rzadki thread, unikatowy
 wax seal, zestaw paperclip), `affixMarks`, `groundMark`, `buildAffixMarks`; all black ink but the seal's red dot (ITEMS §9).
@@ -196,6 +196,28 @@ wax seal, zestaw paperclip), `affixMarks`, `groundMark`, `buildAffixMarks`; all 
 `balance/recovery.ts`): `takePotwierdzenie`, `useHeld(s, bus, auto?, incoming?)`, `onPlayerBlow`. HUD `ui/hud.ts
 createPotwButton` (`.potw-btn`, draws at most two slips, `.count` from two up). Archive: `ui/archive.ts openArchive`
 (`.ar-sec[data-place] .ar-cell[data-uid]`, `.ar-move[data-to]`).
+
+## Sets and paragraph uniques (S17; ITEMS 4.1, 4.2, 6.2, 12)
+Sets `items/sets.ts`: `SETS` (6, one per tag; `SetId`), a piece is a rzadki `Item` with `setId` (no own tier; the paperclip and the
+word "zestaw" key off `setId`), built by `items/setPieces.makeSetPiece(rng, setId, level, index?)`. `recomputeStats` fills
+`Player.sets` (`wornSetCounts`, niekompatybilny pieces do not count), `Player.gearSpeed` (read by `systems/movement.ts`) and
+`Player.grants`; all three are derived, never saved. Two pieces: `bonus2` stats (+`speed2`). Three: `effect3`, checked with
+`hasEffect(p, effect)`; `skills3` patches by skill id (`setSkillPatches`). Event effects live in `items/setFx.ts`
+(`bindSetEffects` from items/install.ts: Obieg on `enemy:rebutted`, Serwis on `enemy:hit`+`skill:cast`, Awaria re-roll on
+`page:entered` -> `Item.rollMul`, cleared off the bag and off a broken set); `onSetHurt` is called by `enemies/hooks.onEnemyHurt`
+(Domniemanie). Awaria "the rule passive doubles" is read in place: pralka/nalesnik quirks, `heroes/shield.projectileDamageMul`,
+`items/reviews.trialMultiplier`, `death/outcomes.applyPetla` (ghost 20 s). Uniques `items/uniques.ts`: `UniqueDef.grant {skill,
+para, ranks}` names a skill id, never a hero; `grantsOf(equipment)`, `grantOfItem`. **`UNIQUES` grants map to today's skill ids;
+S19/S20 must keep these ids or remap the grant** (program95 wirowanie §3, pralnia pranieWstepne §2, oczekiwanie prosze §3,
+windykacja rozlaczenie §3, przedwykonaniem spor §2, zapasowe przybycie §2, granica triangulacja §3, bladpomiaru korekta §2,
+masaplanety grawitacja §2, atmosfera ksiezyc §3). Dormant `skills3` ids waiting for S19/S20: `przerwaTechniczna`, `muzyka`,
+`pomiar`. `heroes/grants.ts`: **every skill read goes through `rankOf(s, i)`** (update rank + item ranks, may exceed 3; worn grant
+installs skill 4/5) **and `patchAt(s, i)`** (run paragraph, replaced by a higher carried one, set patches laid on); `paragraphAt`,
+`heroOfSkill` (ui/archive hero note), `layPatch`. Never read `s.hero.ranks`/`s.hero.patch` directly in a skill. Loot: the planet
+boss's first item is `BOSS_SET_CHANCE` 35% a piece of `planetDef(planet).hostedSet` (planet 1 of an act hosts none);
+`RunState.sporWon` (set by `bindLoot` on `spor:answered` right) lifts it rzadki -> piece -> unique, or the second item one tier
+where no set is hosted, with the `items.loot.komisja` footnote. Sklep: `SHOP_SET_CHANCE` 10% offer. The elite/named zestaw column
+(ITEMS 6.1) is S18. Test hook `giveNamed({set, piece}|{unique}, {wear, ground})`, `recomputeStats()`; shots `scripts/shot-sets.mjs` (4196).
 
 ## Campaign, page content, quests (PLAN 3, 7, 8)
 `world/campaign.ts` owns the priorities (`PRIORITIES`, `PRIORITY_IDS`, `DEFAULT_PRIORITY`, `priorityUnlocked`,
@@ -297,7 +319,7 @@ posted -> `footnote`, right -> `strikeThrough` + `stamp`, wrong -> `paperTear`. 
 
 ## Test hook and scripts
 `window.__game`: `start(seed, opts)`, `go`, `state`, `meta/setMeta`, `screen`, `advance(s)`, `turnTo(page)`, `attack`,
-`hitEnemy`, `killEnemy`, `hurtPlayer`, `placePlayer`, `snapshot`, `footnote(text)`, `notes()`, `giveItem`, `demoInventory`,
+`hitEnemy`, `killEnemy`, `hurtPlayer`, `placePlayer`, `snapshot`, `footnote(text)`, `notes()`, `giveItem`, `giveNamed`, `recomputeStats`, `demoInventory`,
 `openInventory`, `openSklep`, `openKiosk`, `setTheme`, `setOrientation`, `setSteering`, `setLeftHanded`, `setSettings(patch)`,
 `controls`, `dropPotwierdzenie(dist)`, `heldPotwierdzenia`, `setHeldPotwierdzenia(n)`, `usePotwierdzenie`, `exportArchive()`,
 `importArchive(text)`, `joystick(dx, dy)`, `pause`, `resume`, `endTicket`, `resumeTicket`, `character`, `startBase(seed?)`,
@@ -315,7 +337,7 @@ renderSfx, music, contextState, ...}`. DOM hooks: `[data-pause=...]`, `[data-des
 `npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot`: 390x844 @2x and 844x390 into `shots/` (`SHOT_PORT`,
 `SHOT_OUT`). Per-domain shots (SHOT_PORT/SHOT_OUT/SHOT_DIR in each header): `scripts/shot-{base,tunnel,pause,attacks,enemies,
 heroes,items,aim 4195,skills 4197,loadout 4198,s2 4182,s3 4183,s4 4184,s5 4185,recovery 4176,s6 4186,s7 4187,s8,elite-packs
-4188,s10-content 4183,s10-quests 4188,s12 4192,s13 4193,s14 4194,s15 4194,s15-faces 4195,spor 4199}.mjs`. Port 4190 is unsafe in
+4188,s10-content 4183,s10-quests 4188,s12 4192,s13 4193,s14 4194,s15 4194,s15-faces 4195,spor 4199,sets 4196}.mjs`. Port 4190 is unsafe in
 Chromium. `npm run smoke` (`SMOKE_PORT` 4191) plays a ticket with real buttons: creation form, base, desk, ticket, exit, run
 (header clear of the note row, no bubble under a pad or note, the update line clear in tap/joystick x both hands), fight, update
 (assign, paragraphs, ultimate), inventory, pause, Zakończ, bookmark resume, two tunnels, boss, Spór, death, landscape joystick,

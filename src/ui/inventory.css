@@ -202,3 +202,44 @@
 .cap.struck {
   text-decoration: line-through;
 }
+
+/* S17: the set block and the unique's paragraph on a card */
+.inv-set,
+.inv-para {
+  margin: 6px 0 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--ink);
+}
+.inv-set-head,
+.inv-para-head {
+  margin: 0 0 3px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+}
+.inv-set-line {
+  margin: 2px 0;
+  font-size: 14px;
+  line-height: 1.25;
+}
+.inv-set-line b {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+.inv-set-line.off {
+  opacity: 0.55;
+}
+.para-mark {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.inv-para-desc {
+  margin: 0 0 3px;
+  font-size: 14px;
+  line-height: 1.25;
+}

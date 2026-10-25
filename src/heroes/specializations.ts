@@ -17,6 +17,7 @@
  * equipped pad skills belong to it; at a cast the capstone patch is laid on its skill (`withCapstone`, called by heroes/skills.ts `fire`).
  */
 import { heroDef, PAD_SLOTS, SKILL_INDICES, type SkillDef, type SkillIndex } from './defs';
+import { patchAt, withPatchAt } from './grants';
 import type { ParagraphPatch } from './paragraphs';
 import { heroById, HERO_IDS, type HeroId } from './registry';
 import { SKILL_CATEGORIES, type Capstone, type CapstonePatch, type SkillCategory, type Specialization } from './specDefs';
@@ -141,21 +142,13 @@ export function mergeCapstone(base: ParagraphPatch | undefined, cap: CapstonePat
 
 /**
  * Run `fn(patch)` for a cast of skill `skill` with the capstone laid on, if it belongs to that skill: the run's patch for the
- * skill is replaced for the duration and restored after, so every helper that reads it (areaOf, power, durationOf...) sees it.
+ * skill (`patchAt`, with a worn unique's paragraph and the sets) answers the merged patch for the duration, so every helper that
+ * reads it (areaOf, power, durationOf...) sees it.
  */
 export function withCapstone<T>(s: RunState, skill: SkillIndex, fn: (patch: ParagraphPatch | undefined) => T): T {
-  const base = s.hero.patch?.[skill];
+  const base = patchAt(s, skill); // the run's paragraph, a worn unique's and the sets' (heroes/grants.ts)
   const cap = runCapstone(s);
   if (!cap || cap.capstone.skill !== heroDef(s.player.heroId).skills[skill].id) return fn(base);
-  const had = s.hero.patch;
-  const arr: (ParagraphPatch | undefined)[] = had ? [...had] : [undefined, undefined, undefined, undefined, undefined];
   const merged = mergeCapstone(base, cap.capstone.patch);
-  arr[skill] = merged;
-  s.hero.patch = arr;
-  try {
-    return fn(merged);
-  } finally {
-    if (had) s.hero.patch = had;
-    else delete s.hero.patch;
-  }
+  return withPatchAt(skill, merged, () => fn(merged));
 }

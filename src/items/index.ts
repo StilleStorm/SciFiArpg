@@ -17,3 +17,5 @@ export * from './rename';
 export * from './unwanted';
 export * from './tiers';
 export * from './absurd';
+export * from './sets';
+export * from './setPieces';

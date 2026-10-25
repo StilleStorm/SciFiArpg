@@ -9,6 +9,7 @@
 import type { Bus } from '../core/events';
 import { createRng } from '../core/rng';
 import { BOSS_OF, type BossId, type FamilyId } from '../enemies/ids';
+import type { SetId } from '../items/types';
 import type { BaseLayout } from './base';
 import type { PlanetGate } from './gate';
 import type { LawId } from './laws';
@@ -98,8 +99,8 @@ export const PLANET_COUNT = 9;
 export const CAMPAIGN_LAST = 3;
 export type Act = 1 | 2 | 3;
 export type LocationType = 'miasto' | 'przedmiescie' | 'magazyn' | 'serwerownia' | 'jaskinia' | 'rownina' | 'wyzyna' | 'biuro' | 'centrum' | 'archiwum';
-/** Sets hosted by a planet (ITEMS 4.1); null while a planet hosts none. Placeholder assignment until the set slice. */
-export type SetId = 'obieg' | 'ostatnia-mila' | 'serwis' | 'infolinia' | 'domniemanie' | 'awaria';
+/** Sets hosted by a planet (ITEMS 4.1, 12.6): the first planet of each act hosts none. */
+export type { SetId };
 
 export interface PlanetDef {
   /** 0-based index; the player-facing number is index + 1. */
@@ -207,8 +208,8 @@ export const PLANETS: readonly PlanetDef[] = [
       },
     ],
   },
-  planet(3, 2, 'powiadomienia', mix(0.3, 0.55, 0.15), ['godziny-konsultanta', 'weryfikacja-dwuetapowa', 'nie-przeszkadzac'], ['miasteczko', 'ladowisko'], ['miasto', 'biuro'], 'ostatnia-mila', [5, 6]),
-  planet(4, 2, 'powiadomienia', mix(0.2, 0.6, 0.2), ['godziny-konsultanta', 'oplata-serwisowa', 'nie-przeszkadzac'], ['miasteczko'], ['centrum', 'miasto'], null, [5, 6]),
+  planet(3, 2, 'powiadomienia', mix(0.3, 0.55, 0.15), ['godziny-konsultanta', 'weryfikacja-dwuetapowa', 'nie-przeszkadzac'], ['miasteczko', 'ladowisko'], ['miasto', 'biuro'], null, [5, 6]),
+  planet(4, 2, 'powiadomienia', mix(0.2, 0.6, 0.2), ['godziny-konsultanta', 'oplata-serwisowa', 'nie-przeszkadzac'], ['miasteczko'], ['centrum', 'miasto'], 'ostatnia-mila', [5, 6]),
   planet(5, 2, 'powiadomienia', mix(0.15, 0.55, 0.3), ['weryfikacja-dwuetapowa', 'oplata-serwisowa', 'godziny-konsultanta'], ['miasteczko', 'wioska'], ['centrum', 'serwerownia', 'archiwum'], 'infolinia', [5, 6]),
   planet(6, 3, 'wygenerowane', mix(0.15, 0.25, 0.6), ['czas-wsteczny', 'parzystosc', 'nie-przeszkadzac'], ['ladowisko', 'wioska'], ['jaskinia', 'rownina'], null, [5, 6]),
   planet(7, 3, 'wygenerowane', mix(0.2, 0.2, 0.6), ['czas-wsteczny', 'grawitacja', 'oplata-serwisowa'], ['wioska', 'miasteczko'], ['wyzyna', 'rownina', 'jaskinia'], 'domniemanie', [5, 6]),

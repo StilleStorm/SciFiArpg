@@ -9,6 +9,8 @@ import { canOpenUpdate, tickUpdateQueue } from '../progression/queue';
 import { PAGE_H, PAGE_W, resolveMove } from '../world/pages';
 import type { RunState } from '../world/run';
 import { trackRun } from './aim';
+import { SKILL_INDICES } from './defs';
+import { patchAt } from './grants';
 import { durationOf, enemiesWithin, nearestEnemy, patchOf, power, setExistence, skillDamage, touchStatus } from './helpers';
 import { FOAM_RADIUS } from './numbers';
 import { effectiveSkill } from './loadout';
@@ -29,7 +31,7 @@ export function heroStep(s: RunState, bus: Bus, dt: number): void {
   h.ringTimer -= dt;
   if (h.ringTimer <= 0) {
     h.ringTimer = RING_STEP;
-    pushRing(h.ring, { t: s.time, x: p.x, y: p.y, hp: p.hp }, RING_SECONDS * Math.max(1, ...(h.patch ?? []).map((q) => q?.dur ?? 1)));
+    pushRing(h.ring, { t: s.time, x: p.x, y: p.y, hp: p.hp }, RING_SECONDS * Math.max(1, ...SKILL_INDICES.map((i) => patchAt(s, i)?.dur ?? 1)));
   }
   if (h.mods.regen > 0 && p.hp < p.hpMax) p.hp = Math.min(p.hpMax, p.hp + h.mods.regen * dt);
 
