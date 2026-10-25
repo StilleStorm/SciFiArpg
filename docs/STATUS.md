@@ -130,6 +130,11 @@ Polish and release. Progress lines are below.
   ~220 s ticket); priority ladder left as is; planet numbering kept as a joke; five on-ramp notes kept;
   the hosted-set rule (ITEMS §12.6) kept; p1 ticket c renamed "Stwierdzenie obecności" (S17 voice).
 
+- **S19 balance (Konsultant)**: planet-1 Normalny bot wins 55% with auto aim, 55% claim-aimed, 30%
+  nearest-aimed and 65% with the new kit, vs 90–100% for the others (Kartograf 40%). The aiming
+  hypothesis is refuted: aiming does not lift him. Proposal: his weapon roll 4–8 → 6–10 (85% wins in a
+  scratch copy, not applied). Recommendation: apply it.
+
 ## Game plan and the slice order
 The plan is docs/PRODUCTION.md: 7 milestones, 30 slices, each with a paste-ready builder brief.
 Design docs: PLAN.md (+§7, §8), SKILLS.md, ITEMS.md (+§12), STORY.md, DESIGN §10.2–10.3.
@@ -184,7 +189,9 @@ Progress is recorded here, one line per slice:
 
 - S18 done: Reklamacja at the Sklep (one affix re-rolled, once per item per planet, cost curve, struck old line; uniques and wycofany refused with the reason, no button), the bin ("Do kosza", 10% of list, asks above zwykły, wycofany refused), przesyłka end to end (awizo cards, base paczkomat pickup for stars, return after two runs, side-ticket item rewards as awizo; free version only by post, 10% of delivered rzadki), the `named` drop rank (gwiazdki 12–18, family permission card if not owned) and the ITEMS §6.1 zestaw column for elites/named elites; awizo ids saved; side-ticket gwiazdki `QUEST_STARS.base` 18→8 (sinks sim ~214/planet vs ~200; `npm run balance` p1 158 vs 151); smoke leg 6k; voice and look passes. Reports S18-*.md. Open: fetch tickets pay 15–20 vs ITEMS' "20–40 at Akt I" (left; S16-style balance call); red on every stat delta in the item card predates S18 (DESIGN §3 says red only on Racja; S28); "Zgłoś problem"/"Zamknij" tap targets (S28); an awizo on a bookmarked run waits on its page until that ticket ends; no ground card for in-run awizos.
 
-**Next pickup:** S19 (Heroes filled: Pralka and Konsultant; Konsultant aiming bot first).
+- S19 done: Pralka and Konsultant at ten skills each with their paragraphs, ultimates 2/3 for both, passives 7–10, ultimate recipes, an ultimate chooser on the Karta and in Konfiguracja; look fixes (Karta ultimate bands, margin note side, Formularz over the crowd, thinner Odpompowanie puddle); smoke Reklamacja leg fixed, leg 6e3 casts every ultimate in all paragraphs; `npm run balance` gains an aimed-cast bot (auto / claim-aimed / nearest-aimed). Reports S19-*.md. Parked: passive slots at levels 10/20/30/40 not built; the Infolinia set patches spor until S20 adds Uwaga; the Konfiguracja chooser tap and Numerek numbers are not smoke-covered.
+
+**Next pickup:** S20.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
