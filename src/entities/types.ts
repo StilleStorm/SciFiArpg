@@ -172,7 +172,7 @@ export interface Pickup extends Base {
 /** A friendly figure: a Petlowiec copy, a Kartograf decoy, or the 10-second friendly copy after Petla. */
 export interface Summon extends Base {
   kind: 'summon';
-  variant: 'copy' | 'decoy' | 'ghost' | 'moon' | 'chair' | 'phone';
+  variant: 'copy' | 'decoy' | 'ghost' | 'moon' | 'chair' | 'phone' | 'benchmark';
   heroId: HeroId;
   facing: 1 | -1;
   moving: boolean;
@@ -192,7 +192,7 @@ export interface Summon extends Base {
 /** A marked patch of paper: Teren nieistniejacy, or an hourglass drawn over a blocked enemy. */
 export interface Zone extends Base {
   kind: 'zone';
-  variant: 'teren' | 'hourglass' | 'wniosek' | 'legenda' | 'start' | 'numer' | 'formularz' | 'stave' | 'nagranie';
+  variant: 'teren' | 'hourglass' | 'wniosek' | 'legenda' | 'start' | 'numer' | 'formularz' | 'stave' | 'nagranie' | 'przekroj' | 'granica' | 'roza' | 'skreslenie' | 'paradoks' | 'zapis';
   /** Seconds left. */
   ttl: number;
   /** Id of the enemy the zone follows (hourglass). */
@@ -206,6 +206,8 @@ export interface Zone extends Base {
   order?: number[];
   /** Stepped by its hero's quirk (heroes/<id>/quirk.ts), not by heroes/system.ts stepZones (S19: formularz, stave, nagranie). */
   own?: true;
+  /** Direction in radians of a drawn line (S20 Kartograf: a survey line from the centre, a border across it). */
+  angle?: number;
 }
 
 export type Entity = Player | Enemy | Projectile | Pickup | Summon | Zone;

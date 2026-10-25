@@ -9,6 +9,7 @@ import type { RunState } from '../world/run';
 import type { AimMode, SkillDef } from './defs';
 import { areaOf, nearestEnemy } from './helpers';
 import { BEBEN_REACH, KSIEZYC_ORBIT, LEGENDA_R, ROZLACZENIE_REACH, START_R } from './numbers';
+import { PARADOKS_R, POWTORZENIE_REACH } from './petlowiec/numbers';
 
 export type Aim =
   | { kind: 'auto'; target?: Enemy | null }
@@ -77,8 +78,18 @@ const GEOMETRY: Record<string, Geometry> = {
   formularz: { autoRange: () => 300, reach: () => 300, radius: (s) => 60 * areaOf(s, 6) },
   przerwaTechniczna: { autoRange: () => DEFAULT_RANGE, reach: () => 120, radius: () => 0 },
   oddzwonimy: { autoRange: () => 300, reach: () => 300, radius: (s) => 110 * areaOf(s, 9) },
+  // S20: the Kartograf's skills 6 to 10 (indices 5 to 9): a measured line 300 away, five lines of 220, a border put 70 ahead, a benchmark of 60 within 260, a rose round him
+  pomiar: { autoRange: () => 300, reach: () => 0, radius: () => 0 },
+  przekroj: { autoRange: () => DEFAULT_RANGE, reach: () => 220, radius: () => 0 },
+  granica: { autoRange: () => DEFAULT_RANGE, reach: () => 130, radius: () => 0 },
+  punktOdniesienia: { autoRange: () => 260, reach: () => 260, radius: () => 60 },
+  rozaWiatrow: { autoRange: () => 140, reach: () => 0, radius: () => 0 },
   // S19: Pralka's Odpompowanie (skill 10, index 9): a puddle of 100 at a point up to 260 away
   odpompowanie: { autoRange: () => 260, reach: () => 260, radius: (s) => 100 * areaOf(s, 9) },
+  // S20: the Petlowiec's skills 6 to 10 (indices 5 to 9): a remark at a target within 260, a line of 180, a clock of 110 within 260 (Paradoks, index 7)
+  uwaga: { autoRange: () => 260, reach: () => 0, radius: () => 0 },
+  powtorzenie: { autoRange: () => DEFAULT_RANGE, reach: (s) => POWTORZENIE_REACH * areaOf(s, 6), radius: () => 0 },
+  paradoks: { autoRange: () => 260, reach: () => 260, radius: (s) => PARADOKS_R * areaOf(s, 7) },
 };
 
 /** The arrow length (kierunek) or the farthest point (wskazanie) of a skill; 0 for an auto skill. */
@@ -245,7 +256,7 @@ export function previewOf(s: RunState, skill: SkillDef, aim: Aim): AimPreview | 
     const a = fitAim(skill, aim);
     return a.kind === 'wskazanie' ? { kind: 'circle', x: a.x, y: a.y, r } : null;
   }
-  if (skill.id === 'teren' || skill.id === 'wniosek' || skill.id === 'start' || skill.id === 'legenda' || skill.id === 'odpompowanie' || skill.id === 'formularz' || skill.id === 'oddzwonimy') {
+  if (skill.id === 'teren' || skill.id === 'wniosek' || skill.id === 'start' || skill.id === 'legenda' || skill.id === 'odpompowanie' || skill.id === 'formularz' || skill.id === 'oddzwonimy' || skill.id === 'punktOdniesienia' || skill.id === 'paradoks') {
     const c = terenCentre(s, skill, aim);
     return { kind: 'circle', x: c.x, y: c.y, r };
   }

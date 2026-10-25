@@ -97,6 +97,8 @@ describe('recipes follow DESIGN 14', () => {
     const own = [
       ...['pralkaUlt', 'konsUlt', 'petlUlt', 'kartoUlt', 'nalesUlt'],
       ...['pralkaPersonUlt', 'pralkaClaimUlt', 'konsUltQueue', 'konsUltSurvey'],
+      ...['kartoStrike', 'kartoSurvey'],
+      ...['petlUltRewind', 'petlUltArrival'],
     ];
     const first = (h: (typeof HERO_IDS)[number]): string => heroById(h).ultimates?.[0]?.id ?? '';
     expect(new Set(HERO_IDS.map((h) => ultimateSound(h, first(h)))).size).toBe(HERO_IDS.length);

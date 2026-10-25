@@ -153,6 +153,10 @@ export function stepScale(s: RunState): void {
 /** True while the full scale lasts: every survey line pierces and marks (heroes/auto.ts). */
 export const scaleActive = (s: RunState): boolean => s.hero.scale !== null && s.time < s.hero.scale.until;
 
+/** Punkt odniesienia: the radius round a benchmark inside which the Kartograf's autos pierce, and whether he stands in one (heroes/auto.ts). */
+export const BENCHMARK_R = 60;
+export const benchmarkNear = (s: RunState): boolean => s.summons.some((m) => m.variant === 'benchmark' && Math.hypot(m.x - s.player.x, m.y - s.player.y) <= BENCHMARK_R);
+
 /** Legenda: a name for each enemy that enters (once per cast), przeczytane toward the player, 0.35x egzystencjalny per second. */
 export function stepLegend(s: RunState, bus: Bus, z: Zone, dt: number): void {
   const p = s.player;

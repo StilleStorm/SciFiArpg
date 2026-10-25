@@ -1800,12 +1800,13 @@ try {
   }
   await shot('16b-every-hero-cast');
 
-  // ---------- 6e3. S19: every ultimate of Pralka and Konsultant (the slot's and ultimates 2 and 3) in all three paragraphs casts, runs and ends ----------
+  // ---------- 6e3. S19/S20: every ultimate of Pralka, Konsultant and Petlowiec (the slot's and ultimates 2 and 3) in all three paragraphs casts, runs and ends ----------
   for (const [i, h] of [
     { id: 'pralka', ults: ['pelnyCykl', 'uznanieOsobowosci', 'reklamacja'] },
     { id: 'konsultant', ults: ['przekazanie', 'koniecKolejki', 'ankieta'] },
+    { id: 'petlowiec', ults: ['zebranie', 'cofniecie', 'przedwczesny'] },
   ].entries()) {
-    await page.evaluate((a) => window.__game.start(50 + a.i, { heroId: a.id }), { i, id: h.id });
+    await page.evaluate((a) => window.__game.start(50 + a.i, { heroId: a.id, lawId: 'grawitacja' }), { i, id: h.id }); // a law that opens a banner mid-leg would hold the clock
     await sleep(300);
     if (await page.evaluate(() => window.__game.state().modal === 'cookies')) await page.locator('.cookie button').last().click({ timeout: 3000 });
     const res = await page.evaluate((ults) => {

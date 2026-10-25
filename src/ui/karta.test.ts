@@ -102,7 +102,7 @@ describe('konfiguracja data', () => {
   it('rows carry category and pad; the ultimate row is locked until its level', () => {
     const s = createRun(3, { heroId: 'kartograf' });
     const rows = konfiguracjaRows(s);
-    expect(rows.map((r) => r.pad)).toEqual([0, 1, 2, null, null]);
+    expect(rows.map((r) => r.pad)).toEqual([0, 1, 2, null, null, null, null, null, null, null]);
     expect(rows.every((r) => r.category !== null)).toBe(true);
     expect(konfiguracjaUltimate(s)?.locked).toBe(true);
     s.player.level = 12;

@@ -84,6 +84,22 @@ function sectionSign(x: number, y: number): string {
   return `M${n2(x + 3.5)} ${n2(y - 8)}C${n2(x + 3.5)} ${n2(y - 11)} ${n2(x - 3.5)} ${n2(y - 11)} ${n2(x - 3.5)} ${n2(y - 7)}C${n2(x - 3.5)} ${n2(y - 3.5)} ${n2(x + 3.5)} ${n2(y - 3)} ${n2(x + 3.5)} ${n2(y + 0.5)}M${n2(x - 3.5)} ${n2(y - 0.5)}C${n2(x - 3.5)} ${n2(y + 3)} ${n2(x + 3.5)} ${n2(y + 3.5)} ${n2(x + 3.5)} ${n2(y + 7)}C${n2(x + 3.5)} ${n2(y + 11)} ${n2(x - 3.5)} ${n2(y + 11)} ${n2(x - 3.5)} ${n2(y + 8)}M${n2(x - 3.5)} ${n2(y - 7)}V${n2(y - 0.5)}M${n2(x + 3.5)} ${n2(y + 0.5)}V${n2(y + 7)}`;
 }
 
+/** A curved arrow from (ax, ay) to (bx, by), bent to one side by `bend`, with a small head at the end (Zamiana miejsc). */
+function bentArrow(ax: number, ay: number, bx: number, by: number, bend: number): string {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const len = Math.hypot(dx, dy) || 1;
+  const cx = (ax + bx) / 2 - (dy / len) * bend;
+  const cy = (ay + by) / 2 + (dx / len) * bend;
+  const hx = bx - cx;
+  const hy = by - cy;
+  const hl = Math.hypot(hx, hy) || 1;
+  const ux = hx / hl;
+  const uy = hy / hl;
+  const head = (k: number): string => `M${n2(bx)} ${n2(by)}L${n2(bx - ux * 9 + -uy * k)} ${n2(by - uy * 9 + ux * k)}`;
+  return `M${n2(ax)} ${n2(ay)}Q${n2(cx)} ${n2(cy)} ${n2(bx)} ${n2(by)}${head(4.5)}${head(-4.5)}`;
+}
+
 /** The capsule he arrived in, standing upright with its centre of the base at (0, 0): bullet shell, window, three fins. */
 export const CAPSULE_PARTS: readonly string[] = [
   'M-9 0V-20Q-9-34 0-40Q9-34 9-20V0Z',
@@ -205,6 +221,10 @@ export function bindHeroFx(bus: Bus, layer: SVGGElement): void {
         eraseOut(g, 420, 1000, () => g.remove());
         break;
       }
+      case 'swap':
+        // Zamiana miejsc: two dotted arrows crossing between the two places, each pointing at the other's
+        sketch(layer, bentArrow(e.x, e.y, e.x2, e.y2, 16) + bentArrow(e.x2, e.y2, e.x, e.y, 16), { dash: '2 4', ms: 180, hold: 360 });
+        break;
       case 'capsule': {
         // Odlozony start: the capsule stands where it landed, in a dotted ring of the area it struck
         const g = el('g', { transform: `translate(${n2(e.x)} ${n2(e.y + 12)}) scale(1.35)` });

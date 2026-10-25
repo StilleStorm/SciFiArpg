@@ -420,6 +420,69 @@ export const RECIPES = {
     noise(300, 0.2, 0.3, { q: 1, delay: 0.64, role: 'tail' }),
     { ...noise(2000, 0.012, 0.2, { q: 0.8, role: 'tail' }), repeat: 6, spread: 0.15, delay: 0.68 },
   ], 0.3, 7),
+  /** Petlowiec: Uwaga na marginesie, a pen scribbling a remark beside the text, the nib lifted. */
+  petlNote: combat([
+    click(2600, 0.35),
+    thump(96, 0.12, 0.85, { pitchDrop: 0.3 }),
+    { ...noise(2200, 0.03, 0.2, { q: 3, role: 'tail' }), repeat: 5, spread: 0.14, delay: 0.03 },
+    noise(1700, 0.08, 0.2, { q: 4, pitchDrop: 0.4, delay: 0.18, role: 'tail' }),
+  ], 0.2, 7),
+  /** Petlowiec: Powtórzenie, the same ruled line drawn twice, the second fainter. */
+  petlLine: combat([
+    click(2800, 0.4),
+    thump(88, 0.13, 0.85, { pitchDrop: 0.3 }),
+    noise(3000, 0.16, 0.3, { q: 1.5, pitchDrop: 0.5, delay: 0.02, role: 'tail' }),
+    click(2800, 0.3, { delay: 0.2 }),
+    thump(88, 0.1, 0.4, { delay: 0.2, pitchDrop: 0.3 }),
+    noise(3000, 0.16, 0.18, { q: 1.5, pitchDrop: 0.5, delay: 0.22, role: 'tail' }),
+  ], 0.2, 7),
+  /** Petlowiec: Paradoks, a clock ticking in the circle, the beat coming back half a second late. */
+  petlClock: combat([
+    click(2400, 0.4),
+    thump(76, 0.16, 0.9, { pitchDrop: 0.25 }),
+    { ...click(3200, 0.28, { q: 3, decay: 0.006, role: 'tail' }), repeat: 6, spread: 0.45, delay: 0.1 },
+    thump(76, 0.12, 0.45, { delay: 0.5, pitchDrop: 0.25, role: 'tail' }),
+    noise(1500, 0.14, 0.18, { q: 2, delay: 0.5, role: 'tail' }),
+  ], 0.25, 7),
+  /** Petlowiec: Opóźnienie, the breath held (a sweep rising) and the blow set down late. */
+  petlDelay: combat([
+    click(2000, 0.3),
+    thump(80, 0.15, 0.8, { pitchDrop: 0.3 }),
+    noise(900, 0.4, 0.3, { q: 1.5, attack: 0.1, pitchDrop: -1.2, delay: 0.02, role: 'tail' }),
+    thump(62, 0.2, 0.55, { delay: 0.45, pitchDrop: 0.3, role: 'tail' }),
+  ], 0.3, 7),
+  /** Petlowiec: Zamiana miejsc, two sweeps crossing in opposite directions, a click at each end. */
+  petlSwap: combat([
+    click(2400, 0.4),
+    thump(92, 0.13, 0.85, { pitchDrop: 0.3 }),
+    noise(2000, 0.22, 0.3, { q: 1.5, pitchDrop: 0.6, delay: 0.02, role: 'tail' }),
+    noise(2000, 0.22, 0.3, { q: 1.5, pitchDrop: -0.6, delay: 0.02, role: 'tail' }),
+    click(2900, 0.35, { delay: 0.22 }),
+    thump(92, 0.1, 0.4, { delay: 0.22, pitchDrop: 0.3 }),
+  ], 0.25, 7),
+  /** Pętlowiec, Cofnięcie zgłoszenia: the tape run back, the last lines wound in, WYCOFANO stamped. */
+  petlUltRewind: combat([
+    click(2800, 0.5),
+    thump(98, 0.17, 0.9, { pitchDrop: 0.3 }),
+    thump(50, 0.3, 0.6, { delay: 0.002, pitchDrop: 0.1, role: 'sub' }),
+    noise(3200, 0.5, 0.4, { q: 2, attack: 0.02, pitchDrop: 0.9, delay: 0.04, role: 'tail' }),
+    { ...click(3000, 0.3, { decay: 0.006, role: 'tail' }), repeat: 26, spread: 0.5, delay: 0.1 },
+    click(2300, 0.5, { delay: 0.82 }),
+    thump(74, 0.2, 1.0, { delay: 0.82, pitchDrop: 0.25 }),
+    noise(1400, 0.18, 0.3, { q: 0.8, delay: 0.84, role: 'tail' }),
+  ], 1.2, 9),
+  /** Pętlowiec, Przedwczesny powrót: the capsule falling in a whistle, landing before it left, PRZYBYŁ PRZED WYJAZDEM. */
+  petlUltArrival: combat([
+    click(2600, 0.5),
+    thump(100, 0.17, 0.9, { pitchDrop: 0.3 }),
+    thump(50, 0.3, 0.6, { delay: 0.002, pitchDrop: 0.1, role: 'sub' }),
+    noise(2600, 0.5, 0.35, { q: 4, attack: 0.05, pitchDrop: 0.85, delay: 0.04, role: 'tail' }),
+    thump(66, 0.22, 1.0, { delay: 0.5, pitchDrop: 0.2 }),
+    thump(44, 0.35, 0.6, { delay: 0.505, pitchDrop: 0.1, role: 'sub' }),
+    noise(300, 0.25, 0.35, { q: 1, delay: 0.5, role: 'tail' }),
+    click(2300, 0.5, { delay: 0.9 }),
+    thump(74, 0.2, 1.0, { delay: 0.9, pitchDrop: 0.25 }),
+  ], 1.2, 9),
   /** Kartograf: theodolite click-shot. */
   kartoClick: combat([
     click(3200, 0.7),
@@ -465,6 +528,71 @@ export const RECIPES = {
     thump(108, 0.1, 0.85, { delay: 0.45 }),
     noise(3800, 0.07, 0.35, { q: 1.2, pitchDrop: 0.5, delay: 0.45, role: 'tail' }),
   ], 0.25, 7),
+  // ---------- Kartograf, skills 6 to 10 and ultimates 2 and 3 (S20) ----------
+  /** Kartograf: Pomiar, a sight clicked in and a tape pulled out to the mark, three ticks. */
+  kartoMeasure: combat([
+    click(3400, 0.55),
+    noise(4800, 0.1, 0.25, { q: 2, attack: 0.01, pitchDrop: 0.4, delay: 0.01 }),
+    thump(104, 0.12, 0.9, { delay: 0.03, pitchDrop: 0.25 }),
+    { ...click(3000, 0.22, { decay: 0.006, role: 'tail' }), repeat: 3, spread: 0.12, delay: 0.05 },
+    pluck(2200, 0.2, 0.16, { delay: 0.04, bright: 8000 }),
+  ], 0.2, 7),
+  /** Kartograf: Przekroj, five ruler flicks fanned one after another. */
+  kartoSection: combat([
+    click(2800, 0.5),
+    thump(92, 0.12, 0.85, { pitchDrop: 0.3 }),
+    { ...noise(4200, 0.03, 0.3, { q: 1.6, attack: 0.004 }), repeat: 5, spread: 0.18, delay: 0.015 },
+    { ...click(2400, 0.32, { decay: 0.006, role: 'tail' }), repeat: 5, spread: 0.18, delay: 0.03 },
+    noise(1600, 0.1, 0.18, { q: 1, delay: 0.2, role: 'tail' }),
+  ], 0.25, 7),
+  /** Kartograf: Granica, two border posts driven in and a rule drawn between them. */
+  kartoBorder: combat([
+    click(2200, 0.5),
+    thump(78, 0.16, 0.95, { pitchDrop: 0.25 }),
+    thump(66, 0.14, 0.7, { delay: 0.09, pitchDrop: 0.25 }),
+    noise(2600, 0.2, 0.28, { q: 1.4, attack: 0.02, delay: 0.02, role: 'tail' }),
+    click(3000, 0.35, { delay: 0.1 }),
+  ], 0.3, 7),
+  /** Kartograf: Punkt odniesienia, a benchmark knocked into the ground and a level tapped on it. */
+  kartoBench: combat([
+    click(3000, 0.5),
+    thump(70, 0.15, 0.95, { pitchDrop: 0.25 }),
+    pluck(1560, 0.35, 0.24, { delay: 0.05, bright: 7000 }),
+    pluck(1560, 0.2, 0.12, { delay: 0.14, bright: 7000 }),
+    noise(3600, 0.05, 0.25, { q: 1.2, delay: 0.01, role: 'tail' }),
+  ], 0.25, 7),
+  /** Kartograf: Roza wiatrow, a compass needle spun and settled, a low gust. */
+  kartoRose: combat([
+    click(2400, 0.4),
+    thump(84, 0.15, 0.85, { pitchDrop: 0.3 }),
+    noise(700, 0.4, 0.4, { q: 1.4, attack: 0.08, pitchDrop: 0.5, delay: 0.02, role: 'body' }),
+    { ...click(3200, 0.25, { decay: 0.006, role: 'tail' }), repeat: 8, spread: 0.3, delay: 0.04 },
+    pluck(1760, 0.3, 0.2, { delay: 0.36, bright: 8000 }),
+  ], 0.4, 7),
+  /** Kartograf, Skreslenie z mapy: a red pen dragged across the sheet, twice, then NIE ISTNIEJE. */
+  kartoStrike: combat([
+    click(2400, 0.5),
+    thump(98, 0.16, 0.9, { pitchDrop: 0.3 }),
+    thump(50, 0.3, 0.6, { delay: 0.002, pitchDrop: 0.1, role: 'sub' }),
+    noise(3400, 0.22, 0.4, { q: 1, attack: 0.01, pitchDrop: 0.5, delay: 0.03, role: 'tail' }),
+    noise(2800, 0.22, 0.4, { q: 1, attack: 0.01, pitchDrop: -0.4, delay: 0.26, role: 'tail' }),
+    click(2300, 0.55, { delay: 0.7 }),
+    thump(72, 0.2, 1.0, { delay: 0.7, pitchDrop: 0.25 }),
+    noise(1300, 0.18, 0.3, { q: 0.8, delay: 0.72, role: 'tail' }),
+  ], 1.2, 9),
+  /** Kartograf, Pomiar kontrolny: three survey lines struck in turn and met, POMIAR ZGODNY. */
+  kartoSurvey: combat([
+    click(2800, 0.5),
+    thump(100, 0.15, 0.9, { pitchDrop: 0.3 }),
+    thump(52, 0.3, 0.6, { delay: 0.002, pitchDrop: 0.1, role: 'sub' }),
+    click(3600, 0.35, { delay: 0.1 }),
+    click(3000, 0.35, { delay: 0.22 }),
+    click(2500, 0.35, { delay: 0.34 }),
+    noise(4600, 0.4, 0.28, { q: 1.6, attack: 0.05, pitchDrop: 0.6, delay: 0.05, role: 'tail' }),
+    pluck(2000, 0.5, 0.2, { delay: 0.62, bright: 9000 }),
+    click(2300, 0.55, { delay: 0.7 }),
+    thump(76, 0.2, 1.0, { delay: 0.7, pitchDrop: 0.25 }),
+  ], 1.2, 9),
   /** Nalesnik: the auto-attack, the disc slapped down on the other side. */
   nalesSlap: combat([
     click(2600, 0.5),

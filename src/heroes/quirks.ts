@@ -1,5 +1,6 @@
 /** Passive quirks that react to events: the dispatch to the quirk of the hero in play (the quirks themselves live in src/heroes/<id>/quirk.ts). */
 import type { Bus } from '../core/events';
+import type { Enemy } from '../entities/types';
 import type { RunState } from '../world/run';
 import { heroById } from './registry';
 
@@ -17,6 +18,11 @@ export function tickRound(s: RunState, bus: Bus): void {
 /** The share (0..1) by which the kiosk's service fee is cut for the run `s` (Konsultant's passive 10); 0 for every other hero. */
 export function priceCut(s: RunState): number {
   return heroById(s.player.heroId).quirk?.priceCut?.(s) ?? 0;
+}
+
+/** The factor on a blow of the player on `target` from the hero's quirk (1 for every hero without one). */
+export function dealtMul(s: RunState, target: Enemy): number {
+  return heroById(s.player.heroId).quirk?.dealtMul?.(s, target) ?? 1;
 }
 
 export { HITS_PER_ERROR } from './pralka/quirk';

@@ -1,6 +1,7 @@
 /** The Petlowiec's drawing and his auto-attack animation: the helmet dips and the remark is scribbled beside it. */
 import { el, n2 } from '../../render/svg';
-import { hide, setPart, type BuildExtras, type DriveCtx, type FigureDef, type HeroFigure } from '../figureKit';
+import type { Zone } from '../../entities/types';
+import { circlePath, hide, setPart, type BuildExtras, type DriveCtx, type FigureDef, type HeroFigure } from '../figureKit';
 import { clamp01, keyframes, neutralPose, type HeroPose } from '../poseKit';
 
 /** a cosmonaut who arrived before departing: a second helmet, dotted, a little behind the first */
@@ -78,6 +79,34 @@ function drive({ p, pose, side, fx }: DriveCtx): void {
   }
 }
 
+const f1 = (v: number): string => String(Math.round(v * 10) / 10);
+
+/**
+ * The things his skills leave on the page (S20), as strokes. Paradoks: a clock face as wide as its area, a dotted rim, twelve ticks and
+ * two hands. Powtórzenie § 3: the ruled line left standing, dotted, from the zone's centre along its angle, with three crossbars.
+ */
+export function zoneParts(z: Zone): readonly string[] | null {
+  const r = z.r;
+  if (z.variant === 'paradoks') {
+    let ticks = '';
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      const from = i % 3 === 0 ? 0.82 : 0.9;
+      ticks += `M${f1(Math.cos(a) * r * from)} ${f1(Math.sin(a) * r * from)}L${f1(Math.cos(a) * r)} ${f1(Math.sin(a) * r)}`;
+    }
+    return [`~${circlePath(0, 0, r)}`, ticks, `M0 0V${f1(-r * 0.52)}`, `M0 0L${f1(r * 0.34)} ${f1(r * 0.17)}`, 'M-2 0h.01'];
+  }
+  if (z.variant === 'zapis') {
+    const a = z.angle ?? 0;
+    const dx = Math.cos(a);
+    const dy = Math.sin(a);
+    let bars = '';
+    for (const k of [0.25, 0.5, 0.75]) bars += `M${f1(dx * r * k + dy * 6)} ${f1(dy * r * k - dx * 6)}L${f1(dx * r * k - dy * 6)} ${f1(dy * r * k + dx * 6)}`;
+    return [`~M0 0L${f1(dx * r)} ${f1(dy * r)}`, bars];
+  }
+  return null;
+}
+
 export const figure: HeroFigure = {
   def: figureDef,
   wash: { cx: 0, cy: -10, r: 21, seed: 0x4803 },
@@ -86,4 +115,5 @@ export const figure: HeroFigure = {
   pose,
   build,
   drive,
+  zoneParts,
 };

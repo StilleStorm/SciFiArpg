@@ -4,6 +4,7 @@
  */
 import type { SfxName } from '../audio/recipes';
 import type { Bus } from '../core/events';
+import type { Enemy } from '../entities/types';
 import type { Family } from '../progression/update';
 import type { RunState } from '../world/run';
 import type { Aim } from './aim';
@@ -25,6 +26,8 @@ export interface HeroQuirk {
   tick?(s: RunState, bus: Bus): void;
   /** The share (0..1) by which the kiosk's fee is cut while this run lasts (Konsultant, Wstrzymanie oplat); 0 or absent: none. Read through heroes/quirks.ts `priceCut` by both Sklep checkouts (base kiosk and in-run kiosk). */
   priceCut?(s: RunState): number;
+  /** S20: the factor (1 = none) on every blow the player lands on `target` (Kartograf, Odleglosc w linii prostej); read through heroes/quirks.ts `dealtMul` by systems/combat.ts applyDamage. */
+  dealtMul?(s: RunState, target: Enemy): number;
 }
 
 export interface HeroSounds {

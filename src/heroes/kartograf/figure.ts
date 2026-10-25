@@ -1,6 +1,7 @@
 /** The Kartograf's drawing and his auto-attack animation: the range pole kicks back as the ruled line is struck. */
 import { n2 } from '../../render/svg';
-import { setPart, type DriveCtx, type FigureDef, type HeroFigure } from '../figureKit';
+import type { Summon, Zone } from '../../entities/types';
+import { circlePath, setPart, type DriveCtx, type FigureDef, type HeroFigure } from '../figureKit';
 import { clamp01, KICK, neutralPose, type HeroPose } from '../poseKit';
 
 /** a surveyor of planets that only the navigation app confirms; carries the range pole and the map */
@@ -48,6 +49,55 @@ function drive({ p, pose, a, t, lux, fx }: DriveCtx): void {
   fx.driveLaser(a, t);
 }
 
+const f1 = (v: number): string => String(Math.round(v * 10) / 10);
+
+/**
+ * The things his skills leave on the page (S20), as strokes in the zone's own frame. A survey line (Przekroj, Pomiar kontrolny): a
+ * ruled line from the centre along the zone's angle with a tick every 20 units. A border (Granica): two parallel rules across the
+ * angle with a cross every 30 units and posts at both ends. The rose (Roza wiatrow): a dotted rim and a four-point star. The strike
+ * (Skreslenie z mapy): the ruled rectangle, struck through by its two diagonals.
+ */
+export function zoneParts(z: Zone): readonly string[] | null {
+  const a = z.angle ?? 0;
+  const ux = Math.cos(a);
+  const uy = Math.sin(a);
+  if (z.variant === 'przekroj') {
+    const ticks: string[] = [];
+    for (let d = 20; d < z.r; d += 20) {
+      ticks.push(`M${f1(ux * d + uy * 4)} ${f1(uy * d - ux * 4)}L${f1(ux * d - uy * 4)} ${f1(uy * d + ux * 4)}`);
+    }
+    return [`M0 0L${f1(ux * z.r)} ${f1(uy * z.r)}`, ticks.join('')];
+  }
+  if (z.variant === 'granica') {
+    const r = z.r;
+    const off = 3;
+    const rule = (k: number): string => `M${f1(-ux * r - uy * k)} ${f1(-uy * r + ux * k)}L${f1(ux * r - uy * k)} ${f1(uy * r + ux * k)}`;
+    const posts: string[] = [];
+    for (const end of [-1, 1]) posts.push(`M${f1(ux * r * end - uy * 9)} ${f1(uy * r * end + ux * 9)}L${f1(ux * r * end + uy * 9)} ${f1(uy * r * end - ux * 9)}`);
+    const crosses: string[] = [];
+    for (let d = -r + 18; d < r - 8; d += 30) crosses.push(`M${f1(ux * d - uy * off)} ${f1(uy * d + ux * off)}L${f1(ux * d + uy * off)} ${f1(uy * d - ux * off)}`);
+    return [rule(off), rule(-off), posts.join(''), crosses.join('')];
+  }
+  if (z.variant === 'roza') {
+    const r = z.r;
+    const s = r * 0.55;
+    const w = s * 0.2;
+    return [`~${circlePath(0, 0, r)}`, `M0 ${f1(-s)}L${f1(w)} ${f1(-w)}L${f1(s)} 0L${f1(w)} ${f1(w)}L0 ${f1(s)}L${f1(-w)} ${f1(w)}L${f1(-s)} 0L${f1(-w)} ${f1(-w)}Z`, `M-4 ${f1(-s - 7)}V${f1(-s - 19)}L4 ${f1(-s - 7)}V${f1(-s - 19)}`, circlePath(0, 0, w * 0.7)];
+  }
+  if (z.variant === 'skreslenie') {
+    const w = z.r * 0.8;
+    const h = z.r * 0.56;
+    return [`M${f1(-w)} ${f1(-h)}H${f1(w)}V${f1(h)}H${f1(-w)}Z`, `M${f1(-w)} ${f1(-h)}L${f1(w)} ${f1(h)}M${f1(w)} ${f1(-h)}L${f1(-w)} ${f1(h)}`, `~M${f1(-w + 10)} ${f1(-h + 10)}H${f1(w - 10)}V${f1(h - 10)}H${f1(-w + 10)}Z`];
+  }
+  return null;
+}
+
+/** A benchmark (Punkt odniesienia): a small triangle on its pole over a ground rule, and the radius within which his lines pierce (dotted). */
+export function summonParts(e: Summon): readonly string[] | null {
+  if (e.variant !== 'benchmark') return null;
+  return ['M0-14L11 4H-11Z', 'M0-14V-24', 'M-14 8H14', 'M0 0h.01', `~${circlePath(0, 0, 60)}`];
+}
+
 export const figure: HeroFigure = {
   def: figureDef,
   wash: { cx: -1, cy: -7, r: 20, seed: 0x4804 },
@@ -55,4 +105,6 @@ export const figure: HeroFigure = {
   attackMs: 380,
   pose,
   drive,
+  zoneParts,
+  summonParts,
 };

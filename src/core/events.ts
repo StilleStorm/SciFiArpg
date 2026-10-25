@@ -70,7 +70,7 @@ export interface GameEvents {
   /** The appeal form was filed: the shadowban is lifted. */
   'player:unsuspended': undefined;
   /** A skill wants a sketch on the page (render/heroFx.ts draws it): from (x, y) to (x2, y2) or with radius r. */
-  'skill:fx': { kind: 'swirl' | 'foam' | 'cone' | 'ring' | 'line' | 'blink' | 'dash' | 'drum' | 'wet' | 'section' | 'cut' | 'tide' | 'capsule' | 'steam' | 'puddle'; x: number; y: number; x2: number; y2: number; r: number };
+  'skill:fx': { kind: 'swirl' | 'foam' | 'cone' | 'ring' | 'line' | 'blink' | 'dash' | 'drum' | 'wet' | 'section' | 'cut' | 'tide' | 'capsule' | 'steam' | 'puddle' | 'swap'; x: number; y: number; x2: number; y2: number; r: number };
   /** A hit matched the enemy's claim: the bubble is struck through (enemies/claims in systems/combat.ts). */
   'enemy:rebutted': { id: number };
   /** First hit of another type than the claim on this enemy ("nie na temat"). */

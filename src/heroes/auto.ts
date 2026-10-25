@@ -5,7 +5,7 @@ import { attack } from '../systems/combat';
 import { nextId, type RunState } from '../world/run';
 import { heroDef } from './defs';
 import { SKALA_VERIFY_S } from './numbers';
-import { scaleActive } from './steps2';
+import { benchmarkNear, scaleActive } from './steps2';
 import { ultimateAuto } from './ultimate';
 import { touchStatus } from './helpers';
 import { line } from './primitives';
@@ -74,7 +74,7 @@ export function fireLaser(s: RunState, p: Player, target: Enemy, bus: Bus): Lase
   // Skala 1:1 (skill 4 of the Kartograf): every line pierces as if it had crit, and whoever it crosses waits for verification
   const scale = scaleActive(s);
   if (scale) touchStatus(target, 'do_weryfikacji', SKALA_VERIFY_S, p.id);
-  if ((crit || scale || ult?.pierce === true) && def.auto.pierceOnCrit) {
+  if ((crit || scale || ult?.pierce === true || benchmarkNear(s)) && def.auto.pierceOnCrit) {
     const reach = Math.max(p.attackRange, dist + 24);
     ex = sx + ux * reach;
     ey = sy + uy * reach;

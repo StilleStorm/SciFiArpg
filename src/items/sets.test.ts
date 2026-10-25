@@ -248,9 +248,6 @@ describe('the effects of three pieces', () => {
   });
 });
 
-/** Infolinia patches Spor today; the line names Uwaga (na marginesie), which S20 adds to Petlowiec: S20 moves the patch to `uwaga` and drops this. */
-const S20_REMAP = new Set(['infolinia:spor']);
-
 describe('sets: the three-piece line names every live skill its patch reaches (S19 integrator)', () => {
   it('a skills3 key that is a skill of some hero is named in the set bonus3 text; a dormant one is not required', async () => {
     const { HEROES } = await import('../heroes/registry');
@@ -261,7 +258,6 @@ describe('sets: the three-piece line names every live skill its patch reaches (S
       for (const id of Object.keys(set.skills3 ?? {})) {
         const key = skills.get(id);
         if (key === undefined) continue; // dormant until its hero is filled (S20)
-        if (S20_REMAP.has(`${set.id}:${id}`)) continue;
         const name = t(key).split(/[.,:]/)[0]?.trim() ?? '';
         expect(line, `${set.id}: ${id}`).toContain(name);
       }

@@ -60,8 +60,8 @@ describe('the skills declare an aim mode', () => {
     const modes = (id: HeroId): string[] => heroDef(id).skills.map((sk) => sk.aim);
     expect(modes('pralka')).toEqual(['auto', 'auto', 'kierunek', 'kierunek', 'auto', 'auto', 'auto', 'auto', 'auto', 'wskazanie']);
     expect(modes('konsultant')).toEqual(['wskazanie', 'kierunek', 'auto', 'wskazanie', 'kierunek', 'auto', 'wskazanie', 'auto', 'kierunek', 'wskazanie']);
-    expect(modes('petlowiec')).toEqual(['auto', 'auto', 'auto', 'auto', 'wskazanie']);
-    expect(modes('kartograf')).toEqual(['kierunek', 'wskazanie', 'wskazanie', 'auto', 'wskazanie']);
+    expect(modes('petlowiec')).toEqual(['auto', 'auto', 'auto', 'auto', 'wskazanie', 'auto', 'kierunek', 'wskazanie', 'auto', 'auto']);
+    expect(modes('kartograf')).toEqual(['kierunek', 'wskazanie', 'wskazanie', 'auto', 'wskazanie', 'auto', 'kierunek', 'kierunek', 'wskazanie', 'auto']);
     expect(modes('nalesnik')).toEqual(['kierunek', 'auto', 'wskazanie', 'auto', 'kierunek']);
   });
 });

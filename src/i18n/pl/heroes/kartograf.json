@@ -69,6 +69,76 @@
         "name": "Wykaz urzędowy",
         "desc": "Legenda regulaminowa, obrażenia większe o 30%. Kosztuje 8 racji."
       }
+    },
+    "pomiar": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Pomiar celu. Trzeci pomiar tego samego przeciwnika pod rząd oznacza go jako zgłoszonego na 3 s."
+      },
+      "2": {
+        "name": "Pomiar przybliżony",
+        "desc": "Mechaniczny. Mierzy dwóch najbliższych, bez oznaczania. Odnowienie dłuższe o 1 s."
+      },
+      "3": {
+        "name": "Pomiar kontrolowany",
+        "desc": "Egzystencjalny. Przeciwnik już zgłoszony otrzymuje 1,4 raza więcej obrażeń. Odnowienie dłuższe o 2 s."
+      }
+    },
+    "przekroj": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Pięć linii w wachlarzu 40°, zasięg 220, po 0,5 obrażeń każda. Linie przebijają wszystko na swojej drodze."
+      },
+      "2": {
+        "name": "Przekrój poprzeczny",
+        "desc": "Jedna gruba linia, zasięg 160, obrażenia podwójne wobec wachlarza."
+      },
+      "3": {
+        "name": "Przekrój warstwowy",
+        "desc": "Egzystencjalny. Linie zostają na stronie 1,5 s, a stojący na nich czekają na weryfikację. Odnowienie dłuższe o 3 s."
+      }
+    },
+    "granica": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Granica długości 160 przez 4 s. Kto ją przekroczy, zostaje odepchnięty o 60 i czeka na weryfikację 1 s."
+      },
+      "2": {
+        "name": "Granica sporna",
+        "desc": "Egzystencjalna. Bez odepchnięcia; przekraczający otrzymują 0,8 obrażeń. Odnowienie dłuższe o 2 s."
+      },
+      "3": {
+        "name": "Granica państwowa",
+        "desc": "Regulaminowa. Trwa 6 s, przekraczający zostają zablokowani na 1 s. Odnowienie dłuższe o 3 s."
+      }
+    },
+    "punktOdniesienia": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Reper stoi 20 s. Korekta skacze do niego z dowolnego miejsca, a pomiary z jego pobliża przechodzą na wylot."
+      },
+      "2": {
+        "name": "Reper niwelacyjny",
+        "desc": "Dwa repery, drugi tam, gdzie stoisz. Każdy trwa 12 s."
+      },
+      "3": {
+        "name": "Reper sporny",
+        "desc": "Egzystencjalny. Co 4 s przeciwnicy w pobliżu czytają reper i idą ku niemu. Odnowienie dłuższe o 4 s."
+      }
+    },
+    "rozaWiatrow": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Przeciwnicy w promieniu 140 zostają odepchnięci o 90 w najbliższą stronę świata i czekają na weryfikację 1 s."
+      },
+      "2": {
+        "name": "Róża czterech wiatrów",
+        "desc": "Mechaniczna. Odepchnięci otrzymują 0,9 obrażeń. Odnowienie dłuższe o 3 s."
+      },
+      "3": {
+        "name": "Róża odwrotna",
+        "desc": "Regulaminowa. Przyciąga zamiast odpychać i nie wymaga weryfikacji. Odnowienie dłuższe o 2 s."
+      }
     }
   },
   "ult": {
@@ -89,6 +159,46 @@
         "3": {
           "name": "Nakład poczwórny",
           "desc": "Mapa trwa 4 s, pomiar mechaniczny strzela czterokrotnie. Kosztuje 6 racji."
+        }
+      }
+    },
+    "skreslenie": {
+      "name": "Skreślenie z mapy",
+      "desc": "Prostokąt 200 na 140 zostaje skreślony. Wygenerowani istniejący w stopniu poniżej 0,5 znikają od razu, pozostali otrzymują 2,5 raza więcej obrażeń i istnieją w stopniu 0,3.",
+      "stamp": "NIE ISTNIEJE",
+      "note": "Obszar nieujęty w ewidencji gruntów.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Skreślenie, jak w opisie."
+        },
+        "2": {
+          "name": "Skreślenie rutynowe",
+          "desc": "Regulaminowe, bez skreślania na miejscu, obrażenia 3,5 raza. Kosztuje 4 racje."
+        },
+        "3": {
+          "name": "Skreślenie z zastrzeżeniem",
+          "desc": "Prostokąt zostaje na stronie 5 s i działa jak Teren nieistniejący. Kosztuje 5 racji."
+        }
+      }
+    },
+    "pomiarKontrolny": {
+      "name": "Pomiar kontrolny",
+      "desc": "Trzy linie pomiarowe z jednego punktu, co 120°, po 1,8 obrażeń. Kto stoi na przecięciu, otrzymuje trafienia krytyczne.",
+      "stamp": "POMIAR ZGODNY",
+      "note": "Wynik zgodny z wynikiem. Różnicy nie stwierdzono.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Trzy linie co 120°, po 1,8 obrażeń."
+        },
+        "2": {
+          "name": "Pomiar wielokrotny",
+          "desc": "Sześć linii co 60°, po 1,0 obrażeń. Kosztuje 4 racje."
+        },
+        "3": {
+          "name": "Pomiar urzędowy",
+          "desc": "Regulaminowy. Przecięcie linii zostaje reperem na 20 s. Kosztuje 5 racji."
         }
       }
     }
@@ -114,6 +224,52 @@
         "name": "Obszar skreślony",
         "desc": "„Teren nieistniejący” nie istnieje na obszarze większym o 20%."
       }
+    }
+  },
+  "skill6": {
+    "name": "Pomiar",
+    "pad": "Pomiar",
+    "desc": "Pomiar liniowy celu. Trzeci pomiar tego samego przeciwnika pod rząd oznacza go jako zgłoszonego. Obrażenia regulaminowe."
+  },
+  "skill7": {
+    "name": "Przekrój",
+    "pad": "Przekrój",
+    "desc": "Pięć linii pomiarowych w wachlarzu. Każda przebija wszystko na swojej drodze. Obrażenia mechaniczne."
+  },
+  "skill8": {
+    "name": "Granica",
+    "pad": "Granica",
+    "desc": "Linia graniczna w poprzek wskazanego kierunku. Kto ją przekroczy, zostaje odepchnięty i czeka na weryfikację."
+  },
+  "skill9": {
+    "name": "Punkt odniesienia",
+    "pad": "Odniesienie",
+    "desc": "Reper stoi na stronie przez 20 sekund. Korekta skacze do niego z dowolnego miejsca, a pomiary z jego pobliża przechodzą na wylot."
+  },
+  "skill10": {
+    "name": "Róża wiatrów",
+    "pad": "Róża",
+    "desc": "Wszyscy w pobliżu zostają odepchnięci w najbliższą stronę świata i czekają na weryfikację."
+  },
+  "note": {
+    "pomiar": "Pomiar wykonano z odległości. Odległość podano w przybliżeniu.",
+    "przekroj": "Linie przekroju przecinają się w miejscu, którego na mapie nie ma.",
+    "granica": "Granica została wytyczona. Strony zostały o tym powiadomione.",
+    "odniesienia": "Punkt odniesienia obowiązuje do odwołania. Odwołania nie wniesiono.",
+    "roza": "Strony świata ustalono większością głosów."
+  },
+  "rule": {
+    "urzadzenia": {
+      "wrong": "Zmierzono: czajnik, wysokość 3 m, szerokość nieokreślona.",
+      "right": "Poprawka pomiaru: to nie był czajnik. Wysokość 1,2 m. Szerokość określono."
+    },
+    "powiadomienia": {
+      "wrong": "Zmierzono: chmura opadowa, zasięg 40 km.",
+      "right": "Poprawka pomiaru: to nie była chmura, lecz powiadomienie. Zasięg: jeden ekran."
+    },
+    "wygenerowane": {
+      "wrong": "Zmierzono: pasmo górskie, wysokość 2 100 m n.p.m.",
+      "right": "Poprawka pomiaru: pasma nie znaleziono. Istota mierzyła 1,7 m, w stopniu zależnym od polubień."
     }
   }
 }

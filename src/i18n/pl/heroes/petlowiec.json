@@ -69,6 +69,76 @@
         "name": "Lot wieloetapowy",
         "desc": "Lądowanie egzystencjalne, obszar większy o 30%. Odnowienie dłuższe o 4 s."
       }
+    },
+    "uwaga": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Uwaga do przeciwnika, a od każdej kopii uwaga do jej własnego."
+      },
+      "2": {
+        "name": "Uwaga zbiorcza",
+        "desc": "Uwaga regulaminowa. Wszystkie kopie kierują ją do tego samego przeciwnika co on. Odnowienie dłuższe o 1 s."
+      },
+      "3": {
+        "name": "Uwaga nie na temat",
+        "desc": "Uwaga mechaniczna, obrażenia większe o ponad połowę. Kopie jej nie powtarzają. Odnowienie dłuższe o 2 s."
+      }
+    },
+    "powtorzenie": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Linia o długości 180: jedna od niego i po jednej od każdej kopii."
+      },
+      "2": {
+        "name": "Powtórzenie dosłowne",
+        "desc": "Linia regulaminowa. Trafieni zostają wyciszeni na 1 s. Odnowienie dłuższe o 2 s."
+      },
+      "3": {
+        "name": "Powtórzenie w zapisie",
+        "desc": "Linie zostają na stronie 2 s i zadają obrażenia co pół sekundy, o 40% mniejsze. Odnowienie dłuższe o 3 s."
+      }
+    },
+    "paradoks": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Tarcza zegarowa o promieniu 110 na 4 s. Trafienia w jej obrębie wracają po 0,5 s, w połowie."
+      },
+      "2": {
+        "name": "Paradoks dziadka",
+        "desc": "Echo mechaniczne, 0,8 zamiast 0,5. Promień 70. Odnowienie dłuższe o 2 s."
+      },
+      "3": {
+        "name": "Paradoks urzędowy",
+        "desc": "Tarcza regulaminowa. Kto w niej stoi, czeka na weryfikację. Trwa 3 s zamiast 4."
+      }
+    },
+    "opoznienie": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Przez 3 s otrzymane obrażenia zostają zapisane i naliczone po 3 s, w połowie."
+      },
+      "2": {
+        "name": "Opóźnienie bezterminowe",
+        "desc": "Zapis trwa 2 s, naliczona zostaje jedna czwarta. Odnowienie dłuższe o 5 s."
+      },
+      "3": {
+        "name": "Opóźnienie z winy nadawcy",
+        "desc": "Zapis egzystencjalny. Naliczenie trafia w najbliższego przeciwnika, nie w niego. Odnowienie dłuższe o 4 s."
+      }
+    },
+    "zamiana": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Zamiana miejsc z najbliższą kopią."
+      },
+      "2": {
+        "name": "Zamiana z przeciwnikiem",
+        "desc": "Zamiana egzystencjalna z najbliższym przeciwnikiem w zasięgu 260, z wyjątkiem bossów. Odnowienie dłuższe o 2 s."
+      },
+      "3": {
+        "name": "Zamiana planowa",
+        "desc": "Zamiana regulaminowa. Pobyt kopii zostaje odnowiony i wydłużony o jedną czwartą. Kosztuje 5 racji."
+      }
     }
   },
   "ult": {
@@ -89,6 +159,46 @@
         "3": {
           "name": "Skład ograniczony",
           "desc": "Dwie kopie, obrażenia egzystencjalne większe o połowę. Kosztuje 6 racji."
+        }
+      }
+    },
+    "cofniecie": {
+      "name": "Cofnięcie zgłoszenia",
+      "desc": "Ostatnie 6 s zostaje wycofane: on i przeciwnicy (poza bossami) wracają tam, gdzie wtedy stali, a jego racja do tego, co wtedy miał. Skreśleni pozostają skreśleni. Pozostali otrzymują uderzenie.",
+      "stamp": "WYCOFANO",
+      "note": "Zgłoszenie nr {number} wycofane. Uznano za niebyłe.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Wycofane 6 s. Uderzenie mechaniczne dla wszystkich, którzy pozostali."
+        },
+        "2": {
+          "name": "Sprostowanie",
+          "desc": "Wycofane 10 s. Bez uderzenia."
+        },
+        "3": {
+          "name": "Cofnięcie częściowe",
+          "desc": "Wraca tylko on. Wszyscy przeciwnicy zablokowani na 2 s. Uderzenie egzystencjalne. Kosztuje 6 racji."
+        }
+      }
+    },
+    "przedwczesny": {
+      "name": "Przedwczesny powrót",
+      "desc": "Kapsuła, którą przybył, spada na niego i na każdą kopię naraz, w obszarze 100 wokół każdego. Wygenerowani w jej obrębie istnieją słabiej.",
+      "stamp": "PRZYBYŁ PRZED WYJAZDEM",
+      "note": "Przybycie nr {number} odnotowano przed wyjazdem.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Jedna kapsuła na niego i na każdą kopię. Uderzenie egzystencjalne."
+        },
+        "2": {
+          "name": "Lądowanie twarde",
+          "desc": "Uderzenie mechaniczne. Trafieni odrzuceni o 90."
+        },
+        "3": {
+          "name": "Trzy kapsuły",
+          "desc": "Trzy kapsuły co 0,5 s, tylko na niego, każda z obrażeniami mniejszymi o 40%. Kosztuje 6 racji."
         }
       }
     }
@@ -115,5 +225,32 @@
         "desc": "„Spór” obejmuje obszar większy o 20%."
       }
     }
-  }
+  },
+  "skill6": {
+    "name": "Uwaga na marginesie",
+    "pad": "Uwaga",
+    "desc": "Uwaga w stronę przeciwnika. Każda kopia kieruje własną uwagę do własnego przeciwnika."
+  },
+  "skill7": {
+    "name": "Powtórzenie",
+    "pad": "Powtórzenie",
+    "desc": "Uwaga zapisana jako linia o długości 180. Każda kopia kreśli tę samą linię od siebie."
+  },
+  "skill8": {
+    "name": "Paradoks",
+    "pad": "Paradoks",
+    "desc": "Tarcza zegarowa we wskazanym miejscu na 4 s. Każde trafienie w jej obrębie wraca po pół sekundy, w połowie."
+  },
+  "skill9": {
+    "name": "Opóźnienie",
+    "pad": "Opóźnienie",
+    "desc": "Przez 3 s otrzymane obrażenia zostają zapisane i naliczone po 3 s, w połowie. Naliczenie nie zabija."
+  },
+  "skill10": {
+    "name": "Zamiana miejsc",
+    "pad": "Zamiana",
+    "desc": "Zamienia się miejscem z najbliższą kopią. Przeciwnicy w miejscu, które opuścił, zostają przeczytani bez odpowiedzi w stronę kopii na 2 s. Bez kopii nic się nie dzieje."
+  },
+  "delayNote": "Obrażenia zapisano w dzienniku. Zostaną naliczone w terminie.",
+  "logNote": "Wpis powtórzono po raz trzeci. Opłaty nie pobrano."
 }

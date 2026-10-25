@@ -11,6 +11,7 @@ import { fireAuto } from '../heroes/auto';
 import { isRebuttal } from '../combat/claims';
 import { killFill, meterGain, METER_REBUTTAL } from '../combat/meter';
 import { heroDef } from '../heroes/defs';
+import { dealtMul } from '../heroes/quirks';
 import { absorbShield, playerDamageMul } from '../heroes/shield';
 import { onPlayerBlow } from './recovery';
 import { wearerDefence } from '../items/stats';
@@ -55,6 +56,10 @@ export function attack(s: RunState, bus: Bus, attacker: Fighter, defender: Fight
 export function applyDamage(s: RunState, bus: Bus, defender: Fighter, amount: number, crit: boolean, type?: DamageType, credit = true): boolean {
   const rebuttal = credit && type !== undefined && defender.kind === 'enemy' && isRebuttal(defender.claim, type);
   ({ amount, crit } = modifyDamage(bus, defender, amount, crit, type, s)); // claims, existence, zgloszony
+  if (credit && defender.kind === 'enemy' && amount > 0) {
+    const mul = dealtMul(s, defender); // the hero's quirk (Kartograf, Odleglosc w linii prostej)
+    if (mul !== 1) amount = Math.max(1, Math.round(amount * mul));
+  }
   if (rebuttal) meterGain(s, METER_REBUTTAL); // the Argument meter (combat/meter.ts)
   if (defender.kind === 'enemy' && defender.defect) learnDefect(s, defender.defect);
   if (defender.kind === 'player') amount = absorbShield(defender, amount);

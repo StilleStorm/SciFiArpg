@@ -96,7 +96,7 @@ export const SETS: readonly SetDef[] = [
     skills3: {
       wirowanie: { area: 1.5 },
       muzyka: { area: 180 / 150 },
-      spor: { count: 1 },
+      uwaga: { count: 1 },
       pomiar: { cd: -2 },
       ksiezyc: { count: 1 },
     },
