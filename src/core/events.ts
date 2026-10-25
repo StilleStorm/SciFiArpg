@@ -38,6 +38,8 @@ export interface GameEvents {
   footnote: { text: string; correction?: boolean };
   /** A footnote was printed with number `n`; `correction` = the Asystent's later correction of a wrong note (audio: typewriter key / carriage return). */
   'footnote:added': { n: number; text: string; correction: boolean };
+  /** S20: the slip retracts its last line (struck through in red; the history keeps it, struck): Pętlowiec's Cofnięcie zgłoszenia. main.ts calls `Footnotes.retract`. */
+  'footnote:retract': undefined;
   /**
    * A stamp on the page. `quiet`: another sound carries it (an ultimate's recipe ends in its own thud), audio does not play the stamp.
    * `away`: a point the stamp must not cover (the hero who cast it); render keeps every stamp inside the view.

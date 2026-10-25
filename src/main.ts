@@ -585,6 +585,7 @@ const printNote = (text: string, correction = false): number => {
 };
 const asystent = bindAsystent(bus, { say: printNote, getState: () => game.state, firstTicket: () => meta.history.length === 0, steering: () => effectiveSteering(meta.settings, currentOrient()) });
 bus.on('footnote', (e) => printNote(e.text, e.correction === true)); // the finale's duel of footnotes prints its corrections as corrections
+bus.on('footnote:retract', () => void footnotes.retract()); // Cofnięcie zgłoszenia withdraws the slip's last line
 // Sound: the bindings are the only place where events meet sounds (src/audio/bindings.ts).
 const audio = createAudio(bus, { getState: () => game.state, freeze: (ms) => loop.freeze(ms) });
 // The kiosk's office hours are decided by the clause (economy/hours.ts keeps the decision).

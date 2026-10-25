@@ -26,8 +26,10 @@ export interface Footnotes {
   openHistory(): boolean;
   /** The slip is on screen and covers client point (x, y): joystick mode routes its quick taps here (the slip lets pointers through). */
   hits(clientX: number, clientY: number): boolean;
-  /** The most recent notes, oldest first. */
-  recent(n?: number): { n: number; text: string }[];
+  /** Strike out the last note (on the slip and in the history); false when there is none or it is already struck. */
+  retract(): boolean;
+  /** The most recent notes, oldest first; `struck` marks a retracted one. */
+  recent(n?: number): { n: number; text: string; struck?: boolean }[];
   readonly count: number;
 }
 
@@ -44,15 +46,15 @@ export function createFootnotes(root: HTMLElement): Footnotes {
   // rule and never shows through it (a line through a note would read as struck out)
   const list = h('div', 'fn-list');
   el.append(list);
-  const log: { n: number; text: string }[] = [];
+  const log: { n: number; text: string; struck?: boolean }[] = [];
   let count = 0;
   let sheet: Popup | null = null;
   /** A long note is alone on the slip until this tween (render frames, no game state) lets the notes that waited for it through; its cancel. */
   let held: (() => void) | null = null;
   const waiting: { n: number; text: string }[] = [];
 
-  const line = (n: number, text: string): HTMLElement => {
-    const p = h('p', 'fn');
+  const line = (n: number, text: string, struck = false): HTMLElement => {
+    const p = h('p', struck ? 'fn struck' : 'fn');
     p.append(h('sup', '', String(n)), document.createTextNode(text));
     return p;
   };
@@ -133,7 +135,7 @@ export function createFootnotes(root: HTMLElement): Footnotes {
       if (log.length === 0) return false;
       sheet?.close();
       const body = h('div', 'fn-history');
-      for (const e of fn.recent()) body.append(line(e.n, e.text));
+      for (const e of fn.recent()) body.append(line(e.n, e.text, e.struck === true));
       sheet = openPopup(root, { title: t('ui.notes.history'), className: 'pop-history', body: [body], tapToClose: true, onClose: () => (sheet = null) });
       // opened by a quick tap through the stage (joystick mode), the same tap's click lands on the sheet: it must not close it
       const openedAt = performance.now();
@@ -150,6 +152,16 @@ export function createFootnotes(root: HTMLElement): Footnotes {
       if (el.classList.contains('hidden') || log.length === 0) return false;
       const r = el.getBoundingClientRect();
       return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    },
+    retract() {
+      const last = log[log.length - 1];
+      if (!last || last.struck) return false;
+      last.struck = true;
+      // on the slip only if it is printed (a note waiting behind a long one is struck in the history alone)
+      const nodes = list.querySelectorAll('.fn');
+      const shown = nodes[nodes.length - 1];
+      if (shown?.querySelector('sup')?.textContent === String(last.n)) shown.classList.add('struck');
+      return true;
     },
     recent(n = HISTORY) {
       return log.slice(-n);

@@ -330,6 +330,12 @@ button {
   max-height: 38px;
   overflow: hidden;
 }
+.fn.struck {
+  /* a withdrawn note (Cofnięcie zgłoszenia): struck through in red, like every correction */
+  text-decoration: line-through;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1.5px;
+}
 .fn sup {
   font-size: 10px;
   line-height: 0;

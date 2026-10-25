@@ -107,6 +107,7 @@ const cofniecie = defineUltimate('petlowiec', {
       if (u.dmg > 0) skillDamage(s, bus, en, type, COFNIECIE_DAMAGE * u.dmg);
     }
     petlState(s).snaps.length = 0; // a second withdrawal does not return to the same moment
+    bus.emit('footnote:retract'); // the slip withdraws its last line too (SKILLS section 3)
   },
 });
 
