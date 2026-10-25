@@ -226,8 +226,9 @@ export function bindHeroFx(bus: Bus, layer: SVGGElement): void {
         sketch(layer, bentArrow(e.x, e.y, e.x2, e.y2, 16) + bentArrow(e.x2, e.y2, e.x, e.y, 16), { dash: '2 4', ms: 180, hold: 360 });
         break;
       case 'capsule': {
-        // Odlozony start: the capsule stands where it landed, in a dotted ring of the area it struck
-        const g = el('g', { transform: `translate(${n2(e.x)} ${n2(e.y + 12)}) scale(1.35)` });
+        // Odlozony start: the capsule stands where it landed, in a dotted ring of the area it struck. Thin and faded: it falls on
+        // the hero and his copies, whose figures must still read through it (S20 look: a scribbled heap at the centre).
+        const g = el('g', { transform: `translate(${n2(e.x)} ${n2(e.y + 12)}) scale(1.35)`, 'stroke-width': 0.8, opacity: 0.55 });
         for (const d of CAPSULE_PARTS) g.append(el('path', { d }));
         layer.append(g);
         drawIn(g, 120);

@@ -25,6 +25,8 @@ const RING_R = 42;
 const SPOR_R = 85;
 const SPOR_DAMAGE = 0.6;
 const COPY_DAMAGE = 0.7;
+/** Landings closer than this share one drawn capsule (units). */
+const CAPSULE_MERGE = 36;
 
 /**
  * Zebranie wszystkich petli (regulaminowy, auto, 12): four copies for 6 s, past the usual limit of copies, each casting Spor on
@@ -120,8 +122,13 @@ function landings(e: UltEnv): { x: number; y: number }[] {
 /** One fall of the capsule on every landing: 2.5x within 100 of each, and a push in § 2. */
 function fall(e: UltEnv): void {
   const { c, s, bus, u, tune, type } = e;
+  const drawn: { x: number; y: number }[] = [];
   for (const at of landings(e)) {
-    fx(c, 'capsule', at.x, at.y, PRZEDWCZESNY_R);
+    // a copy standing on him gets its blow but not a second capsule drawn over the same figure
+    if (!drawn.some((d) => Math.hypot(d.x - at.x, d.y - at.y) < CAPSULE_MERGE)) {
+      drawn.push(at);
+      fx(c, 'capsule', at.x, at.y, PRZEDWCZESNY_R);
+    }
     aoe(c, {
       x: at.x,
       y: at.y,
@@ -146,6 +153,7 @@ const przedwczesny = defineUltimate('petlowiec', {
   type: 'egzystencjalny',
   seconds: 2,
   radius: null,
+  noteClear: PRZEDWCZESNY_R,
   two: { patch: { type: 'mechaniczny' }, tune: { push: PRZEDWCZESNY_PUSH } },
   three: { patch: { dur: 0.75, dmg: 0.6, cost: 6 }, tune: { volley: 3, only: 1 } },
   cast(e) {

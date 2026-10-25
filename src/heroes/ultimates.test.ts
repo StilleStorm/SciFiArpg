@@ -10,7 +10,7 @@ import { createRun, nextId, type RunState } from '../world/run';
 import { MAX_COPIES } from './numbers';
 import { patchFields, PATCH_FIELD_LIMIT, PATCH_KEYS, type ParagraphNo } from './paragraphs';
 import { HERO_IDS, heroById, type HeroId } from './registry';
-import { castUltimate, setUltimateParagraph, stepUltimates, ultimateActive, ultimateOf, ultimateSeconds, ultimateUnlocked, ultNoteY, ultStampSpot, ULT_NOTE_GAP } from './ultimate';
+import { castUltimate, setUltimateParagraph, stepUltimates, ultimateActive, ultimateOf, ultimateSeconds, ultimateUnlocked, ultNoteY, ultStampSpot, ULT_NOTE_GAP, ULT_NOTE_RING_OFFSETS } from './ultimate';
 import { FIRST_ULTIMATE_LEVEL, MAX_ULT_RADIUS, MAX_ULT_S } from './ultimateDefs';
 import { heroStep } from './system';
 
@@ -433,6 +433,14 @@ describe('the ultimate stamp', () => {
     expect(ultNoteY(queueUpLeft, 500, 500, 18)).toBe(500 + 18 + ULT_NOTE_GAP);
     expect(ultNoteY([...queueUpLeft, ...queueUpLeft.map((e) => ({ x: e.x, y: 1000 - e.y }))], 500, 500, 18)).toBe(500 - 18 - ULT_NOTE_GAP);
     expect(ultNoteY([{ x: 1200, y: 100 }], 500, 500, 18)).toBe(500 - 18 - ULT_NOTE_GAP); // far off: not counted
+  });
+
+  it('an ultimate drawing a ring round the hero puts its note below the ring, on the line with fewest enemies', () => {
+    expect(ultNoteY([], 500, 500, 18, 100)).toBe(500 + 100 + (ULT_NOTE_RING_OFFSETS[0] ?? 0));
+    const onFirst = [{ x: 520, y: 500 + 100 + 34 }];
+    expect(ultNoteY(onFirst, 500, 500, 18, 100)).toBe(500 + 100 + (ULT_NOTE_RING_OFFSETS[2] ?? 0));
+    const above = [0, 1, 2].map((i) => ({ x: 500, y: 300 + i }));
+    expect(ultNoteY(above, 500, 500, 18, 100)).toBeGreaterThan(600); // never back above, where the stamp is
   });
 
   it('castUltimate stamps off the hero and names him as the point to stay off', () => {

@@ -66,6 +66,8 @@ export interface UltimateDef {
   stampKey: string;
   /** The page reaction: a margin note, `{number}` is filled with the ticket number. */
   noteKey: string;
+  /** Radius of the ring it draws round the hero, which the margin note must stand clear of (heroes/ultimate.ts `ultNoteY`). */
+  noteClear?: number;
   list: readonly [UltimateParagraph, UltimateParagraph, UltimateParagraph];
   /** The instant part of the cast. Runs once, after the cost is paid. */
   cast(e: UltEnv): void;
@@ -82,6 +84,7 @@ export interface UltimateSpec {
   seconds: number;
   radius: number | null;
   pageWide?: boolean;
+  noteClear?: number;
   two: { patch: ParagraphPatch; tune?: Record<string, number> };
   three: { patch: ParagraphPatch; tune?: Record<string, number> };
   cast: UltimateDef['cast'];
@@ -113,6 +116,7 @@ export function defineUltimate(hero: HeroId, o: UltimateSpec): UltimateDef {
     list: [para(1, {}), para(2, o.two.patch, o.two.tune), para(3, o.three.patch, o.three.tune)],
     cast: o.cast,
   };
+  if (o.noteClear !== undefined) def.noteClear = o.noteClear;
   if (o.tick) def.tick = o.tick;
   if (o.end) def.end = o.end;
   return def;

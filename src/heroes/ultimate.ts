@@ -100,7 +100,7 @@ export function castUltimate(s: RunState, bus: Bus): boolean {
   const spot = ultStampSpot(s.enemies, p.x, p.y, text.length);
   // never on the hero: beside him on the emptier side; render/bindings keeps it inside the view and off `away`
   bus.emit('stamp', { text, x: spot.x, y: spot.y, quiet: true, away: { x: p.x, y: p.y } }); // quiet: the ultimate recipe ends in its own thud
-  bus.emit('margin:note', { text: t(def.noteKey, { number: 1000 + (s.seed % 9000) }), x: p.x, y: ultNoteY(s.enemies, p.x, p.y, p.r) });
+  bus.emit('margin:note', { text: t(def.noteKey, { number: 1000 + (s.seed % 9000) }), x: p.x, y: ultNoteY(s.enemies, p.x, p.y, p.r, def.noteClear) });
   bus.emit('ultimate:cast', { heroId: p.heroId, ultimateId: def.id, x: p.x, y: p.y });
   return true;
 }
@@ -140,7 +140,8 @@ export const ULT_NOTE_GAP = 56;
  * (a pull line, a lash, a queue) run from the hero to them, so the note on the emptier side is not overprinted (S19 look:
  * Koniec kolejki's pull line through the note). Counts enemies within 260 units across and 320 up or down; a tie stays above. Pure.
  */
-export function ultNoteY(enemies: readonly { x: number; y: number }[], x: number, y: number, r: number): number {
+export function ultNoteY(enemies: readonly { x: number; y: number }[], x: number, y: number, r: number, clear?: number): number {
+  if (clear !== undefined) return ringNoteY(enemies, x, y, clear);
   let above = 0;
   let below = 0;
   for (const e of enemies) {
@@ -149,6 +150,28 @@ export function ultNoteY(enemies: readonly { x: number; y: number }[], x: number
     else if (e.y > y) below++;
   }
   return above > below ? y + r + ULT_NOTE_GAP : y - r - ULT_NOTE_GAP;
+}
+
+/** Offsets below a drawn ring (beyond its radius) where the note may stand; the stamp takes the space above. */
+export const ULT_NOTE_RING_OFFSETS: readonly number[] = [34, 70, 106];
+
+/**
+ * The note of an ultimate that draws a ring round the hero: below the ring (the stamp lands above it), at the first offset whose
+ * line (about 170 units each side, 50 up and down: an enemy figure hangs some 40 below its centre) has the fewest enemies under it. Pure.
+ */
+function ringNoteY(enemies: readonly { x: number; y: number }[], x: number, y: number, clear: number): number {
+  let best = y + clear + (ULT_NOTE_RING_OFFSETS[0] ?? 34);
+  let bestN = Infinity;
+  for (const dy of ULT_NOTE_RING_OFFSETS) {
+    const cy = y + clear + dy;
+    let n = 0;
+    for (const e of enemies) if (Math.abs(e.x - x) < 170 && Math.abs(e.y - cy) < 50) n++;
+    if (n < bestN) {
+      bestN = n;
+      best = cy;
+    }
+  }
+  return best;
 }
 
 /** Per step: the meter drains out of combat, and what runs is ticked; at the end of its time it is ended and removed. */
