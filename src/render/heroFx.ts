@@ -195,10 +195,11 @@ export function bindHeroFx(bus: Bus, layer: SVGGElement): void {
         break;
       }
       case 'puddle': {
-        // Odpompowanie: a hatched puddle with a wavy rim and the swirl of the drain at its centre (S19)
+        // Odpompowanie: a hatched puddle with a wavy rim and the swirl of the drain at its centre (S19). The rim is a thin line and
+        // the hatch faint: the puddle is as wide as the screen's half and must stay under the figures, not compete with them.
         const g = el('g', {});
         const rim = smoothClosed(blobPoints(pen, e.x, e.y, e.r, 14, 0.07));
-        g.append(el('path', { d: rim }), el('path', { d: rim, fill: 'url(#hatch)', stroke: 'none', 'fill-opacity': 0.6 }), el('path', { d: spiral(e.x, e.y, e.r * 0.22), 'stroke-width': 1.2 }));
+        g.append(el('path', { d: rim, 'stroke-width': 1.1 }), el('path', { d: rim, fill: 'url(#hatch)', stroke: 'none', 'fill-opacity': 0.28 }), el('path', { d: spiral(e.x, e.y, e.r * 0.22), 'stroke-width': 1 }));
         layer.append(g);
         drawIn(g, 240);
         eraseOut(g, 420, 1000, () => g.remove());
@@ -261,6 +262,11 @@ export const zoneBuilder: Builder<Zone> = {
     const drawn = HERO_IDS.map((id) => heroById(id).figure.zoneParts?.(z) ?? null).find((x) => x !== null);
     if (drawn) {
       appendParts(g, drawn);
+      // the contact form is the point of the zone: the crowd it holds stands on it, so its lines are drawn over them (S19 look)
+      if (z.variant === 'formularz') {
+        g.dataset['over'] = '';
+        g.setAttribute('stroke-width', '2.2');
+      }
       return g;
     }
     if (z.variant === 'numer') return buildCaseNumber(g, z);

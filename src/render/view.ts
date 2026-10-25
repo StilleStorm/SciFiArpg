@@ -6,6 +6,7 @@ import { drawIn } from './ink';
  * attributes per frame (never rebuild children). Position/facing are handled by the view sync.
  */
 export interface Builder<E extends Entity> {
+  /** The view; a `data-over` attribute on it puts it above every figure, also those spawned later (default: zones and pickups below). */
   create(e: E): SVGGElement;
   patch?(e: E, g: SVGGElement, timeMs: number): void;
   /** If set, strokes are drawn in over this many ms when the view is created. */
@@ -93,8 +94,14 @@ export function createViews(layer: SVGGElement, builders: Builders): Views {
           const g = make(e);
           g.dataset['id'] = String(e.id);
           g.dataset['kind'] = e.kind;
-          if (e.kind === 'pickup' || e.kind === 'zone') layer.prepend(g);
-          else layer.append(g);
+          if (g.dataset['over'] !== undefined) layer.append(g);
+          else if (e.kind === 'pickup' || e.kind === 'zone') layer.prepend(g);
+          else {
+            // a view marked `data-over` (a zone that must read over the crowd, e.g. Formularz kontaktowy) stays above later figures
+            const over = layer.querySelector(':scope > [data-over]');
+            if (over) layer.insertBefore(g, over);
+            else layer.append(g);
+          }
           slot = { g, transform: '', seen: pass };
           slots.set(e.id, slot);
           const ms = pending.get(g);
