@@ -10669,7 +10669,7 @@
    "player": {
     "attackRange": 190,
     "facing": 1,
-    "hp": 76,
+    "hp": 90,
     "shield": 0,
     "stats": {
      "critChance": 0.25,
@@ -10887,7 +10887,7 @@
    "player": {
     "attackRange": 190,
     "facing": 1,
-    "hp": 76,
+    "hp": 90,
     "shield": 0,
     "stats": {
      "critChance": 0.25,
@@ -11126,7 +11126,7 @@
    "player": {
     "attackRange": 190,
     "facing": 1,
-    "hp": 76,
+    "hp": 90,
     "shield": 0,
     "stats": {
      "critChance": 0.25,
@@ -11344,7 +11344,7 @@
    "player": {
     "attackRange": 190,
     "facing": 1,
-    "hp": 76,
+    "hp": 90,
     "shield": 0,
     "stats": {
      "critChance": 0.25,
@@ -11583,7 +11583,7 @@
    "player": {
     "attackRange": 190,
     "facing": 1,
-    "hp": 76,
+    "hp": 90,
     "shield": 0,
     "stats": {
      "critChance": 0.25,
@@ -11801,7 +11801,7 @@
    "player": {
     "attackRange": 190,
     "facing": 1,
-    "hp": 76,
+    "hp": 90,
     "shield": 0,
     "stats": {
      "critChance": 0.25,

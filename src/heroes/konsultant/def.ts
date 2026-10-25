@@ -3,7 +3,7 @@ import { defineHero, defineSkill } from '../build';
 import type { HeroDef } from '../defs';
 
 export const def: HeroDef = defineHero('konsultant', {
-  racja: 76,
+  racja: 90,
   racjaPerLevel: 8,
   speed: 128,
   r: 13,

@@ -124,6 +124,12 @@ Polish and release. Progress lines are below.
   (S17 voice); there are no page bosses, the named elite takes their gwiazdki/permission rows
   (S18); the finale is not saved mid-fight; the unikatowy seal keeps its red dot (ITEMS §12.8).
 
+- **Answered (player, 2026-10-25, MVP playtest):** capstones stay flat bonuses; Konsultant feels too
+  weak → racja 76 → 90 now (S19 still re-measures with an aiming bot); the finale is too easy / too short
+  → tuned before S17 (longer phases, harder bodies; finale-mode balance target ~60–70% bot wins,
+  ~220 s ticket); priority ladder left as is; planet numbering kept as a joke; five on-ramp notes kept;
+  the hosted-set rule (ITEMS §12.6) kept; p1 ticket c renamed "Stwierdzenie obecności" (S17 voice).
+
 ## Game plan and the slice order
 The plan is docs/PRODUCTION.md: 7 milestones, 30 slices, each with a paste-ready builder brief.
 Design docs: PLAN.md (+§7, §8), SKILLS.md, ITEMS.md (+§12), STORY.md, DESIGN §10.2–10.3.
