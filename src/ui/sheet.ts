@@ -34,29 +34,18 @@ export function createSheet(root: HTMLElement, opts: SheetOptions): Sheet {
   head.append(titles, close);
   const scroll = h('div', 'ps-scroll');
   const notes = h('div', 'ps-notes');
-  // printed under the cut while the body runs on below it, so a line sliced by the rule reads as a page that continues
+  // a typed line of its own on clean paper between the body and the notes' rule, there only while the body runs on below its edge
   const more = h('span', 'ps-more', t('ui.sheet.more'));
   more.hidden = true;
-  notes.append(more);
-  frame.append(head, scroll, notes);
+  frame.append(head, scroll, more, notes);
   el.append(frame);
   root.append(el);
   let queued = false;
   const place = (): void => {
     queued = false;
-    more.hidden = !runsOn(scroll.scrollTop, scroll.clientHeight, scroll.scrollHeight);
-    if (more.hidden) return;
-    // the strip starts at the top of the first printed line the body's edge would slice, so no line shows half a glyph
-    const bottom = scroll.getBoundingClientRect().bottom;
-    // the strip hangs from the notes' rule (their top border) up to the edge, across the gap between body and notes
-    const rule = notes.getBoundingClientRect().top;
-    // a pinned action between the body and the notes (the desk's Nowe zgłoszenie) stays uncovered: the strip then ends at the body's edge
-    const foot = scroll.nextElementSibling === notes ? rule : bottom;
-    const edge = cutEdge(lineBoxes(scroll, bottom), Math.min(bottom, foot - CUE_ROOM));
-    const tall = Math.round(foot - edge);
-    more.style.height = `${tall}px`;
-    more.style.top = `${Math.round(edge - rule) - 1}px`;
-    more.style.paddingTop = `${Math.max(0, tall - CUE_ROOM)}px`;
+    // while the line is printed it takes its own height from the body, so the test counts that height back
+    const room = more.hidden ? 0 : CUE_ROOM;
+    more.hidden = !runsOn(scroll.scrollTop, scroll.clientHeight + room, scroll.scrollHeight);
   };
   const cue = (): void => {
     if (queued) return;
@@ -87,8 +76,8 @@ export function createSheet(root: HTMLElement, opts: SheetOptions): Sheet {
   };
 }
 
-/** Room the cue's own words need above the notes' rule, in px (one 13 px mono line). */
-const CUE_ROOM = 13;
+/** Height the cue line takes from the body when it is printed, in px (its line plus the gap above it). */
+const CUE_ROOM = 18;
 
 /** The line boxes of the text (and the drawings) near the foot of a scrolled body (only those reaching within 80 px of its edge). */
 export function lineBoxes(scroll: HTMLElement, bottom: number): { top: number; bottom: number }[] {

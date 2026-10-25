@@ -92,23 +92,17 @@
   width: 64px;
   border-top: 2px solid var(--ink);
 }
-/* a paper strip across the foot of the body: the sliced line goes under it and the strip says the page goes on */
+/* "c.d. poniżej": a line of its own between the body and the notes' rule, never over the body or a pinned action */
 .ps-more {
-  position: absolute;
-  top: -14px;
-  left: 0;
-  right: 0;
-  height: 13px;
-  padding: 0;
+  flex: none;
   box-sizing: border-box;
+  height: 18px;
+  padding-top: 3px;
   text-align: right;
   font-family: var(--mono);
   font-size: 11px;
-  line-height: 13px;
+  line-height: 15px;
   letter-spacing: 0.04em;
-  background-color: var(--paper);
-  background-image: var(--paper-noise, none);
-  /* taps reach the row under it, as they did before the strip */
   pointer-events: none;
 }
 .ps-more[hidden] {

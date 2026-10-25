@@ -161,13 +161,15 @@ export function createSettings(
     body.scrollTop = scrolled;
     // the same "c.d. poniżej" cue as the sheets (ui/sheet.ts): printed under the cut while the form runs on below it
     const place = (): void => {
-      more.hidden = !runsOn(body.scrollTop, body.clientHeight, body.scrollHeight);
+      // the cue's own line takes height from the body while it is printed, so the test counts that height back
+      more.hidden = !runsOn(body.scrollTop, body.clientHeight + (more.hidden ? 0 : more.offsetHeight), body.scrollHeight);
       if (more.hidden) return;
       // a paper veil from the first sliced line down to the cut, so no line shows half its glyphs
       const bottom = body.getBoundingClientRect().bottom;
       veil.style.height = `${Math.max(0, Math.round(bottom - cutEdge(lineBoxes(body, bottom), bottom)))}px`;
     };
     body.addEventListener('scroll', place, { passive: true });
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(place).observe(body);
     requestAnimationFrame(place);
   }
 
