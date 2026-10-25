@@ -101,11 +101,11 @@
     "trybOszczedny": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Przez 4 s obrażenia mniejsze o 40%, chód wolniejszy o 30%. Trafienia w Pralkę liczą się do błędu programu podwójnie."
+        "desc": "Przez 4 s przyjmuje o 40% mniej obrażeń i chodzi o 30% wolniej. Trafienia w nią liczą się do błędu programu podwójnie."
       },
       "2": {
         "name": "Tryb nocny",
-        "desc": "Tryb trwa 6 s, obrażenia mniejsze o 25%. Pralka nie zwalnia."
+        "desc": "Tryb trwa 6 s, Pralka przyjmuje o 25% mniej obrażeń i nie zwalnia."
       },
       "3": {
         "name": "Tryb serwisowy",
