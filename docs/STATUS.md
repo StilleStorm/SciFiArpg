@@ -197,7 +197,9 @@ Progress is recorded here, one line per slice:
 
 - S19 done: Pralka and Konsultant at ten skills each with their paragraphs, ultimates 2/3 for both, passives 7–10, ultimate recipes, an ultimate chooser on the Karta and in Konfiguracja; look fixes (Karta ultimate bands, margin note side, Formularz over the crowd, thinner Odpompowanie puddle); smoke Reklamacja leg fixed, leg 6e3 casts every ultimate in all paragraphs; `npm run balance` gains an aimed-cast bot (auto / claim-aimed / nearest-aimed). Reports S19-*.md. Parked: passive slots at levels 10/20/30/40 not built; the Infolinia set patches spor until S20 adds Uwaga; the Konfiguracja chooser tap and Numerek numbers are not smoke-covered.
 
-**Next pickup:** S20.
+- S20 done: Pętlowiec and Kartograf at ten skills each with their paragraphs, ultimates 2/3, passives 7–10, recipes; Awaria slow, Opóźnienie HUD bracket, Cofnięcie struck footnote, copy disagreement footnote; voice pass. Look fix at the gate: the Przedwczesny note stands below its ring, the capsule is thin and drawn once per spot. Reports S20-*.md. Parked: Kartograf win rate (under Needs the player); the voice report's "Pomiar"/"odczyt" naming proposal (reports/S20-voice.md); passive slots at levels 10/20/30/40 still unbuilt.
+
+**Next pickup:** S21. The /automode loop stopped after S20 at the player's request; resume only when the player asks.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
