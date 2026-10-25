@@ -362,7 +362,7 @@ try {
   await page.locator('[data-desk=konfiguracja]').click({ timeout: 3000 });
   await page.locator('.kf-sheet .kf-row').first().waitFor({ state: 'visible', timeout: 3000 });
   const kfDesk = await page.evaluate(() => ({ rows: document.querySelectorAll('.kf-sheet .kf-row').length, desk: !!document.querySelector('.desk-sheet:not(.hidden)'), stamps: document.querySelectorAll('.kf-sheet .kf-box.active .kf-stamp').length }));
-  check('the desk line "Konfiguracja" opens the sheet over the hidden desk, § 1 stamped on the installed skills', kfDesk.rows === 5 && !kfDesk.desk && kfDesk.stamps >= 3, JSON.stringify(kfDesk));
+  check('the desk line "Konfiguracja" opens the sheet over the hidden desk, § 1 stamped on the installed skills', kfDesk.rows === 10 && !kfDesk.desk && kfDesk.stamps >= 3, JSON.stringify(kfDesk));
   await page.locator('.kf-back').click({ timeout: 3000 });
   await sleep(300);
   check('Wróć from Konfiguracja shows the desk again', await page.evaluate(() => !document.querySelector('.kf-sheet') && !!document.querySelector('.desk-sheet:not(.hidden)')));
@@ -587,7 +587,7 @@ try {
     padButtons: document.querySelectorAll('.loadout-sheet .lo-row:not(.off) .lo-pad').length,
     small: [...document.querySelectorAll('.loadout-sheet .lo-pad')].filter((b) => b.getBoundingClientRect().height < 43).length,
   }));
-  check('the pause line "Umiejętności" opens the loadout: five rows, skill 5 greyed, pad numbers on the four installed', lo.rows === 5 && lo.off.join() === '4' && !lo.pause && lo.padButtons === 12 && lo.small === 0, JSON.stringify(lo));
+  check('the pause line "Umiejętności" opens the loadout: ten rows (Pralka, S19), skills 5 to 10 greyed, pad numbers on the four installed', lo.rows === 10 && lo.off.join() === '4,5,6,7,8,9' && !lo.pause && lo.padButtons === 12 && lo.small === 0, JSON.stringify(lo));
   check('the loadout marks the pad each skill occupies', lo.on.join() === '1:2,2:3,3:1', lo.on.join());
   // tap skill 2 onto pad 3: the two swap (skill 3 goes to pad 2)
   await page.locator('.lo-row[data-skill="1"] .lo-pad[data-pad="3"]').click({ timeout: 3000 });
@@ -655,7 +655,7 @@ try {
       stamps: document.querySelectorAll('.kf-sheet .kf-box.active .kf-stamp').length,
       pause: !!document.querySelector('.pause-sheet:not(.hidden)'),
     }), skill);
-    check('the pause line "Konfiguracja" opens the sheet over the hidden pause sheet, the active box stamped', kf.rows === 5 && kf.active === String(n) && kf.stamps >= 3 && !kf.pause, JSON.stringify(kf));
+    check('the pause line "Konfiguracja" opens the sheet over the hidden pause sheet, the active box stamped', kf.rows === 10 && kf.active === String(n) && kf.stamps >= 3 && !kf.pause, JSON.stringify(kf));
     await shot('08aa-konfiguracja');
     await page.locator(`.kf-sheet .kf-row[data-skill="${skill}"] .kf-box[data-n="1"]`).click({ timeout: 3000 });
     await sleep(200);
@@ -1504,8 +1504,16 @@ try {
       const g = window.__game;
       const s = g.state();
       s.player.gwiazdki = 400;
-      const a = g.giveItem('rzadki');
-      const b = g.giveItem('rzadki');
+      // a rolled rzadki may be one the kiosk refuses (about 1 in 10: "w wersji próbnej" or wycofany); the leg needs two it takes
+      const takeable = () => {
+        for (let k = 0; k < 12; k++) {
+          const it = g.giveItem('rzadki');
+          if (it && g.reclaimRefusal(it) === null) return it;
+        }
+        return null;
+      };
+      const a = takeable();
+      const b = takeable();
       const bad = g.giveItem('rzadki');
       if (bad && !bad.affixes.includes('wycofany')) {
         bad.affixes.push('wycofany');
@@ -1524,7 +1532,7 @@ try {
     await page.locator('[data-rek="toggle"]').click().catch(() => undefined);
     const rowA = page.locator(`button[data-rek="${gear.a}"]`);
     const rowShown = await rowA.waitFor({ state: 'visible', timeout: 3000 }).then(() => true, () => false);
-    await rowA.dispatchEvent('click');
+    await rowA.dispatchEvent('click', undefined, { timeout: 2000 }).catch(() => undefined);
     await sleep(300);
     const after = await mods(gear.a);
     const starsAfter = await page.evaluate(() => window.__game.state().player.gwiazdki);
@@ -1536,7 +1544,7 @@ try {
     const diff = before && after ? after.mods !== before.mods || after.affixes.join() !== before.affixes.join() : false;
     check(
       'S18 reklamacja: the Sklep re-rolls the item (one entry on its record, the purse pays); the row then has no button, the wycofany one never had',
-      rowShown && diff && after.n === before.n + 1 && starsAfter < gear.stars && refusedNoBtn && otherBtn && badNoBtn && afterRefusal.n === after.n,
+      rowShown && diff && after.n === before.n + 1 && starsAfter < gear.stars && refusedNoBtn && otherBtn && badNoBtn && afterRefusal?.n === after.n,
       JSON.stringify({ rowShown, before, after, starsAfter, gearStars: gear.stars, refusedNoBtn, otherBtn, badNoBtn }),
     );
     await page.locator('.ps-close').locator('visible=true').first().click({ timeout: 800 }).catch(() => undefined);
@@ -1762,14 +1770,17 @@ try {
       g.placePlayer(600, 800);
       g.hero.spawn(6);
       const st0 = s.status;
-      g.hero.installSkill(3);
-      g.hero.installSkill(4);
-      const out = { hero: g.hero.info().heroId, cast: [], cd: [], st0, st1: s.status };
       const ids = g.hero.info().skillIds;
+      for (let k = 3; k < ids.length; k++) g.hero.installSkill(k); // a filled hero (S19) has up to eleven
+      const out = { hero: g.hero.info().heroId, cast: [], cd: [], st0, st1: s.status, n: ids.length };
       out.para = [];
       // every skill with each of its three paragraphs (S2): the patched cast fires and starts a cooldown too
       for (const n of [1, 2, 3]) {
-        for (let k = 0; k < 5; k++) {
+        for (let k = 0; k < ids.length; k++) {
+          // a step back (Przerwa techniczna) or a throw moves the hero or the crowd: every cast starts from the same spot with a crowd in reach
+          g.enemies.clear();
+          g.placePlayer(600, 800);
+          g.hero.spawn(6);
           g.hero.assignPad(1, k);
           if (!g.hero.setParagraph(ids[k], n, true)) out.para.push(`${ids[k]}:${n}`);
           for (const e of s.enemies) e.hp = e.hpMax = 1e9;
@@ -1785,9 +1796,52 @@ try {
       return out;
     });
     const r = castAll[id];
-    check(`${id}: all five skills cast and start a cooldown with § 1, § 2 and § 3`, r.hero === id && r.cast.length === 15 && r.cast.every(Boolean) && r.cd.every(Boolean) && r.para.length === 0 && r.active.every((n) => n === 3), JSON.stringify(r));
+    check(`${id}: all ${r.n} skills cast and start a cooldown with § 1, § 2 and § 3`, r.hero === id && r.n >= 5 && r.cast.length === 3 * r.n && r.cast.every(Boolean) && r.cd.every(Boolean) && r.para.length === 0 && r.active.length === r.n && r.active.every((n) => n === 3), JSON.stringify(r));
   }
   await shot('16b-every-hero-cast');
+
+  // ---------- 6e2. S19: Konsultant's Wstrzymanie oplat cuts the in-run kiosk's service fee (20% -> 14% after three asks) ----------
+  {
+    await page.evaluate(() => window.__game.start(41, { heroId: 'konsultant' }));
+    await sleep(300);
+    if (await page.evaluate(() => window.__game.state().modal === 'cookies')) await page.locator('.cookie button').last().click({ timeout: 3000 });
+    const pre = await page.evaluate(() => {
+      const g = window.__game;
+      const s = g.state();
+      g.enemies.clear();
+      s.player.hp = s.player.hpMax = 1e9;
+      s.hero.pendingLevels = 0;
+      s.player.gwiazdki = 5000;
+      s.hero.upgrades['passive10'] = 1;
+      const k = g.hero.info().skillIds.indexOf('pomoc');
+      g.hero.assignPad(1, k);
+      let asked = 0;
+      for (let i = 0; i < 3; i++) {
+        s.hero.cd.fill(0);
+        if (g.hero.cast(1)) asked++;
+        g.advance(0.2);
+      }
+      s.law.officeOpen = true; // a clause may have shut the office or sent the bot: the fee is what is tested
+      s.law.botTime = false;
+      return { k, asked, opened: g.openKiosk() };
+    });
+    await page.locator('.sk-buy button').first().click({ timeout: 3000 }).catch(() => undefined);
+    await sleep(200);
+    const fee = await page.evaluate(() => {
+      const row = document.querySelector('.sk-checkout tr.fee');
+      const total = document.querySelector('.sk-checkout tr.total td:last-child')?.textContent ?? '';
+      const price = document.querySelector('.sk-checkout tr:first-child td:last-child')?.textContent ?? '';
+      return { label: row?.querySelector('td')?.textContent ?? '', fee: row?.querySelector('td:last-child')?.textContent ?? '', total, price };
+    });
+    const p = Number(fee.price);
+    check(
+      'S19 Konsultant passive 10: three asks cut the kiosk fee to 14% and the checkout total follows',
+      pre.asked === 3 && pre.opened === 'sheet' && fee.label.includes('14') && p > 0 && Math.abs(Number(fee.fee) - p * 0.14) < 1 && Number(fee.total) === p + Number(fee.fee),
+      JSON.stringify({ pre, fee }),
+    );
+    await page.locator('.ps-close').locator('visible=true').first().click({ timeout: 800 }).catch(() => undefined);
+    await sleep(200);
+  }
 
   // ---------- 6f. Konfiguracja and the Karta uprawnień (S4): a pad and a column changed at the desk hold in the run and after a reload ----------
   await page.evaluate(() => window.__game.startBase());
@@ -2683,7 +2737,7 @@ try {
         const stamp = [...document.querySelectorAll('#world text, #ui div, #ui span')].some((x) => x.childElementCount === 0 && /SPRAWĘ ZAMKNIĘTO/.test(x.textContent ?? ''));
         return { ok, stamp, info: h.finale.info() };
       });
-      await sleep(150);
+      await sleep(500);
       const stamped = end.stamp || (await ev(() => [...document.querySelectorAll('text, div, span')].some((x) => x.childElementCount === 0 && /SPRAWĘ ZAMKNIĘTO/.test(x.textContent ?? ''))));
       check(`S15 ${hero}: the closing stamp SPRAWĘ ZAMKNIĘTO falls once`, end.ok && end.info?.stage === 'done' && stamped, JSON.stringify({ ok: end.ok, stage: end.info?.stage, stamped }));
       // the stamp is read on clean paper: no bubble speaks over it, it lies clear of the desk's drawing; the final footnote is alone and whole on the slip

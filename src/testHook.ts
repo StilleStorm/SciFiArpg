@@ -11,6 +11,7 @@ import { createRng } from './core/rng';
 import { addItem, equipItem } from './items/inventory';
 import { makeSetPiece } from './items/setPieces';
 import { renameItem } from './items/rename';
+import { reclaimRefusal } from './economy/reklamacja';
 import { recomputeStats } from './items/stats';
 import { UNIQUES_BY_ID, makeUnique } from './items/uniques';
 import type { Awizo, SetId } from './items/types';
@@ -39,7 +40,7 @@ import { holdPad, releasePad, tapUltimatePad, ultimatePadInfo } from './ui/pads'
 import { setMeterForUi } from './ui/ultimate';
 import { castUltimate, meterOf, ultimateReady } from './heroes/ultimate';
 import { screenLayout, type ScreenLayout } from './render/keepOut';
-import { heroDef } from './heroes/defs';
+import { heroDef, skillAt } from './heroes/defs';
 import { categoryOf, loadoutAdvice, runCapstone, specializationOf } from './heroes/specializations';
 import { createEnemyHook, createSporHook, type EnemyHook, type SporHook } from './enemies/hook';
 import { createAudioHook, type AudioHook } from './audio/hook';
@@ -109,6 +110,8 @@ export interface GameHook {
   recomputeStats(): void;
   /** Regenerate an item's name from its base and affixes after a script changed `affixes` by hand (grammar agreement included). */
   renameItem(item: Item): string;
+  /** Why the kiosk would refuse a Reklamacja of `item` on the current planet (economy/reklamacja.ts), or null when it would take it. */
+  reclaimRefusal(item: Item): string | null;
   /**
    * S18: put a delivery notice on the player: a set piece, a unique or a rolled item of `tier`. `page` 0 (default) = waiting at the base
    * paczkomat, N = the paczkomat of page N of the run. Returns it, or null when there is no state or the name is unknown.
@@ -340,8 +343,8 @@ export function installTestHook(deps: HookDeps): void {
       const skills = heroDef(st.player.heroId).skills;
       const cap = runCapstone(st);
       return {
-        pads: st.hero.pads.map((i) => skills[i].id),
-        categories: st.hero.pads.map((i) => categoryOf(skills[i])),
+        pads: st.hero.pads.map((i) => skillAt({ skills }, i).id),
+        categories: st.hero.pads.map((i) => categoryOf(skillAt({ skills }, i))),
         specialization: st.hero.spec ?? null,
         capstone: cap ? cap.capstone.skill : null,
         advice: loadoutAdvice({ heroId: st.player.heroId, pads: st.hero.pads }),
@@ -465,6 +468,7 @@ export function installTestHook(deps: HookDeps): void {
       if (game.state) recomputeStats(game.state.player);
     },
     renameItem: (item) => renameItem(item),
+    reclaimRefusal: (item) => reclaimRefusal(item, game.state?.plan?.planet ?? 0)?.reason ?? null,
     giveAwizo(what, page = 0) {
       const st = game.state;
       if (!st) return null;
