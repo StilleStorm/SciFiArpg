@@ -170,7 +170,9 @@ Progress is recorded here, one line per slice:
 
 - M3 story plan review done (reports/M3-story.md): STORY §8.0 (headline and rewritten-card rules as built), §8.1 ticket c renamed, §8.4 phase-3 reply text, §8.5 closed, §8.6 decisions; ITEMS §6.1/6.3/6.5/7.4 (no page bosses, named elite takes the rows, side tickets as a source, ~200 target kept); DESIGN §4.2 "What M3 added"; PLAN §8 balance rule; PRODUCTION S17 (two voice items), S18 (`named` rank, ~200 check), S19 (Konsultant aiming bot before numbers), S27 (finale look items), S28 (M3 look leftovers, levelUp hook); four playtest questions above. Order unchanged.
 
-**Next pickup:** the M3 milestone end (ARCHITECTURE fold, gate, push, milestone report), then the MVP playtest.
+- **M3 Akt I + finale complete = MVP** (2026-10-25): e2e:m3 green (Akt I start to finish skipping cards, planets 1–3 through both gates and bosses, the Anomalia's three phases, case closed, reload; Pralka and Kartograf × both orientations; 40-enemy frame time 16.7–16.95 ms headless); look over all 58 shots (2 FIX fixed, rest KNOWN for S28); voice pass on all Akt I text; story plan review; ARCHITECTURE folded (348 lines; Balance section, page gates, planet modules, on-ramp, e2e:m3/balance).
+
+**Next pickup:** the MVP playtest by the player (questions under "Needs the player"); park the feedback here. Without new feedback, S17 (sets and legendary paragraphs, M4).
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).

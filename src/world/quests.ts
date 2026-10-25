@@ -94,8 +94,8 @@ export function toQuests(raw: unknown): QuestState {
 // ---------- the offers ----------
 
 /**
- * Hand-written side tickets by the planet modules (S12: planet 1 registers its two or three). Each has an id starting with `h:`.
- * SEAM: STORY §8 (S11) writes the tickets, S12 fills this list through `registerSideTickets`.
+ * Hand-written side tickets by the planet modules (src/world/planets/p<N>.ts, two or three each, through
+ * `registerSideTickets`). Each has an id starting with `h:`.
  */
 const HAND_WRITTEN: QuestDef[] = [];
 
