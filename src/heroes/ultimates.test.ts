@@ -10,7 +10,7 @@ import { createRun, nextId, type RunState } from '../world/run';
 import { MAX_COPIES } from './numbers';
 import { patchFields, PATCH_FIELD_LIMIT, PATCH_KEYS, type ParagraphNo } from './paragraphs';
 import { HERO_IDS, heroById, type HeroId } from './registry';
-import { castUltimate, setUltimateParagraph, stepUltimates, ultimateActive, ultimateOf, ultimateSeconds, ultimateUnlocked, ultStampSpot } from './ultimate';
+import { castUltimate, setUltimateParagraph, stepUltimates, ultimateActive, ultimateOf, ultimateSeconds, ultimateUnlocked, ultNoteY, ultStampSpot, ULT_NOTE_GAP } from './ultimate';
 import { FIRST_ULTIMATE_LEVEL, MAX_ULT_RADIUS, MAX_ULT_S } from './ultimateDefs';
 import { heroStep } from './system';
 
@@ -425,6 +425,14 @@ describe('the ultimate stamp', () => {
     const crowdAbove = [-130, -190, -260, -330].flatMap((dy) => [0, 1].map((i) => ({ x: 490 + i * 20, y: hero.y + dy })));
     const spot = ultStampSpot(crowdAbove, hero.x, hero.y, 15);
     expect(spot.y).toBeGreaterThan(hero.y + 100);
+  });
+
+  it('the margin note goes above the hero, below him when more enemies stand above (their pull lines run there)', () => {
+    expect(ultNoteY([], 500, 500, 18)).toBe(500 - 18 - ULT_NOTE_GAP);
+    const queueUpLeft = [1, 2, 3].map((i) => ({ x: 500 - i * 40, y: 500 - i * 60 }));
+    expect(ultNoteY(queueUpLeft, 500, 500, 18)).toBe(500 + 18 + ULT_NOTE_GAP);
+    expect(ultNoteY([...queueUpLeft, ...queueUpLeft.map((e) => ({ x: e.x, y: 1000 - e.y }))], 500, 500, 18)).toBe(500 - 18 - ULT_NOTE_GAP);
+    expect(ultNoteY([{ x: 1200, y: 100 }], 500, 500, 18)).toBe(500 - 18 - ULT_NOTE_GAP); // far off: not counted
   });
 
   it('castUltimate stamps off the hero and names him as the point to stay off', () => {

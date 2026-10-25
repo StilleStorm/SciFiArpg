@@ -100,7 +100,7 @@ export function castUltimate(s: RunState, bus: Bus): boolean {
   const spot = ultStampSpot(s.enemies, p.x, p.y, text.length);
   // never on the hero: beside him on the emptier side; render/bindings keeps it inside the view and off `away`
   bus.emit('stamp', { text, x: spot.x, y: spot.y, quiet: true, away: { x: p.x, y: p.y } }); // quiet: the ultimate recipe ends in its own thud
-  bus.emit('margin:note', { text: t(def.noteKey, { number: 1000 + (s.seed % 9000) }), x: p.x, y: p.y - p.r - 56 });
+  bus.emit('margin:note', { text: t(def.noteKey, { number: 1000 + (s.seed % 9000) }), x: p.x, y: ultNoteY(s.enemies, p.x, p.y, p.r) });
   bus.emit('ultimate:cast', { heroId: p.heroId, ultimateId: def.id, x: p.x, y: p.y });
   return true;
 }
@@ -130,6 +130,25 @@ export function ultStampSpot(enemies: readonly { x: number; y: number }[], x: nu
     }
   }
   return best;
+}
+
+/** How far the margin note stands from the hero's centre beyond his radius (units). */
+export const ULT_NOTE_GAP = 56;
+
+/**
+ * Where the ultimate's margin note goes: above the hero, or below him when more enemies stand above. The ultimate's own strokes
+ * (a pull line, a lash, a queue) run from the hero to them, so the note on the emptier side is not overprinted (S19 look:
+ * Koniec kolejki's pull line through the note). Counts enemies within 260 units across and 320 up or down; a tie stays above. Pure.
+ */
+export function ultNoteY(enemies: readonly { x: number; y: number }[], x: number, y: number, r: number): number {
+  let above = 0;
+  let below = 0;
+  for (const e of enemies) {
+    if (Math.abs(e.x - x) > 260 || Math.abs(e.y - y) > 320) continue;
+    if (e.y < y) above++;
+    else if (e.y > y) below++;
+  }
+  return above > below ? y + r + ULT_NOTE_GAP : y - r - ULT_NOTE_GAP;
 }
 
 /** Per step: the meter drains out of combat, and what runs is ticked; at the end of its time it is ended and removed. */
