@@ -134,6 +134,12 @@ Polish and release. Progress lines are below.
   nearest-aimed and 65% with the new kit, vs 90–100% for the others (Kartograf 40%). The aiming
   hypothesis is refuted: aiming does not lift him. Proposal: his weapon roll 4–8 → 6–10 (85% wins in a
   scratch copy, not applied). Recommendation: apply it.
+- **S20 balance (Kartograf)**: planet-1 Normalny bot (20 runs) wins 55% with the ten-skill kit (40% in
+  S19) vs 90–100% for the others; scratch copies: racja 68 → 90 gives 65%, weapon 5–10 → 7–12 gives
+  60%, neither alone closes the gap (the bot keeps him on the old pads and never casts Pomiar, Granica
+  or Róża). His racja 68 is the lowest of the five. Question: is he meant to be the glass cannon?
+  Recommendation: no, apply racja 68 → 85 and weapon 5–10 → 6–11 together, then re-measure with
+  `BAL_LOADOUT=pomiar,granica,korekta`. Not applied; nothing waits on it.
 
 ## Game plan and the slice order
 The plan is docs/PRODUCTION.md: 7 milestones, 30 slices, each with a paste-ready builder brief.
