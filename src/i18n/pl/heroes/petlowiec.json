@@ -73,21 +73,21 @@
     "uwaga": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Uwaga do przeciwnika, a od każdej kopii uwaga do jej własnego."
+        "desc": "Uwaga do przeciwnika. Każda kopia wnosi własną, do własnego."
       },
       "2": {
         "name": "Uwaga zbiorcza",
-        "desc": "Uwaga regulaminowa. Wszystkie kopie kierują ją do tego samego przeciwnika co on. Odnowienie dłuższe o 1 s."
+        "desc": "Uwaga regulaminowa. Kopie kierują swoje do tego samego przeciwnika co Pętlowiec. Odnowienie dłuższe o 1 s."
       },
       "3": {
         "name": "Uwaga nie na temat",
-        "desc": "Uwaga mechaniczna, obrażenia większe o ponad połowę. Kopie jej nie powtarzają. Odnowienie dłuższe o 2 s."
+        "desc": "Uwaga mechaniczna, obrażenia większe o 55%. Kopie jej nie powtarzają. Odnowienie dłuższe o 2 s."
       }
     },
     "powtorzenie": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Linia o długości 180: jedna od niego i po jednej od każdej kopii."
+        "desc": "Linia długości 180 od Pętlowca i po jednej od każdej kopii."
       },
       "2": {
         "name": "Powtórzenie dosłowne",
@@ -105,7 +105,7 @@
       },
       "2": {
         "name": "Paradoks dziadka",
-        "desc": "Echo mechaniczne, 0,8 zamiast 0,5. Promień 70. Odnowienie dłuższe o 2 s."
+        "desc": "Echo mechaniczne, w 80% zamiast w połowie. Promień 70. Odnowienie dłuższe o 2 s."
       },
       "3": {
         "name": "Paradoks urzędowy",
@@ -123,7 +123,7 @@
       },
       "3": {
         "name": "Opóźnienie z winy nadawcy",
-        "desc": "Zapis egzystencjalny. Naliczenie trafia w najbliższego przeciwnika, nie w niego. Odnowienie dłuższe o 4 s."
+        "desc": "Zapis egzystencjalny. Naliczenie otrzymuje najbliższy przeciwnik. Odnowienie dłuższe o 4 s."
       }
     },
     "zamiana": {
@@ -164,13 +164,13 @@
     },
     "cofniecie": {
       "name": "Cofnięcie zgłoszenia",
-      "desc": "Ostatnie 6 s zostaje wycofane: on i przeciwnicy (poza bossami) wracają tam, gdzie wtedy stali, a jego racja do tego, co wtedy miał. Skreśleni pozostają skreśleni. Pozostali otrzymują uderzenie.",
+      "desc": "Ostatnie 6 s zostaje wycofane. Pętlowiec i przeciwnicy, z wyjątkiem bossów, wracają tam, gdzie wtedy stali. Racja wraca do ówczesnego stanu, o ile był wyższy. Skreśleni pozostają skreśleni. Pozostali otrzymują uderzenie.",
       "stamp": "WYCOFANO",
       "note": "Zgłoszenie nr {number} wycofane. Uznano za niebyłe.",
       "para": {
         "1": {
           "name": "Brzmienie podstawowe",
-          "desc": "Wycofane 6 s. Uderzenie mechaniczne dla wszystkich, którzy pozostali."
+          "desc": "Wycofane 6 s. Pozostali otrzymują uderzenie mechaniczne."
         },
         "2": {
           "name": "Sprostowanie",
@@ -178,19 +178,19 @@
         },
         "3": {
           "name": "Cofnięcie częściowe",
-          "desc": "Wraca tylko on. Wszyscy przeciwnicy zablokowani na 2 s. Uderzenie egzystencjalne. Kosztuje 6 racji."
+          "desc": "Wraca tylko Pętlowiec. Przeciwnicy zostają zablokowani na 2 s. Uderzenie egzystencjalne. Kosztuje 6 racji."
         }
       }
     },
     "przedwczesny": {
       "name": "Przedwczesny powrót",
-      "desc": "Kapsuła, którą przybył, spada na niego i na każdą kopię naraz, w obszarze 100 wokół każdego. Wygenerowani w jej obrębie istnieją słabiej.",
+      "desc": "Kapsuła, którą przybył, spada naraz na Pętlowca i na każdą kopię, w promieniu 100. Wygenerowane w jej obrębie istnieją słabiej.",
       "stamp": "PRZYBYŁ PRZED WYJAZDEM",
       "note": "Przybycie nr {number} odnotowano przed wyjazdem.",
       "para": {
         "1": {
           "name": "Brzmienie podstawowe",
-          "desc": "Jedna kapsuła na niego i na każdą kopię. Uderzenie egzystencjalne."
+          "desc": "Kapsuła na Pętlowca i po jednej na każdą kopię. Uderzenie egzystencjalne."
         },
         "2": {
           "name": "Lądowanie twarde",
@@ -198,7 +198,7 @@
         },
         "3": {
           "name": "Trzy kapsuły",
-          "desc": "Trzy kapsuły co 0,5 s, tylko na niego, każda z obrażeniami mniejszymi o 40%. Kosztuje 6 racji."
+          "desc": "Trzy kapsuły co 0,5 s, tylko na Pętlowca, każda o 40% słabsza. Kosztuje 6 racji."
         }
       }
     }
@@ -229,7 +229,7 @@
   "skill6": {
     "name": "Uwaga na marginesie",
     "pad": "Uwaga",
-    "desc": "Uwaga w stronę przeciwnika. Każda kopia kieruje własną uwagę do własnego przeciwnika."
+    "desc": "Uwaga w stronę przeciwnika. Każda kopia wnosi własną, do własnego."
   },
   "skill7": {
     "name": "Powtórzenie",
@@ -249,7 +249,7 @@
   "skill10": {
     "name": "Zamiana miejsc",
     "pad": "Zamiana",
-    "desc": "Zamienia się miejscem z najbliższą kopią. Przeciwnicy w miejscu, które opuścił, zostają przeczytani bez odpowiedzi w stronę kopii na 2 s. Bez kopii nic się nie dzieje."
+    "desc": "Zamienia się miejscem z najbliższą kopią. Przeciwnicy przy opuszczonym miejscu zostają przeczytani bez odpowiedzi i przez 2 s zajmują się kopią. Bez kopii nic się nie dzieje."
   },
   "delayNote": "Obrażenia zapisano w dzienniku. Zostaną naliczone w terminie.",
   "logNote": "Wpis powtórzono po raz trzeci. Opłaty nie pobrano."

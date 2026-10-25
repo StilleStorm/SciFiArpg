@@ -144,19 +144,19 @@
         },
         "7": {
           "name": "Pętla po śmierci",
-          "desc": "Cecha stała, nie zajmuje miejsca. Gdy śmierć przybierze postać Pętli, pozostawiona kopia jest po jego stronie przez 10 s."
+          "desc": "Cecha stała, nie zajmuje miejsca. Gdy śmierć przybierze postać Pętli, pozostawiona kopia przez 10 s jest po stronie Pętlowca."
         },
         "8": {
           "name": "Sprzeczność",
-          "desc": "Trafienie kopii innego rodzaju niż jego ostatnie trafienie zadaje o 15% więcej obrażeń."
+          "desc": "Kopia trafiająca innym rodzajem obrażeń niż ostatnio Pętlowiec zadaje o 15% więcej."
         },
         "9": {
           "name": "Dziennik pokładowy",
-          "desc": "Co trzecie użycie tej samej umiejętności z rzędu jest bezpłatne: jej odnowienie nie rozpoczyna się."
+          "desc": "Co trzecie z rzędu użycie tej samej umiejętności jest bezpłatne: odnowienia nie nalicza się."
         },
         "10": {
           "name": "Zapasowa kapsuła",
-          "desc": "Pętla odnawia także kopie: każda zostaje na pełny czas pobytu."
+          "desc": "Pętla odnawia także kopie. Każdej przysługuje ponownie pełny pobyt."
         }
       },
       "kartograf": {
@@ -190,15 +190,15 @@
         },
         "8": {
           "name": "Odległość w linii prostej",
-          "desc": "Obrażenia większe o 1% za każde 10 jednostek do celu, najwyżej o 20%."
+          "desc": "Obrażenia większe o 1% za każde 10 jednostek odległości do celu, najwyżej o 20%."
         },
         "9": {
           "name": "Błąd pomiaru",
-          "desc": "Błędy pomiaru trwają o 2 s dłużej i zadają 0,5 obrażeń mechanicznych temu, kto się o nie otrze."
+          "desc": "Błędy pomiaru po Korekcie trwają o 2 s dłużej. Kto się o nie otrze, otrzymuje 0,5 uderzenia mechanicznego."
         },
         "10": {
           "name": "Trzeci punkt",
-          "desc": "Trzecie trafienie linii pomiarowej w tego samego przeciwnika jest odparciem, bez względu na jego tezę."
+          "desc": "Trzecie z rzędu trafienie linią pomiarową w tego samego przeciwnika jest odparciem, bez względu na jego tezę."
         }
       },
       "nalesnik": {
