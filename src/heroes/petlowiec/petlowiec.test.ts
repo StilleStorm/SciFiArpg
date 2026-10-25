@@ -28,7 +28,8 @@ import { MAX_ULT_RADIUS, MAX_ULT_S } from '../ultimateDefs';
 import { durationOf, power } from '../helpers';
 import { areaOf } from '../helpers';
 import { PARADOKS_ECHO, PARADOKS_R, POWTORZENIE_REACH } from './numbers';
-import { copiesOf } from './quirk';
+import { copiesOf, owedRacja } from './quirk';
+import { racjaBracket } from '../quirks';
 import { petlStateIfAny } from './state';
 
 const DT = 1 / 60;
@@ -420,6 +421,19 @@ describe('Opóźnienie', () => {
     s.player.hp = 1000;
     hurt(s, bus, 100); // the window is over
     expect(s.player.hp).toBe(900);
+  });
+
+  it('the HUD bracket (S20 integrator): 0 while it logs, the owed racja until paid, then none', () => {
+    const { s, bus } = scene([[300, 0]]);
+    s.player.hp = s.player.hpMax = 1000;
+    expect(racjaBracket(s)).toBeNull();
+    cast(s, bus, IXS.opoznienie);
+    run(s, bus, 0.1);
+    expect(owedRacja(s)).toBe(0);
+    hurt(s, bus, 100);
+    expect(racjaBracket(s)).toBe(50);
+    run(s, bus, 3 * durationOf(s, IXS.opoznienie) + 0.3);
+    expect(racjaBracket(s)).toBeNull();
   });
 
   it('§ 2 bezterminowe pays a quarter after two seconds; § 3 sends what is owed to the nearest enemy', () => {

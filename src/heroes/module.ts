@@ -30,6 +30,8 @@ export interface HeroQuirk {
   dealtMul?(s: RunState, target: Enemy): number;
   /** S20: the factor (1 = none) on the walking speed of enemy `e` (Kartograf, the «Awaria» rule: the misnamed walk 20% slower); read through heroes/quirks.ts `enemySpeedMul` by enemies/ai.ts. */
   enemySpeedMul?(s: RunState, e: Enemy): number;
+  /** S20: while blows taken are held back (Pętlowiec, Opóźnienie), the racja they will still cost (0 while logging and nothing owed yet); null when nothing is held. Read through heroes/quirks.ts `racjaBracket` by ui/hud.ts, which brackets that part of the racja line. */
+  racjaBracket?(s: RunState): number | null;
 }
 
 export interface HeroSounds {

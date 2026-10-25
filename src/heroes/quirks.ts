@@ -30,5 +30,10 @@ export function enemySpeedMul(s: RunState, e: Enemy): number {
   return heroById(s.player.heroId).quirk?.enemySpeedMul?.(s, e) ?? 1;
 }
 
+/** The racja held back from the player (a bracket on the HUD racja line), or null when the hero holds nothing back. */
+export function racjaBracket(s: RunState): number | null {
+  return heroById(s.player.heroId).quirk?.racjaBracket?.(s) ?? null;
+}
+
 export { HITS_PER_ERROR } from './pralka/quirk';
 export { ROUND_BELOW, ROUND_COOLDOWN_S, ROUND_S, ROUND_UPOR } from './nalesnik/quirk';

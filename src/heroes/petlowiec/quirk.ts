@@ -109,6 +109,16 @@ function note(s: RunState, st: PetlState): void {
   while (st.snaps.length > 0 && s.time - (st.snaps[0]?.t ?? s.time) > SNAP_KEEP_S) st.snaps.shift();
 }
 
+/** Opóźnienie on the HUD: the racja the logged blows will still cost him (0 while it logs with nothing owed yet); null when it neither logs nor owes. */
+export function owedRacja(s: RunState): number | null {
+  const st = petlStateIfAny(s);
+  if (!st) return null;
+  let owed = 0;
+  for (const o of st.owed) if (!o.toEnemy) owed += Math.max(1, Math.round(o.amount));
+  const logging = st.delay !== null && s.time < st.delay.until;
+  return logging || owed > 0 ? owed : null;
+}
+
 /** Opóźnienie: pay what is owed when it falls due; never fatal. Nobody to receive it, nothing is paid. */
 function payOwed(s: RunState, bus: Bus, st: PetlState): void {
   if (st.owed.length === 0) return;
@@ -195,4 +205,5 @@ export const quirk: HeroQuirk = {
   tick(s, bus) {
     tickPetl(s, bus);
   },
+  racjaBracket: owedRacja,
 };

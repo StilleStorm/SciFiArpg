@@ -1,6 +1,7 @@
 import { createRng } from '../core/rng';
 import { t } from '../i18n';
 import { xpToNext } from '../progression/xp';
+import { racjaBracket } from '../heroes/quirks';
 import { buildSlip } from '../render/pickupCard';
 import { el as svgEl, n2, wobblyCircle } from '../render/svg';
 import { heldOf } from '../systems/recovery';
@@ -110,6 +111,20 @@ function racjaPaths(width: number, ratio: number): { left: string; lost: string;
   return { left: x > 0 ? left : '', lost: x < width ? lost : '', whole: `M0 ${LINE_Y + 3}L${n2(width)} ${LINE_Y + 3}` };
 }
 
+/**
+ * S20: the part of the racja line that blows held back will still cost (Pętlowiec's Opóźnienie, SKILLS section 3), drawn as a
+ * square bracket from `ratio - owed` to `ratio` (at least 8 px wide, so a bracket with nothing owed yet still reads as one).
+ */
+export function bracketPath(width: number, ratio: number, owed: number): string {
+  const x1 = Math.max(0, Math.min(1, ratio)) * width;
+  let x0 = Math.max(0, Math.min(1, ratio - Math.max(0, owed))) * width;
+  if (x1 - x0 < 8) x0 = Math.max(0, x1 - 8);
+  const right = Math.max(x1, x0 + 8);
+  const top = LINE_Y - 6;
+  const bot = LINE_Y + 4;
+  return `M${n2(x0 + 3)} ${top}L${n2(x0)} ${top}L${n2(x0)} ${bot}L${n2(x0 + 3)} ${bot}M${n2(right - 3)} ${top}L${n2(right)} ${top}L${n2(right)} ${bot}L${n2(right - 3)} ${bot}`;
+}
+
 function field(labelKey: string, extra = ''): { root: HTMLElement; value: HTMLElement; blank: HTMLElement } {
   const root = h('div', `field ${extra}`.trim());
   const label = h('label', '', t(labelKey));
@@ -168,7 +183,8 @@ export function createHud(
   const whole = svgEl('path', { class: 'whole' });
   const left = svgEl('path', { class: 'left' });
   const lost = svgEl('path', { class: 'lost' });
-  svg.append(whole, left, lost);
+  const bracket = svgEl('path', { class: 'bracket' });
+  svg.append(whole, left, lost, bracket);
   racja.blank.append(svg);
   // The Argument meter: an ink underline that fills with the meter, and turns red when it is full.
   const aSvg = svgEl('svg', { 'aria-hidden': 'true' });
@@ -177,7 +193,7 @@ export function createHud(
   aSvg.append(aWhole, aLeft);
   argument.blank.append(aSvg);
 
-  const cache = { racja: '', ratio: -1, aRatio: -1, aWidth: 0, width: 0, reputacja: '', gwiazdki: '', strona: '', upd: false, phase: '' };
+  const cache = { racja: '', bracket: '', ratio: -1, aRatio: -1, aWidth: 0, width: 0, reputacja: '', gwiazdki: '', strona: '', upd: false, phase: '' };
   const setText = (node: HTMLElement, key: 'racja' | 'reputacja' | 'gwiazdki' | 'strona', text: string): void => {
     if (cache[key] === text) return;
     cache[key] = text;
@@ -233,6 +249,13 @@ export function createHud(
         whole.setAttribute('d', d.whole);
         left.setAttribute('d', d.left);
         lost.setAttribute('d', d.lost);
+        cache.bracket = '\u0000'; // the line moved: the bracket follows it
+      }
+      const held = racjaBracket(s);
+      const bd = held === null || width <= 0 ? '' : bracketPath(width, ratio, held / p.hpMax);
+      if (bd !== cache.bracket) {
+        cache.bracket = bd;
+        bracket.setAttribute('d', bd);
       }
     },
   };

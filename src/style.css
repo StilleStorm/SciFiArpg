@@ -273,6 +273,11 @@ button {
   stroke: var(--ink);
   stroke-width: 0.9;
 }
+/* Opóźnienie: a square ink bracket round the racja the held-back blows will cost */
+.racja .bracket {
+  stroke: var(--ink);
+  stroke-width: 1.3;
+}
 
 /* ---------- Footnotes: the bottom of the page ---------- */
 .foot {
