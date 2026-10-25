@@ -306,6 +306,27 @@ build on. Data lives in `world/campaign.ts`, `world/content.ts`, `world/quests.t
 - **Recovery** (built S5, rule in PLAN §8): potwierdzenia drop by rank, vacuum 90, heal 25% or
   held up to 5 (tap or auto-use under 15%), regen 2%/s after 4 s out of combat. No potions.
 
+What M3 added to the frame (built S11a–S16; the per-planet content is STORY §8):
+- **The exit is always open** (player, 2026-10-19): the base opens with the plan accepted at the
+  last priority; a bookmark is the exit's destination; story locks are **page gates** in a page's
+  exit corner, at most one per planet, lifted by a teczka carried, a named elite struck or the
+  boss struck, with a figure (NPC primitive, no nameplate) and two Asystent footnotes. Never on
+  the first planet of an act.
+- **Planet modules** (`src/world/planets/p<N>.ts`): clerk, side tickets, boss variant (variant
+  line under the name, planet Spór table, one data change), location types with ≥6 drawn props
+  each (`src/render/locations/`), `locationSplit` steering types to pages, `headline` (the first
+  campaign ticket on an unclosed planet prints the headline clause; travel and extras roll the
+  pool). Cards take `story.p<N>.*` with the hero's line and fall back to placeholders.
+- **The finale**: the final ticket is one page, planet 1's base struck through, three phases
+  (family forms with the footnote duel; the hero's face; existence from right Spór replies),
+  the stamp SPRAWĘ ZAMKNIĘTO, a unique not yet held, the final footnote held alone on the slip.
+  Not saved mid-fight: a bookmark restarts it at phase 1. First-meet notes are off for Anomalia
+  bodies.
+- **On-ramp**: five once-only footnotes on a character's first ticket (walk, attack, rebut,
+  update, potwierdzenie), never wrong. **Balance numbers** live in `src/balance/*` and are tuned
+  from `npm run balance` (a plain bot: auto aim, no dodging), never by ear.
+- **No page bosses**: one planet boss per run; the named elite is the mid-run boss (ITEMS §6).
+
 ---
 
 ## 5. Combat

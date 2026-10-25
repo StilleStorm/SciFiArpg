@@ -177,3 +177,7 @@ Superseded by docs/PRODUCTION.md (S1–S30): 1 → S1, 2 → S2, 3 → S3, 4 →
   hero, planet, page, last 10 events, settings, device) to the clipboard.
 - **Text size** setting for footnotes, cards and forms (three steps).
 - **Desktop** (later): WASD and a mouse-aim mode; the game already runs with click-to-move.
+- **Balance** (built S16): every tunable number sits in `src/balance/*` (recovery, meter, loot,
+  campaign) and is moved only from `npm run balance` output or a playtest, with the before/after
+  listed in the slice report. The bot is a plain player (auto aim, no dodging); a hero it loses
+  with is a question for the playtest first (Konsultant, STATUS "Needs the player").

@@ -301,7 +301,7 @@ right on Wysoki (10% of rolls) and Krytyczny (25%); Niski shifts left (20%).
 |---|---|---|---|---|---|
 | any | common | 12% | 75 / 22 / 3 / 0 / 0 | by family | by family |
 | any | elite | 100% ×1 | 35 / 45 / 17 / 2 / 1 | by family | by family |
-| any | page boss (Prototyp, Weryfikacja, Hipoteza) | ×3 | one rzadki guaranteed; others 20 / 50 / 25 / 4 / 1 | – | – |
+| any | named elite (the mid-run boss; one per two pages, built S9) | 100% ×1 | nietypowy+ guaranteed: 0 / 55 / 40 / 4 / 1 | by family | by family |
 | Urządzenia | – | – | – | przyrząd, broń mech | metal, hałas |
 | Powiadomienia | – | – | – | dokument, nakrycie | papier, chaos |
 | Wygenerowane | – | – | – | odzież, broń egz | wątpliwość, porządek |
@@ -309,6 +309,12 @@ right on Wysoki (10% of rolls) and Krytyczny (25%); Niski shifts left (20%).
 Slot skew: 40% of the family's two slots, 60% any. Tag skew: a rzadki from that family likes
 one of its two tags 70% of the time, so the dominant family makes its set tag easier to
 complete there. Pętla copies drop one of your own items, as built.
+
+M3 review: there are **no page bosses**. The earlier rows named a "page boss (Prototyp,
+Weryfikacja, Hipoteza)" per page; the game has one planet boss per run (`DROPS.boss`) and the
+family bosses appear only as the planet boss and the Anomalia's phase-1 forms. Diablo 2 had
+unique monsters and act bosses, not a boss per level, so the **named elite** takes the mid-run
+boss's place in every table below (its drop is built; its gwiazdki and permission rows are S18).
 
 ### 6.2 The Komisja's bosses
 
@@ -322,8 +328,8 @@ to the best drop ("Komisja przychyliła się").
 ### 6.3 Permission cards
 
 Permissions (DESIGN §8) are cards in the bag with no slot. An elite of the family drops its
-card 20% if not owned, a page boss of the family 100%, a planet boss the dominant family's
-100%. Cards never go through przesyłka.
+card 20% if not owned, a named elite of the family 100% (S18; was "page boss"), a planet boss
+the dominant family's 100%. Cards never go through przesyłka.
 
 ### 6.4 Przesyłka: the rare channel
 
@@ -339,8 +345,9 @@ as built; an awizo not collected before the page turns goes to the base paczkoma
 |---|---|---|
 | common kill | 1–2 | 60% |
 | elite | 5–8 | 100% |
-| page boss | 12–18 | 100% |
+| named elite (S18: `DROPS.named`; was "page boss") | 12–18 | 100% |
 | planet boss | 25–35 | 100% |
+| side ticket finished (built S10, `QUEST_STARS`) | 20–40 at Akt I | by ticket |
 | Konsultant's Czy mogę jeszcze w czymś pomóc | 1 per kill | by skill |
 
 Priority multiplier on all amounts: Niski ×0.8, Normalny ×1, Wysoki ×1.3, Krytyczny ×1.6.
@@ -382,14 +389,18 @@ był reklamowany trzykrotnie. Zgłaszającego odnotowano." Each reclaim adds one
 | Sources | ≈ gwiazdki | Sinks | ≈ gwiazdki |
 |---|---|---|---|
 | 60 common kills | 55 | one Reklamacja on a rzadki | 60–120 |
-| 6 elites | 40 | one nietypowy from the Sklep (with fee) | 30–60 |
-| 4 page bosses | 60 | one adapter | 15–90 |
+| 4 elites (S16 bot: 3.6 per planet-1 run) | 25 | one nietypowy from the Sklep (with fee) | 30–60 |
+| 2 named elites (S18 row; was "4 page bosses") | 30 | one adapter | 15–90 |
 | planet boss | 30 | buying out a free version | 100–200 |
-| bin returns (§8.3) | 15 | paczkomat pickup at base | 15 |
-| **total** | **~200** | one of the above per planet plus small change | **~200** |
+| 2–3 side tickets finished (S16 bot: 2.7) | 60 | paczkomat pickup at base | 15 |
+| bin returns (§8.3, S18) | 15 | | |
+| **total** | **~200 (S16 bot without the S18 rows: 151)** | one of the above per planet plus small change | **~200** |
 
 A player who reclaims every planet buys nothing; one who shops never reclaims. Both are fine.
 Krytyczny priority gives ×1.6 and the prices do not move, which is the reward for difficulty.
+M3 review: the bot's 151 per planet is the table minus the named-elite gwiazdki and the bin
+returns, both S18 rows; S18's seeded simulation checks the ~200 after adding them, and no rate
+in `DROPS`/`QUEST_STARS` moves before that.
 
 ## 8. Inventory and stash
 

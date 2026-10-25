@@ -104,6 +104,25 @@ Polish and release. Progress lines are below.
   to them (S21a, after S21).
 - MVP playtest questions to ask after M3 (not before): whether the Anomalia at `CAMPAIGN_LAST` 3
   (level ~12–15) reads as a finale, and whether the hosted-set rule (ITEMS §12.6) should change.
+- MVP playtest, added at the M3 story review (2026-10-25; none blocks M4):
+  1. **Konsultant**: the S16 bot wins 40–50% of planet-1 Normalny runs with him (others 80–100%),
+     likely because it casts his kierunek/wskazanie skills on auto aim. Play one planet-1 ticket
+     as Konsultant: does he feel weak or does he feel like a hero who must aim? Recommendation:
+     no number moves before this answer; S19 re-measures with an aiming bot and moves racja
+     76 → 90 only if he still trails (PRODUCTION S19).
+  2. **Priority ladder**: a geared level-9 character on planet 3 is barely touched at Wysoki
+     (0.1 deaths) and Krytyczny (0.1 deaths, min racja 0.53). Play one Krytyczny ticket: too
+     soft? Recommendation: leave `PLANET_*_GROWTH` and the PRIORITY_ROWS until then (raising the
+     growth made the finale ~30% harder in the bot).
+  3. **Planet names** "Dwudziesta Trzecia/Czwarta/Piąta" with consecutive numbers (the file's
+     list order) and the "według akt" card line describing the next planet: do they land as a
+     running joke or read as a typo? Recommendation: keep (STORY §8.0, §8.5).
+  4. **The on-ramp**: five footnotes on the first ticket (walk, attack, rebut, update, Potw.).
+     Enough, too many, or did one come too late? Recommendation: keep five, mode-neutral walk line.
+  Decided at the review without the player (STORY §8.6, ITEMS §6): the p1 ticket c is renamed
+  "Stwierdzenie obecności" (S17 voice); phase 3's right reply stays egzystencjalny with a new text
+  (S17 voice); there are no page bosses, the named elite takes their gwiazdki/permission rows
+  (S18); the finale is not saved mid-fight; the unikatowy seal keeps its red dot (ITEMS §12.8).
 
 ## Game plan and the slice order
 The plan is docs/PRODUCTION.md: 7 milestones, 30 slices, each with a paste-ready builder brief.
@@ -149,7 +168,9 @@ Progress is recorded here, one line per slice:
 
 - S16 done: on-ramp (five once-only first-ticket footnotes, `src/narration/onramp.ts`; `ui.note.start/firstKill/pickup` dropped), `npm run balance` (scripts/balance-report.mjs, BAL_* env, 6 runs/hero ~70 s, 20 ~4 min, finale mode), numbers moved to `src/balance/{recovery,meter,loot,campaign}.ts`, one tuning change (METER_KILL 0.03→0.04, METER_REBUTTAL 0.08→0.10: finale ultimates 0.67→0.90 per 100 s), `npm run e2e:m3` (Akt I + finale, Pralka and Kartograf, both orientations, M3_PORT 4189). Report reports/S16-builder-onramp-balance.md. Konsultant wins 40–50% of planet-1 Normalny bot runs vs 80–100% for the others; damage 5–9, racja 90, and racja 86 + pewność 105 + upór 48 each left it at 40–50%, so it is likely the bot's auto-aim on Konsultant's aimed skills, not the numbers: ask the player at the MVP playtest. Gwiazdki ~151/planet vs ~200 in ITEMS 7.4 (no page-boss drop rank in `DROPS`; M4). Voice pass on all Akt I text (10 lines; walk note split by steering, `narration.onramp.walkTap`; the rebut note says teza; the p4–9 stand-in clerk renamed Referent ds. Ogólnych). Look over all 58 shots: the "c.d. poniżej" mark is now its own line between body and notes rule, shown only on real overflow (src/ui/sheet.ts), which also removed a red stamp edge poking out in land-sklep; the rest KNOWN (S28). Open for the player: the p1 ticket "Potwierdzenie obecności" vs the potwierdzenie item (pun or rename); the red dot in the unikatowy seal (kept: a wax seal counts as a stamp).
 
-**Next pickup:** the M3 milestone end (story plan review, ARCHITECTURE fold, gate, push, milestone report), then the MVP playtest.
+- M3 story plan review done (reports/M3-story.md): STORY §8.0 (headline and rewritten-card rules as built), §8.1 ticket c renamed, §8.4 phase-3 reply text, §8.5 closed, §8.6 decisions; ITEMS §6.1/6.3/6.5/7.4 (no page bosses, named elite takes the rows, side tickets as a source, ~200 target kept); DESIGN §4.2 "What M3 added"; PLAN §8 balance rule; PRODUCTION S17 (two voice items), S18 (`named` rank, ~200 check), S19 (Konsultant aiming bot before numbers), S27 (finale look items), S28 (M3 look leftovers, levelUp hook); four playtest questions above. Order unchanged.
+
+**Next pickup:** the M3 milestone end (ARCHITECTURE fold, gate, push, milestone report), then the MVP playtest.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).

@@ -167,14 +167,18 @@ Every entry maps onto a built contract, so a planet is data plus drawings:
   shape are: ≥6 drawn props per type, hatching and ink only, DESIGN §3). The same type on another
   planet may reuse the drawings with the planet's wash.
 - **Law**: one of the pool, printed as the ticket header; the ticket's form field "warunek:
-  usunięcie zjawiska lokalnego" names the phenomenon.
+  usunięcie zjawiska lokalnego" names the phenomenon. Built S13 (`PlanetDef.headline`): the
+  first campaign ticket on a planet not yet in the closed list prints the headline clause (so a
+  re-issued ticket after a failed run prints it again); travel and extras roll the pool.
 - **Boss**: the family boss in a planet variant (§4): variant line, two Spór comments with one
   right reply and two wrong ones each (the right type set per comment), one data change.
 - **Clerk** (`NpcDef`): name as a form field title, role, three sheet lines; the look seed.
 - **Side tickets**: two or three, each `{template, n, family?, reward, title, text, twist}`;
   rewards from stars / permission / potwierdzenia (the unique through S18's awizo).
 - **Chapter card**: title is generated ("Akt I. Planeta Druga (Zaległa)"); three lines of the
-  Asystent's summary; five hero lines; two lines for the red rewritten variant.
+  Asystent's summary; five hero lines; two lines for the red rewritten variant. The rewritten
+  variant carries no hero line (built S12, kept at the M3 review: the red card is the Komisja's
+  note, not the applicant's).
 - **Hero lines**: one per hero per card; short, in the hero's register (SKILLS profiles).
 - **Music/wash**: the act's (§4); nothing per planet unless the planet is the act's odd one.
 - **Gate** (added S11, after the player's decision of 2026-10-19 and the S11a brief): a story
@@ -254,9 +258,12 @@ corner here. (Diablo 1 barred nothing before the Butcher.)
   wnioskodawcy doręczono na planetę zgodną z aktami. Planeta zgodna z aktami jest tutaj. Bagaż
   rozsypano na stronach. Zebrać {count} sztuki." Twist: the luggage went to the right planet,
   which is this one (the spine, planted on page one and never explained).
-- c) reach, n 3, reward 20 stars. Title "Potwierdzenie obecności". Text "Komisja wymaga
-  potwierdzenia, że wnioskodawca znajduje się na planecie, na której się znajduje. Potwierdzenie
-  składa się na stronie {count}." Twist: none beyond the text; this is the tutorial ticket.
+- c) reach, n 3, reward 20 stars. Title "Stwierdzenie obecności" (M3 review: renamed from
+  "Potwierdzenie obecności"; the on-ramp teaches *potwierdzenie* as the recovery slip on the same
+  first ticket, and a reach ticket must not send a new player looking for a slip on page 3; the
+  voice editor writes the key at the S17 pass). Text "Komisja wymaga stwierdzenia, że wnioskodawca
+  znajduje się na planecie, na której się znajduje. Stwierdzenie sporządza się na stronie
+  {count}." Twist: none beyond the text; this is the tutorial ticket.
 
 **Chapter card** (`story.p1.card`; title generated "Akt I. Planeta Dwudziesta Trzecia
 (Przydzielona)"):
@@ -538,9 +545,12 @@ closed (§3); the kill is a stamp.
 - meet "Anomalia istnieje w stopniu, w jakim zgłoszenie uznaje się za otwarte. Zgłoszenie
   jest otwarte od trzech planet."
 - spor.comment "Zgłoszenie jest otwarte. Dopóki jest otwarte, jestem potrzebny." Right:
-  **egzystencjalny** "Zgłoszenie zamyka się stemplem, nie zgodą. Stempel jest w ręku
-  wnioskodawcy." Wrong mechaniczny "Potrzebnego można wyłączyć. Wyłącznik jest z tyłu." Wrong
-  regulaminowy "Zgłoszenie otwarte podlega przekazaniu na planetę następną."
+  **egzystencjalny** "Zgłoszenie uznaje się za zamknięte. Potrzebny do zgłoszenia zamkniętego
+  nie jest nikomu potrzebny, więc go nie ma." (M3 review: the type stays egzystencjalny, phase 3
+  is about existence, §3; the S11 text "Zgłoszenie zamyka się stemplem, nie zgodą. Stempel jest
+  w ręku wnioskodawcy." read as regulaminowy and goes to the voice editor at the S17 pass.) Wrong
+  mechaniczny "Potrzebnego można wyłączyć. Wyłącznik jest z tyłu." Wrong regulaminowy
+  "Zgłoszenie otwarte podlega przekazaniu na planetę następną."
 - stamp "SPRAWĘ ZAMKNIĘTO" (red, the boss-death stamp slot).
 - close "Asystent w wersji 0.9 został wycofany. Wycofanie odnotowano. Tym razem wykonano."
 
@@ -579,15 +589,35 @@ here needs a new rendering technique (DESIGN §7 rule): wrong-footnote style, th
 and the Spór prompt all exist. Hero-specific phase-2 bodies are the one drawn item (one figure
 per face, S15's look budget).
 
-### 8.5 Open questions from S11 (recommendations; none blocking)
-1. Consecutive planet numbers from 23 (the Komisja's list order), instead of random ordinals:
-   recommend yes; the off-by-one then hides in plain sight. Player-only taste, not blocking.
-2. The "według akt" line on every chapter card (§8.0): recommend yes; it costs one card line
-   and carries the spine without a cutscene.
-3. First ticket on a planet prints the headline clause (`lawPool[0]`), later tickets roll the
-   pool: a small S12 builder item; recommend yes so the planet's Spór and tickets land on a
-   first visit as written.
-4. The P3 gate keys on a forced named elite ("Ochrona Obiektu") on page 4: S14 needs a way to
-   force one named elite with a fixed name on a page (S9 names them procedurally). Alternative
-   if that is heavy: key on a teczka like P2. Recommend the elite (two gates with the same key
-   would read as one trick).
+### 8.5 Open questions from S11 (closed at the M3 review: all four shipped as recommended)
+1. Consecutive planet numbers from 23 (the Komisja's list order): shipped (planets.json p1–p3);
+   S22 continues at 26, S25 at 29. The player may still rename at the playtest.
+2. The "według akt" line on every chapter card (§8.0): shipped on p1–p3; S22 and S25 keep it.
+3. First ticket on a planet prints the headline clause: shipped S13 as `PlanetDef.headline`
+   (§8.0 Law).
+4. The P3 gate keys on a forced named elite "Ochrona Obiektu": shipped S14 as the gate kind
+   `elite` (`spawnGateElite`, lifts on `elite:slain`). Three gate kinds now exist (teczka, elite,
+   boss); S22 and S25 pick from them and add none without a builder item.
+
+### 8.6 Decisions at the M3 review (what Akt I and the finale fixed for the later acts)
+- **Gates as built**: at most one per planet, in the exit corner, lifted by a teczka carried, a
+  named elite struck or the boss struck; the figure (Magazynier, Portier) has no nameplate and
+  answers a tap with its one line. Planet 1 of every act has no gate (the act's first planet
+  flows); the other two may have one each.
+- **Boss variants**: one data change each so far (racja 260; racja 360; attackRange 60 + a drawn
+  stapler arm). Akt II keeps the rule (§4) and may spend its one change on a part, as planet 3 did.
+- **The finale is not saved mid-fight**: a bookmark taken during the final ticket restarts it at
+  phase 1 (Diablo resets a left boss fight). Kept; nothing of the finale goes into the save.
+- **No "page bosses"**: the Diablo 2 benchmark has unique monsters and act bosses, not a boss per
+  level. The named elite (one per two pages) is the game's mid-run boss; ITEMS §6 and §7.4 now say
+  so, and the planet boss stays the only `boss` rank. S22/S25 plan no page bosses.
+- **Finale balance** (S16 bot, level 12 with 3 nietypowy + 2 rzadki): 85% win, 0.6 deaths, 156 s,
+  1.4 ultimates per run. Read as a fair climax; whether it reads as a *finale* is the playtest
+  question in STATUS, not a numbers question.
+- **Hero lines on the finale**: the stamp's hero line and the final footnote are the last two
+  texts a player reads; the footnote is held alone on the slip for 12 s (`LONG_NOTE` 200 chars).
+  A future final footnote (S27, `CAMPAIGN_LAST` 9) must either stay over 200 characters or drop
+  `LONG_NOTE`; the voice editor keeps the 235-character text as the model.
+- **Open from S16 voice** (not player questions): `settings.joystick` "Joystick" vs "Drążek":
+  the loanword stays (common Polish; the settings sheet is the one place a loanword is plain
+  usage); `onramp.walk` is mode-neutral and stays so until the playtest says a player got lost.
