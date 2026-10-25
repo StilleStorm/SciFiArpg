@@ -20,7 +20,8 @@ export type DeathOutcome = 'zgloszenie' | 'petla' | 'zawieszenie';
 export const DEATH_OUTCOMES: readonly DeathOutcome[] = ['zgloszenie', 'petla', 'zawieszenie'];
 
 export const GHOST_SECONDS = 10;
-const ARGUE_LINES = 3;
+/** How many `heroes.copy.argue.N` lines there are (a copy disagreeing in a footnote). */
+export const ARGUE_LINES = 3;
 
 /** Equal chances; a suspended player who dies again always gets a zgloszenie. */
 export function pickOutcome(rng: Rng, suspended: boolean): DeathOutcome {

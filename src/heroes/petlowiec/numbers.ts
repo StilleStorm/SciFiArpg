@@ -61,3 +61,6 @@ export const PRZEDWCZESNY_DAMAGE = 2.5;
 export const PRZEDWCZESNY_EXISTENCE = 0.3;
 export const PRZEDWCZESNY_PUSH = 90;
 export const PRZEDWCZESNY_GAP_S = 0.5;
+
+/** Passive 7, Pętla po śmierci: a copy of Przybycie still standing this long after his death files a footnote of disagreement. */
+export const NIEZGODA_AFTER_S = 2;

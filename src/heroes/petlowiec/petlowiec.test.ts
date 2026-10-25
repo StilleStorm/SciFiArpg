@@ -783,6 +783,27 @@ describe('Cofnięcie zgłoszenia (ultimate 2) and Przedwczesny powrót (ultimate
   });
 });
 
+describe('passive 7, Pętla po śmierci (S20 integrator)', () => {
+  it('a copy that outlives him by two seconds files a footnote of disagreement; none without a copy', () => {
+    const { s, bus } = scene();
+    const notes: string[] = [];
+    bus.on('footnote', (e) => notes.push(e.text));
+    run(s, bus, 0.1); // the quirk binds the bus on its first step
+    bus.emit('player:died', { x: 600, y: 800 });
+    run(s, bus, 2.2);
+    expect(notes).toHaveLength(0);
+    withCopies(s, bus);
+    for (const m of copiesOf(s)) m.ttl = 60;
+    notes.length = 0; // the copies' own arrival notes
+    bus.emit('player:died', { x: 600, y: 800 });
+    run(s, bus, 1.5);
+    expect(notes).toHaveLength(0);
+    run(s, bus, 0.7);
+    expect(notes).toHaveLength(1);
+    expect(notes[0]).toMatch(/^Kopia /);
+  });
+});
+
 describe('the record the quirk keeps', () => {
   it('is made by the first step, and a run that has none leaves nothing behind', () => {
     const { s, bus } = scene([[100, 0]]);

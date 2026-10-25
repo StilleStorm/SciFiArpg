@@ -17,7 +17,8 @@ import { effectiveSkill } from '../loadout';
 import type { HeroQuirk } from '../module';
 import { TICK_S } from '../numbers';
 import { line } from '../primitives';
-import { DZIENNIK_EVERY, PARADOKS_ECHO_DELAY_S, SNAP_KEEP_S, SNAP_STEP_S, SPRZECZNOSC_BONUS } from './numbers';
+import { ARGUE_LINES } from '../../death/outcomes';
+import { DZIENNIK_EVERY, NIEZGODA_AFTER_S, PARADOKS_ECHO_DELAY_S, SNAP_KEEP_S, SNAP_STEP_S, SPRZECZNOSC_BONUS } from './numbers';
 import { petlState, petlStateIfAny, type PetlState } from './state';
 
 const taken = (s: RunState, id: string): boolean => (s.hero.upgrades[id] ?? 0) > 0;
@@ -85,6 +86,20 @@ export function bindPetl(bus: Bus, s?: RunState): void {
       });
       return; // one echo per hit, however many clocks stand over it
     }
+  });
+  // passive 7 (the rule, always on): a copy that outlives him by two seconds disagrees with the record in a footnote
+  bus.on('player:died', () => {
+    const run = trackedRun();
+    if (!run || run.player.heroId !== 'petlowiec') return;
+    const ids = copiesOf(run).map((m) => m.id);
+    if (ids.length === 0) return;
+    petlState(run).timers.push({
+      at: run.time + NIEZGODA_AFTER_S,
+      run(r, b) {
+        const left = copiesOf(r).find((m) => ids.includes(m.id));
+        if (left) b.emit('footnote', { text: t(`heroes.copy.argue.${1 + (left.id % ARGUE_LINES)}`) });
+      },
+    });
   });
   bus.on('skill:cast', (ev) => {
     const run = trackedRun();
