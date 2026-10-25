@@ -1,10 +1,10 @@
 import type { Player } from '../entities/types';
 import { BASE_SCHEDULE, botLine, createHours, formatClock, type HoursMachine } from '../economy/hours';
 import {
-  FEE_RATE,
   REPORTS_TO_UPDATE,
   buy,
   feeOf,
+  feeRateOf,
   loadSklep,
   reportProblem,
   restock,
@@ -37,6 +37,8 @@ export interface SklepOptions {
   nextNumber?: () => number;
   /** Planet index whose item band the stock is rolled in (items/level.ts shopIlvl). Default: planet 1. */
   planet?: number;
+  /** The share by which the service fee is cut, read at every checkout (heroes/quirks.ts `priceCut`). Default: none. */
+  feeCut?: () => number;
 }
 
 export interface SklepHandle {
@@ -177,10 +179,11 @@ export function mountSklep(container: HTMLElement, meta: { runsCompleted: number
     const box = h('div', 'sk-checkout');
     const table = h('table', 'ttab');
     const price = l.price;
+    const cut = opts.feeCut?.() ?? 0;
     const rows: [string, string, string][] = [
       [t('economy.sklep.price'), String(price), ''],
-      [t('economy.sklep.fee', { percent: Math.round(FEE_RATE * 100) }), String(feeOf(price)), 'fee'],
-      [t('economy.sklep.total'), String(totalOf(price)), 'total'],
+      [t('economy.sklep.fee', { percent: Math.round(feeRateOf(cut) * 100) }), String(feeOf(price, cut)), 'fee'],
+      [t('economy.sklep.total'), String(totalOf(price, cut)), 'total'],
       [t('economy.sklep.balance'), String(player.gwiazdki), ''],
     ];
     for (const [label, value, cls] of rows) {
@@ -194,10 +197,10 @@ export function mountSklep(container: HTMLElement, meta: { runsCompleted: number
     const actions = h('div', 'sk-actions');
     const ok = h('button', 'ps-btn', t('economy.sklep.confirm'));
     ok.type = 'button';
-    ok.disabled = player.gwiazdki < totalOf(price);
+    ok.disabled = player.gwiazdki < totalOf(price, cut);
     ok.addEventListener('click', () => {
       if (!isOpen()) return askBot();
-      const res = buy(state, player, l.id, opts.nextNumber ? opts.nextNumber() : nextNumberFor(player));
+      const res = buy(state, player, l.id, opts.nextNumber ? opts.nextNumber() : nextNumberFor(player), opts.feeCut?.() ?? 0);
       if (!res.ok) {
         say(res.failure === 'full' ? t('items.full') : res.failure === 'sold' ? t('economy.sklep.gone') : t('economy.sklep.refused'));
       } else {

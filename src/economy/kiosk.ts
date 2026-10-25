@@ -1,5 +1,6 @@
 import type { Bus } from '../core/events';
 import { t } from '../i18n';
+import { priceCut } from '../heroes/quirks';
 import { shopIlvl } from '../items/level';
 import { mountSklep, type SklepHandle } from '../ui/sklep';
 import type { RunState } from '../world/run';
@@ -67,6 +68,7 @@ export function openKiosk(): 'sheet' | 'bot' | 'none' {
     mode: 'kiosk',
     state: storeFor(s),
     planet: planetOf(s),
+    feeCut: () => priceCut(s),
     say: (text) => c.bus.emit('footnote', { text }),
     nextNumber: () => s.nextItemNumber++,
     onClose: () => {

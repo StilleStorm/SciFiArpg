@@ -46,6 +46,7 @@ import { createSettings } from './ui/settings';
 import { guardGhostClicks } from './ui/sheet';
 import { openPaczkomat, type PaczkomatSheet } from './ui/paczkomat';
 import { mountSklep, type SklepHandle } from './ui/sklep';
+import { priceCut as heroPriceCut } from './heroes/quirks';
 import { openCard, type CardHandle } from './ui/cards';
 import { createTicket } from './ui/ticket';
 import { campaignViewOf, cardToShow, markShown, type CampaignView } from './ui/ticketModel';
@@ -502,6 +503,7 @@ function openSheet(kind: SheetKind): void {
       shop = mountSklep(stage.ui, { runsCompleted: meta.runsCompleted }, s.player, {
         nextNumber: () => s.nextItemNumber++,
         planet: s.plan?.planet ?? s.campaign?.current ?? 0,
+        feeCut: () => heroPriceCut(s),
         onClose: () => {
           shop = null;
           if (game.state === s) save(withCharacter(meta, s));

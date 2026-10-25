@@ -64,8 +64,10 @@ export function lieRate(updates: number, seed = 0): number {
   return createRng(seed).fork(`sklep-rate:${updates}`).pick(UPDATED_LIE_RATES);
 }
 
-export const feeOf = (price: number): number => Math.ceil(price * FEE_RATE);
-export const totalOf = (price: number): number => price + feeOf(price);
+/** The service fee rate after a cut `cut` (0..1; Konsultant's Wstrzymanie oplat, `heroes/quirks.ts priceCut`). */
+export const feeRateOf = (cut = 0): number => FEE_RATE * (1 - Math.min(1, Math.max(0, cut)));
+export const feeOf = (price: number, cut = 0): number => Math.ceil(price * feeRateOf(cut));
+export const totalOf = (price: number, cut = 0): number => price + feeOf(price, cut);
 
 /** The shop sells ordinary things: no uniques, mostly low tiers. */
 const SHOP_WEIGHTS: readonly [number, number, number, number] = [45, 40, 15, 0];
@@ -178,11 +180,11 @@ export interface Purchase {
  * only now, in the footnote; the gwiazdki are not refunded. Not enough money for the real
  * price gives a refusal that says nothing about why.
  */
-export function buy(state: SklepState, p: Pick<Player, 'gwiazdki' | 'inventory'>, listingId: number, itemNumber: number): Purchase {
+export function buy(state: SklepState, p: Pick<Player, 'gwiazdki' | 'inventory'>, listingId: number, itemNumber: number, cut = 0): Purchase {
   const listing = state.stock.find((l) => l.id === listingId);
   if (!listing || listing.sold) return { ok: false, failure: 'sold', total: 0, fee: 0 };
   if (inventoryFull(p)) return { ok: false, failure: 'full', total: 0, fee: 0 };
-  const fee = feeOf(listing.truePrice);
+  const fee = feeOf(listing.truePrice, cut);
   const total = listing.truePrice + fee;
   if (!spendStars(p, total)) return { ok: false, failure: 'poor', total, fee };
   listing.sold = true;

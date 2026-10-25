@@ -13,6 +13,7 @@ import {
   buy,
   createSklep,
   feeOf,
+  feeRateOf,
   lieRate,
   makeListing,
   reportProblem,
@@ -44,6 +45,20 @@ describe('Sklep: service fee', () => {
     expect(feeOf(11)).toBe(3);
     expect(totalOf(10)).toBe(12);
     expect(totalOf(1)).toBe(2);
+  });
+  it('a fee cut (Konsultant passive 10) lowers the fee, never below zero, and buy() charges the cut fee', () => {
+    expect(feeRateOf(0.3)).toBeCloseTo(0.14, 9);
+    expect(feeOf(10, 0.3)).toBe(2);
+    expect(feeOf(100, 0.3)).toBe(14);
+    expect(feeOf(100, 5)).toBe(0);
+    const s = createSklep();
+    s.updates = 0;
+    const l = makeListing(createRng(1), 1, 3, 'bron', 0);
+    s.stock = [l];
+    const p = { gwiazdki: 1000, inventory: [] as never[] };
+    const res = buy(s, p, l.id, 5, 0.3);
+    expect(res.fee).toBe(feeOf(l.truePrice, 0.3));
+    expect(p.gwiazdki).toBe(1000 - l.truePrice - feeOf(l.truePrice, 0.3));
   });
   it('charges listed price plus fee for an honest listing and hands over the advertised item', () => {
     const s = createSklep();

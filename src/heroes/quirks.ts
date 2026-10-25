@@ -14,5 +14,10 @@ export function tickRound(s: RunState, bus: Bus): void {
   heroById(s.player.heroId).quirk?.tick?.(s, bus);
 }
 
+/** The share (0..1) by which the kiosk's service fee is cut for the run `s` (Konsultant's passive 10); 0 for every other hero. */
+export function priceCut(s: RunState): number {
+  return heroById(s.player.heroId).quirk?.priceCut?.(s) ?? 0;
+}
+
 export { HITS_PER_ERROR } from './pralka/quirk';
 export { ROUND_BELOW, ROUND_COOLDOWN_S, ROUND_S, ROUND_UPOR } from './nalesnik/quirk';
