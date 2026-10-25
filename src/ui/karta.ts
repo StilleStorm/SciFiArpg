@@ -214,9 +214,12 @@ export function kartaInputFromRun(s: RunState): KartaInput {
 /** Lettering on the chart's stamps, in css px: a phone reads nothing under 11. */
 const STAMP_PX = 11.5;
 
-function stampSvg(text: string, size: number, rot: number): SVGSVGElement {
+/** The ultimate's band carries a smaller stamp: three bands on the first screen must not read as a pile of red (S19 look). */
+const ULT_STAMP_PX = 8.5;
+
+function stampSvg(text: string, size: number, rot: number, px = STAMP_PX): SVGSVGElement {
   const { w, h: hh } = stampSize(text, size);
-  const k = STAMP_PX / size;
+  const k = px / size;
   const svg = el('svg', {
     class: 'kt-stamp',
     viewBox: `${-w / 2 - 3} ${-hh / 2 - 3} ${w + 6} ${hh + 6}`,
@@ -278,8 +281,9 @@ export function openKarta(root: HTMLElement, input: KartaInput, onBack: () => vo
   sheet.note(t('forms.karta.note'));
   sheet.note(t('forms.karta.noteGate'));
   const body = h('div', 'kt-body');
-  // the ultimates: the one in the slot stands first, as `data-node=ult`; the others (S19) follow, level order
+  // the ultimates: the one in the slot stands first, as `data-node=ult`, over the columns; the others (S19) follow the columns, level order
   const shown = model.ultimates.length > 1 ? [...model.ultimates].sort((a, b) => Number(b.chosen === true) - Number(a.chosen === true) || a.level - b.level) : model.ultimate ? [model.ultimate] : [];
+  const later = h('div', 'kt-ults');
   shown.forEach((u, k) => {
     const band = h('div', `kt-ult ${u.state}`);
     band.dataset['node'] = k === 0 ? 'ult' : `ult:${u.id ?? k}`;
@@ -289,13 +293,14 @@ export function openKarta(root: HTMLElement, input: KartaInput, onBack: () => vo
     utag.append(h('span', '', t('forms.karta.ultTitle')), h('span', '', t('forms.karta.level', { level: u.level })));
     text.append(utag, h('span', 'kt-name', u.name), ultParas(u.paragraphs));
     band.append(text);
-    if (u.state === 'granted') band.append(stampSvg(t('forms.karta.approved'), 14, -3));
+    if (u.state === 'granted') band.append(stampSvg(t('forms.karta.approved'), 14, -3, ULT_STAMP_PX));
     else band.append(h('span', 'kt-gate', t('forms.karta.none')), h('span', 'kt-need', u.note));
-    body.append(band);
+    (k === 0 ? body : later).append(band);
   });
   const cols = h('div', 'kt-cols');
   for (const col of model.columns) cols.append(columnEl(col));
   body.append(cols);
+  if (later.childElementCount > 0) body.append(later);
   if (model.band.length > 0) {
     const band = h('div', 'kt-band');
     band.append(h('h3', 'kt-colhead', t('forms.karta.passives')), h('p', 'kt-colno', t('forms.karta.passivesNote')));

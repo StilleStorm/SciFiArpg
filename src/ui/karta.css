@@ -54,7 +54,7 @@
 :root:not([data-orient='landscape']) :is(.kt-node, .kt-cap) {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  column-gap: 8px;
+  column-gap: 2px;
   row-gap: 1px;
   align-items: start;
 }
@@ -84,10 +84,10 @@
 .kt-tag {
   display: flex;
   justify-content: space-between;
-  column-gap: 4px;
+  column-gap: 3px;
   flex-wrap: wrap;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: 11.5px; /* the widest tag ("podstawowa poz. 1") still fits one line beside a portrait stamp */
   letter-spacing: 0;
   color: var(--ink-wet);
   line-height: 1.2;
@@ -186,6 +186,9 @@
   gap: 1px;
   min-width: 0;
 }
+.kt-ult .kt-tag {
+  font-size: 12px;
+}
 .kt-ult .kt-name {
   font-family: var(--title);
   font-weight: 400;
@@ -197,7 +200,7 @@
   display: flex;
   flex-wrap: wrap;
   column-gap: 10px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.3;
   color: var(--ink-wet);
 }
@@ -212,20 +215,43 @@
   flex: none;
   text-align: right;
 }
-/* portrait: the box's text takes the whole first line; the stamp, or "BRAK UPRAWNIEŃ od poziomu N", gets a line of its own */
+/* portrait: tag and name across the box; the paragraphs one per line on the left, the small stamp (or "BRAK UPRAWNIEŃ od poziomu N")
+   at their right, so a band stays about as tall as its three paragraphs (S19 look: three tall bands pushed the chart off screen one) */
 :root:not([data-orient='landscape']) .kt-ult {
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: baseline;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   column-gap: 8px;
   row-gap: 0;
+  align-items: center;
 }
 :root:not([data-orient='landscape']) .kt-ulttext {
-  flex: 1 1 100%;
+  display: contents;
 }
-:root:not([data-orient='landscape']) .kt-ult > :is(.kt-gate, .kt-need, .kt-stamp) {
-  margin-top: 8px;
-  text-align: left;
+:root:not([data-orient='landscape']) .kt-ult :is(.kt-tag, .kt-name) {
+  grid-column: 1 / span 2;
+}
+:root:not([data-orient='landscape']) .kt-ult .kt-ultparas {
+  grid-column: 1;
+  flex-direction: column;
+}
+:root:not([data-orient='landscape']) .kt-ult > .kt-stamp {
+  grid-column: 2;
+  grid-row: 3;
+  margin: 0 -4px 0 0;
+}
+:root:not([data-orient='landscape']) .kt-ult > .kt-gate {
+  grid-column: 2;
+  grid-row: 3;
+  align-self: start;
+  margin-top: 2px;
+  text-align: right;
+}
+:root:not([data-orient='landscape']) .kt-ult > .kt-need {
+  grid-column: 1 / span 2;
+  margin-top: 4px;
+}
+.kt-ults {
+  margin-top: 16px;
 }
 .kt-band {
   margin-top: 16px;
