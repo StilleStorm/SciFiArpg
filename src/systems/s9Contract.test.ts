@@ -51,24 +51,24 @@ describe('S9 flow on planet 3 at Wysoki', () => {
       expect(rtOf(named).affixes.length).toBeLessThanOrEqual(3);
       s.pickups.length = 0;
       bus.emit('enemy:died', { id: named.id, x: 5, y: 5, tier: 'elite' });
-      const firstItems = s.pickups.flatMap((k) => (k.item ? [k.item] : []));
+      // S18: an elite's zestaw piece, unique or (30%) rzadki arrives by post, so the items are the pickups and the awizos
+      const heldItems = (st: typeof s) => [...st.pickups.flatMap((k) => (k.item ? [k.item] : [])), ...(st.player.awizos ?? []).map((a) => a.item)];
+      const firstItems = heldItems(s);
       const first = firstItems.length;
-      const guaranteed = firstItems[firstItems.length - 1];
-      expect(guaranteed && TIER_ORDER.indexOf(guaranteed.tier) >= TIER_ORDER.indexOf('nietypowy')).toBe(true);
-      expect(guaranteed?.level).toBeGreaterThanOrEqual(LOW);
-      expect(guaranteed?.level).toBeLessThanOrEqual(HIGH);
+      // the guaranteed item is among them: nietypowy or better, in the band of the page
+      const guaranteed = firstItems.find((i) => TIER_ORDER.indexOf(i.tier) >= TIER_ORDER.indexOf('nietypowy') && i.level >= LOW && i.level <= HIGH);
+      expect(guaranteed).toBeDefined();
       // the same seed and plan without the record: the named kill leaves exactly one item more
       const plain = createRun(seed, { plan: PLAN, pageCount: 5 });
       const pbus = createBus();
       bindLoot(pbus, () => plain);
       pbus.emit('enemy:died', { id: named.id, x: 5, y: 5, tier: 'elite' });
-      expect(first).toBe(plain.pickups.filter((k) => k.item).length + 1);
+      expect(first).toBe(heldItems(plain).length + 1);
       // a repeated death event never pays the guarantee twice
-      s.pickups.length = 0;
-      plain.pickups.length = 0;
+      const [before, plainBefore] = [heldItems(s).length, heldItems(plain).length];
       bus.emit('enemy:died', { id: named.id, x: 5, y: 5, tier: 'elite' });
       pbus.emit('enemy:died', { id: named.id, x: 5, y: 5, tier: 'elite' });
-      expect(s.pickups.filter((k) => k.item).length).toBe(plain.pickups.filter((k) => k.item).length);
+      expect(heldItems(s).length - before).toBe(heldItems(plain).length - plainBefore);
     }
   });
 });

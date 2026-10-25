@@ -1,0 +1,63 @@
+/* Paczkomat and awizo cards: a plate with a hatched barcode, typed lines, no fills. Shared sheet styles are in sheet.css. */
+.awizo {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+}
+.awizo-cap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.awizo-n {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.awizo-where {
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.15;
+}
+.awizo-parcel,
+.awizo-from,
+.awizo-back {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.25;
+}
+.awizo-plate {
+  padding: 9px 0;
+  border-top: 1px solid var(--ink);
+}
+.awizo-plate:last-of-type {
+  border-bottom: 1px solid var(--ink);
+}
+.awizo-actions {
+  margin: 8px 0 0 67px;
+}
+.awizo-actions .ps-btn {
+  min-height: 44px;
+}
+.awizo-fee {
+  margin: 10px 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+/* the awizo list in the Załączniki sheet */
+.inv-awizo {
+  padding: 9px 0;
+  border-top: 1px solid var(--ink);
+}
+.inv-awizo:last-of-type {
+  border-bottom: 1px solid var(--ink);
+}
+.awizo-away {
+  margin: 6px 0 0;
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.2;
+}

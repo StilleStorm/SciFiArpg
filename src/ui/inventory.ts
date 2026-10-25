@@ -16,7 +16,9 @@ import {
 import { effectiveStats } from '../items/stats';
 import { SLOTS, type Item, type Slot, type StatBlock } from '../items/types';
 import { FREE_TRIAL_KILLS } from '../items/reviews';
-import { claimIsHearsay } from '../items/absurd';
+import { claimIsHearsay, disposalRefusal } from '../items/absurd';
+import { binItem, binValue, needsAsk } from '../economy/kosz';
+import { reklamacjaWords } from '../economy/reklamacja';
 import { drawingSvg } from '../render/itemDrawings';
 import type { RunState } from '../world/run';
 import { h } from './dom';
@@ -38,6 +40,7 @@ import {
   summary,
   tierWord,
 } from './itemView';
+import { awizoCard } from './paczkomat';
 import { createSheet, type Sheet } from './sheet';
 import './inventory.css';
 
@@ -63,6 +66,8 @@ export function createInventorySheet(root: HTMLElement, host: InventoryHost, onC
   const sheet = createSheet(root, { title: t('items.ui.title'), sub: t('items.ui.sub'), onClose });
   let selected: number | null = null;
   let firstDraw = true;
+  /** The item whose bin form is up (rzadki and up ask once). */
+  let binAsk: number | null = null;
 
   const find = (p: Player, uid: number): Item | null => {
     for (const it of p.inventory) if (it.uid === uid) return it;
@@ -195,6 +200,11 @@ export function createInventorySheet(root: HTMLElement, host: InventoryHost, onC
       }
     }
     d.append(statsTable(item));
+    reklamacjaWords(item).forEach((w, i) => {
+      const line = h('p', 'inv-line inv-rek');
+      line.append(document.createTextNode(`${t('economy.reklamacja.lineStruck', { k: i + 1 })} `), h('s', '', w.struck), document.createTextNode(`. ${t('economy.reklamacja.lineTyped')} ${w.typed}.`));
+      d.append(line);
+    });
     for (const extra of [setBlock(p, item), paragraphBlock(p, item)]) if (extra) d.append(extra); // S17: the set with its bonuses, the unique's paragraph
     if (item.likes || item.dislikes) {
       const tags = h('p', 'inv-line');
@@ -268,6 +278,38 @@ export function createInventorySheet(root: HTMLElement, host: InventoryHost, onC
       if (dropItem(pl, item)) host.say(t('items.ui.dropped', { n: item.number }));
       if (selected === item.uid) selected = null;
     })));
+    const doBin = (): void => {
+      binAsk = null;
+      act((pl) => {
+        const res = binItem(pl, item);
+        if (!res.ok) return host.say(res.message);
+        for (const note of res.notes) host.say(note);
+        if (selected === item.uid) selected = null;
+      });
+    };
+    buttons.append(mk(t('economy.kosz.refund', { price: binValue(item) }), () => {
+      const refusal = disposalRefusal(item, 'bin'); // a withdrawn item can only be dropped
+      if (refusal) return host.say(refusal);
+      if (!needsAsk(item)) return doBin();
+      binAsk = item.uid;
+      refresh();
+    }));
+    if (binAsk === item.uid) {
+      // rzadki and up ask once, on a one-line form
+      const form = h('div', 'inv-ask');
+      form.append(h('p', 'inv-line', t('economy.kosz.ask', { n: item.number, price: binValue(item) })));
+      const row = h('div', 'inv-actions');
+      row.append(
+        mk(t('economy.kosz.yes'), doBin),
+        mk(t('economy.kosz.no'), () => {
+          binAsk = null;
+          refresh();
+        }),
+      );
+      form.append(row);
+      d.append(form);
+      return d;
+    }
     d.append(buttons);
     return d;
   }
@@ -313,6 +355,14 @@ export function createInventorySheet(root: HTMLElement, host: InventoryHost, onC
     sheet.scroll.append(h('h3', 'inv-h', t('items.ui.bag')));
     if (!p.inventory.length) sheet.scroll.append(h('p', 'inv-empty', t('items.ui.empty')));
     for (const item of p.inventory) sheet.scroll.append(plate(p, item));
+    if (p.awizos && p.awizos.length > 0) {
+      sheet.scroll.append(h('h3', 'inv-h', t('economy.paczkomat.head')));
+      for (const a of p.awizos) {
+        const card = h('div', 'inv-awizo');
+        card.append(awizoCard(a));
+        sheet.scroll.append(card);
+      }
+    }
     sheet.scroll.scrollTop = top;
   }
 

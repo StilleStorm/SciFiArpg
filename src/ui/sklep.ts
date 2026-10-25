@@ -13,6 +13,7 @@ import {
   type Listing,
   type SklepState,
 } from '../economy/sklep';
+import { reclaim, reclaimRefusal, reklamacjaCost, reklamacjaWords, timesReclaimed } from '../economy/reklamacja';
 import { t } from '../i18n';
 import { allItems } from '../items/inventory';
 import { shopIlvl } from '../items/level';
@@ -128,6 +129,7 @@ export function mountSklep(container: HTMLElement, meta: { runsCompleted: number
 
   // ----- list -----
   let checkout: number | null = null;
+  let reklamOpen = false;
   let feeNoted = false;
   const sold = new Set<number>();
 
@@ -218,6 +220,60 @@ export function mountSklep(container: HTMLElement, meta: { runsCompleted: number
     return box;
   };
 
+  /** The Reklamacja line (ITEMS 7.3): one affix of one item is re-rolled, once per item per planet. Rows are the worn items and the bag. */
+  const reklamacjaSection = (): HTMLElement => {
+    const planet = opts.planet ?? 0;
+    const sec = h('section', 'sk-rek');
+    sec.append(h('h3', 'sk-rek-h', t('economy.reklamacja.title')), h('p', 'sk-rek-line', t('economy.reklamacja.line')));
+    const toggle = h('button', 'ps-btn quiet', t(reklamOpen ? 'economy.reklamacja.close' : 'economy.reklamacja.open'));
+    toggle.type = 'button';
+    toggle.dataset['rek'] = 'toggle';
+    toggle.addEventListener('click', () => {
+      reklamOpen = !reklamOpen;
+      draw();
+    });
+    sec.append(toggle);
+    if (!reklamOpen) return sec;
+    const items = allItems({ inventory: player.inventory, equipment: player.equipment ?? {} });
+    if (items.length === 0) sec.append(h('p', 'sk-rek-none', t('economy.reklamacja.none')));
+    for (const item of items) {
+      const row = h('div', 'sk-rek-row');
+      const info = h('div', 'sk-info');
+      // a row the kiosk will refuse says why and has no button: a unique or wycofany in short, the rest in the Asystent's words
+      const refused = reclaimRefusal(item, planet);
+      const meta = !refused
+        ? t('economy.reklamacja.meta', { times: timesReclaimed(item), price: reklamacjaCost(item) })
+        : refused.reason === 'unique' || refused.reason === 'withdrawn'
+          ? t('economy.reklamacja.no')
+          : refused.message;
+      info.append(h('span', 'sk-name', `${t('economy.reklamacja.row', { n: item.number })} · ${displayName(item)}`), h('span', 'sk-sum', meta));
+      for (const w of reklamacjaWords(item).slice(-1)) {
+        const line = h('span', 'sk-rek-struck');
+        line.append(document.createTextNode(`${t('economy.reklamacja.lineStruck', { k: timesReclaimed(item) })} `), h('s', '', w.struck), document.createTextNode(`. ${t('economy.reklamacja.lineTyped')} ${w.typed}.`));
+        info.append(line);
+      }
+      const b = h('button', 'ps-btn', t('economy.reklamacja.file'));
+      b.type = 'button';
+      b.dataset['rek'] = String(item.number);
+      b.addEventListener('click', () => {
+        if (!isOpen()) return askBot();
+        const res = reclaim(player, item, planet);
+        if (!res.ok) {
+          say(res.message);
+        } else {
+          say(t('economy.reklamacja.done', { n: item.number, price: res.cost }));
+          say(res.note);
+          persist();
+        }
+        draw();
+      });
+      row.append(info);
+      if (!refused) row.append(b);
+      sec.append(row);
+    }
+    return sec;
+  };
+
   function draw(): void {
     if (closed) return;
     const top = sheet.scroll.scrollTop;
@@ -226,6 +282,7 @@ export function mountSklep(container: HTMLElement, meta: { runsCompleted: number
     renderHours();
     sheet.scroll.append(hoursLine);
     for (const l of state.stock) sheet.scroll.append(row(l));
+    sheet.scroll.append(reklamacjaSection());
     const foot = h('div', 'sk-foot');
     const report = h('button', 'ps-btn quiet', t('economy.sklep.report'));
     report.type = 'button';

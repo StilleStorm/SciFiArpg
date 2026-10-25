@@ -10,9 +10,12 @@ import { createPickup, createPotwierdzeniePickup } from './entities/factory';
 import { createRng } from './core/rng';
 import { addItem, equipItem } from './items/inventory';
 import { makeSetPiece } from './items/setPieces';
+import { renameItem } from './items/rename';
 import { recomputeStats } from './items/stats';
 import { UNIQUES_BY_ID, makeUnique } from './items/uniques';
-import type { SetId } from './items/types';
+import type { Awizo, SetId } from './items/types';
+import { issueAwizo } from './items/delivery';
+import { rollItem } from './items/generate';
 import { HELD_CAP, heldOf, useHeld } from './systems/recovery';
 import { nextId } from './world/run';
 import { exportText, parseArchive } from './save/export';
@@ -104,6 +107,17 @@ export interface GameHook {
   giveNamed(what: { set: SetId; piece: 0 | 1 | 2 } | { unique: string }, opts?: { wear?: boolean; ground?: boolean }): Item | null;
   /** Recompute the player's stats, sets and grants after a script changed `equipment` by hand. */
   recomputeStats(): void;
+  /** Regenerate an item's name from its base and affixes after a script changed `affixes` by hand (grammar agreement included). */
+  renameItem(item: Item): string;
+  /**
+   * S18: put a delivery notice on the player: a set piece, a unique or a rolled item of `tier`. `page` 0 (default) = waiting at the base
+   * paczkomat, N = the paczkomat of page N of the run. Returns it, or null when there is no state or the name is unknown.
+   */
+  giveAwizo(what: { set: SetId; piece: 0 | 1 | 2 } | { unique: string } | { tier: ItemTier }, page?: number): Awizo | null;
+  /** The delivery notices the player holds. */
+  awizos(): { n: number; page: number; age: number; name: string }[];
+  /** S18: end the run as the game does (`run:ended`, once): the ticket is filed and the base page of the next one shows. */
+  endRun(outcome?: 'zgloszenie' | 'petla' | 'zawieszenie' | 'ukonczono'): void;
   /** Mount a screenshot gallery of item figures over the screen (S8): tiers per slot, all 40 bases, absurd-affix marks, ground plates. */
   itemGallery(mode: 'tiers' | 'bases' | 'affixes' | 'ground'): void;
   /** Replace the inventory with six fixed items (two worn, one niekompatybilny, a unique, a free version). */
@@ -450,6 +464,21 @@ export function installTestHook(deps: HookDeps): void {
     recomputeStats() {
       if (game.state) recomputeStats(game.state.player);
     },
+    renameItem: (item) => renameItem(item),
+    giveAwizo(what, page = 0) {
+      const st = game.state;
+      if (!st) return null;
+      const level = Math.max(1, st.player.level + st.pageIndex);
+      let item: Item | null = null;
+      if ('set' in what) item = makeSetPiece(createRng(0x5e7 + what.piece), what.set, level, what.piece);
+      else if ('unique' in what) {
+        const def = UNIQUES_BY_ID.get(what.unique);
+        item = def ? makeUnique(def, 0x7000 + st.nextItemNumber, level) : null;
+      } else item = rollItem(createRng(0xa51 + st.nextItemNumber), { level, tier: what.tier });
+      return item ? issueAwizo(st, item, page) : null;
+    },
+    endRun: (outcome = 'zgloszenie') => deps.bus.emit('run:ended', { outcome }),
+    awizos: () => (game.state?.player.awizos ?? []).map((a) => ({ n: a.n, page: a.page, age: a.age, name: a.item.name })),
     giveNamed(what, opts) {
       const st = game.state;
       if (!st) return null;

@@ -92,7 +92,7 @@ export const namedRecord = (s: RunState, id: number): NamedRecord | undefined =>
  * The named-elite drop guarantee. The loot system calls this from its `enemy:died` handler with the dead enemy's
  * id; the answer is the lowest tier the kill must leave (an extra item, rolled at that tier or better), once.
  * Null for every other enemy. The same fact is announced as the `elite:slain` event.
- * `bindLoot` (systems/loot.ts) calls it and drops the extra item through `dropGuaranteed`.
+ * `bindLoot` (systems/loot.ts) calls it and drops the extra item through `dropNamedItem`.
  */
 export function claimNamedDrop(s: RunState, id: number): { minTier: typeof NAMED_MIN_TIER; name: string } | null {
   const rec = runOf(s).records.get(id);

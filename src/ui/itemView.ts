@@ -68,14 +68,17 @@ export function rowValue(b: StatBlock, key: RowKey): number {
 export const rowLabel = (key: RowKey): string => t(`items.stat.${key}`);
 
 /** Short one-line summary for lists: the first three non-zero rows. */
+const NBSP = '\u00a0';
+
 export function summary(b: StatBlock): string {
   const parts: string[] = [];
   for (const key of ROW_KEYS) {
     const text = rowText(b, key);
-    if (text) parts.push(`${t(`items.statShort.${key}`)} ${text}`);
+    // label and value never part: a line breaks only after a " · " (the label's own spaces are bound too)
+    if (text) parts.push(`${t(`items.statShort.${key}`)} ${text}`.replace(/ /g, NBSP));
     if (parts.length === 3) break;
   }
-  return parts.join(' · ');
+  return parts.join(`${NBSP}· `);
 }
 
 /** The numbers the item is worth right now (claimed in trial, actual after). */

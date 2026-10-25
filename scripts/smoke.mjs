@@ -495,12 +495,22 @@ try {
   // ---------- 3b. the fourth and fifth skill (DESIGN 10.1): installed by the update, put on a pad, moved in the loadout ----------
   await settle();
   // the real path first: a permission, a level, the offer with skill 4, its entry and Zainstaluj; the form goes on to the assign step
-  const fam = await page.evaluate(() => {
-    const g = window.__game;
-    g.enemies.clear();
-    for (const f of ['urzadzenia', 'powiadomienia', 'wygenerowane']) g.hero.givePermission(f);
-    return g.hero.info().ranks[3];
-  });
+  const givePermissions = () =>
+    page.evaluate(() => {
+      const g = window.__game;
+      g.enemies.clear();
+      for (const f of ['urzadzenia', 'powiadomienia', 'wygenerowane']) g.hero.givePermission(f);
+      return g.hero.info().ranks[3];
+    });
+  let fam = await givePermissions();
+  if (fam !== 0) {
+    // the loot stream moves with every drop-table change: an elite of the first fight left its permission card and the update before
+    // already installed skill 4. The leg needs a hero without it, so it starts again from a fresh ticket.
+    await page.evaluate(() => window.__game.start(5, { heroId: 'pralka' }));
+    await sleep(800);
+    await settle();
+    fam = await givePermissions();
+  }
   let viaForm = false;
   for (let k = 0; k < 12 && fam === 0 && !viaForm; k++) {
     await page.evaluate(() => {
@@ -1461,6 +1471,163 @@ try {
   await page.locator('.npc-sheet .ps-close').first().click().catch(() => undefined);
   await sleep(200);
   check('urzędnik: a real touch on the figure opens his sheet', tapOpened, JSON.stringify({ cb }));
+  // S18: the base paczkomat is a live station: an awizo waiting at the base is picked up for its fee into the bag, the sheet closes
+  const parcel = await page.evaluate(() => {
+    const g = window.__game;
+    const s = g.state();
+    s.player.gwiazdki = Math.max(s.player.gwiazdki, 40);
+    const a = g.giveAwizo({ tier: 'rzadki' }, 0);
+    return { n: a?.n ?? 0, stars: s.player.gwiazdki, bag: s.player.inventory.length };
+  });
+  await page.evaluate(() => window.__game.station('paczkomat'));
+  const pzOpen = await page.locator(`[data-awizo="${parcel.n}"]`).waitFor({ state: 'visible', timeout: 3000 }).then(() => true, () => false);
+  await page.locator(`[data-awizo="${parcel.n}"]`).click().catch(() => undefined);
+  await sleep(200);
+  const picked = await page.evaluate((n) => {
+    const p = window.__game.state().player;
+    return { stars: p.gwiazdki, bag: p.inventory.length, waiting: (p.awizos ?? []).some((a) => a.n === n), inBag: p.inventory.some((i) => i.number === n) };
+  }, parcel.n);
+  await page.locator('.paczkomat-sheet .ps-close').first().click().catch(() => undefined);
+  await sleep(200);
+  const pzClosed = (await page.locator('.paczkomat-sheet').count()) === 0;
+  check(
+    'paczkomat: the base station opens its sheet; Odbierz takes the fee, the parcel enters the bag; Zamknij closes',
+    pzOpen && !picked.waiting && picked.inBag && picked.stars === parcel.stars - 15 && pzClosed,
+    JSON.stringify({ parcel, pzOpen, picked, pzClosed }),
+  );
+  // ---------- 6k. S18: reklamacja at the Sklep, a rare drop by post to the base paczkomat, the bin refuses a wycofany item ----------
+  {
+    const t18 = Date.now();
+    await page.evaluate(() => window.__game.startBase(7));
+    await sleep(900);
+    const gear = await page.evaluate(() => {
+      const g = window.__game;
+      const s = g.state();
+      s.player.gwiazdki = 400;
+      const a = g.giveItem('rzadki');
+      const b = g.giveItem('rzadki');
+      const bad = g.giveItem('rzadki');
+      if (bad && !bad.affixes.includes('wycofany')) {
+        bad.affixes.push('wycofany');
+        g.renameItem(bad);
+      }
+      return { a: a?.number ?? 0, b: b?.number ?? 0, bad: bad?.number ?? 0, stars: s.player.gwiazdki };
+    });
+    const mods = (n) =>
+      page.evaluate((num) => {
+        const it = window.__game.state().player.inventory.find((i) => i.number === num);
+        return it ? { affixes: [...it.affixes], mods: JSON.stringify(it.mods ?? null), n: (it.reklamacje ?? []).length } : null;
+      }, n);
+    const before = await mods(gear.a);
+    await page.evaluate(() => window.__game.station('kiosk'));
+    await page.locator('[data-rek="toggle"]').waitFor({ state: 'visible', timeout: 4000 }).catch(() => undefined);
+    await page.locator('[data-rek="toggle"]').click().catch(() => undefined);
+    const rowA = page.locator(`button[data-rek="${gear.a}"]`);
+    const rowShown = await rowA.waitFor({ state: 'visible', timeout: 3000 }).then(() => true, () => false);
+    await rowA.dispatchEvent('click');
+    await sleep(300);
+    const after = await mods(gear.a);
+    const starsAfter = await page.evaluate(() => window.__game.state().player.gwiazdki);
+    // the item is refused on this planet now: its row carries no button, the other rzadki still has one; the wycofany row has none
+    const refusedNoBtn = (await page.locator(`button[data-rek="${gear.a}"]`).count()) === 0;
+    const otherBtn = (await page.locator(`button[data-rek="${gear.b}"]`).count()) === 1;
+    const badNoBtn = (await page.locator(`button[data-rek="${gear.bad}"]`).count()) === 0;
+    const afterRefusal = await mods(gear.a);
+    const diff = before && after ? after.mods !== before.mods || after.affixes.join() !== before.affixes.join() : false;
+    check(
+      'S18 reklamacja: the Sklep re-rolls the item (one entry on its record, the purse pays); the row then has no button, the wycofany one never had',
+      rowShown && diff && after.n === before.n + 1 && starsAfter < gear.stars && refusedNoBtn && otherBtn && badNoBtn && afterRefusal.n === after.n,
+      JSON.stringify({ rowShown, before, after, starsAfter, gearStars: gear.stars, refusedNoBtn, otherBtn, badNoBtn }),
+    );
+    await page.locator('.ps-close').locator('visible=true').first().click({ timeout: 800 }).catch(() => undefined);
+    await sleep(200);
+
+    // a rare drop by post: named elites are slain in a run until an awizo is filed (seeded stream, bounded)
+    await page.evaluate(() => window.__game.start(23, { pageCount: 3 }));
+    await sleep(500);
+    const post = await page.evaluate(() => {
+      const g = window.__game;
+      const s = g.state();
+      s.player.hp = s.player.hpMax = 1e9;
+      s.player.gwiazdki = Math.max(s.player.gwiazdki, 60);
+      let kills = 0;
+      while ((s.player.awizos ?? []).length === 0 && kills < 60) {
+        const id = g.enemies.spawnNamed('urzadzenia', 'pilny');
+        for (const t of ['regulaminowy', 'mechaniczny', 'egzystencjalny']) g.enemies.hit(id, t, 1e7);
+        g.enemies.clear();
+        s.pickups.length = 0;
+        kills++;
+      }
+      const a = (s.player.awizos ?? [])[0];
+      return { kills, n: a?.n ?? 0, tier: a?.item.tier ?? null, number: a?.item.number ?? 0, bag: s.player.inventory.length };
+    });
+    check('S18 przesyłka: a drop is filed as an awizo, not put in the bag', post.n > 0 && post.number === post.n, JSON.stringify(post));
+    // Zakończ keeps the bookmark and the parcel on its page; another ticket gives the first up and the parcel goes to the base,
+    // where Odbierz at the paczkomat takes 15 gwiazdek and puts it in the bag
+    await page.evaluate(() => window.__game.endTicket());
+    await page.evaluate(() => window.__game.start(24, { pageCount: 3 }));
+    await sleep(300);
+    await page.evaluate(() => window.__game.startBase(7));
+    await sleep(900);
+    const pre = await page.evaluate((n) => {
+      const g = window.__game;
+      const p = g.state().player;
+      p.gwiazdki = Math.max(p.gwiazdki, 60);
+      return { waiting: (p.awizos ?? []).some((a) => a.n === n), stars: p.gwiazdki };
+    }, post.n);
+    check('S18 przesyłka: the awizo is kept after the ticket', pre.waiting, JSON.stringify(pre));
+    await page.evaluate(() => window.__game.station('paczkomat'));
+    const card = page.locator(`[data-awizo="${post.n}"]`);
+    const cardShown = await card.waitFor({ state: 'visible', timeout: 3000 }).then(() => true, () => false);
+    await card.click().catch(() => undefined);
+    await sleep(250);
+    const got = await page.evaluate((n) => {
+      const p = window.__game.state().player;
+      return { stars: p.gwiazdki, waiting: (p.awizos ?? []).some((a) => a.n === n), inBag: p.inventory.some((i) => i.number === n) };
+    }, post.n);
+    check('S18 paczkomat: Odbierz at the base takes 15 gwiazdek and the posted item enters the bag', cardShown && got.inBag && !got.waiting && got.stars === pre.stars - 15, JSON.stringify({ cardShown, got, pre }));
+    await page.locator('.paczkomat-sheet .ps-close').first().click().catch(() => undefined);
+    await sleep(200);
+
+    // the bin: the wycofany item is refused (still in the bag, a footnote says why), a plain one goes
+    await page.evaluate(() => window.__game.startBase(7));
+    await sleep(700);
+    const badNum = gear.bad;
+    await page.evaluate(() => window.__game.openInventory());
+    await sleep(500);
+    const binTap = async (num) => {
+      await page.evaluate((n) => {
+        const plate = [...document.querySelectorAll('.inv-plate')].find((pl) => pl.textContent?.includes(`Ryc. ${n}.`));
+        if (plate && !plate.classList.contains('open')) plate.querySelector('.inv-row')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      }, num);
+      await sleep(250);
+      return page.evaluate((n) => {
+        const plate = [...document.querySelectorAll('.inv-plate.open')].find((pl) => pl.textContent?.includes(`Ryc. ${n}.`));
+        const btn = [...(plate?.querySelectorAll('.inv-actions .ps-btn') ?? [])].find((b) => b.textContent?.startsWith('Do kosza'));
+        btn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        return btn !== undefined;
+      }, num);
+    };
+    const tapped = await binTap(badNum);
+    await sleep(300);
+    const binAsk = await page.locator('.inv-ask').count();
+    const stillThere = await page.evaluate((n) => window.__game.state().player.inventory.some((i) => i.number === n), badNum);
+    const notes = await page.evaluate(() => window.__game.notes());
+    check(
+      'S18 kosz: a wycofany z obiegu item is refused (no confirmation, still in the bag, the Asystent says it can only be dropped)',
+      tapped && binAsk === 0 && stillThere && JSON.stringify(notes).includes('wycofany'),
+      JSON.stringify({ tapped, binAsk, stillThere, notes }),
+    );
+    // control: a plain rzadki asks for confirmation (the refusal above is the wycofany rule, not a dead button)
+    await binTap(gear.b);
+    await sleep(250);
+    check('S18 kosz: a plain rzadki item asks for confirmation', (await page.locator('.inv-ask').count()) === 1);
+    await page.locator('.ps-close').locator('visible=true').first().click({ timeout: 800 }).catch(() => undefined);
+    await sleep(200);
+    await page.evaluate(() => window.__game.startBase());
+    await sleep(700);
+    log(`S18 leg wall time ${Date.now() - t18} ms (pinned clock)`);
+  }
   // the board: accept from the sheet, finish by the hook, report from the sheet; stars and the stamped card
   await page.evaluate(() => window.__game.station('tablica'));
   await page.locator('[data-bq=accept]').first().waitFor({ state: 'visible', timeout: 3000 }).catch(() => undefined);

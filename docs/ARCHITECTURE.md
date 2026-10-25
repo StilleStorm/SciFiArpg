@@ -368,3 +368,32 @@ arcs by `render/enemyFigures.ts`), `registerFace`, `faceFor`, `faceKeys`; one pe
 per enemy, text `story.finale.face.<hero>.*`. **Boot order**: only `game.ts` imports `register.ts` (fills the lookup in
 `state.ts`); everything else reads faces through `state.ts` (`faceOf`, `faceDrawing`, `facePartsOf`, `captionKeyOf`,
 `wearsOwnBody`); lint `anomalia-boot-order` rejects a value import of `anomalia/index|register|faces/*` elsewhere.
+
+## Reklamacja, the bin, przesyłka, the named rank (S18; ITEMS 6.1, 6.3-6.5, 7.3, 7.4, 8, 12.7)
+**Drop tables**: `balance/loot.ts DROP_TIER_WEIGHTS` has five columns (`DropWeights`: zwykły / nietypowy / rzadki / zestaw / unikatowy;
+common 75/22/3/0/0, elite 35/45/17/2/1, named 0/55/40/4/1, boss 20/50/29/0/1). `systems/loot.ts rollDropColumn(rng, weights, priority,
+lawBonus)` returns a `DropColumn` (a tier or `'zestaw'`); `rollDropTier` keeps its four-column callers (a zestaw column rolls rzadki;
+`world/content.ts` teczki and `dropGuaranteed` are unchanged). A zestaw column is a `makeSetPiece` of `planetDef(planet).hostedSet`, none where the planet
+hosts no set (that share rolls rzadki). `LootRank = DropSource | 'named'`: `dropLoot(s, x, y, rank, bus?)`; `DROPS.named` pays 12-18 gwiazdki
+and its item roll is the elite's; the extra guaranteed item is `dropNamedItem(s, x, y, minTier, bus?)` (named weights); `bindLoot` asks
+`claimNamedDrop` first, then `rollPermission(s, 'named' | tier, family)` (`NAMED_PERMISSION_CHANCE` 1: the family's card every time it is not held).
+**Przesyłka** `items/delivery.ts`: `Awizo {n, item, page, age, seed?, komisja?}` (`items/types.ts`), kept in `Player.awizos` (absent = none; saved
+as `Character.awizos`, copied by `world/tunnel.ts carryPurse`). `sendByPost(s, bus, rng, item)` (called by `dropLoot` for common/elite/named, never a boss):
+a zestaw piece or unique always, a rzadki `RZADKI_AWIZO_CHANCE` 30% (and then `items/generate.ts freeVersionOf`: 10%, `P_FREE`, arrive "w wersji
+darmowej", the only channel of that affix; `rollAffixIds` never rolls it), max one per page (`WeakMap` per run), `page` = `paczkomatPage(s)` (the
+1-based kiosk page still ahead, else 0 = base). `tickDelivery(s, bus, dt)` runs from `updateLoot`: within `CODE_REACH` of the page's kiosk the code is
+requested (footnote), the SMS arrives `CODE_DELAY` 6-12 s later and the item enters the bag (a full bag waits; straying past `CODE_KEEP` loses
+the code). `bindDelivery` (`items/install.ts`): `run:ended` -> `settleAwizos` (page -> 0; an awizo already at the base ages one run; at
+`AWIZO_RUNS_AT_BASE` 2 it goes back to the sender, footnote on the next `base:entered`), `run:started` with another seed -> the awizos of a given-up ticket go to
+the base. `claimAwizo(p, n)` = pickup at the base for `PACZKOMAT_FEE` 15. `QuestReward.item` (`{unique}` | `{set, piece?}`, `world/quests.ts`):
+`completeQuest` -> `sendReward` -> an awizo at the base with `komisja`, never the bag. UI `ui/paczkomat.ts`: `awizoCard(a)` (also in the Załączniki
+sheet), `openPaczkomat(root, host)`; `main.ts` sheet kind `paczkomat` (the base station).
+**Reklamacja** `economy/reklamacja.ts`: `reclaim(purse, item, planet)`, `reclaimRefusal`, `reklamacjaCost` (10 x tier x (1 + 0.5 x times); tier factor
+`TIER_PRICE_MUL`, a set piece `ZESTAW_PRICE_MUL` 10), `rerollable`, `reklamacjaWords`; `Item.reklamacje[{planet, struck, typed, mod}]`. The roll is
+`createRng(item.uid).fork('reklamacja:<times>')`; the numbers move by the difference of the old and the new line (the new line's magnitude tier is
+re-rolled, `Item.modTier` stays). Not reclaimable: uniques, wycofany (`disposalRefusal`), the two fixed lines of a set piece, absurd / free /
+unwanted lines, items in their "w wersji próbnej" period. UI: the Reklamacja section of `ui/sklep.ts` (base and kiosk); a row
+`reclaimRefusal` refuses shows the reason and no button. `highestNumber` (save) counts awizo items. Side tickets: `QUEST_STARS.base` 8 (planet 1 ≈ 22 each).
+**Bin** `economy/kosz.ts`: `binItem(p, item)` (10% of `itemValue`, `BIN_SHARE`; `disposalRefusal(item, 'bin')`), `needsAsk` (rzadki, zestaw, unikatowy ask once
+on the Załączniki sheet's one-line form), a binned unique adds `economy.kosz.unique`. Test hook: `giveAwizo`, `awizos`, `endRun`, `renameItem`;
+shots `scripts/shot-reklamacja.mjs` (4197; portrait, landscape, and checks: 44 px taps, no button on a refused row, no wrap at 360).

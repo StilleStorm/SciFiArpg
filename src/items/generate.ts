@@ -1,5 +1,5 @@
-import type { Rng } from '../core/rng';
-import { AFFIXES_BY_ID, effectFor, randomAffixPool, type Affix } from './affixes';
+import { createRng, type Rng } from '../core/rng';
+import { AFFIXES_BY_ID, canCombine, effectFor, randomAffixPool, type Affix } from './affixes';
 import { BASES, BASES_BY_ID, basesForSlot, oddStats, type BaseItem } from './bases';
 import { affixesOf, nameItem } from './grammar';
 import { TIER_BASE_MUL, ilvlScale, listPrice } from './level';
@@ -34,8 +34,8 @@ export const TIER_WEIGHTS: Record<DropSource, readonly [number, number, number, 
 const TIER_ORDER: readonly ItemTier[] = ['zwykly', 'nietypowy', 'rzadki', 'unikatowy'];
 const TIER_MUL = TIER_BASE_MUL;
 const TIER_GRADE: Record<ItemTier, 1 | 2 | 3> = { zwykly: 1, nietypowy: 2, rzadki: 3, unikatowy: 3 };
-/** Probability that a rare item carries the free-version affix. */
-export const P_FREE = 0.12;
+/** Probability that a rzadki delivered by post carries the free-version affix (ITEMS 6.4: the only channel it has). */
+export const P_FREE = 0.1;
 /** Zwykły items with no affix at all. */
 export const P_NO_AFFIX = 0.4;
 
@@ -171,13 +171,13 @@ export function buildItem(rng: Rng, base: BaseItem, tier: ItemTier, level: numbe
 
 /**
  * Affix ids for a generated item (ITEMS 3.4): count by tier (zwykły 0-1 with 40% none, nietypowy 1-2,
- * rzadki 2-3 with at least one grade 2+), exclusions in `canCombine`, the free version replacing one
- * rolled affix on 12% of rzadki.
+ * rzadki 2-3 with at least one grade 2+), exclusions in `canCombine`. The free version is never rolled here (ITEMS 6.4: it comes
+ * only by post, `freeVersionOf`); the rzadki still draws its old chance at 0, so every seeded stream after it stays where it was.
  */
 export function rollAffixIds(rng: Rng, base: BaseItem, tier: ItemTier, shop = false): string[] {
   const count = tier === 'zwykly' ? (rng.chance(P_NO_AFFIX) ? 0 : 1) : tier === 'nietypowy' ? rng.int(1, 2) : rng.int(2, 3);
   const chosen: Affix[] = [];
-  if (tier === 'rzadki' && rng.chance(P_FREE)) {
+  if (tier === 'rzadki' && rng.chance(0)) {
     const free = AFFIXES_BY_ID.get('darmowy');
     if (free) chosen.push(free);
   }
@@ -211,4 +211,24 @@ export function rollItem(rng: Rng, opts: RollOptions): Item {
   }
   const base = pickBase(rng, opts.slot, opts.baseId);
   return buildItem(rng, base, tier, level, rollAffixIds(rng, base, tier, opts.shop === true));
+}
+
+/**
+ * A rzadki that travels by post (items/delivery.ts): one time in ten (`P_FREE`) it arrives "w wersji darmowej", the free version
+ * replacing one rolled affix (one that cannot stand beside it first, else the last). Rebuilt from the same base, tier and level; the roll
+ * is a fork of the item's uid, so the loot stream is not moved. Anything else, or the nine times in ten, comes back as it was.
+ */
+export function freeVersionOf(item: Item): Item {
+  if (item.tier !== 'rzadki' || item.setId || item.uniqueId || item.freeVersion) return item;
+  const rng = createRng(item.uid).fork('darmowy');
+  if (!rng.chance(P_FREE)) return item;
+  const base = BASES_BY_ID.get(item.baseId);
+  const free = AFFIXES_BY_ID.get('darmowy');
+  if (!base || !free) return item;
+  const rolled = affixesOf(item.affixes);
+  const clash = rolled.findIndex((a) => !canCombine([a], free));
+  const drop = clash >= 0 ? clash : rolled.length - 1;
+  const kept = rolled.filter((_, i) => i !== drop);
+  if (!canCombine(kept, free)) return item;
+  return buildItem(rng, base, 'rzadki', item.level, [free.id, ...kept.map((a) => a.id)]);
 }

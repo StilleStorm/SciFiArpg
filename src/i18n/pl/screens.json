@@ -269,7 +269,6 @@
       "quest": "Przejście zablokowano do czasu wykonania zgłoszenia z tablicy. Tablica jest w bazie.",
       "lifted": "Przejście odblokowano. Warunek uznano za spełniony."
     },
-    "paczkomatClosed": "Paczkomat nieczynny. Przesyłki w drodze. Kod odbioru zostanie wysłany po odbiorze.",
     "station": {
       "biurko": "Biurko",
       "kiosk": "Kiosk",

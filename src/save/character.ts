@@ -9,7 +9,7 @@ import { DEFAULT_HERO_ID, HERO_IDS } from '../heroes/registry';
 import { specializationOf, ultimatesOf } from '../heroes/specializations';
 import { ultRun } from '../heroes/ultimate';
 import { recomputeStats } from '../items/stats';
-import { SLOTS, type Item, type Slot } from '../items/types';
+import { SLOTS, type Awizo, type Item, type Slot } from '../items/types';
 import { applyParagraphs, activeParagraphsOf, paragraphsOf, type ParagraphNo } from '../progression/paragraphs';
 import { applyProgress, padsFrom, serializeProgress, type ProgressData } from '../progression/persist';
 import { cloneCampaign, toCampaign, type CampaignState } from '../world/campaign';
@@ -41,6 +41,8 @@ export interface Character extends ProgressData {
   campaign?: CampaignState;
   /** The side tickets held and the count done (world/quests.ts). Absent = none, so older saves load. */
   quests?: QuestState;
+  /** Delivery notices at the paczkomat (items/delivery.ts); absent = none, so older saves load. */
+  awizos?: Awizo[];
 }
 
 export function isHeroId(v: unknown): v is HeroId {
@@ -78,6 +80,7 @@ export function serializeCharacter(s: RunState): Character {
   return {
     ...(s.campaign ? { campaign: cloneCampaign(s.campaign) } : {}),
     ...(s.quests && (s.quests.active.length > 0 || s.quests.done > 0) ? { quests: cloneQuests(s.quests) } : {}),
+    ...(p.awizos && p.awizos.length > 0 ? { awizos: clone(p.awizos) } : {}),
     ...((p.potwierdzenia ?? 0) > 0 ? { potwierdzenia: p.potwierdzenia } : {}),
     ...(s.hero.ultimateId ? { ultimate: s.hero.ultimateId } : {}),
     ...(s.hero.spec ? { specialization: s.hero.spec } : {}),
@@ -93,9 +96,10 @@ export function serializeCharacter(s: RunState): Character {
 }
 
 /** Highest plate number among the carried items (the next pickup continues after it). */
-export function highestNumber(c: Pick<Character, 'inventory' | 'equipment'>): number {
+export function highestNumber(c: Pick<Character, 'inventory' | 'equipment' | 'awizos'>): number {
   let top = 0;
   for (const i of c.inventory) top = Math.max(top, i.number);
+  for (const a of c.awizos ?? []) top = Math.max(top, a.item.number);
   for (const slot of SLOTS) top = Math.max(top, c.equipment[slot]?.number ?? 0);
   return top;
 }
@@ -121,6 +125,8 @@ export function applyCharacter(s: RunState, c: Character): void {
   }
   if (c.campaign) s.campaign = cloneCampaign(c.campaign);
   if (c.quests) s.quests = cloneQuests(c.quests);
+  if (c.awizos?.length) p.awizos = clone(c.awizos);
+  else delete p.awizos;
   p.hp = p.hpMax;
   s.nextItemNumber = Math.max(s.nextItemNumber, highestNumber(c) + 1);
 }
@@ -148,6 +154,9 @@ export function toCharacter(raw: unknown): Character | null {
   const rawUltPara = raw['ultParagraph'];
   const ultParagraph = rawUltPara === 2 || rawUltPara === 3 ? rawUltPara : undefined;
   const held = Math.min(HELD_CAP, Math.floor(num(raw['potwierdzenia'], 0)));
+  const awizos: Awizo[] = Array.isArray(raw['awizos'])
+    ? raw['awizos'].filter(isRecord).flatMap((a) => (isRecord(a['item']) && typeof a['n'] === 'number' ? [{ ...(clone(a) as unknown as Awizo), page: Math.max(0, Math.floor(num(a['page'], 0))), age: Math.max(0, Math.floor(num(a['age'], 0))) }] : []))
+    : [];
   const perms = Array.isArray(raw['permissions']) ? raw['permissions'].filter((x): x is string => typeof x === 'string') : [];
   return {
     version: CHARACTER_VERSION,
@@ -168,6 +177,7 @@ export function toCharacter(raw: unknown): Character | null {
     ...(held > 0 ? { potwierdzenia: held } : {}),
     ...(isRecord(raw['campaign']) ? { campaign: toCampaign(raw['campaign']) } : {}),
     ...(isRecord(raw['quests']) ? { quests: toQuests(raw['quests']) } : {}),
+    ...(awizos.length > 0 ? { awizos } : {}),
   };
 }
 

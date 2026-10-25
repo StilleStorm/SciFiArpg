@@ -44,6 +44,7 @@ import { mountRoster, type Roster } from './ui/roster';
 import { rosterStore } from './ui/rosterStore';
 import { createSettings } from './ui/settings';
 import { guardGhostClicks } from './ui/sheet';
+import { openPaczkomat, type PaczkomatSheet } from './ui/paczkomat';
 import { mountSklep, type SklepHandle } from './ui/sklep';
 import { openCard, type CardHandle } from './ui/cards';
 import { createTicket } from './ui/ticket';
@@ -134,11 +135,13 @@ const freshSeed = (): number => (Date.now() ^ Math.floor(Math.random() * 0x10000
 let nextSeed = freshSeed();
 
 /** The sheets over the base page. At most one is up; the base holds still while it is. */
-type SheetKind = 'biurko' | 'ticket' | 'kiosk' | 'tablica' | 'urzednik';
+type SheetKind = 'biurko' | 'ticket' | 'kiosk' | 'tablica' | 'urzednik' | 'paczkomat';
 let sheetKind: SheetKind | null = null;
 /** The base was running and a sheet paused it (the sheet gives it back). */
 let sheetHolds = false;
 let shop: SklepHandle | null = null;
+/** The base paczkomat's sheet (S18): the awizos waiting at the base. */
+let paczkomatUi: PaczkomatSheet | null = null;
 
 const baza = createBaza(stage.ui, {
   onNewTicket: () => newTicket(),
@@ -429,6 +432,8 @@ function dropSheets(): void {
   ticket.close();
   shop?.unmount();
   shop = null;
+  paczkomatUi?.close();
+  paczkomatUi = null;
   if (sheetKind !== null) {
     sheetKind = null;
     releaseBase();
@@ -447,6 +452,8 @@ function openSheet(kind: SheetKind): void {
   npcUi = null;
   shop?.unmount();
   shop = null;
+  paczkomatUi?.close();
+  paczkomatUi = null;
   if (!wasUp) {
     holdBase();
     syncHistory('baza', 'ticket');
@@ -476,6 +483,20 @@ function openSheet(kind: SheetKind): void {
       npcUi = openNpcSheet(stage.ui, npcAt(questPlanet(s)), handed, { onClose: () => closeSheet() });
       break;
     }
+    case 'paczkomat':
+      // the parcels waiting at the base; a pickup costs gwiazdki and moves the item into the bag, so the character is saved with it
+      paczkomatUi = openPaczkomat(stage.ui, {
+        player: () => (game.state === s ? s.player : null),
+        say: (text) => {
+          paczkomatUi?.sheet.note(text);
+          bus.emit('footnote', { text });
+        },
+        changed: () => {
+          if (game.state === s) save(withCharacter(meta, s));
+        },
+        onClose: () => closeSheet(),
+      });
+      break;
     case 'kiosk':
       // The base Sklep spends the gwiazdki of the live player and fills the bag and gear the run starts with.
       shop = mountSklep(stage.ui, { runsCompleted: meta.runsCompleted }, s.player, {
@@ -516,8 +537,7 @@ function acceptNow(priority?: PriorityId): boolean {
 /** Open the sheet (or the footnote) of a station (a tap on it, `Game.onTap` -> `station:opened`). */
 function openStation(id: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik'): boolean {
   if (screen !== 'baza' || game.state?.phase !== 'base') return false;
-  if (id === 'paczkomat') bus.emit('footnote', { text: t('screens.base.paczkomatClosed') });
-  else openSheet(id);
+  openSheet(id);
   return true;
 }
 bus.on('station:opened', (e) => void openStation(e.station));

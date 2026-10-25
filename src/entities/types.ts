@@ -5,7 +5,7 @@ import type { Vec } from '../core/vec';
 import type { EnemyRt } from '../enemies/runtime';
 import type { DefectId, EliteId, FamilyId } from '../enemies/ids';
 import type { HeroId } from '../heroes';
-import type { Item, ItemGrant, SetId, Slot } from '../items';
+import type { Awizo, Item, ItemGrant, SetId, Slot } from '../items';
 
 /** What a hero gives before any equipment (items/stats.ts adds the gear). B3 sets it per hero. */
 export interface BaseStats {
@@ -63,6 +63,8 @@ export interface Player extends Fighter {
   equipment: Partial<Record<Slot, Item>>;
   /** Carried items, at most INVENTORY_CAP (20). */
   inventory: Item[];
+  /** S18: delivery notices (items/delivery.ts), kept beside the bag and saved with the character; absent = none. */
+  awizos?: Awizo[];
   /** What the hero gives before equipment; items/stats.ts recomputeStats(player) adds the gear on top. */
   baseStats: BaseStats;
   /** Which hero is being played (heroes/defs.ts). */

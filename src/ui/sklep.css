@@ -113,3 +113,59 @@
   margin: 1px 2px 0 0;
   white-space: nowrap;
 }
+
+/* Reklamacja (S18): a line under the stock; the rows list the worn items and the bag. */
+.sk-rek {
+  margin: 14px 0 0;
+  padding: 8px 0 0;
+  border-top: 1.5px solid var(--ink);
+}
+.sk-rek-h {
+  margin: 0 0 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.sk-rek-line {
+  margin: 0 0 6px;
+  font-size: 14.5px;
+  line-height: 1.25;
+}
+.sk-rek-none {
+  margin: 6px 0;
+  font-style: italic;
+  font-size: 14.5px;
+}
+.sk-rek-row {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-top: 1px dotted var(--ink-wet);
+}
+.sk-rek-row .ps-btn {
+  flex: none;
+  min-height: 44px;
+  padding: 6px 9px 4px;
+  font-size: 11px;
+}
+.sk-rek-struck {
+  font-style: italic;
+  font-size: 13.5px;
+  line-height: 1.2;
+}
+.inv-rek s,
+.sk-rek-struck s {
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1.5px;
+}
+.inv-ask {
+  margin: 8px 0 0;
+}
+/* the toggle of the Reklamacja form is a quiet link with a full tap target */
+.sk-rek [data-rek='toggle'] {
+  min-height: 44px;
+}

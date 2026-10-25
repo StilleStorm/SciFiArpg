@@ -4,7 +4,7 @@ import { t } from '../i18n';
 import { onPageEntry, hitIgnoresItem, isWithdrawn, TRIAL_PAGES } from './absurd';
 import { AFFIXES, AFFIXES_BY_ID, canCombine, effectFor, modelToken } from './affixes';
 import { BASES, BASES_BY_ID } from './bases';
-import { buildItem, rollItem, statsFor } from './generate';
+import { buildItem, freeVersionOf, rollItem, statsFor } from './generate';
 import { affixesOf, nameItem, nameParts } from './grammar';
 import { MOD_MULTIPLIER, modTierForLevel, modTierMark, rollModTier } from './tiers';
 import { SLOTS, STAT_KEYS, type Item } from './types';
@@ -161,7 +161,8 @@ describe('roll rules', () => {
   });
   it('every affix can appear: each is rolled at least once over the slots it fits', () => {
     const seen = new Set<string>();
-    for (const slot of SLOTS) for (const i of rolls(4000, 'rzadki', slot, 90)) for (const id of i.affixes) seen.add(id);
+    // the free version has no weight: it arrives only on a rzadki sent by post (ITEMS 6.4), so the rolls are passed through `freeVersionOf`
+    for (const slot of SLOTS) for (const i of rolls(4000, 'rzadki', slot, 90)) for (const id of freeVersionOf(i).affixes) seen.add(id);
     for (const a of AFFIXES) expect(seen.has(a.id), a.id).toBe(true);
   });
   it('the shop halves grade 3: it reads plainer than drops', () => {

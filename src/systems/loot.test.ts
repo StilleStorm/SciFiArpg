@@ -111,9 +111,10 @@ describe('loot', () => {
       bus.emit('enemy:died', { id: 7, x: 0, y: 0, tier: 'elite' });
       bus.emit('enemy:died', { id: 7, x: 0, y: 0, tier: 'elite' });
     }
-    const items = (s: typeof plain) => s.pickups.filter((k) => k.item);
+    // S18: a zestaw piece, a unique or a rzadki of an elite may go by post (an awizo) instead of dropping, so the items are counted both ways
+    const items = (s: typeof plain) => [...s.pickups.flatMap((k) => (k.item ? [k.item] : [])), ...(s.player.awizos ?? []).map((a) => a.item)];
     expect(items(named).length).toBe(items(plain).length + 1);
-    expect(items(named).some((k) => k.item && k.item.tier !== 'zwykly')).toBe(true);
+    expect(items(named).some((i) => i.tier !== 'zwykly')).toBe(true);
   });
 });
 
@@ -198,7 +199,9 @@ describe('drop tables (ITEMS 6.1, 6.2, 6.5)', () => {
     for (let i = 0; i < 100; i++) {
       s.pickups.length = 0;
       dropLoot(s, 0, 0, 'elite');
-      expect(s.pickups.filter((k) => k.item)).toHaveLength(1);
+      // S18: a zestaw piece, a unique or a rzadki may go by post: one item either way
+      expect(s.pickups.filter((k) => k.item).length + (s.player.awizos?.length ?? 0)).toBe(1);
+      delete s.player.awizos;
       const stars = s.pickups.find((k) => k.gwiazdki)?.gwiazdki ?? 0;
       expect(stars).toBeGreaterThanOrEqual(5);
       expect(stars).toBeLessThanOrEqual(8);

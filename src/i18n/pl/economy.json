@@ -45,5 +45,68 @@
     "d": "Przekazuję do konsultanta. Konsultant jest niedostępny. Przekazuję do bota.",
     "e": "Twoja wiadomość jest dla nas ważna. Jesteś 4. w kolejce. Poprzednia osoba też.",
     "f": "Sklep jest nieczynny. Godziny pracy podano w innym kanale."
+  },
+  "reklamacja": {
+    "title": "Reklamacja",
+    "line": "Rozpatrzeniu podlega jedna cecha przedmiotu. Wynik jest wiążący. Prawo wyboru nie przysługuje.",
+    "open": "Złóż reklamację",
+    "close": "Zwiń formularz",
+    "none": "Brak przedmiotów podlegających reklamacji.",
+    "row": "Przedmiot nr {n}",
+    "meta": "Reklamowano: {times}. Opłata: {price} gw.",
+    "file": "Reklamuj",
+    "done": "Reklamację przedmiotu nr {n} rozpatrzono. Pobrano {price} gw.",
+    "unique": "Egzemplarz unikatowy nie podlega reklamacji. Producenta nie ustalono.",
+    "trial": "Przedmiot jest w okresie próbnym. Wersja próbna nie podlega reklamacji.",
+    "planet": "Przedmiot reklamowano już na tej planecie. Kolejną reklamację przyjmie inna planeta.",
+    "nothing": "Żadna cecha przedmiotu nie podlega reklamacji.",
+    "poor": "Opłata za reklamację wynosi {price} gw. Stan konta jest niższy.",
+    "note": {
+      "first": "Reklamację uwzględniono. Wady nie stwierdzono.",
+      "again": "Reklamację uwzględniono ponownie. Wady nadal nie stwierdzono.",
+      "lying": "Reklamację uwzględniono w całości. Opinie zweryfikowane pozostają w mocy.",
+      "third": "Przedmiot reklamowano wielokrotnie. Zgłaszającego odnotowano."
+    },
+    "lineStruck": "Reklamacja nr {k}. Skreślono:",
+    "lineTyped": "Wpisano:",
+    "no": "Nie podlega reklamacji."
+  },
+  "kosz": {
+    "refund": "Do kosza · {price} gw.",
+    "ask": "Przedmiot nr {n} zostanie zniszczony. Zwrot: {price} gw. Potwierdzić?",
+    "yes": "Potwierdzam",
+    "no": "Anuluj",
+    "done": "Przedmiot nr {n} odrzucono do kosza. Zwrócono {price} gw. Opłata serwisowa: 0 gw.",
+    "unique": "Egzemplarz unikatowy zniszczono. Komisja nie zgłosiła sprzeciwu.",
+    "missing": "Przedmiotu nie odnaleziono w aktach."
+  },
+  "paczkomat": {
+    "title": "Paczkomat",
+    "sub": "Przesyłki oczekujące na odbiór.",
+    "empty": "Przesyłek brak. Paczkomat nie zgłasza zastrzeżeń.",
+    "head": "Awiza",
+    "awizo": "Awizo nr {n}",
+    "page": "Paczkomat na stronie {page} zgłoszenia.",
+    "base": "Paczkomat w bazie.",
+    "parcel": "Przesyłka: {tier}, {slot}, poziom {level}.",
+    "komisja": "Nadawca: Komisja.",
+    "back": {
+      "one": "Zwrot do nadawcy za {count} zgłoszenie.",
+      "few": "Zwrot do nadawcy za {count} zgłoszenia.",
+      "many": "Zwrot do nadawcy za {count} zgłoszeń."
+    },
+    "away": "Przesyłka oczekuje na stronie zgłoszenia. W bazie nie podlega wydaniu.",
+    "get": "Odbierz",
+    "fee": "Opłata za odbiór: {fee} gw.",
+    "claimed": "Przesyłkę nr {n} wydano za okazaniem awiza. Pobrano {fee} gw. Pozycję dopisano do załączników.",
+    "poor": "Opłata za odbiór wynosi {fee} gw. Stan konta jest niższy.",
+    "full": "Załączniki są pełne. Przesyłki nie wydano.",
+    "sent": "Przesyłkę nr {n} skierowano do paczkomatu na stronie {page}. Awizo dołączono do akt.",
+    "sentBase": "Przesyłkę nr {n} skierowano do paczkomatu w bazie. Awizo dołączono do akt.",
+    "codeAsked": "Kod odbioru przesyłki nr {n} wysłano SMS-em. Szacowany czas: kilka sekund.",
+    "codeLost": "Kod odbioru przesyłki nr {n} wygasł wskutek oddalenia się odbiorcy od paczkomatu.",
+    "released": "Kod odbioru: {code}. Przesyłkę nr {n} wydano.",
+    "returned": "Przesyłki nr {n} nie odebrano w terminie. Zwrócono ją nadawcy. Ubolewanie wyrażono w granicach procedury.",
+    "komisjaSent": "Komisja nadała przesyłkę nr {n}. Odbiór w paczkomacie w bazie. Doręczenia osobistego nie przewidziano."
   }
 }

@@ -199,12 +199,14 @@ export function createRunHold<R extends object>(): RunHold<R> {
 export function carryPurse(s: RunState, c: Character | undefined): boolean {
   const p = s.player;
   if (!c || c.heroId !== p.heroId) return false;
-  const same = p.gwiazdki === c.gwiazdki && JSON.stringify(p.inventory) === JSON.stringify(c.inventory) && JSON.stringify(p.equipment) === JSON.stringify(c.equipment);
+  const same = p.gwiazdki === c.gwiazdki && JSON.stringify(p.inventory) === JSON.stringify(c.inventory) && JSON.stringify(p.equipment) === JSON.stringify(c.equipment) && JSON.stringify(p.awizos ?? []) === JSON.stringify(c.awizos ?? []);
   if (same) return false;
   const copy = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
   p.gwiazdki = c.gwiazdki;
   p.inventory = copy(c.inventory);
   p.equipment = copy(c.equipment);
+  if (c.awizos?.length) p.awizos = copy(c.awizos);
+  else delete p.awizos;
   recomputeStats(p);
   s.nextItemNumber = Math.max(s.nextItemNumber, highestNumber(c) + 1);
   return true;

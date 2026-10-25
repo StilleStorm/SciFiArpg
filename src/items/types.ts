@@ -117,12 +117,30 @@ export interface Item {
   setId?: SetId;
   /** S17 «Awaria»: the factor (0.85..1.15) the worn piece's numbers are scaled by until the next page entry (items/setFx.ts); dropped as soon as the set is no longer complete. */
   rollMul?: number;
+  /** S18 Reklamacja (items/reklamacja.ts): the planets (0-based) this item was reclaimed on, one entry per reclaim, and the struck lines. */
+  reklamacje?: { planet: number; struck: string; typed: string; mod: number }[];
   /** S8: tier I-V of the affix magnitudes (ITEMS 3.2); absent on older items = I. */
   modTier?: 1 | 2 | 3 | 4 | 5;
   /** S8: stats without the +20% of "w wersji próbnej", restored when the trial period ends. */
   plain?: { claimed: StatBlock; actual: StatBlock };
   /** S8: runtime state of the absurd affixes (items/absurd.ts). */
   absurd?: { pagesWorn?: number; trialEnded?: boolean; ewentNominal?: number; ewentNow?: number };
+}
+
+/**
+ * S18 przesyłka (ITEMS 6.4, 8): a delivery notice. The item waits in a paczkomat; `page` is the 1-based page of the run whose paczkomat
+ * holds it, 0 once it is at the base paczkomat. `age` counts the runs that ended while it waited at the base (items/delivery.ts).
+ */
+export interface Awizo {
+  /** The parcel's own number: the plate number the item carries ("Awizo nr 14"). */
+  n: number;
+  item: Item;
+  page: number;
+  age: number;
+  /** The seed of the run that sent it: an awizo of a ticket that was given up (a later run started with another seed) goes to the base. */
+  seed?: number;
+  /** Sent by the Komisja (a side ticket's reward). */
+  komisja?: boolean;
 }
 
 export const emptyStats = (): StatBlock => ({

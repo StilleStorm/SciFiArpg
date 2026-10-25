@@ -16,6 +16,8 @@ import { QUEST_STARS } from '../balance/loot';
 import { earnStars } from '../economy/stars';
 import { t } from '../i18n';
 import { HELD_CAP } from '../systems/recovery';
+import { shopIlvl } from '../items/level';
+import { sendReward, type RewardItem } from '../items/delivery';
 import { PLANET_COUNT, planetDef } from './campaign';
 import type { RunState } from './run';
 
@@ -29,6 +31,11 @@ export interface QuestReward {
   permission?: FamilyId;
   /** Potwierdzenia added to the stack (up to the cap of five). */
   potwierdzenia?: number;
+  /**
+   * S18: a unique or a set piece, named by id. It is never paid into the bag: the Komisja sends it, and it waits as an awizo at the base
+   * paczkomat (items/delivery.ts, ITEMS 12.7). `level` defaults to the planet's shop band.
+   */
+  item?: RewardItem;
 }
 
 export interface QuestDef {
@@ -267,6 +274,10 @@ export function completeQuest(s: RunState, bus: Bus, id: string): boolean {
   q.log.push(id);
   if (q.log.length > LOG_CAP) q.log.splice(0, q.log.length - LOG_CAP);
   payReward(s, def.reward);
+  if (def.reward.item) {
+    const awizo = sendReward(s, createRng(s.seed).fork(`reward:${id}`), def.reward.item, shopIlvl(def.planet));
+    if (awizo) bus.emit('footnote', { text: t('economy.paczkomat.komisjaSent', { n: awizo.n }) });
+  }
   bus.emit('quest:changed', { id, what: 'done' });
   return true;
 }

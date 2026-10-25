@@ -5,7 +5,7 @@ import type { Player } from '../entities/types';
 import { adsActive, tickAds } from './ads';
 import { adapterPrice, conflictTag, refreshCompat } from './compat';
 import { fillDemoInventory } from './demo';
-import { rollItem, rollTier, buildItem, TIER_WEIGHTS } from './generate';
+import { rollItem, rollTier, buildItem, freeVersionOf, TIER_WEIGHTS } from './generate';
 import { INVENTORY_CAP, addItem, buyAdapter, buyOut, dropItem, equipItem, unequipSlot } from './inventory';
 import { addAffix } from './rename';
 import { HONEST_SPREAD, P_BOUGHT, P_UNDERRATED, TRIAL_KILLS, advanceTrial, formatRating, reviewLine, rollTruth } from './reviews';
@@ -118,22 +118,30 @@ describe('rollItem', () => {
     const w = rollItem(createRng(1), { level: 2, tier: 'unikatowy', slot: 'bron' });
     expect(w.slot).toBe('bron');
   });
-  it('the free version only appears on rzadki and is rare', () => {
+  it('the free version is never rolled; one delivered rzadki in ten arrives with it (ITEMS 6.4)', () => {
     const rng = createRng(12);
     let free = 0;
     let rare = 0;
     for (let i = 0; i < 2000; i++) {
-      const z = rollItem(rng, { level: 1, tier: 'nietypowy' });
-      expect(z.freeVersion).toBeUndefined();
+      expect(rollItem(rng, { level: 1, tier: 'nietypowy' }).freeVersion).toBeUndefined();
       const r = rollItem(rng, { level: 1, tier: 'rzadki' });
+      expect(r.freeVersion).toBeUndefined();
       rare++;
-      if (r.freeVersion) {
-        free++;
-        expect(r.name).toContain('w\u00a0wersji darmowej');
-      }
+      const d = freeVersionOf(r);
+      expect(freeVersionOf(r)).toEqual(d); // a pure function of the item
+      if (d === r) continue;
+      free++;
+      expect(d.freeVersion).toBe(true);
+      expect(d.affixes).toContain('darmowy');
+      expect(d.affixes.length).toBe(r.affixes.length);
+      expect(d.baseId).toBe(r.baseId);
+      expect(d.level).toBe(r.level);
+      expect(d.name).toContain('w\u00a0wersji darmowej');
     }
-    expect(free / rare).toBeGreaterThan(0.06);
-    expect(free / rare).toBeLessThan(0.2);
+    expect(free / rare).toBeGreaterThan(0.07);
+    expect(free / rare).toBeLessThan(0.13);
+    const z = rollItem(createRng(3), { level: 1, tier: 'nietypowy' });
+    expect(freeVersionOf(z)).toBe(z);
   });
 });
 
