@@ -1800,11 +1800,12 @@ try {
   }
   await shot('16b-every-hero-cast');
 
-  // ---------- 6e3. S19/S20: every ultimate of Pralka, Konsultant and Petlowiec (the slot's and ultimates 2 and 3) in all three paragraphs casts, runs and ends ----------
+  // ---------- 6e3. S19/S20: every ultimate of Pralka, Konsultant, Petlowiec and Kartograf (the slot's and ultimates 2 and 3) in all three paragraphs casts, runs and ends ----------
   for (const [i, h] of [
     { id: 'pralka', ults: ['pelnyCykl', 'uznanieOsobowosci', 'reklamacja'] },
     { id: 'konsultant', ults: ['przekazanie', 'koniecKolejki', 'ankieta'] },
     { id: 'petlowiec', ults: ['zebranie', 'cofniecie', 'przedwczesny'] },
+    { id: 'kartograf', ults: ['mapaOstateczna', 'skreslenie', 'pomiarKontrolny'] },
   ].entries()) {
     await page.evaluate((a) => window.__game.start(50 + a.i, { heroId: a.id, lawId: 'grawitacja' }), { i, id: h.id }); // a law that opens a banner mid-leg would hold the clock
     await sleep(300);
@@ -1813,7 +1814,6 @@ try {
       const g = window.__game;
       const s = g.state();
       const out = [];
-      s.player.hp = s.player.hpMax = 1e9;
       s.hero.pendingLevels = 0;
       g.setLevel(40);
       for (const u of ults) {
@@ -1826,19 +1826,69 @@ try {
           s.hero.ult = { para: n, active: [], idle: 0 };
           s.law.botTime = 0; // the page's law (the bot answers for a few seconds) forbids casts; the ultimate itself is what this leg asks about
           s.player.statuses.length = 0; // the previous cast's crowd may have laid a status on him: this leg asks whether the ultimate itself casts
+          s.player.hp = s.player.hpMax = 1e9;
           g.fillMeter(1);
           const cast = g.castUltimate();
           const during = g.ultimateInfo();
-          g.advance(1);
-          g.advance(9);
+          // an ultimate that recomputes his stats (Uznanie osobowości) sets racja back to the real maximum: the leg keeps him alive
+          // second by second, or the crowd of six would kill him mid-leg and the death slip would hold the next cast
+          for (let k = 0; k < 10; k++) {
+            g.advance(1);
+            s.player.hp = s.player.hpMax = 1e9;
+          }
           const after = g.ultimateInfo();
-          const why = cast ? undefined : { st: s.player.statuses.map((x) => x.kind), modal: s.modal, status: s.status, phase: s.phase, bot: s.law.botTime, lvl: s.player.level, ready: g.ultimateInfo().ready, act: g.ultimateInfo().active };
+          const why = cast ? undefined : { st: s.player.statuses.map((x) => x.kind), modal: s.modal, status: s.status, phase: s.phase, bot: s.law.botTime, lvl: s.player.level, ready: g.ultimateInfo().ready, act: g.ultimateInfo().active, open: [...document.querySelectorAll('#ui > *:not(.hidden)')].map((x) => x.className).filter((c) => /sheet|pop|form|sk-|upd/.test(c)), pending: s.hero.pendingLevels };
           out.push({ u, n, cast, why, ran: during.active.includes(u), ended: after.active.length === 0, meter: after.meter });
         }
       }
       return out;
     }, h.ults);
     check(`${h.id}: all three ultimates cast and end with § 1, § 2 and § 3`, res.length === 9 && res.every((r) => r.cast && r.ran && r.ended && r.meter === 0), JSON.stringify(res.filter((r) => !(r.cast && r.ran && r.ended && r.meter === 0))));
+  }
+
+  // ---------- 6e4. S20: Petlowiec's Opóźnienie brackets the HUD racja line; Cofnięcie zgłoszenia strikes the slip's last footnote ----------
+  {
+    await page.evaluate(() => window.__game.start(60, { heroId: 'petlowiec', lawId: 'grawitacja' }));
+    await sleep(300);
+    if (await page.evaluate(() => window.__game.state().modal === 'cookies')) await page.locator('.cookie button').last().click({ timeout: 3000 });
+    const pre = await page.evaluate(() => {
+      const g = window.__game;
+      const s = g.state();
+      g.enemies.clear();
+      s.player.hp = s.player.hpMax = 1e6;
+      s.hero.pendingLevels = 0;
+      g.setLevel(40);
+      const k = g.hero.info().skillIds.indexOf('opoznienie');
+      s.hero.ranks[k] = Math.max(1, s.hero.ranks[k] ?? 0);
+      g.hero.assignPad(1, k);
+      s.hero.cd.fill(0);
+      s.law.botTime = 0;
+      return { k, cast: g.hero.cast(1) };
+    });
+    await sleep(250); // the HUD is patched on the render frames
+    const bracket = await page.evaluate(() => document.querySelector('.hud .racja path.bracket')?.getAttribute('d') ?? '');
+    await shot('16c-opoznienie-bracket');
+    check('S20 petlowiec: Opóźnienie draws a bracket on the HUD racja line while it logs', pre.cast === true && bracket.startsWith('M'), JSON.stringify({ pre, bracket }));
+    const struck = await page.evaluate(() => {
+      const g = window.__game;
+      const s = g.state();
+      g.advance(8); // Opóźnienie is over and paid
+      const before = document.querySelectorAll('.foot .fn.struck').length;
+      const notes = document.querySelectorAll('.foot .fn').length;
+      g.enemies.clear();
+      g.hero.spawn(3);
+      s.hero.ultimateId = 'cofniecie';
+      s.hero.ult = { para: 1, active: [], idle: 0 };
+      s.law.botTime = 0;
+      g.fillMeter(1);
+      const cast = g.castUltimate();
+      return { notes, before, cast, after: document.querySelectorAll('.foot .fn.struck').length, last: document.querySelector('.foot .fn:last-child')?.classList.contains('struck') ?? false };
+    });
+    await sleep(250);
+    await shot('16d-cofniecie-struck-note');
+    const bracketAfter = await page.evaluate(() => document.querySelector('.hud .racja path.bracket')?.getAttribute('d') ?? '');
+    check('S20 petlowiec: the bracket is gone once Opóźnienie is paid', bracketAfter === '', JSON.stringify({ bracketAfter }));
+    check('S20 petlowiec: Cofnięcie zgłoszenia strikes the last footnote on the slip', struck.cast && struck.notes > 0 && struck.after === struck.before + 1 && struck.last, JSON.stringify(struck));
   }
 
   // ---------- 6e2. S19: Konsultant's Wstrzymanie oplat cuts the in-run kiosk's service fee (20% -> 14% after three asks) ----------
