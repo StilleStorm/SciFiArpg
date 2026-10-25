@@ -73,7 +73,7 @@
     "plukanie": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Strumień o promieniu 70 na najbliższego, a gdy nikogo nie ma, wokół Pralki. Spłukuje z niej jeden status."
+        "desc": "Strumień o promieniu 70 w najbliższego przeciwnika, a gdy nikogo nie ma, w samą Pralkę. Spłukuje z niej jeden status."
       },
       "2": {
         "name": "Płukanie wtórne",
@@ -101,11 +101,11 @@
     "trybOszczedny": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Przez 4 s o 40% mniej obrażeń, ruch wolniejszy o 30%. Trafienia w Pralkę liczą się podwójnie dla błędu programu."
+        "desc": "Przez 4 s obrażenia mniejsze o 40%, chód wolniejszy o 30%. Trafienia w Pralkę liczą się do błędu programu podwójnie."
       },
       "2": {
         "name": "Tryb nocny",
-        "desc": "Trwa 6 s, obrażenia mniejsze o 25%. Pralka nie zwalnia."
+        "desc": "Tryb trwa 6 s, obrażenia mniejsze o 25%. Pralka nie zwalnia."
       },
       "3": {
         "name": "Tryb serwisowy",
@@ -119,7 +119,7 @@
       },
       "2": {
         "name": "Cykl powtórzony",
-        "desc": "Ostatnia umiejętność uruchamia się jeszcze raz, od razu. Odnowienie dłuższe o 4 s."
+        "desc": "Ostatnio użyta umiejętność uruchamia się ponownie, od razu. Odnowienie dłuższe o 4 s."
       },
       "3": {
         "name": "Zmiana bez opłat",
@@ -164,7 +164,7 @@
     },
     "uznanieOsobowosci": {
       "name": "Uznanie osobowości",
-      "desc": "Przez 6 s Pralka jest osobą: żaden status jej nie dotyczy, upór ma większy o 30. Kto stoi w promieniu 160, traci rację co sekundę, a wygenerowane istnieją najwyżej w 30%.",
+      "desc": "Przez 6 s Pralka jest osobą: żaden status jej nie dotyczy, upór ma większy o 30. Kto stoi w promieniu 160, traci rację co sekundę, a Wygenerowane istnieją najwyżej w 30%.",
       "stamp": "OSOBA",
       "note": "Wniosek nr {number} rozpatrzono pozytywnie na czas rozpatrzenia.",
       "para": {
@@ -178,7 +178,7 @@
         },
         "3": {
           "name": "Uznanie warunkowe",
-          "desc": "Obrażenia regulaminowe, 4 s, na sekundę prawie dwa razy większe. Pralka nie może się ruszyć. Kosztuje 6 racji."
+          "desc": "Obrażenia regulaminowe, na sekundę prawie dwa razy większe. Trwa 4 s. Pralka nie może się ruszyć. Kosztuje 6 racji."
         }
       }
     },
@@ -190,7 +190,7 @@
       "para": {
         "1": {
           "name": "Brzmienie podstawowe",
-          "desc": "Wszyscy na stronie zgłoszeni na 8 s. Jedno uderzenie regulaminowe."
+          "desc": "Wszyscy obecni na stronie zgłoszeni na 8 s. Jedno uderzenie regulaminowe."
         },
         "2": {
           "name": "Reklamacja z blokadą",
@@ -229,7 +229,7 @@
   "skill6": {
     "name": "Płukanie",
     "pad": "Płukanie",
-    "desc": "Strumień na najbliższego, a gdy nikogo nie ma, wokół Pralki. Spłukuje z niej jeden status."
+    "desc": "Strumień w najbliższego przeciwnika, a gdy nikogo nie ma, w samą Pralkę. Spłukuje z niej jeden status."
   },
   "skill7": {
     "name": "Program 90°",
@@ -239,7 +239,7 @@
   "skill8": {
     "name": "Tryb oszczędny",
     "pad": "Oszczędnie",
-    "desc": "Przez 4 s o 40% mniej obrażeń i wolniejszy ruch. Trafienia w Pralkę liczą się podwójnie dla błędu programu."
+    "desc": "Przez 4 s Pralka przyjmuje o 40% mniej obrażeń i chodzi wolniej. Trafienia w nią liczą się do błędu programu podwójnie."
   },
   "skill9": {
     "name": "Zmiana programu",

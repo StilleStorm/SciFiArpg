@@ -72,7 +72,7 @@
         },
         "10": {
           "name": "Bęben pełny",
-          "desc": "Każdy przeciwnik przyciągnięty Wirowaniem dodaje 4% do następnego Otwarcia bębna lub Programu 90°, najwyżej 24%."
+          "desc": "Każdy przeciwnik przyciągnięty Wirowaniem dodaje 4% obrażeń następnemu Otwarciu bębna lub Programowi 90°, najwyżej 24%."
         }
       },
       "konsultant": {
@@ -102,15 +102,15 @@
         },
         "7": {
           "name": "Dostęp do systemu",
-          "desc": "Zawsze włączona. Przedmioty weryfikuje dwa razy szybciej, a wady urządzeń widzi od razu."
+          "desc": "Cecha stała, nie zajmuje miejsca. Przedmioty weryfikuje dwa razy szybciej, wady urządzeń widzi od razu."
         },
         "8": {
           "name": "Numerek",
-          "desc": "Przeciwnicy, którym nada status, dostają numer. Każdy zgon w kolejności numerów dodaje 3% szansy na argument nie do odparcia, najwyżej 15%."
+          "desc": "Przeciwnicy, którym nada status, otrzymują numerek. Każdy zgon w kolejności numerków podnosi na 8 s szansę na argument nie do odparcia o 3 punkty, najwyżej o 15. Zgon poza kolejnością unieważnia kolejkę."
         },
         "9": {
           "name": "Połączenie nagrywane",
-          "desc": "Zablokowany przeciwnik, który zginie, zostawia na ziemi swój dymek na 3 s. Następny, który na niego wejdzie, przejmuje tezę."
+          "desc": "Zablokowany przeciwnik, który zginie, zostawia na stronie swój dymek na 3 s. Pierwszy, kto na niego wejdzie, przejmuje tezę."
         },
         "10": {
           "name": "Wstrzymanie opłat",
