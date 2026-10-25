@@ -134,9 +134,9 @@ elite `story.p3.gate.elite`, reachable, clear of the corner; no rolled named eli
 
 ## Heroes (DESIGN 10; `src/heroes/README.md` is the folder contract)
 One folder per hero `src/heroes/<id>/` exporting `hero: HeroModule` (`heroes/module.ts`): `def` (`HeroDef`, via
-`defineHero`/`defineSkill`), `figure` (`HeroFigure`: drawing, wash `hue`, attack pose, `drive/build/patch`), `sounds` (five
-recipe names, `autoStart`, `ultimate`), `casts` (`Record<skillId, SkillFn>`), `pads` (five glyphs), `passives` (six
-`HeroPassive`), `paragraphs`, `ultimates`, `specs`, optional `quirk` (`onHit`, `tick`). `heroes/registry.ts` is the one list:
+`defineHero`/`defineSkill`), `figure` (`HeroFigure`: drawing, wash `hue`, attack pose, `drive/build/patch`, optional `zoneParts(z)`/`summonParts(e)`), `sounds`
+(one recipe per skill, `autoStart`, `ultimate`), `casts` (`Record<skillId, SkillFn>`), `pads` (one glyph per skill), `passives`
+(`HeroPassive`, `rule?`), `paragraphs`, `ultimates`, `specs`, optional `quirk` (`onHit`, `tick`, `priceCut`). `heroes/registry.ts` is the one list:
 `HERO_ID_LIST` (pralka, konsultant, petlowiec, kartograf, nalesnik), `HeroId`, `HEROES`, `HERO_IDS`, `heroById(id)`,
 `heroDef(id)`, `DEFAULT_HERO_ID`, `isHeroId`. No hero id outside its folder (lint `hero-id-literal`); per-hero branches are
 data: `HeroDef.traits` (`trialSpeed`, `seesDefects`, `revealsPage`, `skim`, `friendlyCopy`, `buffKillGwiazdki`), `auto.lash`,
@@ -147,7 +147,7 @@ removeSummon decoy statusApply buff heal shield cooldownReset deferredDamage ech
 `heroes/_template/*.tpl`). Contract test `heroes/contract.test.ts` vs `contract.snapshot.json` (`-u` only for an intended
 change). Numbers in `heroes/numbers.ts`, aim geometry in `heroes/aim.ts GEOMETRY`, per-step effects in `heroes/steps2.ts`;
 `heroes/shield.ts projectileDamageMul` (skim), `bindNumerBonus` (an `enemy:hit` listener). The base page animates on game.ts's
-render clock `animMs` (no `RunState.time` there). Skills: `SkillIndex 0..4`, `PadSlot 0..2`, `SkillDef.requires?: FamilyId`
+render clock `animMs` (no `RunState.time` there). Skills: `SkillIndex 0..10` (see Filled heroes), `PadSlot 0..2`, `SkillDef.requires?: FamilyId`
 (rank 1 of skills 3 and 4), `SkillDef.aim: 'auto' | 'kierunek' | 'wskazanie'`. `HeroRun.cd/cdTotal/ranks` keyed by SkillIndex,
 `pads: [SkillIndex x3]`. `heroes/loadout.ts`: `isInstalled`, `installedSkills`, `padSkill` (carries paragraph + capstone),
 `padOf`, `assignPad`, `fixPads`, `effectiveSkill(s, i)` (every read of a skill's shape). `castSkill(s, bus, slot, free, aim)` ->
@@ -210,8 +210,8 @@ word "zestaw" key off `setId`), built by `items/setPieces.makeSetPiece(rng, setI
 para, ranks}` names a skill id, never a hero; `grantsOf(equipment)`, `grantOfItem`. **`UNIQUES` grants map to today's skill ids;
 S19/S20 must keep these ids or remap the grant** (program95 wirowanie §3, pralnia pranieWstepne §2, oczekiwanie prosze §3,
 windykacja rozlaczenie §3, przedwykonaniem spor §2, zapasowe przybycie §2, granica triangulacja §3, bladpomiaru korekta §2,
-masaplanety grawitacja §2, atmosfera ksiezyc §3). Dormant `skills3` ids waiting for S19/S20: `przerwaTechniczna`, `muzyka`,
-`pomiar`. `heroes/grants.ts`: **every skill read goes through `rankOf(s, i)`** (update rank + item ranks, may exceed 3; worn grant
+masaplanety grawitacja §2, atmosfera ksiezyc §3). Dormant `skills3` id waiting for S20: `pomiar`
+(`przerwaTechniczna`, `muzyka` act since S19). `heroes/grants.ts`: **every skill read goes through `rankOf(s, i)`** (update rank + item ranks, may exceed 3; worn grant
 installs skill 4/5) **and `patchAt(s, i)`** (run paragraph, replaced by a higher carried one, set patches laid on); `paragraphAt`,
 `heroOfSkill` (ui/archive hero note), `layPatch`. Never read `s.hero.ranks`/`s.hero.patch` directly in a skill. Loot: the planet
 boss's first item is `BOSS_SET_CHANCE` 35% a piece of `planetDef(planet).hostedSet` (planet 1 of an act hosts none);
@@ -397,3 +397,12 @@ unwanted lines, items in their "w wersji próbnej" period. UI: the Reklamacja se
 **Bin** `economy/kosz.ts`: `binItem(p, item)` (10% of `itemValue`, `BIN_SHARE`; `disposalRefusal(item, 'bin')`), `needsAsk` (rzadki, zestaw, unikatowy ask once
 on the Załączniki sheet's one-line form), a binned unique adds `economy.kosz.unique`. Test hook: `giveAwizo`, `awizos`, `endRun`, `renameItem`;
 shots `scripts/shot-reklamacja.mjs` (4197; portrait, landscape, and checks: 44 px taps, no button on a refused row, no wrap at 360).
+
+## Filled heroes: skills past the fifth, three ultimates (S19; Pralka, Konsultant filled; S20/S21 fill the rest the same way)
+**More than five skills.** `SkillIndex` is 0..10 (`heroes/defs.ts`), `HeroDef.skills` is `readonly [SkillDef x5, ...SkillDef[]]`; ask `skillAt(def, i)` (never `skills[i]` with a `SkillIndex`) and `skillIndicesOf(def)` (`SKILL_INDICES` is the whole range). `HeroRun.cd/cdTotal/ranks` are `Slots<number>`: five long until a skill past the fifth writes, so read `?? 0`; a five-skill hero keeps byte-identical contract digests. `HeroSounds.skills`, `HeroPadGlyphs` are rest tuples; `skill:cast.skill` and `padsFrom` take 0..10. Skills 0..2 are always installed, 3+ through an update rank (`skill<i+1>`). Skills 3 and 4 keep their family permission; **skills from `LEVELLED_FROM` 5 (`progression/update.ts`) need none and are first offered at `SkillParagraphs.level`**, lead the form as the new skill (`featureOf` `skill4..skill11`) and take "Przypisz do przycisku" (`newSkillOf` 3..10). Paragraph ids `para:<0..10>:<2|3>`. `HeroPassive.rule: true` (passive 7) is never an entry, always stamped on the Karta. `contract.test.ts` replays every skill of every hero (snapshot: 120 keys after S19).
+**Three ultimates.** `ultimates` at levels 12 / 24 / 36; `HeroSounds.ultimate` is one name or a record by ultimate id: `audio/bindings.ts ultimateSound(heroId, ultimateId)` plays the id's recipe, else the record's first (`ultimate:cast.ultimateId` is always set). `ui/konfiguracja.ts konfiguracjaUltimates(s)`: the chosen one keeps its paragraph row, the others a `.kf-ultpick[data-ultimate]` button (44 px, once the level has come; `commitLoadout(s, {ultimate})`); `ui/karta.ts` prints every ultimate (chosen first, `data-node=ult`). A stamp wider than the view is set smaller (`render/bindings.ts`, 17 down to 11).
+**Per-run hero records** live in the folder, in a `WeakMap` keyed by the run (never in `HeroRun`, never saved, not in the digest), stepped by the hero's `quirk.tick`: Pralka `running.ts` (`tickPralka`; zone, resist, puddle, shield, Bęben, ultimate upor; `syncSpeed` holds her speed under a slow), Konsultant `state.ts` + `quirk.ts` (owned zones and summons, chairs, phone timers, Numerek chain, Nagranie bubbles, the asks of passive 10). `Zone.own: true` = the hero's quirk steps that zone (`heroes/system.ts stepZones` skips it). Render hooks are generic: `HeroFigure.zoneParts(z)` / `summonParts(e)` return path strings ("~" = dotted), asked by `render/heroFx.ts zoneBuilder` / `render/heroFigures.ts summonBuilder` before the built-in branches (`appendParts`). New variants: `Zone` `formularz|stave|nagranie`, `Summon` `chair|phone`; fx kinds `steam|puddle`.
+**Fee cut.** `HeroQuirk.priceCut(s)` (0..1) is read through `heroes/quirks.ts priceCut(s)` by both Sklep checkouts (`SklepOptions.feeCut`, base kiosk in main.ts and in-run `economy/kiosk.ts`); `economy/sklep.ts feeRateOf(cut)`, `feeOf(price, cut)`, `totalOf(price, cut)`, `buy(..., cut)`. Konsultant passive 10: 10% per "Czy mogę jeszcze w czymś pomóc", at most 30%, for the run.
+**Pralka** (`heroes/pralka/`): skills 6..10 `plukanie program90 trybOszczedny zmianaProgramu odpompowanie` (levels 3/9/3/7/14), ultimates `pelnyCykl` / `uznanieOsobowosci` (24) / `reklamacja` (36, page-wide), passives 7 (rule) 8 Wersja 1.1, 9 Gwarancja, 10 Bęben pełny. Recipes `pralkaRinse|Steam|Eco|Switch|Pump|PersonUlt|ClaimUlt`. Shots `scripts/shot-pralka.mjs` (4198).
+**Konsultant** (`heroes/konsultant/`, numbers and the skill index map `IX` in `numbers.ts`): skills 6..10 `zgloszenie formularz muzyka przerwaTechniczna oddzwonimy` (levels 1/3/1/3/14; `GEOMETRY` entries in `aim.ts`), ultimates `przekazanie` / `koniecKolejki` (24, r 220 around him) / `ankieta` (36, placed by cluster, not aimed), passives 7 (rule) 8 Numerek, 9 Połączenie nagrywane, 10 Wstrzymanie opłat. `hook.info()` adds `aims`, `types` (the balance bot). Recipes `konsTicket|Form|Music|Break|Callback|UltQueue|UltSurvey`. Shots `scripts/shot-konsultant.mjs` (4199). Balance bot: `BAL_AIM=auto|nearest|claim`, `BAL_LOADOUT=<ids>`.
+**S17 hooks now live:** set patches `ostatnia-mila.przerwaTechniczna` (reach 1.35) and `infolinia.muzyka` (area 1.2) act; `set.ostatnia-mila.bonus3` names Przerwa techniczna. Still dormant for S20: `pomiar` (Infolinia), Kartograf's Awaria rule; Infolinia patches `spor` while its line names Uwaga (S20 moves it to the new `uwaga` skill; `items/sets.test.ts S20_REMAP`). `UNIQUES` grant ids unchanged.
