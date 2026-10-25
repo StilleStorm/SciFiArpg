@@ -178,6 +178,8 @@ Progress is recorded here, one line per slice:
 
 - **M3 Akt I + finale complete = MVP** (2026-10-25): e2e:m3 green (Akt I start to finish skipping cards, planets 1–3 through both gates and bosses, the Anomalia's three phases, case closed, reload; Pralka and Kartograf × both orientations; 40-enemy frame time 16.7–16.95 ms headless); look over all 58 shots (2 FIX fixed, rest KNOWN for S28); voice pass on all Akt I text; story plan review; ARCHITECTURE folded (348 lines; Balance section, page gates, planet modules, on-ramp, e2e:m3/balance).
 
+- S16b done (player verdict: finale too easy/short): FORM_HP_MUL 1.2→1.6, new FINALE_DMG_MUL 1.25 on every Anomalia body, REPLY_BITE 0.4→0.15; finale-mode bot (all heroes, n=100): win 87%→64–68%, ticket 142→225 s (seed 500), phases 91/35/16→126/62/37 s; `npm run balance` finale mode prints p1s/p2s/p3s. Left for S27: Pralka still wins 100% (her face is easy), Kartograf's Planeta face stalls the non-aiming bot (5–20% of runs hit the 300 s cap), phase 2 ranges ~10–290 s by face; S19's aiming bot re-measures.
+
 **Next pickup:** the MVP playtest by the player (questions under "Needs the player"); park the feedback here. Without new feedback, S17 (sets and legendary paragraphs, M4).
 
 ## Known limits

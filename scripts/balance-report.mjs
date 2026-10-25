@@ -167,6 +167,14 @@ async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode,
     g.advance(DT);
     const p = s.player;
     row.tEnd = Math.round(s.time);
+    if (mode === 'finale') {
+      const fi = g.finale.info();
+      if (fi) {
+        const st = fi.stage === 'done' ? 'last' : fi.stage;
+        row.phaseSec ??= { form: 0, face: 0, last: 0 };
+        row.phaseSec[st] = (row.phaseSec[st] ?? 0) + DT;
+      }
+    }
     row.level = p.level;
     row.kills = s.kills;
     if (s.hero.deaths > prevDeaths) {
@@ -332,7 +340,7 @@ await browser.close();
 
 const avg = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
 const f = (n, d = 1) => (Number.isFinite(n) ? n.toFixed(d) : '-');
-const cols = ['hero', 'n', 'win%', 'dead%', 'stall%', 'tBossPg', 'tBoss', 'fight', 'tEnd', 'deaths', 'lvl', 'minHp', 'potwDrop', 'held', 'used', 'ults', 'drops', 'z/n/r/u', 'stars', 'elites', 'teczki', 'side', 'updates'];
+const cols = ['hero', 'n', 'win%', 'dead%', 'stall%', 'tBossPg', 'tBoss', 'fight', 'tEnd', 'deaths', 'lvl', 'minHp', 'potwDrop', 'held', 'used', 'ults', ...(process.env.BAL_MODE === 'finale' ? ['p1s', 'p2s', 'p3s'] : []), 'drops', 'z/n/r/u', 'stars', 'elites', 'teczki', 'side', 'updates'];
 console.log(`Balance report: planet ${PLANET + 1}, ${PRIORITY}, ${RUNS} runs per hero, ${((Date.now() - t0) / 1000).toFixed(0)} s wall`);
 console.log(cols.join('\t'));
 for (const heroId of [...HEROES, 'ALL']) {
@@ -345,6 +353,7 @@ for (const heroId of [...HEROES, 'ALL']) {
       f(avg(r.filter((x) => x.tBossPage !== null).map((x) => x.tBossPage)), 0), f(avg(r.filter((x) => x.tBoss !== null).map((x) => x.tBoss)), 0), f(avg(r.filter((x) => x.won && x.tBoss !== null).map((x) => x.tEnd - x.tBoss)), 0), f(avg(r.map((x) => x.tEnd)), 0),
       f(avg(r.map((x) => x.deaths))), f(avg(r.map((x) => x.level))), f(avg(r.map((x) => x.minHpFrac)), 2),
       f(avg(r.map((x) => x.potwDropped))), f(avg(r.map((x) => x.potwHeldMax))), f(avg(r.map((x) => x.potwUsed))), f(avg(r.map((x) => x.ults))),
+      ...(process.env.BAL_MODE === 'finale' ? ['form', 'face', 'last'].map((k) => f(avg(r.map((x) => x.phaseSec?.[k] ?? 0)), 0)) : []),
       f(avg(r.map((x) => x.drawn))), `${f(d('zwykly'))}/${f(d('nietypowy'))}/${f(d('rzadki'))}/${f(d('unikatowy'))}`,
       f(avg(r.map((x) => x.stars)), 0), f(avg(r.map((x) => x.elites ?? 0))), f(avg(r.map((x) => x.teczki))), `${f(avg(r.map((x) => x.sideDone)))}/${f(avg(r.map((x) => x.sideTaken)))}`, f(avg(r.map((x) => x.updates))),
     ].join('\t'),

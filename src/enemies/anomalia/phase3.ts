@@ -15,7 +15,7 @@ import { EXISTENCE_FLOOR, EXISTENCE_PER_REPLY, LAST_HP, makeBody, note, swapBody
 import type { Finale } from './state';
 
 /** A right reply takes this share of the racja the Anomalia has left in phase 3. */
-export const REPLY_BITE = 0.4;
+export const REPLY_BITE = 0.15;
 /** Every right reply before phase 3 takes this share off its racja. */
 export const REPLY_HEAD_START = 0.1;
 /** How far wearing it down thins it out, on top of the replies. */

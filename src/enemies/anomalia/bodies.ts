@@ -20,9 +20,11 @@ export const FORM_ORDER: readonly FamilyId[] = ['urzadzenia', 'powiadomienia', '
 export const FORM_BOSS: readonly BossId[] = ['prototyp', 'weryfikacja', 'hipoteza'];
 
 /** A form has this many times the racja of the family boss it copies (before the scale of the last planet). */
-export const FORM_HP_MUL = 1.2;
+export const FORM_HP_MUL = 1.6;
 /** Racja of the hero's face and of the existence finish, before the scale. */
 export const FACE_HP = 420;
+/** Every body of the Anomalia hits this much harder than the last planet's scale alone makes it. */
+export const FINALE_DMG_MUL = 1.25;
 export const LAST_HP = 360;
 export { FACE_END_FRACTION } from './state';
 /** Seconds after the correction's footnote is due: the old Asystent speaks, the current one corrects it. */
@@ -39,7 +41,7 @@ export function makeBody(s: RunState, f: Finale, family: FamilyId, hp: number): 
   const e = makeBoss(nextId(s), f.desk.x, f.desk.y, s.rngs.spawn.int(1, 1e6), family, s.rngs.spawn);
   setEnemyScale(e, f.scale);
   e.hp = e.hpMax = Math.max(1, Math.round(hp * f.scale.hp));
-  e.stats = { ...e.stats, dmgMin: Math.max(1, Math.round(e.stats.dmgMin * f.scale.dmg)), dmgMax: Math.max(1, Math.round(e.stats.dmgMax * f.scale.dmg)) };
+  e.stats = { ...e.stats, dmgMin: Math.max(1, Math.round(e.stats.dmgMin * f.scale.dmg * FINALE_DMG_MUL)), dmgMax: Math.max(1, Math.round(e.stats.dmgMax * f.scale.dmg * FINALE_DMG_MUL)) };
   const rt = rtOf(e);
   rt.baseDmg = { min: e.stats.dmgMin, max: e.stats.dmgMax };
   rt.sporAt = undefined;

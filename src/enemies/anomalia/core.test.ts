@@ -441,7 +441,7 @@ describe('phase 3: existence and the closing stamp', () => {
     const ex = e.existence ?? 1;
     answerSpor(c.s, c.bus, c.s.spor?.prompt?.correct ?? 0);
     c.step(2);
-    expect(e.hp).toBeLessThan(hp * 0.7);
+    expect(e.hp).toBeLessThan(hp * 0.9);
     expect(e.existence ?? 1).toBeLessThan(ex);
     expect(finaleInfo(c.s)?.correct).toBe(1);
   });
