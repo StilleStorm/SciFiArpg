@@ -141,6 +141,8 @@ Polish and release. Progress lines are below.
   Recommendation: no, apply racja 68 → 85 and weapon 5–10 → 6–11 together, then re-measure with
   `BAL_LOADOUT=pomiar,granica,korekta`. Not applied; nothing waits on it.
 
+- **S21 questions (none blocks):** (1) Zderzenie's stamp lands beside Naleśnik at the cast; move it to where the roll ends (a hook in heroes/ultimate.ts)? Recommendation: yes, in S28. (2) Voice asks for one rule on quoting skill names in text (with or without „…”), and whether the PEŁNIA stamp stays. Recommendation: names without quotes, keep PEŁNIA.
+
 ## Game plan and the slice order
 The plan is docs/PRODUCTION.md: 7 milestones, 30 slices, each with a paste-ready builder brief.
 Design docs: PLAN.md (+§7, §8), SKILLS.md, ITEMS.md (+§12), STORY.md, DESIGN §10.2–10.3.
@@ -199,7 +201,9 @@ Progress is recorded here, one line per slice:
 
 - S20 done: Pętlowiec and Kartograf at ten skills each with their paragraphs, ultimates 2/3, passives 7–10, recipes; Awaria slow, Opóźnienie HUD bracket, Cofnięcie struck footnote, copy disagreement footnote; voice pass. Look fix at the gate: the Przedwczesny note stands below its ring, the capsule is thin and drawn once per spot. Reports S20-*.md. Parked: Kartograf win rate (under Needs the player); the voice report's "Pomiar"/"odczyt" naming proposal (reports/S20-voice.md); passive slots at levels 10/20/30/40 still unbuilt.
 
-**Next pickup:** S21. The /automode loop stopped after S20 at the player's request; resume only when the player asks.
+- S21 done: Naleśnik at ten skills with paragraphs, ultimates Zderzenie (24) and Pełnia (36), passives 7–10 (Pory: lying flat, a skimmed shot costs 1 racja and is answered; `onSkim` hook in enemies/projectiles.ts), Atmosfera unique grants Zaokrąglenie § 3; smoke leg 6e5; balance planet-1 Normalny 90% win (20 runs), no number moved. Scaffold validated: `npm run new-hero <id>` failed 16 tests, now fills i18n/recipes/trims/Anomalia face/snapshot and has `--remove`; four tests made hero-count independent. Voice pass (Zaokrąglenie note direction-neutral, Zderzenie stamp WPŁYNĘŁO). Reports S21-*.md. Parked: the first five Naleśnik skills keep their pre-S21 paragraphs (as Kartograf); SKILLS §5 deviations not ratified in the doc; passive slots 10/20/30/40 unbuilt; a scenery blot can sit under the right-hand pads (S28).
+
+**Next pickup:** M4 end (PRODUCTION "M4 end": tester `e2e-milestone-4.mjs`, look over all of `shots/`, story review, push), then S21a. The /automode loop stays off until the player asks.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
