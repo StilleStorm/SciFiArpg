@@ -1,7 +1,10 @@
 # Skills proposal: categories, paragraphs, ultimates, passives per hero
 
-Status: PROPOSAL for discussion with the player (2026-10-18). Companion to `docs/PLAN.md` §2;
-when accepted, each hero block is the brief for one fill-in slice (PLAN §5, slice 5).
+Status: accepted roster (2026-10-18), built S19–S21. The tables below are the briefs the
+builders worked from; **§6 (M4 review) lists where the code differs and rules which stands**.
+Where §6 is silent the table holds; where they disagree, the code and the Polish skill text in
+`src/i18n/pl/heroes/<id>.json` are the truth, and the voice editor keeps the text true to the
+code, not to this file.
 
 Conventions. Types: **mech**, **reg**, **egz** (mechaniczny, regulaminowy, egzystencjalny). Aim as
 DESIGN §5.6 (kier. = kierunek, wsk. = wskazanie). "Lvl" is the unlock level (PLAN §2.5); today's
@@ -288,3 +291,85 @@ Question 5 (Zderzenie's 600) is decided by play in S21. Kept for the record.
    rank's gate enough?
 5. Zderzenie rolls 600 in one direction: acceptable on the phone, or wskazanie with a shorter
    path?
+
+---
+
+## 6. Ratified at the M4 review (2026-10-26): where the build differs from the tables
+
+The five heroes shipped at ten skills, three ultimates and ten passives each (S19–S21). The
+builders deviated from the tables where the engine or the phone asked for it; each deviation
+was weighed against the Diablo benchmark and the cross-hero rules and is **ratified as built**
+unless marked otherwise. Nobody re-syncs the tables above; this section is the errata.
+
+### 6.1 Rules that explain most deviations (apply to every hero)
+- **The only slow is do weryfikacji (50%).** Every "slow 30% / 40% / 70%" in the tables reads as
+  the status *do weryfikacji* (one marker per status, DESIGN §5.3). No second slow status exists
+  and none is added. (Formularz, Przekrój § 3, Krawędź § 3, Odpompowanie § 2.)
+- **Ultimates are not aimed.** The stamp pad is one tap (PLAN §2.1); an ultimate marked *wsk.* or
+  *kier.* places itself at the heart of the biggest crowd within its reach, or the way the hero
+  faces when nobody is near (Ankieta, Skreślenie z mapy, Pomiar kontrolny, Zderzenie). Diablo 3's
+  stamp-like ultimates are self-cast for the same reason; the aimed variant is the skill, not the
+  ultimate.
+- **Ultimate record 8 s** (`MAX_ULT_S`, DESIGN §10.2) wins over a longer table value (Uznanie
+  osobowości § 2 is 8 s, not 12). A **summon left by an ultimate may outlive its record**
+  (Pełnia § 3's two moons for 14 s): the ultimate is over, the moons are ordinary summons, as a
+  Diablo 3 summon outlives the cast that made it.
+- **A paragraph patches at most four fields and § 2 or § 3 carries a price** in the patch
+  vocabulary (racja, cooldown, self-status): where a table cell listed more or priced nothing, the
+  builder dropped the extra field (Granica § 3 stays 160 long) or added a cooldown price (Zmiana
+  programu § 3).
+- **Cooldowns where the table gave none** are the builder's (Pierścień 16, Upadek 12, Zmiana
+  orbity 18, Pomiar 3 not 2.5). They move only through `npm run balance` (PLAN §8).
+- **Specialization columns are a partition** of the ten skills (the Karta chart needs every
+  skill in exactly one column); the overlapping sample loadouts above are what the columns are
+  named after, not their contents. Capstones unchanged (S4).
+- **The first five skills of every hero keep their S2 paragraphs** (names and numbers in the
+  i18n files), which already differed from the tables before M4 (DESIGN §10.2 "decided 2026-10-19
+  to match the built data"). Not re-synced; the Karta and the update form print the built text.
+- **Paragraph descriptions are capped at 120 characters** (`paragraphs.test.ts`). A paragraph
+  that needs more words needs fewer fields, not a longer line.
+- **Rank-7 passive is the rule**, always on, never offered, printed on the Karta with its stamp
+  (PLAN §7). Passives 8–10 are ordinary update-form entries today; whether four **slots** at
+  10/20/30/40 (DESIGN §10.2) are still wanted is a player question (reports/M4-story.md).
+
+### 6.2 Per-hero errata (kept as built)
+- **Pralka**: Uznanie osobowości § 2 8 s, no summon bonus; Zmiana programu § 1 costs 10 racja at
+  the cast, § 3 pays with a longer cooldown instead of being free; Tryb oszczędny counts hits
+  double for Błąd programu as the table says.
+- **Konsultant**: Formularz slows by *do weryfikacji*; Koniec kolejki pulls carriers of his
+  status within **r 220** (the page-wide slot is Przekazanie do działu; one page-wide per hero),
+  fewer than three carriers are topped up with the nearest, bosses never pulled; Ankieta placed
+  by cluster; Przerwa techniczna on a tap steps away from the nearest enemy; Wstrzymanie opłat
+  cuts the kiosk fee (base and in-run) up to 30% for the run.
+- **Pętlowiec**: Opóźnienie hands the blow back inside the hit (never fatal: the payment floors
+  at 1 racja), window and delay scale with duration; Zamiana miejsc with no copy does nothing and
+  costs no cooldown (§ 2 swaps with the nearest non-boss enemy within 260); Cofnięcie zgłoszenia
+  rewinds within the page only, never moves a boss, never lowers racja; Powtórzenie and Uwaga are
+  not copy-castable (a copy would multiply its own lines); the copy's disagreement footnote fires
+  2 s after his death (passive 7, text left unpromised on purpose).
+- **Kartograf**: Pomiar cd 3; Przekrój § 3 lines stay 1.5 s with *do weryfikacji*; Granica § 3
+  160 long; Punkt odniesienia: a **drag toward** the benchmark (within 25°) blinks Korekta to it
+  from anywhere (a tap on it would be clamped to Korekta's reach); Skreślenie z mapy and Pomiar
+  kontrolny placed by cluster, the latter three **rays** of 200 from the point, not full lines;
+  Mapa z góry's wrong names are footnotes with a correction on death; Trzeci punkt counts the
+  hits of Pomiar, Przekrój and Pomiar kontrolny only. **Open, not ratified**: SKILLS says "a line
+  hit", and Triangulacja is his podstawowa line, so the *Pomiar* loadout (Triangulacja + Pomiar +
+  Pomiar kontrolny, passive 10) loses a third of its hits; wire Triangulacja in S28 (one hook on
+  its projectile path; the auto laser stays out, it is not a skill).
+- **Naleśnik**: Krawędź § 3 slows by *do weryfikacji* 1 s; Zaokrąglenie's "−35% taken" is
+  **+35 resist on all three types** (§ 2 +20; § 3 *w dół* −20 on all types while flat) because
+  the engine has no flat damage-taken multiplier outside the shield; while flat a skimmed shot
+  still **costs 1 racja** and is answered by Pory; Upadek is an instant hop; Zderzenie rolls
+  toward the biggest crowd within 300 (else the way he faces), its stamp WPŁYNĘŁO lands beside
+  him at the cast until S28 moves it to the end of the roll (player, 2026-10-26); Pełnia draws no
+  margin diagram (the outer dotted ring stands for it); a Księżyc cast during Pełnia replaces one
+  of its moons (same summon variant, `max: 1`); PEŁNIA stays a bare-noun stamp (player).
+
+### 6.3 Naming settled here (voice applies at the next Voice: yes slice, S21a)
+- Kartograf's **auto laser is "odczyt"** in every skill text (Skala, Mapa ostateczna, Punkt
+  odniesienia, the laser footnote); **"Pomiar" is only the skill** (and Pomiar kontrolny). The
+  S20 text uses "pomiar" for both and a player cannot tell which one pierces.
+- Pad labels may be the button's word, not a noun ("Oszczędnie" is the programme button on the
+  drum); skill names stay nouns (DESIGN §12.1).
+- Damage *taken* is always "przyjmuje o N% mniej/więcej obrażeń"; damage *dealt* is "N uderzenia"
+  (a multiplier of the weapon roll) or "obrażenia większe o N%" (DESIGN §12.1).

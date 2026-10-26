@@ -327,6 +327,34 @@ What M3 added to the frame (built S11a–S16; the per-planet content is STORY §
   from `npm run balance` (a plain bot: auto aim, no dodging), never by ear.
 - **No page bosses**: one planet boss per run; the named elite is the mid-run boss (ITEMS §6).
 
+What M4 added to the frame (built S17–S21; the errata are SKILLS §6 and ITEMS §12.9–13):
+- **Sets and paragraph uniques** (ITEMS §4): six sets, pieces are rzadki with a `setId` and a
+  paperclip; 2/3-piece bonuses with a joint footnote; one hosted set per planet (none on the
+  first planet of an act), the planet boss drops a piece 35%, the Sklep offers one 10%; ten
+  uniques each carrying +1/+2 ranks and one § 2/§ 3 of a skill, unlocked while worn, stats only
+  on another hero; a won Spór lifts the best drop one tier ("Komisja przychyliła się").
+- **Sinks and the post** (ITEMS §6.4, §7.3, §8): Reklamacja at the Sklep and the in-run kiosk
+  (one affix re-rolled, once per item per planet, struck and retyped); the bin at 10% of list;
+  every zestaw piece, unique and 30% of rzadki from a common, elite or named elite arrives as an
+  awizo (kiosk page in the run, else the base paczkomat, 15 gwiazdki, returned to sender after
+  two runs); *w wersji darmowej* only by post; side-ticket items only as an awizo from the
+  Komisja. The **named rank** (gwiazdki 12–18, the family's permission card when not held, the
+  zestaw column) is the mid-run boss's drop.
+- **Five heroes at ten skills** with § 1–3 each, **three ultimates** (12/24/36, a chooser on the
+  Karta and in Konfiguracja), **ten passives** (the seventh is the rule, always on, never
+  offered; 8–10 are update-form entries). Ultimates are never aimed (placed by cluster); the
+  only slow is *do weryfikacji*; the ultimate record is 8 s and a summon it leaves may outlive
+  it; specialization columns partition the ten skills (SKILLS §6.1).
+- **Hero quirk hooks** read through `heroes/quirks.ts`, never by hero id: `priceCut` (the kiosk
+  fee), `dealtMul`, `enemySpeedMul`, `racjaBracket` (the HUD bracket), `onSkim`; a hero's own
+  zones and summons draw through `zoneParts`/`summonParts`. The footnote slip can **retract** its
+  last line (`footnote:retract`, struck in red, kept struck in the history).
+- **The bot aims** (`BAL_AIM` auto / claim / nearest, `BAL_LOADOUT`): the Konsultant's gap was not
+  aiming (55% either way) but thin damage on the aimed kits; the player left Konsultant and
+  Kartograf numbers as they are (2026-10-26). `npm run new-hero <id>` scaffolds a hero that passes
+  the whole gate, and `--remove` takes it out.
+- **Passive slots** at 10/20/30/40 (§10.2) are **not built**: a player question at the M4 review.
+
 ---
 
 ## 5. Combat
@@ -698,7 +726,10 @@ Księżyc); the voice editor decides the final words.
   most 8 s, one stamp, one page reaction, radius at most 220 or the hero's own path; at most one
   ultimate per hero acts page-wide and only through a status.
 - **Passives (cechy):** 10 per hero; the seventh is the hero's absurd rule, always on and outside
-  the slots; four slots unlock at levels 10 / 20 / 30 / 40.
+  the slots; four slots unlock at levels 10 / 20 / 30 / 40. *M4 review: the slots are not built;
+  passives 8–10 are permanent update-form picks like 1–6. Whether to build the slots (Diablo 3)
+  or strike this line (Diablo 2 permanence, the form's "pozostałe zostaną usunięte") is a player
+  question (reports/M4-story.md); until answered nothing is built.*
 - **Progression:** levels 1–40 (MVP 1–30). Skills unlock by category on a schedule (level 1: one
   podstawowa and one obronna; one mobility and one obronna that works alone by level 3; one
   skill of each damage type by level 7). The aktualizacja form stays the level-up moment and
@@ -905,3 +936,8 @@ music and SFX volume, both persisted; defaults on.
   on purpose; the Asystent notes it once as a clerical omission (backlog).
 - Skill names are printed without quotation marks in running text, inflected as nouns
   ("Odnowienie Pętli krótsze o 1 s"), player decision 2026-10-26.
+- Added at the M4 review (SKILLS §6.3): damage *taken* is "przyjmuje o N% mniej/więcej
+  obrażeń"; damage *dealt* is "N uderzenia" (a multiplier of the weapon roll) or "obrażenia
+  większe o N%". Kartograf's auto laser is *odczyt*; *Pomiar* is only the skill. A pad label may
+  be the button's own word ("Oszczędnie"); a skill name stays a noun. Multipliers are written
+  with a comma ("0,8 uderzenia"); four-digit numbers take no thousands separator.

@@ -234,7 +234,7 @@ roughly rzadki budget plus 20%.
 | Unique | Base | Hero · skill · § | Story (register) |
 |---|---|---|---|
 | Pilot «Program 95°» | pilot | Pralka · Program 90° · § 3 *gotowanie* | Pilot do pralki, której nie wyprodukowano. Przycisk 95° działa; pozostałe przyciski komentują. Instrukcja zaleca nie opuszczać pomieszczenia. |
-| Kombinezon «Pralnia Zakładowa» | kombinezon | Pralka · Pełny cykl · § 2 *delikatny* | Egzemplarz z zakładu, który zamknięto za cykl. Identyfikator wskazuje numer, nie osobę. Delikatność jest wymogiem BHP. |
+| Kombinezon «Pralnia Zakładowa» | kombinezon | Pralka · Pranie wstępne · § 2 *piana aktywna* (M4: was Pełny cykl § 2; ultimates carry no ranks) | Egzemplarz z zakładu, który zamknięto za cykl. Identyfikator wskazuje numer, nie osobę. Delikatność jest wymogiem BHP. |
 | Zegarek «Szacowany czas oczekiwania» | zegarek | Konsultant · Proszę czekać · § 3 *czas wydłużony* | Zegarek wskazuje czas oczekiwania zamiast godziny. Czas oczekiwania rośnie. Zegarek jest punktualny. |
 | Daszek «Dział windykacji» | daszek | Konsultant · Rozłączenie · § 3 *formalne* | Daszek z działu, do którego się nie dzwoni; on dzwoni. Rozłączenie następuje bez podniesienia głosu. Korony nie przewidziano. |
 | Faktura «Wystawiona przed wykonaniem usługi» | faktura | Pętlowiec · Opóźnienie · § 3 *z winy nadawcy* | Faktura obejmuje usługę, która jeszcze nie nastąpiła. Termin płatności minął wczoraj. Odsetki nalicza się nadawcy. |
@@ -247,6 +247,16 @@ roughly rzadki budget plus 20%.
 Rule for the next ten (one per hero per planet later): a unique's paragraph is always an
 existing § 2 or § 3 from SKILLS.md, never a fourth variant, so a unique never adds behaviour
 the paragraph system does not already own.
+
+M4 review (as built, `UNIQUES` in src/items/uniques.ts): S17 mapped the grants to the skills
+that existed then; S21 remapped Atmosfera to Zaokrąglenie § 3 once it existed. Three more
+remaps are owed now that the skills exist, and they go into S21a as data: **Program 95°** →
+`program90` § 3 *Gotowanie* (ranks 2, today Wirowanie § 3), **Faktura** → `opoznienie` § 3
+*z winy nadawcy* (ranks 2, today Spór § 2), **Wskaźnik «Granica państwowa»** → `granica` § 3
+*państwowa* (ranks 2, today Triangulacja § 3). **Kombinezon «Pralnia Zakładowa»** stays on
+Pranie wstępne § 2 (table row corrected here): a grant is +1/+2 ranks of a *skill*, and
+ultimates carry no ranks, so an ultimate paragraph can never be a unique's grant; the rule
+above now reads "an existing § 2 or § 3 of a skill, never of an ultimate".
 
 ## 5. Item level and scaling
 
@@ -347,7 +357,7 @@ as built; an awizo not collected before the page turns goes to the base paczkoma
 | elite | 5–8 | 100% |
 | named elite (S18: `DROPS.named`; was "page boss") | 12–18 | 100% |
 | planet boss | 25–35 | 100% |
-| side ticket finished (built S10, `QUEST_STARS`) | 20–40 at Akt I | by ticket |
+| side ticket finished (built S10, `QUEST_STARS`; M4 review: as built after S18's `base` 18 → 8) | procedural 15–30 at Akt I (kill 20–30, fetch 15–20, reach 25–30, deliver 20; avg 22.5); hand-written per STORY §8 | by ticket |
 | Konsultant's Czy mogę jeszcze w czymś pomóc | 1 per kill | by skill |
 
 Priority multiplier on all amounts: Niski ×0.8, Normalny ×1, Wysoki ×1.3, Krytyczny ×1.6.
@@ -404,7 +414,9 @@ in `DROPS`/`QUEST_STARS` moves before that.
 
 ## 8. Inventory and stash
 
-- **Bag**: 20 slots in a run as today (*Załączniki*). Cards (permissions, awizo) take slots.
+- **Bag**: 20 slots in a run as today (*Załączniki*). Permission cards take slots; awizo cards
+  do not (M4 review, as built S18: `Player.awizos` is its own list under the plates, saved with
+  the character, so a parcel never blocks a pickup).
 - **Archiwum**: a card-index drawer at the base desk, **40 slots, shared across heroes**,
   because uniques with another hero's paragraph are worth keeping and a per-hero stash would
   make them junk; the card footnotes which hero the paragraph concerns. Grows to 60 with a
@@ -512,3 +524,19 @@ Added at the M2 plan review (story agent; the player may overrule at the M3 play
    tickets pay stars, permission cards and potwierdzenia (STORY §5).
 8. **Red is not a tier mark** (ruled at the S8 gate): the rzadki thread is black; the wax seal's
    red dot stays because a seal impress is a stamp (§9 already updated).
+
+Added at the M4 plan review (story agent, 2026-10-26; none needs the player):
+9. **Fetch tickets pay 15–20** at Akt I as built (§6.5 row updated), not the table's 20–40: the
+   S18 sinks simulation lands at ~214 per planet against the ~200 target with `QUEST_STARS.base`
+   8, and PLAN §8 moves a number only from `npm run balance` or a playtest. Akt II and III
+   tickets scale through `QUEST_STARS` by act, not by a new rate.
+10. **Set pieces are tier rzadki plus `setId`** (the clip, the word "zestaw" and the drops key off
+    `setId`; `ItemTier` unchanged). A piece that clashes with worn gear does not count toward the
+    bonus. The Awaria 2-piece bonus is not re-rolled on page entry, only the pieces' stats.
+11. **Won Spór on a planet with no hosted set** (1, 4, 7): the second drop rises one tier to
+    rzadki at most; with a set: rzadki → piece → unique ("Komisja przychyliła się").
+12. **A named elite's set piece and unique go by post** like an elite's; its permission card and
+    gwiazdki drop in place (§6.3, §6.5). The in-run awizo has no ground card (footnote + the
+    Awiza section); an awizo of a bookmarked run waits on its page until that ticket ends.
+13. **The three grant remaps** of §4.2 (Program 95°, Faktura, Wskaźnik; Pralnia stays) are
+    S21a data work; a unique's grant is never an ultimate paragraph.

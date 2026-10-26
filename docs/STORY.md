@@ -621,3 +621,31 @@ per face, S15's look budget).
 - **Open from S16 voice** (not player questions): `settings.joystick` "Joystick" vs "Drążek":
   the loanword stays (common Polish; the settings sheet is the one place a loanword is plain
   usage); `onramp.walk` is mode-neutral and stays so until the playtest says a player got lost.
+
+### 8.7 Decisions at the M4 review (what Depth fixed for Akt II and III; S22 and S25 read this)
+- **Hosted sets are story hooks, not mechanics.** Planet 5 hosts «Ostatnia mila» (the
+  shopping-app planet, ITEMS §12.6), planet 6 «Infolinia», 8 «Domniemanie», 9 «Awaria». The
+  planet's clerk, one side ticket or the boss's Spór comment may name the set's subject (a
+  delivery, a hotline, a doubt, a breakdown) in one line; the set itself drops as built (boss 35%,
+  Sklep 10%, elites by post). Nothing in a planet entry adds a drop rule.
+- **Every item reward comes by post.** A hand-written side ticket that pays a unique or set
+  piece (`QuestReward.item`, at most one such ticket per planet) is an awizo at the base
+  paczkomat from the Komisja, never a plate at the board. The ticket's text may promise
+  delivery; the Asystent's line at the paczkomat is the twist ("Doręczenia osobistego nie
+  przewidziano").
+- **The ten uniques are the pool for the whole campaign**; "one per hero per planet later"
+  (ITEMS §4.2) is not a deliverable of S22/S25. A planet entry does not name a unique.
+- **Heroes at ten skills do not change the boss contract**: still one variant line, two Spór
+  comments with one right reply each, one data change. A Spór comment may refer to what the
+  hero does (Konsultant's queue, Kartograf's measurements) only in the comment, never in a reply
+  type (the right type is set per comment, §8.0).
+- **The Konsultant's kiosk cut** (passive 10, up to 30% off the fee) and **Reklamacja** are both
+  Sklep lines, so an Akt II vendor lie or kiosk footnote may mention them; no planet changes
+  prices or fees.
+- **Page gates stay as §8.6**; a named elite that lifts a gate (planet 3's Ochrona Obiektu)
+  drops the `named` rank like any other, so a gate elite is not a reward in itself.
+- **No new enemy family in Akt II** by default: the three families' claims are what the fifty
+  skills and the sets rebut (`set.obieg`, `set.domniemanie` name regulaminowy and egzystencjalny
+  claims). S22 may propose one act **event** (§5) or new elite affixes for `akt2-enemies`; a
+  fourth family would need every hero's § 1–3 types re-balanced and is parked unless the player
+  asks for it (STATUS "Needs the player" at S22).
