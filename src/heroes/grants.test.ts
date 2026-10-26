@@ -67,7 +67,7 @@ describe('the ten paragraph uniques', () => {
       expect(para?.patch).not.toEqual({});
       expect(BASES_BY_ID.get(u.baseId), u.id).toBeDefined();
     }
-    for (const id of HERO_IDS) expect(perHero.get(id), id).toBe(2);
+    for (const id of HERO_IDS) expect(perHero.get(id) ?? 0, id).toBe(HERO_IDS.indexOf(id) < 5 ? 2 : 0); // a hero in the making has none yet
   });
 
   it('use flat stats only (makeUnique scales every number by the level)', () => {

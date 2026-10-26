@@ -29,12 +29,20 @@ A skill is the list of these calls with its numbers. Randomness goes through `s.
 
 ## Adding a hero
 
-`npm run new-hero <id>` makes the folder from `_template/*.tpl` (compiling placeholders), registers the id, and prints `CHECKLIST.md`:
-figure, auto pose, skills, ultimates, passives, four recipes, profile text, upgrade pool, tests, shots, Anomalia face. Everything other domains
-need per hero is in the folder (`sounds.ts`, `pads.ts` glyphs, `passives.ts`, the wash `hue` in `figure.ts`); no table outside it is keyed by hero id. Regenerate the contract snapshot once, for the new keys only.
+`npm run new-hero <id>` makes the folder from `_template/*.tpl` (compiling placeholders), registers the id, and prints `CHECKLIST.md`.
+Since S21 it also does every edit outside the folder that `npm run check` needs with a new hero registered: the i18n stub
+(`src/i18n/pl/heroes/<id>.json`) and a `[<id>] `-marked copy of the first hero's entry in every i18n map keyed by hero, placeholder
+recipes and trims between `SCAFFOLD <id>` markers (`audio/recipes.ts`, `audio/levels.ts`), a placeholder Anomalia face
+(`enemies/anomalia/faces/<id>.ts`, registered in `faces/index.ts` and `faces/heroes.ts`), and the contract snapshot keys.
+`npm run new-hero <id> -- --remove` takes all of it out again (and refuses the five shipped heroes). Flags: `--dry-run`, `--no-register`
+(folder only), `--no-snapshot`. Everything other domains need per hero is in the folder (`sounds.ts`, `pads.ts` glyphs, `passives.ts`,
+the wash `hue` in `figure.ts`) or in the places the script fills; a map keyed by hero id that the script cannot rewrite (a JSON file not in
+the canonical 2-space form) is reported by name. Two gotchas it handles: vitest caches the `import.meta.glob` of `src/i18n/index.ts` in
+`node_modules/.vitest-cache`, so a new i18n file is not seen until that is cleared (the script clears it); and `vitest run -u <file>`
+runs every file, the path goes first (`vitest run <file> -u`).
 
 ## Tests
 
 `contract.test.ts` (every hero x skill x aim kind against `contract.snapshot.json`), `primitives/primitives.test.ts`, `registry.test.ts`
-(five heroes, full folders, sounds and i18n keys, the hero-id rule), and the older hero tests (`heroes.test.ts`, `aim.test.ts`, `skills45.test.ts`,
+(the heroes of HERO_ID_LIST, full folders, sounds and i18n keys, the hero-id rule), and the older hero tests (`heroes.test.ts`, `aim.test.ts`, `skills45.test.ts`,
 `nalesnik.test.ts`, `laser.test.ts`, `wiring.test.ts`).

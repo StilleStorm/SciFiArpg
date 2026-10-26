@@ -31,7 +31,7 @@ function tick(s: RunState, bus: ReturnType<typeof createBus>, seconds: number): 
 
 describe('hero definitions', () => {
   it('has five heroes with five typed skills each (the 4th and 5th gated by a permission) and no mana', () => {
-    expect(HEROES.map((h) => h.id)).toEqual(['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik']);
+    expect(HEROES.map((h) => h.id).slice(0, 5)).toEqual(['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik']); // a hero in the making (scripts/new-hero.mjs) comes after them
     for (const h of HEROES) {
       expect(h.skills.length).toBeGreaterThanOrEqual(5); // 5 for the original kit, 10 or 11 once a hero is filled (S19)
       expect(h.skills.slice(0, 3).every((sk) => sk.requires === undefined)).toBe(true);

@@ -7,8 +7,8 @@ import { HERO_ID_LIST, HERO_IDS, HEROES, heroById, heroDef } from './registry';
 describe('registry', () => {
   it('lists the five heroes, once each, in the order of HERO_ID_LIST', () => {
     expect(HERO_IDS).toEqual([...HERO_ID_LIST]);
-    expect(HEROES).toHaveLength(5);
-    expect(new Set(HERO_IDS).size).toBe(5);
+    expect(HEROES).toHaveLength(HERO_ID_LIST.length); // five shipped; a hero in the making (scripts/new-hero.mjs) adds one
+    expect(new Set(HERO_IDS).size).toBe(HERO_ID_LIST.length);
   });
 
   it('heroById and heroDef find every hero and agree with each other', () => {
