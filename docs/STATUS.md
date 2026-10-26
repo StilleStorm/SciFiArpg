@@ -6,7 +6,7 @@ current: it replaces chat memory. Context note: the project's own files cost ~1k
 (CLAUDE.md); a large first-command context comes from the harness (tool definitions, skills,
 plugins, connectors), which the player trims in Claude settings, not in the repo.
 
-## Where things are (2026-10-18)
+## Where things are (2026-10-26, M4 complete)
 - Branch: `claude/scifi-arpg-concept-6vqk36`. Deploys to https://stillestorm.github.io/SciFiArpg/
   on every push (GitHub Actions; repo public; github-pages environment allows `claude/*`).
 - Playable first version is live: four heroes, three enemy families with claims/rebuttals,
@@ -141,6 +141,8 @@ Polish and release. Progress lines are below.
   Recommendation: no, apply racja 68 → 85 and weapon 5–10 → 6–11 together, then re-measure with
   `BAL_LOADOUT=pomiar,granica,korekta`. Not applied; nothing waits on it.
 
+- **Passive slots** at levels 10/20/30/40 (PLAN, never built): strike the line, or build them? Recommendation (M4 story review): strike it; passives stay permanent picks on the update form. If wanted, S29 builds a "Cechy" block in Konfiguracja. Not blocking.
+
 - **Answered (player, 2026-10-26):** Zderzenie's stamp moves to where the roll ends (S28, hook in heroes/ultimate.ts); skill names without quotes in text (DESIGN §12.1, applied to the hero and forms JSON); the PEŁNIA stamp stays; the Konsultant and Kartograf balance proposals are left unapplied for now (fine as is).
 
 ## Game plan and the slice order
@@ -203,7 +205,9 @@ Progress is recorded here, one line per slice:
 
 - S21 done: Naleśnik at ten skills with paragraphs, ultimates Zderzenie (24) and Pełnia (36), passives 7–10 (Pory: lying flat, a skimmed shot costs 1 racja and is answered; `onSkim` hook in enemies/projectiles.ts), Atmosfera unique grants Zaokrąglenie § 3; smoke leg 6e5; balance planet-1 Normalny 90% win (20 runs), no number moved. Scaffold validated: `npm run new-hero <id>` failed 16 tests, now fills i18n/recipes/trims/Anomalia face/snapshot and has `--remove`; four tests made hero-count independent. Voice pass (Zaokrąglenie note direction-neutral, Zderzenie stamp WPŁYNĘŁO). Reports S21-*.md. Parked: the first five Naleśnik skills keep their pre-S21 paragraphs (as Kartograf); SKILLS §5 deviations not ratified in the doc; passive slots 10/20/30/40 unbuilt; a scenery blot can sit under the right-hand pads (S28).
 
-**Next pickup:** M4 end (PRODUCTION "M4 end": tester `e2e-milestone-4.mjs`, look over all of `shots/`, story review, push), then S21a. The /automode loop stays off until the player asks.
+- **M4 Depth complete** (2026-10-26): `npm run e2e:m4` green (scripts/e2e-milestone-4.mjs, M4_PORT 4190, both orientations: every skill and ultimate § 1–3 of all five heroes from fresh profiles, a set at 2 and 3 pieces, a reclamation with the refused second try, a transfer bag → personal → shared Archiwum → second case file → reload; 40 enemies 16.8–17.0 ms headless; set 3-piece combat effects not exercised in a fight). Look over `shots/` (reports/M4-look.md): 5 FIX, 0 REDO, all folded into the S28 brief (Argument meter and "Ostateczny" underline red, paczkomat Odbierz clipped by "c.d. poniżej", Racja width cap, every-skill cast clutter, § 3 pad badges); shots/ itself shows few M4 screens (shot.mjs frames for M4 screens are in S28). Story review (reports/M4-story.md): SKILLS §6 ratifies the S19–S21 deviations and "odczyt", ITEMS §4.2/§6.5/§8/§12.9–13 (fetch pay kept, three unique grant remaps owed in S21a, awizo outside the bag), STORY §8.7, DESIGN §4.2 "What M4 added", §12.1 four editorial rules; PRODUCTION S21a–S24, S27–S29 adjusted. ARCHITECTURE folded to 344 lines. Open: scripts/shot-aim.mjs defaults to port 4190, which Node fetch refuses (give it another port when next touched).
+
+**Next pickup:** S21a (PRODUCTION; it now also carries the three unique grant remaps, the odczyt voice pass and re-running e2e:m1–m3). The /automode loop stays off until the player asks.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
