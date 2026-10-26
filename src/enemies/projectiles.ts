@@ -58,7 +58,7 @@ export function updateEnemyProjectiles(s: RunState, bus: Bus, dt: number): void 
     if (!done && pr.damage > 0 && !p.suspended && !s.law.botTime && s.status === 'running' && Math.hypot(p.x - pr.x, p.y - pr.y) < p.r + pr.r) {
       const skim = projectileDamageMul(p);
       applyDamage(s, bus, p, Math.max(1, Math.round(pr.damage * skim)), false, pr.damageType);
-      if (skim < 1 && pr.from !== undefined) onSkim(s, bus, pr.from); // the hero's quirk (Nalesnik, Pory)
+      if (skim < 1 && pr.from !== undefined && s.status === 'running') onSkim(s, bus, pr.from); // the hero's quirk (Nalesnik, Pory); not once the blow ended the run
       done = true;
     }
     if (done) list.splice(i, 1);

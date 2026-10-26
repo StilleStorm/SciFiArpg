@@ -1892,6 +1892,44 @@ try {
     check('S20 petlowiec: Cofnięcie zgłoszenia strikes the last footnote on the slip', struck.cast && struck.notes > 0 && struck.after === struck.before + 1 && struck.last, JSON.stringify(struck));
   }
 
+  // ---------- 6e5. S21: Nalesnik's Zaokrąglenie § 3 lies him flat: an enemy shot skims off (costs 1 racja) and Pory (passive 8) returns 0.3x to its sender ----------
+  {
+    await page.evaluate(() => window.__game.start(61, { heroId: 'nalesnik', lawId: 'grawitacja' }));
+    await sleep(300);
+    if (await page.evaluate(() => window.__game.state().modal === 'cookies')) await page.locator('.cookie button').last().click({ timeout: 3000 });
+    const r = await page.evaluate(() => {
+      const g = window.__game;
+      const s = g.state();
+      g.enemies.clear();
+      s.hero.pendingLevels = 0;
+      g.setLevel(40);
+      g.placePlayer(600, 800);
+      const k = g.hero.info().skillIds.indexOf('zaokraglenie');
+      g.hero.installSkill(k);
+      g.hero.assignPad(1, k);
+      const para = g.hero.setParagraph('zaokraglenie', 3, true);
+      s.hero.upgrades['passive8'] = 1;
+      s.hero.cd.fill(0);
+      s.law.botTime = 0;
+      s.player.statuses.length = 0;
+      s.player.hp = s.player.hpMax = 1e6;
+      const cast = g.hero.cast(1);
+      g.hero.spawn(1);
+      const e = s.enemies[0];
+      if (!e) return { para, cast, enemy: false };
+      e.hp = e.hpMax = 1e6;
+      e.x = s.player.x + 300;
+      e.y = s.player.y;
+      const hp0 = s.player.hp;
+      s.projectiles.push({ kind: 'projectile', id: 900000001, x: s.player.x + 4, y: s.player.y, r: 5, vx: 0, vy: 0, ttl: 1, damage: 500, damageType: 'mechaniczny', owner: 'enemy', from: e.id });
+      g.advance(0.05);
+      return { para, cast, enemy: true, flat: s.player.flat === true, cost: hp0 - s.player.hp, returned: 1e6 - e.hp, left: s.projectiles.some((x) => x.id === 900000001) };
+    });
+    await sleep(200);
+    await shot('16e-nalesnik-flat');
+    check('S21 nalesnik: Zaokrąglenie § 3 lies him flat, a 500 shot costs him 1 racja and Pory answers its sender', r.para && r.cast && r.enemy && r.flat && r.cost === 1 && r.returned > 0 && !r.left, JSON.stringify(r));
+  }
+
   // ---------- 6e2. S19: Konsultant's Wstrzymanie oplat cuts the in-run kiosk's service fee (20% -> 14% after three asks) ----------
   {
     await page.evaluate(() => window.__game.start(41, { heroId: 'konsultant' }));
