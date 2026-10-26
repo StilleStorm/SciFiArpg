@@ -329,8 +329,8 @@ unless marked otherwise. Nobody re-syncs the tables above; this section is the e
 - **Paragraph descriptions are capped at 120 characters** (`paragraphs.test.ts`). A paragraph
   that needs more words needs fewer fields, not a longer line.
 - **Rank-7 passive is the rule**, always on, never offered, printed on the Karta with its stamp
-  (PLAN §7). Passives 8–10 are ordinary update-form entries today; whether four **slots** at
-  10/20/30/40 (DESIGN §10.2) are still wanted is a player question (reports/M4-story.md).
+  (PLAN §7). Passives 8–10 are ordinary update-form entries; the four slots at 10/20/30/40 were struck
+  (player, 2026-10-26, DESIGN §10.2).
 
 ### 6.2 Per-hero errata (kept as built)
 - **Pralka**: Uznanie osobowości § 2 8 s, no summon bonus; Zmiana programu § 1 costs 10 racja at

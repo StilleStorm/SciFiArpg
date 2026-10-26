@@ -141,9 +141,7 @@ Polish and release. Progress lines are below.
   Recommendation: no, apply racja 68 → 85 and weapon 5–10 → 6–11 together, then re-measure with
   `BAL_LOADOUT=pomiar,granica,korekta`. Not applied; nothing waits on it.
 
-- **Passive slots** at levels 10/20/30/40 (PLAN, never built): strike the line, or build them? Recommendation (M4 story review): strike it; passives stay permanent picks on the update form. If wanted, S29 builds a "Cechy" block in Konfiguracja. Not blocking.
-
-- **Answered (player, 2026-10-26):** Zderzenie's stamp moves to where the roll ends (S28, hook in heroes/ultimate.ts); skill names without quotes in text (DESIGN §12.1, applied to the hero and forms JSON); the PEŁNIA stamp stays; the Konsultant and Kartograf balance proposals are left unapplied for now (fine as is).
+- **Answered (player, 2026-10-26):** passive slots at 10/20/30/40 struck (passives stay permanent update-form picks; DESIGN §10.2, PLAN §2.4, SKILLS); Zderzenie's stamp moves to where the roll ends (S28, hook in heroes/ultimate.ts); skill names without quotes in text (DESIGN §12.1, applied to the hero and forms JSON); the PEŁNIA stamp stays; the Konsultant and Kartograf balance proposals are left unapplied for now (fine as is).
 
 ## Game plan and the slice order
 The plan is docs/PRODUCTION.md: 7 milestones, 30 slices, each with a paste-ready builder brief.

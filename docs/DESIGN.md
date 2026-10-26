@@ -353,7 +353,7 @@ What M4 added to the frame (built S17–S21; the errata are SKILLS §6 and ITEMS
   aiming (55% either way) but thin damage on the aimed kits; the player left Konsultant and
   Kartograf numbers as they are (2026-10-26). `npm run new-hero <id>` scaffolds a hero that passes
   the whole gate, and `--remove` takes it out.
-- **Passive slots** at 10/20/30/40 (§10.2) are **not built**: a player question at the M4 review.
+- **Passive slots** at 10/20/30/40 were struck by the player (2026-10-26); passives stay permanent picks.
 
 ---
 
@@ -725,11 +725,9 @@ Księżyc); the voice editor decides the final words.
   reply by half, and drains slowly out of combat. Full meter = one ultimate. Each ultimate: at
   most 8 s, one stamp, one page reaction, radius at most 220 or the hero's own path; at most one
   ultimate per hero acts page-wide and only through a status.
-- **Passives (cechy):** 10 per hero; the seventh is the hero's absurd rule, always on and outside
-  the slots; four slots unlock at levels 10 / 20 / 30 / 40. *M4 review: the slots are not built;
-  passives 8–10 are permanent update-form picks like 1–6. Whether to build the slots (Diablo 3)
-  or strike this line (Diablo 2 permanence, the form's "pozostałe zostaną usunięte") is a player
-  question (reports/M4-story.md); until answered nothing is built.*
+- **Passives (cechy):** 10 per hero; the seventh is the hero's absurd rule, always on and never
+  offered. The others are permanent update-form picks (Diablo 2 permanence, the form's
+  "pozostałe zostaną usunięte"); there are no passive slots (player, 2026-10-26).
 - **Progression:** levels 1–40 (MVP 1–30). Skills unlock by category on a schedule (level 1: one
   podstawowa and one obronna; one mobility and one obronna that works alone by level 3; one
   skill of each damage type by level 7). The aktualizacja form stays the level-up moment and

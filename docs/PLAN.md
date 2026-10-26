@@ -40,8 +40,7 @@ really lives: 12 skills × 3 paragraphs = 36 behaviours per hero without 36 butt
 - Boss Spór and the Argument meter interact: a correct reply fills the meter by half.
 
 ### 2.4 Passives (cechy)
-A pool of ~10 per hero, 4 slots unlocked at levels 10/20/30/40 (M4 review: the slots are not
-built, passives are permanent update-form picks; a player question, DESIGN §10.2). The existing six per hero are the
+A pool of ~10 per hero, permanent update-form picks; no slots (player, 2026-10-26, DESIGN §10.2). The existing six per hero are the
 seed. Passives are the place for "the hero's absurd rule" (Pralka's program error, Naleśnik's
 hydrostatics).
 
