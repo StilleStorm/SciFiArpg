@@ -32,6 +32,8 @@ export interface HeroQuirk {
   enemySpeedMul?(s: RunState, e: Enemy): number;
   /** S20: while blows taken are held back (Pętlowiec, Opóźnienie), the racja they will still cost (0 while logging and nothing owed yet); null when nothing is held. Read through heroes/quirks.ts `racjaBracket` by ui/hud.ts, which brackets that part of the racja line. */
   racjaBracket?(s: RunState): number | null;
+  /** S21: a shot of enemy `from` skimmed off the player (heroes/shield.ts projectileDamageMul < 1); read through heroes/quirks.ts `onSkim` by enemies/projectiles.ts (Nalesnik, Pory). */
+  onSkim?(s: RunState, bus: Bus, from: number): void;
 }
 
 export interface HeroSounds {

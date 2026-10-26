@@ -64,21 +64,26 @@ describe('Nalesnik, the definition', () => {
     expect(def.auto.range).toBeLessThan(80);
   });
 
-  it('has the five skills with the aim modes of the spec', () => {
+  it('has the ten skills with the aim modes of the spec (the first five are the original kit)', () => {
     expect(def.skills.map((k) => [k.id, k.aim, k.type])).toEqual([
       ['orbita', 'kierunek', 'mechaniczny'],
       ['grawitacja', 'auto', 'egzystencjalny'],
       ['wniosek', 'wskazanie', 'regulaminowy'],
       ['plywy', 'auto', 'mechaniczny'],
       ['ksiezyc', 'kierunek', 'egzystencjalny'],
+      ['krawedz', 'auto', 'mechaniczny'],
+      ['pierscien', 'auto', 'regulaminowy'],
+      ['zaokraglenie', 'auto', 'mechaniczny'],
+      ['upadek', 'wskazanie', 'mechaniczny'],
+      ['zmianaOrbity', 'wskazanie', 'regulaminowy'],
     ]);
   });
 
-  it('has an upgrade pool of 5 skills x 3 ranks and 6 passives', () => {
+  it('has an upgrade pool of 10 skills x 3 ranks and the passives of the form (the rule, number 7, is never offered)', () => {
     const pool = poolFor('nalesnik');
-    expect(pool.filter((u) => u.kind === 'skill')).toHaveLength(5);
+    expect(pool.filter((u) => u.kind === 'skill')).toHaveLength(10);
     expect(pool.filter((u) => u.kind === 'skill').every((u) => u.maxRank === 3)).toBe(true);
-    expect(pool.filter((u) => u.kind === 'passive')).toHaveLength(6);
+    expect(pool.filter((u) => u.kind === 'passive')).toHaveLength(9);
   });
 
   it('is applied to a fresh run', () => {

@@ -87,6 +87,8 @@ export interface Player extends Fighter {
   round?: boolean;
   /** The hero has the `skim` trait (heroes/defs.ts HeroTraits): projectiles skim off it at full racja (heroes/shield.ts). */
   skim?: boolean;
+  /** Nalesnik, Zaokraglenie § 3 (w dol): lies flat for a few seconds, every projectile skims off (heroes/shield.ts). */
+  flat?: boolean;
   /** The Argument meter, 0..1 (combat/meter.ts): fills from rebuttals, kills and a right Spor reply; full = one ultimate. Never saved. */
   meter: number;
   /** Potwierdzenia held for later use, 0..5 (systems/recovery.ts; saved with the character). Absent = none. */
@@ -153,6 +155,8 @@ export interface Projectile extends Base {
   pierceOnCrit?: boolean;
   /** Ids of enemies already hit. */
   passed?: number[];
+  /** Id of the enemy that fired it (an enemy shot; S21: the Nalesnik's Pory returns a share of a skimmed blow to it). */
+  from?: number;
 }
 
 export interface Pickup extends Base {
@@ -186,13 +190,13 @@ export interface Summon extends Base {
   damageMul: number;
   speed: number;
   /** Nalesnik's Ksiezyc (variant 'moon'): where it is on its circle round the player (`ring` is the circle's radius); `hits` is run time of the last strike per enemy id. */
-  orbit?: { angle: number; r: number; ring?: number; hits?: Record<number, number> };
+  orbit?: { angle: number; r: number; ring?: number; hits?: Record<number, number>; grow?: { from: number; to: number; born: number; over: number }; knock?: number };
 }
 
 /** A marked patch of paper: Teren nieistniejacy, or an hourglass drawn over a blocked enemy. */
 export interface Zone extends Base {
   kind: 'zone';
-  variant: 'teren' | 'hourglass' | 'wniosek' | 'legenda' | 'start' | 'numer' | 'formularz' | 'stave' | 'nagranie' | 'przekroj' | 'granica' | 'roza' | 'skreslenie' | 'paradoks' | 'zapis';
+  variant: 'teren' | 'hourglass' | 'wniosek' | 'legenda' | 'start' | 'numer' | 'formularz' | 'stave' | 'nagranie' | 'przekroj' | 'granica' | 'roza' | 'skreslenie' | 'paradoks' | 'zapis' | 'pierscien' | 'krater' | 'luk';
   /** Seconds left. */
   ttl: number;
   /** Id of the enemy the zone follows (hourglass). */

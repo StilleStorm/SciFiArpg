@@ -84,6 +84,12 @@ const GEOMETRY: Record<string, Geometry> = {
   granica: { autoRange: () => DEFAULT_RANGE, reach: () => 130, radius: () => 0 },
   punktOdniesienia: { autoRange: () => 260, reach: () => 260, radius: () => 60 },
   rozaWiatrow: { autoRange: () => 140, reach: () => 0, radius: () => 0 },
+  // S21: the Nalesnik's skills 6 to 10 (indices 5 to 9): a short roll at a target within 115, a band round him, a round-up on the spot, a hop of up to 140 landing in 100, a curve of 200
+  krawedz: { autoRange: () => 115, reach: () => 0, radius: () => 0 },
+  pierscien: { autoRange: () => DEFAULT_RANGE, reach: () => 0, radius: () => 0 },
+  zaokraglenie: { autoRange: () => DEFAULT_RANGE, reach: () => 0, radius: () => 0 },
+  upadek: { autoRange: () => 140, reach: () => 140, radius: (s) => 100 * areaOf(s, 8) },
+  zmianaOrbity: { autoRange: () => 200, reach: () => 200, radius: () => 0 },
   // S19: Pralka's Odpompowanie (skill 10, index 9): a puddle of 100 at a point up to 260 away
   odpompowanie: { autoRange: () => 260, reach: () => 260, radius: (s) => 100 * areaOf(s, 9) },
   // S20: the Petlowiec's skills 6 to 10 (indices 5 to 9): a remark at a target within 260, a line of 180, a clock of 110 within 260 (Paradoks, index 7)
@@ -256,7 +262,7 @@ export function previewOf(s: RunState, skill: SkillDef, aim: Aim): AimPreview | 
     const a = fitAim(skill, aim);
     return a.kind === 'wskazanie' ? { kind: 'circle', x: a.x, y: a.y, r } : null;
   }
-  if (skill.id === 'teren' || skill.id === 'wniosek' || skill.id === 'start' || skill.id === 'legenda' || skill.id === 'odpompowanie' || skill.id === 'formularz' || skill.id === 'oddzwonimy' || skill.id === 'punktOdniesienia' || skill.id === 'paradoks') {
+  if (skill.id === 'teren' || skill.id === 'wniosek' || skill.id === 'start' || skill.id === 'legenda' || skill.id === 'odpompowanie' || skill.id === 'formularz' || skill.id === 'oddzwonimy' || skill.id === 'punktOdniesienia' || skill.id === 'paradoks' || skill.id === 'upadek') {
     const c = terenCentre(s, skill, aim);
     return { kind: 'circle', x: c.x, y: c.y, r };
   }

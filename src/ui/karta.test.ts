@@ -108,4 +108,12 @@ describe('konfiguracja data', () => {
     s.player.level = 12;
     expect(konfiguracjaUltimate(s)?.locked).toBe(false);
   });
+
+  it('S21: the Nalesnik lists ten rows, each with a category and a column', () => {
+    const s = createRun(3, { heroId: 'nalesnik' });
+    const rows = konfiguracjaRows(s);
+    expect(rows).toHaveLength(10);
+    expect(rows.map((r) => r.pad)).toEqual([0, 1, 2, null, null, null, null, null, null, null]);
+    expect(rows.every((r) => r.category !== null)).toBe(true);
+  });
 });

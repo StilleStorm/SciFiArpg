@@ -23,7 +23,8 @@ export const SKIM = 0.7;
 export const SKIM_FROM = 0.9;
 export const SKIM_FROM_AWARIA = 0.8;
 
-export function projectileDamageMul(p: Pick<Player, 'hp' | 'hpMax' | 'skim' | 'sets'>): number {
+export function projectileDamageMul(p: Pick<Player, 'hp' | 'hpMax' | 'skim' | 'sets' | 'flat'>): number {
+  if (p.flat === true) return 0; // Zaokraglenie § 3 (w dol): lying flat, everything skims off (the blow still costs 1)
   const from = hasEffect(p, 'regula-podwojona') ? SKIM_FROM_AWARIA : SKIM_FROM; // «Awaria», three pieces: flat from 80%
   return p.skim === true && p.hp >= p.hpMax * from ? SKIM : 1;
 }

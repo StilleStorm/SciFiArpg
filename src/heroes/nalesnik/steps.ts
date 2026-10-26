@@ -11,6 +11,7 @@ import { resolveMove } from '../../world/pages';
 import type { RunState } from '../../world/run';
 import { effectiveSkill } from '../loadout';
 import { durationOf, enemiesWithin, power, skillDamage, touchStatus } from '../helpers';
+import { gatherMass, taken } from './hits';
 
 /** Orbita: seconds the roll lasts (the length is ORBITA_LENGTH in aim.ts), and the satellite's circle. */
 export const ORBITA_TIME = 0.5;
@@ -92,6 +93,7 @@ export function stepRoll(s: RunState, bus: Bus, dt: number): void {
 export function stepOrbit(s: RunState, dt: number): void {
   const o = s.hero.orbit;
   if (!o) return;
+  if (taken(s, 'passive10')) o.left = Math.max(o.left, 1); // Satelita staly: it stays until it dies (nalesnik/quirk.ts strikes it)
   const e = s.enemies.find((x) => x.id === o.id);
   if (!e || o.left <= 0) {
     s.hero.orbit = null;
@@ -132,6 +134,7 @@ export function stepGravity(s: RunState, bus: Bus, dt: number): void {
       continue;
     }
     if (e.boss) continue; // a boss does not fall
+    gatherMass(s, g, e); // passive 9: each enemy pulled adds to the next ofensywna
     const move = Math.min(step, d - rim + 1);
     e.x -= ((e.x - p.x) / d) * move;
     e.y -= ((e.y - p.y) / d) * move;

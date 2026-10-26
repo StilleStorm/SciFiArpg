@@ -62,7 +62,7 @@ describe('the skills declare an aim mode', () => {
     expect(modes('konsultant')).toEqual(['wskazanie', 'kierunek', 'auto', 'wskazanie', 'kierunek', 'auto', 'wskazanie', 'auto', 'kierunek', 'wskazanie']);
     expect(modes('petlowiec')).toEqual(['auto', 'auto', 'auto', 'auto', 'wskazanie', 'auto', 'kierunek', 'wskazanie', 'auto', 'auto']);
     expect(modes('kartograf')).toEqual(['kierunek', 'wskazanie', 'wskazanie', 'auto', 'wskazanie', 'auto', 'kierunek', 'kierunek', 'wskazanie', 'auto']);
-    expect(modes('nalesnik')).toEqual(['kierunek', 'auto', 'wskazanie', 'auto', 'kierunek']);
+    expect(modes('nalesnik')).toEqual(['kierunek', 'auto', 'wskazanie', 'auto', 'kierunek', 'auto', 'auto', 'auto', 'wskazanie', 'wskazanie']);
   });
 });
 

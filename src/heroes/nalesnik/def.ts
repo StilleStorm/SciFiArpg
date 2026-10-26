@@ -1,4 +1,4 @@
-/** Data of the hero: numbers, auto-attack, five typed skills (DESIGN 10, 10.1). */
+/** Data of the hero: numbers, auto-attack, ten typed skills (DESIGN 10, 10.1). */
 import { defineHero, defineSkill } from '../build';
 import type { HeroDef } from '../defs';
 
@@ -18,5 +18,11 @@ export const def: HeroDef = defineHero('nalesnik', {
     defineSkill('nalesnik', 3, 'wniosek', 'regulaminowy', 16, 'wskazanie'),
     defineSkill('nalesnik', 4, 'plywy', 'mechaniczny', 12, 'auto', 'urzadzenia'),
     defineSkill('nalesnik', 5, 'ksiezyc', 'egzystencjalny', 20, 'kierunek', 'powiadomienia'),
+    // S21: skills 6 to 10 (docs/SKILLS.md section 5); they open by level (the `level` of their paragraphs), no permission
+    defineSkill('nalesnik', 6, 'krawedz', 'mechaniczny', 3, 'auto'),
+    defineSkill('nalesnik', 7, 'pierscien', 'regulaminowy', 16, 'auto'),
+    defineSkill('nalesnik', 8, 'zaokraglenie', 'mechaniczny', 14, 'auto'),
+    defineSkill('nalesnik', 9, 'upadek', 'mechaniczny', 12, 'wskazanie'),
+    defineSkill('nalesnik', 10, 'zmianaOrbity', 'regulaminowy', 18, 'wskazanie'),
   ],
 });

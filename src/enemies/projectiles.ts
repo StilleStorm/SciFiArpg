@@ -6,6 +6,7 @@ import { applyDamage } from '../systems/combat';
 import { nextId, type RunState } from '../world/run';
 import type { RangedSpec } from './partsBase';
 import { enemyOutgoing } from './hooks';
+import { onSkim } from '../heroes/quirks';
 import { projectileDamageMul } from '../heroes/shield';
 import { wearerDefence } from '../items/stats';
 
@@ -30,6 +31,7 @@ export function fireShot(s: RunState, e: Enemy, tx: number, ty: number, spec: Ra
       damage,
       damageType: spec.type,
       owner: 'enemy',
+      from: e.id,
     });
   }
 }
@@ -54,7 +56,9 @@ export function updateEnemyProjectiles(s: RunState, bus: Bus, dt: number): void 
       }
     }
     if (!done && pr.damage > 0 && !p.suspended && !s.law.botTime && s.status === 'running' && Math.hypot(p.x - pr.x, p.y - pr.y) < p.r + pr.r) {
-      applyDamage(s, bus, p, Math.max(1, Math.round(pr.damage * projectileDamageMul(p))), false, pr.damageType);
+      const skim = projectileDamageMul(p);
+      applyDamage(s, bus, p, Math.max(1, Math.round(pr.damage * skim)), false, pr.damageType);
+      if (skim < 1 && pr.from !== undefined) onSkim(s, bus, pr.from); // the hero's quirk (Nalesnik, Pory)
       done = true;
     }
     if (done) list.splice(i, 1);

@@ -2,8 +2,8 @@
 import type { HeroSounds } from '../module';
 
 export const sounds: HeroSounds = {
-  skills: ['nalesOrbita', 'nalesGravity', 'nalesFlag', 'nalesTide', 'nalesMoon'],
-  ultimate: 'nalesUlt',
+  skills: ['nalesOrbita', 'nalesGravity', 'nalesFlag', 'nalesTide', 'nalesMoon', 'nalesEdge', 'nalesRing', 'nalesRound', 'nalesFall', 'nalesSwerve'],
+  ultimate: { decyzjaKomisji: 'nalesUlt', zderzenie: 'nalesCollide', pelnia: 'nalesFull' },
   /** Played when the auto-attack starts (a flip with a slap). */
   autoStart: 'nalesSlap',
 };

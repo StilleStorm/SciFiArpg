@@ -35025,6 +35025,1479 @@
    ]
   ]
  },
+ "nalesnik.krawedz.auto.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     2.79
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     2.79
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 5
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 32,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     5,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": []
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 2,
+     "statuses": [],
+     "x": 672,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0.29
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     2.79
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 5
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 32,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     5,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 680,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": []
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Krawędź nie jest granicą. Spór o to, po której stronie leży, trwa."
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "dash",
+     "r": 0,
+     "x": 600,
+     "x2": 680,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 600,
+      "y": 800
+     },
+     "free": false,
+     "skill": 5,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": [
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": true,
+     "id": 2,
+     "x": 660,
+     "y": 800
+    }
+   ]
+  ]
+ },
+ "nalesnik.krawedz.kierunek.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     2.79
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     2.79
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 5
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 32,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     5,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": []
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 2,
+     "statuses": [],
+     "x": 672,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0.29
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     2.79
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 5
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 32,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     5,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 680,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": []
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Krawędź nie jest granicą. Spór o to, po której stronie leży, trwa."
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "dash",
+     "r": 0,
+     "x": 600,
+     "x2": 680,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 600,
+      "y": 800
+     },
+     "free": false,
+     "skill": 5,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": [
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": true,
+     "id": 2,
+     "x": 660,
+     "y": 800
+    }
+   ]
+  ]
+ },
+ "nalesnik.krawedz.wskazanie.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     2.79
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     2.79
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 5
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 32,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     5,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": []
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 2,
+     "statuses": [],
+     "x": 672,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0.29
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     2.79
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 5
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 32,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     5,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 680,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": []
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Krawędź nie jest granicą. Spór o to, po której stronie leży, trwa."
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "dash",
+     "r": 0,
+     "x": 600,
+     "x2": 680,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 600,
+      "y": 800
+     },
+     "free": false,
+     "skill": 5,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": [
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": true,
+     "id": 2,
+     "x": 660,
+     "y": 800
+    }
+   ]
+  ]
+ },
  "nalesnik.ksiezyc.auto.plain": {
   "afterCast": {
    "enemies": [
@@ -38193,6 +39666,1659 @@
    ]
   ]
  },
+ "nalesnik.pierscien.auto.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     null,
+     14.88
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     14.88
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 6
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 64,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     6,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": [
+    {
+     "acc": 88.2,
+     "id": 14,
+     "kind": "zone",
+     "own": true,
+     "r": 121.8,
+     "ttl": 4.6,
+     "variant": "pierscien",
+     "x": 600,
+     "y": 800
+    }
+   ]
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4992,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4992,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4992,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4992,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     12.38
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     14.88
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 6
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 64,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     6,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": [
+    {
+     "acc": 88.2,
+     "id": 14,
+     "kind": "zone",
+     "own": true,
+     "r": 121.8,
+     "ttl": 2.1,
+     "variant": "pierscien",
+     "x": 600,
+     "y": 800
+    }
+   ]
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Pierścień uznano za planetarny wyłącznie ze względu na ilość gruzu."
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "ring",
+     "r": 121.8,
+     "x": 600,
+     "x2": 600,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 600,
+      "y": 800
+     },
+     "free": false,
+     "skill": 6,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": [
+   [
+    "enemy:hit",
+    {
+     "amount": 8,
+     "crit": false,
+     "id": 3,
+     "x": 710,
+     "y": 770
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 8,
+     "crit": false,
+     "id": 6,
+     "x": 640,
+     "y": 890
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 8,
+     "crit": false,
+     "id": 7,
+     "x": 570,
+     "y": 680
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 8,
+     "crit": false,
+     "id": 11,
+     "x": 680,
+     "y": 740
+    }
+   ]
+  ]
+ },
+ "nalesnik.pierscien.kierunek.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     null,
+     14.88
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     14.88
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 6
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 64,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     6,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": [
+    {
+     "acc": 88.2,
+     "id": 14,
+     "kind": "zone",
+     "own": true,
+     "r": 121.8,
+     "ttl": 4.6,
+     "variant": "pierscien",
+     "x": 600,
+     "y": 800
+    }
+   ]
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4992,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4992,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4992,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4992,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     12.38
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     14.88
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 6
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 64,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     6,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": [
+    {
+     "acc": 88.2,
+     "id": 14,
+     "kind": "zone",
+     "own": true,
+     "r": 121.8,
+     "ttl": 2.1,
+     "variant": "pierscien",
+     "x": 600,
+     "y": 800
+    }
+   ]
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Pierścień uznano za planetarny wyłącznie ze względu na ilość gruzu."
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "ring",
+     "r": 121.8,
+     "x": 600,
+     "x2": 600,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 600,
+      "y": 800
+     },
+     "free": false,
+     "skill": 6,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": [
+   [
+    "enemy:hit",
+    {
+     "amount": 8,
+     "crit": false,
+     "id": 3,
+     "x": 710,
+     "y": 770
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 8,
+     "crit": false,
+     "id": 6,
+     "x": 640,
+     "y": 890
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 8,
+     "crit": false,
+     "id": 7,
+     "x": 570,
+     "y": 680
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 8,
+     "crit": false,
+     "id": 11,
+     "x": 680,
+     "y": 740
+    }
+   ]
+  ]
+ },
+ "nalesnik.pierscien.wskazanie.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     null,
+     14.88
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     14.88
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 6
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 64,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     6,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": [
+    {
+     "acc": 88.2,
+     "id": 14,
+     "kind": "zone",
+     "own": true,
+     "r": 121.8,
+     "ttl": 4.6,
+     "variant": "pierscien",
+     "x": 600,
+     "y": 800
+    }
+   ]
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4992,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4992,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4992,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4992,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     12.38
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     14.88
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 6
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 64,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     6,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": [
+    {
+     "acc": 88.2,
+     "id": 14,
+     "kind": "zone",
+     "own": true,
+     "r": 121.8,
+     "ttl": 2.1,
+     "variant": "pierscien",
+     "x": 600,
+     "y": 800
+    }
+   ]
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Pierścień uznano za planetarny wyłącznie ze względu na ilość gruzu."
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "ring",
+     "r": 121.8,
+     "x": 600,
+     "x2": 600,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 600,
+      "y": 800
+     },
+     "free": false,
+     "skill": 6,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": [
+   [
+    "enemy:hit",
+    {
+     "amount": 8,
+     "crit": false,
+     "id": 3,
+     "x": 710,
+     "y": 770
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 8,
+     "crit": false,
+     "id": 6,
+     "x": 640,
+     "y": 890
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 8,
+     "crit": false,
+     "id": 7,
+     "x": 570,
+     "y": 680
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 8,
+     "crit": false,
+     "id": 11,
+     "x": 680,
+     "y": 740
+    }
+   ]
+  ]
+ },
  "nalesnik.plywy.auto.plain": {
   "afterCast": {
    "enemies": [
@@ -39854,6 +42980,1687 @@
     }
    ]
   ]
+ },
+ "nalesnik.upadek.auto.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 3,
+     "statuses": [],
+     "x": 752.875,
+     "y": 744.275
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 20,
+     "id": 4,
+     "statuses": [],
+     "x": 798.809,
+     "y": 830.847
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 6,
+     "statuses": [],
+     "x": 629.153,
+     "y": 938.809
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 11,
+     "statuses": [],
+     "x": 695.811,
+     "y": 692.566
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     null,
+     null,
+     null,
+     11.16
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     null,
+     11.16
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 8
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 256,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     8,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 5.5,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 660,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": []
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 3,
+     "statuses": [],
+     "x": 752.875,
+     "y": 744.275
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 20,
+     "id": 4,
+     "statuses": [],
+     "x": 798.809,
+     "y": 830.847
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 6,
+     "statuses": [],
+     "x": 629.153,
+     "y": 938.809
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 11,
+     "statuses": [],
+     "x": 695.811,
+     "y": 692.566
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     8.66
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     null,
+     11.16
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 8
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 256,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     8,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 5.5,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 100,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 660,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": []
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Upadek na powierzchnię nastąpił zgodnie z grawitacją. Grawitacja nie była stroną."
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "blink",
+     "r": 0,
+     "x": 600,
+     "x2": 660,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "ring",
+     "r": 112,
+     "x": 660,
+     "x2": 660,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 2,
+     "x": 660,
+     "y": 800
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 3,
+     "x": 710,
+     "y": 770
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 4,
+     "x": 750,
+     "y": 820
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 6,
+     "x": 640,
+     "y": 890
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 11,
+     "x": 680,
+     "y": 740
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 660,
+      "y": 800
+     },
+     "free": false,
+     "skill": 8,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": []
+ },
+ "nalesnik.upadek.kierunek.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 3,
+     "statuses": [],
+     "x": 752.875,
+     "y": 744.275
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 20,
+     "id": 4,
+     "statuses": [],
+     "x": 798.809,
+     "y": 830.847
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 6,
+     "statuses": [],
+     "x": 629.153,
+     "y": 938.809
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 11,
+     "statuses": [],
+     "x": 695.811,
+     "y": 692.566
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     null,
+     null,
+     null,
+     11.16
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     null,
+     11.16
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 8
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 256,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     8,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 5.5,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 660,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": []
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 3,
+     "statuses": [],
+     "x": 752.875,
+     "y": 744.275
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 20,
+     "id": 4,
+     "statuses": [],
+     "x": 798.809,
+     "y": 830.847
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 6,
+     "statuses": [],
+     "x": 629.153,
+     "y": 938.809
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 11,
+     "statuses": [],
+     "x": 695.811,
+     "y": 692.566
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     8.66
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     null,
+     11.16
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 8
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 256,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     8,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 5.5,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 100,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 660,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": []
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Upadek na powierzchnię nastąpił zgodnie z grawitacją. Grawitacja nie była stroną."
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "blink",
+     "r": 0,
+     "x": 600,
+     "x2": 660,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "ring",
+     "r": 112,
+     "x": 660,
+     "x2": 660,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 2,
+     "x": 660,
+     "y": 800
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 3,
+     "x": 710,
+     "y": 770
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 4,
+     "x": 750,
+     "y": 820
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 6,
+     "x": 640,
+     "y": 890
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 11,
+     "x": 680,
+     "y": 740
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 660,
+      "y": 800
+     },
+     "free": false,
+     "skill": 8,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": []
+ },
+ "nalesnik.upadek.wskazanie.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 2,
+     "statuses": [],
+     "x": 630.589,
+     "y": 759.565
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 3,
+     "statuses": [],
+     "x": 706.993,
+     "y": 720.091
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 20,
+     "id": 4,
+     "statuses": [],
+     "x": 775.126,
+     "y": 776.772
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 6,
+     "statuses": [],
+     "x": 590.638,
+     "y": 897.965
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 9,
+     "statuses": [],
+     "x": 670.448,
+     "y": 986.019
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     null,
+     null,
+     null,
+     11.16
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     null,
+     11.16
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "wskazanie",
+      "x": 716.487,
+      "y": 877.658
+     },
+     "skill": 8
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 256,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     8,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 5.5,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 716.487,
+    "y": 877.658
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": []
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 2,
+     "statuses": [],
+     "x": 630.589,
+     "y": 759.565
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 3,
+     "statuses": [],
+     "x": 706.993,
+     "y": 720.091
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 20,
+     "id": 4,
+     "statuses": [],
+     "x": 775.126,
+     "y": 776.772
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 6,
+     "statuses": [],
+     "x": 590.638,
+     "y": 897.965
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 4980,
+     "id": 9,
+     "statuses": [],
+     "x": 670.448,
+     "y": 986.019
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     8.66
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     null,
+     11.16
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "wskazanie",
+      "x": 716.487,
+      "y": 877.658
+     },
+     "skill": 8
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 256,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     8,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 5.5,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 100,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 716.487,
+    "y": 877.658
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": []
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Upadek na powierzchnię nastąpił zgodnie z grawitacją. Grawitacja nie była stroną."
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "blink",
+     "r": 0,
+     "x": 600,
+     "x2": 716.487,
+     "y": 800,
+     "y2": 877.658
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "ring",
+     "r": 112,
+     "x": 716.487,
+     "x2": 716.487,
+     "y": 877.658,
+     "y2": 877.658
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 2,
+     "x": 660,
+     "y": 800
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 3,
+     "x": 710,
+     "y": 770
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 4,
+     "x": 750,
+     "y": 820
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 6,
+     "x": 640,
+     "y": 890
+    }
+   ],
+   [
+    "enemy:hit",
+    {
+     "amount": 20,
+     "crit": false,
+     "id": 9,
+     "x": 690,
+     "y": 940
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 0.832,
+      "dy": 0.555,
+      "kind": "wskazanie",
+      "x": 716.487,
+      "y": 877.658
+     },
+     "free": false,
+     "skill": 8,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": []
  },
  "nalesnik.wniosek.auto.plain": {
   "afterCast": {
@@ -41521,6 +46328,3013 @@
     }
    ]
   ]
+ },
+ "nalesnik.zaokraglenie.auto.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     null,
+     null,
+     13.02
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     13.02
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 7
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 128,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     7,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 6.65,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 100,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "egzystencjalny": 35,
+      "mechaniczny": 43,
+      "regulaminowy": 35
+     },
+     "upor": 78
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": []
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     10.52
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     13.02
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 7
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 128,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     7,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 6.65,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 100,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "egzystencjalny": 35,
+      "mechaniczny": 43,
+      "regulaminowy": 35
+     },
+     "upor": 78
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": []
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Zaokrąglenie nastąpiło w górę, zgodnie z przyjętą praktyką."
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "ring",
+     "r": 34,
+     "x": 600,
+     "x2": 600,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 600,
+      "y": 800
+     },
+     "free": false,
+     "skill": 7,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": []
+ },
+ "nalesnik.zaokraglenie.kierunek.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     null,
+     null,
+     13.02
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     13.02
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 7
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 128,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     7,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 6.65,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 100,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "egzystencjalny": 35,
+      "mechaniczny": 43,
+      "regulaminowy": 35
+     },
+     "upor": 78
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": []
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     10.52
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     13.02
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 7
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 128,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     7,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 6.65,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 100,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "egzystencjalny": 35,
+      "mechaniczny": 43,
+      "regulaminowy": 35
+     },
+     "upor": 78
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": []
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Zaokrąglenie nastąpiło w górę, zgodnie z przyjętą praktyką."
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "ring",
+     "r": 34,
+     "x": 600,
+     "x2": 600,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 600,
+      "y": 800
+     },
+     "free": false,
+     "skill": 7,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": []
+ },
+ "nalesnik.zaokraglenie.wskazanie.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     null,
+     null,
+     13.02
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     13.02
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 7
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 128,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     7,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 6.65,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 100,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "egzystencjalny": 35,
+      "mechaniczny": 43,
+      "regulaminowy": 35
+     },
+     "upor": 78
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": []
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     10.52
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     13.02
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 7
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 128,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     7,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 6.65,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 100,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "egzystencjalny": 35,
+      "mechaniczny": 43,
+      "regulaminowy": 35
+     },
+     "upor": 78
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": []
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Zaokrąglenie nastąpiło w górę, zgodnie z przyjętą praktyką."
+    }
+   ],
+   [
+    "skill:fx",
+    {
+     "kind": "ring",
+     "r": 34,
+     "x": 600,
+     "x2": 600,
+     "y": 800,
+     "y2": 800
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 600,
+      "y": 800
+     },
+     "free": false,
+     "skill": 7,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": []
+ },
+ "nalesnik.zmianaOrbity.auto.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     null,
+     null,
+     null,
+     null,
+     16.74
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     null,
+     null,
+     16.74
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 9
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 512,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     9,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": [
+    {
+     "angle": 0,
+     "id": 14,
+     "kind": "zone",
+     "own": true,
+     "r": 120,
+     "ttl": 1,
+     "variant": "luk",
+     "x": 600,
+     "y": 800
+    }
+   ]
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     14.24
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     null,
+     null,
+     16.74
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 9
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 512,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     9,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 720,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": []
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Zmianę orbity zgłoszono po fakcie. Orbita nie wniosła sprzeciwu."
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 720,
+      "y": 800
+     },
+     "free": false,
+     "skill": 9,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": []
+ },
+ "nalesnik.zmianaOrbity.kierunek.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     null,
+     null,
+     null,
+     null,
+     16.74
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     null,
+     null,
+     16.74
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 9
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 512,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     9,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": [
+    {
+     "angle": 0,
+     "id": 14,
+     "kind": "zone",
+     "own": true,
+     "r": 120,
+     "ttl": 1,
+     "variant": "luk",
+     "x": 600,
+     "y": 800
+    }
+   ]
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     14.24
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     null,
+     null,
+     16.74
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "auto"
+     },
+     "skill": 9
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 512,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     9,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 720,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": []
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Zmianę orbity zgłoszono po fakcie. Orbita nie wniosła sprzeciwu."
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 1,
+      "dy": 0,
+      "kind": "auto",
+      "x": 720,
+      "y": 800
+     },
+     "free": false,
+     "skill": 9,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": []
+ },
+ "nalesnik.zmianaOrbity.wskazanie.plain": {
+  "afterCast": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     null,
+     null,
+     null,
+     null,
+     16.74
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     null,
+     null,
+     16.74
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "wskazanie",
+      "x": 720,
+      "y": 880
+     },
+     "skill": 9
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 512,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     9,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.067,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 600,
+    "y": 800
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 3.2,
+   "zones": [
+    {
+     "angle": 0.588,
+     "id": 14,
+     "kind": "zone",
+     "own": true,
+     "r": 144.222,
+     "ttl": 1,
+     "variant": "luk",
+     "x": 600,
+     "y": 800
+    }
+   ]
+  },
+  "afterTick": {
+   "enemies": [
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 2,
+     "statuses": [],
+     "x": 660,
+     "y": 800
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 3,
+     "statuses": [],
+     "x": 710,
+     "y": 770
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 40,
+     "id": 4,
+     "statuses": [],
+     "x": 750,
+     "y": 820
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 5,
+     "statuses": [],
+     "x": 530,
+     "y": 810
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 6,
+     "statuses": [],
+     "x": 640,
+     "y": 890
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 7,
+     "statuses": [],
+     "x": 570,
+     "y": 680
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 8,
+     "statuses": [],
+     "x": 800,
+     "y": 710
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 9,
+     "statuses": [],
+     "x": 690,
+     "y": 940
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 10,
+     "statuses": [],
+     "x": 860,
+     "y": 840
+    },
+    {
+     "attackTimer": 999,
+     "boss": false,
+     "hp": 5000,
+     "id": 11,
+     "statuses": [],
+     "x": 680,
+     "y": 740
+    }
+   ],
+   "hero": {
+    "appealOwed": false,
+    "appeals": [],
+    "bonus": {
+     "pewnoscSiebie": 0,
+     "racja": 0,
+     "resist": {},
+     "trialSpeed": 0,
+     "upor": 0
+    },
+    "buffCrit": 0,
+    "buffUntil": 0,
+    "calm": 0,
+    "cd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     14.24
+    ],
+    "cdTotal": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     null,
+     null,
+     null,
+     null,
+     16.74
+    ],
+    "copyDrops": [],
+    "dash": null,
+    "deaths": 0,
+    "ghosts": [],
+    "gravity": null,
+    "heroId": "nalesnik",
+    "hitsTaken": 0,
+    "lastCast": {
+     "aim": {
+      "kind": "wskazanie",
+      "x": 720,
+      "y": 880
+     },
+     "skill": 9
+    },
+    "mods": {
+     "area": 1,
+     "cooldown": 1,
+     "crit": 0,
+     "dmg": 1,
+     "duration": 1,
+     "gwiazdki": 0,
+     "lifeOnKill": 0,
+     "regen": 0,
+     "shield": 0,
+     "speed": 1,
+     "summonMax": 0,
+     "xp": 1
+    },
+    "moonUpor": 0,
+    "noted": 512,
+    "numer": null,
+    "offer": null,
+    "orbit": null,
+    "pads": [
+     9,
+     1,
+     2
+    ],
+    "pendingLevels": 0,
+    "ranks": [
+     0,
+     0,
+     0,
+     1,
+     1,
+     null,
+     null,
+     null,
+     null,
+     1
+    ],
+    "reading": null,
+    "redirects": [],
+    "rerollUsed": false,
+    "ring": 28,
+    "ringTimer": 0.017,
+    "roll": null,
+    "roundReadyAt": 0,
+    "roundUntil": 0,
+    "roundUpor": 0,
+    "scale": null,
+    "shieldUntil": 0,
+    "silenceNoteAt": -99,
+    "suspendedAtKills": 0,
+    "tide": null,
+    "updateRequested": false,
+    "upgrades": {}
+   },
+   "pickups": [
+    {
+     "id": 12,
+     "x": 480,
+     "y": 800
+    },
+    {
+     "id": 13,
+     "x": 620,
+     "y": 1060
+    }
+   ],
+   "player": {
+    "attackRange": 54,
+    "facing": 1,
+    "hp": 1000000,
+    "shield": 0,
+    "stats": {
+     "critChance": 0,
+     "dmgMax": 10,
+     "dmgMin": 10,
+     "pewnoscSiebie": 100,
+     "resist": {
+      "mechaniczny": 8
+     },
+     "upor": 58
+    },
+    "target": null,
+    "x": 720,
+    "y": 880
+   },
+   "projectiles": [],
+   "summons": [],
+   "time": 5.7,
+   "zones": []
+  },
+  "castEvents": [
+   [
+    "footnote",
+    {
+     "text": "Zmianę orbity zgłoszono po fakcie. Orbita nie wniosła sprzeciwu."
+    }
+   ],
+   [
+    "skill:cast",
+    {
+     "aim": {
+      "dx": 0.832,
+      "dy": 0.555,
+      "kind": "wskazanie",
+      "x": 720,
+      "y": 880
+     },
+     "free": false,
+     "skill": 9,
+     "slot": 0
+    }
+   ]
+  ],
+  "result": true,
+  "tickEvents": []
  },
  "petlowiec.juzBylo.auto.copy": {
   "afterCast": {

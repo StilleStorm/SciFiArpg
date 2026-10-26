@@ -2,10 +2,22 @@
 import { defineSpec, type HeroSpecs } from '../specDefs';
 
 export const specs: HeroSpecs = {
-  categories: { orbita: 'podstawowa', grawitacja: 'uzytkowa', wniosek: 'obronna', plywy: 'ofensywna', ksiezyc: 'uzytkowa' },
+  categories: {
+    orbita: 'podstawowa',
+    krawedz: 'podstawowa',
+    plywy: 'ofensywna',
+    upadek: 'ofensywna',
+    pierscien: 'ofensywna',
+    wniosek: 'obronna',
+    zaokraglenie: 'obronna',
+    grawitacja: 'uzytkowa',
+    ksiezyc: 'uzytkowa',
+    zmianaOrbity: 'uzytkowa',
+  },
+  // docs/SKILLS.md loadouts: Toczenie (a roller, hits from the move), Studnia (pulls, pushes, heals in its zone), Uklad (orbiting bodies do the work); the columns are a partition
   list: [
-    defineSpec('nalesnik', 'toczenie', ['orbita', 'wniosek', 'plywy'], 'plywy', { area: 1.2 }),
-    defineSpec('nalesnik', 'studnia', ['grawitacja', 'plywy', 'wniosek'], 'grawitacja', { area: 1.2 }),
-    defineSpec('nalesnik', 'uklad', ['ksiezyc', 'grawitacja', 'orbita'], 'ksiezyc', { dmg: 1.2 }),
+    defineSpec('nalesnik', 'toczenie', ['orbita', 'krawedz', 'zaokraglenie', 'plywy'], 'plywy', { area: 1.2 }),
+    defineSpec('nalesnik', 'studnia', ['grawitacja', 'wniosek', 'zmianaOrbity'], 'grawitacja', { area: 1.2 }),
+    defineSpec('nalesnik', 'uklad', ['ksiezyc', 'pierscien', 'upadek'], 'ksiezyc', { dmg: 1.2 }),
   ],
 };

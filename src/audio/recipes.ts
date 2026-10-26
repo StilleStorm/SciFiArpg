@@ -642,6 +642,47 @@ export const RECIPES = {
     pluck(180, 0.9, 0.35, { delay: 0.005, bright: 900, role: 'tail' }),
     pluck(270, 0.6, 0.15, { delay: 0.01, bright: 1200, role: 'tail' }),
   ], 0.3, 7),
+  /** Nalesnik: Krawedz, a short roll on the rim, a click at the touch. */
+  nalesEdge: combat([
+    click(2100, 0.45),
+    noise(120, 0.2, 0.6, { q: 2.4, attack: 0.03, role: 'body' }),
+    thump(92, 0.1, 0.8, { delay: 0.16, pitchDrop: 0.25 }),
+    { ...thump(80, 0.06, 0.4, { pitchDrop: 0.15, delay: 0.02 }), repeat: 3, spread: 0.45 },
+    noise(2600, 0.1, 0.22, { q: 1.2, attack: 0.01, delay: 0.17, role: 'tail' }),
+  ], 0.2, 7),
+  /** Nalesnik: Pierscien, gravel turning in a band round him, small stones. */
+  nalesRing: combat([
+    click(1500, 0.3),
+    noise(130, 0.7, 0.5, { q: 2.8, attack: 0.15, role: 'body' }),
+    thump(66, 0.16, 0.8, { delay: 0.02, pitchDrop: 0.2 }),
+    { ...click(2600, 0.22, { q: 2, decay: 0.01, role: 'tail' }), repeat: 11, spread: 0.55, delay: 0.05 },
+    noise(900, 0.6, 0.2, { q: 0.8, attack: 0.2, pitchDrop: 0.4, delay: 0.05, role: 'tail' }),
+  ], 0.3, 7),
+  /** Nalesnik: Zaokraglenie, a soft swell to a round thud. */
+  nalesRound: combat([
+    click(1300, 0.25),
+    noise(140, 0.5, 0.5, { q: 2, attack: 0.3, role: 'body' }),
+    noise(700, 0.4, 0.2, { q: 0.8, attack: 0.28, pitchDrop: -0.6, role: 'tail' }),
+    thump(72, 0.18, 0.9, { delay: 0.28, pitchDrop: 0.2 }),
+    thump(52, 0.3, 0.5, { delay: 0.28, pitchDrop: 0.1, role: 'sub' }),
+  ], 0.3, 7),
+  /** Nalesnik: Upadek na powierzchnie, a hop, a flat landing, the ink slap. */
+  nalesFall: combat([
+    click(2400, 0.4),
+    noise(1800, 0.18, 0.2, { q: 0.9, attack: 0.02, pitchDrop: 0.7, role: 'tail' }),
+    noise(110, 0.3, 0.45, { q: 2.6, attack: 0.04, role: 'body' }),
+    thump(66, 0.2, 1.0, { delay: 0.18, pitchDrop: 0.3 }),
+    thump(44, 0.4, 0.7, { delay: 0.18, pitchDrop: 0.1, role: 'sub' }),
+    noise(3200, 0.07, 0.3, { q: 1.2, delay: 0.19, role: 'tail' }),
+  ], 0.3, 7),
+  /** Nalesnik: Zmiana orbity, a long roll that curves, then a small settle. */
+  nalesSwerve: combat([
+    click(1700, 0.35),
+    noise(100, 0.5, 0.65, { q: 2.2, attack: 0.05, role: 'body' }),
+    noise(900, 0.45, 0.2, { q: 0.8, attack: 0.1, pitchDrop: -0.8, role: 'tail' }),
+    { ...thump(76, 0.08, 0.5, { pitchDrop: 0.15, delay: 0.04 }), repeat: 6, spread: 0.36 },
+    thump(60, 0.15, 0.8, { delay: 0.42, pitchDrop: 0.2 }),
+  ], 0.3, 7),
 
   // ---------- ultimates (DESIGN 10.2): one per hero, longer and heavier than a skill, each ending in the stamp ----------
   /** Pralka, Pełny cykl: the drum spins up, everything is pulled in, CYKL ZAKOŃCZONY thudded down at the end. */
@@ -752,6 +793,33 @@ export const RECIPES = {
     thump(68, 0.2, 1.0, { delay: 0.55, pitchDrop: 0.25 }),
     thump(44, 0.4, 0.7, { delay: 0.552, pitchDrop: 0.1, role: 'sub' }),
     { ...noise(3600, 0.012, 0.28, { q: 1.2, role: 'tail' }), repeat: 8, spread: 0.3, delay: 0.58 },
+  ], 1.2, 9),
+
+  /** Nalesnik, Zderzenie: a long heavy roll through the crowd, the crater, UDERZENIE. */
+  nalesCollide: combat([
+    click(1900, 0.5),
+    thump(82, 0.2, 1.0, { pitchDrop: 0.3 }),
+    thump(46, 0.4, 0.7, { delay: 0.002, pitchDrop: 0.1, role: 'sub' }),
+    noise(100, 0.55, 0.7, { q: 2, attack: 0.04, delay: 0.02, role: 'body' }),
+    { ...thump(70, 0.08, 0.5, { pitchDrop: 0.15, delay: 0.1 }), repeat: 6, spread: 0.45 },
+    noise(1000, 0.5, 0.3, { q: 0.8, attack: 0.1, pitchDrop: 0.5, delay: 0.1, role: 'tail' }),
+    click(2200, 0.55, { delay: 0.7 }),
+    thump(62, 0.22, 1.0, { delay: 0.7, pitchDrop: 0.25 }),
+    noise(2400, 0.15, 0.3, { q: 0.9, delay: 0.72, role: 'tail' }),
+  ], 1.2, 9),
+  /** Nalesnik, Pelnia: three plucked moons ringing in turn, widening, PELNIA. */
+  nalesFull: combat([
+    click(2200, 0.5),
+    thump(84, 0.18, 0.95, { pitchDrop: 0.3 }),
+    thump(46, 0.4, 0.7, { delay: 0.002, pitchDrop: 0.1, role: 'sub' }),
+    pluck(90, 0.25, 0.6, { delay: 0.01, bright: 600, role: 'body' }),
+    pluck(180, 0.9, 0.3, { delay: 0.12, bright: 900, role: 'tail' }),
+    pluck(135, 0.9, 0.3, { delay: 0.26, bright: 900, role: 'tail' }),
+    pluck(270, 0.8, 0.25, { delay: 0.4, bright: 1200, role: 'tail' }),
+    noise(300, 0.55, 0.3, { q: 0.8, attack: 0.3, pitchDrop: -0.5, delay: 0.1, role: 'tail' }),
+    click(2300, 0.5, { delay: 0.7 }),
+    thump(66, 0.2, 1.0, { delay: 0.7, pitchDrop: 0.25 }),
+    thump(44, 0.4, 0.7, { delay: 0.702, pitchDrop: 0.1, role: 'sub' }),
   ], 1.2, 9),
 
   // ---------- flavours: laid over hit / crit / kill by the enemy family ----------

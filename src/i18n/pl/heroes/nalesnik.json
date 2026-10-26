@@ -69,6 +69,76 @@
         "name": "Wpis do katalogu",
         "desc": "Księżyc regulaminowy, obrażenia większe o 30%. Odnowienie dłuższe o 3 s."
       }
+    },
+    "krawedz": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Przetoczenie o 80 jednostek na krawędzi w stronę celu, 0,8 uderzenia. Od tyłu trafienie jest krytyczne."
+      },
+      "2": {
+        "name": "Krawędź złożona",
+        "desc": "Regulaminowa. Obejmuje wszystkich na drodze, po 0,6 uderzenia."
+      },
+      "3": {
+        "name": "Krawędź ostra",
+        "desc": "Egzystencjalna. 1,2 uderzenia, cel czeka na weryfikację. Odnowienie dłuższe o 2 s."
+      }
+    },
+    "pierscien": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Pierścień gruzu, promień 90–120, trwa 4 s. Wejście w niego to 0,6 uderzenia i 1 s oczekiwania na weryfikację."
+      },
+      "2": {
+        "name": "Pierścień wewnętrzny",
+        "desc": "Promień 50–80, po 0,9 uderzenia, trwa 3 s."
+      },
+      "3": {
+        "name": "Pierścień planetarny",
+        "desc": "Egzystencjalny, trwa 6 s. Wygenerowane, które go przekroczą, istnieją w stopniu 0,5. Odnowienie dłuższe o 3 s."
+      }
+    },
+    "zaokraglenie": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Zaokrąglenie na 3 s: upór wyższy o 20, o 35% mniej obrażeń otrzymanych, ruch wolniejszy o 20%."
+      },
+      "2": {
+        "name": "Zaokrąglenie w górę",
+        "desc": "Trwa 5 s, o 20% mniej obrażeń otrzymanych, bez spowolnienia."
+      },
+      "3": {
+        "name": "Zaokrąglenie w dół",
+        "desc": "Regulaminowe. Płasko: pociski zsuwają się całkiem, cios w zwarciu kosztuje o 20% więcej. Odnowienie dłuższe o 3 s."
+      }
+    },
+    "upadek": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Skok na wskazane miejsce, do 140 jednostek. Lądowanie: 1,6 uderzenia w promieniu 100, odepchnięcie, zaokrąglenie 2 s."
+      },
+      "2": {
+        "name": "Upadek kontrolowany",
+        "desc": "Regulaminowy. Promień 60, 2,4 uderzenia, bez odepchnięcia."
+      },
+      "3": {
+        "name": "Upadek z wysokości",
+        "desc": "Egzystencjalny. Krater przez 3 s zadaje 0,3 uderzenia na sekundę. Odnowienie dłuższe o 3 s."
+      }
+    },
+    "zmianaOrbity": {
+      "1": {
+        "name": "Brzmienie podstawowe",
+        "desc": "Przetoczenie po łuku, do 200 jednostek, przez przeciwników. Przetoczeni czekają na weryfikację 2 s."
+      },
+      "2": {
+        "name": "Zmiana na wniosek",
+        "desc": "Mechaniczna. Przetoczeni otrzymują 0,7 uderzenia."
+      },
+      "3": {
+        "name": "Zmiana o 180°",
+        "desc": "Egzystencjalna. Naleśnik ląduje z pierścieniem Pływów o promieniu 80. Odnowienie dłuższe o 3 s."
+      }
     }
   },
   "ult": {
@@ -89,6 +159,46 @@
         "3": {
           "name": "Decyzja warunkowa",
           "desc": "Decyzja mechaniczna, bez blokady: każdy w obszarze otrzymuje co sekundę połowę obrażeń. Kosztuje 6 racji."
+        }
+      }
+    },
+    "zderzenie": {
+      "name": "Zderzenie",
+      "desc": "Naleśnik toczy się 600 jednostek w stronę największego skupiska, przez przeciwników. Każdy na drodze otrzymuje 3 uderzenia. Tam, gdzie się zatrzyma, zostaje krater na 4 s, w którym czeka się na weryfikację.",
+      "stamp": "UDERZENIE",
+      "note": "Zderzenie odnotowano. Strony nie zostały o nim poinformowane.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Zderzenie, jak w opisie."
+        },
+        "2": {
+          "name": "Zderzenie nadzwyczajne",
+          "desc": "Egzystencjalne. Cała droga zostaje Terenem nieistniejącym. Kosztuje 4 racje."
+        },
+        "3": {
+          "name": "Zderzenie urzędowe",
+          "desc": "Regulaminowe. Zasięg 300, 4 uderzenia. Kosztuje 6 racji."
+        }
+      }
+    },
+    "pelnia": {
+      "name": "Pełnia",
+      "desc": "Trzy księżyce na 8 s, na orbitach rozszerzających się od 90 do 160 jednostek. Każde minięcie przeciwnika to 0,7 uderzenia. Upór wyższy o 30.",
+      "stamp": "PEŁNIA",
+      "note": "Pełnia nastąpiła zgodnie z kalendarzem. Kalendarza nie zatwierdzono.",
+      "para": {
+        "1": {
+          "name": "Brzmienie podstawowe",
+          "desc": "Pełnia, jak w opisie."
+        },
+        "2": {
+          "name": "Pełnia z pływami",
+          "desc": "Mechaniczna. Księżyce odpychają o 40. Kosztuje 4 racje."
+        },
+        "3": {
+          "name": "Pełnia regulaminowa",
+          "desc": "Regulaminowa. Dwa księżyce, które zostają na 14 s. Kosztuje 6 racji."
         }
       }
     }
@@ -115,5 +225,37 @@
         "desc": "„Księżyc” zadaje o 20% więcej obrażeń."
       }
     }
+  },
+  "skill6": {
+    "name": "Krawędź",
+    "pad": "Krawędź",
+    "desc": "Krótkie przetoczenie na krawędzi w stronę celu. Trafienie od tyłu jest krytyczne. Obrażenia mechaniczne."
+  },
+  "skill7": {
+    "name": "Pierścień",
+    "pad": "Pierścień",
+    "desc": "Wokół Naleśnika krąży pierścień gruzu. Kto do niego wejdzie, otrzymuje obrażenia i czeka na weryfikację."
+  },
+  "skill8": {
+    "name": "Zaokrąglenie",
+    "pad": "Zaokrąglenie",
+    "desc": "Zaokrąglenie na żądanie. Upór wyższy, część obrażeń nie dochodzi do skutku, ruch wolniejszy."
+  },
+  "skill9": {
+    "name": "Upadek na powierzchnię",
+    "pad": "Upadek",
+    "desc": "Naleśnik podskakuje we wskazane miejsce i ląduje płasko. Obrażenia obszarowe, odepchnięcie, chwilowe zaokrąglenie."
+  },
+  "skill10": {
+    "name": "Zmiana orbity",
+    "pad": "Zmiana",
+    "desc": "Przetoczenie po łuku do wskazanego miejsca, przez przeciwników, nie przez ściany. Przetoczeni czekają na weryfikację."
+  },
+  "note": {
+    "krawedz": "Krawędź nie jest granicą. Spór o to, po której stronie leży, trwa.",
+    "pierscien": "Pierścień uznano za planetarny wyłącznie ze względu na ilość gruzu.",
+    "zaokraglenie": "Zaokrąglenie nastąpiło w górę, zgodnie z przyjętą praktyką.",
+    "upadek": "Upadek na powierzchnię nastąpił zgodnie z grawitacją. Grawitacja nie była stroną.",
+    "zmiana": "Zmianę orbity zgłoszono po fakcie. Orbita nie wniosła sprzeciwu."
   }
 }

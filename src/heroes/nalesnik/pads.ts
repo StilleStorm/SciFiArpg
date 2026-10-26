@@ -1,4 +1,4 @@
-/** The pad glyphs of the five skills, by SkillIndex (ui/pads.ts): a rolling disc seen edge-on with its trail, a spiral of dots falling in, a small flag. */
+/** The pad glyphs of the ten skills, by SkillIndex (ui/pads.ts): a rolling disc seen edge-on with its trail, a spiral of dots falling in, a small flag, tide rings, a pebble on its orbit; then (S21) an edge, a ringed planet, a flat disc becoming round, a hop and landing, a curve with an arrow. */
 import { glyphCircle as circ } from '../figureKit';
 import type { HeroPadGlyphs } from '../module';
 
@@ -10,4 +10,14 @@ export const pads: HeroPadGlyphs = [
   [circ(0, 0, 5), '~' + circ(0, 0, 10), 'M-12-12A17 17 0 0 1 12-12', 'M-12 12A17 17 0 0 0 12 12'],
   // a dotted orbit with a pebble on it
   ['~M-16 0A16 8 0 1 0 16 0A16 8 0 1 0 -16 0', circ(0, 0, 4.5), circ(11, -6, 2.4)],
+  // S21. Krawedz: a disc standing on its edge on a ground rule, the short roll toward it (dotted) and the touch
+  ['M2-12A4.5 12 0 1 0 2 12A4.5 12 0 1 0 2-12', 'M-15 14H17', '~M-17-2H-7', '~M-17 6H-9', 'M10-11L15-15'],
+  // Pierscien: a small planet inside a band of debris (two dotted ellipses) with pebbles
+  [circ(0, 0, 5.5), '~M-17 0A17 7 0 1 0 17 0A17 7 0 1 0 -17 0', '~M-12 0A12 5 0 1 0 12 0A12 5 0 1 0 -12 0', circ(-14, -4, 1.6), circ(15, 4, 1.8), circ(4, -7, 1.3)],
+  // Zaokraglenie: a flat disc below and the round one it becomes above, an arrow between
+  ['M-15 12A15 4.5 0 1 0 15 12A15 4.5 0 1 0 -15 12', circ(0, -7, 8), 'M0 5V0', 'M-3 2L0 5L3 2', circ(3, -9, 1.6)],
+  // Upadek na powierzchnie: the arc of the hop (dotted), a flat landing on a rule and the ink slap at its two ends
+  ['~M-16-6Q-6-18 5-4', 'M-8 11A12 4 0 1 0 16 11A12 4 0 1 0 -8 11', 'M-11 15l-3 3M19 15l3 3', 'M5-8L5-3M2-5H8'],
+  // Zmiana orbity: a curve (dotted) from a small start to an arrowhead, round the dot of a centre
+  [circ(-15, 11, 2.6), '~M-15 11Q-18-10 8-11', 'M4-16L11-11L5-6', circ(2, 2, 3.2)],
 ];

@@ -227,8 +227,9 @@ export function stepMoon(s: RunState, bus: Bus, m: Summon, dt: number): void {
   const o = m.orbit;
   if (!o) return;
   const p = s.player;
-  const circle = KSIEZYC_ORBIT * areaOf(s, 4);
-  o.ring = circle;
+  const g = o.grow; // Pelnia (nalesnik/ultimates.ts): the orbit widens from `from` to `to` over `over` seconds; its drawn ring stays the outer one
+  const circle = g ? g.from + (g.to - g.from) * Math.min(1, Math.max(0, (s.time - g.born) / g.over)) : KSIEZYC_ORBIT * areaOf(s, 4);
+  if (!g) o.ring = circle;
   o.angle += KSIEZYC_RATE * dt;
   o.r = Math.min(circle, o.r + KSIEZYC_LAUNCH * dt);
   m.x = p.x + Math.cos(o.angle) * o.r;
@@ -239,6 +240,7 @@ export function stepMoon(s: RunState, bus: Bus, m: Summon, dt: number): void {
     const last = hits[e.id];
     if (last !== undefined && s.time - last < KSIEZYC_GAP_S) continue;
     hits[e.id] = s.time;
-    skillDamage(s, bus, e, m.damageType, m.damageMul);
+    if (skillDamage(s, bus, e, m.damageType, m.damageMul)) continue;
+    if (o.knock !== undefined && !e.boss) knockback(s, e, m.x, m.y, o.knock);
   }
 }

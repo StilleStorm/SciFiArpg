@@ -1800,12 +1800,13 @@ try {
   }
   await shot('16b-every-hero-cast');
 
-  // ---------- 6e3. S19/S20: every ultimate of Pralka, Konsultant, Petlowiec and Kartograf (the slot's and ultimates 2 and 3) in all three paragraphs casts, runs and ends ----------
+  // ---------- 6e3. S19/S20/S21: every ultimate of Pralka, Konsultant, Petlowiec, Kartograf and Nalesnik (the slot's and ultimates 2 and 3) in all three paragraphs casts, runs and ends ----------
   for (const [i, h] of [
     { id: 'pralka', ults: ['pelnyCykl', 'uznanieOsobowosci', 'reklamacja'] },
     { id: 'konsultant', ults: ['przekazanie', 'koniecKolejki', 'ankieta'] },
     { id: 'petlowiec', ults: ['zebranie', 'cofniecie', 'przedwczesny'] },
     { id: 'kartograf', ults: ['mapaOstateczna', 'skreslenie', 'pomiarKontrolny'] },
+    { id: 'nalesnik', ults: ['decyzjaKomisji', 'zderzenie', 'pelnia'] },
   ].entries()) {
     await page.evaluate((a) => window.__game.start(50 + a.i, { heroId: a.id, lawId: 'grawitacja' }), { i, id: h.id }); // a law that opens a banner mid-leg would hold the clock
     await sleep(300);

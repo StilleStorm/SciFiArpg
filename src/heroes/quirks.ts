@@ -35,5 +35,10 @@ export function racjaBracket(s: RunState): number | null {
   return heroById(s.player.heroId).quirk?.racjaBracket?.(s) ?? null;
 }
 
+/** A shot of enemy `from` skimmed off the player: the hero's quirk may answer it (Nalesnik, Pory). */
+export function onSkim(s: RunState, bus: Bus, from: number): void {
+  heroById(s.player.heroId).quirk?.onSkim?.(s, bus, from);
+}
+
 export { HITS_PER_ERROR } from './pralka/quirk';
 export { ROUND_BELOW, ROUND_COOLDOWN_S, ROUND_S, ROUND_UPOR } from './nalesnik/quirk';

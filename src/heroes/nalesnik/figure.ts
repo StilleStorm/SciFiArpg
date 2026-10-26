@@ -1,7 +1,9 @@
 /** The Nalesnik's drawing (a flat asteroid, built in code) and his auto-attack animation: the flip with the ink slap. */
 import { createRng } from '../../core/rng';
 import { blobPoints, el, n2, smoothClosed } from '../../render/svg';
+import type { Zone } from '../../entities/types';
 import { circlePath, setPart, type BuildExtras, type FigureDef, type HeroFigure, type PartName, type Parts, type Walker } from '../figureKit';
+import { ZMIANA_BEND } from './numbers';
 import { clamp01, FLIP_MS, HOP, keyframes, neutralPose, SLAP_AT_MS, SLAP_DRAW_MS, SLAP_ERASE_MS, SLAP_HOLD_MS, type HeroPose } from '../poseKit';
 
 /** a flat asteroid with a pending application: the drawing is built by buildPancake (the disc, its craters, the flag, the orbit) */
@@ -124,6 +126,64 @@ function patchPancake(e: Walker, p: Parts, timeMs: number): void {
   setPart(p, 'pebble', p.named.pebble, `translate(${n2(Math.cos(a) * ORBIT_RX)} ${n2(Math.sin(a) * ORBIT_RY)})`);
 }
 
+const f1 = (v: number): string => String(Math.round(v * 10) / 10);
+
+/**
+ * The things his skills leave on the page (S21), as strokes in the zone's own frame. The ring of debris (Pierscien): two dotted circles
+ * and a scatter of pebbles between them. A crater (Upadek § 3, Zderzenie): a lipped, uneven rim with a dotted inner ring and ticks of
+ * thrown earth. The curve (Zmiana orbity): a dotted arc from the centre to the point along the zone's angle, with an arrowhead.
+ */
+export function zoneParts(z: Zone): readonly string[] | null {
+  if (z.variant === 'pierscien') {
+    const inner = z.acc ?? z.r - 30;
+    const mid = (inner + z.r) / 2;
+    const rng = createRng(z.id * 5113);
+    const pebbles: string[] = [];
+    for (let i = 0; i < 18; i++) {
+      const a = ((i + rng.range(-0.3, 0.3)) / 18) * Math.PI * 2;
+      const d = mid + rng.range(-(z.r - inner) * 0.3, (z.r - inner) * 0.3);
+      pebbles.push(circlePath(Math.cos(a) * d, Math.sin(a) * d, rng.range(1.3, 2.6)));
+    }
+    return [`~${circlePath(0, 0, inner)}`, `~${circlePath(0, 0, z.r)}`, pebbles.join('')];
+  }
+  if (z.variant === 'krater') {
+    const rng = createRng(z.id * 3203);
+    const phase = rng.range(0, 6);
+    const rim = (k: number): string => {
+      let d = '';
+      for (let i = 0; i < 28; i++) {
+        const a = (i / 28) * Math.PI * 2;
+        const r = z.r * k * (1 + 0.06 * Math.sin(3 * a + phase) + 0.04 * Math.sin(5 * a + phase * 2));
+        d += `${i === 0 ? 'M' : 'L'}${f1(Math.cos(a) * r)} ${f1(Math.sin(a) * r)}`;
+      }
+      return `${d}Z`;
+    };
+    let ticks = '';
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2 + rng.range(-0.1, 0.1);
+      ticks += `M${f1(Math.cos(a) * z.r * 1.05)} ${f1(Math.sin(a) * z.r * 1.05)}L${f1(Math.cos(a) * z.r * 1.2)} ${f1(Math.sin(a) * z.r * 1.2)}`;
+    }
+    return [rim(1), rim(0.85), `~${circlePath(0, 0, z.r * 0.5)}`, ticks];
+  }
+  if (z.variant === 'luk') {
+    const a = z.angle ?? 0;
+    const ux = Math.cos(a);
+    const uy = Math.sin(a);
+    const len = z.r;
+    const cx = ux * len * 0.5 - uy * len * ZMIANA_BEND;
+    const cy = uy * len * 0.5 + ux * len * ZMIANA_BEND;
+    const ex = ux * len;
+    const ey = uy * len;
+    // the tangent at the end runs from the control point to the end; two short strokes make the head
+    const tl = Math.hypot(ex - cx, ey - cy) || 1;
+    const tx = (ex - cx) / tl;
+    const ty = (ey - cy) / tl;
+    const head = (turn: number): string => `M${f1(ex)} ${f1(ey)}L${f1(ex - (tx * Math.cos(turn) - ty * Math.sin(turn)) * 12)} ${f1(ey - (tx * Math.sin(turn) + ty * Math.cos(turn)) * 12)}`;
+    return [`~M0 0Q${f1(cx)} ${f1(cy)} ${f1(ex)} ${f1(ey)}`, head(0.5) + head(-0.5), circlePath(0, 0, 3)];
+  }
+  return null;
+}
+
 export const figure: HeroFigure = {
   def: figureDef,
   wash: { cx: 0, cy: 1, r: 22, seed: 0x4805 },
@@ -136,4 +196,5 @@ export const figure: HeroFigure = {
     p.pancake.flip = pose.flip;
   },
   patch: patchPancake,
+  zoneParts,
 };
