@@ -73,7 +73,7 @@
     "krawedz": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Przetoczenie o 80 jednostek na krawędzi w stronę celu, 0,8 uderzenia. Od tyłu trafienie jest krytyczne."
+        "desc": "Przetoczenie na krawędzi o 80 jednostek w stronę celu, 0,8 uderzenia. Trafienie od tyłu jest krytyczne."
       },
       "2": {
         "name": "Krawędź złożona",
@@ -81,13 +81,13 @@
       },
       "3": {
         "name": "Krawędź ostra",
-        "desc": "Egzystencjalna. 1,2 uderzenia, cel czeka na weryfikację. Odnowienie dłuższe o 2 s."
+        "desc": "Egzystencjalna. 1,2 uderzenia, cel czeka 1 s na weryfikację. Odnowienie dłuższe o 2 s."
       }
     },
     "pierscien": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Pierścień gruzu, promień 90–120, trwa 4 s. Wejście w niego to 0,6 uderzenia i 1 s oczekiwania na weryfikację."
+        "desc": "Pierścień gruzu, promień 90–120, trwa 4 s. Każde przekroczenie kosztuje 0,6 uderzenia i 1 s oczekiwania na weryfikację."
       },
       "2": {
         "name": "Pierścień wewnętrzny",
@@ -95,21 +95,21 @@
       },
       "3": {
         "name": "Pierścień planetarny",
-        "desc": "Egzystencjalny, trwa 6 s. Wygenerowane, które go przekroczą, istnieją w stopniu 0,5. Odnowienie dłuższe o 3 s."
+        "desc": "Egzystencjalny, trwa 6 s. Wygenerowane, które go przekroczą, istnieją przez 3 s w stopniu 0,5. Odnowienie dłuższe o 3 s."
       }
     },
     "zaokraglenie": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Zaokrąglenie na 3 s: upór wyższy o 20, o 35% mniej obrażeń otrzymanych, ruch wolniejszy o 20%."
+        "desc": "Zaokrąglenie na 3 s: upór wyższy o 20, obrażenia otrzymane mniejsze o 35%, ruch wolniejszy o 20%."
       },
       "2": {
         "name": "Zaokrąglenie w górę",
-        "desc": "Trwa 5 s, o 20% mniej obrażeń otrzymanych, bez spowolnienia."
+        "desc": "Trwa 5 s, obrażenia otrzymane mniejsze o 20%, bez spowolnienia."
       },
       "3": {
         "name": "Zaokrąglenie w dół",
-        "desc": "Regulaminowe. Płasko: pociski zsuwają się całkiem, cios w zwarciu kosztuje o 20% więcej. Odnowienie dłuższe o 3 s."
+        "desc": "Regulaminowe. Płasko: pocisk zsuwa się za opłatą 1 racji, cios w zwarciu o 20% mocniejszy. Odnowienie dłuższe o 3 s."
       }
     },
     "upadek": {
@@ -137,7 +137,7 @@
       },
       "3": {
         "name": "Zmiana o 180°",
-        "desc": "Egzystencjalna. Naleśnik ląduje z pierścieniem Pływów o promieniu 80. Odnowienie dłuższe o 3 s."
+        "desc": "Egzystencjalna. Lądowanie wywołuje przypływ o promieniu 80: 1,2 uderzenia i odepchnięcie. Odnowienie dłuższe o 3 s."
       }
     }
   },
@@ -164,8 +164,8 @@
     },
     "zderzenie": {
       "name": "Zderzenie",
-      "desc": "Naleśnik toczy się 600 jednostek w stronę największego skupiska, przez przeciwników. Każdy na drodze otrzymuje 3 uderzenia. Tam, gdzie się zatrzyma, zostaje krater na 4 s, w którym czeka się na weryfikację.",
-      "stamp": "UDERZENIE",
+      "desc": "Naleśnik toczy się 600 jednostek przez największe skupisko przeciwników. Każdy na drodze otrzymuje 3 uderzenia. W miejscu zatrzymania zostaje krater, w którym przez 4 s czeka się na weryfikację.",
+      "stamp": "WPŁYNĘŁO",
       "note": "Zderzenie odnotowano. Strony nie zostały o nim poinformowane.",
       "para": {
         "1": {
@@ -174,7 +174,7 @@
         },
         "2": {
           "name": "Zderzenie nadzwyczajne",
-          "desc": "Egzystencjalne. Cała droga zostaje Terenem nieistniejącym. Kosztuje 4 racje."
+          "desc": "Egzystencjalne. Przebyta droga zostaje uznana za Teren nieistniejący. Kosztuje 4 racje."
         },
         "3": {
           "name": "Zderzenie urzędowe",
@@ -198,7 +198,7 @@
         },
         "3": {
           "name": "Pełnia regulaminowa",
-          "desc": "Regulaminowa. Dwa księżyce, które zostają na 14 s. Kosztuje 6 racji."
+          "desc": "Regulaminowa. Dwa księżyce, za to na 14 s. Kosztuje 6 racji."
         }
       }
     }
@@ -244,7 +244,7 @@
   "skill9": {
     "name": "Upadek na powierzchnię",
     "pad": "Upadek",
-    "desc": "Naleśnik podskakuje we wskazane miejsce i ląduje płasko. Obrażenia obszarowe, odepchnięcie, chwilowe zaokrąglenie."
+    "desc": "Naleśnik przeskakuje na wskazane miejsce i ląduje płasko. Obrażenia obszarowe, odepchnięcie, chwilowe zaokrąglenie."
   },
   "skill10": {
     "name": "Zmiana orbity",
@@ -254,7 +254,7 @@
   "note": {
     "krawedz": "Krawędź nie jest granicą. Spór o to, po której stronie leży, trwa.",
     "pierscien": "Pierścień uznano za planetarny wyłącznie ze względu na ilość gruzu.",
-    "zaokraglenie": "Zaokrąglenie nastąpiło w górę, zgodnie z przyjętą praktyką.",
+    "zaokraglenie": "Zaokrąglenie nastąpiło zgodnie z przyjętą praktyką. Kierunku nie podano.",
     "upadek": "Upadek na powierzchnię nastąpił zgodnie z grawitacją. Grawitacja nie była stroną.",
     "zmiana": "Zmianę orbity zgłoszono po fakcie. Orbita nie wniosła sprzeciwu."
   }

@@ -228,19 +228,19 @@
         },
         "7": {
           "name": "Równowaga hydrostatyczna",
-          "desc": "Od 90% racji leży płasko: pociski zadają o 30% mniej. Poniżej jednej trzeciej racji zaokrągla się na 5 s: upór wyższy o 20, bez odepchnięcia. Asystent odnotowuje ponowne rozpatrzenie."
+          "desc": "Od 90% racji leży płasko: pociski zadają o 30% mniej. Poniżej jednej trzeciej zaokrągla się na 5 s: upór wyższy o 20, odepchnięcia nie uwzględnia się. Asystent odnotowuje ponowne rozpatrzenie."
         },
         "8": {
           "name": "Pory",
-          "desc": "Pocisk, który się zsunął, zwraca nadawcy 0,3 uderzenia mechanicznego."
+          "desc": "Zsunięty pocisk wraca do nadawcy jako 0,3 uderzenia mechanicznego."
         },
         "9": {
           "name": "Masa krytyczna",
-          "desc": "Każdy przeciwnik przyciągnięty Grawitacją zwiększa o 3% obrażenia następnej umiejętności ofensywnej, najwyżej o 30%."
+          "desc": "Każdy przeciwnik przyciągnięty „Grawitacją własną” zwiększa o 3% obrażenia następnej umiejętności ofensywnej, najwyżej o 30%."
         },
         "10": {
           "name": "Satelita stały",
-          "desc": "Satelita Orbity zostaje do końca swoich dni i otrzymuje co sekundę 0,2 uderzenia."
+          "desc": "Satelita „Orbity” zostaje do końca swoich dni i otrzymuje co sekundę 0,2 uderzenia."
         }
       }
     },
