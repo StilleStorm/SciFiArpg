@@ -903,3 +903,5 @@ music and SFX volume, both persisted; defaults on.
 - Skill names are nouns or noun phrases without end punctuation, so they compose into
   "{skill}, ulepszenie {rank}". The Konsultant's question is therefore printed without "?"
   on purpose; the Asystent notes it once as a clerical omission (backlog).
+- Skill names are printed without quotation marks in running text, inflected as nouns
+  ("Odnowienie Pętli krótsze o 1 s"), player decision 2026-10-26.

@@ -114,7 +114,7 @@
         },
         "10": {
           "name": "Wstrzymanie opłat",
-          "desc": "Każde użycie „Czy mogę jeszcze w czymś pomóc” obniża opłaty w kiosku o 10% do końca wyprawy, najwyżej o 30%."
+          "desc": "Każde użycie Czy mogę jeszcze w czymś pomóc obniża opłaty w kiosku o 10% do końca wyprawy, najwyżej o 30%."
         }
       },
       "petlowiec": {
@@ -236,11 +236,11 @@
         },
         "9": {
           "name": "Masa krytyczna",
-          "desc": "Każdy przeciwnik przyciągnięty „Grawitacją własną” zwiększa o 3% obrażenia następnej umiejętności ofensywnej, najwyżej o 30%."
+          "desc": "Każdy przeciwnik przyciągnięty Grawitacją własną zwiększa o 3% obrażenia następnej umiejętności ofensywnej, najwyżej o 30%."
         },
         "10": {
           "name": "Satelita stały",
-          "desc": "Satelita „Orbity” zostaje do końca swoich dni i otrzymuje co sekundę 0,2 uderzenia."
+          "desc": "Satelita Orbity zostaje do końca swoich dni i otrzymuje co sekundę 0,2 uderzenia."
         }
       }
     },

@@ -208,21 +208,21 @@
       "name": "Załoga",
       "cap": {
         "name": "Pełny skład",
-        "desc": "„Przybycie przed wyjazdem” trwa o 25% dłużej."
+        "desc": "Przybycie przed wyjazdem trwa o 25% dłużej."
       }
     },
     "chronologia": {
       "name": "Chronologia",
       "cap": {
         "name": "Skrócony obieg",
-        "desc": "Odnowienie „Pętli” krótsze o 1 s."
+        "desc": "Odnowienie Pętli krótsze o 1 s."
       }
     },
     "ladowanie": {
       "name": "Lądowanie",
       "cap": {
         "name": "Pole poszerzone",
-        "desc": "„Spór” obejmuje obszar większy o 20%."
+        "desc": "Spór obejmuje obszar większy o 20%."
       }
     }
   },

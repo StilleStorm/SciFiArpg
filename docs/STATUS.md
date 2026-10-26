@@ -141,7 +141,7 @@ Polish and release. Progress lines are below.
   Recommendation: no, apply racja 68 → 85 and weapon 5–10 → 6–11 together, then re-measure with
   `BAL_LOADOUT=pomiar,granica,korekta`. Not applied; nothing waits on it.
 
-- **S21 questions (none blocks):** (1) Zderzenie's stamp lands beside Naleśnik at the cast; move it to where the roll ends (a hook in heroes/ultimate.ts)? Recommendation: yes, in S28. (2) Voice asks for one rule on quoting skill names in text (with or without „…”), and whether the PEŁNIA stamp stays. Recommendation: names without quotes, keep PEŁNIA.
+- **Answered (player, 2026-10-26):** Zderzenie's stamp moves to where the roll ends (S28, hook in heroes/ultimate.ts); skill names without quotes in text (DESIGN §12.1, applied to the hero and forms JSON); the PEŁNIA stamp stays; the Konsultant and Kartograf balance proposals are left unapplied for now (fine as is).
 
 ## Game plan and the slice order
 The plan is docs/PRODUCTION.md: 7 milestones, 30 slices, each with a paste-ready builder brief.

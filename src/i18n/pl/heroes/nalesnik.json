@@ -208,21 +208,21 @@
       "name": "Toczenie",
       "cap": {
         "name": "Przypływ zwiększony",
-        "desc": "„Pływy” obejmują obszar większy o 20%."
+        "desc": "Pływy obejmują obszar większy o 20%."
       }
     },
     "studnia": {
       "name": "Studnia",
       "cap": {
         "name": "Pole grawitacyjne",
-        "desc": "„Grawitacja własna” obejmuje obszar większy o 20%."
+        "desc": "Grawitacja własna obejmuje obszar większy o 20%."
       }
     },
     "uklad": {
       "name": "Układ",
       "cap": {
         "name": "Księżyc zatwierdzony",
-        "desc": "„Księżyc” zadaje o 20% więcej obrażeń."
+        "desc": "Księżyc zadaje o 20% więcej obrażeń."
       }
     }
   },
