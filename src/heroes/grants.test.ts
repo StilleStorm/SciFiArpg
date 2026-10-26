@@ -11,6 +11,7 @@ import type { SetId } from '../items/sets';
 import { UNIQUES, UNIQUES_BY_ID, makeUnique } from '../items/uniques';
 import { createRun, type RunState } from '../world/run';
 import { grantSkill, heroOfSkill, itemRanksOf, layPatch, paragraphAt, patchAt, rankOf, skillIndexOf } from './grants';
+import type { SkillIndex } from './defs';
 import { HERO_IDS, heroById, type HeroId } from './registry';
 import { cooldownOf, durationOf, patchOf, power } from './helpers';
 import { effectiveSkill, fixPads, isInstalled } from './loadout';
@@ -121,22 +122,35 @@ describe('ranks from a worn unique', () => {
 });
 
 describe('a worn unique unlocks its skill', () => {
-  it.each([['windykacja'], ['atmosfera']])('%s: the fifth skill is installed while it is worn, and leaves the pads when it is taken off', (id) => {
+  it.each([['windykacja'], ['atmosfera']])('%s: the granted skill is installed while it is worn, and leaves the pads when it is taken off', (id) => {
     const owner = ownerOf(id);
     const s = createRun(5, { heroId: owner });
-    const i = skillIndexOf(owner, UNIQUES_BY_ID.get(id)?.grant?.skill ?? '');
-    expect(i).toBe(4);
-    expect(isInstalled(s, 4)).toBe(false);
+    const i = skillIndexOf(owner, UNIQUES_BY_ID.get(id)?.grant?.skill ?? '') as SkillIndex;
+    expect(i).toBeGreaterThanOrEqual(4); // a skill the hero does not start with
+    expect(isInstalled(s, i)).toBe(false);
     wearUnique(s, id);
-    expect(isInstalled(s, 4)).toBe(true);
-    s.hero.pads = [0, 1, 4];
+    expect(isInstalled(s, i)).toBe(true);
+    s.hero.pads = [0, 1, i];
     fixPads(s);
-    expect(s.hero.pads[2]).toBe(4);
+    expect(s.hero.pads[2]).toBe(i);
     const slot = s.player.equipment.nakrycie ? 'nakrycie' : 'odziez';
     unequipSlot(s.player, slot);
     fixPads(s);
-    expect(isInstalled(s, 4)).toBe(false);
-    expect(s.hero.pads).not.toContain(4);
+    expect(isInstalled(s, i)).toBe(false);
+    expect(s.hero.pads).not.toContain(i);
+  });
+
+  it('«Atmosfera szczątkowa» carries Zaokrąglenie § 3 w dół: cast at level 1, he lies flat and every shot skims off (ITEMS §12)', () => {
+    expect(UNIQUES_BY_ID.get('atmosfera')?.grant).toEqual({ skill: 'zaokraglenie', para: 3, ranks: 2 });
+    const s = createRun(5, { heroId: 'nalesnik' });
+    const i = skillIndexOf('nalesnik', 'zaokraglenie') as SkillIndex;
+    wearUnique(s, 'atmosfera');
+    expect(paragraphAt(s, i)).toBe(3);
+    s.hero.pads = [0, 1, i];
+    fixPads(s);
+    expect(castSkill(s, createBus(), 2)).toBe(true);
+    expect(s.player.flat).toBe(true);
+    expect(projectileDamageMul(s.player)).toBe(0);
   });
 });
 

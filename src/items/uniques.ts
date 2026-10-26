@@ -44,7 +44,7 @@ export const UNIQUES: readonly UniqueDef[] = [
   { id: 'granica', baseId: 'wskaznik', stats: { dmgMin: 7, dmgMax: 12, pewnosc: 12, crit: 4, resRegulaminowy: 8 }, likes: 'papier', dislikes: 'chaos', grant: { skill: 'triangulacja', para: 3, ranks: 2 } },
   { id: 'bladpomiaru', baseId: 'polisa', stats: { racja: 24, resMechaniczny: 14, resRegulaminowy: 8, pewnosc: 8 }, likes: 'watpliwosc', dislikes: 'porzadek', grant: { skill: 'korekta', para: 2, ranks: 1 } },
   { id: 'masaplanety', baseId: 'liczydlo', stats: { pewnosc: 10, upor: 14, racja: 14, resMechaniczny: 8 }, likes: 'metal', dislikes: 'halas', grant: { skill: 'grawitacja', para: 2, ranks: 1 } },
-  { id: 'atmosfera', baseId: 'czepek', stats: { upor: 14, resRegulaminowy: 12, resMechaniczny: 10, racja: 10 }, likes: 'porzadek', dislikes: 'halas', grant: { skill: 'ksiezyc', para: 3, ranks: 2 } },
+  { id: 'atmosfera', baseId: 'czepek', stats: { upor: 14, resRegulaminowy: 12, resMechaniczny: 10, racja: 10 }, likes: 'porzadek', dislikes: 'halas', grant: { skill: 'zaokraglenie', para: 3, ranks: 2 } },
 ];
 
 export const UNIQUES_BY_ID: ReadonlyMap<string, UniqueDef> = new Map(UNIQUES.map((u) => [u.id, u]));
