@@ -178,7 +178,7 @@
         },
         "3": {
           "name": "Uznanie warunkowe",
-          "desc": "Obrażenia regulaminowe, na sekundę prawie dwa razy większe. Trwa 4 s. Pralka nie może się ruszyć. Kosztuje 6 racji."
+          "desc": "Obrażenia regulaminowe, na sekundę większe o 88%. Trwa 4 s. Pralka nie może się ruszyć. Kosztuje 6 racji."
         }
       }
     },
@@ -222,7 +222,7 @@
       "name": "Serwis",
       "cap": {
         "name": "Przegląd bębna",
-        "desc": "Otwarcie bębna zadaje o 20% więcej obrażeń."
+        "desc": "Obrażenia Otwarcia bębna większe o 20%."
       }
     }
   },

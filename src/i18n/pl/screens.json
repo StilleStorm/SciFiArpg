@@ -501,8 +501,8 @@
   "stops": {
     "title": "Przystanki na żądanie",
     "sub": "Rozkład nieaktualny",
-    "note": "Przystanek zatrzymuje się na żądanie. Żądanie składa się, przechodząc obok niego.",
-    "none": "Na tej planecie nie zarejestrowano żadnego przystanku.",
-    "go": "Strona {page}: zatrzymaj na żądanie"
+    "note": "Żądanie zgłasza się przejściem obok przystanku. Pojazdu nie przewidziano.",
+    "none": "Nie zarejestrowano przystanków.",
+    "go": "Do strony {page}"
   }
 }

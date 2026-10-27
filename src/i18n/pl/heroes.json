@@ -155,7 +155,7 @@
     "desc2": "Mapy są dokładne. Terenu nie sprawdzano.",
     "desc3": "Strzela z daleka, ponieważ stamtąd lepiej widać.",
     "quirk": "Mapę strony widzi w całości już przy wejściu. Pozostali widzą białą kartkę.",
-    "auto": "Laser pomiarowy. Mechaniczny, daleki zasięg, trafia natychmiast. Argument nie do odparcia przebija wszystko na linii.",
+    "auto": "Odczyt laserowy. Mechaniczny, daleki zasięg, trafia natychmiast. Argument nie do odparcia przebija wszystko na linii.",
     "decoy": "błąd pomiaru",
     "skill1": {
       "name": "Triangulacja",
@@ -176,7 +176,7 @@
     "skill4": {
       "name": "Skala 1:1",
       "pad": "Skala",
-      "desc": "Przez 5 sekund mapa jest w skali 1:1. Zasięg większy, każdy pomiar przechodzi na wylot, zmierzeni czekają na weryfikację."
+      "desc": "Przez 5 sekund mapa jest w skali 1:1. Zasięg odczytu większy, każdy odczyt przechodzi na wylot, trafieni czekają na weryfikację."
     },
     "skill5": {
       "name": "Legenda",

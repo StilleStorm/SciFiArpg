@@ -44,7 +44,7 @@
         },
         "3": {
           "name": "Wyższe obroty",
-          "desc": "Umiejętności zadają o 10% więcej obrażeń."
+          "desc": "Obrażenia umiejętności większe o 10%."
         },
         "4": {
           "name": "Filtr kłaczków",
@@ -72,13 +72,13 @@
         },
         "10": {
           "name": "Bęben pełny",
-          "desc": "Każdy przeciwnik przyciągnięty Wirowaniem dodaje 4% obrażeń następnemu Otwarciu bębna lub Programowi 90°, najwyżej 24%."
+          "desc": "Za każdego przeciwnika przyciągniętego Wirowaniem obrażenia następnego Otwarcia bębna lub Programu 90° większe o 4%, najwyżej o 24%."
         }
       },
       "konsultant": {
         "1": {
           "name": "Skrypt rozmowy",
-          "desc": "Umiejętności zadają o 10% więcej obrażeń."
+          "desc": "Obrażenia umiejętności większe o 10%."
         },
         "2": {
           "name": "Kolejka priorytetowa",
@@ -124,7 +124,7 @@
         },
         "2": {
           "name": "Pamięć mięśniowa",
-          "desc": "Umiejętności zadają o 10% więcej obrażeń."
+          "desc": "Obrażenia umiejętności większe o 10%."
         },
         "3": {
           "name": "Niezgodność wersji",
@@ -148,7 +148,7 @@
         },
         "8": {
           "name": "Sprzeczność",
-          "desc": "Kopia trafiająca innym rodzajem obrażeń niż ostatnio Pętlowiec zadaje o 15% więcej."
+          "desc": "Gdy kopia trafia innym rodzajem obrażeń niż ostatnio Pętlowiec, jej obrażenia są większe o 15%."
         },
         "9": {
           "name": "Dziennik pokładowy",
@@ -166,10 +166,10 @@
         },
         "2": {
           "name": "Poprawka na krzywiznę",
-          "desc": "Umiejętności zadają o 10% więcej obrażeń."
+          "desc": "Obrażenia umiejętności większe o 10%."
         },
         "3": {
-          "name": "Szybki pomiar",
+          "name": "Szybka niwelacja",
           "desc": "Odnowienie umiejętności krótsze o 8%."
         },
         "4": {
@@ -181,8 +181,8 @@
           "desc": "Czas działania dłuższy o 20%."
         },
         "6": {
-          "name": "Odczyt niezależny",
-          "desc": "Szansa na argument nie do odparcia wyższa o 6 punktów, obrażenia o 10%."
+          "name": "Biegły niezależny",
+          "desc": "Szansa na argument nie do odparcia wyższa o 6 punktów, obrażenia większe o 10%."
         },
         "7": {
           "name": "Mapa z góry",
@@ -198,7 +198,7 @@
         },
         "10": {
           "name": "Trzeci punkt",
-          "desc": "Trzecie z rzędu trafienie linią pomiarową w tego samego przeciwnika jest odparciem, bez względu na jego tezę."
+          "desc": "Trzecie z rzędu trafienie tego samego przeciwnika Pomiarem, Przekrojem lub Pomiarem kontrolnym jest odparciem, bez względu na jego tezę."
         }
       },
       "nalesnik": {
@@ -208,7 +208,7 @@
         },
         "2": {
           "name": "Większa masa",
-          "desc": "Umiejętności zadają o 10% więcej obrażeń."
+          "desc": "Obrażenia umiejętności większe o 10%."
         },
         "3": {
           "name": "Poszerzona strefa wpływów",
@@ -228,7 +228,7 @@
         },
         "7": {
           "name": "Równowaga hydrostatyczna",
-          "desc": "Od 90% racji leży płasko: pociski zadają o 30% mniej. Poniżej jednej trzeciej zaokrągla się na 5 s: upór wyższy o 20, odepchnięcia nie uwzględnia się. Asystent odnotowuje ponowne rozpatrzenie."
+          "desc": "Od 90% racji leży płasko i przyjmuje od pocisków o 30% mniej obrażeń. Poniżej jednej trzeciej zaokrągla się na 5 s: upór wyższy o 20, odepchnięcia nie uwzględnia się. Asystent odnotowuje ponowne rozpatrzenie."
         },
         "8": {
           "name": "Pory",
@@ -236,7 +236,7 @@
         },
         "9": {
           "name": "Masa krytyczna",
-          "desc": "Każdy przeciwnik przyciągnięty Grawitacją własną zwiększa o 3% obrażenia następnej umiejętności ofensywnej, najwyżej o 30%."
+          "desc": "Za każdego przeciwnika przyciągniętego Grawitacją własną obrażenia następnej umiejętności ofensywnej większe o 3%, najwyżej o 30%."
         },
         "10": {
           "name": "Satelita stały",

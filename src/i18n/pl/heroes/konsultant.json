@@ -154,7 +154,7 @@
         },
         "2": {
           "name": "Sprawa zasadnicza",
-          "desc": "Obrażenia egzystencjalne, jednorazowe, prawie dwa razy większe. Przekazanie trwa 3 s. Kosztuje 6 racji."
+          "desc": "Obrażenia egzystencjalne, jednorazowe, większe o 88%. Przekazanie trwa 3 s. Kosztuje 6 racji."
         },
         "3": {
           "name": "Przekazanie bez uwag",
@@ -215,7 +215,7 @@
       "name": "Windykacja",
       "cap": {
         "name": "Numer na wezwaniu",
-        "desc": "Numer sprawy zadaje o 20% więcej obrażeń."
+        "desc": "Obrażenia Numeru sprawy większe o 20%."
       }
     },
     "sprzedaz": {

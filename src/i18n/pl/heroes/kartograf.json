@@ -38,14 +38,14 @@
         "desc": "Skok dłuższy o 20%. Błąd pomiaru trwa 8 s."
       },
       "3": {
-        "name": "Pomiar na oko",
+        "name": "Korekta na oko",
         "desc": "Bez wskazywania. Odnowienie krótsze o 4 s, błąd pomiaru trwa 2 s."
       }
     },
     "skala": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Pięć sekund w skali 1:1. Zasięg większy, pomiar przechodzi na wylot."
+        "desc": "Pięć sekund w skali 1:1. Zasięg odczytu większy, odczyt przechodzi na wylot."
       },
       "2": {
         "name": "Skala 1:2",
@@ -81,7 +81,7 @@
       },
       "3": {
         "name": "Pomiar kontrolowany",
-        "desc": "Egzystencjalny. Przeciwnik już zgłoszony otrzymuje obrażenia 1,4 raza większe. Odnowienie dłuższe o 2 s."
+        "desc": "Egzystencjalny. Obrażenia w przeciwnika już zgłoszonego większe o 40%. Odnowienie dłuższe o 2 s."
       }
     },
     "przekroj": {
@@ -115,7 +115,7 @@
     "punktOdniesienia": {
       "1": {
         "name": "Brzmienie podstawowe",
-        "desc": "Reper na 20 s. Korekta w jego stronę kończy się przy nim. Pomiary oddane obok niego przechodzą na wylot."
+        "desc": "Reper na 20 s. Korekta w jego stronę kończy się przy nim. Odczyty oddane obok niego przechodzą na wylot."
       },
       "2": {
         "name": "Reper niwelacyjny",
@@ -144,21 +144,21 @@
   "ult": {
     "mapaOstateczna": {
       "name": "Mapa ostateczna",
-      "desc": "Przez 6 s każdy przeciwnik na stronie zostaje zmierzony i zgłoszony. Pomiar strzela dwukrotnie. Linie przechodzą na wylot.",
+      "desc": "Przez 6 s każdy przeciwnik na stronie zostaje naniesiony na mapę i zgłoszony. Odczyt jest podwójny i przechodzi na wylot.",
       "stamp": "ZATWIERDZONO DO DRUKU",
       "note": "Skala 1:1. Marginesy obrysowane.",
       "para": {
         "1": {
           "name": "Brzmienie podstawowe",
-          "desc": "Wydanie podstawowe. Dwa pomiary na strzał, wszystko na wylot."
+          "desc": "Wydanie podstawowe. Dwa odczyty na strzał, wszystko na wylot."
         },
         "2": {
           "name": "Druk pojedynczy",
-          "desc": "Mapa trwa 8 s. Pomiar strzela raz."
+          "desc": "Mapa trwa 8 s. Odczyt pojedynczy."
         },
         "3": {
           "name": "Nakład poczwórny",
-          "desc": "Mapa trwa 4 s, pomiar mechaniczny strzela czterokrotnie. Kosztuje 6 racji."
+          "desc": "Mechaniczna. Mapa trwa 4 s, odczyt poczwórny. Kosztuje 6 racji."
         }
       }
     },
@@ -208,7 +208,7 @@
       "name": "Pomiar",
       "cap": {
         "name": "Dokładność do metra",
-        "desc": "Triangulacja zadaje o 20% więcej obrażeń."
+        "desc": "Obrażenia Triangulacji większe o 20%."
       }
     },
     "granica": {
@@ -244,7 +244,7 @@
   "skill9": {
     "name": "Punkt odniesienia",
     "pad": "Odniesienie",
-    "desc": "Reper stoi na stronie 20 sekund. Korekta w jego stronę kończy się przy nim, z dowolnej odległości. Pomiary oddane obok niego przechodzą na wylot."
+    "desc": "Reper stoi na stronie 20 sekund. Korekta w jego stronę kończy się przy nim, z dowolnej odległości. Odczyty oddane obok niego przechodzą na wylot."
   },
   "skill10": {
     "name": "Róża wiatrów",
