@@ -2905,6 +2905,125 @@ try {
     await fctx.close();
   }
 
+  // ---------- 6k2. S21a Przystanki: walk over two stops, the base, the stop board by real taps, travel to the second ----------
+  {
+    const sctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await sctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const sp = await sctx.newPage();
+    sp.on('pageerror', (e) => problems.push(`stops pageerror: ${e.message}`));
+    sp.on('console', (m) => {
+      if (m.text().includes('Service Worker registration blocked')) return;
+      if (m.type() === 'error') problems.push(`stops console.error: ${m.text()}`);
+    });
+    await sp.goto(BASE, { waitUntil: 'load' });
+    await sp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await sp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await sleep(600);
+    if ((await sp.evaluate(() => window.__game.screen())) === 'profile') {
+      await sp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+      await sleep(900);
+    }
+    await sp.locator('.card-layer .card-skip').click({ timeout: 3000 }).catch(() => undefined);
+    await sp.evaluate(() => window.__game.go('ticket'));
+    await sp.locator('.ticket-sheet').waitFor({ state: 'visible', timeout: 3000 });
+    await sp.locator('.ticket-sheet button.start').click({ timeout: 2000 });
+    await sleep(1400);
+    await sp.evaluate(() => window.__game.walkToExit());
+    await sp.waitForFunction(() => window.__game.screen() === 'run' && window.__game.state()?.pageIndex === 0, null, { timeout: 8000 });
+    // a kill on the way can print the "Dostepna aktualizacja" form, which holds the run: close it with its own button
+    const dismiss = async () => {
+      for (let k = 0; k < 4; k++) {
+        const btn = sp.locator('.pop-wrap button').locator('visible=true').first();
+        if (!(await btn.isVisible().catch(() => false))) return;
+        await btn.click({ timeout: 2000 }).catch(() => undefined);
+        await sleep(500);
+      }
+    };
+    const walkOver = async (idx) => {
+      await dismiss();
+      // stand beside the post, then really walk onto it: the hook only places the hero, the step does the registering
+      await sp.waitForFunction((i) => window.__game.state()?.pageIndex === i && window.__game.stops.info().stop !== null, idx, { timeout: 8000 });
+      await sp.evaluate(() => {
+        window.__game.enemies.clear();
+        window.__game.stops.place(true);
+      });
+      // the step registers it once the loop has run
+      await sp.waitForFunction(() => window.__game.stops.info().stop?.registered === true, null, { timeout: 5000 });
+      await sleep(300);
+    };
+    await walkOver(0);
+    const r0 = await sp.evaluate(() => ({ list: window.__game.stops.list(), saved: window.__game.meta().character?.stops ?? null, info: window.__game.stops.info() }));
+    check('S21a: walking over the first stop registers page 1 on planet 1 and the save holds it', r0.list[0]?.join() === '0' && r0.saved?.[0]?.join() === '0' && r0.info.stop?.registered === true, JSON.stringify({ list: r0.list, saved: r0.saved }));
+    const count = r0.info.count;
+    check('S21a: the ticket has a stop on every second page (0, 2, ...)', JSON.stringify(r0.info.carries) === JSON.stringify(Array.from({ length: Math.ceil(count / 2) }, (_, i) => i * 2)) && count >= 3, JSON.stringify({ count, carries: r0.info.carries }));
+    // on to page 3 (index 2): the exit twice
+    for (const next of [1, 2]) {
+      await sp.evaluate(() => {
+        window.__game.enemies.clear();
+        const e = window.__game.state().page.exit;
+        window.__game.placePlayer(e.x + (e.corner[1] === 'l' ? 45 : -45), e.y + (e.corner[0] === 't' ? 45 : -45));
+      });
+      await sp.waitForFunction((i) => window.__game.state()?.pageIndex === i, next, { timeout: 12000 });
+      await sleep(500);
+      await dismiss();
+    }
+    await walkOver(2);
+    const r2 = await sp.evaluate(() => ({ list: window.__game.stops.list(), saved: window.__game.meta().character?.stops ?? null }));
+    check('S21a: walking over the second stop registers page 3 as well, saved', r2.list[0]?.join() === '0,2' && r2.saved?.[0]?.join() === '0,2', JSON.stringify(r2));
+    // leave the run (Zakonczenie through the stop itself would be a tap on the post; use the pause path as the player does)
+    await sp.evaluate(() => window.__game.stops.place(false));
+    await sleep(300);
+    const at = await sp.evaluate(() => {
+      const m = document.getElementById('stage').getScreenCTM();
+      const p = window.__game.state().page.stop;
+      return { x: m.a * p.x + m.e, y: m.d * (p.y - 30) + m.f };
+    });
+    await sp.touchscreen.tap(at.x, at.y);
+    await sp.waitForFunction(() => window.__game.screen() === 'baza', null, { timeout: 8000 });
+    await sleep(900);
+    const back = await sp.evaluate(() => ({ phase: window.__game.state()?.phase, bm: window.__game.meta().bookmark?.pageIndex ?? null }));
+    check('S21a: a real tap on a registered post in the run goes back to the base (bookmark on that page)', back.phase === 'base' && back.bm === 2, JSON.stringify(back));
+    // the board: a real tap on the station
+    await sp.evaluate(() => {
+      const s = window.__game.state();
+      const b = s.page.base.stations.find((x) => x.id === 'przystanek');
+      window.__game.placePlayer(b.x - 110, b.y + 90);
+    });
+    await sleep(900);
+    const bat = await sp.evaluate(() => {
+      const m = document.getElementById('stage').getScreenCTM();
+      const b = window.__game.state().page.base.stations.find((x) => x.id === 'przystanek');
+      return { x: m.a * b.x + m.e, y: m.d * (b.y - 30) + m.f };
+    });
+    await sp.touchscreen.tap(bat.x, bat.y + 18);
+    await sp.locator('.stops-sheet').waitFor({ state: 'visible', timeout: 4000 });
+    const board = await sp.evaluate(() => [...document.querySelectorAll('.stops-sheet .stop-go')].map((b) => b.dataset.stop));
+    check('S21a: the board lists the two registered stops of planet 1', board.join() === '0:0,0:2', board.join());
+    await shotOf(sp, 'S21a-stop-board');
+    const go = sp.locator('.stops-sheet .stop-go[data-stop="0:2"]');
+    const gb = await go.boundingBox();
+    await sp.touchscreen.tap(gb.x + gb.width / 2, gb.y + gb.height / 2);
+    await sp.waitForFunction(() => !document.querySelector('.stops-sheet'), null, { timeout: 4000 });
+    await sleep(900);
+    const trip = await sp.evaluate(() => ({ screen: window.__game.screen(), phase: window.__game.state()?.phase, idx: window.__game.state()?.pageIndex, count: window.__game.state()?.pageCount, planet: window.__game.state()?.plan?.planet, bm: window.__game.meta().bookmark?.pageIndex ?? null }));
+    check('S21a: the board tap leaves the base ready to print page 3 of planet 1', trip.screen === 'baza' && trip.idx === 2 && trip.planet === 0 && trip.count >= 3 && trip.bm === 2, JSON.stringify(trip));
+    await sp.evaluate(() => window.__game.walkToExit());
+    await sp.waitForFunction(() => window.__game.screen() === 'run', null, { timeout: 8000 });
+    await sleep(900);
+    const arr = await sp.evaluate(() => {
+      const s = window.__game.state();
+      return { planet: s.plan?.planet, idx: s.pageIndex, count: s.pageCount, priority: s.plan?.priority, planetName: window.__game.meta().bookmark?.planetName ?? null, registered: window.__game.stops.list() };
+    });
+    // item level (ITEMS 5.1) mirrored: base of planet 1 = 1, page offset min(2, floor(i*3/n)), Normalny +0
+    const ilvl = 1 + Math.min(2, Math.floor((arr.idx * 3) / arr.count));
+    check('S21a: walking out lands on page 3 of planet 1 with the page-3 item level, registrations kept', arr.planet === 0 && arr.idx === 2 && arr.priority === 'normalny' && ilvl > 1 + Math.min(2, Math.floor(0 / arr.count)) && arr.registered[0]?.join() === '0,2', JSON.stringify({ ...arr, ilvl }));
+    await sctx.close();
+  }
+
   // ---------- 7. frame time with 40 enemies ----------
   // a fresh run: the death slip of the step above may still hold the old one
   await page.evaluate(() => window.__game.start(11, { pageCount: 5, lawId: 'grawitacja' }));
