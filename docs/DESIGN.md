@@ -274,6 +274,17 @@ inspects the PNGs in `shots/`. The lead rejects any screenshot that violates §3
   Zakończ regenerates the page from the seed: enemies back, floor loot gone, racja full, and a
   footnote says the ticket was reassigned to another consultant. The exact-state return belongs
   to the tunnel within one session only.
+- **Przystanki** (waypoints, S21a, player 2026-10-19). A run has a stop (a timetable post, its
+  timetable struck out) on page 1 and on every second page after it (page indices 0, 2, 4, ...;
+  never the boss page's exit corner). Walking over one registers that page index on the character,
+  per planet, with a footnote; registering is saved at once. The base gets a station, the stop
+  board, listing the registered stops of every open planet (closed planets included; not past
+  `CAMPAIGN_LAST`). A tap prints a fresh ticket for that planet (its campaign plan when it is the
+  current planet, else a travel plan, the priority last chosen) whose exit leads straight to that
+  page, as a bookmark does: enemies new, nothing carried over. The page count is at least the
+  stop's index + 1. Inside a run, tapping a registered stop takes the player to the base without
+  holding the run (unlike the tunnel): the run is settled as a Zakończ, so the bookmark points at
+  the stop's page and the desk offers "Wznów zgłoszenie" from there.
 
 ---
 
