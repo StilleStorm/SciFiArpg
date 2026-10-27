@@ -15,6 +15,7 @@ import { stationAt } from './world/base';
 import { onPageEntered } from './world/laws';
 import { baseHeaderFor, headerFor, tapKiosk } from './world/pageTurn';
 import { tapGateFigure } from './world/gate';
+import { tapStop } from './world/stops';
 import { stampsOnPage, tapMark } from './render/ink';
 import type { Stage } from './render/stage';
 import { createSim } from './systems/step';
@@ -225,6 +226,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
         bus.emit('player:tap', { x: w.x, y: w.y });
         return;
       }
+      if (tapStop(s, bus, w.x, w.y, viewZoom())) return; // a registered stop: back to the base (main.ts hears stop:tapped)
       if (!walk) {
         // Joystick mode: a quick tap only matters on the kiosk (the player steers there himself).
         if (tapKiosk(s, w.x, w.y)) bus.emit('player:tap', { x: w.x, y: w.y });

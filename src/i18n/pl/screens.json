@@ -275,7 +275,8 @@
       "tablica": "Tablica",
       "paczkomat": "Paczkomat",
       "tunel": "Tunel",
-      "urzednik": "Referent"
+      "urzednik": "Referent",
+      "przystanek": "Przystanki"
     },
     "plate": {
       "kiosk": "SKLEP",
@@ -496,5 +497,12 @@
         "text": "Odebrać pokwitowanie, którego nie wydano. W tym celu wynieść poza bazę wniosek o pokwitowanie i po powrocie doręczyć go Referentowi."
       }
     }
+  },
+  "stops": {
+    "title": "Przystanki na żądanie",
+    "sub": "Rozkład nieaktualny",
+    "note": "Przystanek zatrzymuje się na żądanie. Żądanie składa się, przechodząc obok niego.",
+    "none": "Na tej planecie nie zarejestrowano żadnego przystanku.",
+    "go": "Strona {page}: zatrzymaj na żądanie"
   }
 }

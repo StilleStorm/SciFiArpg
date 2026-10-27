@@ -14,10 +14,12 @@ import { applyParagraphs, activeParagraphsOf, paragraphsOf, type ParagraphNo } f
 import { applyProgress, padsFrom, serializeProgress, type ProgressData } from '../progression/persist';
 import { cloneCampaign, toCampaign, type CampaignState } from '../world/campaign';
 import { cloneQuests, toQuests, type QuestState } from '../world/quests';
+import { cloneStops, hasAnyStop, toStops, type Stops } from '../world/stops';
 import type { RunState } from '../world/run';
 import { HELD_CAP } from '../systems/recovery';
 
-export const CHARACTER_VERSION = 1;
+/** 2: `stops` (S21a). A record of any earlier version loads with none (`toCharacter` reads every field as optional). */
+export const CHARACTER_VERSION = 2;
 
 export { HERO_IDS };
 
@@ -43,6 +45,8 @@ export interface Character extends ProgressData {
   quests?: QuestState;
   /** Delivery notices at the paczkomat (items/delivery.ts); absent = none, so older saves load. */
   awizos?: Awizo[];
+  /** The przystanki registered, planet index -> page indices (world/stops.ts). Absent = none, so older saves load. */
+  stops?: Stops;
 }
 
 export function isHeroId(v: unknown): v is HeroId {
@@ -81,6 +85,7 @@ export function serializeCharacter(s: RunState): Character {
     ...(s.campaign ? { campaign: cloneCampaign(s.campaign) } : {}),
     ...(s.quests && (s.quests.active.length > 0 || s.quests.done > 0) ? { quests: cloneQuests(s.quests) } : {}),
     ...(p.awizos && p.awizos.length > 0 ? { awizos: clone(p.awizos) } : {}),
+    ...(hasAnyStop(s.stops) && s.stops ? { stops: cloneStops(s.stops) } : {}),
     ...((p.potwierdzenia ?? 0) > 0 ? { potwierdzenia: p.potwierdzenia } : {}),
     ...(s.hero.ultimateId ? { ultimate: s.hero.ultimateId } : {}),
     ...(s.hero.spec ? { specialization: s.hero.spec } : {}),
@@ -127,6 +132,8 @@ export function applyCharacter(s: RunState, c: Character): void {
   if (c.quests) s.quests = cloneQuests(c.quests);
   if (c.awizos?.length) p.awizos = clone(c.awizos);
   else delete p.awizos;
+  if (hasAnyStop(c.stops) && c.stops) s.stops = cloneStops(c.stops);
+  else delete s.stops;
   p.hp = p.hpMax;
   s.nextItemNumber = Math.max(s.nextItemNumber, highestNumber(c) + 1);
 }
@@ -157,6 +164,7 @@ export function toCharacter(raw: unknown): Character | null {
   const awizos: Awizo[] = Array.isArray(raw['awizos'])
     ? raw['awizos'].filter(isRecord).flatMap((a) => (isRecord(a['item']) && typeof a['n'] === 'number' ? [{ ...(clone(a) as unknown as Awizo), page: Math.max(0, Math.floor(num(a['page'], 0))), age: Math.max(0, Math.floor(num(a['age'], 0))) }] : []))
     : [];
+  const stops = toStops(raw['stops']);
   const perms = Array.isArray(raw['permissions']) ? raw['permissions'].filter((x): x is string => typeof x === 'string') : [];
   return {
     version: CHARACTER_VERSION,
@@ -178,6 +186,7 @@ export function toCharacter(raw: unknown): Character | null {
     ...(isRecord(raw['campaign']) ? { campaign: toCampaign(raw['campaign']) } : {}),
     ...(isRecord(raw['quests']) ? { quests: toQuests(raw['quests']) } : {}),
     ...(awizos.length > 0 ? { awizos } : {}),
+    ...(hasAnyStop(stops) ? { stops } : {}),
   };
 }
 

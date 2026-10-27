@@ -8,6 +8,7 @@ import { drawProp } from './locations';
 import { drawIn, strike } from './ink';
 import { drawChair } from './locations/biuro';
 import { drawNpc } from './npc';
+import { drawStopPost } from './stop';
 import { tween, easeIn } from './tween';
 import { gateFigureAt } from '../world/gate';
 import { STAIN_HUES, washGroup } from './wash';
@@ -717,6 +718,7 @@ export function drawPage(layer: SVGGElement, page: Page, header?: PageHeader): S
     }
   }
   for (const c of page.content ?? []) ink.append(drawContentItem(c));
+  if (page.stop) ink.append(drawStopPost(page.stop)); // the przystanek (world/stops.ts), under the exit and the header
   if (page.exit) ink.append(drawExit(page, page.exit, page.index * 977 + 13));
   if (header) ink.append(drawHeader(page, header));
   ink.setAttribute('data-page-ink', '1');

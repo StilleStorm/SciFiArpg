@@ -107,7 +107,11 @@ export interface GameEvents {
    */
   'base:entered': { layout: 'ladowisko' | 'wioska' | 'miasteczko'; seed: number; number: number };
   /** The player tapped a station of the base and reached it: main.ts opens its sheet (biurko, kiosk, tablica, paczkomat). */
-  'station:opened': { station: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik' };
+  'station:opened': { station: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik' | 'przystanek' };
+  /** The player walked over a stop of a campaign page and it was entered on the character (world/stops.ts); main.ts saves the character at once. */
+  'stop:registered': { planet: number; index: number };
+  /** The player tapped a registered stop in a run: main.ts settles the run as Zakończ and goes back to the base (world/stops.ts tapStop). */
+  'stop:tapped': { planet: number; index: number };
   /** A side ticket changed (world/quests.ts): taken from the board, counted, ready to report, paid out or given back. */
   'quest:changed': { id: string; what: 'accepted' | 'progress' | 'ready' | 'done' | 'dropped' };
   /** A potwierdzenie slip was taken (systems/recovery.ts): `healed` racja restored at once (0 when kept), `held` slips now in the stack. */

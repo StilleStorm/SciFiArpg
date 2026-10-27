@@ -1,0 +1,31 @@
+/* The stop board: a block per planet, one ruled button per registered stop. Paper and ink only; shared sheet styles are in sheet.css. */
+.stops-sheet .ps-sub {
+  font-family: var(--title);
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.stops-planet {
+  margin: 0 0 14px;
+}
+.stops-planet .group {
+  margin: 6px 0 8px;
+}
+.stops-planet .stop-go {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin: 0 0 8px;
+  text-align: left;
+  font-size: 13px;
+}
+.stops-planet .inv-empty {
+  margin: 4px 0 0;
+}
+:root[data-orient='landscape'] .stops {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  column-gap: 26px;
+  align-items: start;
+}

@@ -48,6 +48,7 @@ import type { CampaignView } from './ui/ticketModel';
 import type { PriorityId } from './world/campaign';
 import { createContentHook, type ContentHook } from './world/content';
 import { createQuestHook, type QuestHook } from './world/quests';
+import { createStopsHook, type StopsHook } from './world/stops';
 import { gateHolds, installGate, type GateKind } from './world/gate';
 import { redrawGate } from './render/obstacles';
 import { createFinaleHook, type FinaleHook } from './enemies/anomalia/hook';
@@ -172,6 +173,8 @@ export interface GameHook {
   content: ContentHook;
   /** Side tickets (world/quests.ts): the board's offers, taking, finishing and reporting one. */
   quests: QuestHook;
+  /** Przystanki (world/stops.ts, S21a): the registered stops, registering one, standing at the post, travelling from the board. */
+  stops: StopsHook;
   /** Page gates (world/gate.ts), the fixture of S11a: no real planet carries one yet. */
   gate: GateHook;
   /** The finale (S15, enemies/anomalia/hook.ts): start the final ticket for a hero, read its stage, skip to a phase. */
@@ -220,7 +223,7 @@ export interface GameHook {
    */
   startBase(seed?: number): RunState;
   /** Walk up to a station and tap it: its sheet opens ('biurko' the desk, 'kiosk' the Sklep, 'tablica' the settings, 'paczkomat' a footnote). */
-  station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik'): boolean;
+  station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik' | 'przystanek'): boolean;
   /** The ticket form's button without the sheet: the plan on the desk is accepted again (the exit is open anyway). False outside the base. */
   acceptTicket(): boolean;
   /** Show the ticket form and the cards as for another campaign state (null: the real one). */
@@ -260,7 +263,9 @@ export interface HookDeps {
   openTunnel(): boolean;
   returnFromTunnel(): boolean;
   startBase(seed?: number): RunState;
-  station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik'): boolean;
+  station(name: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik' | 'przystanek'): boolean;
+  /** Travel from the base to a registered stop, as a tap on the stop board does (main.ts `travelToStop`). */
+  travelToStop(planet: number, index: number): boolean;
   acceptTicket(): boolean;
   /** Show the ticket form and the cards as for another campaign state (null: the real one). */
   setCampaignView(v: CampaignView | null): void;
@@ -356,6 +361,7 @@ export function installTestHook(deps: HookDeps): void {
     audio: createAudioHook(),
     content: createContentHook(() => game.state, deps.bus),
     quests: createQuestHook(() => game.state, deps.bus),
+    stops: createStopsHook(() => game.state, deps.bus, deps.travelToStop),
     gate: {
       set(kind, opts = {}) {
         const s = game.state;

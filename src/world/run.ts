@@ -9,6 +9,7 @@ import { applyLaw, neutralLaw, type LawFlags, type LawId } from './laws';
 import type { Tunnel } from './tunnel';
 import { ticketForPlan, ticketForSeed, type TicketInfo } from './ticket';
 import { applyPlanetGates } from './gate';
+import { installStops, syncStops, ticketHasStops, type Stops } from './stops';
 import { finalePage } from './finale';
 import { mixForPlanet, planetDef, type CampaignState, type TicketPlan } from './campaign';
 import type { QuestState } from './quests';
@@ -84,6 +85,8 @@ export interface RunState {
   campaign?: CampaignState;
   /** The side tickets the character holds (world/quests.ts; copied from the saved record, written back by serializeCharacter). */
   quests?: QuestState;
+  /** The stops the character has registered, planet index -> page indices (world/stops.ts; copied from the saved record, written back by serializeCharacter). */
+  stops?: Stops;
   /** The seal stamps on the player now (world/content.ts ticks them; run only, never saved). Absent = none. */
   buffs?: ActiveBuff[];
 }
@@ -119,6 +122,7 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
   if (final) ticket.pageCount = 1;
   const pages = final ? [finalePage(seed)] : generateRunPages(rng, ticket.pageCount, plan ? planetDef(plan.planet).locations : undefined, plan ? planetDef(plan.planet).locationSplit : undefined);
   if (plan) applyPlanetGates(pages, planetDef(plan.planet).gates);
+  if (ticketHasStops(plan)) installStops(pages, rng); // after the gates: the post keeps clear of a barrier (world/stops.ts)
   const runPage = pages[0] ?? generateRunPages(rng, 1)[0];
   if (!runPage) throw new Error('no page');
   const phase = opts.phase ?? 'run';
@@ -163,6 +167,7 @@ export function createRun(seed: number, opts: RunOptions = {}): RunState {
   applyHero(state.player, heroDef(opts.heroId ?? DEFAULT_HERO_ID));
   applyLaw(state, ticket.lawId);
   if (opts.character) applyCharacter(state, opts.character);
+  syncStops(state); // the posts the character has walked over are drawn as registered
   if (opts.resume && phase === 'run') applyBookmark(state, opts.resume);
   return state;
 }

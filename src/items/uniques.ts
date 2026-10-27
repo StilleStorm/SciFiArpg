@@ -35,13 +35,13 @@ export const UNIQUES: readonly UniqueDef[] = [
   { id: 'istnienie', baseId: 'zaswiadczenie', stats: { resEgzystencjalny: 18, racja: 24, resMechaniczny: 8 }, likes: 'papier', dislikes: 'chaos' },
   // S17: one paragraph of one skill each (ITEMS 4.2), two per hero. Stats are roughly the rzadki budget plus 20%. Flat stats only:
   // makeUnique scales every number by the item level, which a percentage must not be.
-  { id: 'program95', baseId: 'pilot', stats: { pewnosc: 14, crit: 4, resMechaniczny: 8, upor: 6 }, likes: 'porzadek', dislikes: 'chaos', grant: { skill: 'wirowanie', para: 3, ranks: 2 } },
+  { id: 'program95', baseId: 'pilot', stats: { pewnosc: 14, crit: 4, resMechaniczny: 8, upor: 6 }, likes: 'porzadek', dislikes: 'chaos', grant: { skill: 'program90', para: 3, ranks: 2 } },
   { id: 'pralnia', baseId: 'kombinezon', stats: { upor: 14, racja: 22, resMechaniczny: 10 }, likes: 'porzadek', dislikes: 'halas', grant: { skill: 'pranieWstepne', para: 2, ranks: 1 } },
   { id: 'oczekiwanie', baseId: 'zegarek', stats: { crit: 4, pewnosc: 12, resEgzystencjalny: 12, racja: 8 }, likes: 'halas', dislikes: 'porzadek', grant: { skill: 'prosze', para: 3, ranks: 2 } },
   { id: 'windykacja', baseId: 'daszek', stats: { crit: 8, pewnosc: 14, resRegulaminowy: 10, upor: 6 }, likes: 'halas', dislikes: 'watpliwosc', grant: { skill: 'rozlaczenie', para: 3, ranks: 2 } },
-  { id: 'przedwykonaniem', baseId: 'faktura', stats: { resRegulaminowy: 16, pewnosc: 8, racja: 12, upor: 6 }, likes: 'papier', dislikes: 'chaos', grant: { skill: 'spor', para: 2, ranks: 1 } },
+  { id: 'przedwykonaniem', baseId: 'faktura', stats: { resRegulaminowy: 16, pewnosc: 8, racja: 12, upor: 6 }, likes: 'papier', dislikes: 'chaos', grant: { skill: 'opoznienie', para: 3, ranks: 2 } },
   { id: 'zapasowe', baseId: 'szelki', stats: { upor: 12, racja: 20, resRegulaminowy: 10, pewnosc: 6 }, likes: 'metal', dislikes: 'watpliwosc', grant: { skill: 'przybycie', para: 2, ranks: 1 } },
-  { id: 'granica', baseId: 'wskaznik', stats: { dmgMin: 7, dmgMax: 12, pewnosc: 12, crit: 4, resRegulaminowy: 8 }, likes: 'papier', dislikes: 'chaos', grant: { skill: 'triangulacja', para: 3, ranks: 2 } },
+  { id: 'granica', baseId: 'wskaznik', stats: { dmgMin: 7, dmgMax: 12, pewnosc: 12, crit: 4, resRegulaminowy: 8 }, likes: 'papier', dislikes: 'chaos', grant: { skill: 'granica', para: 3, ranks: 2 } },
   { id: 'bladpomiaru', baseId: 'polisa', stats: { racja: 24, resMechaniczny: 14, resRegulaminowy: 8, pewnosc: 8 }, likes: 'watpliwosc', dislikes: 'porzadek', grant: { skill: 'korekta', para: 2, ranks: 1 } },
   { id: 'masaplanety', baseId: 'liczydlo', stats: { pewnosc: 10, upor: 14, racja: 14, resMechaniczny: 8 }, likes: 'metal', dislikes: 'halas', grant: { skill: 'grawitacja', para: 2, ranks: 1 } },
   { id: 'atmosfera', baseId: 'czepek', stats: { upor: 14, resRegulaminowy: 12, resMechaniczny: 10, racja: 10 }, likes: 'porzadek', dislikes: 'halas', grant: { skill: 'zaokraglenie', para: 3, ranks: 2 } },

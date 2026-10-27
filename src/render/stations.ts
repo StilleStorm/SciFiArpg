@@ -17,6 +17,7 @@ import type { RunState } from '../world/run';
 import { viewZoom } from './camera';
 import { drawIn } from './ink';
 import { drawNpc } from './npc';
+import { drawStopBoard } from './stop';
 import { drawHeader, drawPage, type PageHeader } from './obstacles';
 import { dotPath, el, n2, polyline, wobblyCircle, wobblyLine } from './svg';
 import { washGroup, type WashHue } from './wash';
@@ -306,6 +307,8 @@ export function drawStation(st: Station, planet: number): SVGGElement {
         return drawPaczkomat(r, seed);
       case 'urzednik':
         return drawNpc(npcAt(planet));
+      case 'przystanek':
+        return drawStopBoard(r, seed);
     }
   })();
   const g = at(st.x, st.y);

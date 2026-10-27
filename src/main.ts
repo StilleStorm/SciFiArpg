@@ -10,6 +10,7 @@ import { bindAsystent } from './narration';
 import { bindFx } from './render/bindings';
 import { initDamageNumbers } from './render/damageNumbers';
 import { bindTunnelFx } from './render/tunnelFx';
+import { bindStopFx } from './render/stop';
 import { createCamera, freeViewRect, keepOutBlocks } from './render/camera';
 import { initInk } from './render/ink';
 import { installPaper } from './render/paper';
@@ -49,6 +50,7 @@ import { mountSklep, type SklepHandle } from './ui/sklep';
 import { priceCut as heroPriceCut } from './heroes/quirks';
 import { openCard, type CardHandle } from './ui/cards';
 import { createTicket } from './ui/ticket';
+import { openStops, type StopsSheet } from './ui/stops';
 import { campaignViewOf, cardToShow, markShown, type CampaignView } from './ui/ticketModel';
 import { bindCampaign, clampPriority, cloneCampaign, defaultPlan, DEFAULT_PRIORITY, extraPlan, newCampaign, noCardsSeen, toCampaign, travelPlan, type CampaignState, type PriorityId, type TicketPlan } from './world/campaign';
 import { createTitle } from './ui/title';
@@ -60,6 +62,8 @@ import { bindLaws, lawHooks } from './world/laws';
 import { PAGE_H, PAGE_W } from './world/pages';
 import { bindPageTurn, bindRunEvents } from './world/pageTurn';
 import { bindGates } from './world/gate';
+import { planStopTravel } from './world/stops';
+import type { Bookmark } from './save/bookmark';
 import type { RunOptions, RunState } from './world/run';
 import { bindTunnel, carryPurse, closeFor, closeTunnel, createRunHold, cutBaseHole, fateOfHeldRun, openTunnel, type LeaveAction } from './world/tunnel';
 import { TICKET_BASE } from './world/ticket';
@@ -136,13 +140,15 @@ const freshSeed = (): number => (Date.now() ^ Math.floor(Math.random() * 0x10000
 let nextSeed = freshSeed();
 
 /** The sheets over the base page. At most one is up; the base holds still while it is. */
-type SheetKind = 'biurko' | 'ticket' | 'kiosk' | 'tablica' | 'urzednik' | 'paczkomat';
+type SheetKind = 'biurko' | 'ticket' | 'kiosk' | 'tablica' | 'urzednik' | 'paczkomat' | 'przystanek';
 let sheetKind: SheetKind | null = null;
 /** The base was running and a sheet paused it (the sheet gives it back). */
 let sheetHolds = false;
 let shop: SklepHandle | null = null;
 /** The base paczkomat's sheet (S18): the awizos waiting at the base. */
 let paczkomatUi: PaczkomatSheet | null = null;
+/** The stop board's sheet (S21a): the registered stops of the open planets. */
+let stopsUi: StopsSheet | null = null;
 
 const baza = createBaza(stage.ui, {
   onNewTicket: () => newTicket(),
@@ -213,6 +219,25 @@ function takePlan(make: (c: CampaignState, seed: number) => TicketPlan | null, p
   leave('newTicket'); // a run held in the tunnel is given up first, as the accept button does
   enterBase({ seed: s.seed, number: s.ticket.number, plan, ...(s.campaign ? { campaign: s.campaign } : {}) });
   acceptNow(priority);
+}
+
+/**
+ * A tap on a registered stop of the stop board (DESIGN 4.1 Przystanki): the ticket is printed again from that page. The plan is
+ * the campaign's own on the current planet, else a travel plan at the priority last chosen; the exit of the base leads to the
+ * stop's page like a bookmark (also saved as one, so the desk offers "Wznów zgłoszenie"), the page count is at least the
+ * stop's index + 1. A run held in the tunnel is given up first, as a new ticket does.
+ */
+function travelToStop(planet: number, index: number): boolean {
+  const s = game.state;
+  if (screen !== 'baza' || !s || s.phase !== 'base') return false;
+  const trip = planStopTravel(s.campaign ?? newCampaign(), s.stops, planet, index, { priority: ticket.priority(), level: s.player.level, seed: s.seed, number: s.ticket.number });
+  if (!trip) return false;
+  if (!hold.peek()) save(withCharacter(meta, s)); // what was done in this base (the bag, the purse, a side ticket) comes along
+  closeSheet();
+  leave('newTicket');
+  save({ ...meta, bookmark: trip.bookmark });
+  enterBase({ seed: trip.bookmark.seed, number: trip.bookmark.ticketNumber, resume: trip.bookmark });
+  return acceptNow(trip.plan.priority);
 }
 
 /**
@@ -353,7 +378,7 @@ function showCreate(fromRoster: boolean): void {
  * open hole near the landing spot. Another ticket clears the footnotes; the same ticket (the tunnel's base, the base after
  * Zakończ) keeps them and their numbering, like the Asystent (narration/asystent.ts).
  */
-function enterBase(over: { seed?: number; number?: number; plan?: TicketPlan; campaign?: CampaignState } = {}): RunState {
+function enterBase(over: { seed?: number; number?: number; plan?: TicketPlan; campaign?: CampaignState; resume?: Bookmark } = {}): RunState {
   const held = hold.peek();
   const b = meta.bookmark;
   const seed = over.seed ?? (held ? held.seed : b ? b.seed : nextSeed);
@@ -364,7 +389,7 @@ function enterBase(over: { seed?: number; number?: number; plan?: TicketPlan; ca
     notesFor = `${seed}:${number}`;
   }
   setOfficeOpen(null);
-  const resume = b && !held && !over.plan && b.seed === seed ? b : undefined;
+  const resume = over.resume ?? (b && !held && !over.plan && b.seed === seed ? b : undefined);
   // The plan on the desk: the held run's, the bookmarked one, a travel/extra choice, or the campaign's next ticket.
   const campaign = over.campaign ? cloneCampaign(over.campaign) : meta.character?.campaign ? toCampaign(meta.character.campaign) : newCampaign();
   // The base is entered with the plan already open (the exit is never locked): at the last priority chosen on the form, default Normalny.
@@ -435,6 +460,8 @@ function dropSheets(): void {
   shop = null;
   paczkomatUi?.close();
   paczkomatUi = null;
+  stopsUi?.close();
+  stopsUi = null;
   if (sheetKind !== null) {
     sheetKind = null;
     releaseBase();
@@ -455,6 +482,8 @@ function openSheet(kind: SheetKind): void {
   shop = null;
   paczkomatUi?.close();
   paczkomatUi = null;
+  stopsUi?.close();
+  stopsUi = null;
   if (!wasUp) {
     holdBase();
     syncHistory('baza', 'ticket');
@@ -498,6 +527,15 @@ function openSheet(kind: SheetKind): void {
         onClose: () => closeSheet(),
       });
       break;
+    case 'przystanek':
+      // the stop board: a tap on a registered stop prints the ticket again from that page (travelToStop)
+      stopsUi = openStops(stage.ui, {
+        campaign: () => s.campaign ?? newCampaign(),
+        stops: () => s.stops,
+        onTravel: (planet, index) => void travelToStop(planet, index),
+        onClose: () => closeSheet(),
+      });
+      break;
     case 'kiosk':
       // The base Sklep spends the gwiazdki of the live player and fills the bag and gear the run starts with.
       shop = mountSklep(stage.ui, { runsCompleted: meta.runsCompleted }, s.player, {
@@ -537,7 +575,7 @@ function acceptNow(priority?: PriorityId): boolean {
 }
 
 /** Open the sheet (or the footnote) of a station (a tap on it, `Game.onTap` -> `station:opened`). */
-function openStation(id: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik'): boolean {
+function openStation(id: 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik' | 'przystanek'): boolean {
   if (screen !== 'baza' || game.state?.phase !== 'base') return false;
   openSheet(id);
   return true;
@@ -563,6 +601,17 @@ bindCampaign(bus, () => game.state);
 // Side tickets count kills, finds and pages of the run proper (world/quests.ts).
 bindQuests(bus, () => game.state);
 bindContent(bus, () => game.state); // teczka taps and page-content redraws (world/content.ts)
+bindStopFx(bus, () => game.state); // a registered stop is drawn again with its pen ring (render/stop.ts)
+// Przystanki (world/stops.ts): registering is saved at once; a tap on a registered stop in a run settles it as Zakończ (the bookmark points at that page).
+bus.on('stop:registered', () => {
+  const s = game.state;
+  if (s && meta.character) save(withCharacter(meta, s));
+});
+bus.on('stop:tapped', (e) => {
+  if (screen !== 'run' || !game.state) return;
+  bus.emit('footnote', { text: t('ui.note.stopLeft', { page: e.index + 1 }) });
+  endTicket();
+});
 const tunnelFx = bindTunnelFx(bus, { page: stage.page, pageWidth: () => game.state?.page.w ?? PAGE_W });
 // The hole in the run takes the player to the base (holding the run); the hole in the base takes him back.
 bus.on('tunnel:entered', () => void (game.state?.phase === 'base' ? returnFromTunnel() : holdRun()));
@@ -1043,6 +1092,7 @@ installTestHook({
     return enterBase(seed === undefined ? {} : { seed });
   },
   station: openStation,
+  travelToStop,
   acceptTicket: () => acceptNow(),
   setCampaignView: (v) => (campaignOverride = v),
   showCard: (kind) => showCard(TICKET_BASE + meta.history.length, kind),

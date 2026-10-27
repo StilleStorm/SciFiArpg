@@ -9,7 +9,8 @@ import { trialMultiplier } from '../items/reviews';
 import { makeSetPiece } from '../items/setPieces';
 import type { SetId } from '../items/sets';
 import { UNIQUES, UNIQUES_BY_ID, makeUnique } from '../items/uniques';
-import { createRun, type RunState } from '../world/run';
+import { createEnemy } from '../entities/factory';
+import { createRun, nextId, type RunState } from '../world/run';
 import { grantSkill, heroOfSkill, itemRanksOf, layPatch, paragraphAt, patchAt, rankOf, skillIndexOf } from './grants';
 import type { SkillIndex } from './defs';
 import { HERO_IDS, heroById, type HeroId } from './registry';
@@ -76,11 +77,30 @@ describe('the ten paragraph uniques', () => {
   });
 });
 
+describe('the three grant remaps (S21a, ITEMS 4.2, 12.13)', () => {
+  it.each([
+    ['program95', 'program90'],
+    ['przedwykonaniem', 'opoznienie'],
+    ['granica', 'granica'],
+  ])('%s carries %s § 3 with 2 ranks, read by the granted skill own index', (id, skill) => {
+    expect(UNIQUES_BY_ID.get(id)?.grant).toEqual({ skill, para: 3, ranks: 2 });
+    const owner = ownerOf(id);
+    const s = createRun(5, { heroId: owner });
+    const i = skillIndexOf(owner, skill) as SkillIndex;
+    expect(i).toBeGreaterThanOrEqual(5); // an unlocked-by-level skill, never an ultimate
+    wearUnique(s, id);
+    expect(itemRanksOf(s.player, i)).toBe(2);
+    expect(paragraphAt(s, i)).toBe(3);
+    expect(patchAt(s, i)).toEqual(heroById(owner).paragraphs[skill]?.list[2]?.patch);
+    expect(isInstalled(s, i)).toBe(true);
+  });
+});
+
 describe('ranks from a worn unique', () => {
   it('add to the skill of the hero it concerns, over the cap of 3, and nothing for the others', () => {
-    const owner = ownerOf('program95'); // wirowanie §3, +2 ranks
+    const owner = ownerOf('program95'); // program90 §3, +2 ranks (S21a remap)
     const s = createRun(5, { heroId: owner });
-    const i = skillIndexOf(owner, 'wirowanie');
+    const i = skillIndexOf(owner, UNIQUES_BY_ID.get('program95')?.grant?.skill ?? '');
     expect(rankOf(s, i as 0)).toBe(0);
     const before = power(s, i as 0);
     wearUnique(s, 'program95');
@@ -104,7 +124,7 @@ describe('ranks from a worn unique', () => {
       expect(patchAt(s, i)).toBeUndefined();
     }
     expect(s.player.grants).toHaveLength(1); // the grant is on the player, it just concerns nobody here
-    expect(grantSkill('konsultant', { skill: 'wirowanie' })).toBeNull();
+    expect(grantSkill('konsultant', { skill: 'program90' })).toBeNull();
   });
 
   it('a niekompatybilny unique gives nothing', () => {
@@ -184,21 +204,22 @@ describe('the paragraph a unique carries', () => {
   });
 
   it('a carried paragraph and the cast capstone apply together, during the cast only', () => {
-    const owner = ownerOf('program95'); // wirowanie §3
+    const owner = ownerOf('oczekiwanie'); // prosze §3; the spec «infolinia» has its capstone on prosze
     const s = createRun(5, { heroId: owner });
-    const i = skillIndexOf(owner, 'wirowanie') as 0;
+    const i = skillIndexOf(owner, 'prosze') as 0;
     s.hero.pads = [0, 1, 2];
-    s.hero.spec = 'pralnia'; // its capstone is on wirowanie
-    wearUnique(s, 'program95');
-    const carried = heroById(owner).paragraphs['wirowanie']?.list[2]?.patch;
+    s.hero.spec = 'infolinia';
+    wearUnique(s, 'oczekiwanie');
+    const carried = heroById(owner).paragraphs['prosze']?.list[2]?.patch;
     const cap = runCapstone(s);
     if (!carried || !cap) throw new Error('setup');
     let seen: unknown = null;
+    s.enemies.push(createEnemy(nextId(s), s.player.x + 60, s.player.y, 1)); // Proszę czekać needs somebody to wait
     const bus = createBus();
     bus.on('skill:cast', () => {
       seen = patchAt(s, i);
     });
-    expect(castSkill(s, bus, 0)).toBe(true);
+    expect(castSkill(s, bus, 0, false, { kind: 'wskazanie', x: s.player.x + 60, y: s.player.y })).toBe(true);
     expect(seen).toEqual(mergeCapstone(carried, cap.capstone.patch));
     expect(patchAt(s, i)).toEqual(carried); // the capstone is gone after the cast, the carried paragraph stays
   });

@@ -44,7 +44,9 @@
   "note": {
     "reassigned": "Zgłoszenie nr {number} przekazano innemu konsultantowi. Dotychczasowych ustaleń nie przekazano.",
     "tunnelOpened": "Stronę przecięto. Koszt naprawy zostanie doliczony.",
-    "tunnelClosed": "Stronę naprawiono taśmą. Taśma nie jest przezroczysta."
+    "tunnelClosed": "Stronę naprawiono taśmą. Taśma nie jest przezroczysta.",
+    "stopRegistered": "Zarejestrowano przystanek na żądanie przy stronie {page}. Rozkład jazdy jest skreślony; przystanek nie.",
+    "stopLeft": "Przystanek przy stronie {page} wywołano. Zgłoszenie wstrzymano do odwołania."
   },
   "notes": {
     "history": "Przypisy"
@@ -62,5 +64,10 @@
   },
   "sheet": {
     "more": "c.d. poniżej"
+  },
+  "stop": {
+    "plate1": "PRZYSTANEK",
+    "plate2": "NA ŻĄDANIE",
+    "stamp": "Zapisano"
   }
 }

@@ -48,6 +48,15 @@ export interface PageExit {
   y: number;
 }
 
+/** A przystanek na żądanie (world/stops.ts): a timetable post standing at (x, y); `registered` when the character has walked over it. */
+export interface PageStop {
+  x: number;
+  y: number;
+  /** Seeds the hand-drawn irregularity (render only). */
+  seed: number;
+  registered: boolean;
+}
+
 export interface Page {
   w: number;
   h: number;
@@ -77,6 +86,8 @@ export interface Page {
   gate?: PageGate;
   /** Teczki, pieczęcie and the event of this page (world/contentKinds.ts); placed from the seed, mutated by world/content.ts. Absent on the base page. */
   content?: PageContent[];
+  /** The stop of this page (DESIGN 4.1 Przystanki), set by `installStops` for a campaign ticket; absent on the base page, the finale and plan-less runs. */
+  stop?: PageStop;
 }
 
 /** What generatePage needs to know about the page's place in the run. */

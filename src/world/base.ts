@@ -34,9 +34,9 @@ export const WALK_R = 13;
 export type BaseLayout = 'ladowisko' | 'wioska' | 'miasteczko';
 export const BASE_LAYOUTS: readonly BaseLayout[] = ['ladowisko', 'wioska', 'miasteczko'];
 /** The stations that open a sheet. The tunnel is a hole, not a station: the player walks into it. */
-export type TappableStation = 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik';
+export type TappableStation = 'biurko' | 'kiosk' | 'tablica' | 'paczkomat' | 'urzednik' | 'przystanek';
 export type StationId = TappableStation | 'tunel';
-export const STATIONS: readonly TappableStation[] = ['biurko', 'kiosk', 'tablica', 'paczkomat', 'urzednik'];
+export const STATIONS: readonly TappableStation[] = ['biurko', 'kiosk', 'tablica', 'paczkomat', 'urzednik', 'przystanek'];
 
 export interface Station {
   id: TappableStation;
@@ -60,10 +60,12 @@ export const STATION_BOX: Record<TappableStation, Box> = {
   paczkomat: { x0: -26, y0: -76, x1: 26, y1: 54 },
   // the clerk (world/npc.ts, render/npc.ts): a standing figure with a stack of forms and a raised stamp
   urzednik: { x0: -34, y0: -76, x1: 34, y1: 56 },
+  // the stop board (render/stop.ts drawStopBoard): a post with three arrow plates and a struck-out timetable (S21a)
+  przystanek: { x0: -40, y0: -92, x1: 40, y1: 14 },
 };
 
 /** Where the margin-note label hangs: this far under the station's centre (world units), centred on it. */
-export const LABEL_DY: Record<TappableStation, number> = { biurko: 60, kiosk: 50, tablica: 32, paczkomat: 60, urzednik: 62 };
+export const LABEL_DY: Record<TappableStation, number> = { biurko: 60, kiosk: 50, tablica: 32, paczkomat: 60, urzednik: 62, przystanek: 30 };
 /** The label takes this many css px per character (Space Mono at `LABEL_PX`) and is this high (text and underline). */
 export const LABEL_CHAR_PX = 7.2;
 export const LABEL_H_PX = 20;
@@ -126,6 +128,7 @@ const SPECS: Record<BaseLayout, LayoutSpec> = {
       kiosk: { x: 660, y: 290 },
       paczkomat: { x: 705, y: 480 },
       urzednik: { x: 130, y: 380 },
+      przystanek: { x: 815, y: 330 },
     },
     props: [
       { kind: 'scorch', x: 190, y: 550 },
@@ -145,6 +148,7 @@ const SPECS: Record<BaseLayout, LayoutSpec> = {
       tablica: { x: 640, y: 280 },
       paczkomat: { x: 770, y: 495 },
       urzednik: { x: 500, y: 565 },
+      przystanek: { x: 650, y: 612 },
     },
     props: [
       { kind: 'hut', x: 130, y: 470 },
@@ -165,6 +169,7 @@ const SPECS: Record<BaseLayout, LayoutSpec> = {
       kiosk: { x: 650, y: 290 },
       paczkomat: { x: 735, y: 520 },
       urzednik: { x: 220, y: 480 },
+      przystanek: { x: 590, y: 560 },
     },
     props: [
       { kind: 'square', x: 450, y: 420 },
@@ -193,6 +198,8 @@ function stationBody(id: TappableStation): Circle[] {
       return [{ x: 0, y: -8, r: 22 }, { x: 0, y: 20, r: 20 }];
     case 'urzednik':
       return [{ x: 0, y: -42, r: 11 }, { x: 0, y: -4, r: 17 }, { x: 0, y: 34, r: 12 }];
+    case 'przystanek':
+      return [{ x: 0, y: 0, r: 11 }, { x: 0, y: -34, r: 8 }];
   }
 }
 

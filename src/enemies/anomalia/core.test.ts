@@ -104,7 +104,7 @@ describe('the final ticket as one page', () => {
     expect(s.page.hasKiosk).toBe(false);
     expect(s.page.base?.stations.map((st) => st.id)).toContain('biurko');
     expect(s.page.obstacles.some((o) => o.station === 'biurko')).toBe(false);
-    expect(s.page.obstacles.filter((o) => o.station !== undefined && o.station !== 'prop').length).toBe(4);
+    expect(s.page.obstacles.filter((o) => o.station !== undefined && o.station !== 'prop').length).toBe(5); // kiosk, tablica, paczkomat, urzednik and the stop board (S21a)
     expect(s.page.w).toBe(900);
   });
   it('is the same layout as the base the player left', () => {

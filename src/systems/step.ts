@@ -7,6 +7,7 @@ import { contentPre, tickContent } from '../world/content';
 import { trackEnemies } from '../world/enemyInfo';
 import { lawPre, tickLaw } from '../world/laws';
 import { tickPageTurn } from '../world/pageTurn';
+import { tickStops } from '../world/stops';
 import { tickTunnel } from '../world/tunnel';
 import type { RunState } from '../world/run';
 import { enemiesAttack, playerAttacks } from './combat';
@@ -54,6 +55,7 @@ export function createSim(bus: Bus) {
       collectPickups(s, bus);
       updateLoot(s, bus, dt);
       tickContent(s, bus, dt);
+      tickStops(s, bus);
       trickleSpawn(s, dt);
       undoLaw();
       undoContent();
