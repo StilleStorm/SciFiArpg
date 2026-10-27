@@ -145,7 +145,10 @@ change). Keys, so that S11 writes and S12 only wires:
 - `story.finale.phase1.*`, `story.finale.face.<heroId>.*`, `story.finale.phase3.*`, `story.finale.footnote`;
 - added S11: `story.p<N>.gate.note|lift|figure` (the page gate, §8.0), `story.finale.card.lines.1..3`
   (the return's card), `story.finale.hero.<heroId>` (the line after the closing stamp); the
-  sub-keys of the finale phases are listed in §8.4.
+  sub-keys of the finale phases are listed in §8.4;
+- added S22: `story.reopened.title|lines.1..3` (the "Sprawę wznowiono" red card, §8.11),
+  `story.p5.boss.hint` (a variant's captcha hint), `story.p5.gate.elite` (the gate elite's name, as
+  `story.p3.gate.elite`); a new boss body's own lines are `enemies.boss.<id>.*` (planet 6, §8.10).
 Planet names stay in `planets.json` (`planets.p<N>.name|loc`), replaced in place by the voice
 editor. Cards fall back to the `screens.cards.*` placeholders when a planet has no story key
 yet, so unwritten planets keep working.
@@ -195,7 +198,8 @@ Every entry maps onto a built contract, so a planet is data plus drawings:
   names the shift. S22 and S25 keep the rule: planet N's card describes planet N+1; planet 9's
   card describes planet 1.
 
-Entries for planets 1–3 and the finale texts follow (S11). Planet numbers in the names run
+Entries for planets 1–3 and the finale texts follow (S11), planets 4–6 and the Akt II decisions
+(§8.8–8.11, S22). Planet numbers in the names run
 consecutively from 23 (the Komisja's list order: "the next planet" is literally the next
 number), so Akt II continues at 26 and Akt III at 29. Hero ids: pralka, konsultant, petlowiec,
 kartograf, nalesnik. All Polish below is a draft for the voice editor, who writes the final
@@ -649,3 +653,398 @@ per face, S15's look budget).
   claims). S22 may propose one act **event** (§5) or new elite affixes for `akt2-enemies`; a
   fourth family would need every hero's § 1–3 types re-balanced and is parked unless the player
   asks for it (STATUS "Needs the player" at S22).
+
+### 8.8 Planet 4: Planeta Dwudziesta Szósta (Przekierowana) — Akt II
+**Record** (`PLANETS[3]`): act 2; dominant Powiadomienia 0.3/0.55/0.15; law pool
+`godziny-konsultanta`, `weryfikacja-dwuetapowa`, `nie-przeszkadzac`; base layouts miasteczko,
+lądowisko; locations miasto, biuro; hosted set none (first planet of the act, ITEMS §12.6);
+pages 5–6; boss Weryfikacja. Record edits for S23 (data only): `headline: 'godziny-konsultanta'`
+(already `lawPool[0]`, named for clarity), `locationSplit: 3` (pages 1–3 miasto, pages 4–6 and the
+boss page biuro). Name `planets.p4.name` "Planeta Dwudziesta Szósta (Przekierowana)", `loc`
+"Planecie Dwudziestej Szóstej" (the placeholder epithet kept: the ticket was redirected here).
+
+**Feel.** The escalation. The ticket comes back on a bigger form, and the bigger form has an
+address: the Komisja's second instance, which occupies the upper floors of a city where every
+building sends notifications. Badges on doors grow while the applicant looks at them; billboards
+offer the last chance; the trams run to a timetable that has been struck out. Outside the
+consultant's hours (the headline clause) the city is run by the bot, which answers every action
+with three options. The Komisja's letters change register with the act: Akt I was polite, Akt II
+writes "w nawiązaniu do zgłoszenia nr …, informujemy" and attaches. Nothing is refused; everything
+is attached. Brick wash, profile B (the act's).
+
+**Locations.**
+- *miasto* (pages 1–3; new type, the act's main one, reused on planet 5): tenements as tall
+  hatched blocks with a grid of windows, a tram on a ruled rail, a bus shelter, billboards on
+  poles with a hatched "OSTATNIA SZANSA", a kiosk (the Sklep's cousin, closed), a fountain drawn
+  as a coffee ring, a zebra crossing as ruled stripes, lampposts, a notice column (słup
+  ogłoszeniowy) papered with awizo slips, manhole covers, a letterbox with a badge number. Page
+  shape: blocks in a grid, streets as corridors, crossings as open squares with long sight lines;
+  a załącznik page may branch from a side street.
+- *biuro* (pages 4–6, boss page): planet 3's drawings reused with the brick wash, plus the
+  second instance's props: form stacks as hatched towers, a lift door with a floor indicator
+  (always "II"), a rope queue on posts, a wall plate "INSTANCJA DRUGA", a numbered-ticket
+  dispenser (reused), a window with a closed blind. Page shape: rooms cut by partitions as on
+  planet 3, but the boss hall is the appeals counter: a long counter with the captcha grid in
+  front of it.
+
+**Law.** Headline clause *Godziny konsultanta* (the act's theme on its first planet: the city
+belongs to the bot outside hours). Warunek: "powiadomienia miejskie".
+
+**Boss.** Weryfikacja, variant line `story.p4.boss.variant`: "Weryfikacja, instancja druga,
+formularz rozszerzony". One data change: racja 220 → 260 (the extended form). The hydrant grid and
+the summons stay. Spór:
+- spor1 (on arrival): comment "Potwierdź, że nie jesteś robotem. Potwierdzenie złożone
+  w instancji pierwszej nie obowiązuje w drugiej." Right: **regulaminowy** "Instancja druga
+  rozpatruje odwołanie, nie tożsamość. Tożsamość rozpatrzono w pierwszej i nie została
+  zaskarżona." Wrong mechaniczny "Robot nie potwierdza, robot uderza. Uderzam, więc nim nie
+  jestem." Wrong egzystencjalny "Robotem jest ten, kto pyta. Pytanie zadano automatycznie."
+- spor2 (the grid solved, the block): comment "Hydranty zaznaczono poprawnie. W związku
+  z eskalacją proszę zaznaczyć je ponownie, na formularzu rozszerzonym." Right: **mechaniczny**
+  "Hydranty zaznaczono stopą. Stopa nadal na nich stoi, więc zaznaczenie trwa." Wrong
+  regulaminowy "Ponowne zaznaczenie wymaga ponownego wezwania. Wezwania nie doręczono." Wrong
+  egzystencjalny "Hydrant zaznaczony istnieje bardziej niż niezaznaczony. Nie trzeba go
+  zaznaczać dwa razy."
+
+**Base and clerk.** miasteczko or lądowisko by seed. Clerk `story.p4.clerk`: name "Referent ds.
+Eskalacji", role "Komisja do Spraw Zjawisk Lokalnych, instancja druga, okienko 4", look seed 4.
+- line0 "Zgłoszenie eskalowano. Eskalacja polega na przepisaniu zgłoszenia na formularz
+  większy. Treść pozostaje bez zmian, zmienia się format."
+- line1 "Instancja druga mieści się nad pierwszą. Pierwszej na tej planecie nie przewidziano."
+- line2 "Konsultant przyjmuje w godzinach. Poza godzinami przyjmuje bot. Bot przyjmuje
+  wszystko i nic nie przekazuje."
+
+**Gate.** None (first planet of the act, §8.6).
+
+**Side tickets** (`story.p4.ticket.a|b|c`, ids `h:p4:a..c`):
+- a) kill, n 14, family powiadomienia, reward 40 stars + permission powiadomienia. Title
+  "Odbiór powiadomień". Text "Powiadomienia miejskie doręcza się przez odebranie. Powiadomienie
+  odebrane uznaje się za przeczytane, przeczytane za usunięte. Odebrać {count}." Twist: reading
+  is deleting; the first Powiadomienia ticket of the act names the family's rule.
+- b) reach, n 5, reward 35 stars + 1 potwierdzenie. Title "Instancja druga". Text "Odwołanie
+  wnosi się w instancji drugiej, na stronie {count}. Instancja druga mieści się nad pierwszą.
+  Pierwszej nie ma." Twist: the appeal goes to a second instance without a first.
+- c) fetch, n 4, reward 30 stars. Title "Załączniki". Text "Eskalacja wymaga załączników.
+  Załączniki dołączono do zgłoszenia i rozesłano po mieście. Zebrać {count} i dołączyć
+  ponownie." Twist: the escalation's attachments were distributed around town for filing.
+
+**Chapter card** (`story.p4.card`; title generated "Akt II. Planeta Dwudziesta Szósta
+(Przekierowana)"):
+- lines.1 "Zjawiska lokalne na planetach pierwszej listy usunięto. Zgłoszenie eskalowano
+  i przekierowano na planetę następną. Przekierowanie nie jest rozpatrzeniem."
+- lines.2 "Według akt planeta jest aplikacją sklepową. Na miejscu stwierdzono miasto
+  powiadomień oraz instancję drugą Komisji."
+- lines.3 "Zjawisko lokalne: powiadomienia miejskie. Instancja druga przyjmuje wyłącznie
+  w godzinach konsultanta. Godzin nie podano."
+- hero.pralka "Eskalacja: program dłuższy, ta sama woda. Formularz większy przyjmuję do bębna,
+  osobowość nadal w toku."
+- hero.konsultant "Eskalowano mnie do przełożonego. Przełożonym okazała się kolejka. Znam ją
+  z drugiej strony słuchawki."
+- hero.petlowiec "Formularz większy wypełniłem w poprzedniej pętli i w następnej. W tej tylko
+  podpisuję."
+- hero.kartograf "Miasto figuruje na mapie jako punkt. Punkt powiększono do miasta bez pomiaru.
+  Zacznę od rogu."
+- hero.nalesnik "Miasto ma kształt siatki. Siatka jest płaska. Pierwszy raz od czterech
+  miliardów lat jestem na miejscu."
+- rewritten.1 "Sprawę przepisano. Eskalację uznano za zakończoną, a instancję drugą za pierwszą."
+- rewritten.2 "Wnioskodawca wraca do miasta. Powiadomienia odebrano. Miasto wysyła nowe."
+
+**Stop posts.** The stop (DESIGN §4.1 Przystanki) is a timetable post; on *miasto* pages it
+reads as the city's own tram stop with no flavour needed, and the builder may put the bus
+shelter prop near the page's stop when the layout allows (the post itself is placed by
+`placeStop`, nothing collides with it). On *biuro* pages it reads as the queue's post; no change.
+
+**Hosted set.** None (first planet of the act). Systems: campaign record (two data edits above),
+locations registry (miasto new, biuro reused with additions), clerk, side tickets, boss variant
+table (racja), cards. Slice: **S23** (builder `planet-4`).
+
+### 8.9 Planet 5: Planeta Dwudziesta Siódma (Pilna) — Akt II
+**Record** (`PLANETS[4]`): act 2; dominant Powiadomienia 0.2/0.6/0.2; law pool
+`godziny-konsultanta`, `oplata-serwisowa`, `nie-przeszkadzac`; base layout miasteczko; locations
+centrum, miasto; hosted set «Ostatnia mila»; pages 5–6; boss Weryfikacja. Record edits for S23:
+`headline: 'oplata-serwisowa'` (the shopping planet charges for every win), locations reordered
+to `['miasto', 'centrum']` with `locationSplit: 3` (pages 1–3 miasto, pages 4–6 and the boss page
+centrum), the gate below. Name "Planeta Dwudziesta Siódma (Pilna)", loc "Planecie Dwudziestej
+Siódmej" (the placeholder epithet kept: the ticket is marked urgent because the offer is limited
+in time).
+
+**Feel.** The planet that is one shopping app. The streets are the storefront (every façade a
+product card with a price and a struck price), the halls behind them are the app's customer
+service and fulfilment centre, and the notifications are the offers: Ostatnia szansa, Twój
+koszyk tęskni. The applicant's ticket has been marked *pilne* because the planet's offer expires;
+the service fee (headline clause) is added to a cart the applicant does not have. The set
+«Ostatnia mila» is the planet's subject: the last mile of every delivery is walked by the
+recipient. The Sklep stock joke (ITEMS §7.1 as built: one oferta plate, 10% a set piece) is at
+home here and needs no planet rule. Brick wash, profile B.
+
+**Locations.**
+- *miasto* (pages 1–3): planet 4's drawings reused with this wash, plus the storefront props:
+  shop windows as hatched rectangles with a price tag and a struck price, a sale banner across the
+  street ("−70%" hatched), a delivery van outline at a kerb, a stack of flattened boxes, a
+  mannequin with a badge number. Page shape as planet 4.
+- *centrum* (centrum obsługi, pages 4–6, boss page; new type, reused on planet 6): long counters
+  as ruled bars with numbered windows, a parcel conveyor (planet 1's belt reused), a wall of
+  lockers (the paczkomat column part, three wide), a returns desk with a bin, a mountain of
+  cardboard boxes (hatched), a barcode scanner on a stand, a stand with five hatched rating
+  stars, a chat bubble on a pole ("Czat: offline"), shopping carts nested in a row, a rope queue
+  (planet 4's reused). Page shape: a hall; counters as long bars with gaps, queues as rope lines
+  the player walks around; the boss at the checkout, its grid on the floor in front.
+
+**Law.** Headline clause *Opłata serwisowa* (every victory is charged; the loot tier rises "as
+compensation", as `laws.json` says). Warunek: "powiadomienia o ofertach ograniczonych czasowo".
+
+**Boss.** Weryfikacja, variant line `story.p5.boss.variant`: "Weryfikacja, wersja sklepowa,
+zaznacz wszystkie koszyki". One data change, spent on a part as planet 3 did: the hydrants in
+the grid squares are drawn as **shopping carts** (`BossVariant.grid: 'koszyk'`, one drawing in
+render/enemyFigures.ts; the body stays) and the captcha hint reads from `story.p5.boss.hint`
+"Zaznacz wszystkie kratki z koszykami." (a key override on the variant; the solved line stays
+the family's). Racja as the family has it. Spór:
+- spor1: comment "Potwierdź, że nie jesteś robotem, i dodaj do koszyka. Koszyk tęskni." Right:
+  **egzystencjalny** "Koszyk jest pusty. Pusty koszyk nie tęskni; tęsknota jest funkcją
+  aplikacji, nie koszyka." Wrong mechaniczny "Koszyk ma kółka. Kółka się odkręca." Wrong
+  regulaminowy "Dodanie do koszyka wymaga zalogowania. Wnioskodawca nie posiada konta."
+- spor2 (the grid solved, the block): comment "Weryfikację wstrzymano. Oferta ograniczona
+  czasowo wygasła w trakcie. Proszę zacząć od nowa." Right: **regulaminowy** "Oferta jest ważna
+  do odwołania. Odwołanie wniesiono i przyjęto; wstrzymanie trwa." Wrong mechaniczny "Zegar oferty
+  można przytrzymać ręką." Wrong egzystencjalny "Czas, który minął w trakcie, nikomu nie minął."
+
+**Base and clerk.** miasteczko. Clerk `story.p5.clerk`: name "Specjalista ds. Doręczeń", role
+"Komisja do Spraw Zjawisk Lokalnych, punkt odbioru nr 27 (w aplikacji)", look seed 5.
+- line0 "Zgłoszenie oznaczono jako pilne. Pilność wynika z oferty ograniczonej czasowo. Oferta
+  dotyczy planety."
+- line1 "Przesyłki doręcza się do punktu odbioru. Ostatnią milę pokonuje odbiorca. Odbiorca
+  jest w punkcie odbioru, więc mila się nie zgadza." (the set's hook line, ITEMS §12.6)
+- line2 "Opłatę serwisową dolicza się do koszyka. Koszyka wnioskodawca nie posiada. Opłatę
+  doliczono."
+
+**Gate** (`story.p5.gate`): **page 3** (0-based 2; miasto). Kind `elite`, look `parcels` (planet
+2's wall of parcels reused with this wash: the delivery point at the end of the street) with a
+figure "Dyspozytor" at the gap (look seed 52). Condition: the page's forced named elite, titled
+"Doręczyciel" (`story.p5.gate.elite`, as planet 3's Ochrona Obiektu), is struck. On the lift the
+parcels are struck through and drawn away, the Dyspozytor walks off the page.
+- note "Punkt odbioru obsługuje doręczyciel. Doręczyciel jest na stronie, w trasie. Przesyłki
+  wydaje się po skreśleniu doręczyciela z grafiku."
+- figure (tap) "Nie wydaję. Dysponuję."
+- lift "Doręczyciela skreślono z grafiku. Przesyłki uznano za doręczone. Przejście wolne."
+
+**Side tickets** (`story.p5.ticket.a|b|c`; ticket a is the planet's one item ticket, §8.7):
+- a) deliver, n 1, reward 40 stars + item: one piece of «Ostatnia mila» (`QuestReward.item`,
+  the piece picked by the builder's roll from kask / kamizelka / powerbank at the planet's shop
+  band). Title "Ostatnia mila". Text "Przesyłkę wnioskodawcy doręczono do punktu odbioru. Punkt
+  odbioru jest na pierwszej stronie, wnioskodawca w bazie. Ostatnią milę pokonuje odbiorca:
+  wynieść przesyłkę, wrócić, doręczyć Specjaliście ds. Doręczeń." Twist: the recipient walks the
+  last mile both ways, and the reward is then sent by post anyway: it arrives as an awizo at the
+  paczkomat with the Asystent's line "Doręczenia osobistego nie przewidziano."
+- b) kill, n 16, family powiadomienia, reward 40 stars + permission powiadomienia. Title
+  "Ostatnia szansa". Text "Oferty ograniczone czasowo wygasają po skreśleniu. Skreślić {count}.
+  Oferta ważna do odwołania; odwołanie wniesiono." Twist: the offer's own clause.
+- c) fetch, n 3, reward 30 stars + 1 potwierdzenie. Title "Koszyk". Text "Koszyk wnioskodawcy
+  tęskni. Zawartość koszyka rozłożono na stronach w celu personalizacji. Zebrać {count}. Zakupu
+  nie przewidziano." Twist: the cart's contents were spread out to personalize them; no purchase.
+
+**Chapter card** (`story.p5.card`; "Akt II. Planeta Dwudziesta Siódma (Pilna)"):
+- lines.1 "Zjawisko na planecie poprzedniej usunięto. Zgłoszenie przekazano na planetę
+  następną i oznaczono jako pilne. Pilność wynika z oferty, nie ze zgłoszenia."
+- lines.2 "Według akt planeta jest infolinią. Na miejscu stwierdzono aplikację sklepową
+  wielkości planety."
+- lines.3 "Zjawisko lokalne: powiadomienia o ofertach ograniczonych czasowo. Każde zwycięstwo
+  podlega opłacie serwisowej. Opłatę doliczono do koszyka."
+- hero.pralka "Oferta ograniczona czasowo. Mój czas jest ograniczony do końca programu. Koszyka
+  nie posiadam; wirówkę owszem."
+- hero.konsultant "Twój koszyk tęskni. Mówiłem to tysiąc razy i nikt nie odpowiedział. Teraz
+  wiem: nie mieli koszyka."
+- hero.petlowiec "Ostatnia szansa pojawia się w każdej pętli. Pierwszej szansy nie
+  odnotowano."
+- hero.kartograf "Sklep wielkości planety nie mieści się w skali. Zmierzę ofertę. Towaru nie
+  stwierdzono."
+- hero.nalesnik "Dostawa w ciągu doby. Doba na mojej planecie trwa krócej, więc się spóźnią."
+- rewritten.1 "Sprawę przepisano. Ofertę uznano za wygasłą, a pilność za bezprzedmiotową."
+- rewritten.2 "Wnioskodawca wraca po odbiór. Przesyłkę zwrócono do nadawcy. Nadawcą był
+  wnioskodawca."
+
+**Stop posts.** On *miasto* as planet 4. On *centrum* pages the post stands among the queues and
+reads as the "numerek" post of a service hall; no flavour needed beyond the drawing.
+
+**Hosted set.** «Ostatnia mila» (drops as built: boss 35%, Sklep 10%, elites by post; ticket a
+pays one piece by awizo). Systems: campaign record (headline, location order and split, gate),
+locations registry (centrum new, miasto reused with additions), clerk, side tickets (one
+`QuestReward.item`), boss variant table (`grid` part + hint key override: a small additive change
+to `BossVariant` and enemyFigures.ts), gate (elite kind, parcels look reused), cards. Slice:
+**S23** (builder `planet-5`).
+
+### 8.10 Planet 6: Planeta Dwudziesta Ósma (Nagrywana) — Akt II
+**Record** (`PLANETS[5]`): act 2; dominant Powiadomienia 0.15/0.55/0.3; law pool
+`weryfikacja-dwuetapowa`, `oplata-serwisowa`, `godziny-konsultanta`; base layouts miasteczko,
+wioska; locations centrum, serwerownia, archiwum; hosted set «Infolinia»; pages 5–6. Record edits
+for S24: `boss: 'ankieta'` (the act's new body, below; `BOSS_OF[dominant]` would give
+Weryfikacja), `headline: 'weryfikacja-dwuetapowa'` (already `lawPool[0]`), `locationSplit: [2, 3]`
+(pages 1–2 centrum, page 3 serwerownia, pages 4–6 and the boss page archiwum), the gate below.
+Name "Planeta Dwudziesta Ósma (Nagrywana)", loc "Planecie Dwudziestej Ósmej" (the placeholder
+"Wielokrotna" replaced: the hotline planet is recorded, as every call is).
+
+**Feel.** The hotline. The escalated ticket ends up where tickets go to be spoken about: a call
+centre of cubicles and headsets, a server hall that stores the hold music, and an archive of
+recorded calls, none of them with the applicant. Every page's exit needs two-factor verification
+(headline clause): the code comes by footnote, late. The Wygenerowane share rises to 0.3: the
+callers who exist according to 87% of users. The act ends as every call does, with a
+satisfaction survey, and the survey is the boss. Hosted set «Infolinia»: the clerk's line and the
+boss's second comment name it. Brick wash, profile B; the music profile's hold tune is this
+planet's own joke, nothing per planet is added.
+
+**Locations.**
+- *centrum* (pages 1–2): planet 5's drawings reused with this wash, plus the call centre's
+  props: cubicle partitions as ruled rectangles with a headset on each, a desk phone on a stand,
+  a wall clock labelled "czas oczekiwania", a loudspeaker on a bracket (the hold music), a wall
+  plate "ROZMOWA JEST NAGRYWANA", a whiteboard with a hatched bar chart. Page shape: rows of
+  cubicles as corridors, a break room as an open square.
+- *serwerownia* (page 3): planet 2's drawings reused; the racks store the hold music.
+- *archiwum* (pages 4–6, boss page; new type, reused on planet 9 under Akt III): shelving of
+  tape reels and cassette boxes as hatched rows, filing drawers in long banks, a rolling ladder,
+  a card catalogue, dust sheets drawn as hatched drapes, bound volumes, boxes labelled by year,
+  a reading desk with a lamp, a "CISZA" plate (planet 2's reused). Page shape: long stacks with
+  narrow aisles and cross-cuts; the boss page is the reading room, a clearing among the stacks.
+
+**Law.** Headline clause *Weryfikacja dwuetapowa* (the act's second theme on its last planet).
+Warunek: "powiadomienia o oczekiwaniu na połączenie".
+
+**Boss: Ankieta** (the act's new body, player 2026-10-19; drawn and built in S24). The
+satisfaction survey sent after every call, made manifest: the last page of the escalation.
+- *Body (for the S24 builder, ink only, DESIGN §3).* A tall clipboard on two thin stilt legs
+  (the Urządzenia stilts part reused, longer); the torso is a form sheet with a header band
+  "OCEŃ NASZĄ OBSŁUGĘ" as its head, five hatched star boxes down the front as its face (the
+  stars fill as the fight goes: its "expression"), a pencil on a string as its one arm, the clip at
+  the top drawn as a brow, a paper feed curling out of the top like hair. Size between Weryfikacja
+  and Prototyp. Its claim bubble: "Oceń rozmowę". Family Powiadomienia (resist mechaniczny, weak
+  regulaminowy), `claimType: 'regulaminowy'`. Suggested numbers for `BOSSES.ankieta`: hp 240,
+  speed 30 (it walks, slowly, unlike Weryfikacja), dmg 4–7, attackRange 44, attackCooldown 1.4,
+  pewnoscSiebie 75, upor 45; the balance pass at the end of S24 tunes them.
+- *Fight (existing primitives only: the Weryfikacja grid code generalized to a row, statuses,
+  summons, the phase model).* Every 8 s it **sends the survey**: five hatched star squares are
+  drawn in a row on the floor between it and the player (the hydrant-square drawing, five cells
+  in a line). Standing on the **1-star** square for 1.5 s files a complaint: the Ankieta is
+  **zablokowany** for 3 s (as the hydrants block Weryfikacja) and takes the family's weakness
+  normally. Standing on **5 stars** for 1.5 s thanks it: it regains 10% racja and the row
+  vanishes. A row left unanswered for 6 s is a reminder: it summons two Przypomnienia
+  ("Przypominamy o ankiecie", the Weryfikacja summon code, cap 6) and draws the next row. At half
+  racja, phase 2: the survey becomes obligatory, the row is drawn around the player's position
+  every 6 s instead of near the boss, and the second Spór comment is posted. Footnotes
+  (`enemies.boss.ankieta.*`, voice): meet "Napotkano Ankietę. Prosi o ocenę rozmowy, która się
+  nie odbyła."; hint "Oceń rozmowę w skali od 1 do 5. Ocena 1 podlega rozpatrzeniu."; filed
+  "Złożono ocenę negatywną. Ankietę wstrzymano do rozpatrzenia."; thanked "Dziękujemy za ocenę.
+  Ocena została przekazana."; reminder "Przypominamy o ankiecie."; half "Ankieta jest
+  obowiązkowa. Ocena nie jest."
+- *Variant line.* None (the body is its own); `story.p6.boss.variant` is not written, and the
+  variant-line slot under the name stays empty (planet 9 in S25 does the same for its body).
+- Spór (`story.p6.boss.spor1|spor2`):
+  - spor1 (on arrival): comment "Prosimy o ocenę rozmowy w skali od jednego do pięciu. Rozmowa
+    się nie odbyła." Right: **regulaminowy** "Ocenie podlega rozmowa odbyta. Rozmowy nieodbytej
+    nie ocenia się, lecz zgłasza." Wrong mechaniczny "Ankietę wypełnia się ołówkiem. Ołówek
+    jest na sznurku, sznurek się urywa." Wrong egzystencjalny "Ocena rozmowy, której nie było,
+    jest oceną niczego. Nic nie mieści się w skali."
+  - spor2 (half racja): comment "Dziękujemy za ocenę. Rozmowa była nagrywana; nagranie
+    przekazano do działu, który nie istnieje." Right: **egzystencjalny** "Dział, który nie
+    istnieje, nie przyjmuje nagrań. Nagranie wraca do wnioskodawcy wraz z ankietą." Wrong
+    mechaniczny "Przekazanie można przerwać przez wyjęcie taśmy." Wrong regulaminowy
+    "Przekazanie do działu wymaga numeru sprawy. Numeru nie nadano." (the set's hook: the
+    recorded call, ITEMS §4.1 «Infolinia»)
+
+**Base and clerk.** miasteczko or wioska. Clerk `story.p6.clerk`: name "Pracownik Infolinii,
+stanowisko 28", role "Komisja do Spraw Zjawisk Lokalnych, infolinia, rozmowa nagrywana", look
+seed 6.
+- line0 "Dzień dobry, w czym mogę pomóc. Zgłoszenie odnaleziono. Pomocy nie przewidziano."
+- line1 "Rozmowa jest nagrywana. Nagranie trafia do archiwum. Archiwum nie odsłuchuje." (the
+  set's hook line)
+- line2 "Wyjście ze strony wymaga kodu. Kod wysyła się na numer z akt. Numer z akt należy do
+  planety następnej."
+
+**Gate** (`story.p6.gate`): **page 4** (0-based 3; archiwum). Kind `teczka` with the forced key
+folder (`keyTeczka`, as planet 2), the default hatched tape band across the exit corner (no new
+look: the band reads as "strefa archiwum") with a figure "Archiwista" at it (look seed 63).
+Condition: the teczka "nagranie rozmowy", which the page always places, is opened. On the lift
+the band is struck through, the Archiwista walks off the page.
+- note "Wyjście z archiwum wymaga okazania nagrania rozmowy. Nagranie leży na tej stronie,
+  w teczce. Rozmowy nie przeprowadzono."
+- figure (tap) "Nie wydaję nagrań. Przyjmuję."
+- lift "Nagranie okazano. Archiwista odsłuchał. Rozmowy na nagraniu nie stwierdzono.
+  Przejście wolne."
+
+**Side tickets** (`story.p6.ticket.a|b|c`):
+- a) kill, n 6, family wygenerowane, reward 40 stars + permission wygenerowane (the act's first
+  ticket on the third family, before Akt III). Title "Rozmówcy niezweryfikowani". Text "Na
+  infolinię dzwonią rozmówcy, którzy istnieją według 87% użytkowników. Rozmowę z nimi kończy
+  się przez skreślenie. Zakończyć {count}." Twist: the hotline's callers are generated.
+- b) reach, n 4, reward 35 stars + 1 potwierdzenie. Title "Odsłuch nagrania". Text "Nagrania
+  rozmów przechowuje się w archiwum na stronie {count}. Odsłuchu dokonuje wnioskodawca
+  osobiście. Rozmów z wnioskodawcą nie nagrano." Twist: the applicant goes to hear a recording
+  that does not include them.
+- c) fetch, n 5, reward 35 stars. Title "Numery w kolejce". Text "Przed wnioskodawcą w kolejce
+  znajduje się {count} numerów. Numery leżą na stronach. Numer zebrany uznaje się za obsłużony."
+  Twist: the applicant serves the queue ahead of themselves.
+
+**Chapter card** (`story.p6.card`; "Akt II. Planeta Dwudziesta Ósma (Nagrywana)"):
+- lines.1 "Zjawisko na planecie poprzedniej usunięto. Zgłoszenie przekazano na infolinię.
+  Rozmowa jest nagrywana."
+- lines.2 "Według akt planeta jest jaskinią, w której stwierdzono zjawiska wygenerowane. Na
+  miejscu stwierdzono centrum obsługi, serwerownię i archiwum nagrań." (describes planet 7:
+  S25 keeps planet 7 on jaskinia and równina with Wygenerowane dominant, as its record says)
+- lines.3 "Zjawisko lokalne: powiadomienia o oczekiwaniu na połączenie. Wyjście z każdej
+  strony wymaga weryfikacji dwuetapowej. Etap drugi wymaga pierwszego."
+- hero.pralka "Infolinia prosi o numer seryjny. Podaję numer wniosku o osobowość. Rozmowę
+  przekierowano do serwisu."
+- hero.konsultant "Infolinia. Słuchawka po drugiej stronie. Pierwszy raz dzwonię i pierwszy
+  raz nikt nie odbiera, czyli wszystko działa."
+- hero.petlowiec "Czekam na linii od zeszłego tygodnia. Rozmowa zaczęła się jutro i już ją
+  nagrano."
+- hero.kartograf "Infolinia nie ma współrzędnych. Zmierzę czas oczekiwania; to jedyna długość,
+  jaką tu podają."
+- hero.nalesnik "Proszę czekać. Czekam. Jestem w tym lepszy niż muzyka."
+- rewritten.1 "Sprawę przepisano. Rozmowę uznano za odbytą, a nagranie za niezgodne
+  z rozmową."
+- rewritten.2 "Wnioskodawca wraca na infolinię. Numer w kolejce przyznano ponownie. Ten sam."
+
+**Stop posts.** On *centrum* as planet 5; on *serwerownia* and *archiwum* the post stands in an
+aisle and reads as the stacks' own marker. No flavour needed on any Akt II type; the one place a
+stop could be drawn differently is a city kerb (planet 4), and that is a builder's option, not
+a rule.
+
+**Hosted set.** «Infolinia» (as built; no item ticket on this planet, its hook is spoken by the
+clerk and the boss, and the boss's 35% piece and the Sklep's 10% stand as the set rule says). Closing this
+planet at `CAMPAIGN_LAST` 6 issues the return ticket (§2); the chapter card of the return is
+§8.4's. Systems: campaign record (boss id, headline, split, gate), new boss body (`BossId`
+'ankieta' in enemies/ids.ts, `BOSSES.ankieta`, its tick in bosses.ts on the generalized grid, its
+figure in enemyFigures.ts, its Spór table from `story.p6.boss.*`, its footnotes in
+enemies.json), locations registry (archiwum new, centrum and serwerownia reused), gate (teczka
+kind, default band), clerk, side tickets, cards, `CAMPAIGN_LAST` 6 with the reopened card
+(§8.11). Slice: **S24** (builder `planet-6`; the Ankieta's finale form is not needed: phase 1 of
+the Anomalia cycles the three family bosses, §3, and the Ankieta is a planet body, not a family
+form).
+
+### 8.11 Akt II decisions and texts outside the planet entries (S22)
+- **No act event.** The three zdarzenia (formularz, przesyłka, audyt) stay the whole campaign's
+  events (§5). A notifications event ("numerek": take a number and hold a spot by a window) was
+  weighed and dropped: it is formularz with another drawing, and the Diablo benchmark has no
+  per-act events. Instead `akt2-enemies` (S24) adds **two elite affixes** in the Powiadomienia
+  key, with Polish grammar as the four built ones have: *oddzwaniający* (the elite returns once,
+  4 s after it is struck, at 30% racja, re-inked over its strike, claim "Oddzwaniam"; Diablo's
+  resurrecting monster) and *dwuetapowy* (its claim needs two rebuttals before it breaks, the
+  bracket shows "1/2"; the act's two-factor law on a body). Both are elite-system data plus one
+  small hook each; no family, no event, nothing for the player to decide.
+- **No fourth family** (§8.7; the player has not asked).
+- **Weryfikacja on two planets, the new body on the third**: planets 4 and 5 are variants (a
+  number, a part), planet 6 is Ankieta (§8.10). `BOSS_OF[dominant]` stays the rule; planet 6's
+  record names its boss explicitly.
+- **"Sprawę wznowiono" card** (§2; the red card at the desk for a save whose closed list ends at
+  the old `CAMPAIGN_LAST`; keys `story.reopened.title`, `story.reopened.lines.1..3`; no hero line,
+  as every red card, §8.0; shown once, before the planet 4 chapter card):
+  - title "Zgłoszenie nr {number}. Sprawę wznowiono." (the red WZNOWIONO stamp in the
+    PRZEPISANO slot)
+  - lines.1 "Zgłoszenie błędu, o którym mowa w przypisie końcowym, rozpatrzono. Błąd uznano za
+    zasadny i przekazano na planetę następną w kolejności."
+  - lines.2 "Sprawę zamkniętą prawidłowo wznawia się z urzędu: warunek jej zamknięcia,
+    usunięcie zjawisk lokalnych, obowiązuje także na planetach dopisanych do listy."
+  - lines.3 "Wnioskodawca pozostaje na liście oczekujących. Pozycja: następna. Lista została
+    wydłużona."
+  The same text serves the rise to 9 after Akt III (S27 adds nothing but the constant).
+- **Keys added to §7**: `story.reopened.*`, `story.p5.boss.hint`, `story.p5.gate.elite`; the
+  Ankieta's own lines live in `enemies.boss.ankieta.*` like the family bosses'.
+- **Hero lines count**: five per card as before; the Konsultant's lines on planets 4–6 are the one
+  place a hero speaks of its own trade on every card of an act, on purpose (the act is his).

@@ -469,7 +469,11 @@ from drawn parts, so no two are identical, but families are recognizable at a gl
   notification). Weak to regulaminowy (answered with a policy). Claims are their tier names.
   Boss: **Weryfikacja**, a captcha: it asks "Czy jesteś robotem?" and spawns a 3×3 grid of
   hatched squares on the floor; standing on the squares that contain "hydranty" (drawn) for 2 s
-  stuns it; otherwise it summons Przypomnienia while alive.
+  stuns it; otherwise it summons Przypomnienia while alive. Planet 6 (the last of Akt II) has the
+  act's one new boss body instead (player 2026-10-19): **Ankieta**, the satisfaction survey, a
+  clipboard on stilts that draws a row of five star squares; 1 star files a complaint (it is
+  blocked), 5 stars thank it (it heals), an unanswered row summons Przypomnienia. Plan STORY
+  §8.10, built S24.
 - **Wygenerowane** (the generated ones). Cyberiad's probable beasts, today: creatures that exist
   in proportion to their likes. A dragon drawn in dotted line, a thing that is mostly legs, an
   "ewentualny" bear, a hand with seven fingers. They flicker with the existence coefficient.
