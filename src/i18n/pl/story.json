@@ -234,6 +234,227 @@
       }
     }
   },
+  "p4": {
+    "card": {
+      "lines": {
+        "1": "Zjawiska lokalne na trzech planetach usunięto. Zgłoszenie eskalowano i przekierowano na planetę następną. Przekierowanie nie jest rozpatrzeniem.",
+        "2": "Według akt planeta jest aplikacją sklepową. Na miejscu stwierdzono miasto powiadomień oraz instancję drugą Komisji.",
+        "3": "Zjawisko lokalne: powiadomienia miejskie. Instancja druga przyjmuje wyłącznie w godzinach konsultanta. Godzin nie podano."
+      },
+      "hero": {
+        "pralka": "Eskalacja: program dłuższy, woda ta sama. Większy formularz mieści się w bębnie. Wniosek o osobowość w toku.",
+        "konsultant": "Eskalowano mnie do przełożonego. Przełożonym okazała się kolejka. Znam ją z drugiej strony słuchawki.",
+        "petlowiec": "Instancję drugą znam z pętli trzeciej. Pierwszej nie spotkałem w żadnej.",
+        "kartograf": "Miasto figuruje na mapie jako punkt. Punkt powiększono do miasta bez pomiaru. Zaczynam od rogu.",
+        "nalesnik": "Miasto ma kształt siatki. Siatka jest płaska. Pierwszy raz od czterech miliardów lat jestem na miejscu."
+      }
+    },
+    "rewritten": {
+      "lines": {
+        "1": "Sprawę przepisano. Eskalację uznano za zakończoną, a instancję drugą za pierwszą.",
+        "2": "Wnioskodawca wraca do miasta. Powiadomienia odebrano. Miasto wysyła nowe."
+      }
+    },
+    "clerk": {
+      "name": "Referent ds. Eskalacji",
+      "role": "Komisja do Spraw Zjawisk Lokalnych, instancja druga, okienko 4",
+      "line0": "Zgłoszenie eskalowano. Treść pozostała bez zmian. Zmieniono format z A4 na A3.",
+      "line1": "Instancja druga mieści się nad pierwszą. Pierwszej na tej planecie nie przewidziano.",
+      "line2": "Konsultant przyjmuje w godzinach. Poza godzinami przyjmuje bot. Bot przyjmuje wszystko i niczego nie przekazuje."
+    },
+    "ticket": {
+      "a": {
+        "title": "Odbiór powiadomień",
+        "text": {
+          "one": "Powiadomienie skreślone uznaje się za odebrane, odebrane za przeczytane, a przeczytane za usunięte. Odebrać {count} powiadomienie.",
+          "few": "Powiadomienie skreślone uznaje się za odebrane, odebrane za przeczytane, a przeczytane za usunięte. Odebrać {count} powiadomienia.",
+          "many": "Powiadomienie skreślone uznaje się za odebrane, odebrane za przeczytane, a przeczytane za usunięte. Odebrać {count} powiadomień."
+        }
+      },
+      "b": {
+        "title": "Instancja druga",
+        "text": "Odwołanie składa się w instancji drugiej, na stronie {count}. Instancji pierwszej nie powołano. Odwołanie przysługuje mimo to."
+      },
+      "c": {
+        "title": "Załączniki",
+        "text": {
+          "one": "Eskalacja wymaga załączników. Załączniki dołączono, a następnie rozesłano po mieście. Zebrać {count} załącznik i dołączyć ponownie.",
+          "few": "Eskalacja wymaga załączników. Załączniki dołączono, a następnie rozesłano po mieście. Zebrać {count} załączniki i dołączyć ponownie.",
+          "many": "Eskalacja wymaga załączników. Załączniki dołączono, a następnie rozesłano po mieście. Zebrać {count} załączników i dołączyć ponownie."
+        }
+      }
+    },
+    "boss": {
+      "variant": "Weryfikacja, instancja druga, formularz rozszerzony",
+      "spor1": {
+        "comment": "Potwierdź, że nie jesteś robotem. Potwierdzenie złożone w instancji pierwszej nie obowiązuje w drugiej.",
+        "reply": {
+          "mechaniczny": "Robot nie potwierdza, robot uderza. Uderzam, więc robotem nie jestem.",
+          "regulaminowy": "Instancja druga rozpatruje odwołanie, nie tożsamość. Tożsamości nie zaskarżono.",
+          "egzystencjalny": "Robotem jest ten, kto pyta. Pytanie zadano automatycznie."
+        }
+      },
+      "spor2": {
+        "comment": "Hydranty zaznaczono poprawnie. W związku z eskalacją proszę zaznaczyć je ponownie na formularzu rozszerzonym.",
+        "reply": {
+          "mechaniczny": "Hydranty zaznaczono stopą. Stopa stoi, zaznaczenie trwa.",
+          "regulaminowy": "Ponowne zaznaczenie wymaga ponownego wezwania. Wezwania nie doręczono.",
+          "egzystencjalny": "Hydrant zaznaczony istnieje bardziej niż niezaznaczony. Bardziej istnieć nie może."
+        }
+      }
+    }
+  },
+  "p5": {
+    "card": {
+      "lines": {
+        "1": "Zjawisko na planecie poprzedniej usunięto. Zgłoszenie przekazano na planetę następną i oznaczono jako pilne. Pilność wynika z oferty, nie ze zgłoszenia.",
+        "2": "Według akt planeta jest infolinią. Na miejscu stwierdzono aplikację sklepową wielkości planety.",
+        "3": "Zjawisko lokalne: powiadomienia o ofertach ograniczonych czasowo. Każde zwycięstwo podlega opłacie serwisowej."
+      },
+      "hero": {
+        "pralka": "Oferta ograniczona czasowo. Mój czas też: do końca programu. Koszyka nie posiadam. Posiadam bęben.",
+        "konsultant": "„Twój koszyk tęskni”. Czytałem to z kartki tysiącom klientów. Żaden nie miał koszyka.",
+        "petlowiec": "Ostatnia szansa pojawia się w każdej pętli. Pierwszej szansy nie odnotowano.",
+        "kartograf": "Sklep wielkości planety nie mieści się w skali mapy. Zmierzyłem ofertę. Towaru nie stwierdzono.",
+        "nalesnik": "Dostawa w ciągu doby. Moja doba trwa czterdzieści minut. Dostawy się spóźniają."
+      }
+    },
+    "rewritten": {
+      "lines": {
+        "1": "Sprawę przepisano. Ofertę uznano za wygasłą, a pilność za bezprzedmiotową.",
+        "2": "Wnioskodawca wraca po odbiór. Przesyłkę zwrócono do nadawcy. Nadawcą był wnioskodawca."
+      }
+    },
+    "clerk": {
+      "name": "Specjalista ds. Doręczeń",
+      "role": "Komisja do Spraw Zjawisk Lokalnych, punkt odbioru nr 27 (w aplikacji)",
+      "line0": "Zgłoszenie oznaczono jako pilne. Zgłoszenia pilne rozpatruje się w kolejności wpływu, jak pozostałe.",
+      "line1": "Przesyłki doręcza się do punktu odbioru. Ostatnią milę pokonuje odbiorca, w obie strony.",
+      "line2": "Opłatę serwisową dolicza się do koszyka. Koszyka wnioskodawca nie posiada. Opłatę doliczono."
+    },
+    "gate": {
+      "elite": "Doręczyciel",
+      "note": "Punkt odbioru obsługuje doręczyciel. Doręczyciel jest w trasie, na tej stronie. Przesyłki wydaje się po skreśleniu doręczyciela z grafiku.",
+      "figure": "Nie wydaję. Dysponuję.",
+      "lift": "Doręczyciela skreślono z grafiku. Przesyłki uznano za doręczone. Odbiorcy nie zastano. Przejście wolne."
+    },
+    "ticket": {
+      "a": {
+        "title": "Ostatnia mila",
+        "text": "Przesyłkę wnioskodawcy doręczono do punktu odbioru na pierwszej stronie. Wnioskodawca przebywa w bazie. Ostatnią milę pokonuje odbiorca: odebrać przesyłkę i doręczyć ją Specjaliście ds. Doręczeń."
+      },
+      "b": {
+        "title": "Ostatnia szansa",
+        "text": {
+          "one": "Oferta ograniczona czasowo wygasa po skreśleniu. Skreślić {count} ofertę. Każda jest ostatnią szansą.",
+          "few": "Oferta ograniczona czasowo wygasa po skreśleniu. Skreślić {count} oferty. Każda jest ostatnią szansą.",
+          "many": "Oferta ograniczona czasowo wygasa po skreśleniu. Skreślić {count} ofert. Każda jest ostatnią szansą."
+        }
+      },
+      "c": {
+        "title": "Koszyk",
+        "text": {
+          "one": "Koszyk wnioskodawcy tęskni. Jego zawartość rozłożono na stronach w celu personalizacji. Zebrać {count} produkt. Zakupu nie przewidziano.",
+          "few": "Koszyk wnioskodawcy tęskni. Jego zawartość rozłożono na stronach w celu personalizacji. Zebrać {count} produkty. Zakupu nie przewidziano.",
+          "many": "Koszyk wnioskodawcy tęskni. Jego zawartość rozłożono na stronach w celu personalizacji. Zebrać {count} produktów. Zakupu nie przewidziano."
+        }
+      }
+    },
+    "boss": {
+      "variant": "Weryfikacja, wersja sklepowa, w promocji",
+      "hint": "Zaznacz wszystkie kratki z koszykami.",
+      "spor1": {
+        "comment": "Potwierdź, że nie jesteś robotem, i dodaj do koszyka. Koszyk tęskni.",
+        "reply": {
+          "mechaniczny": "Koszyk ma kółka. Kółka się odkręca.",
+          "regulaminowy": "Dodanie do koszyka wymaga zalogowania. Wnioskodawca nie posiada konta.",
+          "egzystencjalny": "Koszyk jest pusty. Pusty koszyk nie tęskni. Tęskni aplikacja."
+        }
+      },
+      "spor2": {
+        "comment": "Weryfikację wstrzymano. Oferta ograniczona czasowo wygasła w trakcie. Proszę zacząć od nowa.",
+        "reply": {
+          "mechaniczny": "Zegar oferty można przytrzymać ręką.",
+          "regulaminowy": "Oferta była ważna do odwołania. Odwołania nie ogłoszono. Oferta obowiązuje.",
+          "egzystencjalny": "Czas, który minął w trakcie, nikomu nie minął."
+        }
+      }
+    }
+  },
+  "p6": {
+    "card": {
+      "lines": {
+        "1": "Zjawisko na planecie poprzedniej usunięto. Zgłoszenie przekazano na infolinię. Rozmowa jest nagrywana.",
+        "2": "Według akt planeta jest jaskinią zjawisk wygenerowanych. Na miejscu stwierdzono centrum obsługi, serwerownię i archiwum nagrań.",
+        "3": "Zjawisko lokalne: powiadomienia o oczekiwaniu na połączenie. Wyjście z każdej strony wymaga weryfikacji dwuetapowej. Etap drugi wymaga pierwszego."
+      },
+      "hero": {
+        "pralka": "Infolinia prosi o numer seryjny. Podaję numer wniosku o osobowość. Rozmowę przekierowano do serwisu.",
+        "konsultant": "Pierwszy raz dzwonię na infolinię. Nikt nie odbiera. Wszystko działa prawidłowo.",
+        "petlowiec": "Czekam na linii od zeszłego tygodnia. Rozmowa zaczęła się jutro i już ją nagrano.",
+        "kartograf": "Infolinia nie ma współrzędnych. Mierzę czas oczekiwania. To jedyna długość, jaką tu podają.",
+        "nalesnik": "Proszę czekać. Czekam. Robię to dłużej niż ta muzyka."
+      }
+    },
+    "rewritten": {
+      "lines": {
+        "1": "Sprawę przepisano. Rozmowę uznano za odbytą, a nagranie za niezgodne z rozmową.",
+        "2": "Wnioskodawca wraca na infolinię. Numer w kolejce przyznano ponownie. Ten sam."
+      }
+    },
+    "clerk": {
+      "name": "Pracownik Infolinii, stanowisko 28",
+      "role": "Komisja do Spraw Zjawisk Lokalnych, infolinia, rozmowa nagrywana",
+      "line0": "Dzień dobry, w czym mogę pomóc? Zgłoszenie odnaleziono. Pomocy nie przewidziano.",
+      "line1": "Rozmowa jest nagrywana. Nagranie trafia do archiwum. Archiwum nie odsłuchuje.",
+      "line2": "Wyjście ze strony wymaga kodu. Kod wysyła się na numer z akt. Numer z akt należy do planety następnej."
+    },
+    "gate": {
+      "note": "Wyjście z archiwum wymaga okazania nagrania rozmowy. Nagranie leży na tej stronie, w teczce. Rozmowy nie przeprowadzono.",
+      "figure": "Nagrań nie wydaję. Archiwizuję.",
+      "lift": "Nagranie okazano. Archiwista odsłuchał. Rozmowy na nagraniu nie stwierdzono. Przejście wolne."
+    },
+    "ticket": {
+      "a": {
+        "title": "Rozmówcy niezweryfikowani",
+        "text": {
+          "one": "Na infolinię dzwonią rozmówcy, którzy istnieją według 87% użytkowników. Rozmowę z nimi kończy się przez skreślenie. Zakończyć {count} rozmowę.",
+          "few": "Na infolinię dzwonią rozmówcy, którzy istnieją według 87% użytkowników. Rozmowę z nimi kończy się przez skreślenie. Zakończyć {count} rozmowy.",
+          "many": "Na infolinię dzwonią rozmówcy, którzy istnieją według 87% użytkowników. Rozmowę z nimi kończy się przez skreślenie. Zakończyć {count} rozmów."
+        }
+      },
+      "b": {
+        "title": "Odsłuch nagrania",
+        "text": "Nagrania rozmów przechowuje się w archiwum na stronie {count}. Odsłuchu dokonuje wnioskodawca osobiście. Rozmów z wnioskodawcą nie nagrano."
+      },
+      "c": {
+        "title": "Numery w kolejce",
+        "text": {
+          "one": "Przed wnioskodawcą w kolejce znajduje się {count} numer. Numery leżą na stronach. Numer zebrany uznaje się za obsłużony.",
+          "few": "Przed wnioskodawcą w kolejce znajdują się {count} numery. Numery leżą na stronach. Numer zebrany uznaje się za obsłużony.",
+          "many": "Przed wnioskodawcą w kolejce znajduje się {count} numerów. Numery leżą na stronach. Numer zebrany uznaje się za obsłużony."
+        }
+      }
+    },
+    "boss": {
+      "spor1": {
+        "comment": "Prosimy ocenić rozmowę w skali od 1 do 5. Rozmowa się nie odbyła.",
+        "reply": {
+          "mechaniczny": "Ołówek wisi na sznurku. Sznurek można urwać.",
+          "regulaminowy": "Ocenie podlega rozmowa odbyta. Rozmowy nieodbytej nie ocenia się, lecz zgłasza.",
+          "egzystencjalny": "Ocena rozmowy, której nie było, jest oceną niczego. Nic nie mieści się w skali."
+        }
+      },
+      "spor2": {
+        "comment": "Dziękujemy za ocenę. Rozmowa była nagrywana. Nagranie przekazano do działu, który nie istnieje.",
+        "reply": {
+          "mechaniczny": "Przekazanie można przerwać przez wyjęcie taśmy.",
+          "regulaminowy": "Przekazanie do działu wymaga numeru sprawy. Numeru nie nadano.",
+          "egzystencjalny": "Dział, który nie istnieje, nie przyjmuje nagrań. Nagranie wraca do nadawcy razem z ankietą."
+        }
+      }
+    }
+  },
   "finale": {
     "card": {
       "lines": {
@@ -361,6 +582,14 @@
       "petlowiec": "Sprawę zamknięto po raz pierwszy. Pamiętam, że już się to zdarzyło.",
       "kartograf": "Planeta istnieje. Naniesiono ją na mapę. Mapa zgadza się z planetą. Akta pozostają do poprawy.",
       "nalesnik": "Sprawę zamknięto. Mój wniosek nadal odłożony. Jest teraz najstarszym dokumentem Komisji i podlega ochronie."
+    }
+  },
+  "reopened": {
+    "title": "Zgłoszenie nr {number}. Sprawę wznowiono.",
+    "lines": {
+      "1": "Zgłoszenie błędu, o którym mowa w przypisie końcowym, rozpatrzono. Błąd uznano za zasadny. Sprawę przekazano na planetę następną w kolejności.",
+      "2": "Sprawę zamkniętą prawidłowo wznawia się z urzędu. Warunek zamknięcia, usunięcie zjawisk lokalnych, obowiązuje także na planetach dopisanych do listy.",
+      "3": "Wnioskodawca pozostaje na liście oczekujących. Pozycja: następna. Listę wydłużono."
     }
   }
 }

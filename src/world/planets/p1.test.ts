@@ -143,7 +143,7 @@ describe('story keys', () => {
     expect(hasStory('p1.card.lines.1')).toBe(true);
     expect(hasStory('p1.ticket.a.text')).toBe(true);
     expect(hasStory('opening.hero.pralka')).toBe(true);
-    expect(hasStory('p5.card.lines.1')).toBe(false);
+    expect(hasStory('p7.card.lines.1')).toBe(false);
     expect(hasStory('p1.card')).toBe(false);
   });
 });
