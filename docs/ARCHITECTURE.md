@@ -102,6 +102,16 @@ Android back: `popstate` in a run toggles the pause sheet. Save: `save/autosave.
 import is byte-identical); `parseArchive(text)` -> `{ok, meta}` | `{ok: false, reason: parse | kind | newer}`; `describeMeta`; `main.ts importSave`.
 Bug dump: `bugDump({meta, bus, planet, page, total, device})` -> `copyText` -> a footnote on the pause sheet (`PauseSheet.note`).
 
+**Przystanki** (S21a, DESIGN 4.1; `world/stops.ts`): `stopIndices(pageCount)` (0, 2, 4, ... `STOP_EVERY`), `ticketHasStops(plan)` (campaign/extra/travel below
+`CAMPAIGN_LAST`; never the finale, a plan-less run or the base), `installStops(pages, rng.fork('stops'))` sets `Page.stop?: PageStop` clear of colliders,
+gate, exit corner and content. `RunState.stops` mirrors `Character.stops?: Record<planet, pageIndex[]>` (CHARACTER_VERSION 2, `toStops`, older records
+load with none). `tickStops` (in `systems/step.ts`) registers within `STOP_WALK_R` 52: `stop:registered` -> footnote on the `footnote` bus, stamp
+ZAPISANO, `render/stop.ts redrawStop`, save at once. A tap on a registered post (`tapStop`, box >= 44 css px) emits `stop:tapped` -> `endTicket()`
+(bookmark at that page). Base station `przystanek` (`render/stop.ts drawStopBoard`) opens `ui/stops.ts openStops(root, host)` listing `stopRows(campaign,
+stops)`; a row tap -> `planStopTravel(c, stops, planet, index, o)` (campaign plan on the current planet, else travel at the last priority; bookmark
+`pageIndex = index`, `pageCount = max(natural, index + 1)`) -> `main.travelToStop` (drops a held tunnel run, saves the bookmark, `enterBase({resume})`,
+`acceptNow`). Hook `__game.stops.{list, register, place, travel, info}`; shots `scripts/shot-stops.mjs` (port 4200).
+
 **Page gates** (`world/gate.ts`): `Page.gate?: PageGate {kind: boss|teczka|quest|elite, id?, need?, key?, liftKey?, look?, figure? {look, key},
 keyTeczka?, eliteId?, slain?}`, set from `PlanetDef.gates: PlanetGate[] {page, gate}` by `applyPlanetGates` in `createRun`. `installGate` adds an
 obstacle of kind `gate` (`GATE_RADIUS` 150 arc of colliders over the exit corner, `Obstacle.variant` = look: `parcels` planet 2, `turnstile` planet 3;
