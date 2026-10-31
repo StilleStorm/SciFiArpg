@@ -251,14 +251,14 @@
       "f": "oddzwaniająca",
       "n": "oddzwaniające",
       "pl": "oddzwaniające",
-      "effect": "Po skreśleniu wraca jeden raz, po czterech sekundach, z 30% racji. Zapowiedziało, że oddzwoni."
+      "effect": "Po skreśleniu wraca raz, po czterech sekundach, z 30% racji. Skreślenie uznaje się za przerwanie połączenia."
     },
     "dwuetapowy": {
       "m": "dwuetapowy",
       "f": "dwuetapowa",
       "n": "dwuetapowe",
       "pl": "dwuetapowe",
-      "effect": "Jego teza wymaga dwóch odparć. Pierwsze stwierdza jedynie odbiór."
+      "effect": "Teza wymaga dwóch odparć. Pierwsze potwierdza jedynie odbiór."
     }
   },
   "boss": {
@@ -329,10 +329,10 @@
     "ankieta": {
       "name": "Ankieta",
       "meet": "Napotkano Ankietę. Prosi o ocenę rozmowy, która się nie odbyła.",
-      "hint": "Oceń rozmowę w skali od 1 do 5. Ocena 1 podlega rozpatrzeniu.",
+      "hint": "Oceń rozmowę w skali od 1 do 5. Ocena 1 podlega rozpatrzeniu. Za ocenę 5 dziękujemy.",
       "filed": "Złożono ocenę negatywną. Ankietę wstrzymano do rozpatrzenia.",
-      "thanked": "Dziękujemy za ocenę. Ocena została przekazana.",
-      "reminder": "Przypominamy o ankiecie.",
+      "thanked": "Dziękujemy za ocenę. Ocenę zaliczono na poczet racji Ankiety.",
+      "reminder": "Przypominamy o ankiecie. Przypomnienie wysłano w dwóch egzemplarzach.",
       "half": "Ankieta jest obowiązkowa. Ocena nie jest."
     }
   },

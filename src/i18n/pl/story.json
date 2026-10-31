@@ -472,7 +472,7 @@
         },
         "weryfikacja": {
           "old": "Wnioskodawca nie potwierdził, że nie jest robotem. Zgłoszenie wstrzymano.",
-          "new": "Sprostowanie: wnioskodawca potwierdził to na trzech planetach. Wstrzymanie nie obowiązuje."
+          "new": "Sprostowanie: wnioskodawca potwierdził to na każdej planecie z listy. Wstrzymanie nie obowiązuje."
         },
         "hipoteza": {
           "old": "Wnioskodawca istnieje według 87% użytkowników. Pozostałe 13% zapytano ponownie.",
@@ -482,8 +482,8 @@
       "spor": {
         "comment": "Zgłoszenie nr {number} czeka na rozpatrzenie. Rozpatrzenie nastąpi po usunięciu zjawiska lokalnego.",
         "reply": {
-          "mechaniczny": "Zjawisko lokalne usunięto trzy razy. Czwarte usunięcie w toku.",
-          "regulaminowy": "Warunek spełniono na trzech planetach. Zgłoszenie podlega rozpatrzeniu, nie przekazaniu.",
+          "mechaniczny": "Zjawisko lokalne usunięto na każdej planecie z listy. Usunięcie następne w toku.",
+          "regulaminowy": "Warunek spełniono na wszystkich planetach z listy. Zgłoszenie podlega rozpatrzeniu, nie przekazaniu.",
           "egzystencjalny": "Zjawiska nie było. Były przekazania."
         }
       },
@@ -563,7 +563,7 @@
     },
     "phase3": {
       "name": "Asystent w wersji 0.9",
-      "meet": "Anomalia istnieje w stopniu, w jakim zgłoszenie uznaje się za otwarte. Zgłoszenie jest otwarte od trzech planet.",
+      "meet": "Anomalia istnieje w stopniu, w jakim zgłoszenie uznaje się za otwarte. Zgłoszenie jest otwarte od planety pierwszej.",
       "spor": {
         "comment": "Zgłoszenie jest otwarte. Dopóki jest otwarte, jestem potrzebny.",
         "reply": {
