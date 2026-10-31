@@ -31,7 +31,7 @@ stays), `moveItem(meta, {zone, index}, to)` (`Zone = 'bag' | 'personal' | 'share
 `ui/rosterStore.ts` is the only UI file on that API (codes -> `ui/rosterModel.ts errorText`). `go('profile')` first runs `settleForRoster()`.
 
 **Entity kinds** (`entities/types.ts`, all `{kind, id, x, y, r}`): `player`, `enemy` (family, tier, claim, defect, elite, boss, runtime bag `rtOf()`:
-`affixes, packOf, packSize, named, age`), `projectile`, `pickup` (item plate, gwiazdki star, permission card, or `potwierdzenie` slip), `summon`
+`affixes, packOf, packSize, named, age, returned?, survey?`), `projectile`, `pickup` (item plate, gwiazdki star, permission card, or `potwierdzenie` slip), `summon`
 (copy, decoy, ghost, `moon`), `zone` (`teren`, `hourglass`, `wniosek`, `legenda`, `start`, `numer`). Radii match the drawing (`ENEMY_SCALE` 1.2,
 `HERO_SCALE` 1.15, `CARD_SCALE` 1.3). Adding a kind: type + factory, array on `RunState`, a `Builder` (`create`, `patch`, `drawInMs`), a case in
 `render/view.ts`.
@@ -68,7 +68,8 @@ it.
 - Tunnel: `tunnel:opened {x, y, pageIndex}`, `tunnel:entered`, `tunnel:returned`, `tunnel:closed {reason: return | second | death | end | page}` (the
   first three are taped).
 - Combat: `attack:started {attackerId, attacker, x, y, tx, ty, ranged, laser?}`, `player:hit`, `enemy:hit|miss`, `enemy:died {id, x, y, tier?,
-  family?}`, `boss:died`, `boss:phase`, `enemy:rebutted|offTopic|escalated`.
+  family?}`, `boss:died`, `boss:phase`, `enemy:rebutted|offTopic|escalated` (`rebutted` fires once per broken bubble: a two-step claim only on
+  its last step), `enemy:returned {id, x, y}` (an oddzwaniajacy back once, a new id).
 - Spór: `spor:posted {id, phase, commentKey, replies, params?}` (`params` interpolate the comment: the finale's `{number}`), `spor:answered {id,
   index, right}`, `spor:closed {id, reason: answered | expired | died}`.
 - Hero: `skill:cast {slot, skill, free, aim}`, `ultimate:cast {heroId, ultimateId, x, y}`, `skill:fx {kind, x, y, x2, y2, r}`, `summon:expired`,
@@ -115,7 +116,7 @@ stops)`; a row tap -> `planStopTravel(c, stops, planet, index, o)` (campaign pla
 **Page gates** (`world/gate.ts`): `Page.gate?: PageGate {kind: boss|teczka|quest|elite, id?, need?, key?, liftKey?, look?, figure? {look, key},
 keyTeczka?, eliteId?, slain?}`, set from `PlanetDef.gates: PlanetGate[] {page, gate}` by `applyPlanetGates` in `createRun`. `installGate` adds an
 obstacle of kind `gate` (`GATE_RADIUS` 150 arc of colliders over the exit corner, `Obstacle.variant` = look: `parcels` planet 2, `turnstile` planet 3;
-`render/obstacles.ts drawGate/redrawGate`). `tickPageTurn` calls `stepGate` (`gateHolds`; lifts with `gateLiftKey(g)`, or writes `gateKey(g)` within
+planet 6 `teczka` gate with no look = the default hatched band; `render/obstacles.ts drawGate/redrawGate`). `tickPageTurn` calls `stepGate` (`gateHolds`; lifts with `gateLiftKey(g)`, or writes `gateKey(g)` within
 `GATE_NOTE_DIST`, every `GATE_NOTE_EVERY` s). Conditions: boss (`bindGates` on `boss:died` on that page), teczka (`need` opened, or with `keyTeczka`
 only the page's one key folder from `placeKeyTeczka`, `Teczka.key`), quest (`id` in the log), elite (`bindGates` sets `slain` on `elite:slain` with
 `eliteId`; `enemies/spawn.ts spawnGateElite`, called first by `populatePage`, places the one forced named elite `story.p3.gate.elite`, no rolled named
@@ -200,7 +201,12 @@ planet boss's first item is a hosted set piece at `BOSS_SET_CHANCE` 35%; `RunSta
 rzadki -> piece -> unique (or the second item one tier where no set is hosted; footnote `items.loot.komisja`). Sklep `economy/sklep.ts restock(state,
 seed, visit, level, planet)`: 3 low, 1 rzadki, 1 `oferta` (`SHOP_SET_CHANCE` 10% a set piece), 1 `adapter` (`Listing.kind` as `.sk-kind` stamp);
 `mountSklep(..., {planet})`, `RollOptions.shop`. Elites: `ELITE_IDS` 10, `spawnElite(..., {makeNamed, pack})`, packs of 2–4, named elites
-`enemies/named.ts`. Marks `render/itemMarks.ts`: `buildTierMark` (nietypowy stamp, rzadki thread, unikatowy wax seal, zestaw paperclip), `affixMarks`,
+`enemies/named.ts` (`pickNamedAffixes(rng, from)`). Every roll picks from `eliteIdsFor(planet)`: the ten, plus `AKT2_ELITE_IDS` (`oddzwaniajacy`,
+`dwuetapowy`) on `AKT2_PLANETS` [3, 5]; bosses and their summons take none. Oddzwaniajacy (`enemies/spawn.ts queueReturn/tickReturns`, run time):
+`ODDZWANIAJACY_DELAY_S` 4 after its strike the same seed and affixes return once at `ODDZWANIAJACY_RACJA` 0.3 with `ODDZWANIAM_CLAIM`,
+`rt.returned`, not named; dropped if the page turned; `render/ink.ts restrike` draws its strike again on the spot as it returns. Dwuetapowy: `combat/claims.ts
+staged(claim)` (`Claim.step/of/base/stepAt`, text `stepKey` = `enemies.claimStep.<family>.<id>.<n>`), `rebut(claim, now)` (true when struck;
+one volley within `STEP_GAP_S` 0.35 counts once; `CLAIM_STEPS` 2). Marks `render/itemMarks.ts`: `buildTierMark` (nietypowy stamp, rzadki thread, unikatowy wax seal, zestaw paperclip), `affixMarks`,
 `groundMark`, `buildAffixMarks`; all black ink but the seal's red dot. `drawingSvg(id, item)`; `itemView.itemRowText`, `declaredHead`, `isStruck`.
 Recovery (`systems/recovery.ts`, numbers in `balance/recovery.ts`): `takePotwierdzenie`, `useHeld(s, bus, auto?, incoming?)`, `onPlayerBlow`. HUD
 `ui/hud.ts createPotwButton` (`.potw-btn`, at most two slips, `.count` from two up). Archive: `ui/archive.ts openArchive` (`.ar-sec[data-place]
@@ -235,14 +241,15 @@ trial period. UI: the Reklamacja section of `ui/sklep.ts` (a refused row: reason
 `world/campaign.ts` owns the priorities (`PRIORITIES`, `PRIORITY_IDS`, `DEFAULT_PRIORITY`, `priorityUnlocked`, `availablePriorities`, `clampPriority`;
 unlock 1/1/8/18), the nine planets (`PLANETS`, `planetDef(i)`; `planets.pN.name|loc` is the only planet-name source), `CampaignState {current, closed,
 finalTicket, caseClosed, extras, cards?}` and the plans (`nextCampaignPlan`, `extraPlan`, `travelList`, `travelPlan`, `defaultPlan`, `closeTicket`,
-`toCampaign`, `toPlan`, `toCardsSeen`), `CAMPAIGN_LAST` 3 (the return ticket follows planet 3; `extraPlan` and `travelList` stop there; a case closed
-shorter is reopened by `toCampaign`, `CampaignState.reopened?`, SEAM: no card shows it yet, S24), `headlineOf(i)`, `lawForPlanet(i, seed, first)`
+`toCampaign`, `toPlan`, `toCardsSeen`), `CAMPAIGN_LAST` 6 (the return ticket follows planet 6; `extraPlan` and `travelList` stop there; a case closed
+shorter is reopened by `toCampaign`: `CampaignState.reopened?`, shown as card kind `reopened` ahead of any chapter card, never over the finale;
+main's `showCard` calls `clearReopened(c)` and saves), `headlineOf(i)`, `lawForPlanet(i, seed, first)`
 (`PlanetDef.headline`, else `lawPool`). `TicketPlan {kind: campaign|final|extra|travel, planet, priority, lawId}`; `createRun(seed, {plan})` uses
 `world/ticket.ts ticketForPlan`; enemies scale by `planScale(s.plan)`, xp by `xpMul`, loot by `lootTierBonus`, `starMul`, `ilvlBonus`; no plan =
 neutral. main.ts `enterBase(over)` picks the plan (over -> held -> bookmark -> `defaultPlan`) and shows the card (`ui/ticketModel.cardToShow`);
 `acceptNow(priority)`; ticket form `ui/ticket.ts open(info, {level, view})` (`onAccept`, `onTravel`, `onExtra` -> `takePlan`). `bindCampaign(bus, ()
 => game.state)` is bound after `bindTunnel` and before main's `run:ended`; `settleCampaign` once per plan object. Cards `ui/cards.ts openCard(root,
-{kind: opening|chapter|rewritten|finale, planetIndex}, {number, onDone})` (`.card-layer[data-card]`, `.card-skip`); `finale` once per character
+{kind: opening|chapter|rewritten|finale|reopened, planetIndex}, {number, onDone})` (`.card-layer[data-card]`, `.card-skip`); `finale` once per character
 (`CardsSeen.finale`). Page content: `world/contentKinds.ts` (`SEALS` six, `CONTENT`, `paragraphsFree(buffs)`, `waivePrice(patch)`), `world/content.ts`
 (`contentPre`, `tickContent`, `grantSeal`, `activeBuffs`, `effectsOf`); `pages.placeContent` (never page 1 or the boss page); `bindContent(bus,
 getState)` bound once at boot; `render/obstacles.redrawContent`. Quests `world/quests.ts`: `QuestState {active, done, log}`, kinds
@@ -251,10 +258,13 @@ npcAt/registerNpc`, `render/npc.ts drawNpc`, `ui/npcSheet.ts`; `ui/karta-osobowa
 **Planet modules** (`world/planets/`, imported once by `main.ts` and the tests that need them): `pN.ts` registers the clerk (`registerNpc`), side
 tickets `h:pN:*` (`registerSideTickets`) and the boss variant (`enemies/bosses.ts registerBossVariant(planet, {..., attackRange?, arm?: 'stapler'})`,
 `bossVariantOf`, `bossVariantLine`, `bossVariantArm`; drawn by `render/enemyFigures.ts`); the planet's record stays in `world/campaign.ts`.
+Boss bodies: `BossId` (… `'ankieta'`), `BOSS_FAMILY` (body -> family), `PlanetDef.boss?` picks a body of its family (`bossBodyFor(family,
+planet)`, else `BOSS_OF`); the chosen body is kept on the enemy by `enemies/bossBody.ts setBossBody/bossBodyOf(e, family)` (read by spor, ai,
+enemyFigures; never import the boss logic for it). Ankieta (planet 6): `EnemyRt.survey: Survey`, `tickSurvey`, `surveyCellCenter/At`, `SURVEY_*`.
 `combat/spor.ts STORY_ANSWERS[planet]`, `storyEntry`, `promptFor(..., planet?)`. `storyKeys.ts hasStory(path)`. Locations
-(`world/planets/locations.ts`): `LOCATIONS` (przedmiescie, magazyn, serwerownia, biuro), `LocationSpec {layout: rows|aisles|corridors|rooms, wall?,
+(`world/planets/locations.ts`): `LOCATIONS` (przedmiescie, magazyn, serwerownia, biuro, miasto, centrum, archiwum), `LocationSpec {layout: rows|aisles|corridors|rooms, wall?,
 wallSide?, row?, props}`, `locationSpec`, `propSpec`, `propColliders`. `world/pages.ts`: obstacle kind `prop` (`Obstacle.variant` = prop id),
-`Page.location?`, `pickLocations/generateRunPages(rng, count, locations?, split?)` (`PlanetDef.locationSplit`: a number or an array of cuts, cut k ->
+`Page.location?`, `pickLocations/generateRunPages(rng, count, locations?, split?)` (`PlanetDef.locationSplit`: a number or an array of cuts, e.g. planet 6 `[2, 3]`, cut k ->
 `locations[k]`), `base.ts generateBase(seed, planet?)` from `PlanetDef.baseLayouts`. Drawings: `render/locations/` (one file per location type,
 `registerDrawings(type, {id: PropDrawer})`, `drawProp`, `drawingsOf`; generic blot fallback). `CardOptions.heroId?` picks the hero's story lines.
 
@@ -319,13 +329,14 @@ requestUpdate, openUpdate, pickUpdate, die, givePermission}`, `enemies.{spawnFam
 `content.{list, put(kind, {seal, dist, dy}), tap, open, seal, buffs}`, `quests.{offers, active, accept(idOrKind), drop, finish, report, happen,
 done}`, `audio.{renderProfile, renderSfx, music, contextState}`. DOM hooks: `[data-pause=...]`, `[data-desk=...]`,
 `[data-roster=new|open|karta|remove|back]`, `.rs-case[data-case] [data-hero]`, `[data-profile=name|karta]`, `.card-skip`, `.spor-reply[data-reply]`.
-`npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot`: 390x844 @2x and 844x390 into `shots/` (`SHOT_PORT`, `SHOT_OUT`). Per-domain
+`npm run check` = typecheck, vitest, `lint:rules`, build. `npm run shot`: 390x844 @2x and 844x390 into `shots/` (`SHOT_PORT`, `SHOT_OUT`, `SHOT_DIR`; the canonical set is the default run). Per-domain
 shots `scripts/shot-<name>.mjs` (SHOT_PORT/SHOT_OUT/SHOT_DIR in each header; port as in its usage line): base 4189, tunnel 4188, pause 4187, attacks
 4186, enemies 4181, heroes 4183, items 4182, aim 4195, skills 4197, loadout 4198, s2 4182, s3 4183, s4 4184, s5 4185, recovery 4176, s6 4186, s7 4187,
 s8 4182, elite-packs 4188, s10-content 4183, s10-quests 4188, s12 4192, s13 4193, s14 4194, s15 4194, s15-faces 4195, spor 4199, sets 4196, reklamacja
-4197, the five heroes (table above). Port 4190 is a blocked port of the fetch standard: Node `fetch` refuses it, so `e2e:m4` probes readiness with
+4197, the five heroes (table above), s24p6 4186, s24akt2 4187. Port 4190 is a blocked port of the fetch standard: Node `fetch` refuses it, so `e2e:m4` probes readiness with
 `node:http`; other scripts must use another port. `npm run smoke` (`SMOKE_PORT` 4191) plays a ticket with real buttons through every screen and system
-(legs listed in its header; 6e3 casts every ultimate in § 1–3, 6e5 the Pory skim, 6k Reklamacja), then 5 s of frame times with 40 enemies
+(legs listed in its header; 6e3 casts every ultimate in § 1–3, 6e5 the Pory skim, 6k Reklamacja; 6g'/6h'/6h'' enter planets 4–6 through the
+case file via `intoCase`, 6k' the reopened card and both Akt II affixes), then 5 s of frame times with 40 enemies
 (`PERF_MAX_MS`, `SMOKE_UNCAPPED`). Milestone gates: `npm run e2e:m1` (`M1_PORT` 4177: every hero x orientation, loadout, ultimate); `e2e:m2`
 (`M2_PORT` 4192, `M2_ONLY`: campaign at Niski, cards, teczka, packs, named elites, side ticket, finale, free travel, reload, perf); `e2e:m3`
 (`M3_PORT` 4189, `M3_OUT`, `M3_DIR`, `M3_ONLY` portrait|landscape|pralka|kartograf: Akt I from a fresh profile through both gates, bosses, Spór, the
