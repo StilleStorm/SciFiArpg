@@ -3067,9 +3067,11 @@ try {
     await qp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
     await qp.locator('.card-layer .card-skip').click({ timeout: 3000 });
     await sleep(500);
-    // the base is opened with the plan by hand (the chapter card of the campaign is not what this leg checks)
-    await ev(() => window.__game.start(6, { phase: 'base', plan: { kind: 'campaign', planet: 5, priority: 'normalny', lawId: 'weryfikacja-dwuetapowa' } }));
+    // planet 6 is entered through the case file (CAMPAIGN_LAST = 6): a save with five planets closed opens planet 6's base and its chapter card
+    const into6 = await intoCase(qp, { current: 5, closed: [0, 1, 2, 3, 4], finalTicket: false, caseClosed: false, extras: 0, cards: { opening: true, chapters: [0, 1, 2, 3, 4] } });
     await sleep(900);
+    const card6 = await ev(() => ({ kind: document.querySelector('.card-layer')?.dataset.card ?? null, plan: window.__game.state()?.plan?.planet ?? null, text: document.querySelector('.card-layer')?.textContent ?? '' }));
+    check('S24p6 chapter card: the case file with five planets closed opens planet 6 with its own chapter card, no key', into6 === true && card6.kind === 'chapter' && card6.plan === 5 && !/story\.|screens\.cards|\[brak/i.test(card6.text), JSON.stringify({ into6, kind: card6.kind, plan: card6.plan, text: card6.text.slice(0, 80) }));
     await qp.locator('.card-layer .card-skip').click({ timeout: 1500 }).catch(() => undefined);
     await sleep(400);
     const base = await ev(() => ({ planet: window.__game.state()?.plan?.planet, clerk: document.querySelectorAll('[data-station=urzednik]').length, offers: window.__game.quests.offers().map((o) => o.id) }));
@@ -3135,7 +3137,7 @@ try {
       const b = window.__game.state().enemies.find((e) => e.boss);
       return b ? { hp: b.hpMax, loc: window.__game.state().page.location, name: [...document.querySelectorAll('text')].some((x) => /^\s*ANKIETA\s*$/.test(x.textContent ?? '')), variant: document.querySelector('[data-part=variant]') !== null } : null;
     });
-    check('S24p6 boss: the Ankieta on the archiwum reading room, racja 240, named, no variant line', boss !== null && boss.loc === 'archiwum' && boss.hp === 240 && boss.name && !boss.variant, JSON.stringify(boss));
+    check('S24p6 boss: the Ankieta on the archiwum reading room, racja 300, named, no variant line', boss !== null && boss.loc === 'archiwum' && boss.hp === 300 && boss.name && !boss.variant, JSON.stringify(boss));
     const row = await ev(() => {
       const h = window.__game;
       h.state().player.suspended = false;
@@ -3158,7 +3160,7 @@ try {
     await qctx.close();
   }
 
-  // ---------- 6k. Akt II systems (S24): the reopened card for a save with the old closed list, once; the two elite affixes ----------
+  // ---------- 6k'. Akt II systems (S24): the reopened card for a save with the old closed list, once; the two elite affixes ----------
   {
     const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
     await qctx.addInitScript(() => {
@@ -3264,9 +3266,10 @@ try {
     const o2 = await ev(() => {
       const g = window.__game;
       const e = g.state().enemies[0];
-      return { n: g.state().enemies.length, hp: e?.hp ?? 0, max: e?.hpMax ?? 0, claim: e?.claim?.textKey ?? null, affix: e?.elite?.affix ?? null, bubble: [...document.querySelectorAll('#world g[data-kind="enemy"] .bubble')].map((b) => b.textContent ?? '') };
+      return { n: g.state().enemies.length, hp: e?.hp ?? 0, max: e?.hpMax ?? 0, claim: e?.claim?.textKey ?? null, affix: e?.elite?.affix ?? null, bubble: [...document.querySelectorAll('#world g[data-kind="enemy"] .bubble')].map((b) => b.textContent ?? ''), restrike: document.querySelectorAll('#fx .restrike').length };
     });
     check('S24 oddzwaniajacy: struck, it is gone for 4 s, then returns once at 30% racja with the claim "Oddzwaniam"', o0.gone && o1 === 0 && o2.n === 1 && o2.affix === 'oddzwaniajacy' && Math.abs(o2.hp / o2.max - 0.3) < 0.05 && o2.claim === 'enemies.claim.oddzwaniam' && o2.bubble.some((x) => /Oddzwaniam/.test(x)), JSON.stringify({ o0, o1, o2 }));
+    check('S24 oddzwaniajacy: it is inked again over its strike (the two strokes drawn again on its spot as it returns)', o2.restrike === 1, JSON.stringify({ restrike: o2.restrike }));
     await shotOf(qp, 'S24-oddzwaniajacy');
     await qctx.close();
   }
