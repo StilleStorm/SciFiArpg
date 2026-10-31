@@ -349,16 +349,18 @@
   letter-spacing: -0.02em;
 }
 
-/* ---------- Spór: the reply strip of a boss argument (ui/spor.ts). Portrait: a row of three boxes above the skill pads (which keep
+/* ---------- Spór: the reply strip of a boss argument (ui/spor.ts). Portrait: three boxes stacked above the skill pads (which keep
    working underneath: the strip lets pointers through between the boxes) and below the hero, who stands at the middle of the
-   screen, so the boss and its two bubbles above him stay clear. ---------- */
+   screen, so the boss and its two bubbles above him stay clear. Stacked, not side by side: three columns of a 390 px phone are
+   too narrow for an 11 px "obrażenia egzystencjalne", and a box one or two lines tall makes the stack no taller than the row was. ---------- */
 .spor {
   position: absolute;
   left: 8px;
   right: 8px;
   bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom) + 156px);
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 4px;
   align-items: stretch;
   pointer-events: none;
 }
@@ -374,9 +376,10 @@
   display: none;
 }
 .spor-reply {
-  flex: 1 1 0;
+  flex: none;
   min-width: 0;
-  padding: 6px 7px 5px;
+  min-height: 44px;
+  padding: 5px 7px 5px;
   border: 1px solid var(--ink);
   border-radius: 0;
   background-color: var(--paper);
@@ -391,7 +394,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 4px;
+  gap: 2px;
 }
 .spor-reply .sp-text {
   display: block;
@@ -399,15 +402,15 @@
 }
 .spor-reply .sp-type {
   display: block;
-  font-size: 9.5px;
+  font-size: 11px;
   line-height: 1.2;
   font-style: italic;
-  padding-top: 3px;
+  padding-top: 2px;
   border-top: 1px dotted var(--ink);
 }
 .spor-reply:active {
   border-width: 2px;
-  padding: 5px 6px 4px;
+  padding: 4px 6px 4px;
 }
 .spor-reply:disabled {
   color: var(--ink);
@@ -415,7 +418,7 @@
 }
 .spor-reply.picked {
   border-width: 2px;
-  padding: 5px 6px 4px;
+  padding: 4px 6px 4px;
 }
 /* a wrong reply is struck in red where it stands: the pen goes across the whole box, a little uphill */
 .spor-reply.wrong {

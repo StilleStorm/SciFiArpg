@@ -133,6 +133,10 @@ try {
       });
     });
 
+  // a stamp on the page hushes every claim bubble (render/bubbleFocus): the run's ZWERYFIKOWANO has to be gone before the bracket can show
+  const noStamp = () =>
+    page.waitForFunction(() => [...document.querySelectorAll('.t-stamp')].every((n) => n.closest('#ui')), undefined, { timeout: 8000 }).catch(() => problems.push('a stamp stayed on the page'));
+
   await stage(47);
   await g(() => {
     const h = window.__game;
@@ -141,6 +145,7 @@ try {
     e.hp = e.hpMax = 9999;
   });
   await place();
+  await noStamp();
   await wait(1100);
   await page.screenshot({ path: `${SHOTS}/dwuetapowy-1of2.png` });
   await g(() => {

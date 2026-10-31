@@ -64,6 +64,11 @@ export const SURVEY_NEED_S = 1.5;
 export const SURVEY_BLOCK_S = 3;
 export const SURVEY_REMIND_S = 6;
 export const SURVEY_HEAL = 0.1;
+/**
+ * How far across (units) the row's centre may stand from the player: the portrait view is at least 390 units wide (render/camera
+ * MIN_VIEW_W) with the player in the middle, so a row of five 52-unit squares plus a margin fits on screen in full.
+ */
+export const SURVEY_REACH = 390 / 2 - (SURVEY_CELLS * GRID_CELL) / 2 - 12;
 
 /**
  * A planet's variant of its family boss (STORY 4, 8.0): a line printed under the boss's name and one data change (racja here).
@@ -247,6 +252,8 @@ function sendSurvey(s: RunState, e: Enemy, sv: Survey): void {
     cy = e.y + ((p.y - e.y) / d) * t0;
   }
   const half = (SURVEY_CELLS * GRID_CELL) / 2 + 12;
+  // the whole row is on a phone held upright: its centre stays within SURVEY_REACH of the player across (the camera keeps the player in the middle)
+  cx = Math.min(p.x + SURVEY_REACH, Math.max(p.x - SURVEY_REACH, cx));
   sv.cx = Math.min(s.page.w - half, Math.max(half, cx));
   sv.cy = Math.min(s.page.h - 60, Math.max(60, cy));
   sv.on = true;

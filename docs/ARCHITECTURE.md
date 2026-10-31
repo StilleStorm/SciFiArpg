@@ -206,7 +206,7 @@ seed, visit, level, planet)`: 3 low, 1 rzadki, 1 `oferta` (`SHOP_SET_CHANCE` 10%
 `ODDZWANIAJACY_DELAY_S` 4 after its strike the same seed and affixes return once at `ODDZWANIAJACY_RACJA` 0.3 with `ODDZWANIAM_CLAIM`,
 `rt.returned`, not named; dropped if the page turned; `render/ink.ts restrike` draws its strike again on the spot as it returns. Dwuetapowy: `combat/claims.ts
 staged(claim)` (`Claim.step/of/base/stepAt`, text `stepKey` = `enemies.claimStep.<family>.<id>.<n>`), `rebut(claim, now)` (true when struck;
-one volley within `STEP_GAP_S` 0.35 counts once; `CLAIM_STEPS` 2). Marks `render/itemMarks.ts`: `buildTierMark` (nietypowy stamp, rzadki thread, unikatowy wax seal, zestaw paperclip), `affixMarks`,
+one volley within `STEP_GAP_S` 0.35 counts once; `CLAIM_STEPS` 2); the elite caption also types the step (`ui.hud.pages`, "1/2"). Marks `render/itemMarks.ts`: `buildTierMark` (nietypowy stamp, rzadki thread, unikatowy wax seal, zestaw paperclip), `affixMarks`,
 `groundMark`, `buildAffixMarks`; all black ink but the seal's red dot. `drawingSvg(id, item)`; `itemView.itemRowText`, `declaredHead`, `isStruck`.
 Recovery (`systems/recovery.ts`, numbers in `balance/recovery.ts`): `takePotwierdzenie`, `useHeld(s, bus, auto?, incoming?)`, `onPlayerBlow`. HUD
 `ui/hud.ts createPotwButton` (`.potw-btn`, at most two slips, `.count` from two up). Archive: `ui/archive.ts openArchive` (`.ar-sec[data-place]
@@ -260,7 +260,7 @@ tickets `h:pN:*` (`registerSideTickets`) and the boss variant (`enemies/bosses.t
 `bossVariantOf`, `bossVariantLine`, `bossVariantArm`; drawn by `render/enemyFigures.ts`); the planet's record stays in `world/campaign.ts`.
 Boss bodies: `BossId` (… `'ankieta'`), `BOSS_FAMILY` (body -> family), `PlanetDef.boss?` picks a body of its family (`bossBodyFor(family,
 planet)`, else `BOSS_OF`); the chosen body is kept on the enemy by `enemies/bossBody.ts setBossBody/bossBodyOf(e, family)` (read by spor, ai,
-enemyFigures; never import the boss logic for it). Ankieta (planet 6): `EnemyRt.survey: Survey`, `tickSurvey`, `surveyCellCenter/At`, `SURVEY_*`.
+enemyFigures; never import the boss logic for it). Ankieta (planet 6): `EnemyRt.survey: Survey`, `tickSurvey`, `surveyCellCenter/At`, `SURVEY_*` (`SURVEY_REACH`: the row's centre within 53 units across of the player, so all five squares are on a 390-wide view).
 `combat/spor.ts STORY_ANSWERS[planet]`, `storyEntry`, `promptFor(..., planet?)`. `storyKeys.ts hasStory(path)`. Locations
 (`world/planets/locations.ts`): `LOCATIONS` (przedmiescie, magazyn, serwerownia, biuro, miasto, centrum, archiwum), `LocationSpec {layout: rows|aisles|corridors|rooms, wall?,
 wallSide?, row?, props}`, `locationSpec`, `propSpec`, `propColliders`. `world/pages.ts`: obstacle kind `prop` (`Obstacle.variant` = prop id),
@@ -294,8 +294,8 @@ drawHeader/headerBox/wrapLines`; `headerFor(s, view?)`, `baseHeaderFor(s, frame?
 headerKeepOut}`. Camera (`render/camera.ts`): at least 390 wide, 700 tall in portrait, 520 in landscape; `bounds` follow the page shown;
 `readableUnits(units, minPx=11)` for world text. Claim bubbles (`render/bubbleFocus.ts`, from game.ts render): `pickBubbles` shows at most `BUBBLE_CAP
 2` (bosses, elites, nearest within 260), none while `stampsOnPage() > 0`; hidden ones stay in the DOM; shown ones are moved by `avoidBoxes` inside
-`freeViewRect(camera)`, off `keepOutBlocks(camera)`, `heroBox(p)` (`HERO_BOX`) and `bubblePlaced`. Keep-out (`render/keepOut.ts`, measured by
-`ui/keepOut.ts watchLayout(ui)`): `screenLayout()` = `{w, h, top, bottom, blocks, row}` in css px from the DOM. Re-measured lazily on layout change.
+`freeViewRect(camera)`, off `keepOutBlocks(camera)`, `heroBox(p)` (`HERO_BOX`) and `bubblePlaced`; a boss's Spór comment shifts with its claim bubble as one box. Keep-out (`render/keepOut.ts`, measured by
+`ui/keepOut.ts watchLayout(ui)`): `screenLayout()` = `{w, h, top, bottom, blocks, row}` in css px from the DOM (blocks: pads, `.upd`, notes, the Spór `.spor-reply` boxes). Re-measured lazily on layout change.
 Never fixed pixels outside the fallback insets in camera.ts. `render/attackFx.ts` turns `attack:started` into transform-only poses;
 `render/damageNumbers.ts` (setting, pool of 10). Sheets share `ui/sheet.ts` (`createSheet`, the `c.d. poniżej` cue `runsOn/cutEdge`, also under the
 settings form `.set-more`; `guardGhostClicks` with the pure `isGhostOf`). Every `#ui` button >= 44 x 44 css px.

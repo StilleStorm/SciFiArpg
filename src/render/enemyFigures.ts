@@ -17,7 +17,7 @@ import { rtOf } from '../enemies/runtime';
 import { t } from '../i18n';
 import { ENEMY_MELEE_MS, LEAN_DEG, LUNGE, attackAt, enemyOffset } from './attackFx';
 import { bubbleBlocks, bubblePlaced, bubbleRect, bubbleShown } from './bubbleFocus';
-import { avoidBoxes, inflate } from './keepOut';
+import { avoidBoxes, inflate, type Box } from './keepOut';
 import { currentViewSize, readableUnits, viewZoom } from './camera';
 import { drawIn, eraseOut, marginNote, stamp } from './ink';
 import { syncStatusMarkers } from './statusMarkers';
@@ -155,13 +155,23 @@ function bubbleTransform(top: number, sx = 0, sy = 0): string {
  */
 function bubbleShift(e: Enemy, st: FigState): [number, number] {
   const view = bubbleRect();
-  const box = st.bubble.dataset['box'];
+  const box = st.bubble.dataset['box'] ?? st.comment?.dataset['box'];
   if (!view || !box) return [0, 0];
-  const [x0 = 0, yt = 0, w = 0, h = 0] = box.split(' ').map(Number);
   const k = bubbleScale();
   const pv = st.bubbleTop;
   const M = 6;
-  const at = { x0: e.x + k * x0, x1: e.x + k * (x0 + w), y0: e.y + pv + k * (yt - pv), y1: e.y + pv + k * (yt + h + 8 - pv) };
+  const pageBox = (b: string): Box => {
+    const [x0 = 0, yt = 0, w = 0, h = 0] = b.split(' ').map(Number);
+    return { x0: e.x + k * x0, x1: e.x + k * (x0 + w), y0: e.y + pv + k * (yt - pv), y1: e.y + pv + k * (yt + h + 8 - pv) };
+  };
+  let at = pageBox(box);
+  // a boss's Spor comment moves with the claim bubble (same pivot, same shift): the pair is kept inside the view as one box,
+  // so the comment, wider than the claim, is never cut by the screen edge
+  const cbox = st.comment?.dataset['box'];
+  if (cbox) {
+    const c = pageBox(cbox);
+    at = { x0: Math.min(at.x0, c.x0), y0: Math.min(at.y0, c.y0), x1: Math.max(at.x1, c.x1), y1: Math.max(at.y1, c.y1) };
+  }
   const [dx, dy] = avoidBoxes(at, inflate(view, -M), bubbleBlocks().map((b) => inflate(b, M)));
   bubblePlaced({ x0: at.x0 + dx, y0: at.y0 + dy, x1: at.x1 + dx, y1: at.y1 + dy });
   return [Math.round(dx), Math.round(dy)];
@@ -293,13 +303,29 @@ function eliteCaption(e: Enemy, asm: Assembly, feet: number): SVGTextElement[] {
   // A paper halo under the letters, so a neighbour's figure or bubble in a crowded pack does not eat the word.
   const style = `${FONT.serif}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke`;
   const name = rtOf(e).named?.name;
-  if (!name || !e.elite) return [el('text', { x: 0, y: n2(feet + 19), 'text-anchor': 'middle', 'font-size': readableUnits(12, 12), style }, [e.elite ? eliteWord(e.elite.affix, asm.body) : ''])];
+  // the step a two-step claim stands at (dwuetapowy, STORY 8.11) is typed after the first line of the caption, so it reads even
+  // while the claim bubble is hushed (a stamp on the page) or another enemy speaks instead
+  const step = el('tspan', { 'data-part': 'step' }, [stepMark(e)]);
+  if (!name || !e.elite) {
+    const text = el('text', { x: 0, y: n2(feet + 19), 'text-anchor': 'middle', 'font-size': readableUnits(12, 12), style }, [e.elite ? eliteWord(e.elite.affix, asm.body) : '']);
+    text.append(step);
+    return [text];
+  }
   const cut = name.indexOf(', ');
   const lines = cut > 0 ? [name.slice(0, cut + 1), name.slice(cut + 2)] : [name];
   const size = [readableUnits(12, 12), readableUnits(11)];
-  return lines.map((line, i) =>
+  const texts = lines.map((line, i) =>
     el('text', { x: 0, y: n2(feet + 19 + i * ((size[1] ?? 11) + 1)), 'text-anchor': 'middle', 'font-size': size[i] ?? 11, 'data-part': 'named', style: i === 0 ? style : `${style}; font-style: italic` }, [line]),
   );
+  texts[0]?.append(step);
+  return texts;
+}
+
+/** The caption's step mark of a claim that needs more than one rebuttal: " 1/2" before the first, " 2/2" after it; empty otherwise. */
+function stepMark(e: Enemy): string {
+  const c = e.claim;
+  if (!c || c.struck === true || c.of === undefined || c.of < 2) return '';
+  return ` ${t('ui.hud.pages', { page: c.step ?? 1, total: c.of })}`;
 }
 
 /**
@@ -737,6 +763,8 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
     } else if (e.claim?.struck) {
       strikeBubble(st.bubble, true);
     }
+    const mark = st.over.querySelector('[data-part="step"]');
+    if (mark) mark.textContent = stepMark(e);
   }
 
   const on = bubbleShown(e);

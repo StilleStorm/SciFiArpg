@@ -9,6 +9,8 @@ import { chromiumPath, launchArgs } from './browser.mjs';
 const PORT = Number(process.env.SHOT_PORT ?? 4186);
 const OUT = process.env.SHOT_OUT ?? 'dist-p6';
 const SHOTS = process.env.SHOT_DIR ?? 'shots-p6';
+// SHOT_TAG prefixes every file name (shots-m5/ holds planets 5 and 6 side by side: SHOT_TAG=p5- / p6-)
+const TAG = process.env.SHOT_TAG ?? '';
 const BASE = `http://127.0.0.1:${PORT}/SciFiArpg/`;
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
@@ -48,8 +50,28 @@ try {
     await page.goto(BASE, { waitUntil: 'load' });
     await page.waitForFunction(() => window.__game !== undefined);
     await page.evaluate(() => document.fonts.ready);
-    const shot = (name) => page.screenshot({ path: `${SHOTS}/${view.tag}-${name}.png` });
     const wait = (ms) => page.waitForTimeout(ms);
+    // a kill can level the hero up and lay AKTUALIZACJA over the page: install the first entry (and put the pad off) before any picture
+    const settle = async () => {
+      for (let k = 0; k < 6; k++) {
+        const sheet = page.locator('.sheet:not(.hidden):has(.install)');
+        if (!(await sheet.first().isVisible().catch(() => false))) return;
+        const later = page.locator('.sheet.assigning:not(.hidden) .report.later');
+        if (await later.isVisible().catch(() => false)) {
+          await later.click({ timeout: 2000 }).catch(() => undefined);
+          await wait(400);
+          continue;
+        }
+        await sheet.locator('.entry:not(.locked)').first().click({ timeout: 2000 }).catch(() => undefined);
+        await sheet.locator('.install').click({ timeout: 2000 }).catch(() => undefined);
+        await wait(1200);
+      }
+      problems.push('the update sheet stayed open');
+    };
+    const shot = async (name) => {
+      await settle();
+      await page.screenshot({ path: `${SHOTS}/${view.tag}-${TAG}${name}.png` });
+    };
     const g = (fn, arg) => page.evaluate(fn, arg);
 
     // a case file standing at planet 6 (planets 1 to 5 closed)
@@ -115,6 +137,17 @@ try {
     });
     await wait(1100);
     await shot('gate-before');
+    // the Archiwista on its own: the page cleared, the hero a step nearer the band so the figure stands clear of the pads
+    await quiet();
+    await g(() => {
+      const h = window.__game;
+      const e = h.state().page.exit;
+      const fx = e.corner[1] === 'l' ? 1 : -1;
+      const fy = e.corner[0] === 't' ? 1 : -1;
+      h.placePlayer(e.x + fx * 200, e.y + fy * 175);
+    });
+    await wait(1100);
+    await shot('archiwista');
     await g(() => { const h = window.__game; const key = h.content.list().find((c) => c.key); if (key) h.content.open(key.id); h.advance(0.2); });
     await wait(500);
     await shot('gate-lifting');
@@ -142,6 +175,21 @@ try {
     await g(() => { const h = window.__game; const b = h.state().enemies.find((e) => e.boss); if (b) { b.speed = 0; h.placePlayer(b.x + 40, b.y + 260); h.advance(4.3); } });
     await wait(900);
     await shot('boss-grid');
+    // the row of five on screen: wait for a row, then stand the hero just under its middle square
+    await g(() => {
+      const h = window.__game;
+      const b = h.state().enemies.find((e) => e.boss);
+      for (let k = 0; k < 120 && b && !b.rt?.survey?.on; k++) {
+        h.state().player.hp = h.state().player.hpMax; // the boss and its reminders keep hitting while the row is awaited
+        h.advance(0.1);
+      }
+      const sv = b?.rt?.survey;
+      if (sv?.on) h.placePlayer(sv.cx, sv.cy + 120);
+      h.advance(0.05);
+      h.state().player.hp = h.state().player.hpMax;
+    });
+    await wait(700);
+    await shot('boss-row');
     // standing on the five-star square: the stand-on progress traced round it
     await g(() => {
       const h = window.__game;

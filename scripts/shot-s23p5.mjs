@@ -9,6 +9,8 @@ import { chromiumPath, launchArgs } from './browser.mjs';
 const PORT = Number(process.env.SHOT_PORT ?? 4185);
 const OUT = process.env.SHOT_OUT ?? 'dist-p5';
 const SHOTS = process.env.SHOT_DIR ?? 'shots-p5';
+// SHOT_TAG prefixes every file name (shots-m5/ holds planets 5 and 6 side by side: SHOT_TAG=p5- / p6-)
+const TAG = process.env.SHOT_TAG ?? '';
 const BASE = `http://127.0.0.1:${PORT}/SciFiArpg/`;
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
@@ -48,8 +50,28 @@ try {
     await page.goto(BASE, { waitUntil: 'load' });
     await page.waitForFunction(() => window.__game !== undefined);
     await page.evaluate(() => document.fonts.ready);
-    const shot = (name) => page.screenshot({ path: `${SHOTS}/${view.tag}-${name}.png` });
     const wait = (ms) => page.waitForTimeout(ms);
+    // a kill can level the hero up and lay AKTUALIZACJA over the page: install the first entry (and put the pad off) before any picture
+    const settle = async () => {
+      for (let k = 0; k < 6; k++) {
+        const sheet = page.locator('.sheet:not(.hidden):has(.install)');
+        if (!(await sheet.first().isVisible().catch(() => false))) return;
+        const later = page.locator('.sheet.assigning:not(.hidden) .report.later');
+        if (await later.isVisible().catch(() => false)) {
+          await later.click({ timeout: 2000 }).catch(() => undefined);
+          await wait(400);
+          continue;
+        }
+        await sheet.locator('.entry:not(.locked)').first().click({ timeout: 2000 }).catch(() => undefined);
+        await sheet.locator('.install').click({ timeout: 2000 }).catch(() => undefined);
+        await wait(1200);
+      }
+      problems.push('the update sheet stayed open');
+    };
+    const shot = async (name) => {
+      await settle();
+      await page.screenshot({ path: `${SHOTS}/${view.tag}-${TAG}${name}.png` });
+    };
     const g = (fn, arg) => page.evaluate(fn, arg);
 
     // a case file standing at planet 5 (planets 1 to 4 closed)
@@ -119,6 +141,23 @@ try {
     });
     await wait(1100);
     await shot('gate-before');
+    // the Doreczyciel on its own: the rest of the page cleared, the elite standing still above the hero, mid-screen
+    await g(() => {
+      const h = window.__game;
+      const s = h.state();
+      const elite = h.enemies.list().find((x) => x.named);
+      const keep = s.enemies.filter((x) => x.id === elite?.id);
+      s.enemies.length = 0;
+      s.enemies.push(...keep);
+      const en = keep[0];
+      if (en) {
+        h.placePlayer(en.x, en.y + 170);
+        en.speed = 0;
+        en.home = { x: en.x, y: en.y };
+      }
+    });
+    await wait(1400);
+    await shot('doreczyciel');
     await g(() => {
       const h = window.__game;
       const elite = h.enemies.list().find((x) => x.named);

@@ -229,6 +229,20 @@ describe('planet 6: the Ankieta', () => {
     expect(surveyCellAt(500, 400, 500, 440)).toBe(-1);
   });
 
+  it('keeps the whole row on a phone held upright: every square within 195 units across of the player, whichever side the boss stands', () => {
+    for (const [bx, by] of [[300, 300], [1100, 700], [300, 700], [700, 300]] as const) {
+      const { s } = boss();
+      const e = placeBoss(s, 'powiadomienia', bx, by);
+      e.x = bx;
+      e.y = by;
+      step(s, e, SURVEY_FIRST_S + 0.3);
+      const sv = rtOf(e).survey;
+      expect(sv?.on).toBe(true);
+      if (!sv) continue;
+      for (let i = 0; i < SURVEY_CELLS; i++) expect(Math.abs(surveyCellCenter(sv.cx, sv.cy, i).x - s.player.x) + 26).toBeLessThanOrEqual(195);
+    }
+  });
+
   it('sends the first row after 4 s between itself and the player', () => {
     const { s, e } = boss();
     step(s, e, SURVEY_FIRST_S - 0.5);

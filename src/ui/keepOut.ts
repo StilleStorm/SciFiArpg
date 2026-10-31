@@ -1,7 +1,7 @@
 /**
  * Measures what the screen furniture covers (render/keepOut.ts) from the DOM, once per layout change: a window resize, an
  * orientation or steering change, the left-handed mirror, the text size, a note, pad or the update line shown or hidden,
- * the HUD or the footnote band changing size. Nothing is measured per frame: an observer only marks the layout stale and
+ * the HUD, the footnote band or the Spór reply strip changing size. Nothing is measured per frame: an observer only marks the layout stale and
  * the next reader measures it.
  */
 import { invalidateLayout, setLayoutSource, type Box, type ScreenLayout } from '../render/keepOut';
@@ -39,7 +39,8 @@ export function measureLayout(ui: HTMLElement): ScreenLayout {
     if (footBox.x1 - footBox.x0 >= w * 0.6) bottom = footBox.y0;
     else blocks.push(footBox);
   }
-  ui.querySelectorAll('.pad, .upd').forEach((n) => {
+  // the Spór reply strip (ui/spor.ts) while a boss argues: claim bubbles and stamps keep off its three boxes
+  ui.querySelectorAll('.pad, .upd, .spor-reply').forEach((n) => {
     const b = rectOf(n);
     if (b) blocks.push(b);
   });
@@ -92,7 +93,8 @@ export function watchLayout(ui: HTMLElement): void {
     () => {
       const l = measureLayout(ui);
       classes.takeRecords(); // the measurement's own class flips (the hidden notes) are not a layout change
-      for (const sel of ['.hud', '.foot']) {
+      // the Spór strip is filled and emptied without a class change: its size (none while empty) marks the layout stale
+      for (const sel of ['.hud', '.foot', '.spor']) {
         const n = ui.querySelector(sel);
         if (n) ro.observe(n);
       }
