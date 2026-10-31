@@ -187,7 +187,7 @@ describe('planet 6: the Ankieta', () => {
     s.player.y = c.y;
   };
 
-  it('is the planet\'s body: Powiadomienia, racja 240, claim regulaminowy, no variant line; other planets keep Weryfikacja', () => {
+  it('is the planet\'s body: Powiadomienia, racja 300, claim regulaminowy, no variant line; other planets keep Weryfikacja', () => {
     const { e } = boss();
     expect(bossIdOf(e)).toBe('ankieta');
     expect(e.hpMax).toBe(BOSSES.ankieta.hp);

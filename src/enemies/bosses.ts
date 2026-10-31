@@ -52,7 +52,7 @@ export const BOSSES: Record<BossId, BossDef> = {
   prototyp: { hp: 300, speed: 50, dmgMin: 5, dmgMax: 8, pewnoscSiebie: 80, upor: 50, attackRange: 44, attackCooldown: 1.5, claimType: 'egzystencjalny' },
   weryfikacja: { hp: 220, speed: 0, dmgMin: 3, dmgMax: 5, pewnoscSiebie: 70, upor: 40, attackRange: 40, attackCooldown: 1.4, claimType: 'regulaminowy' },
   hipoteza: { hp: 260, speed: 46, dmgMin: 6, dmgMax: 9, pewnoscSiebie: 80, upor: 40, attackRange: 42, attackCooldown: 1.3, claimType: 'mechaniczny' },
-  ankieta: { hp: 240, speed: 30, dmgMin: 4, dmgMax: 7, pewnoscSiebie: 75, upor: 45, attackRange: 44, attackCooldown: 1.4, claimType: 'regulaminowy' },
+  ankieta: { hp: 300, speed: 30, dmgMin: 4, dmgMax: 7, pewnoscSiebie: 75, upor: 45, attackRange: 44, attackCooldown: 1.4, claimType: 'regulaminowy' },
 };
 
 /** Ankieta (STORY 8.10): the row of five squares, its timings. */
