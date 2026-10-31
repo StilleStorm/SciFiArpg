@@ -366,6 +366,41 @@ What M4 added to the frame (built S17–S21; the errata are SKILLS §6 and ITEMS
   the whole gate, and `--remove` takes it out.
 - **Passive slots** at 10/20/30/40 were struck by the player (2026-10-26); passives stay permanent picks.
 
+What M5 added to the frame (built S22–S24; the per-planet content is STORY §8.8–8.11, the
+review's rulings §8.12):
+- **Akt II as planned**: planets 4–6 (Przekierowana, Pilna, Nagrywana) with three new location
+  types (miasto 17 drawings incl. five storefront props, centrum 9, archiwum 8) and three reused
+  (biuro, serwerownia, parcels look); `locationSplit` as a page index or an array; the first
+  campaign ticket's `headline` set per record (not always `lawPool[0]`). Weryfikacja on planets
+  4 and 5 (racja 260; a drawn part: `BossVariant.grid: 'koszyk'` with `hintKey`), the act's new
+  body **Ankieta** on planet 6 (`BossId`, `PLANETS[5].boss` set explicitly, `BOSS_FAMILY`,
+  `bossBodyOf` so Spór, AI and figures ask which body a boss wears without importing the boss
+  logic). Two gates: a named elite "Doręczyciel" at a parcels wall (planet 5, page 3) and a
+  teczka "nagranie rozmowy" at the default band (planet 6, page 4); `spawnGateElite` names the
+  elite from the run's planet. One item-paying hand-written ticket (planet 5 a: a set piece rolled
+  from the character seed when the reward is sent, delivered as an awizo).
+- **The Ankieta fight** on existing primitives: the Weryfikacja grid generalized to a row of five
+  with two outcomes (1 star 1.5 s = zablokowany 3 s; 5 stars = +10% racja; unanswered 6 s = two
+  Przypomnienia and a new row), phase 2 at half racja draws the row round the player. Racja 300
+  after the bot. Bosses and their summons never carry elite affixes.
+- **Elite affixes by act**: `eliteIdsFor(planet)` adds *oddzwaniający* (returns once 4 s after its
+  strike at 30% racja as a new body with the same seed, not named; the strike is re-inked over it,
+  `enemy:returned`) and *dwuetapowy* (a claim of two steps; the bubble text is the bracketed
+  `enemies.claimStep.*` variant so a step is a new bubble; `enemy:rebutted` fires on the break
+  only, per-hit counters still pay each step). Rule from the M5 review: pools **accumulate** from
+  the act's first planet onward (S26 widens the Akt II pair to planets 4–9).
+- **`CAMPAIGN_LAST` 6** and the red "Sprawę wznowiono" card (kind `reopened`, stamp WZNOWIONO,
+  once ahead of the planet 4 chapter card, never over the finale card; the flag is cleared when
+  shown and saved); `cloneCampaign` keeps `cards.finale`. The finale lines no longer count planets,
+  so the rise to 9 is the constant alone. No `// SEAM:` left in src.
+- **Measured** (S24 bot, level 14, Normalny, the S19–S21 kits): no hero dies on planets 4–6, the
+  lowest racja seen 0.74 of max; boss fights 19–31 s; the Konsultant's tickets stall the bot
+  25–38% (a pathing question, not his numbers). Whether Akt II Normalny is too soft is a player
+  question (STATUS "Needs the player"); no number moved at the review.
+- **Not built, where it went**: the Ankieta's star fill and the paper feed, the planet-4
+  second-instance biuro props, the archiwum reels, the Spór cards over the survey row (S28);
+  `solvedKey` and the wider affix pool (S26); two text fixes (S25 voice).
+
 ---
 
 ## 5. Combat

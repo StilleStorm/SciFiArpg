@@ -180,4 +180,6 @@ Superseded by docs/PRODUCTION.md (S1–S30): 1 → S1, 2 → S2, 3 → S3, 4 →
 - **Balance** (built S16): every tunable number sits in `src/balance/*` (recovery, meter, loot,
   campaign) and is moved only from `npm run balance` output or a playtest, with the before/after
   listed in the slice report. The bot is a plain player (auto aim, no dodging); a hero it loses
-  with is a question for the playtest first (Konsultant, STATUS "Needs the player").
+  with is a question for the playtest first (Konsultant, STATUS "Needs the player"). The converse
+  holds too: an act no hero dies in with the bot (Akt II Normalny at level 14, S24) is a playtest
+  question before `PLANET_*_GROWTH` or a priority row moves (M5 review, STORY §8.12).

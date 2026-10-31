@@ -540,3 +540,11 @@ Added at the M4 plan review (story agent, 2026-10-26; none needs the player):
     Awiza section); an awizo of a bookmarked run waits on its page until that ticket ends.
 13. **The three grant remaps** of §4.2 (Program 95°, Faktura, Wskaźnik; Pralnia stays) are
     S21a data work; a unique's grant is never an ultimate paragraph.
+
+Added at the M5 plan review (story agent, 2026-10-31; none needs the player):
+14. **An item-paying side ticket names the set, not the piece.** Planet 5's ticket a
+    (`reward.item: { set: 'ostatnia-mila' }`) rolls kask / kamizelka / powerbank from the character
+    seed when the reward is sent, so two characters get different pieces and a replay farms the set
+    (§12.1); the ticket text promises the set's subject, never a slot. S25 writes Akt III item
+    tickets the same way (at most one per planet, §12.7, STORY §8.7). Nothing else of the item rules
+    changed in M5: boss 35%, Sklep 10%, elites by post held on planets 5 and 6 as built.

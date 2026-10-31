@@ -148,7 +148,13 @@ change). Keys, so that S11 writes and S12 only wires:
   sub-keys of the finale phases are listed in §8.4;
 - added S22: `story.reopened.title|lines.1..3` (the "Sprawę wznowiono" red card, §8.11),
   `story.p5.boss.hint` (a variant's captcha hint), `story.p5.gate.elite` (the gate elite's name, as
-  `story.p3.gate.elite`); a new boss body's own lines are `enemies.boss.<id>.*` (planet 6, §8.10).
+  `story.p3.gate.elite`); a new boss body's own lines are `enemies.boss.<id>.*` (planet 6, §8.10);
+- added S24 (outside `story`): `screens.cards.stampReopened` "WZNOWIONO" and
+  `screens.cards.kind.reopened` (the red card's stamp and kind), `enemies.elite.<id>.*` for the two
+  Akt II affixes, `enemies.claim.oddzwaniam`, `enemies.claimStep.<family>.<id>.1|2` (the two-step
+  bracket, built mechanically from the claim text);
+- to add at S25 (voice): `story.p5.boss.solved` (a variant's solved line, §8.9, M5 review §8.12) and
+  the one-word fix of `story.p6.boss.spor2.reply.egzystencjalny` (§8.12).
 Planet names stay in `planets.json` (`planets.p<N>.name|loc`), replaced in place by the voice
 editor. Cards fall back to the `screens.cards.*` placeholders when a planet has no story key
 yet, so unwritten planets keep working.
@@ -199,7 +205,7 @@ Every entry maps onto a built contract, so a planet is data plus drawings:
   card describes planet 1.
 
 Entries for planets 1–3 and the finale texts follow (S11), planets 4–6 and the Akt II decisions
-(§8.8–8.11, S22). Planet numbers in the names run
+(§8.8–8.11, S22; what M5 shipped and the review's rulings, §8.12). Planet numbers in the names run
 consecutively from 23 (the Komisja's list order: "the next planet" is literally the next
 number), so Akt II continues at 26 and Akt III at 29. Hero ids: pralka, konsultant, petlowiec,
 kartograf, nalesnik. All Polish below is a draft for the voice editor, who writes the final
@@ -682,10 +688,14 @@ is attached. Brick wash, profile B (the act's).
   a załącznik page may branch from a side street.
 - *biuro* (pages 4–6, boss page): planet 3's drawings reused with the brick wash, plus the
   second instance's props: form stacks as hatched towers, a lift door with a floor indicator
-  (always "II"), a rope queue on posts, a wall plate "INSTANCJA DRUGA", a numbered-ticket
-  dispenser (reused), a window with a closed blind. Page shape: rooms cut by partitions as on
-  planet 3, but the boss hall is the appeals counter: a long counter with the captcha grid in
-  front of it.
+  (always "II"), a rope queue on posts (centrum's `sznur`, cross-type reuse as `tasmociag` was),
+  a numbered-ticket dispenser (reused), a window with a closed blind. Page shape: rooms cut by
+  partitions as on planet 3, but the boss hall is the appeals counter: a long counter with the
+  captcha grid in front of it. *As built (S23) and ruled at the M5 review (§8.12):* the pages are
+  planet 3's biuro as it stands; the extra props are an S28 item on the shared `BIURO` spec (they
+  also appear on planets 3 and 9, which is allowed as the storefront props are on planet 4); the
+  wall plate "INSTANCJA DRUGA" is **dropped** (words in a drawing, and false on the other biuro
+  planets); the lift's "II" is a floor, not an instance, so it stays.
 
 **Law.** Headline clause *Godziny konsultanta* (the act's theme on its first planet: the city
 belongs to the bot outside hours). Warunek: "powiadomienia miejskie".
@@ -796,8 +806,12 @@ compensation", as `laws.json` says). Warunek: "powiadomienia o ofertach ogranicz
 zaznacz wszystkie koszyki". One data change, spent on a part as planet 3 did: the hydrants in
 the grid squares are drawn as **shopping carts** (`BossVariant.grid: 'koszyk'`, one drawing in
 render/enemyFigures.ts; the body stays) and the captcha hint reads from `story.p5.boss.hint`
-"Zaznacz wszystkie kratki z koszykami." (a key override on the variant; the solved line stays
-the family's). Racja as the family has it. Spór:
+"Zaznacz wszystkie kratki z koszykami." (a key override on the variant). *Changed at the M5
+review (§8.12):* the solved line does **not** stay the family's; the shared line says "hydranty"
+over a grid of carts, which is an error, not a joke. `BossVariant.solvedKey` mirrors `hintKey`
+(S26, the builder who touches bosses.ts) and `story.p5.boss.solved` reads "Wszystkie koszyki
+zaznaczono. Weryfikację wstrzymano." (S25 voice). Racja as the family has it (220; the one data
+change is the part). Spór:
 - spor1: comment "Potwierdź, że nie jesteś robotem, i dodaj do koszyka. Koszyk tęskni." Right:
   **egzystencjalny** "Koszyk jest pusty. Pusty koszyk nie tęskni; tęsknota jest funkcją
   aplikacji, nie koszyka." Wrong mechaniczny "Koszyk ma kółka. Kółka się odkręca." Wrong
@@ -916,7 +930,12 @@ satisfaction survey sent after every call, made manifest: the last page of the e
   and Prototyp. Its claim bubble: "Oceń rozmowę". Family Powiadomienia (resist mechaniczny, weak
   regulaminowy), `claimType: 'regulaminowy'`. Suggested numbers for `BOSSES.ankieta`: hp 240,
   speed 30 (it walks, slowly, unlike Weryfikacja), dmg 4–7, attackRange 44, attackCooldown 1.4,
-  pewnoscSiebie 75, upor 45; the balance pass at the end of S24 tunes them.
+  pewnoscSiebie 75, upor 45; the balance pass at the end of S24 tunes them. *As built (S24):*
+  hp **300** after the bot (at 240 it was the shortest boss fight of the act; now 23 s against
+  planet 5's 25 s), the other numbers as suggested; the star boxes are **static** part art. The
+  fill is an S28 render item (§8.12): filled stars = `floor(5 × (1 − racja/max))`, one attribute
+  per frame on the figure, so the survey rates the beating it gets and dies at five stars; the
+  paper feed, which reads as a chimney, is redrawn in the same item.
 - *Fight (existing primitives only: the Weryfikacja grid code generalized to a row, statuses,
   summons, the phase model).* Every 8 s it **sends the survey**: five hatched star squares are
   drawn in a row on the floor between it and the player (the hydrant-square drawing, five cells
@@ -927,11 +946,14 @@ satisfaction survey sent after every call, made manifest: the last page of the e
   ("Przypominamy o ankiecie", the Weryfikacja summon code, cap 6) and draws the next row. At half
   racja, phase 2: the survey becomes obligatory, the row is drawn around the player's position
   every 6 s instead of near the boss, and the second Spór comment is posted. Footnotes
-  (`enemies.boss.ankieta.*`, voice): meet "Napotkano Ankietę. Prosi o ocenę rozmowy, która się
-  nie odbyła."; hint "Oceń rozmowę w skali od 1 do 5. Ocena 1 podlega rozpatrzeniu."; filed
-  "Złożono ocenę negatywną. Ankietę wstrzymano do rozpatrzenia."; thanked "Dziękujemy za ocenę.
-  Ocena została przekazana."; reminder "Przypominamy o ankiecie."; half "Ankieta jest
-  obowiązkowa. Ocena nie jest."
+  (`enemies.boss.ankieta.*`, voiced S24; the final lines): meet "Napotkano Ankietę. Prosi o ocenę
+  rozmowy, która się nie odbyła."; hint "Oceń rozmowę w skali od 1 do 5. Ocena 1 podlega
+  rozpatrzeniu. Za ocenę 5 dziękujemy."; filed "Złożono ocenę negatywną. Ankietę wstrzymano do
+  rozpatrzenia."; thanked "Dziękujemy za ocenę. Ocenę zaliczono na poczet racji Ankiety.";
+  reminder "Przypominamy o ankiecie. Przypomnienie wysłano w dwóch egzemplarzach."; half "Ankieta
+  jest obowiązkowa. Ocena nie jest." As built, the row is sent 4 s after arrival and then every 8 s
+  after an answer, 135–210 units from the boss toward the player; phase 2 draws it round the
+  player every 6 s; the bot never stands in a square, so its fight times are rough.
 - *Variant line.* None (the body is its own); `story.p6.boss.variant` is not written, and the
   variant-line slot under the name stays empty (planet 9 in S25 does the same for its body).
 - Spór (`story.p6.boss.spor1|spor2`):
@@ -942,7 +964,10 @@ satisfaction survey sent after every call, made manifest: the last page of the e
     jest oceną niczego. Nic nie mieści się w skali."
   - spor2 (half racja): comment "Dziękujemy za ocenę. Rozmowa była nagrywana; nagranie
     przekazano do działu, który nie istnieje." Right: **egzystencjalny** "Dział, który nie
-    istnieje, nie przyjmuje nagrań. Nagranie wraca do wnioskodawcy wraz z ankietą." Wrong
+    istnieje, nie przyjmuje nagrań. Nagranie wraca do wnioskodawcy wraz z ankietą." (story.json
+    has "do nadawcy razem z ankietą"; the M5 review rules for **wnioskodawcy**, §8.12: the sender
+    of a recorded hotline call is the hotline, so "nadawca" hands the Ankieta its own win, and the
+    survey following the applicant is the set's hook. S25 voice, one line.) Wrong
     mechaniczny "Przekazanie można przerwać przez wyjęcie taśmy." Wrong regulaminowy
     "Przekazanie do działu wymaga numeru sprawy. Numeru nie nadano." (the set's hook: the
     recorded call, ITEMS §4.1 «Infolinia»)
@@ -1036,7 +1061,8 @@ form).
   the old `CAMPAIGN_LAST`; keys `story.reopened.title`, `story.reopened.lines.1..3`; no hero line,
   as every red card, §8.0; shown once, before the planet 4 chapter card):
   - title "Zgłoszenie nr {number}. Sprawę wznowiono." (the red WZNOWIONO stamp in the
-    PRZEPISANO slot)
+    PRZEPISANO slot; built S24 as `screens.cards.stampReopened`, kind `reopened`, shown once ahead
+    of the planet 4 chapter card and never over the finale card)
   - lines.1 "Zgłoszenie błędu, o którym mowa w przypisie końcowym, rozpatrzono. Błąd uznano za
     zasadny i przekazano na planetę następną w kolejności."
   - lines.2 "Sprawę zamkniętą prawidłowo wznawia się z urzędu: warunek jej zamknięcia,
@@ -1048,3 +1074,37 @@ form).
   Ankieta's own lines live in `enemies.boss.ankieta.*` like the family bosses'.
 - **Hero lines count**: five per card as before; the Konsultant's lines on planets 4–6 are the one
   place a hero speaks of its own trade on every card of an act, on purpose (the act is his).
+
+### 8.12 Decisions at the M5 review (what Akt II fixed for Akt III; S25 reads this with §8.6–8.7)
+What shipped against §8.8–8.11 is in DESIGN §4.2 "What M5 added". The rulings:
+- **Planets 4–6 shipped as planned** with these deviations, all ratified: planet 4's biuro pages
+  are planet 3's drawings (the second-instance props are S28, the wall plate dropped, §8.8); planet
+  5's storefront props were built by S24 on the shared `MIASTO` spec and so also stand on planet 4
+  (§8.9 allowed it); planet 5's set piece is rolled from the character seed when the ticket's
+  reward is sent, not fixed by the builder (ITEMS §12.14); the Ankieta's racja is 300 and its face
+  is static (§8.10); the bus shelter is an ordinary miasto prop, not placed by the stop.
+- **Variant overrides are text, never lies.** A variant that redraws a part also overrides every
+  footnote that names the part (planet 5: hint *and* solved line). `BossVariant.solvedKey` joins
+  `hintKey` (S26), `story.p5.boss.solved` is written at S25. S25 applies the rule to any Akt III
+  variant that spends its change on a part.
+- **Elite affixes accumulate by act** (Diablo's monster modifiers do not retire between acts). The
+  two Akt II affixes roll on every planet from 4 on, not 4–6 only: S26 widens `eliteIdsFor` to
+  "from planet 4" (`AKT2_PLANETS` becomes a start index) and, if S25 proposes an Akt III pair in the
+  Wygenerowane key, that pair rolls from planet 7 on. Bosses and their summons never roll them
+  (`makeBoss` clears `elite`; kept). Named elites draw from the same pool (as built).
+- **S25 keeps**: planet 7 on jaskinia + równina with Wygenerowane dominant (planet 6's card line 2
+  describes it, §8.10); planet 9 reuses archiwum (the reel drawing is enlarged in S28; the
+  planet-9 builder may do it when adding Akt III props to `ARCHIWUM`); planet 9's card describes
+  planet 1 (§8.0); the "Sprawę wznowiono" card text serves the rise to 9 unchanged (§8.11); the
+  finale lines no longer count planets ("na każdej planecie z listy", S24 voice), so S27 adds no
+  finale text, only the constant and the final footnote rule of §8.6.
+- **Planet 9's new body** (player, 2026-10-19): S25 chooses it as S22 chose the Ankieta (a
+  recommendation, built in S27 unless the player objects before S27; alternatives weighed in the
+  report), on existing primitives, no finale form, no variant line; Wygenerowane by family unless
+  S25 argues for the dominant's boss family. The Ankieta's budget split held (one new body ≈ one
+  builder slice with the fight on existing code), so S27 keeps the same shape.
+- **Akt II difficulty** is a player question, not a text one (STATUS "Needs the player"). The
+  story side is settled: nothing in §8.8–8.11 makes a planet harder or softer, and no planet entry
+  will carry a number.
+- **No fourth family, no act event** stays the rule for Akt III unless the player asks; at most
+  one affix pair as in Akt II.
