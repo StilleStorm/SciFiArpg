@@ -22,7 +22,7 @@ const BASE = `http://127.0.0.1:${PORT}/SciFiArpg/`;
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 const ORIENTS = { portrait: { width: 390, height: 844 }, landscape: { width: 844, height: 390 } };
-const LAST = 3; // CAMPAIGN_LAST in src/world/campaign.ts
+const LAST = 6; // CAMPAIGN_LAST in src/world/campaign.ts (S24)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** The roster of case files: close a sheet over the base, then Pauza and Wyjdź. */

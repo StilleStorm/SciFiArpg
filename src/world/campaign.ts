@@ -93,10 +93,10 @@ export function clampPriority(id: PriorityId, level: number): PriorityId {
 export const PLANET_COUNT = 9;
 /**
  * The campaign's last planet, 1-based (STORY 2): the return ticket to planet 1 is issued when this one is closed. 3 at the MVP
- * (Akt I), 6 after Akt II, 9 after Akt III. A character whose case was closed at a shorter length is reopened when the constant
+ * (Akt I), 6 with Akt II (now), 9 after Akt III. A character whose case was closed at a shorter length is reopened when the constant
  * rises (`toCampaign`, `CampaignState.reopened`).
  */
-export const CAMPAIGN_LAST = 3;
+export const CAMPAIGN_LAST = 6;
 export type Act = 1 | 2 | 3;
 export type LocationType = 'miasto' | 'przedmiescie' | 'magazyn' | 'serwerownia' | 'jaskinia' | 'rownina' | 'wyzyna' | 'biuro' | 'centrum' | 'archiwum';
 /** Sets hosted by a planet (ITEMS 4.1, 12.6): the first planet of each act hosts none. */
@@ -233,7 +233,27 @@ export const PLANETS: readonly PlanetDef[] = [
       },
     ],
   },
-  planet(5, 2, 'powiadomienia', mix(0.15, 0.55, 0.3), ['weryfikacja-dwuetapowa', 'oplata-serwisowa', 'godziny-konsultanta'], ['miasteczko', 'wioska'], ['centrum', 'serwerownia', 'archiwum'], 'infolinia', [5, 6]),
+  {
+    ...planet(5, 2, 'powiadomienia', mix(0.15, 0.55, 0.3), ['weryfikacja-dwuetapowa', 'oplata-serwisowa', 'godziny-konsultanta'], ['miasteczko', 'wioska'], ['centrum', 'serwerownia', 'archiwum'], 'infolinia', [5, 6]),
+    // the act's new body, not BOSS_OF[dominant] (which would be Weryfikacja): the Ankieta, a Powiadomienia body (STORY 8.10)
+    boss: 'ankieta',
+    headline: 'weryfikacja-dwuetapowa',
+    // pages 1-2 centrum, page 3 serwerownia, pages 4-6 and the boss page archiwum
+    locationSplit: [2, 3],
+    // page 4: the exit corner behind the hatched band with an Archiwista; lifts when the forced teczka "nagranie rozmowy" is opened (planets/p6.ts)
+    gates: [
+      {
+        page: 3,
+        gate: {
+          kind: 'teczka',
+          keyTeczka: true,
+          key: 'story.p6.gate.note',
+          liftKey: 'story.p6.gate.lift',
+          figure: { look: 63, key: 'story.p6.gate.figure' },
+        },
+      },
+    ],
+  },
   planet(6, 3, 'wygenerowane', mix(0.15, 0.25, 0.6), ['czas-wsteczny', 'parzystosc', 'nie-przeszkadzac'], ['ladowisko', 'wioska'], ['jaskinia', 'rownina'], null, [5, 6]),
   planet(7, 3, 'wygenerowane', mix(0.2, 0.2, 0.6), ['czas-wsteczny', 'grawitacja', 'oplata-serwisowa'], ['wioska', 'miasteczko'], ['wyzyna', 'rownina', 'jaskinia'], 'domniemanie', [5, 6]),
   planet(8, 3, 'wygenerowane', mix(0.15, 0.15, 0.7), ['czas-wsteczny', 'weryfikacja-dwuetapowa', 'parzystosc', 'ciasteczka'], ['miasteczko', 'ladowisko'], ['archiwum', 'biuro'], 'awaria', [6, 6]),
@@ -343,8 +363,8 @@ export interface CampaignState {
   cards?: CardsSeen;
   /**
    * The case was closed at a shorter campaign than `CAMPAIGN_LAST` and `toCampaign` reopened it: the red card "Sprawę wznowiono" is due
-   * at the desk (STORY 2). Set once on load, cleared by whoever shows the card.
-   * SEAM: the card (kind, lines, stamp) needs voice keys and `ui/cards.ts`/main.ts wiring; nothing shows it yet (needed at S24, when the constant rises to 6).
+   * at the desk (STORY 2, 8.11). Set once on load; main.ts `showCard` shows the red card (ui/cards.ts kind `reopened`, ahead of the next
+   * chapter card) and clears it with `clearReopened`, so it comes once.
    */
   reopened?: true;
 }
@@ -410,8 +430,15 @@ export function toCampaign(raw: unknown): CampaignState {
 export const cloneCampaign = (c: CampaignState): CampaignState => ({
   ...c,
   closed: [...c.closed],
-  ...(c.cards ? { cards: { opening: c.cards.opening, chapters: [...c.cards.chapters] } } : {}),
+  ...(c.cards ? { cards: { ...c.cards, chapters: [...c.cards.chapters] } } : {}),
 });
+
+/** The campaign with the "Sprawę wznowiono" card taken as shown: a copy without the flag. */
+export function clearReopened(c: CampaignState): CampaignState {
+  const { reopened: _shown, ...rest } = cloneCampaign(c);
+  void _shown;
+  return rest;
+}
 
 /** The plan a base of this campaign offers by default: the next campaign ticket, or after the case an extra one. */
 export function defaultPlan(c: CampaignState, priority: PriorityId, seed: number): TicketPlan {

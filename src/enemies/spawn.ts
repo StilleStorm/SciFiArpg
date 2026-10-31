@@ -9,9 +9,10 @@ import { t } from '../i18n';
 import { reachableCells } from '../world/base';
 import { resolveMove } from '../world/pages';
 import { nextId, type RunState } from '../world/run';
-import { ELITE_IDS, FAMILY_IDS, makeMix, pickFamily, setEnemyScale, type EliteId, type FamilyId, type MissionMix } from './families';
+import { eliteIdsFor, FAMILY_IDS, makeMix, pickFamily, setEnemyScale, type EliteId, type FamilyId, type MissionMix } from './families';
 import { planScale } from '../world/campaign';
-import { ownsAffix, POWIELONY_COPIES } from './elites';
+import { ODDZWANIAJACY_DELAY_S, ODDZWANIAJACY_RACJA, ODDZWANIAM_CLAIM, ownAffixes, ownsAffix, POWIELONY_COPIES } from './elites';
+import { staged } from '../combat/claims';
 import { applyTierStats, makeEnemy, type MakeOpts } from './make';
 import { generateName, namedAllowed, namedRecord, NAMED_CHANCE, pickNamedAffixes, recordNamed } from './named';
 import { rtOf } from './runtime';
@@ -82,7 +83,7 @@ function eliteOpts(s: RunState, base: SpawnOpts, rolled: EliteId): MakeOpts {
   // the page of an 'elite' gate carries exactly one named elite, the forced one (`spawnGateElite`): none is rolled besides it
   const named = base.makeNamed ?? (base.elite === undefined && s.page.gate?.kind !== 'elite' && namedAllowed(s) && r.chance(NAMED_CHANCE));
   if (!named) return { elite: rolled };
-  const affixes = [rolled, ...pickNamedAffixes(r).filter((a) => a !== rolled)].slice(0, r.chance(0.5) ? 2 : 3);
+  const affixes = [rolled, ...pickNamedAffixes(r, eliteIdsFor(s.plan?.planet)).filter((a) => a !== rolled)].slice(0, r.chance(0.5) ? 2 : 3);
   return { elite: rolled, affixes, named: base.name ?? generateName(r) };
 }
 
@@ -128,6 +129,64 @@ function onEliteDied(s: RunState, bus: Bus, ev: GameEvents['enemy:died']): void 
     bus.emit('footnote', { text: t('enemies.named.slain', { name: rec.name }) });
   }
   if (e && ownsAffix(e, 'powielony')) spawnCopies(s, e, ev.x, ev.y);
+  if (e && ownsAffix(e, 'oddzwaniajacy') && !rtOf(e).returned) queueReturn(s, e, ev.x, ev.y);
+}
+
+// ---------- oddzwaniajacy: the one return ----------
+
+interface Return {
+  at: number;
+  x: number;
+  y: number;
+  page: number;
+  seed: number;
+  family: FamilyId;
+  tier: number;
+  affixes: EliteId[];
+}
+const returns = new WeakMap<RunState, Return[]>();
+
+/** The elite was struck: it is due back ODDZWANIAJACY_DELAY_S later (run time, so a pause holds it), on the same page. */
+function queueReturn(s: RunState, e: Enemy, x: number, y: number): void {
+  const list = returns.get(s) ?? [];
+  list.push({ at: s.time + ODDZWANIAJACY_DELAY_S, x, y, page: s.pageIndex, seed: e.seed, family: e.family, tier: e.tier, affixes: [...ownAffixes(e)] });
+  returns.set(s, list);
+}
+
+/** Returns still waiting for their time on this run (tests, the shot script). */
+export const pendingReturns = (s: RunState): number => returns.get(s)?.length ?? 0;
+
+/**
+ * Per step: a struck oddzwaniajacy whose time has come is inked again over its strike: the same body (the same seed), at 30% of
+ * its racja, with the claim "Oddzwaniam", and it does not return a second time. A return into a spot the page has since filled
+ * is dropped; so is one whose page has been turned.
+ */
+export function tickReturns(s: RunState, bus: Bus): void {
+  const list = returns.get(s);
+  if (!list || list.length === 0) return;
+  const rest: Return[] = [];
+  for (const r of list) {
+    if (r.page !== s.pageIndex) continue;
+    if (s.time < r.at) {
+      rest.push(r);
+      continue;
+    }
+    const first = r.affixes[0];
+    const e = makeEnemy(nextId(s), r.x, r.y, r.seed, r.family, { tier: r.tier, ...(first ? { elite: first } : {}), affixes: r.affixes });
+    if (s.plan) {
+      setEnemyScale(e, planScale(s.plan));
+      applyTierStats(e, false);
+    }
+    e.home = { x: e.x, y: e.y };
+    e.hp = Math.max(1, Math.round(e.hpMax * ODDZWANIAJACY_RACJA));
+    const rt = rtOf(e);
+    rt.returned = true;
+    e.claim = ownsAffix(e, 'dwuetapowy') ? staged({ ...ODDZWANIAM_CLAIM }) : { ...ODDZWANIAM_CLAIM };
+    s.enemies.push(e);
+    trackElite(s, e);
+    bus.emit('enemy:returned', { id: e.id, x: e.x, y: e.y });
+  }
+  returns.set(s, rest);
 }
 
 const bound = new WeakMap<Bus, { s: RunState }>();
@@ -189,7 +248,7 @@ export function spawnGateElite(s: RunState, view?: Rect): Enemy | null {
   for (let tries = 0; tries < 40 && pool.length > 0; tries++) {
     const c = pool[r.int(0, pool.length - 1)];
     if (!c) continue;
-    const got = placeElite(s, s.ticket.family, c.x, c.y, tier, r.pick(ELITE_IDS), { makeNamed: true, name: gateEliteName(s), pack: false });
+    const got = placeElite(s, s.ticket.family, c.x, c.y, tier, r.pick(eliteIdsFor(s.plan?.planet)), { makeNamed: true, name: gateEliteName(s), pack: false });
     const leader = got[0];
     if (leader) {
       g.eliteId = leader.id;
@@ -221,7 +280,7 @@ export function spawnWave(s: RunState, family: FamilyId, count: number, around: 
       const y = around.y + Math.sin(a) * d;
       if (x < 60 || y < 60 || x > s.page.w - 60 || y > s.page.h - 60) continue;
       if (Math.hypot(x - s.player.x, y - s.player.y) < (opts.minPlayer ?? 160)) continue;
-      const elite = opts.elite ?? (wantElite || r.chance(ELITE_CHANCE * planScale(s.plan).eliteMul) ? r.pick(ELITE_IDS) : undefined);
+      const elite = opts.elite ?? (wantElite || r.chance(ELITE_CHANCE * planScale(s.plan).eliteMul) ? r.pick(eliteIdsFor(s.plan?.planet)) : undefined);
       const tier = opts.tier ?? (fam === 'powiadomienia' ? 1 : pageTier(s));
       const placed = elite ? placeElite(s, fam, x, y, tier, elite, opts) : [placeEnemy(s, fam, x, y, { tier })].filter((e): e is Enemy => e !== null);
       if (placed.length > 0) {
@@ -297,7 +356,7 @@ export function countInView(s: RunState, view: Rect, minDist = 0): number {
 export function spawnElite(s: RunState, family: FamilyId, around?: Vec, affix?: EliteId, extra: Pick<SpawnOpts, 'makeNamed' | 'pack'> = {}): Enemy | null {
   const r = s.rngs.spawn;
   const at = around ?? { x: r.range(160, s.page.w - 160), y: r.range(160, s.page.h - 160) };
-  const got = spawnWave(s, family, 1, at, { elite: affix ?? r.pick(ELITE_IDS), minRadius: 0, maxRadius: 80, ...extra });
+  const got = spawnWave(s, family, 1, at, { elite: affix ?? r.pick(eliteIdsFor(s.plan?.planet)), minRadius: 0, maxRadius: 80, ...extra });
   // spawnWave doubles under Parzystosc; the elite is the first one
   return got[0] ?? null;
 }
@@ -311,7 +370,7 @@ export function spawnEnemy(s: RunState, minDistance = MIN_SPAWN_DISTANCE): Enemy
     const y = r.range(80, s.page.h - 80);
     if (Math.hypot(x - s.player.x, y - s.player.y) < minDistance) continue;
     const tier = family === 'powiadomienia' ? 1 : pageTier(s);
-    const elite = r.chance(ELITE_CHANCE * planScale(s.plan).eliteMul) ? r.pick(ELITE_IDS) : undefined;
+    const elite = r.chance(ELITE_CHANCE * planScale(s.plan).eliteMul) ? r.pick(eliteIdsFor(s.plan?.planet)) : undefined;
     if (elite) {
       const got = placeElite(s, family, x, y, tier, elite, {});
       if (got[0]) return got[0];

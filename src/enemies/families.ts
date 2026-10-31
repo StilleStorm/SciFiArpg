@@ -205,6 +205,8 @@ export const ELITES: Record<EliteId, EliteDef> = {
   poufny: { id: 'poufny', prefix: 'enemies.elite.poufny' },
   nadgorliwy: { id: 'nadgorliwy', prefix: 'enemies.elite.nadgorliwy' },
   wielokrotny: { id: 'wielokrotny', prefix: 'enemies.elite.wielokrotny' },
+  oddzwaniajacy: { id: 'oddzwaniajacy', prefix: 'enemies.elite.oddzwaniajacy' },
+  dwuetapowy: { id: 'dwuetapowy', prefix: 'enemies.elite.dwuetapowy' },
 };
 export const ELITE_HP_MUL = 1.6;
 export const ELITE_DMG_MUL = 1.25;

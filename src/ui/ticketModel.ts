@@ -17,6 +17,8 @@ export interface CampaignView {
   caseClosed: boolean;
   /** The return ticket to planet 1 (the finale). */
   finale: boolean;
+  /** The case was closed at a shorter campaign and has been reopened: the red card "Sprawę wznowiono" is due (CampaignState.reopened). */
+  reopened?: boolean;
 }
 
 export function startOfCampaign(): CampaignView {
@@ -30,14 +32,15 @@ export function campaignViewOf(c: CampaignState, plan?: TicketPlan): CampaignVie
     closed: [...c.closed],
     caseClosed: c.caseClosed,
     finale: plan ? plan.kind === 'final' : c.finalTicket,
+    ...(c.reopened ? { reopened: true } : {}),
   };
 }
 
 export const actOf = (planetIndex: number): 1 | 2 | 3 => (planetIndex < 3 ? 1 : planetIndex < 6 ? 2 : 3);
 export const ACT_ROMAN = ['I', 'II', 'III'] as const;
 
-/** `finale`: the return ticket's card (STORY 8.4), red with the PRZEPISANO stamp like the rewritten one. */
-export type CardKind = 'opening' | 'chapter' | 'rewritten' | 'finale';
+/** `finale`: the return ticket's card (STORY 8.4), red with the PRZEPISANO stamp like the rewritten one. `reopened`: "Sprawę wznowiono" (STORY 8.11), red with the WZNOWIONO stamp. */
+export type CardKind = 'opening' | 'chapter' | 'rewritten' | 'finale' | 'reopened';
 
 export interface CardSpec {
   kind: CardKind;
@@ -47,10 +50,13 @@ export interface CardSpec {
 /**
  * The card a new ticket's base entry shows. The first ticket of a character gets the opening page; the first visit of a
  * planet its chapter card; a return to a closed planet (free travel) the same card rewritten in red. Null: nothing.
+ * A reopened case (`view.reopened`) gets its red card first, ahead of the chapter card of the planet the campaign goes on to; the
+ * caller clears the flag (`clearReopened`) when it shows it, so it comes once.
  */
 export function cardToShow(view: CampaignView, seen: CardsSeen, ticketsFiled: number): CardSpec | null {
   const planetIndex = Math.min(Math.max(view.planetIndex, 0), PLANET_COUNT - 1);
   if (!seen.opening && ticketsFiled === 0) return { kind: 'opening', planetIndex };
+  if (view.reopened === true && !view.finale) return { kind: 'reopened', planetIndex };
   if (view.finale) return seen.finale ? null : { kind: 'finale', planetIndex };
   if (view.caseClosed && view.closed.includes(planetIndex)) {
     return seen.chapters.includes(-1 - planetIndex) ? null : { kind: 'rewritten', planetIndex };
@@ -62,6 +68,7 @@ export function cardToShow(view: CampaignView, seen: CardsSeen, ticketsFiled: nu
 /** Record a card as shown. A rewritten card is remembered as -1 - planetIndex so it shows once per planet too. */
 export function markShown(seen: CardsSeen, card: CardSpec): CardsSeen {
   if (card.kind === 'finale') return { ...seen, finale: true };
+  if (card.kind === 'reopened') return seen; // remembered by clearing CampaignState.reopened, not here
   if (card.kind === 'opening') return { opening: true, chapters: [...seen.chapters, ...(seen.chapters.includes(card.planetIndex) ? [] : [card.planetIndex])] };
   const key = card.kind === 'rewritten' ? -1 - card.planetIndex : card.planetIndex;
   return seen.chapters.includes(key) ? seen : { ...seen, chapters: [...seen.chapters, key] };

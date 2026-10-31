@@ -47,7 +47,7 @@ describe('campaign contract (tester)', () => {
       c = closeTicket(c, plan(i)).campaign;
       expect(closeTicket(c, plan(i)).campaign.closed).toEqual(c.closed);
     }
-    expect([...c.closed].sort((a, b) => a - b)).toEqual([0, 1, 2]);
+    expect([...c.closed].sort((a, b) => a - b)).toEqual(Array.from({ length: CAMPAIGN_LAST }, (_, i) => i));
     expect(travelList(newCampaign())).toEqual([]);
   });
 

@@ -220,4 +220,82 @@ function wlaz(o: Obstacle, r: Rng): SVGGElement {
   return k.g;
 }
 
-registerDrawings('miasto', { kamienica, tramwaj, wiata, billboard, budka, fontanna, latarnia, slup, 'skrzynka-pocztowa': skrzynkaPocztowa, rozklad, pasy, wlaz });
+/** A shop window: a frame with a hatched display (two shapes on a plinth), a price tag with the price and, struck through, the old price. */
+function vitryna(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-50, -44], [50, -44], [50, 30], [-50, 30]], { fill: 'paper', w: 2.3, jit: 0.7 });
+  k.shape([[-45, -39], [45, -39], [45, 25], [-45, 25]], { fill: 'hatch', w: 1, jit: 0.4 });
+  k.shape([[-36, -4], [-10, -4], [-10, 25], [-36, 25]], { fill: 'paper', w: 1.2, jit: 0.4 });
+  k.disc(14, 8, 12, { fill: 'paper', w: 1.2 });
+  k.shape([[-6, 25], [34, 25], [34, 30], [-6, 30]], { fill: 'paper', w: 1, jit: 0.2 });
+  // the price tag with the old price struck through and the new one under it
+  k.shape([[16, -36], [42, -36], [42, -12], [16, -12]], { fill: 'paper', w: 1.3, jit: 0.3 });
+  k.mark(String(r.int(40, 99)), 29, -26, 7);
+  k.line(19, -29, 39, -24, 1.1);
+  k.mark(String(r.int(10, 39)), 29, -16, 8);
+  k.path('M-50 30L-56 38H56L50 30', { w: 1.4 });
+  return k.g;
+}
+
+/** A sale banner strung across the street between two posts: a hatched strip with the percentage in hatched digits, the strings sagging. */
+function baner(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  for (const x of [-46, 46]) {
+    k.shape([[x - 3, -40], [x + 3, -40], [x + 3, 36], [x - 3, 36]], { fill: 'hatch', w: 1.5, jit: 0.4 });
+    k.shape([[x - 8, 36], [x + 8, 36], [x + 10, 42], [x - 10, 42]], { fill: 'paper', w: 1.3, jit: 0.3 });
+  }
+  k.path('M-43 -34Q0 -26 43 -34M-43 -4Q0 4 43 -4', { w: 1 });
+  k.shape([[-40, -30], [40, -30], [40, -8], [-40, -8]], { fill: 'paper', w: 1.8, jit: 0.6 });
+  k.shape([[-36, -27], [36, -27], [36, -11], [-36, -11]], { fill: 'hatch', w: 0.8, jit: 0.3 });
+  k.shape([[-26, -25], [26, -25], [26, -13], [-26, -13]], { fill: 'paper', w: 0.9, jit: 0.3 });
+  k.mark('-70%', 0, -15, 13);
+  return k.g;
+}
+
+/** A delivery van at the kerb, side on: a box body with a hatched stripe, a cab with a window, two wheels, a roller door, a kerb line. */
+function furgon(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-50, -34], [14, -34], [14, 22], [-50, 22]], { fill: 'paper', w: 2.2, jit: 0.6 });
+  k.shape([[-50, 4], [14, 4], [14, 12], [-50, 12]], { fill: 'hatch', w: 0.9, jit: 0.3 });
+  k.path('M-36 -34V4M-22 -34V4M-8 -34V4', { w: 0.6 });
+  k.shape([[14, -18], [34, -18], [48, -2], [50, 22], [14, 22]], { fill: 'paper', w: 2.2, jit: 0.6 });
+  k.shape([[20, -13], [32, -13], [42, -2], [20, -2]], { fill: 'hatch', w: 1, jit: 0.3 });
+  k.disc(-30, 24, 8, { fill: 'paper', w: 1.8 });
+  k.disc(30, 24, 8, { fill: 'paper', w: 1.8 });
+  k.disc(-30, 24, 2.4, { fill: 'hatch', w: 0.9 });
+  k.disc(30, 24, 2.4, { fill: 'hatch', w: 0.9 });
+  k.mark(String(r.int(10, 99)), -18, -16, 12);
+  k.path('M-56 33H56', { w: 1.2 });
+  return k.g;
+}
+
+/** A stack of flattened boxes: sheets of cardboard lying on each other, corrugation as ruled lines, a strap, the top one lifting at a corner. */
+function kartonyPlaskie(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  for (let i = 0; i < 4; i++) {
+    const y = 20 - i * 9;
+    const j = r.range(-3, 3);
+    k.shape([[-42 + j, y], [44 + j, y - 2], [46 + j, y + 8], [-44 + j, y + 9]], { fill: i % 2 === 0 ? 'paper' : 'hatch', w: 1.5, jit: 0.4 });
+  }
+  k.path('M-30 -4L-30 -14M0 -2L0 -14M30 -4L30 -14', { w: 0.7 });
+  k.shape([[-30, -16], [34, -18], [40, -34], [-22, -30]], { fill: 'paper', w: 1.6, jit: 0.4 });
+  k.path('M-24 -26L34 -28M-20 -22L30 -24', { w: 0.6 });
+  k.path('M-16 -2V24M16 -4V24', { w: 1.1 });
+  return k.g;
+}
+
+/** A shop mannequin: a faceless head, a torso with a sash, a stand on a round foot; a badge with a number pinned to the chest. */
+function manekin(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.disc(0, -44, 10, { fill: 'paper', w: 1.8 });
+  k.line(0, -34, 0, -28, 2);
+  k.path('M-22 -26Q-26 -4 -16 22L16 22Q26 -4 22 -26Q0 -34 -22 -26Z', { fill: 'paper', w: 2 });
+  k.path('M-22 -22L22 -6', { w: 1.4 });
+  k.path('M-16 10Q0 16 16 10', { w: 0.8 });
+  k.line(0, 22, 0, 52, 2);
+  k.shape([[-20, 52], [20, 52], [24, 58], [-24, 58]], { fill: 'hatch', w: 1.5, jit: 0.3 });
+  badge(k, 8, -14, 8, r.int(1, 24));
+  return k.g;
+}
+
+registerDrawings('miasto', { vitryna, baner, furgon, 'kartony-plaskie': kartonyPlaskie, manekin, kamienica, tramwaj, wiata, billboard, budka, fontanna, latarnia, slup, 'skrzynka-pocztowa': skrzynkaPocztowa, rozklad, pasy, wlaz });

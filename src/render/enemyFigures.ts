@@ -9,8 +9,9 @@ import type { Bus } from '../core/events';
 import type { Enemy } from '../entities/types';
 import { ENEMY_SCALE, assemble, assembleBoss, layoutAssembly, type Assembly, type Layout } from '../enemies/assemble';
 import { captionKeyOf, faceDrawing, faceHeroOf, facePartsOf, wearsOwnBody } from '../enemies/anomalia/state';
-import { CONFIRM_R, GRID_CELL, GRID_NEED_S, CONFIRM_NEED_S, bossVariantArm, bossVariantGrid, bossVariantLine, gridCellCenter } from '../enemies/bosses';
-import { BOSS_OF, ELITE_SCALE, eliteWord } from '../enemies/families';
+import { CONFIRM_R, GRID_CELL, SURVEY_CELLS, SURVEY_NEED_S, surveyCellCenter, GRID_NEED_S, CONFIRM_NEED_S, bossVariantArm, bossVariantGrid, bossVariantLine, gridCellCenter } from '../enemies/bosses';
+import { bossBodyOf } from '../enemies/bossBody';
+import { ELITE_SCALE, eliteWord } from '../enemies/families';
 import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsBase';
 import { rtOf } from '../enemies/runtime';
 import { t } from '../i18n';
@@ -79,7 +80,7 @@ function assemblyOf(e: Enemy): Assembly {
   const hero = faceHeroOf(e); // the Anomalia in the hero's own face (phase 2 of the finale)
   const face = hero ? faceDrawing(hero, e.seed) : null;
   if (face) return face;
-  return e.boss ? assembleBoss(BOSS_OF[e.family], e.seed) : assemble(e.seed, e.family, e.tier);
+  return e.boss ? assembleBoss(bossBodyOf(e, e.family), e.seed) : assemble(e.seed, e.family, e.tier);
 }
 
 // ---------- parts to DOM ----------
@@ -350,7 +351,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
     fig.append(lg);
   }
 
-  const boss = e.boss ? BOSS_OF[e.family] : null;
+  const boss = e.boss ? bossBodyOf(e, e.family) : null;
   // the Planeta's measuring arcs are its tell: no stain under them, the outline and the arcs stay sharp on clean paper
   if (!facePartsOf(e)) addWash(under, e, hw, H, feet);
   if (boss === 'weryfikacja') buildGrid(under, e);
@@ -537,10 +538,72 @@ function buildRing(under: SVGGElement, e: Enemy): void {
   under.append(ring);
 }
 
+/** A five-point star outline of outer radius `rad` centred on (0, 0). */
+function starPath(rad: number): string {
+  let d = '';
+  for (let i = 0; i < 10; i++) {
+    const rr = i % 2 === 0 ? rad : rad * 0.42;
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    d += `${i === 0 ? 'M' : 'L'}${n2(Math.cos(a) * rr)} ${n2(Math.sin(a) * rr)}`;
+  }
+  return d + 'Z';
+}
+
+/** Ankieta's survey row (STORY 8.10): five squares in a line, the 1-star and the 5-star ones answerable. Centred on (0, 0); the patch places it. */
+function buildSurvey(): SVGGElement {
+  const row = el('g', { 'data-part': 'survey' });
+  const half = GRID_CELL / 2 - 3;
+  for (let i = 0; i < SURVEY_CELLS; i++) {
+    const c = surveyCellCenter(0, 0, i);
+    const cg = el('g', { transform: `translate(${n2(c.x)} ${n2(c.y)})` });
+    cg.append(el('path', { d: box(-half, -half, half, half, 1.6), 'stroke-width': 1.2 }));
+    if (i === 0 || i === SURVEY_CELLS - 1) {
+      cg.append(el('path', { d: starPath(i === 0 ? 11 : 12), 'stroke-width': 1.3, ...(i === SURVEY_CELLS - 1 ? { style: INK_FILL } : {}) }));
+      cg.append(el('text', { x: 0, y: n2(half - 4), 'text-anchor': 'middle', 'font-size': 9, style: `${FONT.mono}; fill: var(--ink); stroke: none` }, [String(i + 1)]));
+    } else {
+      cg.append(el('path', { d: hatchRect(-half + 2, -half + 2, half - 2, half - 2, 3.4 + (i % 3), i % 2 === 0), 'stroke-width': 0.8 }));
+      cg.append(el('path', { d: starPath(5.5), 'stroke-width': 0.9, style: 'fill: var(--paper)' }));
+    }
+    row.append(cg);
+  }
+  return row;
+}
+
+/** Place the survey row where the world has it, and trace the stand-on progress of the answerable square. */
+function syncSurvey(e: Enemy, st: FigState): void {
+  const sv = rtOf(e).survey;
+  let row = st.under.querySelector<SVGGElement>(':scope > [data-part="survey"]');
+  if (!sv?.on) {
+    row?.remove();
+    return;
+  }
+  if (!row) {
+    row = buildSurvey();
+    st.under.append(row);
+    drawIn(row, 280);
+  }
+  // the under group is mirrored with the figure; the row is a thing on the page, so it is placed in world terms and not mirrored
+  const f = st.flip < 0 ? -1 : 1;
+  row.setAttribute('transform', `translate(${n2(f * (sv.cx - e.x))} ${n2(sv.cy - e.y)}) scale(${f} 1)`);
+  const p = sv.at === 0 || sv.at === SURVEY_CELLS - 1 ? Math.min(1, sv.stand / SURVEY_NEED_S) : 0;
+  const sig = `${sv.at}:${Math.round(p * 30)}`;
+  if (row.dataset['sig'] === sig) return;
+  row.dataset['sig'] = sig;
+  row.querySelector(':scope > [data-part="sprog"]')?.remove();
+  if (p <= 0) return;
+  const q = surveyCellCenter(0, 0, sv.at);
+  const h = GRID_CELL / 2 - 8;
+  const ring = el('path', { d: `M${n2(q.x - h)} ${n2(q.y - h)}L${n2(q.x + h)} ${n2(q.y - h)}L${n2(q.x + h)} ${n2(q.y + h)}L${n2(q.x - h)} ${n2(q.y + h)}Z`, 'data-part': 'sprog', 'stroke-width': 2.4 });
+  row.append(ring);
+  const len = ring.getTotalLength();
+  ring.style.strokeDasharray = String(len);
+  ring.style.strokeDashoffset = String(len * (1 - p));
+}
+
 /** Progress of the captcha squares and of the confirmation, drawn once something has progressed. */
 function syncBossProgress(e: Enemy, st: FigState): void {
   const rt = rtOf(e);
-  const boss = BOSS_OF[e.family];
+  const boss = bossBodyOf(e, e.family);
   let p = 0;
   if (boss === 'weryfikacja' && rt.grid) p = Math.min(1, rt.grid.time / GRID_NEED_S);
   else if (boss === 'hipoteza') p = rt.confirmed ? 1 : Math.min(1, rt.confirm / CONFIRM_NEED_S);
@@ -607,7 +670,7 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
     st.phase = phase;
     st.layout.legs(phase).forEach((d, i) => st.legPaths[i]?.setAttribute('d', d));
   }
-  const missing = rt.limped || (e.boss === true && BOSS_OF[e.family] === 'prototyp' && rt.phase >= 2);
+  const missing = rt.limped || (e.boss === true && bossBodyOf(e, e.family) === 'prototyp' && rt.phase >= 2);
   if (missing !== st.hiddenLeg) {
     st.hiddenLeg = missing;
     const last = st.legPaths[st.legPaths.length - 1];
@@ -698,6 +761,7 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
 
   syncStatusMarkers(st.markers, e.statuses, { hw: st.hw, top: st.top, feet: st.feet });
   if (e.boss && !wearsOwnBody(e)) syncBossProgress(e, st);
+  if (e.boss && rtOf(e).survey) syncSurvey(e, st);
   if (st.partArcs.length > 0) syncMeasured(e, st);
 }
 

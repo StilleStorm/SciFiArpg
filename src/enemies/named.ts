@@ -36,8 +36,8 @@ export function generateName(rng: Rng): string {
 }
 
 /** Two or three different affixes. */
-export function pickNamedAffixes(rng: Rng): EliteId[] {
-  const pool = [...ELITE_IDS];
+export function pickNamedAffixes(rng: Rng, from: readonly EliteId[] = ELITE_IDS): EliteId[] {
+  const pool = [...from];
   const n = rng.chance(0.5) ? 2 : 3;
   const out: EliteId[] = [];
   for (let i = 0; i < n; i++) {

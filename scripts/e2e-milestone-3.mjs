@@ -22,7 +22,7 @@ const BASE = `http://127.0.0.1:${PORT}/SciFiArpg/`;
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 const ORIENTS = { portrait: { width: 390, height: 844 }, landscape: { width: 844, height: 390 } };
-const LAST = 3; // CAMPAIGN_LAST in src/world/campaign.ts
+const LAST = 6; // CAMPAIGN_LAST in src/world/campaign.ts (S24: Akt II is part of the campaign)
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** The roster of case files: close a sheet over the base, then Pauza and Wyjdź. */
@@ -263,11 +263,15 @@ async function leg(browser, orient, heroKey) {
   const opening = await skipCard();
   check('the opening card shows story text without keys and one tap skips it', opening?.kind === 'opening' && clean(opening.text), JSON.stringify(opening && { kind: opening.kind, len: opening.text.length }));
 
-  // ---- planets 1-3 ----
+  // ---- planets 1-6 (CAMPAIGN_LAST) ----
   const EXPECT = [
     { loc: ['przedmiescie', 'magazyn'], hp: 260, variant: /^Prototyp, seria 1/, spor: 'story.p1.boss.spor1.comment', clerk: null, gate: null },
     { loc: ['magazyn', 'serwerownia'], hp: 360, variant: /^Prototyp, seria 2/, spor: 'story.p2.boss.spor1.comment', clerk: /Zaległości/, gate: 'teczka' },
     { loc: ['biuro', 'serwerownia'], hp: null, variant: /^Prototyp, seria 3/, spor: 'story.p3.boss.spor1.comment', clerk: /Aktualizacji/, gate: 'elite' },
+    { loc: ['miasto', 'biuro'], hp: null, variant: /^Weryfikacja, instancja druga/, spor: 'story.p4.boss.spor1.comment', clerk: /Eskalacji/, gate: null },
+    { loc: ['miasto', 'centrum'], hp: null, variant: /^Weryfikacja, wersja sklepowa/, spor: 'story.p5.boss.spor1.comment', clerk: /Doręcze/, gate: 'elite' },
+    // planet 6: the Ankieta is a body of its own, no variant line (STORY 8.10)
+    { loc: ['archiwum', 'centrum', 'serwerownia'], hp: null, variant: null, spor: 'story.p6.boss.spor1.comment', clerk: /Infolinii/, gate: 'teczka' },
   ];
   const levels = [];
   let chapterSkips = 0;
@@ -304,7 +308,7 @@ async function leg(browser, orient, heroKey) {
     check('the gate of the planet stopped the walk while it held, then lifted', ex.gate === null ? gatesSeen.length === 0 : gatesSeen.length === 1 && gatesSeen[0].gate.kind === ex.gate && gatesSeen[0].heldTurned === false && gatesSeen[0].lifted, JSON.stringify(gatesSeen));
     const bp = await bossPage();
     await shot(`planet${p + 1}-boss`);
-    check('the boss stands on the last page with its variant line under the name', bp.boss !== null && (ex.hp === null || bp.boss.hp === ex.hp) && ex.variant.test(bp.boss.variant ?? '') && ex.loc.includes(bp.boss.loc), JSON.stringify(bp.boss));
+    check('the boss stands on the last page with its variant line under the name', bp.boss !== null && (ex.hp === null || bp.boss.hp === ex.hp) && (ex.variant === null || ex.variant.test(bp.boss.variant ?? '')) && ex.loc.includes(bp.boss.loc), JSON.stringify(bp.boss));
     check('the boss posts the Spor comment of the planet as text with three replies', bp.spor?.key === ex.spor && bp.spor.replies === 3 && bp.bubble.length > 10 && !/story\./.test(bp.bubble), JSON.stringify({ spor: bp.spor, bubble: bp.bubble.slice(0, 40) }));
     levels.push(await ev(() => window.__game.state().hero.level));
     const down = await killBoss();
@@ -315,11 +319,11 @@ async function leg(browser, orient, heroKey) {
     if (p < LAST - 1) {
       check('boss down: back on the base, this planet closed once in the save, the next planet is the next ticket', down && after.campaign?.closed?.join() === Array.from({ length: p + 1 }, (_, i) => i).join() && after.campaign?.current === p + 1 && after.plan?.planet === p + 1 && after.history === p + 1, JSON.stringify(after));
     } else {
-      check('boss down on planet 3: the return ticket to planet 1 is on the desk (finale)', down && after.campaign?.closed?.length === LAST && after.campaign?.finalTicket === true && !after.campaign?.caseClosed && after.plan?.kind === 'final' && after.plan?.planet === 0, JSON.stringify(after));
+      check(`boss down on planet ${LAST}: the return ticket to planet 1 is on the desk (finale)`, down && after.campaign?.closed?.length === LAST && after.campaign?.finalTicket === true && !after.campaign?.caseClosed && after.plan?.kind === 'final' && after.plan?.planet === 0, JSON.stringify(after));
     }
   }
   tag = `${orient} ${heroKey}`;
-  check('both chapter cards were skipped by a tap', chapterSkips === LAST - 1, String(chapterSkips));
+  check('every chapter card was skipped by a tap', chapterSkips === LAST - 1, String(chapterSkips));
 
   // ---- the finale: the Anomalia ----
   tag = `${orient} ${heroKey} finale`;

@@ -8,3 +8,4 @@ import './p2';
 import './p3';
 import './p4';
 import './p5';
+import './p6';

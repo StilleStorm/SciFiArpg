@@ -7,7 +7,7 @@ import { applyDamage } from '../systems/combat';
 import type { DamageType } from '../combat/damage';
 import { nextId, type RunState } from '../world/run';
 import { placeBoss } from './bosses';
-import { ELITE_IDS, FAMILY_IDS, type EliteId, type FamilyId } from './families';
+import { eliteIdsFor, FAMILY_IDS, type EliteId, type FamilyId } from './families';
 import { ownAffixes } from './elites';
 import { makeEnemy } from './make';
 import { spawnWave } from './spawn';
@@ -60,14 +60,14 @@ export function createEnemyHook(getState: () => RunState | null, bus: Bus): Enem
       const s = getState();
       if (!s || !FAMILY_IDS.includes(family)) return [];
       const at = { x: s.player.x, y: s.player.y - 220 };
-      const got = spawnWave(s, family, 1, at, { elite: affix ?? s.rngs.spawn.pick(ELITE_IDS), pack: true, makeNamed: false, minRadius: 0, maxRadius: 20, minPlayer: 100 });
+      const got = spawnWave(s, family, 1, at, { elite: affix ?? s.rngs.spawn.pick(eliteIdsFor(s.plan?.planet)), pack: true, makeNamed: false, minRadius: 0, maxRadius: 20, minPlayer: 100 });
       return got.map((e) => e.id);
     },
     spawnNamed(family, affix) {
       const s = getState();
       if (!s || !FAMILY_IDS.includes(family)) return null;
       const at = { x: s.player.x, y: s.player.y - 220 };
-      const got = spawnWave(s, family, 1, at, { elite: affix ?? s.rngs.spawn.pick(ELITE_IDS), makeNamed: true, pack: false, minRadius: 0, maxRadius: 20, minPlayer: 100 });
+      const got = spawnWave(s, family, 1, at, { elite: affix ?? s.rngs.spawn.pick(eliteIdsFor(s.plan?.planet)), makeNamed: true, pack: false, minRadius: 0, maxRadius: 20, minPlayer: 100 });
       return got[0]?.id ?? null;
     },
     spawnBoss(family) {

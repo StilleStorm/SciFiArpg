@@ -1,7 +1,8 @@
 import type { Bus } from '../core/events';
 import { createRng, type Rng } from '../core/rng';
 import type { Enemy } from '../entities/types';
-import { BOSS_OF, type BossId } from '../enemies/families';
+import { bossBodyOf } from '../enemies/bossBody';
+import type { BossId } from '../enemies/families';
 import { t } from '../i18n';
 import { planetDef } from '../world/campaign';
 import { hasStory } from '../world/planets/storyKeys';
@@ -65,18 +66,20 @@ export interface SporEntry {
   replies: readonly [SporReply, SporReply, SporReply];
 }
 
-const entry = (boss: BossId, phase: 1 | 2, answer: DamageType): SporEntry => {
-  const base = `enemies.boss.${boss}.spor${phase}`;
+const entryAt = (base: string, answer: DamageType): SporEntry => {
   const reply = (type: DamageType): SporReply => ({ textKey: `${base}.reply.${type}`, type });
   const [a, b, c] = DAMAGE_TYPES;
   return { commentKey: `${base}.comment`, answer, replies: [reply(a ?? 'mechaniczny'), reply(b ?? 'regulaminowy'), reply(c ?? 'egzystencjalny')] };
 };
+const entry = (boss: BossId, phase: 1 | 2, answer: DamageType): SporEntry => entryAt(`enemies.boss.${boss}.spor${phase}`, answer);
 
 /** Two comments per boss: phase 1 and phase 2. The keys live in enemies.json. */
 export const SPOR_PROMPTS: Record<BossId, readonly [SporEntry, SporEntry]> = {
   prototyp: [entry('prototyp', 1, 'mechaniczny'), entry('prototyp', 2, 'regulaminowy')],
   weryfikacja: [entry('weryfikacja', 1, 'regulaminowy'), entry('weryfikacja', 2, 'egzystencjalny')],
   hipoteza: [entry('hipoteza', 1, 'egzystencjalny'), entry('hipoteza', 2, 'mechaniczny')],
+  // the Ankieta argues only in the planet 6 words (STORY 8.10); the family table points at the same keys
+  ankieta: [entryAt('story.p6.boss.spor1', 'regulaminowy'), entryAt('story.p6.boss.spor2', 'egzystencjalny')],
 };
 
 /**
@@ -89,6 +92,7 @@ export const STORY_ANSWERS: Readonly<Record<number, readonly [DamageType, Damage
   2: ['mechaniczny', 'egzystencjalny'],
   3: ['regulaminowy', 'mechaniczny'],
   4: ['egzystencjalny', 'regulaminowy'],
+  5: ['regulaminowy', 'egzystencjalny'],
 };
 
 /** The planet's own comment of a phase, or null when the planet has none (then the family's applies). */
@@ -152,7 +156,7 @@ export function postSpor(s: RunState, bus: Bus, boss: Enemy, phase: 1 | 2): bool
   if ((sp.answered[boss.id] ?? 0) >= phase) return false;
   sp.answered[boss.id] = phase;
   // a stream of its own, so the shuffle never moves another system's rolls
-  const prompt = promptFor(BOSS_OF[boss.family], phase, createRng(s.seed ^ Math.imul(boss.id, 0x9e3779b1)).fork(`spor${phase}`), s.plan?.planet);
+  const prompt = promptFor(bossBodyOf(boss, boss.family), phase, createRng(s.seed ^ Math.imul(boss.id, 0x9e3779b1)).fork(`spor${phase}`), s.plan?.planet);
   close(sp, bus, 'expired');
   sp.prompt = prompt;
   sp.bossId = boss.id;

@@ -120,4 +120,70 @@ const hipoteza: BodyPart = {
   draw: () => ({ art: hipotezaArt(), hips: [-15, -8, 10, 17] }),
 };
 
-export const BOSS_BODIES: readonly BodyPart[] = [proto, captcha, hipoteza];
+/**
+ * Ankieta (STORY 8.10): a tall clipboard on two long stilts. The sheet's head band is the header "OCEN NASZA OBSLUGE" (drawn as ruled
+ * lettering strokes, no words here: the plate text is the boss caption), five hatched star boxes down the front are its face, a pencil on a
+ * string its one arm, the clip at the top a brow, a paper feed curling out of the top.
+ */
+function stars(y: number): string {
+  // a five-point star outline centred on (0, y), radius 3.1
+  let d = '';
+  for (let i = 0; i < 10; i++) {
+    const rad = i % 2 === 0 ? 3.1 : 1.3;
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    d += `${i === 0 ? 'M' : 'L'}${(Math.cos(a) * rad).toFixed(1)} ${(y + Math.sin(a) * rad).toFixed(1)}`;
+  }
+  return d + 'Z';
+}
+
+const ankieta: BodyPart = {
+  id: 'ankieta',
+  family: 'powiadomienia',
+  tier: 0,
+  w: 40,
+  h: 64,
+  neck: null,
+  anchors: { topL: { x: -14, y: -62 }, topR: { x: 14, y: -62 }, back: { x: -20, y: -32 }, front: { x: 0, y: -32 }, side: { x: 20, y: -32 } },
+  variants: 1,
+  rise: 6,
+  headChance: 0,
+  boss: 'ankieta',
+  draw: () => ({
+    art: {
+      line:
+        // the board and the sheet on it
+        box(-20, -64, 20, 0) +
+        box(-17, -58, 17, -3, 0.7) +
+        // the header band
+        pl(-17, -48, 17, -48) +
+        // the clip: a brow across the top
+        poly(-8, -68, 8, -68, 8, -62, -8, -62) +
+        pl(-5, -68, -5, -72, 5, -72, 5, -68) +
+        // five star boxes down the front, the face
+        box(-8, -44, 8, -37, 0.4) +
+        box(-8, -35, 8, -28, 0.4) +
+        box(-8, -26, 8, -19, 0.4) +
+        box(-8, -17, 8, -10, 0.4) +
+        box(-8, -8, 8, -1.4, 0.4) +
+        // the pencil on a string: hangs from the left edge, the one arm
+        'M-20-40Q-30-38 -30-26L-30-8L-27.5-3L-25-8L-25-26Q-25-34 -20-34' +
+        // the paper feed curling out of the top
+        'M-3-72Q-10-84 -2-88Q6-92 4-80Q2-74 6-72',
+      thin:
+        pl(-14, -53, -6, -53) +
+        pl(-2, -53, 8, -53) +
+        pl(-14, -50.5, 3, -50.5) +
+        pl(13, -53, 15, -53) +
+        pl(-30, -22, -25, -22) +
+        pl(-30, -18, -25, -18) +
+        pl(11, -62, 11, -58) +
+        pl(-1, -76, 3, -79) +
+        [-40.5, -31.5, -22.5, -13.5, -4.7].map(stars).join(''),
+      hatch: rectPath(-16, -57, 16, -49) + rectPath(-27.5, -29, -26.5, -6),
+      ink: circ(-11, -4.5, 0.8) + circ(11, -4.5, 0.8) + circ(11, -67, 0.8),
+    },
+    hips: [-9, 9],
+  }),
+};
+
+export const BOSS_BODIES: readonly BodyPart[] = [proto, captcha, hipoteza, ankieta];

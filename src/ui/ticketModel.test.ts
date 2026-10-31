@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { newCampaign, toCardsSeen } from '../world/campaign';
+import { clearReopened, cloneCampaign, newCampaign, toCampaign, toCardsSeen } from '../world/campaign';
 import { actOf, campaignViewOf, cardToShow, markShown, noCardsSeen, startOfCampaign } from './ticketModel';
 
 describe('campaign view', () => {
@@ -51,6 +51,27 @@ describe('cards', () => {
     expect(cardToShow(view, seen, 3)).toBeNull();
     expect(toCardsSeen(JSON.parse(JSON.stringify(seen))).finale).toBe(true);
     expect(toCardsSeen({ opening: true, chapters: [] }).finale).toBeUndefined();
+  });
+  it('the reopened case shows "Sprawę wznowiono" once, before the chapter card of planet 4', () => {
+    // a save whose closed list ends at the old CAMPAIGN_LAST (3): toCampaign reopens it and goes on from planet 4
+    let camp = toCampaign({ closed: [0, 1, 2], caseClosed: true });
+    expect(camp).toMatchObject({ reopened: true, current: 3, caseClosed: false });
+    const seen = { opening: true, chapters: [0, 1, 2] };
+    const view = campaignViewOf(camp);
+    expect(view.reopened).toBe(true);
+    expect(cardToShow(view, seen, 12)).toEqual({ kind: 'reopened', planetIndex: 3 });
+    expect(markShown(seen, { kind: 'reopened', planetIndex: 3 })).toBe(seen); // the card is remembered by the flag, not in the seen list
+    // taken as shown: the flag goes (cloning keeps everything else), and the chapter card of planet 4 is next
+    camp = clearReopened({ ...camp, cards: seen });
+    expect(camp.reopened).toBeUndefined();
+    expect(camp).toMatchObject({ current: 3, closed: [0, 1, 2], cards: seen });
+    expect(cardToShow(campaignViewOf(camp), seen, 12)).toEqual({ kind: 'chapter', planetIndex: 3 });
+    // it does not come back after a save and load, nor for a campaign that was never closed short
+    expect(toCampaign(JSON.parse(JSON.stringify(camp))).reopened).toBeUndefined();
+    expect(campaignViewOf(toCampaign({ closed: [0, 1], current: 2 })).reopened).toBeUndefined();
+    // the return ticket's card wins over it, and cloning keeps the finale mark
+    expect(cardToShow({ ...view, finale: true }, seen, 12)).toEqual({ kind: 'finale', planetIndex: 3 });
+    expect(cloneCampaign({ ...newCampaign(), cards: { opening: true, chapters: [], finale: true } }).cards?.finale).toBe(true);
   });
   it('acts', () => {
     expect([0, 2, 3, 5, 6, 8].map(actOf)).toEqual([1, 1, 2, 2, 3, 3]);

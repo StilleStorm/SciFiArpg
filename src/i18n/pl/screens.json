@@ -308,9 +308,11 @@
       "opening": "Strona otwierająca",
       "chapter": "Karta rozdziału",
       "rewritten": "Przepisano",
-      "finale": "Bilet powrotny"
+      "finale": "Bilet powrotny",
+      "reopened": "Wznowienie sprawy"
     },
     "stamp": "PRZEPISANO",
+    "stampReopened": "WZNOWIONO",
     "act": "Akt {act}",
     "title": "{act}. {planet}",
     "openingTitle": "Zgłoszenie nr {number}",

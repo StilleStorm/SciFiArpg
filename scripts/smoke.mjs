@@ -2297,7 +2297,7 @@ try {
       return { rows: 0, screen: window.__game.screen(), plan: s?.plan ?? null, accepted: s?.phase === 'base' && s?.pageIndex === 0, card: document.querySelector('.card-layer')?.dataset.card ?? null, sheet: !!document.querySelector('.ticket-sheet') };
     });
     trav.rows = rows;
-    check('campaign: after the case planets 1..CAMPAIGN_LAST (three) are offered, not the nine closed; travel to planet 2 accepts a travel ticket there and shows the rewritten card', rows === 3 && trav.screen === 'baza' && trav.plan?.kind === 'travel' && trav.plan?.planet === 1 && trav.accepted && trav.card === 'rewritten' && !trav.sheet, JSON.stringify(trav));
+    check('campaign: after the case planets 1..CAMPAIGN_LAST (six) are offered, not the nine closed; travel to planet 2 accepts a travel ticket there and shows the rewritten card', rows === 6 && trav.screen === 'baza' && trav.plan?.kind === 'travel' && trav.plan?.planet === 1 && trav.accepted && trav.card === 'rewritten' && !trav.sheet, JSON.stringify(trav));
     // enemies scale: the same family and seed, Niski on planet 1 against Krytyczny on planet 8
     const hpOf = async (plan) => {
       await cp.evaluate((pl) => window.__game.start(21, { plan: pl }), plan);
@@ -2781,6 +2781,21 @@ try {
     await qctx.close();
   }
 
+  // S24: a case file is entered the way a player gets there: the save holds the campaign (the old closed list, or the planets so far), the archive is read back, and the base prints its cards itself
+  const intoCase = async (pg, campaign) => {
+    const ok = await pg.evaluate((camp) => {
+      const g = window.__game;
+      const a = JSON.parse(g.exportArchive());
+      const c = a.meta.characters.find((x) => x.id === a.meta.activeCharacterId);
+      c.character.campaign = camp;
+      delete c.bookmark;
+      return g.importArchive(JSON.stringify(a));
+    }, campaign);
+    await sleep(700);
+    await pg.locator('.desk-sheet .ps-close').first().click({ timeout: 1500 }).catch(() => undefined); // an import opens the desk over the base: the card is under it
+    return ok;
+  };
+
   // ---------- 6g'. planet 4 content (S23): chapter card, clerk, side ticket, miasto and biuro pages, the boss variant ----------
   {
     const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
@@ -2803,19 +2818,17 @@ try {
     await qp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
     await qp.locator('.card-layer .card-skip').click({ timeout: 3000 });
     await sleep(500);
-    // the campaign stops at CAMPAIGN_LAST until S24 raises it, so planet 4 is entered the way the hook can: the card view and a base of its plan
-    await ev(() => {
-      window.__game.setCampaignView({ planetIndex: 3, closed: [0, 1, 2], caseClosed: false, finale: false });
-      const st = window.__game.startBase(5);
-      st.plan = { kind: 'campaign', planet: 3, priority: 'normalny', lawId: 'godziny-konsultanta' };
-      window.__game.showCard('chapter');
-    });
+    // S24: planet 4 is entered through the case file: a save closed at the old CAMPAIGN_LAST (planets 1-3) is reopened, the base is planet 4's
+    // and prints the red "Sprawę wznowiono" card first, then the chapter card (checked in the S24 leg below); here the reopened card is skipped
+    const into4 = await intoCase(qp, { current: 0, closed: [0, 1, 2], finalTicket: false, caseClosed: true, extras: 0, cards: { opening: true, chapters: [0, 1, 2, -1, -2, -3], finale: true } });
     await sleep(900);
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 }).catch(() => undefined);
+    await sleep(700);
     const card = await ev(() => {
       const l = document.querySelector('.card-layer');
       return { kind: l?.dataset.card ?? null, text: l?.textContent ?? '', planet: window.__game.state()?.plan?.planet, law: window.__game.state()?.plan?.lawId };
     });
-    check('S23 chapter card: planet 4 carries its story text, no key and no placeholder; the plan is planet 4', card.kind === 'chapter' && card.planet === 3 && /Dwudziest/.test(card.text) && /przekierowan/i.test(card.text) && !/story\.|screens\.cards|\[brak/i.test(card.text), JSON.stringify({ kind: card.kind, planet: card.planet, law: card.law, head: card.text.slice(0, 90) }));
+    check('S23 chapter card: planet 4 (entered through the reopened case file) carries its story text, no key and no placeholder; the plan is planet 4', into4 === true && card.kind === 'chapter' && card.planet === 3 && /Dwudziest/.test(card.text) && /przekierowan/i.test(card.text) && !/story\.|screens\.cards|\[brak/i.test(card.text), JSON.stringify({ kind: card.kind, planet: card.planet, law: card.law, head: card.text.slice(0, 90) }));
     await shotOf(qp, 'S23-card');
     await qp.locator('.card-layer .card-skip').click({ timeout: 3000 }).catch(() => undefined);
     await sleep(500);
@@ -2922,14 +2935,15 @@ try {
     await qp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
     await qp.locator('.card-layer .card-skip').click({ timeout: 3000 });
     await sleep(500);
-    // planet 5 is past CAMPAIGN_LAST until S24 raises it: the base is opened with the plan by hand (no chapter card is reachable yet)
-    await ev(() => window.__game.start(5, { phase: 'base', plan: { kind: 'campaign', planet: 4, priority: 'normalny', lawId: 'oplata-serwisowa' } }));
+    // S24: planet 5 is entered through the case file: four planets closed, the base is planet 5's and prints its chapter card
+    const into5 = await intoCase(qp, { current: 4, closed: [0, 1, 2, 3], finalTicket: false, caseClosed: false, extras: 0, cards: { opening: true, chapters: [0, 1, 2, 3] } });
     await sleep(900);
+    const card5 = await ev(() => ({ kind: document.querySelector('.card-layer')?.dataset.card ?? null, plan: window.__game.state()?.plan?.planet ?? null, text: document.querySelector('.card-layer')?.textContent ?? '' }));
+    check('S23p5 chapter card: the case file with four planets closed opens planet 5 with its own chapter card, no key', into5 === true && card5.kind === 'chapter' && card5.plan === 4 && !/story\.|screens\.cards|\[brak/i.test(card5.text), JSON.stringify({ into5, kind: card5.kind, plan: card5.plan, text: card5.text.slice(0, 80) }));
     await qp.locator('.card-layer .card-skip').click({ timeout: 1500 }).catch(() => undefined);
     await sleep(400);
     const base = await ev(() => ({ planet: window.__game.state()?.plan?.planet, clerk: document.querySelectorAll('[data-station=urzednik]').length, offers: window.__game.quests.offers().map((o) => o.id) }));
     check('S23p5 planet 5 base: the clerk is drawn and the board carries the three h:p5 side tickets', base.planet === 4 && base.clerk === 1 && base.offers.filter((id) => id.startsWith('h:p5:')).length === 3, JSON.stringify(base));
-    // the clerk's sheet and the chapter card are not reachable from the campaign until S24 raises CAMPAIGN_LAST: p5.test.ts covers their texts
     // ticket a: reported, it pays one piece of Ostatnia mila as an awizo (not into the bag)
     const awizo = await ev(() => {
       const h = window.__game;
@@ -3028,6 +3042,232 @@ try {
       }
       check('S23p5 Spór: the planet 5 comment (story.p5.boss.spor1) is posted and the right reply is the egzystencjalny one', first !== null && first.commentKey === 'story.p5.boss.spor1.comment' && first.replies[first.correct].textKey.endsWith('.egzystencjalny'), JSON.stringify({ key: first?.commentKey, right: first ? first.replies[first.correct].textKey : null }));
     }
+    await qctx.close();
+  }
+
+  // ---------- 6h''. planet 6 content (S24): clerk, tickets, centrum/serwerownia/archiwum, the teczka gate with the Archiwista, the Ankieta and its survey row ----------
+  {
+    const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await qctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const qp = await qctx.newPage();
+    qp.on('pageerror', (e) => problems.push(`S24p6 pageerror: ${e.message}`));
+    qp.on('console', (m) => {
+      if (m.text().includes('Service Worker registration blocked')) return;
+      if (m.type() === 'error' || m.type() === 'warning') problems.push(`S24p6 console.${m.type()}: ${m.text()}`);
+    });
+    const ev = (fn, arg) => qp.evaluate(fn, arg);
+    await qp.goto(BASE, { waitUntil: 'load' });
+    await qp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await qp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 });
+    await sleep(500);
+    // the base is opened with the plan by hand (the chapter card of the campaign is not what this leg checks)
+    await ev(() => window.__game.start(6, { phase: 'base', plan: { kind: 'campaign', planet: 5, priority: 'normalny', lawId: 'weryfikacja-dwuetapowa' } }));
+    await sleep(900);
+    await qp.locator('.card-layer .card-skip').click({ timeout: 1500 }).catch(() => undefined);
+    await sleep(400);
+    const base = await ev(() => ({ planet: window.__game.state()?.plan?.planet, clerk: document.querySelectorAll('[data-station=urzednik]').length, offers: window.__game.quests.offers().map((o) => o.id) }));
+    check('S24p6 planet 6 base: the clerk is drawn and the board carries the three h:p6 side tickets', base.planet === 5 && base.clerk === 1 && base.offers.filter((id) => id.startsWith('h:p6:')).length === 3, JSON.stringify(base));
+
+    await ev(() => window.__game.start(43, { plan: { kind: 'campaign', planet: 5, priority: 'niski', lawId: 'weryfikacja-dwuetapowa' }, pageCount: 6 }));
+    await sleep(700);
+    for (let k = 0; k < 4 && (await ev(() => window.__game.state()?.modal ?? null)); k++) {
+      await qp.locator('.pop-wrap .form-btn, .pop-wrap button').locator('visible=true').first().click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(400);
+    }
+    const turn = async (k) => {
+      await ev((n) => {
+        window.__game.state().enemies.length = 0;
+        window.__game.turnTo(n);
+      }, k);
+      await qp.waitForFunction((n) => window.__game.state()?.pageIndex === n && !window.__game.state().turning, k, { timeout: 6000 }).catch(() => undefined);
+      await sleep(500);
+    };
+    const locs = await ev(() => window.__game.state().pages.map((q) => q.location));
+    check('S24p6 pages: centrum x2, serwerownia, archiwum x3', locs.join() === 'centrum,centrum,serwerownia,archiwum,archiwum,archiwum', JSON.stringify(locs));
+    await turn(3);
+    const gate0 = await ev(() => {
+      const s = window.__game.state();
+      const props = [...document.querySelectorAll('#page [data-obstacle="prop"]')];
+      return {
+        loc: s.page.location,
+        info: window.__game.gate.info(),
+        wall: document.querySelectorAll('#page [data-obstacle=gate]').length,
+        figure: document.querySelectorAll('#page [data-gate-figure]').length,
+        keys: window.__game.content.list().filter((c) => c.key).length,
+        props: props.length,
+        drawn: props.filter((n) => n.childElementCount > 0).length,
+      };
+    });
+    check('S24p6 gate: page 4 is an archiwum with every prop drawn, the hatched band, an Archiwista and exactly one key teczka', gate0.loc === 'archiwum' && gate0.info?.kind === 'teczka' && gate0.info.holds && !gate0.info.look && gate0.info.keyTeczka && gate0.wall === 1 && gate0.figure === 1 && gate0.keys === 1 && gate0.props >= 6 && gate0.props === gate0.drawn, JSON.stringify(gate0));
+    await ev(() => window.__game.gate.approach());
+    await sleep(500);
+    const noted = await ev(() => window.__game.notes().map((n) => n.text));
+    check('S24p6 gate: at the blocked corner the Asystent names the condition (nagranie, w teczce)', noted.some((x) => /Wyjście\s+z\s+archiwum\s+wymaga\s+okazania\s+nagrania/.test(x)), JSON.stringify(noted.slice(-3)));
+    await shotOf(qp, 'S24p6-gate-before');
+    const lifted = await ev(() => {
+      const h = window.__game;
+      const key = h.content.list().find((c) => c.key);
+      h.content.open(key.id);
+      h.advance(0.2);
+      return { info: h.gate.info(), page: h.state().page.gate === undefined, notes: h.notes().map((n) => n.text) };
+    });
+    check('S24p6 gate: opening the nagranie lifts it with the planet own footnote', lifted.info === null && lifted.page && lifted.notes.some((x) => /Nagranie\s+okazano/.test(x)), JSON.stringify({ info: lifted.info, page: lifted.page, notes: lifted.notes.slice(-2) }));
+    await turn(5);
+    for (let k = 0; k < 4 && !(await ev(() => window.__game.state()?.enemies.some((e) => e.boss))); k++) {
+      if (await qp.locator('.sheet:not(.hidden) .entry').first().isVisible().catch(() => false)) {
+        await qp.locator('.sheet:not(.hidden) .entry').first().click({ timeout: 2000 }).catch(() => undefined);
+        await qp.locator('.sheet:not(.hidden) .install').click({ timeout: 2000 }).catch(() => undefined);
+        await sleep(300);
+        await qp.locator('.sheet.assigning:not(.hidden) .report.later').click({ timeout: 2000 }).catch(() => undefined);
+      }
+      await sleep(900);
+    }
+    await qp.waitForFunction(() => window.__game.state()?.enemies.some((e) => e.boss), null, { timeout: 8000 }).catch(() => undefined);
+    await sleep(600);
+    const boss = await ev(() => {
+      const b = window.__game.state().enemies.find((e) => e.boss);
+      return b ? { hp: b.hpMax, loc: window.__game.state().page.location, name: [...document.querySelectorAll('text')].some((x) => /^\s*ANKIETA\s*$/.test(x.textContent ?? '')), variant: document.querySelector('[data-part=variant]') !== null } : null;
+    });
+    check('S24p6 boss: the Ankieta on the archiwum reading room, racja 240, named, no variant line', boss !== null && boss.loc === 'archiwum' && boss.hp === 240 && boss.name && !boss.variant, JSON.stringify(boss));
+    const row = await ev(() => {
+      const h = window.__game;
+      h.state().player.suspended = false;
+      const b = h.state().enemies.find((e) => e.boss);
+      if (b) h.placePlayer(b.x, b.y + 220);
+      h.advance(4.5);
+      return { cells: document.querySelectorAll('[data-part=survey] > g').length, notes: h.notes().map((n) => n.text) };
+    });
+    await sleep(500);
+    const rowDom = await ev(() => ({ cells: document.querySelectorAll('[data-part=survey] > g').length }));
+    check('S24p6 boss: after 4 s the survey row of five squares is drawn and the hint is written', (row.cells === 5 || rowDom.cells === 5) && row.notes.some((x) => /Oceń\s+rozmowę\s+w\s+skali/.test(x)), JSON.stringify({ row: row.cells, dom: rowDom.cells, notes: row.notes.slice(-2) }));
+    await shotOf(qp, 'S24p6-boss-row');
+    let first = null;
+    for (let i = 0; i < 50 && !first; i++) {
+      const info = await ev(() => window.__game.spor.info());
+      if (info?.open && info.phase === 1) first = info;
+      else await sleep(200);
+    }
+    check('S24p6 Spór: the planet 6 comment (story.p6.boss.spor1) is posted and the right reply is the regulaminowy one', first !== null && first.commentKey === 'story.p6.boss.spor1.comment' && first.replies[first.correct].textKey.endsWith('.regulaminowy'), JSON.stringify({ key: first?.commentKey, right: first ? first.replies[first.correct].textKey : null }));
+    await qctx.close();
+  }
+
+  // ---------- 6k. Akt II systems (S24): the reopened card for a save with the old closed list, once; the two elite affixes ----------
+  {
+    const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await qctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const qp = await qctx.newPage();
+    qp.on('pageerror', (e) => problems.push(`S24 pageerror: ${e.message}`));
+    qp.on('console', (m) => {
+      if (m.text().includes('Service Worker registration blocked')) return;
+      if (m.type() === 'error' || m.type() === 'warning') problems.push(`S24 console.${m.type()}: ${m.text()}`);
+    });
+    const ev = (fn, arg) => qp.evaluate(fn, arg);
+    await qp.goto(BASE, { waitUntil: 'load' });
+    await qp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await qp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 });
+    await sleep(500);
+    const oldSave = { current: 0, closed: [0, 1, 2], finalTicket: false, caseClosed: true, extras: 0, cards: { opening: true, chapters: [0, 1, 2, -1, -2, -3], finale: true } };
+    const ok = await intoCase(qp, oldSave);
+    await sleep(900);
+    const red = await ev(() => {
+      const l = document.querySelector('.card-layer');
+      const camp = window.__game.meta().character?.campaign;
+      return { kind: l?.dataset.card ?? null, red: l?.classList.contains('rewritten') ?? false, text: l?.textContent ?? '', stamp: l?.querySelector('.card-stamp')?.textContent ?? '', hero: !!l?.querySelector('.card-hero'), flag: camp?.reopened ?? null, current: camp?.current ?? null, closed: camp?.closed ?? null };
+    });
+    check('S24 reopened: a save closed at planets 1-3 shows the red "Sprawę wznowiono" card first, with the WZNOWIONO stamp, its three story lines and no hero line; the flag is taken', ok === true && red.kind === 'reopened' && red.red && red.stamp === 'WZNOWIONO' && /Sprawę wznowiono/.test(red.text) && /Wnioskodawca pozostaje na liście oczekujących/.test(red.text) && !red.hero && red.flag === null && red.current === 3 && red.closed.join() === '0,1,2' && !/story\.|screens\.cards|\[brak/i.test(red.text), JSON.stringify(red));
+    await shotOf(qp, 'S24-reopened');
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 }).catch(() => undefined);
+    await sleep(900);
+    const next = await ev(() => ({ kind: document.querySelector('.card-layer')?.dataset.card ?? null, plan: window.__game.state()?.plan?.planet ?? null }));
+    check('S24 reopened: the planet 4 chapter card follows it', next.kind === 'chapter' && next.plan === 3, JSON.stringify(next));
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 }).catch(() => undefined);
+    await sleep(500);
+    const again = await ev(() => {
+      const g = window.__game;
+      const a = g.exportArchive();
+      g.importArchive(a);
+      return { ok: true };
+    });
+    await sleep(900);
+    const once = await ev(() => ({ kind: document.querySelector('.card-layer')?.dataset.card ?? null, flag: window.__game.meta().character?.campaign?.reopened ?? null }));
+    check('S24 reopened: the card is shown once; the saved case file reads back without it', again.ok && once.kind !== 'reopened' && once.flag === null, JSON.stringify(once));
+    await qp.locator('.card-layer .card-skip').click({ timeout: 1500 }).catch(() => undefined);
+
+    // the two affixes on planet 4
+    await ev(() => window.__game.start(47, { plan: { kind: 'campaign', planet: 3, priority: 'niski', lawId: 'godziny-konsultanta' }, pageCount: 3 }));
+    await sleep(700);
+    for (let k = 0; k < 4 && (await ev(() => window.__game.state()?.modal ?? null)); k++) {
+      await qp.locator('.pop-wrap .form-btn, .pop-wrap button').locator('visible=true').first().click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(400);
+    }
+    await ev(() => {
+      const g = window.__game;
+      g.state().player.suspended = true;
+      g.state().player.level = 25; // a kill must not print the update form that holds the run
+      g.enemies.clear();
+      g.enemies.spawnFamily('urzadzenia', 1, { elite: 'dwuetapowy' });
+    });
+    await sleep(500);
+    const d0 = await ev(() => {
+      const e = window.__game.enemies.list()[0];
+      const st = window.__game.state().enemies[0];
+      return { claim: e?.claim ?? null, type: st?.claim?.type ?? null, bubble: [...document.querySelectorAll('#world g[data-kind="enemy"] .bubble')].map((b) => b.textContent ?? '') };
+    });
+    check('S24 dwuetapowy: the elite\'s claim bubble reads "1/2"', /claimStep\.urzadzenia\..+\.1$/.test(d0.claim ?? '') && d0.bubble.some((x) => /\(1\/2\)/.test(x)), JSON.stringify(d0));
+    await ev((ty) => {
+      const g = window.__game;
+      g.state().enemies[0].hp = g.state().enemies[0].hpMax = 9999;
+      g.enemies.hit(g.enemies.list()[0].id, ty, 5);
+    }, d0.type);
+    await sleep(600);
+    const d1 = await ev(() => ({ struck: window.__game.state().enemies[0]?.claim?.struck ?? false, claim: window.__game.enemies.list()[0]?.claim ?? null, bubble: [...document.querySelectorAll('#world g[data-kind="enemy"] .bubble')].map((b) => b.textContent ?? '') }));
+    check('S24 dwuetapowy: the first rebuttal does not break the claim, the bracket moves to 2/2', !d1.struck && /\.2$/.test(d1.claim ?? '') && d1.bubble.some((x) => /\(2\/2\)/.test(x)), JSON.stringify(d1));
+    await ev((ty) => {
+      const g = window.__game;
+      g.advance(0.6);
+      g.enemies.hit(g.enemies.list()[0].id, ty, 5);
+    }, d0.type);
+    const d2 = await ev(() => ({ struck: window.__game.state().enemies[0]?.claim?.struck ?? false }));
+    check('S24 dwuetapowy: the second rebuttal breaks it', d2.struck === true, JSON.stringify(d2));
+
+    await ev(() => {
+      const g = window.__game;
+      g.enemies.clear();
+      g.enemies.spawnFamily('urzadzenia', 1, { elite: 'oddzwaniajacy' });
+    });
+    await sleep(400);
+    const o0 = await ev(() => {
+      const g = window.__game;
+      const e = g.state().enemies[0];
+      const max = e.hpMax;
+      g.enemies.hit(e.id, 'mechaniczny', 99999);
+      return { max, gone: g.state().enemies.length === 0 };
+    });
+    await ev(() => window.__game.advance(1));
+    const o1 = await ev(() => window.__game.enemies.list().length);
+    await ev(() => window.__game.advance(3.4));
+    await sleep(600);
+    const o2 = await ev(() => {
+      const g = window.__game;
+      const e = g.state().enemies[0];
+      return { n: g.state().enemies.length, hp: e?.hp ?? 0, max: e?.hpMax ?? 0, claim: e?.claim?.textKey ?? null, affix: e?.elite?.affix ?? null, bubble: [...document.querySelectorAll('#world g[data-kind="enemy"] .bubble')].map((b) => b.textContent ?? '') };
+    });
+    check('S24 oddzwaniajacy: struck, it is gone for 4 s, then returns once at 30% racja with the claim "Oddzwaniam"', o0.gone && o1 === 0 && o2.n === 1 && o2.affix === 'oddzwaniajacy' && Math.abs(o2.hp / o2.max - 0.3) < 0.05 && o2.claim === 'enemies.claim.oddzwaniam' && o2.bubble.some((x) => /Oddzwaniam/.test(x)), JSON.stringify({ o0, o1, o2 }));
+    await shotOf(qp, 'S24-oddzwaniajacy');
     await qctx.close();
   }
 

@@ -228,7 +228,7 @@ export interface GameHook {
   acceptTicket(): boolean;
   /** Show the ticket form and the cards as for another campaign state (null: the real one). */
   setCampaignView(v: CampaignView | null): void;
-  showCard(kind: 'opening' | 'chapter' | 'rewritten' | 'finale'): void;
+  showCard(kind: 'opening' | 'chapter' | 'rewritten' | 'finale' | 'reopened'): void;
   /** The priority chosen on the ticket accepted last. */
   priority(): PriorityId;
   /**
@@ -269,7 +269,7 @@ export interface HookDeps {
   acceptTicket(): boolean;
   /** Show the ticket form and the cards as for another campaign state (null: the real one). */
   setCampaignView(v: CampaignView | null): void;
-  showCard(kind: 'opening' | 'chapter' | 'rewritten' | 'finale'): void;
+  showCard(kind: 'opening' | 'chapter' | 'rewritten' | 'finale' | 'reopened'): void;
   /** The priority chosen on the ticket accepted last. */
   priority(): PriorityId;
   /** The footnotes as printed (ui/footnotes.ts `recent`). */

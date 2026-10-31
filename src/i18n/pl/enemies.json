@@ -62,7 +62,85 @@
     "boss": {
       "prototyp": "Wersja ostateczna",
       "weryfikacja": "Czy jesteś robotem?",
-      "hipoteza": "Jestem prawdopodobna"
+      "hipoteza": "Jestem prawdopodobna",
+      "ankieta": "Oceń rozmowę"
+    },
+    "oddzwaniam": "Oddzwaniam"
+  },
+  "claimStep": {
+    "urzadzenia": {
+      "update": {
+        "1": "Wymagam aktualizacji (1/2)",
+        "2": "Wymagam aktualizacji (2/2)"
+      },
+      "offline": {
+        "1": "Nie znaleziono sieci (1/2)",
+        "2": "Nie znaleziono sieci (2/2)"
+      },
+      "newVersion": {
+        "1": "Dostępna nowa wersja (1/2)",
+        "2": "Dostępna nowa wersja (2/2)"
+      },
+      "warranty": {
+        "1": "Gwarancja do 2031 (1/2)",
+        "2": "Gwarancja do 2031 (2/2)"
+      },
+      "unauthorized": {
+        "1": "Wykryto nieautoryzowany ruch (1/2)",
+        "2": "Wykryto nieautoryzowany ruch (2/2)"
+      },
+      "faultless": {
+        "1": "Działam prawidłowo (1/2)",
+        "2": "Działam prawidłowo (2/2)"
+      }
+    },
+    "powiadomienia": {
+      "reminder": {
+        "1": "Przypomnienie (1/2)",
+        "2": "Przypomnienie (2/2)"
+      },
+      "lastChance": {
+        "1": "Ostatnia szansa (1/2)",
+        "2": "Ostatnia szansa (2/2)"
+      },
+      "cart": {
+        "1": "Twój koszyk tęskni (1/2)",
+        "2": "Twój koszyk tęskni (2/2)"
+      },
+      "deleted": {
+        "1": "Konto zostanie usunięte (1/2)",
+        "2": "Konto zostanie usunięte (2/2)"
+      }
+    },
+    "wygenerowane": {
+      "users": {
+        "1": "Istnieję według 87% użytkowników (1/2)",
+        "2": "Istnieję według 87% użytkowników (2/2)"
+      },
+      "community": {
+        "1": "Zweryfikowane przez społeczność (1/2)",
+        "2": "Zweryfikowane przez społeczność (2/2)"
+      },
+      "resolution": {
+        "1": "Rozdzielczość 4K (1/2)",
+        "2": "Rozdzielczość 4K (2/2)"
+      },
+      "anatomy": {
+        "1": "Bez wad anatomicznych (1/2)",
+        "2": "Bez wad anatomicznych (2/2)"
+      },
+      "unknown": {
+        "1": "Autor nieznany (1/2)",
+        "2": "Autor nieznany (2/2)"
+      },
+      "likes": {
+        "1": "Polubiło 12 tys. osób (1/2)",
+        "2": "Polubiło 12 tys. osób (2/2)"
+      }
+    },
+    "oddzwaniam": {
+      "1": "Oddzwaniam (1/2)",
+      "2": "Oddzwaniam (2/2)"
     }
   },
   "defect": {
@@ -167,6 +245,20 @@
       "n": "wielokrotne",
       "pl": "wielokrotne",
       "effect": "Składany w trzech egzemplarzach: strzela trzykrotnie, a z bliska sięga dalej."
+    },
+    "oddzwaniajacy": {
+      "m": "oddzwaniający",
+      "f": "oddzwaniająca",
+      "n": "oddzwaniające",
+      "pl": "oddzwaniające",
+      "effect": "Po skreśleniu wraca jeden raz, po czterech sekundach, z 30% racji. Zapowiedziało, że oddzwoni."
+    },
+    "dwuetapowy": {
+      "m": "dwuetapowy",
+      "f": "dwuetapowa",
+      "n": "dwuetapowe",
+      "pl": "dwuetapowe",
+      "effect": "Jego teza wymaga dwóch odparć. Pierwsze stwierdza jedynie odbiór."
     }
   },
   "boss": {
@@ -233,6 +325,15 @@
           "egzystencjalny": "Liczba palców zależy od tego, kto je liczy."
         }
       }
+    },
+    "ankieta": {
+      "name": "Ankieta",
+      "meet": "Napotkano Ankietę. Prosi o ocenę rozmowy, która się nie odbyła.",
+      "hint": "Oceń rozmowę w skali od 1 do 5. Ocena 1 podlega rozpatrzeniu.",
+      "filed": "Złożono ocenę negatywną. Ankietę wstrzymano do rozpatrzenia.",
+      "thanked": "Dziękujemy za ocenę. Ocena została przekazana.",
+      "reminder": "Przypominamy o ankiecie.",
+      "half": "Ankieta jest obowiązkowa. Ocena nie jest."
     }
   },
   "summon": {

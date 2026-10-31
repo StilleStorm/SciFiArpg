@@ -3,6 +3,7 @@
  * when led too far. Simple obstacle steering, group spacing, defect and elite mechanics, escalation, claim
  * rotation, existence drift, first-meeting footnotes. `updateEnemyAi` is the one entry (systems/enemies.ts).
  */
+import { staged } from '../combat/claims';
 import { applyStatus, getStatus, isSilenced, isStunned, statusSpeedMul } from '../combat/status';
 import type { Bus } from '../core/events';
 import type { Rng } from '../core/rng';
@@ -16,11 +17,11 @@ import { resolveMove } from '../world/pages';
 import type { RunState } from '../world/run';
 import { isAnomalia } from './anomalia/state';
 import { assemble, assembleBoss, serialOf } from './assemble';
+import { bossBodyOf } from './bossBody';
 import { tickBoss } from './bosses';
 import {
   AURA_DMG_MUL,
   AURA_RADIUS,
-  BOSS_OF,
   CLAIMS,
   CLAIM_ROTATE_S,
   DEFECTS,
@@ -34,7 +35,7 @@ import {
 import { ODNAWIALNY_QUIET_S, ODNAWIALNY_RATE, SHARED_AFFIXES, WIELOKROTNY_SHOTS, affixSpeedMul, affixTempoMul, hasAffix, ownAffixes, ownsAffix } from './elites';
 import { applyTierStats } from './make';
 import { namedRecord } from './named';
-import { bindEliteDeaths, trackElite } from './spawn';
+import { bindEliteDeaths, tickReturns, trackElite } from './spawn';
 import { fireShot, updateEnemyProjectiles } from './projectiles';
 import { defectLearned, rtOf } from './runtime';
 import type { RangedSpec } from './partsBase';
@@ -63,7 +64,7 @@ interface Target {
 export function rangedOf(e: Enemy): RangedSpec | null {
   const rt = rtOf(e);
   if (rt.ranged === undefined) {
-    const a = e.boss ? assembleBoss(BOSS_OF[e.family], e.seed) : assemble(e.seed, e.family, e.tier);
+    const a = e.boss ? assembleBoss(bossBodyOf(e, e.family), e.seed) : assemble(e.seed, e.family, e.tier);
     rt.ranged = a.ranged ?? null;
   }
   return rt.ranged;
@@ -130,14 +131,15 @@ export function tickEscalation(e: Enemy, rng: Rng, bus: Bus, dt: number): boolea
 
 /** Elites swap their claim every CLAIM_ROTATE_S seconds (a new bubble, drawn in). */
 export function tickClaimRotation(e: Enemy, rng: Rng, dt: number): boolean {
-  if (!e.elite || e.boss) return false;
+  if (!e.elite || e.boss || rtOf(e).returned) return false; // the one that came back keeps its "Oddzwaniam"
   const rt = rtOf(e);
   rt.claimT -= dt;
   if (rt.claimT > 0) return false;
   rt.claimT = CLAIM_ROTATE_S;
-  const all = CLAIMS[e.family].filter((c) => c.key !== e.claim?.textKey);
+  const all = CLAIMS[e.family].filter((c) => c.key !== (e.claim?.base ?? e.claim?.textKey));
   const c = rng.pick(all);
   e.claim = { textKey: c.key, type: c.type };
+  if (ownsAffix(e, 'dwuetapowy')) e.claim = staged(e.claim);
   rtOf(e).offTopicShown = false;
   return true;
 }
@@ -205,7 +207,7 @@ function meet(s: RunState, e: Enemy, bus: Bus): void {
   };
   if (e.boss) {
     const key = `boss:${e.family}`;
-    if (!m.keys.has(key) && d < MEET_RANGE * 1.7) note(key, t(`enemies.boss.${BOSS_OF[e.family]}.meet`));
+    if (!m.keys.has(key) && d < MEET_RANGE * 1.7) note(key, t(`enemies.boss.${bossBodyOf(e, e.family)}.meet`));
     return;
   }
   if (d > (s.player.seesDefects ? MEET_RANGE_SEES_DEFECTS : MEET_RANGE)) return;
@@ -312,6 +314,7 @@ function tickEnemy(s: RunState, e: Enemy, grid: Grid<Enemy>, near: Enemy[], bus:
   if (!e.boss) tickExistence(e, ai, dt);
   tickEscalation(e, ai, bus, dt);
   tickClaimRotation(e, ai, dt);
+  if (e.claim && ownsAffix(e, 'dwuetapowy')) e.claim = staged(e.claim); // a claim set afresh (escalation) needs its two steps again
   rt.shootT -= dt;
   meet(s, e, bus);
 
@@ -414,6 +417,7 @@ function tickEnemy(s: RunState, e: Enemy, grid: Grid<Enemy>, near: Enemy[], bus:
 export function updateEnemyAi(s: RunState, grid: Grid<Enemy>, bus: Bus, dt: number): void {
   const list = [...s.enemies];
   bindEliteDeaths(s, bus);
+  tickReturns(s, bus);
   const byId = new Map<number, Enemy>();
   for (const e of list) {
     rtOf(e).dmgMult = 1;

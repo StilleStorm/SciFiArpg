@@ -2,6 +2,18 @@ import type { Vec } from '../core/vec';
 import type { RangedSpec } from './partsBase';
 import type { DefectId, EliteId } from './ids';
 
+/** Ankieta's survey row: five squares in a line at (cx, cy) while `on`; `wait` seconds until the next is sent, `age` since this one was drawn, `stand` on the 1 or 5 star square. */
+export interface Survey {
+  on: boolean;
+  cx: number;
+  cy: number;
+  wait: number;
+  age: number;
+  stand: number;
+  /** Which square the player stood on at the last step (-1 none), so a change restarts `stand`. */
+  at: number;
+}
+
 /**
  * Per-enemy mutable state that only the enemy modules read (AI timers, defect and boss phases).
  * Lives on `Enemy.rt`; `rtOf(enemy)` creates it on first use so enemies built by other modules still work.
@@ -58,6 +70,8 @@ export interface EnemyRt {
   volleyT: number;
   /** Weryfikacja: captcha grid. cells are indices 0..8 of the hydrant squares; time is seconds stood on them. */
   grid?: { cells: [number, number]; time: number; cx: number; cy: number };
+  /** Ankieta: the survey row of five squares (enemies/bosses.ts `Survey`); absent on other bodies. */
+  survey?: Survey;
   /** Hipoteza: seconds the player has stood in the outline, and whether it is confirmed. */
   confirm: number;
   confirmed: boolean;
@@ -74,6 +88,8 @@ export interface EnemyRt {
   named?: { name: string };
   /** Run time of the last hit taken (elite odnawialny heals after a quiet spell). */
   hurtAt: number;
+  /** Elite oddzwaniajacy: this body is the one that came back (it returns once only), so its claim stays "Oddzwaniam". */
+  returned?: boolean;
 }
 
 export function newRt(): EnemyRt {

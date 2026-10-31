@@ -81,6 +81,8 @@ export interface GameEvents {
   'elite:named': { id: number; x: number; y: number; name: string };
   /** A named elite fell: the kill guarantees an item of at least `minTier` (systems/loot.ts claims it with claimNamedDrop). */
   'elite:slain': { id: number; x: number; y: number; name: string; minTier: 'nietypowy' };
+  /** An elite oddzwaniajacy came back once, 4 s after it was struck (enemies/spawn.ts tickReturns); it is a new enemy id. */
+  'enemy:returned': { id: number; x: number; y: number };
   /** A notification climbed to the next tier. */
   'enemy:escalated': { id: number; tier: number; x: number; y: number };
   /** A boss reached a new phase (Prototyp at half racja, Weryfikacja's grid solved, Hipoteza confirmed). */

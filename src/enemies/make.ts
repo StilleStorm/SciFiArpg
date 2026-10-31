@@ -1,4 +1,5 @@
 /** Building an Enemy from a seed, a family and a tier. Pure data; the look comes from assemble(). */
+import { staged } from '../combat/claims';
 import { createRng } from '../core/rng';
 import { createEnemy } from '../entities/factory';
 import type { Enemy } from '../entities/types';
@@ -84,6 +85,7 @@ export function makeEnemy(id: number, x: number, y: number, seed: number, family
   applyTierStats(e, false);
   e.attackTimer = 0.6;
   e.claim = pickClaim(createRng(seed).fork('claim'), family, e.tier);
+  if (ownsAffix(e, 'dwuetapowy')) e.claim = staged(e.claim);
   e.facing = seed % 2 === 0 ? 1 : -1;
   const rt = rtOf(e);
   if (family === 'wygenerowane') {

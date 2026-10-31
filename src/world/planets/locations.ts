@@ -135,6 +135,12 @@ const MIASTO: LocationSpec = {
     P('rozklad', [40, 54], [[0, 0, 0.4]]),
     P('pasy', [150, 210], []),
     P('wlaz', [40, 52], []),
+    // the storefront of planet 5 (STORY 8.9): shop windows, a sale banner on its posts, a delivery van, flattened boxes, a mannequin
+    P('vitryna', [110, 140], [[-0.3, 0, 0.17], [0, 0, 0.17], [0.3, 0, 0.17]]),
+    P('baner', [150, 190], [[-0.42, 0, 0.08], [0.42, 0, 0.08]]),
+    P('furgon', [150, 190], [[-0.36, 0, 0.1], [-0.12, 0, 0.1], [0.12, 0, 0.1], [0.36, 0, 0.1]]),
+    P('kartony-plaskie', [80, 100], [[-0.22, 0, 0.24], [0.22, 0, 0.24]]),
+    P('manekin', [40, 52], [[0, 0, 0.4]]),
   ],
 };
 
@@ -163,6 +169,29 @@ const CENTRUM: LocationSpec = {
   ],
 };
 
+/**
+ * Archiwum (STORY 8.10): the archive of recorded calls. Long stacks of tape shelving are the walls (columns, as in the serwerownia: narrow
+ * aisles with cross-cuts, the middle one kept clear: the reading room of the boss page); filing-drawer banks, a rolling ladder, a card
+ * catalogue, bound volumes, boxes by year, a reading desk and the serwerownia's `cisza` plate stand in the side aisles; dust sheets are
+ * flat marks on the floor.
+ */
+const ARCHIWUM: LocationSpec = {
+  layout: 'corridors',
+  wall: 'regal',
+  flat: ['plachta'],
+  props: [
+    P('regal', [50, 60], [[0, -1, 0.5], [0, 0, 0.5], [0, 1, 0.5]]),
+    P('szuflady', [140, 180], [[-0.36, 0, 0.1], [-0.12, 0, 0.1], [0.12, 0, 0.1], [0.36, 0, 0.1]]),
+    P('drabina-przesuwna', [44, 56], [[0, -0.6, 0.45], [0, 0.6, 0.45]]),
+    P('katalog', [60, 76], [[0, 0, 0.42]]),
+    P('tomy', [90, 115], [[-0.3, 0, 0.17], [0, 0, 0.17], [0.3, 0, 0.17]]),
+    P('pudla', [80, 100], [[-0.25, 0.1, 0.22], [0.25, 0.1, 0.22], [0, -0.28, 0.2]]),
+    P('czytelnia', [96, 120], [[-0.25, 0, 0.2], [0.25, 0, 0.2]]),
+    P('cisza', [60, 76], [[0, 0, 0.4]]),
+    P('plachta', [150, 210], []),
+  ],
+};
+
 /** The types that have props. Planets 2 and 3 add theirs (serwerownia, biuro, ...) here. */
 export const LOCATIONS: Partial<Record<LocationType, LocationSpec>> = {
   przedmiescie: PRZEDMIESCIE,
@@ -171,6 +200,7 @@ export const LOCATIONS: Partial<Record<LocationType, LocationSpec>> = {
   biuro: BIURO,
   miasto: MIASTO,
   centrum: CENTRUM,
+  archiwum: ARCHIWUM,
 };
 
 export const locationSpec = (type: LocationType | undefined): LocationSpec | undefined => (type ? LOCATIONS[type] : undefined);

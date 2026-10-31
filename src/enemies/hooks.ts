@@ -2,7 +2,7 @@
  * What enemies change in combat: claims and rebuttals, existence, statuses on damage taken, defects that
  * react to a hit, elite teleport. Called from systems/combat.ts; pure state changes plus events.
  */
-import { isRebuttal } from '../combat/claims';
+import { isRebuttal, rebut } from '../combat/claims';
 import type { DamageType } from '../combat/damage';
 import { applyStatus, getStatus, isSilenced, isStunned, statusDamageTakenMul } from '../combat/status';
 import type { Bus } from '../core/events';
@@ -50,8 +50,8 @@ export function modifyDamage(
           a *= 2;
           c = true;
         }
-        claim.struck = true;
-        bus.emit('enemy:rebutted', { id: defender.id });
+        // the bubble breaks on the last step only; a first step of a two-step claim moves its bracket, and the event (strike sound, footnote) waits for the break
+        if (rebut(claim, s?.time ?? 0)) bus.emit('enemy:rebutted', { id: defender.id });
       } else if (claim.struck !== true) {
         const rt = rtOf(defender);
         if (!rt.offTopicShown) {

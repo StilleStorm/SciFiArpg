@@ -26,6 +26,12 @@ export const NADGORLIWY_CAP = 0.6;
 export const WIELOKROTNY_SHOTS = 3;
 export const WIELOKROTNY_REACH = 1.5;
 
+/** oddzwaniajacy: seconds after the strike it returns, and the share of its racja it returns with. */
+export const ODDZWANIAJACY_DELAY_S = 4;
+export const ODDZWANIAJACY_RACJA = 0.3;
+/** The claim of the one that came back (type: it answers to the rule that one calls back). */
+export const ODDZWANIAM_CLAIM = { textKey: 'enemies.claim.oddzwaniam', type: 'regulaminowy' } as const;
+
 /** Own affixes of an enemy: the list in its runtime, or the single `elite.affix`. */
 export function ownAffixes(e: Enemy): readonly EliteId[] {
   const own = e.rt?.affixes;

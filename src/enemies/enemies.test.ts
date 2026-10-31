@@ -39,7 +39,7 @@ describe('part library', () => {
     expect(DECOS.filter((d) => d.family === 'urzadzenia').length).toBeGreaterThanOrEqual(5);
     expect(bodiesOf('powiadomienia').map((b) => b.tier).sort()).toEqual([1, 2, 3, 4]);
     expect(bodiesOf('wygenerowane').length).toBeGreaterThanOrEqual(4);
-    expect(BODIES.filter((b) => b.boss).length).toBe(3);
+    expect(BODIES.filter((b) => b.boss).length).toBe(4); // prototyp, weryfikacja, hipoteza and the Ankieta (planet 6)
   });
 });
 

@@ -202,6 +202,24 @@ export function assembleBoss(boss: BossId, seed = 1): Assembly {
         radius: Math.round(30 * ENEMY_SCALE),
         width: 50,
       };
+    case 'ankieta':
+      return {
+        family: 'powiadomienia',
+        tier: 4,
+        body: 'ankieta',
+        variant: 0,
+        legs: 'stilts',
+        head: null,
+        decos: [],
+        legLen: 30,
+        scale: 1.15,
+        dotted: 0,
+        serial,
+        boss,
+        height: 64 + 30,
+        radius: Math.round(28 * ENEMY_SCALE),
+        width: 50,
+      };
     case 'hipoteza':
       return {
         family: 'wygenerowane',

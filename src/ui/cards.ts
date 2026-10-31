@@ -10,6 +10,7 @@ import './base.css';
 function storySource(spec: CardSpec): { lines: string; hero: string | undefined } | null {
   if (spec.kind === 'opening') return { lines: 'opening.lines', hero: 'opening.hero' };
   if (spec.kind === 'finale') return { lines: 'finale.card.lines', hero: undefined };
+  if (spec.kind === 'reopened') return { lines: 'reopened.lines', hero: undefined };
   const n = spec.planetIndex + 1;
   if (spec.kind === 'rewritten') return { lines: `p${n}.rewritten.lines`, hero: undefined };
   return { lines: `p${n}.card.lines`, hero: `p${n}.card.hero` };
@@ -18,7 +19,7 @@ function storySource(spec: CardSpec): { lines: string; hero: string | undefined 
 /** Lines per card kind (3 or 4 for the finished cards; the story slice may add a fourth). */
 const LINE_COUNT = { openingLines: 3, chapterLines: 3, rewrittenLines: 2 } as const;
 /** The placeholder lines of each kind (shown where the story file has no line). */
-const LINE_KEY = { opening: 'openingLines', chapter: 'chapterLines', rewritten: 'rewrittenLines', finale: 'chapterLines' } as const;
+const LINE_KEY = { opening: 'openingLines', chapter: 'chapterLines', rewritten: 'rewrittenLines', finale: 'chapterLines', reopened: 'chapterLines' } as const;
 
 export interface CardOptions {
   /** The ticket number the opening page is filed under. */
@@ -42,7 +43,7 @@ export interface CardHandle {
  * stray tap on the base below is still a tap on the base.
  */
 export function openCard(root: HTMLElement, spec: CardSpec, opts: CardOptions): CardHandle {
-  const rewritten = spec.kind === 'rewritten' || spec.kind === 'finale'; // the return's card is the red rewritten frame with its own lines
+  const rewritten = spec.kind === 'rewritten' || spec.kind === 'finale' || spec.kind === 'reopened'; // the return's card is the red rewritten frame with its own lines
   const layer = h('div', `card-layer${rewritten ? ' rewritten' : ''}`);
   layer.dataset.card = spec.kind;
   const paper = h('div', 'card-paper');
@@ -54,7 +55,9 @@ export function openCard(root: HTMLElement, spec: CardSpec, opts: CardOptions): 
       ? t('screens.cards.openingTitle', { number: opts.number })
       : spec.kind === 'finale'
         ? t('screens.cards.finaleTitle', { number: opts.number, planet })
-        : t('screens.cards.title', { act: t('screens.cards.act', { act: ACT_ROMAN[actNo - 1] ?? 'I' }), planet });
+        : spec.kind === 'reopened'
+          ? t('story.reopened.title', { number: opts.number })
+          : t('screens.cards.title', { act: t('screens.cards.act', { act: ACT_ROMAN[actNo - 1] ?? 'I' }), planet });
   const head = h('h2', 'card-title', title);
   const lineKey = LINE_KEY[spec.kind];
   const lines = h('div', 'card-lines');
@@ -78,7 +81,7 @@ export function openCard(root: HTMLElement, spec: CardSpec, opts: CardOptions): 
   // a card with its own lines but no hero line (the red rewritten one, or a case file with no hero) shows no hero block; a placeholder card keeps the frame
   if (heroOwn || !live) paper.append(hero);
   paper.append(hint, skip);
-  if (rewritten) paper.append(h('div', 'card-stamp', t('screens.cards.stamp')));
+  if (rewritten) paper.append(h('div', 'card-stamp', t(spec.kind === 'reopened' ? 'screens.cards.stampReopened' : 'screens.cards.stamp')));
   layer.append(paper);
   root.append(layer);
 

@@ -51,8 +51,8 @@ import { priceCut as heroPriceCut } from './heroes/quirks';
 import { openCard, type CardHandle } from './ui/cards';
 import { createTicket } from './ui/ticket';
 import { openStops, type StopsSheet } from './ui/stops';
-import { campaignViewOf, cardToShow, markShown, type CampaignView } from './ui/ticketModel';
-import { bindCampaign, clampPriority, cloneCampaign, defaultPlan, DEFAULT_PRIORITY, extraPlan, newCampaign, noCardsSeen, toCampaign, travelPlan, type CampaignState, type PriorityId, type TicketPlan } from './world/campaign';
+import { campaignViewOf, cardToShow, markShown, type CampaignView, type CardKind } from './ui/ticketModel';
+import { bindCampaign, clampPriority, clearReopened, cloneCampaign, defaultPlan, DEFAULT_PRIORITY, extraPlan, newCampaign, noCardsSeen, toCampaign, travelPlan, type CampaignState, type PriorityId, type TicketPlan } from './world/campaign';
 import { createTitle } from './ui/title';
 import { acceptTicket } from './world/base';
 import { npcAt } from './world/npc';
@@ -192,7 +192,7 @@ const campaignView = (): CampaignView => {
 let cardUi: CardHandle | null = null;
 
 /** The opening page or the chapter card of a new ticket's base, shown once per character (kept in its campaign); a tap removes it. */
-function showCard(number: number, force?: 'opening' | 'chapter' | 'rewritten' | 'finale'): void {
+function showCard(number: number, force?: CardKind): void {
   const s = game.state;
   const view = campaignView();
   const seen = s?.campaign?.cards ?? noCardsSeen();
@@ -200,10 +200,20 @@ function showCard(number: number, force?: 'opening' | 'chapter' | 'rewritten' | 
   if (!spec) return;
   cardUi?.close();
   if (!force && s) {
-    s.campaign = { ...cloneCampaign(s.campaign ?? newCampaign()), cards: markShown(seen, spec) };
+    const base = cloneCampaign(s.campaign ?? newCampaign());
+    // the red "Sprawę wznowiono" card is shown once: taken as shown it clears the flag, and the chapter card follows it (below)
+    s.campaign = spec.kind === 'reopened' ? clearReopened(base) : { ...base, cards: markShown(seen, spec) };
     if (meta.character) save(withCharacter(meta, s)); // a case file keeps it; a bare test start keeps it on the state only
   }
-  cardUi = openCard(stage.ui, spec, { number, ...(meta.heroId ? { heroId: meta.heroId } : {}), onDone: () => (cardUi = null) });
+  const then = !force && spec.kind === 'reopened';
+  cardUi = openCard(stage.ui, spec, {
+    number,
+    ...(meta.heroId ? { heroId: meta.heroId } : {}),
+    onDone: () => {
+      cardUi = null;
+      if (then) showCard(number); // the chapter card of the planet the case goes on to
+    },
+  });
 }
 
 /**
