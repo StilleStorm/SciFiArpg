@@ -104,7 +104,15 @@ export function eraseOut(g: Element, ms: number, delay = 0, done?: () => void): 
 
 // ---------- strike ----------
 
-function worldBox(g: SVGGElement): { x0: number; y0: number; x1: number; y1: number } {
+/** A figure's box in world units. */
+export interface Box {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+function worldBox(g: SVGGElement): Box {
   const bb = g.getBBox();
   const list = g.transform.baseVal;
   const m = list.numberOfItems > 0 ? list.consolidate()?.matrix : undefined;
@@ -135,9 +143,10 @@ function inkLine(d: string, cls: string): SVGPathElement {
  * The editor's pen: two quick strokes across `g`, "skreslono" written beside it, then the
  * drawing is rubbed out and the marks fade. Removes `g` at the end. `g` must be out of the view map.
  */
-export function strike(g: SVGGElement): void {
+export function strike(g: SVGGElement): Box {
   const layer = fx();
-  const { x0, y0, x1, y1 } = worldBox(g);
+  const box = worldBox(g);
+  const { x0, y0, x1, y1 } = box;
   const w = x1 - x0;
   const h = y1 - y0;
   const a = inkLine(wobblyLine(pen, x0 - 4, y0 + h * 0.12, x1 + 4, y1 - h * 0.18, 5, 1.6), 'strike');
@@ -161,6 +170,23 @@ export function strike(g: SVGGElement): void {
     (p) => (group.style.opacity = String(1 - p)),
     { delay: 800, done: () => group.remove() },
   );
+  return box;
+}
+
+/**
+ * The two strokes of an earlier strike drawn again at once over `box`, held `holdMs`, then faded: an elite oddzwaniajacy
+ * comes back after its strike has dried, so the return is inked over the strike (STORY 8.11) and not on an empty spot.
+ */
+export function restrike(box: Box, holdMs = 900): void {
+  const { x0, y0, x1, y1 } = box;
+  const w = x1 - x0;
+  const h = y1 - y0;
+  const a = inkLine(wobblyLine(pen, x0 - 4, y0 + h * 0.12, x1 + 4, y1 - h * 0.18, 5, 1.6), 'strike');
+  const b = inkLine(wobblyLine(pen, x1 + 4, y0 + h * 0.28, x0 - 4, y1 - h * 0.04, 5, 1.6), 'strike');
+  const word = el('text', { class: 't-struck', x: n2(x1 - w * 0.2), y: n2(y0 - 3), transform: `rotate(-7 ${n2(x1)} ${n2(y0)})` }, [t('ui.ink.struck')]);
+  const group = el('g', { class: 'restrike' }, [a, b, word]);
+  fx().append(group);
+  tween(420, (p) => (group.style.opacity = String(1 - p)), { delay: holdMs, done: () => group.remove() });
 }
 
 // ---------- blot ----------

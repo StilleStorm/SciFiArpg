@@ -4,7 +4,7 @@ import { t } from '../i18n';
 import { PAGE_H, PAGE_INSET, PAGE_W } from '../world/pages';
 import { bindAttackFx } from './attackFx';
 import { bindDamageNumbers } from './damageNumbers';
-import { blot, marginNote, stamp, stampSize, strike } from './ink';
+import { blot, marginNote, restrike, stamp, stampSize, strike, type Box } from './ink';
 import { avoidBoxes } from './keepOut';
 import type { Views } from './view';
 
@@ -76,6 +76,9 @@ export function placeStamp(
 }
 
 /** Bus events -> ink on the page. The only place gameplay events become pictures. `page` is the sheet shown now (the run's page or the base page). */
+/** Struck spots remembered for a return (render/ink.ts restrike). */
+const STRUCK_KEEP = 24;
+
 export function bindFx(
   bus: Bus,
   views: Views,
@@ -94,12 +97,24 @@ export function bindFx(
   });
   bus.on('enemy:hit', (e) => hitBlot(e.x, e.y, e.crit));
   bus.on('player:hit', (e) => hitBlot(e.x, e.y, e.crit));
+  // where the last few struck figures stood: an oddzwaniajacy comes back on its death spot, over its strike drawn again
+  const struckAt = new Map<string, Box>();
+  const spot = (x: number, y: number): string => `${Math.round(x)},${Math.round(y)}`;
   bus.on('enemy:died', (e) => {
     const g = views.detach(e.id);
     if (!g) return;
     // the struck do not speak: a detached figure is no longer patched, so its bubbles (claim, Spór comment) would linger over the stamp
     for (const b of g.querySelectorAll('.bubble')) b.classList.add('bubble-off');
-    strike(g);
+    const box = strike(g);
+    struckAt.delete(spot(e.x, e.y));
+    struckAt.set(spot(e.x, e.y), box);
+    if (struckAt.size > STRUCK_KEEP) struckAt.delete(struckAt.keys().next().value ?? '');
+  });
+  bus.on('enemy:returned', (e) => {
+    const box = struckAt.get(spot(e.x, e.y));
+    if (!box) return;
+    struckAt.delete(spot(e.x, e.y));
+    restrike(box);
   });
   bus.on('page:edge', (e) => {
     const m = marginSpot(e.side, e.x, e.y, page() ?? RUN_PAGE);
