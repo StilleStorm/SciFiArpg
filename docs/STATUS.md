@@ -6,7 +6,7 @@ current: it replaces chat memory. Context note: the project's own files cost ~1k
 (CLAUDE.md); a large first-command context comes from the harness (tool definitions, skills,
 plugins, connectors), which the player trims in Claude settings, not in the repo.
 
-## Where things are (2026-10-26, M4 complete)
+## Where things are (2026-10-31, M5 complete)
 - Branch: `claude/scifi-arpg-concept-6vqk36`. Deploys to https://stillestorm.github.io/SciFiArpg/
   on every push (GitHub Actions; repo public; github-pages environment allows `claude/*`).
 - Playable first version is live: four heroes, three enemy families with claims/rebuttals,
@@ -92,7 +92,9 @@ done) · M3 Akt I + finale = MVP (S11–S16) · M4 Depth (S17–S21) · M5 Akt I
 Polish and release. Progress lines are below.
 
 ## Needs the player
-- Akt II difficulty (S24 bot, level-14 kits): no hero dies on planets 4-6 Normalny. Raise Akt II enemy numbers, or leave it to the priority levels? Recommendation: measure again in the M5 e2e at the levels players actually reach there before moving numbers.
+- Akt II difficulty (S24 bot, level-14 kits): no hero dies on planets 4-6 Normalny. Raise Akt II enemy numbers, or leave it to the priority levels? Recommendation (M5 story review): a bot data point at the real Akt I exit level (Normalny + Wysoki), then one player ticket; if soft, move `PLANET_DMG_GROWTH`, not hp (S27/S29).
+- Planet 9's new boss body: S25 proposes it, S27 builds it unless the player objects.
+- A case file reopened from an MVP save does not see the red return card again after planet 6 (`cards.finale` is once per character); e2e:m5 asserts this. Should the second return show it? Recommendation: yes once per `CAMPAIGN_LAST` (decide before S27 sets LAST 9).
 - Capstones as built are small flat bonuses (+20–25% on one skill, DESIGN §10.3). Keep them so, or
   turn them into mechanical rules (Diablo 4 key passives) in M4 S19–S21? Recommendation: keep;
   Diablo 2 had none, they read at a glance on the Karta, and the S16 balance pass tunes magnitudes.
@@ -214,7 +216,9 @@ Progress is recorded here, one line per slice:
 
 - S24 done: planet 6 Nagrywana (p6.ts clerk + h:p6:a-c, archiwum location with 8 drawings, `locationSplit: [2, 3]`, `teczka` gate on page 4 with the Archiwista, hosts Infolinia) and the Ankieta (`BossId 'ankieta'`, `PLANETS[5].boss`, enemies/bossBody.ts, the grid as a row of five with two outcomes, `EnemyRt.survey`, racja 240 -> 300 after the bot: fight 23 s vs planet 5 25 s, planet 4 31 s; `spawnBoss` retries with tighter clearance); miasto storefront props (S23 leftover); elite affixes oddzwaniający (returns once 4 s after its strike at 30% racja, strike redrawn under it, `enemy:returned`) and dwuetapowy (two rebuttals, "(1/2)" via `enemies.claimStep.*`; `enemy:rebutted` fires on the break only) in the planets 4-6 pool only, never on bosses; no Akt II law lacked a mechanic; `CAMPAIGN_LAST` 3 -> 6, the red "Sprawę wznowiono" card (kind `reopened`, WZNOWIONO stamp, once before the planet 4 chapter card), campaign SEAM closed (no `// SEAM:` left); `cloneCampaign` keeps `cards.finale`; smoke legs 6g'/6h'/6h'' enter through the case file, leg 6k covers the card and both affixes (322 ok, 40 enemies 16.7 ms); voice pass (affix effect lines, Ankieta footnotes, "na trzech planetach" lines now hold at 3/6/9). Reports S24-*.md. Balance at level 14 (`BAL_LOADOUT`): no hero dies on planets 4-6 Normalny (under Needs the player); Konsultant tickets stall the bot 25-38% (trace before touching his weapon). Open: e2e-milestone-2/3 edited for LAST 6 but not run (M5 e2e runs them); Ankieta face stars static; the ANKIETA caption over the row of five and the paper feed reading as a chimney (S28); archiwum shelf reels small; `story.p6.boss.spor2.reply.egzystencjalny` "do nadawcy" vs STORY 8.10 "do wnioskodawcy wraz z ankietą" (player); Akt III planets keep the ten old affixes until S27 widens `AKT2_PLANETS`; ARCHITECTURE.md 365 lines, due a fold.
 
-**Next pickup:** M5 end (PRODUCTION "M5 end": `tester` e2e Akt II incl. e2e-milestone-2/3 re-runs at LAST 6, look over `shots/`, story review, push), then S25. The /automode loop stays off until the player asks.
+- **M5 Akt II complete** (2026-10-31): `npm run e2e:m5` green (scripts/e2e-milestone-5.mjs, M5_PORT 4195, Konsultant and Naleśnik × both orientations: the reopened card once from an MVP save, planets 4–6 through the case file with both gates and bosses incl. the Ankieta, both elite affixes never on bosses, free travel 1..6, reload; 40 enemies 16.7–17.2 ms); e2e:m2/m3 re-run green at LAST 6 (m3 needed `scripts/pathwalk.mjs`: straight walks stuck behind Akt II buildings, planet 6's code modal settled). Look (reports/M5-look.md, M5-integrator-look.md): Ankieta reply cards 11 px and stacked in portrait, bubbles kept in view, five-square row held near the player; the dwuetapowy caption reads 1/2 then 2/2; p5/p6 shot scripts close the level-up form, new frames in shots-m5/. The reopened card stays fully red like the rewritten and return cards (one rule, `.card-layer.rewritten`; player may overrule). Left for S28: enemy captions under the HUD pads (P5 gate), the planet-5 boss subtitle cut at the right edge in portrait, the Archiwista under a pad in portrait. Story review (reports/M5-story.md): STORY §8.12 decisions (p5 solved line via `BossVariant.solvedKey` in S25/S26, spor2 "do wnioskodawcy" in S25 voice, affix pools accumulate by act from planet 4 on in S26, Ankieta stars/paper feed/biuro props/archiwum reels to S28), DESIGN §4.2 "What M5 added", ITEMS §12.14, PRODUCTION S25–S29 adjusted. ARCHITECTURE folded.
+
+**Next pickup:** S25 (story plan Akt III). The /automode loop stays off until the player asks.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
