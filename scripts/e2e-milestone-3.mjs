@@ -11,6 +11,7 @@ import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 import { chromiumPath, launchArgs } from './browser.mjs';
+import { pathWalk } from './pathwalk.mjs';
 
 const PORT = Number(process.env.M3_PORT ?? 4189);
 const OUT = process.env.M3_OUT ?? 'dist-m3';
@@ -193,8 +194,16 @@ async function leg(browser, orient, heroKey) {
       } else log.lifted = true;
     }
     const from = await ev(() => window.__game.state().pageIndex);
-    await ev(() => window.__game.gate.push(40));
+    let walked = null;
+    for (let k = 0; k < 6; k++) {
+      walked = await page.evaluate(pathWalk, 40);
+      if (walked.turned || !walked.modal) break;
+      await settle(); // a sheet of the law (the code of Weryfikacja dwuetapowa) holds the run: take it, walk on
+      const now = await ev(() => ({ i: window.__game.state().pageIndex, t: window.__game.state().turning }));
+      if (now.i !== from || now.t) break; // the walk had reached the exit: the page turns once the sheet is put away
+    }
     log.turned = await page.waitForFunction((k) => window.__game.state()?.pageIndex === k + 1 && !window.__game.state().turning, from, { timeout: 8000 }).then(() => true, () => false);
+    log.walk = walked && { steps: walked.steps, reason: walked.reason };
     await sleep(300);
     await settle();
     return log;
