@@ -112,12 +112,65 @@ const BIURO: LocationSpec = {
   ],
 };
 
+/**
+ * Miasto (STORY 8.8): the city of notifications. Tenements are the walls of the streets (tall hatched blocks with a grid of windows,
+ * columns as in the serwerownia: streets are corridors, the middle one kept clear); small things stand in the side streets (a tram
+ * on its rail, a bus shelter, a billboard on a pole, a closed kiosk, a fountain, a lamppost, a notice column, a letterbox, a struck
+ * timetable); zebra crossings and manhole covers are flat marks on the paper.
+ */
+const MIASTO: LocationSpec = {
+  layout: 'corridors',
+  wall: 'kamienica',
+  flat: ['pasy', 'wlaz'],
+  props: [
+    P('kamienica', [66, 80], [[0, -1, 0.5], [0, 0, 0.5], [0, 1, 0.5]]),
+    P('tramwaj', [150, 190], [[-0.36, 0, 0.1], [-0.12, 0, 0.1], [0.12, 0, 0.1], [0.36, 0, 0.1]]),
+    P('wiata', [96, 120], [[-0.28, 0, 0.16], [0, 0, 0.16], [0.28, 0, 0.16]]),
+    P('billboard', [90, 116], [[0, 0.38, 0.16]]),
+    P('budka', [54, 70], [[0, 0, 0.45]]),
+    P('fontanna', [90, 110], [[0, 0, 0.45]]),
+    P('latarnia', [34, 44], [[0, 0, 0.4]]),
+    P('slup', [52, 66], [[0, 0, 0.42]]),
+    P('skrzynka-pocztowa', [40, 52], [[0, 0, 0.4]]),
+    P('rozklad', [40, 54], [[0, 0, 0.4]]),
+    P('pasy', [150, 210], []),
+    P('wlaz', [40, 52], []),
+  ],
+};
+
+/**
+ * Centrum obslugi (STORY 8.9): the customer-service and fulfilment hall. A hall cut by long counters (ruled bars with numbered windows,
+ * two doorways each); rope queues stand in rows the player walks around; lockers, returns desk, boxes, scanner, rating stand, an
+ * offline chat bubble, nested carts and the magazyn's parcel conveyor (`tasmociag`, drawn by the magazyn) are set out between them.
+ * The boss page is an open hall: the counter along its lower edge, the middle clear for the checkout and its grid.
+ */
+const CENTRUM: LocationSpec = {
+  layout: 'rooms',
+  wall: 'lada',
+  row: 'sznur',
+  flat: [],
+  props: [
+    P('lada', [150, 170], [[-0.375, 0, 0.1], [-0.125, 0, 0.1], [0.125, 0, 0.1], [0.375, 0, 0.1]]),
+    P('sznur', [100, 120], [[-0.4, 0, 0.07], [-0.2, 0, 0.07], [0, 0, 0.07], [0.2, 0, 0.07], [0.4, 0, 0.07]]),
+    P('paczkomaty', [120, 150], [[-0.3, 0, 0.15], [0, 0, 0.15], [0.3, 0, 0.15]]),
+    P('zwroty', [90, 115], [[-0.25, 0, 0.22], [0.3, 0.1, 0.16]]),
+    P('kartony', [110, 140], [[-0.25, 0.05, 0.2], [0.25, 0.05, 0.2], [0, -0.25, 0.2]]),
+    P('skaner', [40, 50], [[0, 0, 0.42]]),
+    P('gwiazdki', [70, 90], [[0, 0, 0.42]]),
+    P('czat', [46, 58], [[0, 0.2, 0.3]]),
+    P('wozki', [120, 150], [[-0.3, 0, 0.17], [0, 0, 0.17], [0.3, 0, 0.17]]),
+    P('tasmociag', [150, 190], [[-0.36, 0, 0.1], [-0.12, 0, 0.1], [0.12, 0, 0.1], [0.36, 0, 0.1]]),
+  ],
+};
+
 /** The types that have props. Planets 2 and 3 add theirs (serwerownia, biuro, ...) here. */
 export const LOCATIONS: Partial<Record<LocationType, LocationSpec>> = {
   przedmiescie: PRZEDMIESCIE,
   magazyn: MAGAZYN,
   serwerownia: SERWEROWNIA,
   biuro: BIURO,
+  miasto: MIASTO,
+  centrum: CENTRUM,
 };
 
 export const locationSpec = (type: LocationType | undefined): LocationSpec | undefined => (type ? LOCATIONS[type] : undefined);

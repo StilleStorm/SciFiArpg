@@ -63,11 +63,17 @@ export interface BossVariant {
   attackRange?: number;
   /** The one part drawn on the variant (render/enemyFigures.ts); the body stays. */
   arm?: 'stapler';
+  /** The one part drawn on a Weryfikacja's variant: the hydrants of the grid squares as shopping carts (planet 5). */
+  grid?: 'koszyk';
+  /** i18n key of the captcha hint instead of `enemies.boss.weryfikacja.hint` (planet 5); the solved line stays the family's. */
+  hintKey?: string;
 }
 
 const VARIANTS = new Map<number, BossVariant>();
 const variantLines = new WeakMap<object, string>();
 const variantArms = new WeakMap<object, 'stapler'>();
+const variantGrids = new WeakMap<object, 'koszyk'>();
+const variantHints = new WeakMap<object, string>();
 
 /** Register the boss variant of a planet (0-based index). */
 export function registerBossVariant(planet: number, v: BossVariant): void {
@@ -82,6 +88,12 @@ export const bossVariantLine = (e: object): string | undefined => variantLines.g
 
 /** The extra arm drawn on this boss's variant, if its variant has one. */
 export const bossVariantArm = (e: object): 'stapler' | undefined => variantArms.get(e);
+
+/** The look of the grid squares on this Weryfikacja's variant ('koszyk': shopping carts), if its variant has one. */
+export const bossVariantGrid = (e: object): 'koszyk' | undefined => variantGrids.get(e);
+
+/** The key of the captcha hint of this boss: its variant's override, else the family's. */
+export const bossHintKey = (e: object): string => variantHints.get(e) ?? 'enemies.boss.weryfikacja.hint';
 
 export const bossIdOf = (e: Enemy): BossId | null => (e.boss ? BOSS_OF[e.family] : null);
 
@@ -114,6 +126,8 @@ export function makeBoss(id: number, x: number, y: number, seed: number, family:
   e.hp = e.hpMax = mine ? mine.hp : def.hp;
   if (mine) variantLines.set(e, mine.lineKey);
   if (mine?.arm) variantArms.set(e, mine.arm);
+  if (mine?.grid) variantGrids.set(e, mine.grid);
+  if (mine?.hintKey) variantHints.set(e, mine.hintKey);
   e.speed = def.speed;
   e.attackRange = mine?.attackRange ?? def.attackRange;
   e.attackCooldown = def.attackCooldown;
@@ -195,7 +209,7 @@ export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
     const g = rt.grid;
     if (!rt.noted && Math.hypot(p.x - e.x, p.y - e.y) < 460) {
       rt.noted = true;
-      bus.emit('footnote', { text: t('enemies.boss.weryfikacja.hint') });
+      bus.emit('footnote', { text: t(bossHintKey(e)) });
     }
     if (g && !p.suspended && onHydrant(g, p.x, p.y)) {
       g.time += dt;

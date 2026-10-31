@@ -208,8 +208,31 @@ export const PLANETS: readonly PlanetDef[] = [
       },
     ],
   },
-  planet(3, 2, 'powiadomienia', mix(0.3, 0.55, 0.15), ['godziny-konsultanta', 'weryfikacja-dwuetapowa', 'nie-przeszkadzac'], ['miasteczko', 'ladowisko'], ['miasto', 'biuro'], null, [5, 6]),
-  planet(4, 2, 'powiadomienia', mix(0.2, 0.6, 0.2), ['godziny-konsultanta', 'oplata-serwisowa', 'nie-przeszkadzac'], ['miasteczko'], ['centrum', 'miasto'], 'ostatnia-mila', [5, 6]),
+  {
+    ...planet(3, 2, 'powiadomienia', mix(0.3, 0.55, 0.15), ['godziny-konsultanta', 'weryfikacja-dwuetapowa', 'nie-przeszkadzac'], ['miasteczko', 'ladowisko'], ['miasto', 'biuro'], null, [5, 6]),
+    headline: 'godziny-konsultanta',
+    // pages 1-3 miasto, pages 4-6 and the boss page biuro (STORY 8.8); no gate (first planet of the act)
+    locationSplit: 3,
+  },
+  {
+    ...planet(4, 2, 'powiadomienia', mix(0.2, 0.6, 0.2), ['godziny-konsultanta', 'oplata-serwisowa', 'nie-przeszkadzac'], ['miasteczko'], ['miasto', 'centrum'], 'ostatnia-mila', [5, 6]),
+    headline: 'oplata-serwisowa',
+    // pages 1-3 miasto (planet 4's drawings), pages 4-6 and the boss page centrum (STORY 8.9)
+    locationSplit: 3,
+    // page 3: the exit corner walled with parcels, a Dyspozytor at the gap; it holds until the page's named elite "Doreczyciel" is slain (planets/p5.ts)
+    gates: [
+      {
+        page: 2,
+        gate: {
+          kind: 'elite',
+          look: 'parcels',
+          key: 'story.p5.gate.note',
+          liftKey: 'story.p5.gate.lift',
+          figure: { look: 52, key: 'story.p5.gate.figure' },
+        },
+      },
+    ],
+  },
   planet(5, 2, 'powiadomienia', mix(0.15, 0.55, 0.3), ['weryfikacja-dwuetapowa', 'oplata-serwisowa', 'godziny-konsultanta'], ['miasteczko', 'wioska'], ['centrum', 'serwerownia', 'archiwum'], 'infolinia', [5, 6]),
   planet(6, 3, 'wygenerowane', mix(0.15, 0.25, 0.6), ['czas-wsteczny', 'parzystosc', 'nie-przeszkadzac'], ['ladowisko', 'wioska'], ['jaskinia', 'rownina'], null, [5, 6]),
   planet(7, 3, 'wygenerowane', mix(0.2, 0.2, 0.6), ['czas-wsteczny', 'grawitacja', 'oplata-serwisowa'], ['wioska', 'miasteczko'], ['wyzyna', 'rownina', 'jaskinia'], 'domniemanie', [5, 6]),

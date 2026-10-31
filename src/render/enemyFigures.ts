@@ -9,7 +9,7 @@ import type { Bus } from '../core/events';
 import type { Enemy } from '../entities/types';
 import { ENEMY_SCALE, assemble, assembleBoss, layoutAssembly, type Assembly, type Layout } from '../enemies/assemble';
 import { captionKeyOf, faceDrawing, faceHeroOf, facePartsOf, wearsOwnBody } from '../enemies/anomalia/state';
-import { CONFIRM_R, GRID_CELL, GRID_NEED_S, CONFIRM_NEED_S, bossVariantArm, bossVariantLine, gridCellCenter } from '../enemies/bosses';
+import { CONFIRM_R, GRID_CELL, GRID_NEED_S, CONFIRM_NEED_S, bossVariantArm, bossVariantGrid, bossVariantLine, gridCellCenter } from '../enemies/bosses';
 import { BOSS_OF, ELITE_SCALE, eliteWord } from '../enemies/families';
 import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsBase';
 import { rtOf } from '../enemies/runtime';
@@ -503,9 +503,13 @@ const claimSig = (e: Enemy): string => `${e.claim?.textKey ?? ''}|${e.claim?.str
 const HYDRANT =
   'M-4 8L-4-4Q-4-9 0-9Q4-9 4-4L4 8M-5.5-9.6L5.5-9.6M-4-1L-8-1L-8 3L-4 3M4-1L8-1L8 3L4 3M-6.5 8L6.5 8M0-9L0-12';
 
+/** A shopping cart from the side (planet 5's grid squares): a wire basket with its mesh, the handle, the frame; the wheels are circles. */
+const CART = 'M-7-6L7-6L5 3L-5 3ZM-7-6L-9-9L-12-9M-3-6L-3 3M0-6L0 3M3-6L3 3M-6-1.5L6-1.5M-5 3L-3.6 7M5 3L3.6 7M-3.6 7L3.6 7';
+
 function buildGrid(under: SVGGElement, e: Enemy): void {
   const grid = rtOf(e).grid;
   if (!grid) return;
+  const koszyk = bossVariantGrid(e) === 'koszyk';
   const cell = el('g', { 'data-part': 'grid' });
   for (let i = 0; i < 9; i++) {
     const c = gridCellCenter(0, 0, i);
@@ -513,7 +517,12 @@ function buildGrid(under: SVGGElement, e: Enemy): void {
     const cg = el('g', { transform: `translate(${n2(c.x)} ${n2(c.y)})` });
     cg.append(el('path', { d: box(-half, -half, half, half, 1.6), 'stroke-width': 1.2 }));
     if (grid.cells.includes(i)) {
-      cg.append(el('path', { d: HYDRANT, 'stroke-width': 1.5 }), el('path', { d: circ(0, 2.5, 1.1), style: INK_FILL }));
+      if (koszyk) {
+        const cart = el('g', { transform: 'translate(0 -1) scale(1.45)', 'data-part': 'koszyk' });
+        cart.append(el('path', { d: CART, 'stroke-width': 1.1 }), el('path', { d: circ(-3.6, 8.6, 1.5) + circ(3.6, 8.6, 1.5), 'stroke-width': 0.9 }));
+        cg.append(cart);
+      }
+      else cg.append(el('path', { d: HYDRANT, 'stroke-width': 1.5 }), el('path', { d: circ(0, 2.5, 1.1), style: INK_FILL }));
     } else if (i !== 4) {
       cg.append(el('path', { d: hatchRect(-half + 2, -half + 2, half - 2, half - 2, 3.4 + (i % 3), i % 2 === 0), 'stroke-width': 0.8 }));
     }

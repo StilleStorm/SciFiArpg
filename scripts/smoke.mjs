@@ -2781,6 +2781,256 @@ try {
     await qctx.close();
   }
 
+  // ---------- 6g'. planet 4 content (S23): chapter card, clerk, side ticket, miasto and biuro pages, the boss variant ----------
+  {
+    const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await qctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const qp = await qctx.newPage();
+    qp.on('pageerror', (e) => problems.push(`S23 pageerror: ${e.message}`));
+    qp.on('console', (m) => {
+      if (m.text().includes('Service Worker registration blocked')) return;
+      if (m.type() === 'error' || m.type() === 'warning') problems.push(`S23 console.${m.type()}: ${m.text()}`);
+    });
+    const ev = (fn, arg) => qp.evaluate(fn, arg);
+    await qp.goto(BASE, { waitUntil: 'load' });
+    await qp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await qp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 });
+    await sleep(500);
+    // the campaign stops at CAMPAIGN_LAST until S24 raises it, so planet 4 is entered the way the hook can: the card view and a base of its plan
+    await ev(() => {
+      window.__game.setCampaignView({ planetIndex: 3, closed: [0, 1, 2], caseClosed: false, finale: false });
+      const st = window.__game.startBase(5);
+      st.plan = { kind: 'campaign', planet: 3, priority: 'normalny', lawId: 'godziny-konsultanta' };
+      window.__game.showCard('chapter');
+    });
+    await sleep(900);
+    const card = await ev(() => {
+      const l = document.querySelector('.card-layer');
+      return { kind: l?.dataset.card ?? null, text: l?.textContent ?? '', planet: window.__game.state()?.plan?.planet, law: window.__game.state()?.plan?.lawId };
+    });
+    check('S23 chapter card: planet 4 carries its story text, no key and no placeholder; the plan is planet 4', card.kind === 'chapter' && card.planet === 3 && /Dwudziest/.test(card.text) && /przekierowan/i.test(card.text) && !/story\.|screens\.cards|\[brak/i.test(card.text), JSON.stringify({ kind: card.kind, planet: card.planet, law: card.law, head: card.text.slice(0, 90) }));
+    await shotOf(qp, 'S23-card');
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 }).catch(() => undefined);
+    await sleep(500);
+    const base = await ev(() => ({ planet: window.__game.state()?.plan?.planet, clerk: document.querySelectorAll('[data-station=urzednik]').length, offers: window.__game.quests.offers().map((o) => o.id) }));
+    check('S23 planet 4 base: the clerk is drawn and the board carries the three h:p4 side tickets', base.planet === 3 && base.clerk === 1 && base.offers.filter((id) => id.startsWith('h:p4:')).length === 3, JSON.stringify(base));
+    await shotOf(qp, 'S23-base');
+    await ev(() => window.__game.station('urzednik'));
+    await qp.locator('.npc-sheet').waitFor({ state: 'visible', timeout: 3000 });
+    const clerk = await ev(() => ({ lines: document.querySelectorAll('.npc-sheet .npc-line').length, text: document.querySelector('.npc-sheet')?.textContent ?? '' }));
+    check('S23 the clerk of planet 4: Referent ds. Eskalacji, three story lines, no key', clerk.lines === 3 && /Eskalacji/.test(clerk.text) && !/story\.p4/.test(clerk.text), JSON.stringify({ lines: clerk.lines, head: clerk.text.slice(0, 100) }));
+    await shotOf(qp, 'S23-clerk');
+    await qp.locator('.npc-sheet .ps-close').first().click().catch(() => undefined);
+    await sleep(200);
+    await ev(() => window.__game.station('tablica'));
+    await qp.locator('[data-bq=accept]').first().waitFor({ state: 'visible', timeout: 3000 });
+    const shown = await ev(() => [...document.querySelectorAll('[data-bq=accept]')].map((b) => b.getAttribute('data-quest')));
+    const qid = shown[0];
+    await qp.locator('[data-bq=accept]').first().click();
+    await sleep(200);
+    const stars0 = await ev(() => window.__game.state().player.gwiazdki);
+    const q = await ev((id) => {
+      const g = window.__game;
+      const fin = g.quests.finish(id);
+      return { fin, reported: g.quests.report(id), stars: g.state().player.gwiazdki };
+    }, qid);
+    check('S23 side ticket h:p4:* is listed on the board, taken, finished, reported and pays stars', qid === 'h:p4:a' && shown.filter((id) => id.startsWith('h:p4:')).length === 3 && q.fin && q.reported && q.stars > stars0, JSON.stringify({ shown, stars0, q }));
+    await qp.locator('.ps-close').locator('visible=true').first().click({ timeout: 800 }).catch(() => undefined);
+    await sleep(200);
+
+    // the run: pages 1-3 miasto, pages 4-5 biuro; no gate; the boss on the last page
+    await ev(() => window.__game.start(43, { plan: { kind: 'campaign', planet: 3, priority: 'niski', lawId: 'godziny-konsultanta' }, pageCount: 5 }));
+    await sleep(700);
+    for (let k = 0; k < 4 && (await ev(() => window.__game.state()?.modal ?? null)); k++) {
+      await qp.locator('.pop-wrap .form-btn, .pop-wrap button').locator('visible=true').first().click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(400);
+    }
+    const turn = async (k) => {
+      await ev((n) => {
+        window.__game.state().enemies.length = 0;
+        window.__game.turnTo(n);
+      }, k);
+      await qp.waitForFunction((n) => window.__game.state()?.pageIndex === n && !window.__game.state().turning, k, { timeout: 6000 }).catch(() => undefined);
+      await sleep(500);
+    };
+    const drawn = () => ev(() => {
+      const s = window.__game.state();
+      const nodes = [...document.querySelectorAll('#page [data-obstacle="prop"]')];
+      return { loc: s.page.location, gate: s.page.gate !== undefined, props: nodes.length, drawn: nodes.filter((n) => n.childElementCount > 0).length, kinds: [...new Set(s.page.obstacles.filter((o) => o.kind === 'prop').map((o) => o.variant))] };
+    });
+    const locs = await ev(() => window.__game.state().pages.map((p) => p.location));
+    check('S23 pages: miasto, miasto, miasto, biuro, biuro', locs.join() === 'miasto,miasto,miasto,biuro,biuro', JSON.stringify(locs));
+    const m1 = await drawn();
+    check('S23 page 1: a miasto with every prop drawn and no gate', m1.loc === 'miasto' && !m1.gate && m1.props >= 6 && m1.props === m1.drawn && m1.kinds.includes('kamienica'), JSON.stringify(m1));
+    await shotOf(qp, 'S23-miasto-1');
+    await turn(2);
+    const m3 = await drawn();
+    check('S23 page 3: a miasto with every prop drawn', m3.loc === 'miasto' && m3.props >= 6 && m3.props === m3.drawn, JSON.stringify(m3));
+    await shotOf(qp, 'S23-miasto-3');
+    await turn(3);
+    const b4 = await drawn();
+    check('S23 page 4: a biuro with every prop drawn and no gate', b4.loc === 'biuro' && !b4.gate && b4.props >= 4 && b4.props === b4.drawn, JSON.stringify(b4));
+    await shotOf(qp, 'S23-biuro');
+    await turn(4);
+    await qp.waitForFunction(() => window.__game.state()?.enemies.some((e) => e.boss), null, { timeout: 8000 }).catch(() => undefined);
+    await sleep(600);
+    const boss = await ev(() => {
+      const b = window.__game.state().enemies.find((e) => e.boss);
+      const v = document.querySelector('[data-part=variant]');
+      return b ? { hp: b.hpMax, loc: window.__game.state().page.location, variant: v?.textContent ?? null } : null;
+    });
+    check('S23 boss: Weryfikacja on the biuro hall has racja 260 and the variant line', boss !== null && boss.hp === 260 && boss.loc === 'biuro' && boss.variant === 'Weryfikacja, instancja druga, formularz rozszerzony', JSON.stringify(boss));
+    await shotOf(qp, 'S23-boss');
+    if (boss) {
+      let first = null;
+      for (let i = 0; i < 50 && !first; i++) {
+        const info = await ev(() => window.__game.spor.info());
+        if (info?.open && info.phase === 1) first = info;
+        else await sleep(200);
+      }
+      check('S23 Spór: the planet 4 comment (story.p4.boss.spor1) is posted and the right reply is the regulaminowy one', first !== null && first.commentKey === 'story.p4.boss.spor1.comment' && first.replies[first.correct].textKey.endsWith('.regulaminowy'), JSON.stringify({ key: first?.commentKey, right: first ? first.replies[first.correct].textKey : null }));
+    }
+    await qctx.close();
+  }
+
+  // ---------- 6h'. planet 5 content (S23): chapter card, clerk, ticket a paying a set piece by awizo, miasto then centrum, the parcels gate held by Doreczyciel, the koszyk boss ----------
+  {
+    const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await qctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const qp = await qctx.newPage();
+    qp.on('pageerror', (e) => problems.push(`S23p5 pageerror: ${e.message}`));
+    qp.on('console', (m) => {
+      if (m.text().includes('Service Worker registration blocked')) return;
+      if (m.type() === 'error' || m.type() === 'warning') problems.push(`S23p5 console.${m.type()}: ${m.text()}`);
+    });
+    const ev = (fn, arg) => qp.evaluate(fn, arg);
+    await qp.goto(BASE, { waitUntil: 'load' });
+    await qp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await qp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 });
+    await sleep(500);
+    // planet 5 is past CAMPAIGN_LAST until S24 raises it: the base is opened with the plan by hand (no chapter card is reachable yet)
+    await ev(() => window.__game.start(5, { phase: 'base', plan: { kind: 'campaign', planet: 4, priority: 'normalny', lawId: 'oplata-serwisowa' } }));
+    await sleep(900);
+    await qp.locator('.card-layer .card-skip').click({ timeout: 1500 }).catch(() => undefined);
+    await sleep(400);
+    const base = await ev(() => ({ planet: window.__game.state()?.plan?.planet, clerk: document.querySelectorAll('[data-station=urzednik]').length, offers: window.__game.quests.offers().map((o) => o.id) }));
+    check('S23p5 planet 5 base: the clerk is drawn and the board carries the three h:p5 side tickets', base.planet === 4 && base.clerk === 1 && base.offers.filter((id) => id.startsWith('h:p5:')).length === 3, JSON.stringify(base));
+    // the clerk's sheet and the chapter card are not reachable from the campaign until S24 raises CAMPAIGN_LAST: p5.test.ts covers their texts
+    // ticket a: reported, it pays one piece of Ostatnia mila as an awizo (not into the bag)
+    const awizo = await ev(() => {
+      const h = window.__game;
+      const taken = h.quests.accept('h:p5:a');
+      h.quests.finish('h:p5:a');
+      const paid = h.quests.report('h:p5:a');
+      return { taken, paid, awizos: h.awizos() };
+    });
+    check('S23p5 ticket a: reported, one awizo is waiting at the base paczkomat (a piece of the hosted set)', awizo.taken === 'h:p5:a' && awizo.paid === true && awizo.awizos.length === 1 && awizo.awizos[0].page === 0, JSON.stringify(awizo));
+
+    // the run: pages 1-3 miasto (page 3 gated), pages 4-6 centrum
+    await ev(() => window.__game.start(41, { plan: { kind: 'campaign', planet: 4, priority: 'niski', lawId: 'oplata-serwisowa' }, pageCount: 6 }));
+    await sleep(700);
+    for (let k = 0; k < 4 && (await ev(() => window.__game.state()?.modal ?? null)); k++) {
+      await qp.locator('.pop-wrap .form-btn, .pop-wrap button').locator('visible=true').first().click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(400);
+    }
+    const turn = async (k) => {
+      await ev((n) => {
+        window.__game.state().enemies.length = 0;
+        window.__game.turnTo(n);
+      }, k);
+      await qp.waitForFunction((n) => window.__game.state()?.pageIndex === n && !window.__game.state().turning, k, { timeout: 6000 }).catch(() => undefined);
+      await sleep(500);
+    };
+    const locs = await ev(() => window.__game.state().pages.map((q) => q.location));
+    check('S23p5 pages: miasto x3, centrum x3', locs.join() === 'miasto,miasto,miasto,centrum,centrum,centrum', JSON.stringify(locs));
+    await turn(2);
+    const gate0 = await ev(() => {
+      const named = window.__game.enemies.list().filter((e) => e.named);
+      return {
+        info: window.__game.gate.info(),
+        wall: document.querySelectorAll('#page [data-obstacle=gate][data-gate-look=parcels]').length,
+        figure: document.querySelectorAll('#page [data-gate-figure]').length,
+        named: named.map((e) => e.named),
+      };
+    });
+    check('S23p5 gate: page 3 has a wall of parcels, a Dyspozytor and exactly one named elite, Doręczyciel', gate0.info?.kind === 'elite' && gate0.info.holds && gate0.info.look === 'parcels' && gate0.wall === 1 && gate0.figure === 1 && gate0.named.length === 1 && gate0.named[0] === 'Doręczyciel', JSON.stringify(gate0));
+    await ev(() => {
+      const h = window.__game;
+      const id = h.state().page.gate?.eliteId;
+      h.enemies.hit(id, 'mechaniczny', 99999);
+      h.advance(0.2);
+    });
+    for (let k = 0; k < 12 && !(await qp.locator('.sheet:not(.hidden) .entry').first().isVisible().catch(() => false)); k++) await sleep(250);
+    if (await qp.locator('.sheet:not(.hidden) .entry').first().isVisible().catch(() => false)) {
+      await qp.locator('.sheet:not(.hidden) .entry').first().click({ timeout: 2000 }).catch(() => undefined);
+      await qp.locator('.sheet:not(.hidden) .install').click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(300);
+      await qp.locator('.sheet.assigning:not(.hidden) .report.later').click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(300);
+    }
+    await sleep(500);
+    const lifted = await ev(() => ({ info: window.__game.gate.info(), page: window.__game.state().page.gate === undefined, notes: window.__game.notes().map((n) => n.text) }));
+    check('S23p5 gate: when Doręczyciel is slain the gate lifts with the planet own footnote', lifted.info === null && lifted.page && lifted.notes.some((x) => /skreślono\s+z\s+grafiku/.test(x)), JSON.stringify({ info: lifted.info, page: lifted.page, notes: lifted.notes.slice(-2) }));
+    await ev(() => { window.__game.state().player.suspended = false; });
+    await turn(3);
+    const props = await ev(() => {
+      const s = window.__game.state();
+      const nodes = [...document.querySelectorAll('#page [data-obstacle="prop"]')];
+      return { loc: s.page.location, props: nodes.length, drawn: nodes.filter((n) => n.childElementCount > 0).length };
+    });
+    check('S23p5 page 4: a centrum with every prop drawn', props.loc === 'centrum' && props.props >= 6 && props.props === props.drawn, JSON.stringify(props));
+    // the levels from the elite's kill may have left an update sheet open: put it away until the page turn can populate the hall
+    await turn(5);
+    for (let k = 0; k < 4 && !(await ev(() => window.__game.state()?.enemies.some((e) => e.boss))); k++) {
+      if (await qp.locator('.sheet:not(.hidden) .entry').first().isVisible().catch(() => false)) {
+        await qp.locator('.sheet:not(.hidden) .entry').first().click({ timeout: 2000 }).catch(() => undefined);
+        await qp.locator('.sheet:not(.hidden) .install').click({ timeout: 2000 }).catch(() => undefined);
+        await sleep(300);
+        await qp.locator('.sheet.assigning:not(.hidden) .report.later').click({ timeout: 2000 }).catch(() => undefined);
+      }
+      await sleep(900);
+    }
+    await qp.waitForFunction(() => window.__game.state()?.enemies.some((e) => e.boss), null, { timeout: 8000 }).catch(() => undefined);
+    await sleep(600);
+    const boss = await ev(() => {
+      const b = window.__game.state().enemies.find((e) => e.boss);
+      const v = document.querySelector('[data-part=variant]');
+      return b ? { hp: b.hpMax, loc: window.__game.state().page.location, variant: v?.textContent ?? null, carts: document.querySelectorAll('[data-part=koszyk]').length, hydrants: document.querySelectorAll('[data-part=grid] path[d*="M-4 8L-4-4"]').length } : null;
+    });
+    check('S23p5 boss: Weryfikacja on the centrum hall with the variant line and the grid drawn as two shopping carts', boss !== null && boss.loc === 'centrum' && /^Weryfikacja, wersja sklepowa, w\s+promocji$/.test(boss.variant ?? '') && boss.carts === 2 && boss.hydrants === 0, JSON.stringify(boss));
+    const hint = await ev(() => {
+      const b = window.__game.state().enemies.find((e) => e.boss);
+      if (b) window.__game.placePlayer(b.x, b.y + 120);
+      window.__game.advance(0.3);
+      return window.__game.notes().map((n) => n.text);
+    });
+    check('S23p5 boss: the captcha hint is the planet own (koszykami)', hint.some((x) => /kratki\s+z\s+koszykami/.test(x)), JSON.stringify(hint.slice(-2)));
+    if (boss) {
+      let first = null;
+      for (let i = 0; i < 50 && !first; i++) {
+        const info = await ev(() => window.__game.spor.info());
+        if (info?.open && info.phase === 1) first = info;
+        else await sleep(200);
+      }
+      check('S23p5 Spór: the planet 5 comment (story.p5.boss.spor1) is posted and the right reply is the egzystencjalny one', first !== null && first.commentKey === 'story.p5.boss.spor1.comment' && first.replies[first.correct].textKey.endsWith('.egzystencjalny'), JSON.stringify({ key: first?.commentKey, right: first ? first.replies[first.correct].textKey : null }));
+    }
+    await qctx.close();
+  }
+
   // ---------- 6j. the finale (S15): the return card, then per hero the three phases through the hook, the stamp, the case closed ----------
   {
     const fctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });

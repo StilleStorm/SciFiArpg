@@ -169,7 +169,8 @@ describe('progression', () => {
 
   it('the first campaign ticket on a planet prints its headline clause, later tickets roll the pool', () => {
     expect([0, 1, 2].map(headlineOf)).toEqual(['wymagana-aktualizacja', 'ciasteczka', 'parzystosc']);
-    for (let i = 3; i < PLANET_COUNT; i++) expect(headlineOf(i)).toBe(PLANETS[i]?.lawPool[0]);
+    expect(headlineOf(4)).toBe('oplata-serwisowa');
+    for (let i = 3; i < PLANET_COUNT; i++) if (i !== 4) expect(headlineOf(i)).toBe(PLANETS[i]?.lawPool[0]);
     for (let planet = 0; planet < CAMPAIGN_LAST; planet++) {
       const c = { ...newCampaign(), current: planet, closed: Array.from({ length: planet }, (_, i) => i) };
       for (let seed = 1; seed < 30; seed++) expect(nextCampaignPlan(c, 'normalny', seed)?.lawId).toBe(headlineOf(planet));

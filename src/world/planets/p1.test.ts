@@ -60,7 +60,7 @@ describe('planet 1: base layout and locations', () => {
       expect(drawingsOf(type).sort()).toEqual([...ids].sort());
       for (const p of spec?.props ?? []) expect(propColliders(p.id, 0, 0, p.size[0]).length === 0, p.id).toBe(spec?.flat.includes(p.id) === true);
     }
-    expect(Object.keys(LOCATIONS).sort()).toEqual(['biuro', 'magazyn', 'przedmiescie', 'serwerownia']);
+    expect(Object.keys(LOCATIONS)).toEqual(expect.arrayContaining(['biuro', 'magazyn', 'przedmiescie', 'serwerownia']));
   });
 
   it('pages are given a type by seed: the first the first type, the boss page the last, and every type is seen', () => {
@@ -86,8 +86,8 @@ describe('planet 1: base layout and locations', () => {
     const variants = new Set<string>();
     for (const page of s.pages) for (const o of page.obstacles) if (o.kind === 'prop' && o.variant) variants.add(o.variant);
     expect(variants.size).toBeGreaterThanOrEqual(6);
-    // planet 5's types (centrum, miasto) have no drawings yet: its pages stay the generic ones
-    const other = createRun(11, { plan: plan(4) });
+    // planet 7's types (jaskinia, rownina) have no drawings yet: its pages stay the generic ones
+    const other = createRun(11, { plan: plan(6) });
     expect(other.pages.some((p) => p.obstacles.some((o) => o.kind === 'prop'))).toBe(false);
     expect(other.pages.every((p) => p.location === undefined)).toBe(true);
     expect(createRun(11).pages.every((p) => p.location === undefined)).toBe(true);

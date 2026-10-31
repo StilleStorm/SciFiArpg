@@ -157,6 +157,13 @@ function placeElite(s: RunState, family: FamilyId, x: number, y: number, tier: n
   return pack ? [leader, ...spawnPack(s, leader)] : [leader];
 }
 
+/** The fixed title of a planet's gate elite: `story.p<N>.gate.elite` of the run's planet (planet 3's when the run has no plan or the key is not written). */
+function gateEliteName(s: RunState): string {
+  const key = `story.p${(s.plan?.planet ?? 2) + 1}.gate.elite`;
+  const own = t(key);
+  return own === key ? t('story.p3.gate.elite') : own;
+}
+
 /**
  * The forced named elite of an 'elite' gate (world/gate.ts, planet 3): one named elite with the fixed name `story.p3.gate.elite`
  * instead of a rolled one, otherwise the S9 machinery (2-3 affixes, the record, the guaranteed drop on its death). Placed on a
@@ -182,7 +189,7 @@ export function spawnGateElite(s: RunState, view?: Rect): Enemy | null {
   for (let tries = 0; tries < 40 && pool.length > 0; tries++) {
     const c = pool[r.int(0, pool.length - 1)];
     if (!c) continue;
-    const got = placeElite(s, s.ticket.family, c.x, c.y, tier, r.pick(ELITE_IDS), { makeNamed: true, name: t('story.p3.gate.elite'), pack: false });
+    const got = placeElite(s, s.ticket.family, c.x, c.y, tier, r.pick(ELITE_IDS), { makeNamed: true, name: gateEliteName(s), pack: false });
     const leader = got[0];
     if (leader) {
       g.eliteId = leader.id;
