@@ -484,6 +484,6 @@ try {
 if (problems.length) {
   console.error(problems.join('\n'));
 } else {
-  console.log('shots written to shots/');
+  console.log(`shots written to ${SHOTS}/`);
 }
 process.exit(problems.length ? 1 : 0);
