@@ -184,7 +184,7 @@ describe('registering', () => {
     expect(c?.version).toBe(CHARACTER_VERSION);
     const s = createRun(4, { plan: plan(0), character: c ?? undefined });
     expect(s.stops).toBeUndefined();
-    expect(toStops({ 0: [4, 2, 2, -1, 3, 'x', 1.5], 1: 'no', 7: [0], 99: [0], [CAMPAIGN_LAST]: [0], 2: [] })).toEqual({ 0: [2, 4] });
+    expect(toStops({ 0: [4, 2, 2, -1, 3, 'x', 1.5], 1: 'no', 99: [0], [CAMPAIGN_LAST]: [0], 2: [] })).toEqual({ 0: [2, 4] });
     expect(toStops(null)).toEqual({});
     expect(toStops([1])).toEqual({});
     const dirty = toCharacter({ ...emptyCharacter('pralka'), stops: { 0: [0, 0, 2], 1: ['a'] } });
@@ -248,9 +248,9 @@ describe('the stop board', () => {
     expect(stopRows(fresh, undefined)).toEqual([{ planet: 0, indices: [] }]);
     const mid = campaign({ current: 2, closed: [0, 1] });
     expect(stopRows(mid, { 0: [4, 0], 1: [2], 2: [0] }).map((r) => [r.planet, r.indices])).toEqual([[0, [0, 4]], [1, [2]], [2, [0]]]);
-    const done = campaign({ current: 0, closed: [0, 1, 2, 3, 4, 5], finalTicket: true });
-    expect(stopRows(done, undefined).map((r) => r.planet)).toEqual([0, 1, 2, 3, 4, 5]);
-    const all = campaign({ current: 0, closed: [0, 1, 2, 3, 4, 5, 6, 7], caseClosed: true });
+    const done = campaign({ current: 0, closed: [0, 1, 2, 3, 4, 5, 6, 7, 8], finalTicket: true });
+    expect(stopRows(done, undefined).map((r) => r.planet)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    const all = campaign({ current: 0, closed: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], caseClosed: true });
     expect(stopRows(all, undefined).map((r) => r.planet).every((p) => p < CAMPAIGN_LAST)).toBe(true);
     expect(isOpenPlanet(fresh, 1)).toBe(false);
     expect(isOpenPlanet(all, CAMPAIGN_LAST)).toBe(false);

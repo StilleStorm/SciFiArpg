@@ -144,10 +144,10 @@ describe('progression', () => {
     expect(travelList(newCampaign())).toEqual([]);
     expect(travelPlan(newCampaign(), 2, 'normalny', 1)).toBeNull();
     const c = closeTicket(playThrough(), { kind: 'final', planet: 0, priority: 'normalny', lawId: 'ciasteczka' }).campaign;
-    expect(travelList(c)).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(travelList(c)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
     expect(travelPlan(c, 2, 'krytyczny', 9)).toMatchObject({ kind: 'travel', planet: 2, priority: 'krytyczny' });
-    expect(travelPlan(c, 5, 'krytyczny', 9)).toMatchObject({ kind: 'travel', planet: 5 });
-    expect(travelPlan(c, 6, 'krytyczny', 9)).toBeNull();
+    expect(travelPlan(c, 8, 'krytyczny', 9)).toMatchObject({ kind: 'travel', planet: 8 });
+    expect(travelPlan(c, 9, 'krytyczny', 9)).toBeNull();
     const seen = new Set<number>();
     for (let seed = 1; seed < 200; seed++) {
       const e = extraPlan(c, 'normalny', seed);
@@ -156,14 +156,14 @@ describe('progression', () => {
       expect(lawIds.has(e?.lawId ?? ('x' as never))).toBe(true);
       seen.add(e?.planet ?? -1);
     }
-    expect([...seen].sort()).toEqual([0, 1, 2, 3, 4, 5]);
+    expect([...seen].sort()).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
     expect(closeTicket(c, extraPlan(c, 'normalny', 3) as TicketPlan).campaign.extras).toBe(1);
     expect(closeTicket(c, travelPlan(c, 1, 'normalny', 3) as TicketPlan).campaign.extras).toBe(0);
   });
 
   it('free travel lists only planets 1..CAMPAIGN_LAST, however many a save has closed', () => {
-    const all = { ...newCampaign(), caseClosed: true, closed: [8, 0, 5, 2, 1, 7, 3, 4, 6] };
-    expect(travelList(all)).toEqual([0, 1, 2, 3, 4, 5]);
+    const all = { ...newCampaign(), caseClosed: true, closed: [8, 0, 5, 2, 1, 7, 3, 4, 6, 9, 12] };
+    expect(travelList(all)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
     expect(travelPlan(all, CAMPAIGN_LAST, 'normalny', 1)).toBeNull();
     expect(travelPlan(all, CAMPAIGN_LAST - 1, 'normalny', 1)?.kind).toBe('travel');
   });
@@ -223,8 +223,8 @@ describe('events', () => {
 });
 
 describe('CAMPAIGN_LAST', () => {
-  it('is 6 with Akt II: closing planet 6 issues the return ticket to planet 1', () => {
-    expect(CAMPAIGN_LAST).toBe(6);
+  it('is 9 with Akt III: closing planet 9 issues the return ticket to planet 1', () => {
+    expect(CAMPAIGN_LAST).toBe(9);
     let c = newCampaign();
     for (let i = 0; i < CAMPAIGN_LAST - 1; i++) {
       const out = closeTicket(c, nextCampaignPlan(c, 'normalny', 4) as TicketPlan);
@@ -234,7 +234,7 @@ describe('CAMPAIGN_LAST', () => {
     expect(nextCampaignPlan(c, 'normalny', 4)).toMatchObject({ kind: 'campaign', planet: CAMPAIGN_LAST - 1 });
     const out = closeTicket(c, nextCampaignPlan(c, 'normalny', 4) as TicketPlan);
     expect(out.advanced).toEqual({ from: CAMPAIGN_LAST - 1, to: 0, finale: true });
-    expect(out.campaign).toMatchObject({ closed: [0, 1, 2, 3, 4, 5], finalTicket: true, caseClosed: false, current: 0 });
+    expect(out.campaign).toMatchObject({ closed: [0, 1, 2, 3, 4, 5, 6, 7, 8], finalTicket: true, caseClosed: false, current: 0 });
     expect(nextCampaignPlan(out.campaign, 'wysoki', 4)).toMatchObject({ kind: 'final', planet: 0, priority: 'wysoki' });
     const done = closeTicket(out.campaign, nextCampaignPlan(out.campaign, 'wysoki', 4) as TicketPlan);
     expect(done.caseClosed).toBe(true);
@@ -250,12 +250,12 @@ describe('CAMPAIGN_LAST', () => {
     expect(toCampaign({ closed: [0], finalTicket: true })).toMatchObject({ finalTicket: false, current: 1 });
     expect(toCampaign({ closed: [0], finalTicket: true }).reopened).toBeUndefined();
     // a closed case of the full length stays closed; the flag survives a second load
-    const kept = toCampaign({ closed: [0, 1, 2, 3, 4, 5], caseClosed: true });
+    const kept = toCampaign({ closed: [0, 1, 2, 3, 4, 5, 6, 7, 8], caseClosed: true });
     expect(kept).toMatchObject({ caseClosed: true });
     expect(kept.reopened).toBeUndefined();
     expect(toCampaign(old).reopened).toBe(true);
     // a longer-campaign save that is still mid-way gets the return ticket next
-    expect(toCampaign({ current: 8, closed: [0, 1, 2, 3, 4, 5] })).toMatchObject({ finalTicket: true, current: 0 });
+    expect(toCampaign({ current: 8, closed: [0, 1, 2, 3, 4, 5, 6, 7, 8] })).toMatchObject({ finalTicket: true, current: 0 });
   });
 });
 

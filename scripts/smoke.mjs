@@ -2297,7 +2297,7 @@ try {
       return { rows: 0, screen: window.__game.screen(), plan: s?.plan ?? null, accepted: s?.phase === 'base' && s?.pageIndex === 0, card: document.querySelector('.card-layer')?.dataset.card ?? null, sheet: !!document.querySelector('.ticket-sheet') };
     });
     trav.rows = rows;
-    check('campaign: after the case planets 1..CAMPAIGN_LAST (six) are offered, not the nine closed; travel to planet 2 accepts a travel ticket there and shows the rewritten card', rows === 6 && trav.screen === 'baza' && trav.plan?.kind === 'travel' && trav.plan?.planet === 1 && trav.accepted && trav.card === 'rewritten' && !trav.sheet, JSON.stringify(trav));
+    check('campaign: after the case planets 1..CAMPAIGN_LAST (nine) are offered; travel to planet 2 accepts a travel ticket there and shows the rewritten card', rows === 9 && trav.screen === 'baza' && trav.plan?.kind === 'travel' && trav.plan?.planet === 1 && trav.accepted && trav.card === 'rewritten' && !trav.sheet, JSON.stringify(trav));
     // enemies scale: the same family and seed, Niski on planet 1 against Krytyczny on planet 8
     const hpOf = async (plan) => {
       await cp.evaluate((pl) => window.__game.start(21, { plan: pl }), plan);
@@ -3340,6 +3340,200 @@ try {
     await qctx.close();
   }
 
+  // ---------- 6l. planet 9 content (S27): archiwum and biuro with the observatory props, the teczka gate on page 3, the Wizualizacja with its observation posts (entered by the run hook: planet 9 does not depend on CAMPAIGN_LAST) ----------
+  {
+    const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await qctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const qp = await qctx.newPage();
+    qp.on('pageerror', (e) => problems.push(`S27p9 pageerror: ${e.message}`));
+    qp.on('console', (m) => {
+      if (m.text().includes('Service Worker registration blocked')) return;
+      if (m.type() === 'error' || m.type() === 'warning') problems.push(`S27p9 console.${m.type()}: ${m.text()}`);
+    });
+    const ev = (fn, arg) => qp.evaluate(fn, arg);
+    await qp.goto(BASE, { waitUntil: 'load' });
+    await qp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await qp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 });
+    await sleep(500);
+    await ev(() => window.__game.start(49, { plan: { kind: 'campaign', planet: 8, priority: 'niski', lawId: 'czas-wsteczny' }, pageCount: 6 }));
+    await sleep(700);
+    for (let k = 0; k < 4 && (await ev(() => window.__game.state()?.modal ?? null)); k++) {
+      await qp.locator('.pop-wrap .form-btn, .pop-wrap button').locator('visible=true').first().click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(400);
+    }
+    const settle = async () => {
+      for (let k = 0; k < 4 && (await qp.locator('.sheet:not(.hidden) .entry').first().isVisible().catch(() => false)); k++) {
+        await qp.locator('.sheet:not(.hidden) .entry').first().click({ timeout: 2000 }).catch(() => undefined);
+        await qp.locator('.sheet:not(.hidden) .install').click({ timeout: 2000 }).catch(() => undefined);
+        await sleep(300);
+        await qp.locator('.sheet.assigning:not(.hidden) .report.later').click({ timeout: 2000 }).catch(() => undefined);
+        await sleep(300);
+      }
+    };
+    const turn = async (k) => {
+      await ev((n) => {
+        window.__game.state().enemies.length = 0;
+        window.__game.turnTo(n);
+      }, k);
+      await qp.waitForFunction((n) => window.__game.state()?.pageIndex === n && !window.__game.state().turning, k, { timeout: 6000 }).catch(() => undefined);
+      await sleep(500);
+      await settle();
+    };
+    const locs = await ev(() => window.__game.state().pages.map((q) => q.location));
+    check('S27p9 pages: archiwum x3, biuro x3', locs.join() === 'archiwum,archiwum,archiwum,biuro,biuro,biuro', JSON.stringify(locs));
+    const props = async () =>
+      ev(() => {
+        const nodes = [...document.querySelectorAll('#page [data-obstacle="prop"]')];
+        return { loc: window.__game.state().page.location, props: nodes.length, drawn: nodes.filter((n) => n.childElementCount > 0).length };
+      });
+    await turn(1);
+    const a1 = await props();
+    check('S27p9 page 2: an archiwum with every prop drawn', a1.loc === 'archiwum' && a1.props >= 6 && a1.props === a1.drawn, JSON.stringify(a1));
+    await shotOf(qp, 'S27-archiwum-2');
+    await turn(2);
+    const gate0 = await ev(() => ({ loc: window.__game.state().page.location, info: window.__game.gate.info(), wall: document.querySelectorAll('#page [data-obstacle=gate]').length, figure: document.querySelectorAll('#page [data-gate-figure]').length, keys: window.__game.state().page.content.filter((c) => c.kind === 'teczka' && c.key).length }));
+    check('S27p9 gate: page 3 is the last archiwum page, a teczka gate on the hatched band with a Dyżurny and one key folder', gate0.loc === 'archiwum' && gate0.info?.kind === 'teczka' && gate0.info.holds && !gate0.info.look && gate0.wall === 1 && gate0.figure === 1 && gate0.keys === 1, JSON.stringify(gate0));
+    await turn(3);
+    const b3 = await props();
+    check('S27p9 page 4: a biuro with every prop drawn', b3.loc === 'biuro' && b3.props >= 5 && b3.props === b3.drawn, JSON.stringify(b3));
+    await shotOf(qp, 'S27-biuro-4');
+    await turn(5);
+    for (let k = 0; k < 4 && !(await ev(() => window.__game.state()?.enemies.some((e) => e.boss))); k++) await sleep(900);
+    await qp.waitForFunction(() => window.__game.state()?.enemies.some((e) => e.boss), null, { timeout: 8000 }).catch(() => undefined);
+    await sleep(600);
+    const boss = await ev(() => {
+      const b = window.__game.state().enemies.find((e) => e.boss);
+      return b ? { hp: b.hpMax, e: b.existence, claim: b.claim?.textKey ?? null, loc: window.__game.state().page.location, variant: document.querySelector('[data-part=variant]')?.textContent ?? null, name: [...document.querySelectorAll('#world g[data-kind="enemy"] text')].map((x) => x.textContent ?? '').some((x) => /WIZUALIZACJA/.test(x)) } : null;
+    });
+    check('S27p9 boss: the Wizualizacja on the biuro hall, racja 320, existence 0.4, named, no variant line', boss !== null && boss.loc === 'biuro' && boss.hp === 320 && boss.e === 0.4 && boss.claim === 'enemies.claim.boss.wizualizacja' && boss.name && !boss.variant, JSON.stringify(boss));
+    let first = null;
+    for (let i = 0; i < 50 && !first; i++) {
+      const info = await ev(() => window.__game.spor.info());
+      if (info?.open && info.phase === 1) first = info;
+      else await sleep(200);
+    }
+    check('S27p9 Spór: the planet 9 comment (story.p9.boss.spor1) is posted and the right reply is the egzystencjalny one', first !== null && first.commentKey === 'story.p9.boss.spor1.comment' && first.replies[first.correct].textKey.endsWith('.egzystencjalny'), JSON.stringify({ key: first?.commentKey, right: first ? first.replies[first.correct].textKey : null }));
+    // hold the boss and the player still, and let the hero's blows rest, so only the posts move its racja
+    await ev(() => {
+      const g = window.__game;
+      const s = g.state();
+      const b = s.enemies.find((e) => e.boss);
+      b.rt.speedMul = 0;
+      b.rt.atkSpeed = 0.0001;
+      b.attackTimer = 1e6;
+      s.player.attackTimer = 1e6;
+      s.player.suspended = false;
+      s.enemies = [b];
+      g.spor.answer(g.spor.info().correct);
+    });
+    // the first post: 4 s after arrival (some of that has gone), then it is drawn on the floor
+    for (let i = 0; i < 60 && !(await ev(() => window.__game.state().enemies[0].rt.obs.posts.length > 0)); i++) await ev(() => window.__game.advance(0.2));
+    await sleep(500);
+    const post1 = await ev(() => {
+      const b = window.__game.state().enemies[0];
+      const q = b.rt.obs.posts[0];
+      return { n: b.rt.obs.posts.length, solid: q ? !q.generated : null, drawn: document.querySelectorAll('#world [data-part="posts"] [data-post]').length };
+    });
+    check('S27p9 posts: one solid observation post is marked and drawn on the floor', post1.n === 1 && post1.solid === true && post1.drawn === 1, JSON.stringify(post1));
+    await shotOf(qp, 'S27-boss-post');
+    // 2 s inside: observed, held for 3 s, existence 1
+    await ev(() => {
+      const g = window.__game;
+      const s = g.state();
+      const q = s.enemies[0].rt.obs.posts[0];
+      s.player.x = q.x;
+      s.player.y = q.y;
+      for (let i = 0; i < 24; i++) {
+        s.player.hp = s.player.hpMax;
+        g.advance(0.1);
+      }
+    });
+    const seen = await ev(() => {
+      const b = window.__game.state().enemies[0];
+      return { held: b.statuses.some((x) => x.kind === 'zablokowany'), e: b.existence, posts: b.rt.obs.posts.length, notes: window.__game.notes().map((n) => n.text).slice(-4) };
+    });
+    check('S27p9 posts: 2 s in the post observes: the Wizualizacja is held (zablokowany) and exists at 1, the post goes', seen.held && seen.e === 1 && seen.posts === 0 && seen.notes.some((x) => /Dokonano obserwacji/.test(x)), JSON.stringify(seen));
+    // an unanswered post: after 6 s two Wygenerowane of tier 1 and the next post (the hold of 3 s runs out first; the wait for the next post is cut short)
+    await ev(() => {
+      const g = window.__game;
+      const s = g.state();
+      s.player.x = 100;
+      s.player.y = 100;
+      const b = s.enemies[0];
+      for (let i = 0; i < 36; i++) {
+        s.player.hp = s.player.hpMax;
+        g.advance(0.1);
+      }
+      b.rt.obs.wait = 0.05;
+      s.enemies = s.enemies.filter((e) => e.boss);
+      for (let i = 0; i < 5; i++) g.advance(0.1);
+    });
+    const before = await ev(() => {
+      const s = window.__game.state();
+      return { held: s.enemies[0].statuses.some((x) => x.kind === 'zablokowany'), posts: s.enemies[0].rt.obs.posts.length, gen: s.enemies.filter((e) => e.family === 'wygenerowane' && !e.boss).length };
+    });
+    await ev(() => {
+      const g = window.__game;
+      const s = g.state();
+      for (let i = 0; i < 66; i++) {
+        s.player.hp = s.player.hpMax;
+        s.player.x = 100;
+        s.player.y = 100;
+        g.advance(0.1);
+      }
+    });
+    const filled = await ev(() => {
+      const s = window.__game.state();
+      const small = s.enemies.filter((e) => e.family === 'wygenerowane' && !e.boss && e.tier === 1).length;
+      return { small, gen: s.enemies.filter((e) => e.family === 'wygenerowane' && !e.boss).length, posts: s.enemies[0].rt.obs.posts.length, age: s.enemies[0].rt.obs.age, notes: window.__game.notes().map((n) => n.text).slice(-8) };
+    });
+    check('S27p9 posts: a post left unanswered summons two Wygenerowane of tier 1 and a new post is marked', before.posts === 1 && !before.held && filled.small >= 2 && filled.gen >= 2 && filled.posts === 1 && filled.age < 2, JSON.stringify({ before, filled }));
+    // phase 2: at half racja two posts round the player, one dotted; 2 s in the dotted one heals a tenth and clears both
+    await ev(() => {
+      const g = window.__game;
+      const s = g.state();
+      s.enemies = s.enemies.filter((e) => e.boss);
+      const b = s.enemies[0];
+      s.player.x = 600;
+      s.player.y = 600;
+      b.hp = b.hpMax / 2 - 5;
+      for (let i = 0; i < 70 && b.rt.obs.posts.length !== 2; i++) {
+        s.player.hp = s.player.hpMax;
+        g.advance(0.1);
+      }
+    });
+    await sleep(500);
+    const two = await ev(() => {
+      const b = window.__game.state().enemies[0];
+      return { phase: b.rt.phase, posts: b.rt.obs.posts.map((q) => q.generated), drawn: document.querySelectorAll('#world [data-part="posts"] [data-post]').length, dotted: document.querySelectorAll('#world [data-part="posts"] [stroke-dasharray="2 6"]').length };
+    });
+    check('S27p9 phase 2: two posts round the player, one solid and one dotted, both drawn', two.phase === 2 && two.posts.length === 2 && two.posts.filter(Boolean).length === 1 && two.drawn === 2 && two.dotted === 1, JSON.stringify(two));
+    await shotOf(qp, 'S27-boss-phase2');
+    const heal = await ev(() => {
+      const g = window.__game;
+      const s = g.state();
+      const b = s.enemies[0];
+      const q = b.rt.obs.posts.find((p) => p.generated);
+      const hp0 = b.hp;
+      s.player.x = q.x;
+      s.player.y = q.y;
+      for (let i = 0; i < 24; i++) {
+        s.player.hp = s.player.hpMax;
+        g.advance(0.1);
+      }
+      return { gained: b.hp - hp0, tenth: b.hpMax * 0.1, posts: b.rt.obs.posts.length, held: b.statuses.some((x) => x.kind === 'zablokowany') };
+    });
+    check('S27p9 phase 2: 2 s in the dotted post heals a tenth of the racja, clears both posts and does not hold the boss', Math.abs(heal.gained - heal.tenth) < 2 && heal.posts === 0 && !heal.held, JSON.stringify(heal));
+    await qctx.close();
+  }
+
   // ---------- 6k'. Akt II systems (S24): the reopened card for a save with the old closed list, once; the two elite affixes ----------
   {
     const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
@@ -3585,7 +3779,7 @@ try {
         const g = document.querySelector(`[data-kind=enemy][data-id="${id}"]`);
         return { caption: [...(g?.querySelectorAll('text') ?? [])].map((x) => x.textContent ?? '').filter((x) => /^[A-ZĄĆĘŁŃÓŚŹŻ ]{5,}$/.test(x)), measured: document.querySelectorAll('[data-part=measured] path').length };
       }, face.info?.id);
-      check(`S15 ${hero}: phase 2 wears the hero's own face (its figure, its caption${hero === 'kartograf' ? ', six measuring arcs' : ''})`, face.ok && face.info?.stage === 'face' && faceDom.caption.includes(faceName[hero]) && faceDom.measured === (hero === 'kartograf' ? 6 : 0), JSON.stringify({ stage: face.info?.stage, caption: faceDom.caption, measured: faceDom.measured }));
+      check(`S15 ${hero}: phase 2 wears the hero's own face (its figure, its caption${hero === 'kartograf' ? ', six measuring arcs' : ''})`, face.ok && face.info?.stage === 'face' && faceDom.caption.join(' ').includes(faceName[hero]) && faceDom.measured === (hero === 'kartograf' ? 6 : 0), JSON.stringify({ stage: face.info?.stage, caption: faceDom.caption, measured: faceDom.measured }));
       await shotOf(fp, `S15-face-${hero}`);
       const last = await ev(() => {
         const h = window.__game;

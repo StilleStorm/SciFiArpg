@@ -17,6 +17,11 @@ const PORT = Number(process.env.BAL_PORT ?? 4197);
 const AIM = process.env.BAL_AIM ?? 'nearest';
 const LOADOUT = (process.env.BAL_LOADOUT ?? '').split(',').filter(Boolean);
 const OUT = process.env.BAL_OUT ?? 'dist-balance';
+// BAL_ULT (S27): 1, 2 or 3 = which of the hero's three ultimates sits on the slot (default: the hero's own, the first)
+const ULTS = { pralka: ['pelnyCykl', 'uznanieOsobowosci', 'reklamacja'], konsultant: ['przekazanie', 'koniecKolejki', 'ankieta'], petlowiec: ['zebranie', 'cofniecie', 'przedwczesny'], kartograf: ['mapaOstateczna', 'skreslenie', 'pomiarKontrolny'], nalesnik: ['decyzjaKomisji', 'zderzenie', 'pelnia'] };
+const ULT_NO = Number(process.env.BAL_ULT ?? 0);
+// BAL_PARA (S27): the paragraph (1..3) every skill is put on at the start (forced; default 1 = the old bot, which gives Pralka's Serwisant nothing to strip)
+const PARA = Number(process.env.BAL_PARA ?? 1);
 const HEROES = (process.env.BAL_HEROES ?? 'pralka,konsultant,petlowiec,kartograf,nalesnik').split(',');
 const URL = `http://127.0.0.1:${PORT}/SciFiArpg/`;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -33,7 +38,7 @@ for (let i = 0; i < 100; i++) {
 }
 
 /** One whole ticket, played in the page. Returns the row. */
-async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode, finaleLevel, aim, loadout }) {
+async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode, finaleLevel, aim, loadout, ult, para }) {
   const g = window.__game;
   const LAWS = { 0: 'wymagana-aktualizacja' };
   const lawId = LAWS[planet] ?? undefined;
@@ -52,6 +57,8 @@ async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode,
       ['bron', 'nakrycie', 'odziez', 'przyrzad', 'dokument'].forEach((slot, i) => g.giveItem(i < 3 ? 'nietypowy' : 'rzadki', slot));
     }
   }
+  if (ult) g.state().hero.ultimateId = ult;
+  if (para > 1) for (const id of g.hero.info().skillIds) g.hero.setParagraph(id, para, true);
   const row = {
     heroId, seed, planet, won: false, ended: false, tEnd: 0, tBossPage: null, tBoss: null, deaths: 0, level: 1, kills: 0,
     potwDropped: 0, potwHeldMax: 0, potwUsed: 0, ults: 0, casts: 0, updates: 0,
@@ -355,7 +362,7 @@ async function playHero(heroId) {
   await page.waitForFunction(() => !!window.__game, null, { timeout: 15000 });
   for (let i = 0; i < RUNS; i++) {
     const seed = process.env.BAL_SEED ? Number(process.env.BAL_SEED) + i : 9100 + i * 131 + ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'].indexOf(heroId) * 7;
-    const row = await page.evaluate(playTicket, { aim: AIM, loadout: LOADOUT, heroId, seed, planet: PLANET, priority: PRIORITY, wallMs: Number(process.env.BAL_RUN_MS ?? 100000), trace: !!process.env.BAL_TRACE, mode: process.env.BAL_MODE ?? 'ticket', finaleLevel: Number(process.env.BAL_LEVEL ?? (process.env.BAL_MODE === 'finale' ? 12 : 1)) });
+    const row = await page.evaluate(playTicket, { aim: AIM, loadout: LOADOUT, para: PARA, ult: ULT_NO > 0 ? ULTS[heroId]?.[ULT_NO - 1] ?? null : null, heroId, seed, planet: PLANET, priority: PRIORITY, wallMs: Number(process.env.BAL_RUN_MS ?? 100000), trace: !!process.env.BAL_TRACE, mode: process.env.BAL_MODE ?? 'ticket', finaleLevel: Number(process.env.BAL_LEVEL ?? (process.env.BAL_MODE === 'finale' ? 12 : 1)) });
     if (process.env.BAL_VERBOSE) console.log(`${heroId} #${i} won=${row.won} t=${row.tEnd}s wall=${((Date.now() - t0) / 1000).toFixed(0)}s lvl=${row.level} deaths=${row.deaths} pages=${row.pages} dbg=${JSON.stringify(row.dbg ?? null).slice(0, 700)}`);
     rows.push(row);
     await page.evaluate(() => window.__game.go('baza')).catch(() => undefined);

@@ -2,7 +2,7 @@
 export type FamilyId = 'urzadzenia' | 'powiadomienia' | 'wygenerowane';
 export const FAMILY_IDS: readonly FamilyId[] = ['urzadzenia', 'powiadomienia', 'wygenerowane'];
 
-export type BossId = 'prototyp' | 'weryfikacja' | 'hipoteza' | 'ankieta';
+export type BossId = 'prototyp' | 'weryfikacja' | 'hipoteza' | 'ankieta' | 'wizualizacja';
 export const BOSS_OF: Record<FamilyId, BossId> = {
   urzadzenia: 'prototyp',
   powiadomienia: 'weryfikacja',
@@ -14,6 +14,7 @@ export const BOSS_FAMILY: Record<BossId, FamilyId> = {
   weryfikacja: 'powiadomienia',
   hipoteza: 'wygenerowane',
   ankieta: 'powiadomienia',
+  wizualizacja: 'wygenerowane',
 };
 
 /** Factory defects of the Urzadzenia family (DESIGN 6). One mechanic each. */

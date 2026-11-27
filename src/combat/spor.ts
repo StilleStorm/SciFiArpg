@@ -80,6 +80,8 @@ export const SPOR_PROMPTS: Record<BossId, readonly [SporEntry, SporEntry]> = {
   hipoteza: [entry('hipoteza', 1, 'egzystencjalny'), entry('hipoteza', 2, 'mechaniczny')],
   // the Ankieta argues only in the planet 6 words (STORY 8.10); the family table points at the same keys
   ankieta: [entryAt('story.p6.boss.spor1', 'regulaminowy'), entryAt('story.p6.boss.spor2', 'egzystencjalny')],
+  // the Wizualizacja argues only in the planet 9 words (STORY 8.15)
+  wizualizacja: [entryAt('story.p9.boss.spor1', 'egzystencjalny'), entryAt('story.p9.boss.spor2', 'regulaminowy')],
 };
 
 /**
@@ -95,6 +97,7 @@ export const STORY_ANSWERS: Readonly<Record<number, readonly [DamageType, Damage
   5: ['regulaminowy', 'egzystencjalny'],
   6: ['mechaniczny', 'egzystencjalny'],
   7: ['regulaminowy', 'mechaniczny'],
+  8: ['egzystencjalny', 'regulaminowy'],
 };
 
 /** The planet's own comment of a phase, or null when the planet has none (then the family's applies). */

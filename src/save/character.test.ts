@@ -5,6 +5,7 @@ import { setUltimateParagraph } from '../heroes/ultimate';
 import { commitLoadout } from '../ui/konfLoadout';
 import { fillDemoInventory } from '../items/demo';
 import { applyUpgrade, gainXp, MAX_LEVEL } from '../progression';
+import { CAMPAIGN_LAST, LEGACY_FINALE_LAST } from '../world/campaign';
 import { createRun, type RunState } from '../world/run';
 import { applyCharacter, emptyCharacter, highestNumber, serializeCharacter, toCharacter } from './character';
 import { SAVE_KEY, SAVE_VERSION, defaultMeta, loadMeta, migrate, saveMeta } from './save';
@@ -212,5 +213,23 @@ describe('migration from the stash', () => {
   it('is stable: migrating a migrated save changes nothing', () => {
     const once = migrate(old);
     expect(migrate(JSON.parse(JSON.stringify(once)))).toEqual(once);
+  });
+});
+
+describe('the return card is remembered per CAMPAIGN_LAST (S27)', () => {
+  const closedAt6 = { current: 0, closed: [0, 1, 2, 3, 4, 5], finalTicket: false, caseClosed: true, extras: 3, cards: { opening: true, chapters: [0, 1, 2, 3, 4, 5], finale: true } };
+
+  it('a character saved with the old boolean loads as shown at the LAST of its time, so it comes again at 9, and the saved value is a number', () => {
+    const c = toCharacter({ ...emptyCharacter('pralka'), campaign: closedAt6 });
+    expect(c?.campaign?.cards?.finale).toBe(LEGACY_FINALE_LAST);
+    expect(c?.campaign?.caseClosed).toBe(false); // reopened: the campaign now runs to planet 9
+    const again = toCharacter(JSON.parse(JSON.stringify(c)));
+    expect(again?.campaign?.cards?.finale).toBe(LEGACY_FINALE_LAST);
+  });
+
+  it('a value shown at the current LAST survives a save and a load; a damaged value is dropped', () => {
+    const shown = { ...closedAt6, closed: [0, 1, 2, 3, 4, 5, 6, 7, 8], cards: { opening: true, chapters: [], finale: CAMPAIGN_LAST } };
+    expect(toCharacter(JSON.parse(JSON.stringify({ ...emptyCharacter('pralka'), campaign: shown })))?.campaign?.cards?.finale).toBe(CAMPAIGN_LAST);
+    expect(toCharacter({ ...emptyCharacter('pralka'), campaign: { ...shown, cards: { opening: true, chapters: [], finale: 'x' } } })?.campaign?.cards?.finale).toBeUndefined();
   });
 });

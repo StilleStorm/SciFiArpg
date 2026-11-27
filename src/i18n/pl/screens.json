@@ -40,6 +40,10 @@
     "travelGo": "Wyjedź",
     "extra": "Zgłoszenie dodatkowe",
     "extraNote": "Planeta i regulamin: losowo.",
+    "caseTitle": "Sprawa nr 48214",
+    "caseLead": "Komisja prowadzi postępowanie w sprawie istnienia wnioskodawcy. Każde zgłoszenie dodatkowe dołącza się do akt jako pismo.",
+    "caseLetter": "Pismo nr {count}.",
+    "caseLetters": "Wnioskodawca stawił się na planecie. Stawiennictwo nie przesądza o istnieniu.|Wnioskodawcę widziano. Osoba, która widziała, nie złożyła podpisu.|Wnioskodawca pozostawił ślady. Ślady przypisano innemu wnioskodawcy.|Wnioskodawcę zliczono. Wynik zliczenia nie zgadza się z wynikiem zliczenia.|Obecność wnioskodawcy potwierdzono. Potwierdzenie cofnięto.|Wnioskodawca składa kolejne zgłoszenie. Składanie zgłoszeń uznaje się za dowód w sprawie.",
     "finale": "Bilet powrotny"
   },
   "baza": {
@@ -254,7 +258,9 @@
         }
       },
       "quests": "Zgłoszenia do wykonania",
-      "questsNote": "Zgłoszenia pobiera się z tablicy. Wykonanie zgłasza się na tablicy. Kolejność dowolna, termin nieokreślony."
+      "questsNote": "Zgłoszenia pobiera się z tablicy. Wykonanie zgłasza się na tablicy. Kolejność dowolna, termin nieokreślony.",
+      "certificates": "Zaświadczenia",
+      "certificatesNote": "Komisja zaświadcza wyłącznie to, co zaszło. Zaświadczenia wydaje się z urzędu."
     },
     "ticketApply": "Zatwierdź zmiany",
     "deskOpen": "Zgłoszenie nr {number} otwarto z urzędu.",
@@ -499,6 +505,15 @@
         "text": "Odebrać pokwitowanie, którego nie wydano. W tym celu wynieść poza bazę wniosek o pokwitowanie i po powrocie doręczyć go Referentowi."
       }
     }
+  },
+  "certs": {
+    "akt1": { "name": "Zaświadczenie o zamknięciu Aktu I", "text": "Komisja zaświadcza, że trzy zgłoszenia Aktu I rozpatrzono. Nie rozstrzyga, na czyją korzyść." },
+    "akt2": { "name": "Zaświadczenie o zamknięciu Aktu II", "text": "Komisja zaświadcza, że trzy zgłoszenia Aktu II rozpatrzono. Dwa z nich przekierowano." },
+    "akt3": { "name": "Zaświadczenie o zamknięciu Aktu III", "text": "Komisja zaświadcza, że trzy zgłoszenia Aktu III rozpatrzono. Wnioskodawcę odnotowano jako ostatnio widzianego." },
+    "sprawa": { "name": "Zaświadczenie o zamknięciu sprawy", "text": "Sprawę zamknięto. Komisja wszczęła sprawę nr 48214, która dotyczy wnioskodawcy." },
+    "pisma1": { "name": "Zaświadczenie o złożeniu pisma", "text": "Złożono pierwsze zgłoszenie dodatkowe. Dołączono je do akt sprawy nr 48214." },
+    "pisma10": { "name": "Zaświadczenie o dziesięciu pismach", "text": "Do akt sprawy nr 48214 dołączono dziesięć pism. Komisja przyjmuje, że ktoś je składał." },
+    "pisma25": { "name": "Zaświadczenie o dwudziestu pięciu pismach", "text": "Akta sprawy nr 48214 liczą dwadzieścia pięć pism. Komisja nie wyklucza już, że wnioskodawca istnieje." }
   },
   "stops": {
     "title": "Przystanki na żądanie",

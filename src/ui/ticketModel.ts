@@ -3,7 +3,7 @@
  * The priority table, the planets and the per-character campaign state are world/campaign.ts's; this file only adapts
  * them to what the form and the cards draw. No DOM here, so it is tested (ticketModel.test.ts).
  */
-import { PLANET_COUNT, type CampaignState, type CardsSeen, type TicketPlan } from '../world/campaign';
+import { CAMPAIGN_LAST, PLANET_COUNT, type CampaignState, type CardsSeen, type TicketPlan } from '../world/campaign';
 
 export { noCardsSeen, type CardsSeen } from '../world/campaign';
 
@@ -19,6 +19,8 @@ export interface CampaignView {
   finale: boolean;
   /** The case was closed at a shorter campaign and has been reopened: the red card "Sprawę wznowiono" is due (CampaignState.reopened). */
   reopened?: boolean;
+  /** Zgłoszenia dodatkowe closed so far: the next one is pismo nr `extras + 1` in the Komisja's case (`extraLetter`). */
+  extras?: number;
 }
 
 export function startOfCampaign(): CampaignView {
@@ -33,8 +35,15 @@ export function campaignViewOf(c: CampaignState, plan?: TicketPlan): CampaignVie
     caseClosed: c.caseClosed,
     finale: plan ? plan.kind === 'final' : c.finalTicket,
     ...(c.reopened ? { reopened: true } : {}),
+    ...(c.caseClosed ? { extras: c.extras } : {}),
   };
 }
+
+/** How many letters the Komisja's case against the applicant has in rotation (`screens.ticket.caseLetters`, pipe-separated). */
+export const CASE_LETTERS = 6;
+
+/** The index (0-based) of the letter the next zgłoszenie dodatkowe adds to the case: every extra is one more, and they cycle. */
+export const extraLetterIndex = (extras: number): number => ((Math.max(0, Math.floor(extras)) % CASE_LETTERS) + CASE_LETTERS) % CASE_LETTERS;
 
 export const actOf = (planetIndex: number): 1 | 2 | 3 => (planetIndex < 3 ? 1 : planetIndex < 6 ? 2 : 3);
 export const ACT_ROMAN = ['I', 'II', 'III'] as const;
@@ -57,7 +66,7 @@ export function cardToShow(view: CampaignView, seen: CardsSeen, ticketsFiled: nu
   const planetIndex = Math.min(Math.max(view.planetIndex, 0), PLANET_COUNT - 1);
   if (!seen.opening && ticketsFiled === 0) return { kind: 'opening', planetIndex };
   if (view.reopened === true && !view.finale) return { kind: 'reopened', planetIndex };
-  if (view.finale) return seen.finale ? null : { kind: 'finale', planetIndex };
+  if (view.finale) return (seen.finale ?? 0) >= CAMPAIGN_LAST ? null : { kind: 'finale', planetIndex };
   if (view.caseClosed && view.closed.includes(planetIndex)) {
     return seen.chapters.includes(-1 - planetIndex) ? null : { kind: 'rewritten', planetIndex };
   }
@@ -67,7 +76,7 @@ export function cardToShow(view: CampaignView, seen: CardsSeen, ticketsFiled: nu
 
 /** Record a card as shown. A rewritten card is remembered as -1 - planetIndex so it shows once per planet too. */
 export function markShown(seen: CardsSeen, card: CardSpec): CardsSeen {
-  if (card.kind === 'finale') return { ...seen, finale: true };
+  if (card.kind === 'finale') return { ...seen, finale: CAMPAIGN_LAST };
   if (card.kind === 'reopened') return seen; // remembered by clearing CampaignState.reopened, not here
   if (card.kind === 'opening') return { opening: true, chapters: [...seen.chapters, ...(seen.chapters.includes(card.planetIndex) ? [] : [card.planetIndex])] };
   const key = card.kind === 'rewritten' ? -1 - card.planetIndex : card.planetIndex;

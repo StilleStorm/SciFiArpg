@@ -10,7 +10,7 @@ export const FIGURE_SCALE = 1.3;
  * A figure drawn larger than the rest (times FIGURE_SCALE): the Węzeł's crowd is small figures and must read as dozens of
  * outlines at phone size; the Planeta is terrain, page-sized, its measured arcs around it.
  */
-export const FIGURE_SIZE: Readonly<Record<string, number>> = { [FIGURE_IDS.wezel]: 1.45, [FIGURE_IDS.planeta]: 2 };
+export const FIGURE_SIZE: Readonly<Record<string, number>> = { [FIGURE_IDS.wezel]: 1.45, [FIGURE_IDS.planeta]: 1.7 };
 /** The body's radius as a fraction of its width (the planet is a disc: its sectors reach its drawn edge, `planeta.ts partAt`). */
 const RADIUS_FRAC: Readonly<Record<string, number>> = { [FIGURE_IDS.planeta]: 0.56 };
 

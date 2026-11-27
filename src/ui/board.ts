@@ -2,7 +2,9 @@ import { t } from '../i18n';
 import { isLost, pendingRewrites, rewriteIndex } from '../save/history';
 import type { MetaState, TicketEntry } from '../save/save';
 import { tween } from '../render/tween';
+import { certificatesOf } from '../world/certificates';
 import { questById, type AcceptResult, type ActiveQuest, type QuestDef, type QuestState, MAX_ACTIVE, offersFor } from '../world/quests';
+import { newCampaign } from '../world/campaign';
 import { h } from './dom';
 import { inkStamp } from './karta-osobowa';
 import { createSheet, type Sheet } from './sheet';
@@ -247,6 +249,20 @@ export function createBoard(root: HTMLElement, handlers: BoardHandlers): Board {
     }
     const right = h('div', 'board-col');
     right.append(h('h3', 'group', t('screens.base.board.history')), list);
+    const certs = certificatesOf(meta.character?.campaign ?? newCampaign());
+    if (certs.length > 0) {
+      const box = h('div', 'bq certs');
+      box.append(h('h4', 'bq-head', t('screens.base.board.certificates')), h('p', 'bq-note', t('screens.base.board.certificatesNote')));
+      const ul = h('ul', 'bq-list');
+      for (const c of certs) {
+        const item = h('li', 'bq-card cert');
+        item.dataset['cert'] = c.id;
+        item.append(h('b', 'bq-title', t(`${c.key}.name`)), h('p', 'bq-text', t(`${c.key}.text`)));
+        ul.append(item);
+      }
+      box.append(ul);
+      left.append(box);
+    }
 
     const board = h('div', 'board');
     board.append(left, right);

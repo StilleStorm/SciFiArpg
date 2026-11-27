@@ -22,10 +22,12 @@ export const FORM_BOSS: readonly BossId[] = ['prototyp', 'weryfikacja', 'hipotez
 /** A form has this many times the racja of the family boss it copies (before the scale of the last planet). */
 export const FORM_HP_MUL = 1.6;
 /** Racja of the hero's face and of the existence finish, before the scale. */
-export const FACE_HP = 420;
+export const FACE_HP = 500;
 /** Every body of the Anomalia hits this much harder than the last planet's scale alone makes it. */
-export const FINALE_DMG_MUL = 1.25;
-export const LAST_HP = 360;
+export const FINALE_DMG_MUL = 1.8;
+export const LAST_HP = 420;
+/** Seconds after a face appears before its Spór comment is posted: the face's own bubble stands alone first (S27 stagger; phase 1 and 3 keep `SPOR_FIRST_S`). */
+export const FACE_SPOR_DELAY_S = 4.5;
 export { FACE_END_FRACTION } from './state';
 /** Seconds after the correction's footnote is due: the old Asystent speaks, the current one corrects it. */
 export const CORRECTION_DELAY_S = 3.5;

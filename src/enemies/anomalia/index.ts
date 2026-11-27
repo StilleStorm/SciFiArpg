@@ -36,6 +36,8 @@ export interface AnomaliaFace {
    * for the renderer (render/enemyFigures.ts draws a solid arc where real, a dotted one elsewhere). Planeta Nieistniejaca.
    */
   parts?(e: Enemy): readonly boolean[];
+  /** Optional: this face's racja as a multiple of `FACE_HP` (S27 pacing: a face the hero finishes in ~20 s wears more). Default 1. */
+  hpMul?: number;
 }
 
 const FACES = new Map<HeroId, AnomaliaFace>();

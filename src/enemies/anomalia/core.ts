@@ -6,14 +6,14 @@
  * enemy drawn in at the desk, the old one struck), so the figure, the Spor and the x2 window belong to one body each.
  * `tickAnomalia` is called from `tickBoss` for every boss each step; `beginFinale` from `populatePage` of the final ticket.
  */
-import { postPromptSpor, promptFromEntry, SPOR_FIRST_S, type SporEntry, type SporReply } from '../../combat/spor';
+import { postPromptSpor, promptFromEntry, type SporEntry, type SporReply } from '../../combat/spor';
 import { DAMAGE_TYPES, type DamageType } from '../../combat/damage';
 import type { Bus } from '../../core/events';
 import type { Enemy } from '../../entities/types';
 import { t } from '../../i18n';
 import type { RunState } from '../../world/run';
 import { rtOf } from '../runtime';
-import { FACE_END_FRACTION, FACE_HP, finaleScale, flushNotes, makeBody, note, sporRng, swapBody } from './bodies';
+import { FACE_END_FRACTION, FACE_HP, FACE_SPOR_DELAY_S, finaleScale, flushNotes, makeBody, note, sporRng, swapBody } from './bodies';
 import { bodyPoint } from './gate';
 import type { AnomaliaFace } from './index';
 import { formFallen, nextFormIndex, startForm } from './phase1';
@@ -81,11 +81,11 @@ function beginFace(s: RunState, bus: Bus, f: Finale, old: Enemy): void {
     startLast(s, bus, f, old);
     return;
   }
-  const e = makeBody(s, f, 'wygenerowane', FACE_HP);
+  const e = makeBody(s, f, 'wygenerowane', FACE_HP * (face.hpMul ?? 1));
   delete e.existence;
   e.r = faceLookup()?.assemblyOf(face.figure, e.seed).radius ?? e.r;
   swapBody(s, bus, f, old, e, 'face', f.heroId);
-  rtOf(e).sporAt = s.time + SPOR_FIRST_S;
+  rtOf(e).sporAt = s.time + FACE_SPOR_DELAY_S;
   note(s, bus, f, t(faceKeys(f.heroId).meet));
   face.start(s, e, bus);
 }

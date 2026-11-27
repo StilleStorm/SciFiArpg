@@ -4,8 +4,8 @@
 // once, ahead of the planet 4 chapter card, and not again after a reload -> planets 4, 5, 6 entered through the case file with the ticket
 // sheet, each played page by page to its boss and closed (planet 5: the parcels wall held by the named elite Doreczyciel, lifted by his
 // death; planet 6: the hatched band held by the Archiwista until the key teczka, the nagranie, is opened; the planet 5 boss with its
-// shopping-cart grid; the planet 6 Ankieta with its row of five squares, both outcomes (a 1 and a 5) and the fight to the end) -> the return
-// ticket after planet 6 (CAMPAIGN_LAST) -> the Anomalia skipped to the stamp, the case closed -> free travel lists planets 1..6, a reload keeps
+// shopping-cart grid; the planet 6 Ankieta with its row of five squares, both outcomes (a 1 and a 5) and the fight to the end) -> planets 7-9 skipped by an archive read
+// back (Akt III is the M6 gate), the return ticket after planet 9 (CAMPAIGN_LAST) with the red return card shown again (once per CAMPAIGN_LAST) -> the Anomalia skipped to the stamp, the case closed -> free travel lists planets 1..9, a reload keeps
 // the campaign -> the two Akt II elite affixes (oddzwaniajacy, dwuetapowy) on every one of planets 4-6 and never on a boss -> 40 enemies on an
 // Akt II page, 5 s of frame times. Cards are skipped, never read to the end; their text is only checked for keys and placeholders.
 // Usage: npm run e2e:m5 (builds into dist-m5 first). Env: M5_PORT (4195), M5_OUT (dist-m5), M5_DIR (shots-m5),
@@ -27,8 +27,9 @@ const BASE = `http://127.0.0.1:${PORT}/SciFiArpg/`;
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 const ORIENTS = { portrait: { width: 390, height: 844 }, landscape: { width: 844, height: 390 } };
-const LAST = 6; // CAMPAIGN_LAST in src/world/campaign.ts
+const LAST = 9; // CAMPAIGN_LAST in src/world/campaign.ts (S27)
 const FIRST_AKT2 = 3; // planet index 3 = planet 4
+const AKT2_END = 6; // planets 4-6 are played here; Akt III (planets 7-9) is the M6 gate, so the case file is carried past it by an archive read back
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 mkdirSync(SHOTS, { recursive: true });
@@ -500,7 +501,7 @@ async function leg(browser, orient, heroKey) {
     5: { loc: ['centrum', 'serwerownia', 'archiwum'], hp: 300, variant: null, spor: 'story.p6.boss.spor1.comment', right: 'regulaminowy', clerk: /Infolinii/, gate: 'teczka' },
   };
   let chapterSkips = 0;
-  for (let p = FIRST_AKT2; p < LAST; p++) {
+  for (let p = FIRST_AKT2; p < AKT2_END; p++) {
     tag = `${orient} ${heroKey} planet ${p + 1}`;
     const ex = EXPECT[p];
     if (p > FIRST_AKT2) {
@@ -573,21 +574,37 @@ async function leg(browser, orient, heroKey) {
       const m = window.__game.meta();
       return { screen: window.__game.screen(), campaign: m.character?.campaign ?? null, plan: window.__game.state()?.plan ?? null, history: m.history.length };
     });
-    if (p < LAST - 1) {
+    if (p < AKT2_END - 1) {
       check('boss down: back on the base, this planet closed once in the save, the next planet is the next ticket', down && after.campaign?.closed?.join() === Array.from({ length: p + 1 }, (_, i) => i).join() && after.campaign?.current === p + 1 && after.plan?.planet === p + 1, JSON.stringify(after));
     } else {
-      check(`boss down on planet ${LAST}: six planets closed, the return ticket to planet 1 is on the desk (finale)`, down && after.campaign?.closed?.join() === '0,1,2,3,4,5' && after.campaign?.finalTicket === true && !after.campaign?.caseClosed && after.plan?.kind === 'final' && after.plan?.planet === 0, JSON.stringify(after));
+      check('boss down on planet 6: six planets closed, planet 7 (Akt III) is the next campaign ticket', down && after.campaign?.closed?.join() === '0,1,2,3,4,5' && after.campaign?.finalTicket === false && after.campaign?.current === 6 && after.plan?.kind === 'campaign' && after.plan?.planet === 6, JSON.stringify(after));
     }
   }
   tag = `${orient} ${heroKey}`;
-  check('the chapter cards of planets 5 and 6 were skipped by a tap', chapterSkips === LAST - 1 - FIRST_AKT2, String(chapterSkips));
+  check('the chapter cards of planets 5 and 6 were skipped by a tap', chapterSkips === AKT2_END - 1 - FIRST_AKT2, String(chapterSkips));
+
+  // ---- Akt III is not played here: the case file is carried to the return ticket (nine planets closed) the way a player's archive is read back ----
+  tag = `${orient} ${heroKey} finale`;
+  await skipCard(1200); // planet 7's chapter card, never read
+  const nine = { current: 0, closed: [0, 1, 2, 3, 4, 5, 6, 7, 8], finalTicket: true, caseClosed: false, extras: 0, cards: { opening: true, chapters: [0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -2, -3], finale: 6 } };
+  const carried = await ev((camp) => {
+    const g = window.__game;
+    const a = JSON.parse(g.exportArchive());
+    const c = a.meta.characters.find((x) => x.id === a.meta.activeCharacterId);
+    c.character.campaign = camp;
+    delete c.bookmark;
+    return g.importArchive(JSON.stringify(a));
+  }, nine);
+  await sleep(700);
+  await page.locator('.desk-sheet .ps-close').first().click({ timeout: 1500 }).catch(() => undefined);
+  await sleep(900);
 
   // ---- the return ticket and the finale, up to the stamp ----
   tag = `${orient} ${heroKey} finale`;
-  // this case file closed the old campaign, so its save already holds cards.finale (the return card is shown once per character, CardsSeen.finale)
+  // the return card is shown once per CAMPAIGN_LAST (CardsSeen.finale holds the LAST it was shown at): this file saw it at the old LAST (6), so it comes again at 9
   const rc = await skipCard(2500);
   const seen = await ev(() => window.__game.meta().character?.campaign?.cards?.finale ?? null);
-  check('the return ticket of an old case file (finale card already seen) shows no second return card', rc === null && seen === true, JSON.stringify({ kind: rc?.kind ?? null, seen }));
+  check('the return ticket of a case file that saw the card at an older LAST shows the red return card again (kind finale), and the save holds the new LAST', carried === true && rc?.kind === 'finale' && seen === LAST, JSON.stringify({ carried, kind: rc?.kind ?? null, seen }));
   const fin = await takeTicket();
   check('the final ticket runs as one page with the Anomalia at the desk', fin.inRun && fin.plan?.kind === 'final' && (await ev(() => window.__game.finale.info()?.stage)) === 'form', JSON.stringify(fin.plan));
   await immortal();
@@ -604,16 +621,16 @@ async function leg(browser, orient, heroKey) {
     const m = window.__game.meta();
     return { c: m.character?.campaign ?? null, plan: window.__game.state()?.plan?.kind ?? null };
   });
-  check('the case is closed in the save (six planets, no final ticket) and extras open on the desk', closed.c?.caseClosed === true && closed.c.finalTicket === false && closed.c.closed.length === LAST && closed.plan === 'extra', JSON.stringify({ c: closed.c && { closed: closed.c.closed, ft: closed.c.finalTicket, cc: closed.c.caseClosed }, plan: closed.plan }));
+  check('the case is closed in the save (nine planets, no final ticket) and extras open on the desk', closed.c?.caseClosed === true && closed.c.finalTicket === false && closed.c.closed.length === LAST && closed.plan === 'extra', JSON.stringify({ c: closed.c && { closed: closed.c.closed, ft: closed.c.finalTicket, cc: closed.c.caseClosed }, plan: closed.plan }));
   await skipCard(1200);
 
-  // ---- 4. free travel lists planets 1..6, a reload keeps the campaign ----
+  // ---- 4. free travel lists planets 1..9, a reload keeps the campaign ----
   tag = `${orient} ${heroKey} travel`;
   await ev(() => window.__game.go('ticket'));
   await page.locator('.ticket-sheet .tk-travel').waitFor({ state: 'visible', timeout: 4000 });
   const rows = await ev(() => [...document.querySelectorAll('.ticket-sheet .tk-travel-row[data-planet]')].map((r) => Number(r.getAttribute('data-planet'))));
   await shot('free-travel');
-  check('free travel lists planets 1..6, no more', rows.join() === '0,1,2,3,4,5', rows.join());
+  check('free travel lists planets 1..9, no more', rows.join() === '0,1,2,3,4,5,6,7,8', rows.join());
   await page.locator('.ticket-sheet .tk-travel-row[data-planet="4"] button').click({ timeout: 3000 });
   await sleep(1000);
   const trav = await ev(() => ({ plan: window.__game.state()?.plan ?? null, sheet: !!document.querySelector('.ticket-sheet') }));
@@ -623,7 +640,7 @@ async function leg(browser, orient, heroKey) {
   await page.waitForFunction(() => window.__game !== undefined);
   await sleep(800);
   const saved = await ev(() => window.__game.meta().characters.map((c) => ({ hero: c.character?.heroId, caseClosed: c.character?.campaign?.caseClosed ?? null, closed: c.character?.campaign?.closed ?? [], ft: c.character?.campaign?.finalTicket ?? null })));
-  check('after a reload the case file keeps the hero, six closed planets and the closed case', saved.length === 1 && saved[0].hero === heroKey && saved[0].caseClosed === true && saved[0].closed.join() === '0,1,2,3,4,5' && saved[0].ft === false, JSON.stringify(saved));
+  check('after a reload the case file keeps the hero, nine closed planets and the closed case', saved.length === 1 && saved[0].hero === heroKey && saved[0].caseClosed === true && saved[0].closed.join() === '0,1,2,3,4,5,6,7,8' && saved[0].ft === false, JSON.stringify(saved));
 
   // ---- 5. 40 enemies on an Akt II page, 5 s of frame times ----
   tag = `${orient} ${heroKey}`;

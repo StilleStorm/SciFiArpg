@@ -14,7 +14,7 @@ import { bindRunEvents } from '../../world/pageTurn';
 import { createRun, type RunState } from '../../world/run';
 import { addItem } from '../../items/inventory';
 import { rtOf } from '../runtime';
-import { FACE_END_FRACTION, FORM_ORDER, finaleScale } from './bodies';
+import { FACE_END_FRACTION, FACE_SPOR_DELAY_S, FORM_ORDER, finaleScale } from './bodies';
 import { advanceStage, deskOf, finaleInfo, skipTo } from './core';
 import { anomaliaHit } from './gate';
 import './register';
@@ -312,7 +312,7 @@ describe('phase 2: the hero face (a stub in this file)', () => {
     stubFace('pralka');
     const c = finale('pralka');
     skipTo(c.s, c.bus, 'face');
-    c.seconds(1.6);
+    c.seconds(FACE_SPOR_DELAY_S + 0.1);
     const p = c.s.spor?.prompt;
     expect(p?.commentKey).toBe('story.finale.face.pralka.spor.comment');
     expect(p?.replies[p.correct].type).toBe('egzystencjalny');
@@ -577,5 +577,17 @@ describe('first-meet notes in the finale', () => {
       ...['prototyp', 'weryfikacja', 'hipoteza'].map((b) => t(`enemies.boss.${b}.meet`)),
     ];
     expect(c.notes().filter((n) => meets.includes(n))).toEqual([]);
+  });
+});
+
+describe('the face stagger and the face racja (S27)', () => {
+  it('a face posts its Spór comment later than the phase 1 comment, so its own bubble stands alone first', () => {
+    stubFace('pralka');
+    const c = finale('pralka');
+    skipTo(c.s, c.bus, 'face');
+    c.seconds(2);
+    expect(c.s.spor?.prompt?.commentKey).not.toBe('story.finale.face.pralka.spor.comment');
+    c.seconds(FACE_SPOR_DELAY_S);
+    expect(c.s.spor?.prompt?.commentKey).toBe('story.finale.face.pralka.spor.comment');
   });
 });

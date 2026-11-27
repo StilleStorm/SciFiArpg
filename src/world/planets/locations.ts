@@ -97,7 +97,7 @@ const BIURO: LocationSpec = {
   wall: 'przepierzenie',
   wallSide: 'przepierzenie-boczne',
   row: 'biurko',
-  flat: [],
+  flat: ['drabina-do-kopuly'],
   props: [
     P('przepierzenie', [150, 170], [[-0.375, 0, 0.1], [-0.125, 0, 0.1], [0.125, 0, 0.1], [0.375, 0, 0.1]]),
     P('przepierzenie-boczne', [46, 52], [[0, -1, 0.34], [0, -0.33, 0.34], [0, 0.33, 0.34], [0, 1, 0.34]]),
@@ -109,6 +109,12 @@ const BIURO: LocationSpec = {
     P('krzesla', [120, 150], [[-0.36, 0, 0.1], [-0.12, 0, 0.1], [0.12, 0, 0.1], [0.36, 0, 0.1]]),
     P('numerek', [38, 48], [[0, 0, 0.42]]),
     P('zegar', [40, 50], [[0, 0, 0.4]]),
+    // planet 9 (S27): the observatory
+    P('teleskop', [80, 105], [[0, 0.1, 0.3]]),
+    P('zegar-bez-cyfr', [44, 56], [[0, 0.1, 0.4]]),
+    P('tablica-rysunkowa', [90, 115], [[-0.25, 0, 0.2], [0.25, 0, 0.2]]),
+    P('drabina-do-kopuly', [150, 210], []),
+    P('rama-pusta', [50, 64], [[0, 0.1, 0.42]]),
   ],
 };
 
@@ -179,13 +185,20 @@ const ARCHIWUM: LocationSpec = {
   layout: 'corridors',
   wall: 'regal',
   flat: ['plachta'],
+  // the props are put on a page from this list in turn, a few from an offset that grows with the page: planet 9's observatory props (S27) stand between planet 6's so that every page of either planet shows both kinds
   props: [
     P('regal', [50, 60], [[0, -1, 0.5], [0, 0, 0.5], [0, 1, 0.5]]),
+    P('plyty-szklane', [70, 90], [[-0.25, 0, 0.2], [0.25, 0, 0.2]]),
     P('szuflady', [140, 180], [[-0.36, 0, 0.1], [-0.12, 0, 0.1], [0.12, 0, 0.1], [0.36, 0, 0.1]]),
+    P('tuby-map', [56, 72], [[-0.2, 0, 0.2], [0.2, 0, 0.2]]),
     P('drabina-przesuwna', [44, 56], [[0, -0.6, 0.45], [0, 0.6, 0.45]]),
+    P('stol-swietlny', [90, 115], [[-0.25, 0, 0.2], [0.25, 0, 0.2]]),
     P('katalog', [60, 76], [[0, 0, 0.42]]),
+    P('dziennik-obserwacji', [50, 64], [[0, 0, 0.4]]),
     P('tomy', [90, 115], [[-0.3, 0, 0.17], [0, 0, 0.17], [0.3, 0, 0.17]]),
+    P('skrzynia-soczewek', [60, 76], [[-0.2, 0, 0.25], [0.2, 0, 0.25]]),
     P('pudla', [80, 100], [[-0.25, 0.1, 0.22], [0.25, 0.1, 0.22], [0, -0.28, 0.2]]),
+    P('przyrzad-pod-plachta', [70, 90], [[0, 0, 0.4]]),
     P('czytelnia', [96, 120], [[-0.25, 0, 0.2], [0.25, 0, 0.2]]),
     P('cisza', [60, 76], [[0, 0, 0.4]]),
     P('plachta', [150, 210], []),

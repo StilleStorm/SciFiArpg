@@ -186,4 +186,70 @@ const ankieta: BodyPart = {
   }),
 };
 
-export const BOSS_BODIES: readonly BodyPart[] = [proto, captcha, hipoteza, ankieta];
+/**
+ * Wizualizacja (STORY 8.15): a framed picture on a three-legged easel (the stilts part, three hips). Double ruled frame; inside it, drawn
+ * in the thin pen (the family's dashes), planet 1 as the model drew it: the horizon runs through the disc, the ring passes in front on both
+ * sides, three moons of which one is square, an oversized suburban house with a picket fence and a dish on top. A strip of hatched lines
+ * hangs under the frame on two strings. No arms, no face, no lettering.
+ */
+/** A ruled rectangle of four filled bars of thickness `t` (solid ink whatever the dashes of the strokes). */
+const bars = (x0: number, y0: number, x1: number, y1: number, t: number): string =>
+  rectPath(x0, y0, x1, y0 + t) + rectPath(x0, y1 - t, x1, y1) + rectPath(x0, y0 + t, x0 + t, y1 - t) + rectPath(x1 - t, y0 + t, x1, y1 - t);
+
+const wizualizacja: BodyPart = {
+  id: 'wizualizacja',
+  family: 'wygenerowane',
+  tier: 1,
+  w: 62,
+  h: 90,
+  neck: null,
+  anchors: { topL: { x: -26, y: -88 }, topR: { x: 26, y: -88 }, back: { x: -30, y: -55 }, front: { x: 0, y: -55 }, side: { x: 30, y: -55 } },
+  variants: 1,
+  rise: 0,
+  headChance: 0,
+  dotted: 0.5,
+  boss: 'wizualizacja',
+  draw: () => ({
+    art: {
+      line:
+        // the tray the frame stands on
+        box(-32, -24, 32, -20, 0.6) +
+        // the strings and the caption strip
+        pl(-8, -20, -14, -15) +
+        pl(8, -20, 14, -15) +
+        box(-16, -15, 16, -5, 0.5),
+      thin:
+        // the planet: a disc, the horizon straight through it, a ring in front on both sides
+        circ(0, -52, 15) +
+        pl(-27, -50, 27, -50.4) +
+        ell(0, -52, 25, 5) +
+        // three moons, the third square
+        circ(-20, -80, 2.6) +
+        circ(21, -79, 2) +
+        box(16.5, -40.5, 21.5, -35.5, 0.4) +
+        // the house on the disc: walls, roof, door, a window, the dish
+        box(-9, -77, 5, -67, 0.5) +
+        pl(-11, -77, -2, -85, 7, -77) +
+        box(-3, -73, 1, -67, 0.3) +
+        box(-7, -74, -5, -71.5, 0.2) +
+        pl(2.5, -83, 6, -88) +
+        'M3-88Q9-88 8-83' +
+        // the picket fence: two rails and the pickets
+        pl(6, -69, 16, -69.4) +
+        pl(6, -65.5, 16, -65.8) +
+        pl(7.5, -71, 7.5, -64) +
+        pl(10, -71, 10, -64) +
+        pl(12.5, -71, 12.5, -64) +
+        pl(15, -71, 15, -64) +
+        // the strip's lines
+        pl(-12, -12, 12, -12.2) +
+        pl(-12, -9, 6, -9.2),
+      hatch: rectPath(-14, -14, 14, -6),
+      // the double ruled frame is filled bars, so it stays a solid rule when the picture's strokes are dashed (existence below 1)
+      ink: bars(-30, -90, 30, -24, 1.8) + bars(-26.5, -86.5, 26.5, -27.5, 1) + circ(-20, -80, 0.9) + circ(5.8, -88, 0.8) + circ(-17, -22, 0.8) + circ(17, -22, 0.8),
+    },
+    hips: [-20, 0, 20],
+  }),
+};
+
+export const BOSS_BODIES: readonly BodyPart[] = [proto, captcha, hipoteza, ankieta, wizualizacja];

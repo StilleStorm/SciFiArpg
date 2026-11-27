@@ -584,6 +584,28 @@
   font-family: var(--mono);
   font-size: 12px;
 }
+/* the Komisja's case against the applicant (STORY 5, 8.16): one letter more with every zgłoszenie dodatkowe */
+.tk-case {
+  margin: 8px 0 0;
+  padding: 6px 8px;
+  border: 1px solid var(--ink);
+}
+.tk-case b {
+  display: block;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.tk-case p {
+  margin: 3px 0 0;
+  font-family: var(--serif);
+  font-size: 14.5px;
+  line-height: 1.3;
+}
+.tk-case .tk-case-letter {
+  font-style: italic;
+}
 .tk-travel-row.extra button {
   border-color: var(--accent);
   color: var(--accent);

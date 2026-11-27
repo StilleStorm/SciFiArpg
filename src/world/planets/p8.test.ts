@@ -121,7 +121,7 @@ describe('planet 8: the boss', () => {
     expect(bossVariantArm(e)).toBe('dlon');
     expect(known('story.p8.boss.variant')).toBe(true);
     expect(bossHintKey(e)).toBe('enemies.boss.weryfikacja.hint');
-    const plain = placeBoss(createRun(5, { plan: plan(8), pageCount: 6 }), 'wygenerowane', 300, 300);
+    const plain = placeBoss(createRun(5, { plan: plan(4), pageCount: 6 }), 'wygenerowane', 300, 300);
     expect(plain.attackRange).toBe(42);
     expect(bossVariantArm(plain)).toBeUndefined();
     expect(bossVariantLine(plain)).toBeUndefined();
@@ -193,7 +193,7 @@ describe('planet 8: the gate on page 4', () => {
       expect(page?.obstacles.find((o) => o.kind === 'gate')?.variant).toBeUndefined();
       expect(page?.location).toBe('jaskinia');
     }
-    expect(createRun(3, { plan: plan(8), pageCount: 6 }).pages.some((p) => p.gate)).toBe(false);
+    expect(createRun(3, { plan: plan(6), pageCount: 6 }).pages.some((p) => p.gate)).toBe(false);
   });
 
   it('the page spawns exactly one named elite titled Użytkownik Potwierdzający, reachable and clear of the gate corner', () => {

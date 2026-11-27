@@ -41,6 +41,7 @@ export const wezel: AnomaliaFace = {
   heroId: PETLOWIEC,
   sporAnswer: 'mechaniczny',
   figure: FIGURE_IDS.wezel,
+  hpMul: 1.3,
   start(_s, e, bus) {
     const st = store.get(e);
     st.head = 0;

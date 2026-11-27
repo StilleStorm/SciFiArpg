@@ -93,10 +93,10 @@ export function clampPriority(id: PriorityId, level: number): PriorityId {
 export const PLANET_COUNT = 9;
 /**
  * The campaign's last planet, 1-based (STORY 2): the return ticket to planet 1 is issued when this one is closed. 3 at the MVP
- * (Akt I), 6 with Akt II (now), 9 after Akt III. A character whose case was closed at a shorter length is reopened when the constant
+ * (Akt I), 6 with Akt II, 9 with Akt III (now). A character whose case was closed at a shorter length is reopened when the constant
  * rises (`toCampaign`, `CampaignState.reopened`).
  */
-export const CAMPAIGN_LAST = 6;
+export const CAMPAIGN_LAST = 9;
 export type Act = 1 | 2 | 3;
 export type LocationType = 'miasto' | 'przedmiescie' | 'magazyn' | 'serwerownia' | 'jaskinia' | 'rownina' | 'wyzyna' | 'biuro' | 'centrum' | 'archiwum';
 /** Sets hosted by a planet (ITEMS 4.1, 12.6): the first planet of each act hosts none. */
@@ -278,7 +278,27 @@ export const PLANETS: readonly PlanetDef[] = [
       },
     ],
   },
-  planet(8, 3, 'wygenerowane', mix(0.15, 0.15, 0.7), ['czas-wsteczny', 'weryfikacja-dwuetapowa', 'parzystosc', 'ciasteczka'], ['miasteczko', 'ladowisko'], ['archiwum', 'biuro'], 'awaria', [6, 6]),
+  {
+    ...planet(8, 3, 'wygenerowane', mix(0.15, 0.15, 0.7), ['czas-wsteczny', 'weryfikacja-dwuetapowa', 'parzystosc', 'ciasteczka'], ['miasteczko', 'ladowisko'], ['archiwum', 'biuro'], 'awaria', [6, 6]),
+    // the act's new body, not BOSS_OF[dominant] (which would be Hipoteza): the Wizualizacja, a Wygenerowane body (STORY 8.15)
+    boss: 'wizualizacja',
+    headline: 'czas-wsteczny',
+    // pages 1-3 archiwum, pages 4-6 and the boss page biuro
+    locationSplit: 3,
+    // page 3 (the last archiwum page): the default hatched band across the exit corner with a Dyzurny; lifts when the forced teczka "akta wnioskodawcy" is opened (planets/p9.ts)
+    gates: [
+      {
+        page: 2,
+        gate: {
+          kind: 'teczka',
+          keyTeczka: true,
+          key: 'story.p9.gate.note',
+          liftKey: 'story.p9.gate.lift',
+          figure: { look: 93, key: 'story.p9.gate.figure' },
+        },
+      },
+    ],
+  },
 ];
 
 export function planetDef(index: number): PlanetDef {
@@ -395,9 +415,15 @@ export interface CampaignState {
 export interface CardsSeen {
   opening: boolean;
   chapters: number[];
-  /** The return ticket's card (STORY 8.4, `story.finale.card`) was shown; absent in older saves. */
-  finale?: true;
+  /**
+   * The return ticket's card (STORY 8.4, `story.finale.card`) was shown at this `CAMPAIGN_LAST`; absent = never. Once per `CAMPAIGN_LAST`
+   * (player, 2026-11-27): a case reopened at a longer campaign sees the red card again. The old boolean `true` loads as `LEGACY_FINALE_LAST`.
+   */
+  finale?: number;
 }
+
+/** The `CAMPAIGN_LAST` of every save that stored `finale: true` (the flag predates the per-LAST value; the last such campaign was 6 planets long). */
+export const LEGACY_FINALE_LAST = 6;
 
 export const noCardsSeen = (): CardsSeen => ({ opening: false, chapters: [] });
 
@@ -406,7 +432,9 @@ export function toCardsSeen(raw: unknown): CardsSeen {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return noCardsSeen();
   const r = raw as Record<string, unknown>;
   const chapters = Array.isArray(r['chapters']) ? r['chapters'].filter((n): n is number => Number.isInteger(n) && (n as number) >= -PLANET_COUNT && (n as number) < PLANET_COUNT) : [];
-  return { opening: r['opening'] === true, chapters: [...new Set(chapters)], ...(r['finale'] === true ? { finale: true as const } : {}) };
+  const f = r['finale'];
+  const finale = f === true ? LEGACY_FINALE_LAST : typeof f === 'number' && Number.isInteger(f) && f >= 1 && f <= PLANET_COUNT ? f : 0;
+  return { opening: r['opening'] === true, chapters: [...new Set(chapters)], ...(finale > 0 ? { finale } : {}) };
 }
 
 export function newCampaign(): CampaignState {
@@ -433,7 +461,7 @@ export function toCampaign(raw: unknown): CampaignState {
     caseClosed = false;
     finalTicket = false;
     current = next;
-  } else if (!caseClosed && !finalTicket && current >= CAMPAIGN_LAST) {
+  } else if (!caseClosed && !finalTicket && (current >= CAMPAIGN_LAST || next >= CAMPAIGN_LAST)) {
     // a save from a longer campaign than the constant says: the return ticket is the next one (damage that points past it is pulled back)
     if (next >= CAMPAIGN_LAST) finalTicket = true;
     else current = CAMPAIGN_LAST - 1;

@@ -9,7 +9,7 @@ import type { Bus } from '../core/events';
 import type { Enemy } from '../entities/types';
 import { ENEMY_SCALE, assemble, assembleBoss, layoutAssembly, type Assembly, type Layout } from '../enemies/assemble';
 import { captionKeyOf, faceDrawing, faceHeroOf, facePartsOf, wearsOwnBody } from '../enemies/anomalia/state';
-import { CONFIRM_R, GRID_CELL, SURVEY_CELLS, SURVEY_NEED_S, surveyCellCenter, GRID_NEED_S, CONFIRM_NEED_S, bossVariantArm, bossVariantGrid, bossVariantLine, gridCellCenter } from '../enemies/bosses';
+import { CONFIRM_R, GRID_CELL, SURVEY_CELLS, SURVEY_NEED_S, surveyCellCenter, GRID_NEED_S, CONFIRM_NEED_S, bossVariantArm, bossVariantGrid, bossVariantLine, gridCellCenter, POST_NEED_S, POST_R } from '../enemies/bosses';
 import { bossBodyOf } from '../enemies/bossBody';
 import { ELITE_SCALE, eliteWord } from '../enemies/families';
 import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsBase';
@@ -434,9 +434,14 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   if (boss) {
     // the Planeta is a map: its name is written on it, above the shaded rim, like a map's title (under its feet it fell among the pads)
     const nameAt = boss === 'weryfikacja' ? GRID_CELL * 1.5 + 14 : facePartsOf(e) ? feet - PLANET_NAME_UP * sc : feet + 16;
-    over.append(
-      el('text', { x: 0, y: n2(nameAt), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [t(captionKeyOf(e) ?? `enemies.boss.${boss}.name`).toLocaleUpperCase('pl')]),
-    );
+    // an Anomalia body's long name ("Asystent w wersji 0.9") stands in two short lines, so the reply cards and the pads cover half of it less
+    const capWords = t(captionKeyOf(e) ?? `enemies.boss.${boss}.name`).toLocaleUpperCase('pl');
+    const capLines = captionKeyOf(e) && !facePartsOf(e) ? wrapClaim(capWords, 14) : [capWords];
+    capLines.forEach((line, i) => {
+      over.append(
+        el('text', { x: 0, y: n2(nameAt + i * readableUnits(11)), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [line]),
+      );
+    });
     const variant = bossVariantLine(e);
     if (variant) {
       // the planet's variant of the boss (STORY 8.0): a line of its own under the name, in the narration hand with a paper halo
@@ -671,6 +676,65 @@ function syncSurvey(e: Enemy, st: FigState): void {
   ring.style.strokeDashoffset = String(len * (1 - p));
 }
 
+/**
+ * Wizualizacja's observation posts (STORY 8.15), marked on the floor: a ruled circle of the post's radius with a cross-hair. The true post is
+ * solid, the generated one dotted with its cross-hair off centre. Ink only, no lettering. Placed in world terms, like the survey row.
+ */
+function buildPosts(e: Enemy): SVGGElement {
+  const g = el('g', { 'data-part': 'posts' });
+  const posts = rtOf(e).obs?.posts ?? [];
+  posts.forEach((q, i) => {
+    const rng = createRng(e.seed).fork(`post${i}`);
+    const c = el('g', { 'data-post': i });
+    const off = q.generated ? 9 : 0;
+    c.append(el('path', { d: wobblyCircle(rng, 0, 0, POST_R, 16, 0.025), 'stroke-width': q.generated ? 1.5 : 2.2, ...(q.generated ? { 'stroke-dasharray': '2 6' } : {}) }));
+    c.append(el('path', { d: `M${n2(off - 14)} ${n2(-off * 0.6)}L${n2(off + 14)} ${n2(-off * 0.6)}M${n2(off)} ${n2(-off * 0.6 - 14)}L${n2(off)} ${n2(-off * 0.6 + 14)}`, 'stroke-width': 1.3 }));
+    c.append(el('path', { d: `M${n2(off - 4)} ${n2(-off * 0.6)}a4 4 0 1 0 8 0a4 4 0 1 0 -8 0`, 'stroke-width': 1 }));
+    g.append(c);
+  });
+  return g;
+}
+
+/** Place the posts where the world has them and trace the stand-in progress of the post the player is in. */
+function syncPosts(e: Enemy, st: FigState): void {
+  const ob = rtOf(e).obs;
+  let host = st.under.querySelector<SVGGElement>(':scope > [data-part="posts"]');
+  const posts = ob?.posts ?? [];
+  if (posts.length === 0) {
+    host?.remove();
+    return;
+  }
+  const sig = posts.map((q) => `${Math.round(q.x)},${Math.round(q.y)},${q.generated ? 1 : 0}`).join(';');
+  if (host && host.dataset['posts'] !== sig) {
+    host.remove();
+    host = null;
+  }
+  if (!host) {
+    host = buildPosts(e);
+    host.dataset['posts'] = sig;
+    st.under.append(host);
+    drawIn(host, 280);
+  }
+  // the under group is mirrored with the figure; the posts are things on the page, so they are placed in world terms and not mirrored
+  const f = st.flip < 0 ? -1 : 1;
+  host.querySelectorAll<SVGGElement>(':scope > [data-post]').forEach((c, i) => {
+    const q = posts[i];
+    if (q) c.setAttribute('transform', `translate(${n2(f * (q.x - e.x))} ${n2(q.y - e.y)}) scale(${f} 1)`);
+  });
+  const p = ob && ob.at >= 0 ? Math.min(1, ob.stand / POST_NEED_S) : 0;
+  const psig = `${ob?.at ?? -1}:${Math.round(p * 30)}`;
+  if (host.dataset['sig'] === psig) return;
+  host.dataset['sig'] = psig;
+  host.querySelector(':scope > [data-part="pprog"]')?.remove();
+  const q = ob && ob.at >= 0 ? posts[ob.at] : undefined;
+  if (!ob || !q || p <= 0) return;
+  const ring = el('path', { d: wobblyCircle(createRng(e.seed).fork('pring'), 0, 0, POST_R - 7, 16, 0.02), 'data-part': 'pprog', 'stroke-width': 2.6, transform: `translate(${n2(f * (q.x - e.x))} ${n2(q.y - e.y)}) scale(${f} 1)` });
+  host.append(ring);
+  const len = ring.getTotalLength();
+  ring.style.strokeDasharray = String(len);
+  ring.style.strokeDashoffset = String(len * (1 - p));
+}
+
 /** Progress of the captcha squares and of the confirmation, drawn once something has progressed. */
 function syncBossProgress(e: Enemy, st: FigState): void {
   const rt = rtOf(e);
@@ -841,6 +905,7 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
   syncStatusMarkers(st.markers, e.statuses, { hw: st.hw, top: st.top, feet: st.feet });
   if (e.boss && !wearsOwnBody(e)) syncBossProgress(e, st);
   if (e.boss && rtOf(e).survey) syncSurvey(e, st);
+  if (e.boss && rtOf(e).obs) syncPosts(e, st);
   if (st.partArcs.length > 0) syncMeasured(e, st);
 }
 

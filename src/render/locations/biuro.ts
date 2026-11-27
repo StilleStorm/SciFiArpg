@@ -212,4 +212,122 @@ function zegar(o: Obstacle, r: Rng): SVGGElement {
   return k.g;
 }
 
-registerDrawings('biuro', { biurko, kartoteka, dystrybutor, roslina, kserokopiarka, przepierzenie, 'przepierzenie-boczne': przepierzenieBoczne, krzesla, numerek, zegar });
+/**
+ * Planet 9's observatory props on the shared office (STORY 8.15), ink and hatching only, no lettering and no digits: a telescope on a tripod
+ * under a drape, a wall clock without digits whose hands are drawn twice, a drawing board with a half-drawn planet, a ladder to a dome hatch
+ * drawn as an arc on the floor, an empty picture frame on a wall hook.
+ */
+/** A telescope on a tripod under a drape: three legs, a tube pointing up and right, a cloth thrown over its middle, the lens ring and the eyepiece out. */
+function teleskop(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.path('M-2 8L-38 94M-2 8L30 96M-2 8L-2 100', { w: 2.2 });
+  k.path('M-22 52L18 52M-14 74L8 74', { w: 1 });
+  k.shape([[-34, 30], [-24, 38], [40, -48], [30, -56]], { fill: 'paper', w: 1.8, jit: 0.4 });
+  // the lens end and the eyepiece
+  k.shape([[30, -56], [42, -48], [46, -56], [34, -64]], { fill: 'paper', w: 1.5, jit: 0.3 });
+  k.disc(40, -57, 3.6, { fill: 'hatch', w: 1 });
+  k.line(-34, 30, -42, 40, 2.6);
+  // the drape over the middle
+  k.path('M-14 14Q-22 -2 -10 -14Q2 -34 16 -34Q30 -26 28 -8Q38 6 22 20Q4 28 -14 14Z', { fill: 'wide', w: 1.8 });
+  k.path('M-4 12Q-6 -6 2 -22M8 18Q12 0 14 -24M20 14Q24 2 22 -10', { w: 0.8 });
+  return k.g;
+}
+
+/** A wall clock without digits: a hatched wall stub, a round face with twelve plain ticks, two pairs of hands, the second pair dotted (drawn twice). */
+function zegarBezCyfr(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-42, 40], [42, 40], [42, 100], [-42, 100]], { fill: 'hatch', w: 1.8, jit: 0.6 });
+  k.shape([[-46, 36], [46, 36], [46, 44], [-46, 44]], { fill: 'paper', w: 1.6, jit: 0.4 });
+  k.line(0, 6, 0, 36, 3);
+  k.disc(0, -30, 42, { fill: 'paper', w: 2.2 });
+  k.disc(0, -30, 36, { w: 1 });
+  let ticks = '';
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2;
+    const inner = i % 3 === 0 ? 27 : 31;
+    ticks += `M${(Math.cos(a) * inner).toFixed(1)} ${(-30 + Math.sin(a) * inner).toFixed(1)}L${(Math.cos(a) * 34).toFixed(1)} ${(-30 + Math.sin(a) * 34).toFixed(1)}`;
+  }
+  k.path(ticks, { w: 1.2 });
+  const hand = (deg: number, len: number, w: number, dotted: boolean): void => {
+    const a = ((deg - 90) / 180) * Math.PI;
+    const n = k.line(0, -30, Math.cos(a) * len, -30 + Math.sin(a) * len, w);
+    if (dotted) n.setAttribute('stroke-dasharray', '2 2.4');
+  };
+  hand(200, 18, 2.8, false);
+  hand(318, 28, 1.8, false);
+  hand(160, 18, 2.2, true);
+  hand(42, 28, 1.4, true);
+  k.disc(0, -30, 2.6, { fill: 'ink', w: 1 });
+  return k.g;
+}
+
+/** A drawing board on two angled legs: the sloped board with a sheet, half a planet in a firm line and the other half only in construction arcs, a T-square, a compass. */
+function tablicaRysunkowa(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.path('M-30 22L-44 96M30 22L44 96M-36 62H36', { w: 2 });
+  k.shape([[-48, 24], [48, 24], [40, -54], [-40, -54]], { fill: 'paper', w: 2.2, jit: 0.6 });
+  k.shape([[-48, 24], [48, 24], [48, 32], [-48, 32]], { fill: 'hatch', w: 1.3, jit: 0.3 });
+  k.shape([[-34, 14], [34, 14], [29, -44], [-29, -44]], { fill: 'paper', w: 1 });
+  // half a planet, solid on the left, construction arcs on the right
+  k.path('M0 -36A24 24 0 0 0 0 12', { w: 1.6 });
+  const dash = k.path('M0 -36A24 24 0 0 1 0 12', { w: 0.8 });
+  dash.setAttribute('stroke-dasharray', '2 3');
+  k.path('M-24 -12H24M0 -40V16', { w: 0.5 });
+  k.path('M-20 -30Q-8 -34 4 -28M10 6Q22 2 26 -8', { w: 0.5 }).setAttribute('stroke-dasharray', '1.5 2');
+  // T-square and a compass
+  k.shape([[-44, -50], [-36, -50], [-36, 18], [-44, 18]], { fill: 'hatch', w: 1.1, jit: 0.2 });
+  k.path('M-36 -44H30', { w: 0.9 });
+  k.path('M36 -44L30 -20M36 -44L42 -20M30 -34H40', { w: 1 });
+  return k.g;
+}
+
+/** A ladder to a dome hatch, drawn on the floor as an arc: two rails curving round and a rung every few degrees, a hatched square hatch at the end. A flat mark. */
+function drabinaDoKopuly(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  const cx = -30;
+  const cy = 54;
+  const pt = (rad: number, deg: number): string => `${(cx + Math.cos((deg * Math.PI) / 180) * rad).toFixed(1)} ${(cy + Math.sin((deg * Math.PI) / 180) * rad).toFixed(1)}`;
+  const a0 = -100;
+  const a1 = -8;
+  const rails = (rad: number): string => `M${pt(rad, a0)}A${rad} ${rad} 0 0 1 ${pt(rad, a1)}`;
+  k.path(rails(78) + rails(94), { w: 1.6 });
+  let rungs = '';
+  for (let a = a0 + 4; a < a1; a += 8) rungs += `M${pt(78, a)}L${pt(94, a)}`;
+  k.path(rungs, { w: 0.9 });
+  const hx = cx + Math.cos((a1 * Math.PI) / 180) * 86;
+  const hy = cy + Math.sin((a1 * Math.PI) / 180) * 86;
+  k.shape([[hx - 8, hy - 9], [hx + 8, hy - 9], [hx + 8, hy + 9], [hx - 8, hy + 9]], { fill: 'hatch', w: 1.4, jit: 0.3 });
+  k.dots([[hx, hy, 1]]);
+  return k.g;
+}
+
+/** An empty picture frame on a wall hook: a hatched wall stub, a nail, two cords, a double frame with nothing in it but a paler patch where something hung. */
+function ramaPusta(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-46, -70], [46, -70], [46, 100], [-46, 100]], { fill: 'hatch', w: 1.8, jit: 0.6 });
+  k.shape([[-46, 96], [46, 96], [50, 104], [-50, 104]], { fill: 'paper', w: 1.6, jit: 0.4 });
+  k.dots([[0, -58, 1.6]]);
+  k.path('M0 -58L-28 -34M0 -58L28 -34', { w: 0.9 });
+  k.shape([[-34, -34], [34, -34], [34, 40], [-34, 40]], { fill: 'paper', w: 2.2, jit: 0.6 });
+  k.shape([[-27, -27], [27, -27], [27, 33], [-27, 33]], { fill: 'wide', w: 1.2, jit: 0.4 });
+  k.shape([[-22, -22], [22, -22], [22, 28], [-22, 28]], { fill: 'paper', w: 0.7, jit: 0.3 });
+  return k.g;
+}
+
+registerDrawings('biuro', {
+  biurko,
+  kartoteka,
+  dystrybutor,
+  roslina,
+  kserokopiarka,
+  przepierzenie,
+  'przepierzenie-boczne': przepierzenieBoczne,
+  krzesla,
+  numerek,
+  zegar,
+  teleskop,
+  'zegar-bez-cyfr': zegarBezCyfr,
+  'tablica-rysunkowa': tablicaRysunkowa,
+  'drabina-do-kopuly': drabinaDoKopuly,
+  'rama-pusta': ramaPusta,
+});

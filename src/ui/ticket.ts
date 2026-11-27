@@ -7,7 +7,7 @@ import type { TicketInfo } from '../world/ticket';
 import { h } from './dom';
 import { createSheet, type Sheet } from './sheet';
 import { CAMPAIGN_LAST, clampPriority, DEFAULT_PRIORITY, planetDef, PRIORITIES, PRIORITY_IDS, priorityUnlocked, type PriorityId } from '../world/campaign';
-import { ACT_ROMAN, actOf, type CampaignView } from './ticketModel';
+import { ACT_ROMAN, actOf, extraLetterIndex, type CampaignView } from './ticketModel';
 import './base.css';
 
 export interface TicketHandlers {
@@ -93,6 +93,11 @@ export function createTicket(root: HTMLElement, handlers: TicketHandlers): Ticke
       r.append(h('span', '', t(planetDef(i).nameKey)), go);
       box.append(r);
     }
+    const letters = t('screens.ticket.caseLetters').split('|');
+    const n = ctx.view.extras ?? 0;
+    const caseBox = h('div', 'tk-case');
+    caseBox.append(h('b', '', t('screens.ticket.caseTitle')), h('p', '', t('screens.ticket.caseLead')), h('p', 'tk-case-letter', `${t('screens.ticket.caseLetter', { count: n + 1 })} ${letters[extraLetterIndex(n)] ?? ''}`));
+    box.append(caseBox);
     const extra = h('div', 'tk-travel-row extra');
     const eb = h('button', '', t('screens.ticket.extra'));
     eb.type = 'button';

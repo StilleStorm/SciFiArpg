@@ -14,6 +14,27 @@ export interface Survey {
   at: number;
 }
 
+/** One observation post of the Wizualizacja: where it is marked on the floor, and whether it is the true one (a solid circle) or the generated one (dotted). */
+export interface ObsPost {
+  x: number;
+  y: number;
+  generated: boolean;
+}
+
+/**
+ * Wizualizacja's observation (STORY 8.15): the posts marked on the floor (none, one, or two in phase 2), `wait` seconds until the next is marked,
+ * `age` since they were marked, `stand` seconds the player has stood in the post `at` (-1 none), `seen` seconds left of the observed state
+ * (existence 1).
+ */
+export interface Observation {
+  posts: ObsPost[];
+  wait: number;
+  age: number;
+  stand: number;
+  at: number;
+  seen: number;
+}
+
 /**
  * Per-enemy mutable state that only the enemy modules read (AI timers, defect and boss phases).
  * Lives on `Enemy.rt`; `rtOf(enemy)` creates it on first use so enemies built by other modules still work.
@@ -75,6 +96,8 @@ export interface EnemyRt {
   grid?: { cells: [number, number]; time: number; cx: number; cy: number };
   /** Ankieta: the survey row of five squares (enemies/bosses.ts `Survey`); absent on other bodies. */
   survey?: Survey;
+  /** Wizualizacja: its observation posts (enemies/bosses.ts); absent on other bodies. */
+  obs?: Observation;
   /** Hipoteza: seconds the player has stood in the outline, and whether it is confirmed. */
   confirm: number;
   confirmed: boolean;

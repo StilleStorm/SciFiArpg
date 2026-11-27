@@ -169,4 +169,132 @@ function plachta(o: Obstacle, r: Rng): SVGGElement {
   return k.g;
 }
 
-registerDrawings('archiwum', { regal, szuflady, 'drabina-przesuwna': drabinaPrzesuwna, katalog, tomy, pudla, czytelnia, plachta });
+/**
+ * Planet 9's observatory props on the shared archive (STORY 8.15), ink and hatching only, no lettering: a rack of glass plates, star charts
+ * rolled in tubes, a light table with a plate on it, an observation log on a lectern, a crate of lenses, an instrument under a dust sheet.
+ */
+/** A rack of glass plates: a frame with a rail top and bottom, nine plates standing in it, two of them showing a picture, one drawn out and leaning. */
+function plytySzklane(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-46, 38], [46, 38], [46, 48], [-46, 48]], { fill: 'hatch', w: 1.6, jit: 0.4 });
+  k.shape([[-46, -52], [46, -52], [46, -44], [-46, -44]], { fill: 'paper', w: 1.6, jit: 0.4 });
+  k.path('M-44 -44V38M44 -44V38', { w: 2 });
+  for (let i = 0; i < 9; i++) {
+    const x = -37 + i * 9.2;
+    k.shape([[x, -42], [x + 6.4, -42], [x + 6.4, 37], [x, 37]], { fill: i === 2 || i === 6 ? 'hatch' : 'paper', w: 0.9, jit: 0.3 });
+  }
+  // the plate drawn out: leaning on the front, a disc and a ring on it
+  k.shape([[-12, 46], [26, 46], [34, -18], [-4, -18]], { fill: 'paper', w: 1.7, jit: 0.4 });
+  k.disc(14, 16, 11, { w: 0.9 });
+  k.path('M-1 18Q14 10 29 14', { w: 0.7 });
+  k.dots([[2, -4, 0.9], [24, -2, 0.8], [8, 38, 0.8]]);
+  return k.g;
+}
+
+/** Star charts rolled in tubes: a stand with six tubes of different heights, hatched bands, one chart pulled half out with stars on it. */
+function tubyMap(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-44, 40], [44, 40], [48, 52], [-48, 52]], { fill: 'hatch', w: 1.6, jit: 0.4 });
+  const tops = [-60, -46, -66, -50, -58, -44];
+  for (let i = 0; i < 6; i++) {
+    const x0 = -42 + i * 14;
+    const y0 = (tops[i] ?? -50) + r.range(-2, 2);
+    k.shape([[x0, y0], [x0 + 11, y0], [x0 + 11, 40], [x0, 40]], { fill: 'paper', w: 1.5, jit: 0.4 });
+    k.path(`M${x0} ${y0 + 6}Q${x0 + 5.5} ${y0 + 9} ${x0 + 11} ${y0 + 6}`, { w: 0.9 });
+    if (i % 2 === 0) k.shape([[x0, y0 + 14], [x0 + 11, y0 + 14], [x0 + 11, y0 + 22], [x0, y0 + 22]], { fill: 'hatch', w: 0.8, jit: 0.2 });
+  }
+  // a chart pulled half out of the third tube: a curling sheet with stars
+  k.path('M-14 -66Q-30 -78 -24 -92Q-8 -98 6 -88Q14 -80 4 -72', { fill: 'paper', w: 1.3 });
+  k.dots([[-14, -90, 0.9], [-6, -84, 0.7], [-18, -80, 0.8], [2, -80, 0.6]]);
+  k.path('M-12 -86l5 3M-17 -83l3 -3', { w: 0.5 });
+  return k.g;
+}
+
+/** A light table: a slab on four legs, a ground-glass panel lit from below (hatched rim), a plate on it with a planet and a ring, a loupe on an arm. */
+function stolSwietlny(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-48, -4], [48, -4], [52, 10], [-52, 10]], { fill: 'paper', w: 2.1, jit: 0.6 });
+  k.shape([[-52, 10], [52, 10], [52, 17], [-52, 17]], { fill: 'hatch', w: 1.3, jit: 0.3 });
+  k.path('M-44 17V56M44 17V56M-26 17V50M26 17V50M-44 40H44', { w: 1.8 });
+  // the glass panel
+  k.shape([[-40, -8], [40, -8], [44, -4], [-44, -4]], { fill: 'hatch', w: 1.1, jit: 0.2 });
+  k.shape([[-36, -40], [36, -40], [40, -8], [-40, -8]], { fill: 'wide', w: 1.5, jit: 0.4 });
+  // the plate on it
+  k.shape([[-24, -34], [20, -34], [24, -12], [-20, -12]], { fill: 'paper', w: 1.3, jit: 0.3 });
+  k.disc(0, -23, 7, { w: 0.9 });
+  k.path('M-14 -21Q0 -28 14 -24', { w: 0.7 });
+  // the loupe on its arm
+  k.path('M42 -6L52 -44Q54 -54 44 -60', { w: 1.6 });
+  k.disc(36, -64, 9, { fill: 'paper', w: 1.5 });
+  k.path('M31 -66Q35 -70 40 -68', { w: 0.6 });
+  return k.g;
+}
+
+/** An observation log on a lectern: a sloped top with an open book of ruled columns (a tick in each), a pen on a chain, a post on a hatched foot. */
+function dziennikObserwacji(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-40, -18], [40, -18], [46, 0], [-46, 0]], { fill: 'paper', w: 2, jit: 0.5 });
+  k.shape([[-46, 0], [46, 0], [46, 8], [-46, 8]], { fill: 'hatch', w: 1.2, jit: 0.3 });
+  k.line(0, 8, 0, 80, 3);
+  k.shape([[-28, 80], [28, 80], [36, 92], [-36, 92]], { fill: 'hatch', w: 1.7, jit: 0.4 });
+  // the open book
+  k.shape([[-36, -16], [-2, -20], [-2, -38], [-36, -34]], { fill: 'paper', w: 1.3, jit: 0.3 });
+  k.shape([[2, -20], [36, -16], [36, -34], [2, -38]], { fill: 'paper', w: 1.3, jit: 0.3 });
+  let rules = '';
+  for (let i = 0; i < 4; i++) rules += `M-32 ${-31 + i * 3.8}L-6 ${-34.4 + i * 3.8}M6 ${-34.4 + i * 3.8}L32 ${-31 + i * 3.8}`;
+  k.path(rules, { w: 0.5 });
+  for (let i = 0; i < 4; i++) k.path(`M${-26 + i * 6} ${-24 + i * -0.6}l1.4 1.6l2.4 -3`, { w: 0.6 });
+  // the pen on its chain
+  k.path('M40 -14Q52 -8 48 4Q46 12 52 18', { w: 0.8 }).setAttribute('stroke-dasharray', '2 1.6');
+  k.line(48, 18, 56, 34, 1.6);
+  return k.g;
+}
+
+/** A crate of lenses: slatted sides, the lid leaning, straw (hatch) in the top, five lenses standing in it with an arc of light on each. */
+function skrzyniaSoczewek(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-46, -4], [46, -4], [46, 54], [-46, 54]], { fill: 'paper', w: 2.2, jit: 0.7 });
+  k.path('M-46 14H46M-46 34H46M-24 -4V54M0 -4V54M24 -4V54', { w: 1 });
+  k.shape([[46, -4], [54, -12], [54, 46], [46, 54]], { fill: 'hatch', w: 1.3, jit: 0.3 });
+  k.shape([[-46, -4], [46, -4], [54, -12], [-38, -12]], { fill: 'hatch', w: 1.5, jit: 0.3 });
+  const sizes = [11, 14, 12, 15, 10];
+  for (let i = 0; i < 5; i++) {
+    const rad = sizes[i] ?? 12;
+    const cx = -34 + i * 17;
+    k.disc(cx, -12 - rad * 0.6, rad, { fill: 'paper', w: 1.3 });
+    k.path(`M${cx - rad * 0.55} ${-12 - rad * 0.6 - rad * 0.2}Q${cx - rad * 0.2} ${-12 - rad * 0.6 - rad * 0.6} ${cx + rad * 0.3} ${-12 - rad * 0.6 - rad * 0.55}`, { w: 0.7 });
+  }
+  // the lid leaning on the right side
+  k.shape([[50, 54], [58, -30], [76, -26], [68, 56]], { fill: 'hatch', w: 1.5, jit: 0.4 });
+  return k.g;
+}
+
+/** An instrument under a dust sheet: a draped hatched shape with folds, a barrel end and two tripod feet showing under the hem. */
+function przyrzadPodPlachta(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.path('M-26 70L-34 96M0 70L2 98M26 70L38 94', { w: 1.8 });
+  k.path('M-40 70Q-46 20 -30 -20Q-18 -58 -6 -70Q6 -86 22 -76Q40 -50 44 -10Q50 40 40 70Q10 80 -14 74Q-30 78 -40 70Z', { fill: 'wide', w: 1.9 });
+  k.path('M-24 62Q-26 16 -14 -22M-2 68Q-4 18 4 -50M18 68Q22 20 24 -26', { w: 0.8 });
+  k.path('M-38 66Q-20 74 -2 68M0 72Q22 78 38 68', { w: 1 });
+  // the barrel end poking out at the top
+  k.shape([[10, -76], [24, -88], [30, -80], [16, -68]], { fill: 'paper', w: 1.4, jit: 0.3 });
+  k.disc(27, -84, 3.2, { w: 0.9 });
+  return k.g;
+}
+
+registerDrawings('archiwum', {
+  regal,
+  szuflady,
+  'drabina-przesuwna': drabinaPrzesuwna,
+  katalog,
+  tomy,
+  pudla,
+  czytelnia,
+  plachta,
+  'plyty-szklane': plytySzklane,
+  'tuby-map': tubyMap,
+  'stol-swietlny': stolSwietlny,
+  'dziennik-obserwacji': dziennikObserwacji,
+  'skrzynia-soczewek': skrzyniaSoczewek,
+  'przyrzad-pod-plachta': przyrzadPodPlachta,
+});

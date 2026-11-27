@@ -6,6 +6,10 @@
  * Ankieta (planet 6, STORY 8.10): walks; every 8 s a row of five star squares is drawn between it and the player (render/enemyFigures.ts);
  * 1.5 s on the 1-star square files a complaint (it is blocked 3 s), 1.5 s on the 5-star square thanks it (it heals 10%, the row goes);
  * a row left 6 s summons two Przypomnienia and draws the next. At half racja the row is drawn round the player every 6 s.
+ * Wizualizacja (planet 9, STORY 8.15): walks, existence pinned at 0.4. First 4 s after arrival, then 8 s after each answer, an observation post (a
+ * solid circle with a cross-hair) is marked on the floor between it and the player; 2 s inside it is an observation (e = 1 for 6 s, zablokowany for
+ * 3); a post left 6 s fills in the detail instead (two Wygenerowane of tier 1, cap 6) and the next is marked. At half racja two posts are marked
+ * round the player every 6 s, one true and one dotted: 2 s in the dotted one confirms the picture (it heals 10%, both posts go).
  * Hipoteza: e = 0.3 until the player stands inside its outline for 3 s; then e = 1 and attacks come 1.5x faster.
  */
 import { SPOR_FIRST_S, postSpor } from '../combat/spor';
@@ -20,7 +24,7 @@ import { assembleBoss } from './assemble';
 import { bossBodyOf, setBossBody } from './bossBody';
 import { BOSS_FAMILY, BOSS_OF, FAMILY_DEFS, FAMILY_IDS, type BossId, type FamilyId } from './families';
 import { makeEnemy } from './make';
-import { newRt, rtOf, type Survey } from './runtime';
+import { newRt, rtOf, type Observation, type Survey } from './runtime';
 import { placeEnemy } from './spawn';
 import { tickAnomalia } from './anomalia/core';
 
@@ -53,7 +57,24 @@ export const BOSSES: Record<BossId, BossDef> = {
   weryfikacja: { hp: 220, speed: 0, dmgMin: 3, dmgMax: 5, pewnoscSiebie: 70, upor: 40, attackRange: 40, attackCooldown: 1.4, claimType: 'regulaminowy' },
   hipoteza: { hp: 260, speed: 46, dmgMin: 6, dmgMax: 9, pewnoscSiebie: 80, upor: 40, attackRange: 42, attackCooldown: 1.3, claimType: 'mechaniczny' },
   ankieta: { hp: 300, speed: 30, dmgMin: 4, dmgMax: 7, pewnoscSiebie: 75, upor: 45, attackRange: 44, attackCooldown: 1.4, claimType: 'regulaminowy' },
+  wizualizacja: { hp: 320, speed: 34, dmgMin: 6, dmgMax: 9, pewnoscSiebie: 80, upor: 45, attackRange: 44, attackCooldown: 1.3, claimType: 'mechaniczny' },
 };
+
+/** Wizualizacja (STORY 8.15): the pinned existence, the post (radius of Hipoteza's outline), and its timings. */
+export const BOSS_WIZUALIZACJA_E = 0.4;
+export const POST_R = CONFIRM_R;
+export const POST_FIRST_S = 4;
+export const POST_EVERY_S = 8;
+export const POST_EVERY_S2 = 6;
+export const POST_NEED_S = 2;
+export const POST_SEEN_S = 6;
+export const POST_BLOCK_S = 3;
+export const POST_REMIND_S = 6;
+export const POST_HEAL = 0.1;
+/** Phase 2: how far from the player the two posts are marked. */
+export const POST_RING = 105;
+/** How far across (units) a post's centre may stand from the player, so the whole circle shows on a phone held upright (the view is at least 390 wide). */
+export const POST_REACH = 390 / 2 - POST_R - 3;
 
 /** Ankieta (STORY 8.10): the row of five squares, its timings. */
 export const SURVEY_CELLS = 5;
@@ -202,6 +223,11 @@ export function makeBoss(id: number, x: number, y: number, seed: number, family:
     const b = cells[spawnRng.int(0, cells.length - 1)] ?? 8;
     rt.grid = { cells: [a, b], time: 0, cx: x, cy: y };
   }
+  if (boss === 'wizualizacja') {
+    e.existence = BOSS_WIZUALIZACJA_E;
+    rt.eTarget = BOSS_WIZUALIZACJA_E;
+    rt.obs = { posts: [], wait: POST_FIRST_S, age: 0, stand: 0, at: -1, seen: 0 };
+  }
   if (boss === 'ankieta') rt.survey = { on: false, cx: x, cy: y, wait: SURVEY_FIRST_S, age: 0, stand: 0, at: -1 };
   return e;
 }
@@ -238,14 +264,15 @@ export function spawnBoss(s: RunState, family: FamilyId | string): Enemy | null 
   return null;
 }
 
-/** Two Przypomnienia round the boss (cap 6 alive): Weryfikacja's summon, and Ankieta's reminder. */
-function summonReminders(s: RunState, e: Enemy): void {
-  const alive = s.enemies.filter((o) => o.family === 'powiadomienia' && !o.boss).length;
+/** Two of `family` (tier 1) round the boss, cap 6 of them alive: Weryfikacja's and Ankieta's Przypomnienia, Wizualizacja's details. */
+function summonAround(s: RunState, e: Enemy, family: FamilyId): void {
+  const alive = s.enemies.filter((o) => o.family === family && !o.boss).length;
   for (let i = 0; i < 2 && alive + i < SUMMON_CAP; i++) {
     const a = s.rngs.spawn.range(0, Math.PI * 2);
-    placeEnemy(s, 'powiadomienia', e.x + Math.cos(a) * (e.r + 40), e.y + Math.sin(a) * (e.r + 40), { tier: 1 });
+    placeEnemy(s, family, e.x + Math.cos(a) * (e.r + 40), e.y + Math.sin(a) * (e.r + 40), { tier: 1 });
   }
 }
+const summonReminders = (s: RunState, e: Enemy): void => summonAround(s, e, 'powiadomienia');
 
 /** Draw the next survey row: between the boss and the player (phase 1), or round the player (phase 2, the survey is obligatory). */
 function sendSurvey(s: RunState, e: Enemy, sv: Survey): void {
@@ -320,6 +347,98 @@ function tickSurvey(s: RunState, e: Enemy, bus: Bus, dt: number): void {
   }
 }
 
+/** Which post of the observation (0..) the point stands in, or -1. */
+export function postAt(posts: readonly { x: number; y: number }[], x: number, y: number): number {
+  return posts.findIndex((q) => Math.hypot(x - q.x, y - q.y) < POST_R);
+}
+
+/** Mark the next post(s): one between the boss and the player (phase 1, the Ankieta's placement), two round the player (phase 2, one of them generated). */
+function markPosts(s: RunState, e: Enemy, ob: Observation): void {
+  const p = s.player;
+  const rng = s.rngs.ai;
+  const inPage = (v: number, max: number): number => Math.min(max - POST_R * 0.6, Math.max(POST_R * 0.6, v));
+  ob.posts = [];
+  if (rtOf(e).phase < 2) {
+    const d = Math.hypot(p.x - e.x, p.y - e.y) || 1;
+    const t0 = Math.min(210, Math.max(135, d * 0.5));
+    const x = Math.min(p.x + POST_REACH, Math.max(p.x - POST_REACH, e.x + ((p.x - e.x) / d) * t0));
+    ob.posts.push({ x: inPage(x, s.page.w), y: inPage(e.y + ((p.y - e.y) / d) * t0, s.page.h), generated: false });
+  } else {
+    const a = rng.range(0, Math.PI * 2);
+    const first = rng.chance(0.5);
+    for (const k of [0, 1]) {
+      const b = a + k * Math.PI;
+      ob.posts.push({ x: inPage(p.x + Math.cos(b) * POST_RING, s.page.w), y: inPage(p.y + Math.sin(b) * POST_RING, s.page.h), generated: (k === 0) === first });
+    }
+  }
+  ob.age = 0;
+  ob.stand = 0;
+  ob.at = -1;
+}
+
+/** Observed or not: the pinned existence 0.4, or 1 while the observation lasts. Runs even while the boss is held (the 6 s are wall time). */
+function tickSeen(e: Enemy, dt: number): void {
+  const ob = rtOf(e).obs;
+  if (!ob) return;
+  if (ob.seen > 0) ob.seen = Math.max(0, ob.seen - dt);
+  e.existence = ob.seen > 0 ? 1 : BOSS_WIZUALIZACJA_E;
+}
+
+/** Wizualizacja's per-step logic: the posts' timers, the true and the generated one, the details, the half-racja phase. */
+function tickObservation(s: RunState, e: Enemy, bus: Bus, dt: number): void {
+  const rt = rtOf(e);
+  const ob = rt.obs;
+  if (!ob) return;
+  const p = s.player;
+  if (rt.phase === 1 && e.hp <= e.hpMax / 2) {
+    rt.phase = 2;
+    bus.emit('footnote', { text: t('enemies.boss.wizualizacja.half') });
+    bus.emit('boss:phase', { id: e.id, family: e.family, x: e.x, y: e.y });
+    postSpor(s, bus, e, 2);
+    ob.wait = ob.posts.length > 0 ? 2 : Math.min(ob.wait, POST_EVERY_S2); // a post up at the break is taken down; the pair follows in 2 s
+    ob.posts = [];
+  }
+  if (ob.posts.length === 0) {
+    ob.wait -= dt;
+    if (ob.wait > 0) return;
+    markPosts(s, e, ob);
+    if (!rt.noted) {
+      rt.noted = true;
+      bus.emit('footnote', { text: t('enemies.boss.wizualizacja.hint') });
+    }
+    return;
+  }
+  ob.age += dt;
+  const at = p.suspended ? -1 : postAt(ob.posts, p.x, p.y);
+  if (at >= 0 && at === ob.at) ob.stand += dt;
+  else ob.stand = at >= 0 ? 0 : Math.max(0, ob.stand - dt * 0.5);
+  ob.at = at;
+  const every = rt.phase >= 2 ? POST_EVERY_S2 : POST_EVERY_S;
+  const post = at >= 0 ? ob.posts[at] : undefined;
+  if (post && ob.stand >= POST_NEED_S) {
+    ob.posts = [];
+    ob.wait = every;
+    ob.stand = 0;
+    ob.at = -1;
+    if (post.generated) {
+      e.hp = Math.min(e.hpMax, e.hp + e.hpMax * POST_HEAL);
+      bus.emit('footnote', { text: t('enemies.boss.wizualizacja.false') });
+    } else {
+      ob.seen = POST_SEEN_S;
+      e.existence = 1;
+      applyStatus(e, 'zablokowany', POST_BLOCK_S, p.id);
+      bus.emit('footnote', { text: t('enemies.boss.wizualizacja.observed') });
+    }
+    bus.emit('boss:phase', { id: e.id, family: e.family, x: e.x, y: e.y });
+    return;
+  }
+  if (ob.age >= POST_REMIND_S) {
+    bus.emit('footnote', { text: t('enemies.boss.wizualizacja.details') });
+    if (!isSilenced(e) && !s.law.botTime) summonAround(s, e, 'wygenerowane');
+    markPosts(s, e, ob);
+  }
+}
+
 /** Per step for a boss (called from the enemy AI, before it moves). */
 export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
   if (!tickAnomalia(s, e, bus, dt)) return; // the Anomalia of the finale (enemies/anomalia/core.ts) runs its own phases; its first-phase forms go on below
@@ -331,6 +450,7 @@ export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
     rt.sporAt = undefined;
     postSpor(s, bus, e, 1);
   }
+  if (boss === 'wizualizacja') tickSeen(e, dt);
   if (isStunned(e)) return;
   if (boss === 'prototyp') {
     if (rt.phase === 1 && e.hp <= e.hpMax / 2) {
@@ -365,6 +485,8 @@ export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
     }
   } else if (boss === 'ankieta') {
     tickSurvey(s, e, bus, dt);
+  } else if (boss === 'wizualizacja') {
+    tickObservation(s, e, bus, dt);
   } else {
     if (!rt.confirmed) {
       e.existence = BOSS_HIPOTEZA_E;

@@ -82,7 +82,7 @@ describe('figure sizes', () => {
     const wezelA = faceAssemblyOf(FIGURE_IDS.wezel);
     const planetaA = faceAssemblyOf(FIGURE_IDS.planeta);
     expect(wezelA.scale).toBeCloseTo(base.scale * 1.45, 5);
-    expect(planetaA.scale).toBeCloseTo(base.scale * 2, 5);
+    expect(planetaA.scale).toBeCloseTo(base.scale * 1.7, 5);
     expect(planetaA.dotted).toBe(0);
     // the drawn disc is 46 units of the body frame; with the reach of a measuring line it is covered whole
     const drawn = 46 * planetaA.scale * ENEMY_SCALE;

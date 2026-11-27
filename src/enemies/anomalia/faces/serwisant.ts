@@ -73,6 +73,7 @@ export const serwisant: AnomaliaFace = {
   heroId: PRALKA,
   sporAnswer: 'egzystencjalny',
   figure: FIGURE_IDS.serwisant,
+  hpMul: 1.3,
   start(s, e, bus) {
     const st = store.get(e);
     st.wait = STRIP_WAIT_S;
