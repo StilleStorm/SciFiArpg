@@ -92,10 +92,9 @@ done) · M3 Akt I + finale = MVP (S11–S16) · M4 Depth (S17–S21) · M5 Akt I
 Polish and release. Progress lines are below.
 
 ## Needs the player
+- **Answered (player, 2026-11-27):** planet 9's body is the Wizualizacja as planned (S27 builds it); the red return card shows once per `CAMPAIGN_LAST` (remember `cards.finale` per LAST in S27; e2e:m5's "not again" assertion flips); planet 9 keeps the epithet Niedostępna.
 - Akt II difficulty (S24 bot, level-14 kits): no hero dies on planets 4-6 Normalny. Raise Akt II enemy numbers, or leave it to the priority levels? Recommendation (M5 story review): a bot data point at the real Akt I exit level (Normalny + Wysoki), then one player ticket; if soft, move `PLANET_DMG_GROWTH`, not hp (S27/S29).
-- Planet 9's new boss body: S25 proposes **Wizualizacja** (STORY §8.15: the picture that stands in a file in place of an observation, a framed drawing on an easel; fought by standing on marked observation posts, from half racja one of two posts is generated and heals it). S27 builds it unless the player objects; alternatives weighed in STORY §8.16 (a generated applicant, the file itself, a crowd of the 87%).
 - Akt III names (S25, STORY §8.13–8.15): Planeta Dwudziesta Dziewiąta (Ewentualna), Trzydziesta (Wygenerowana), Trzydziesta Pierwsza (Niedostępna). The player may rename; nothing waits on it.
-- A case file reopened from an MVP save does not see the red return card again after planet 6 (`cards.finale` is once per character); e2e:m5 asserts this. Should the second return show it? Recommendation: yes once per `CAMPAIGN_LAST` (decide before S27 sets LAST 9).
 - Capstones as built are small flat bonuses (+20–25% on one skill, DESIGN §10.3). Keep them so, or
   turn them into mechanical rules (Diablo 4 key passives) in M4 S19–S21? Recommendation: keep;
   Diablo 2 had none, they read at a glance on the Karta, and the S16 balance pass tunes magnitudes.
@@ -225,7 +224,7 @@ Progress is recorded here, one line per slice:
 
 - S26 done: planet 7 (p7.ts, jaskinia 13 drawings on `rooms`, równina 12 on `rows`, headline nie-przeszkadzac, Hipoteza racja 300 variant, Spór table 6, smoke leg 6i) and planet 8 (p8.ts, wyżyna 14 drawings on `rooms` with wall 'skarpa' (not `rows`: only `rooms` leaves gaps and an open summit), Hipoteza variant `arm: 'dlon'` reach 60, page-4 elite gate, ticket a pays a Domniemanie piece by awizo, Spór table 7, smoke leg 6i'); `akt3-enemies`: `BossVariant.solvedKey` (p5 registers `story.p5.boss.solved`), `eliteIdsFor` Akt II pair from index 3 and the Akt III pair from 6, affixes niepotwierdzony (existence pin 0.3 for 2 s every 6 s on any body; render resets a borrowed existence) and polubiony (−10% damage taken per other non-boss within 200, cap 40%), smoke leg 6k' extended, akt3Elites.test.ts; voice pass on the affix lines. Planets 7–8 are entered by the run hook until S27 raises `CAMPAIGN_LAST`. Look for S28: the planet-8 HIPOTEZA caption over a fence prop; wyżyna props under the HUD (as before). Smoke S15 petlowiec closing-stamp check failed once of three runs (intermittent; `offDesk` false).
 
-**Next pickup:** S27 (planet 9 + Wizualizacja + finale polish; the two player questions under Needs the player first). The /automode loop stays off until the player asks.
+**Next pickup:** S27 (planet 9 + Wizualizacja + finale polish; the player's answers are under Needs the player). The /automode loop stays off until the player asks.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
