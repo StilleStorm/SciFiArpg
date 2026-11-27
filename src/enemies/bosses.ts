@@ -83,7 +83,7 @@ export interface BossVariant {
   /** The reach of its blows instead of `BOSSES[boss].attackRange` (planet 3: 60, an arm with a stapler). */
   attackRange?: number;
   /** The one part drawn on the variant (render/enemyFigures.ts); the body stays. */
-  arm?: 'stapler';
+  arm?: 'stapler' | 'dlon';
   /** The one part drawn on a Weryfikacja's variant: the hydrants of the grid squares as shopping carts (planet 5). */
   grid?: 'koszyk';
   /** i18n key of the captcha hint instead of `enemies.boss.weryfikacja.hint` (planet 5); the solved line stays the family's. */
@@ -92,7 +92,7 @@ export interface BossVariant {
 
 const VARIANTS = new Map<number, BossVariant>();
 const variantLines = new WeakMap<object, string>();
-const variantArms = new WeakMap<object, 'stapler'>();
+const variantArms = new WeakMap<object, 'stapler' | 'dlon'>();
 const variantGrids = new WeakMap<object, 'koszyk'>();
 const variantHints = new WeakMap<object, string>();
 
@@ -108,7 +108,7 @@ export const bossVariantOf = (planet: number | undefined): BossVariant | undefin
 export const bossVariantLine = (e: object): string | undefined => variantLines.get(e);
 
 /** The extra arm drawn on this boss's variant, if its variant has one. */
-export const bossVariantArm = (e: object): 'stapler' | undefined => variantArms.get(e);
+export const bossVariantArm = (e: object): 'stapler' | 'dlon' | undefined => variantArms.get(e);
 
 /** The look of the grid squares on this Weryfikacja's variant ('koszyk': shopping carts), if its variant has one. */
 export const bossVariantGrid = (e: object): 'koszyk' | undefined => variantGrids.get(e);
