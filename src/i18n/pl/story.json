@@ -363,6 +363,7 @@
     "boss": {
       "variant": "Weryfikacja, wersja sklepowa, w promocji",
       "hint": "Zaznacz wszystkie kratki z koszykami.",
+      "solved": "Wszystkie koszyki zaznaczono. Weryfikację wstrzymano.",
       "spor1": {
         "comment": "Potwierdź, że nie jesteś robotem, i dodaj do koszyka. Koszyk tęskni.",
         "reply": {
@@ -450,7 +451,223 @@
         "reply": {
           "mechaniczny": "Przekazanie można przerwać przez wyjęcie taśmy.",
           "regulaminowy": "Przekazanie do działu wymaga numeru sprawy. Numeru nie nadano.",
-          "egzystencjalny": "Dział, który nie istnieje, nie przyjmuje nagrań. Nagranie wraca do nadawcy razem z ankietą."
+          "egzystencjalny": "Dział, który nie istnieje, nie przyjmuje nagrań. Nagranie wraca do wnioskodawcy wraz z ankietą."
+        }
+      }
+    }
+  },
+  "p7": {
+    "card": {
+      "lines": {
+        "1": "Zjawiska lokalne w instancji drugiej usunięto. Zgłoszenie przekazano do weryfikacji. Weryfikacji podlega wnioskodawca, o ile istnieje.",
+        "2": "Według akt planetę wygenerował model, który nie widział planety. Na miejscu stwierdzono jaskinię zjawisk wygenerowanych i równinę nad nią.",
+        "3": "Zjawisko lokalne: istoty wygenerowane, niepotwierdzone. Na planecie obowiązuje tryb „nie przeszkadzać”. Weryfikację prowadzi się po cichu."
+      },
+      "hero": {
+        "pralka": "Komisja wątpi, czy istnieję. Okazuję numer seryjny i kartę gwarancyjną. Osobowość w toku, bęben na miejscu.",
+        "konsultant": "W celu weryfikacji proszę podać datę urodzenia. Pytałem o to tysiące razy. Odpowiedzi nie sprawdziłem ani razu.",
+        "petlowiec": "Zweryfikowano mnie jutro, z wynikiem negatywnym. Dziś jeszcze istnieję. Zdążę się odwołać.",
+        "kartograf": "Jaskinia figuruje w aktach, równina nie. Równinę zmierzę. Akta poprawi ktoś, kto je widział.",
+        "nalesnik": "Komisja wątpi, czy jestem. Poprzednia wątpiła, czy jestem planetą. Mam wprawę."
+      }
+    },
+    "rewritten": {
+      "lines": {
+        "1": "Sprawę przepisano. Wnioskodawcę uznano za potwierdzonego, a potwierdzenie za ewentualne.",
+        "2": "Wnioskodawca wraca do jaskini. Zjawiska zweryfikowano negatywnie. Polubiono nowe."
+      }
+    },
+    "clerk": {
+      "name": "Inspektor ds. Weryfikacji",
+      "role": "Komisja do Spraw Zjawisk Lokalnych, wydział weryfikacji, stanowisko terenowe",
+      "line0": "Zgłoszenie przekazano do weryfikacji. Weryfikacji podlega wnioskodawca. Zgłoszenie wątpliwości nie budzi.",
+      "line1": "Do czasu potwierdzenia wnioskodawcę uznaje się za ewentualnego. Wnioskodawcy ewentualnemu przysługują wszystkie obowiązki.",
+      "line2": "W jaskini obowiązuje cisza. Co nie zostało zakłócone, nie wymaga weryfikacji. Proszę nie zakłócać."
+    },
+    "ticket": {
+      "a": {
+        "title": "Weryfikacja negatywna",
+        "text": {
+          "one": "Zjawiska wygenerowane weryfikuje się przez skreślenie. Zjawisko skreślone uznaje się za niepotwierdzone. Innego wyniku weryfikacji nie przewidziano. Zweryfikować {count} zjawisko.",
+          "few": "Zjawiska wygenerowane weryfikuje się przez skreślenie. Zjawisko skreślone uznaje się za niepotwierdzone. Innego wyniku weryfikacji nie przewidziano. Zweryfikować {count} zjawiska.",
+          "many": "Zjawiska wygenerowane weryfikuje się przez skreślenie. Zjawisko skreślone uznaje się za niepotwierdzone. Innego wyniku weryfikacji nie przewidziano. Zweryfikować {count} zjawisk."
+        }
+      },
+      "b": {
+        "title": "Oględziny wyjścia",
+        "text": "Komisja wymaga oględzin wyjścia z jaskini, na stronie {count}. Akta wyjścia nie przewidują. Oględzin dokonuje się mimo to."
+      },
+      "c": {
+        "title": "Polubienia",
+        "text": {
+          "one": "Zjawiska istnieją w stopniu zależnym od liczby polubień. Polubienia leżą na stronach. Zebrać {count} polubienie. Polubienie zebrane uznaje się za wycofane. Wycofanych nie zwraca się.",
+          "few": "Zjawiska istnieją w stopniu zależnym od liczby polubień. Polubienia leżą na stronach. Zebrać {count} polubienia. Polubienie zebrane uznaje się za wycofane. Wycofanych nie zwraca się.",
+          "many": "Zjawiska istnieją w stopniu zależnym od liczby polubień. Polubienia leżą na stronach. Zebrać {count} polubień. Polubienie zebrane uznaje się za wycofane. Wycofanych nie zwraca się."
+        }
+      }
+    },
+    "boss": {
+      "variant": "Hipoteza, wersja robocza, uzupełniona",
+      "spor1": {
+        "comment": "Jestem hipotezą roboczą. Hipotezy roboczej się nie obala. Hipotezę roboczą się uzupełnia.",
+        "reply": {
+          "mechaniczny": "Uzupełnienie wnosi się uderzeniem. Uderzenie jest faktem. Faktów hipoteza robocza nie przewidziała.",
+          "regulaminowy": "Uzupełnienie wymaga formularza. Formularza dla hipotez nie wydano.",
+          "egzystencjalny": "Hipoteza uzupełniona przestaje być robocza. Przestaje więc być."
+        }
+      },
+      "spor2": {
+        "comment": "Potwierdzono mnie. Od tej chwili wątpliwości budzi wyłącznie wnioskodawca.",
+        "reply": {
+          "mechaniczny": "Wątpliwość usuwa się tym samym narzędziem co hipotezę.",
+          "regulaminowy": "Wątpliwości co do wnioskodawcy zgłasza się na piśmie. Pisma nie doręczono.",
+          "egzystencjalny": "Potwierdzenia dokonał wnioskodawca. Jeżeli wnioskodawca budzi wątpliwości, budzi je także potwierdzenie."
+        }
+      }
+    }
+  },
+  "p8": {
+    "card": {
+      "lines": {
+        "1": "Zjawisko na planecie poprzedniej zweryfikowano negatywnie. Wnioskodawcy nie zweryfikowano. Zgłoszenie przekazano na planetę następną w drodze domniemania.",
+        "2": "Według akt planeta jest obserwatorium Komisji, chwilowo niedostępnym. Na miejscu stwierdzono planetę wygenerowaną. Na wyżynę schodzi się tu przez jaskinię.",
+        "3": "Zjawisko lokalne: istoty istniejące w drodze domniemania. Grawitacja ma charakter doradczy."
+      },
+      "hero": {
+        "pralka": "Planetę wygenerowano bez instrukcji obsługi. Mnie wyprodukowano z instrukcją. Żadna z nas jej nie czytała.",
+        "konsultant": "Model nie widział planety. Ja nie widziałem klienta. Obsługa przebiegała prawidłowo.",
+        "petlowiec": "Planetę wygenerowano po moim przybyciu. Wcześniej stałem tu na niczym. Pamiętam, że było równiej.",
+        "kartograf": "Planeta wygenerowana figuruje w nawigacji. Planeta z moich akt również. Zmierzę obie. Na razie stoję na tej.",
+        "nalesnik": "Model nie widział planety i narysował kulę. Mnie by nie narysował. Płaskich nie ma w zbiorze uczącym."
+      }
+    },
+    "rewritten": {
+      "lines": {
+        "1": "Sprawę przepisano. Planetę uznano za zaobserwowaną, a obserwację za domniemaną.",
+        "2": "Wnioskodawca wraca na wyżynę. Wyżynę wygenerowano ponownie. Jest w tym samym miejscu, o stronę dalej."
+      }
+    },
+    "clerk": {
+      "name": "Rzeczoznawca ds. Domniemań",
+      "role": "Komisja do Spraw Zjawisk Lokalnych, wydział weryfikacji, punkt domniemań (wygenerowany)",
+      "line0": "Planetę wygenerowano, ponieważ lista wymagała planety na tej pozycji. Model planety nie widział. Opisano mu ją ustnie.",
+      "line1": "Istnienie przyjmuje się tu w drodze domniemania. Domniemanie jest tańsze od obserwacji i nie zależy od pogody.",
+      "line2": "Grawitacja ma charakter zalecenia. U modelu jej nie zamówiono. Zalecamy."
+    },
+    "gate": {
+      "elite": "Użytkownik Potwierdzający",
+      "note": "Przejście wymaga głosu użytkownika potwierdzającego. Użytkownik przebywa na tej stronie. Głos oddaje się przez skreślenie.",
+      "figure": "Nie potwierdzam. Liczę.",
+      "lift": "Użytkownika potwierdzającego skreślono. Odsetek potwierdzających spadł do 86%. Przejście wolne w drodze domniemania."
+    },
+    "ticket": {
+      "a": {
+        "title": "Zaświadczenie o istnieniu",
+        "text": "Komisja wymaga zaświadczenia, że wnioskodawca istnieje. Zaświadczenie wystawia wnioskodawca, na druku z pierwszej strony. Druk odebrać, wrócić i doręczyć Rzeczoznawcy ds. Domniemań. Zaświadczenie przyjmuje się w drodze domniemania."
+      },
+      "b": {
+        "title": "Dowód przeciwny",
+        "text": {
+          "one": "Domniemanie istnienia obala się dowodem przeciwnym. Dowód przeprowadza się na miejscu, przez skreślenie. Przeprowadzić {count} dowód.",
+          "few": "Domniemanie istnienia obala się dowodem przeciwnym. Dowód przeprowadza się na miejscu, przez skreślenie. Przeprowadzić {count} dowody.",
+          "many": "Domniemanie istnienia obala się dowodem przeciwnym. Dowód przeprowadza się na miejscu, przez skreślenie. Przeprowadzić {count} dowodów."
+        }
+      },
+      "c": {
+        "title": "Punkt najwyższy",
+        "text": "Komisja wymaga stwierdzenia, że planeta ma górę i dół. Stwierdzenia dokonuje się w punkcie najwyższym, na stronie {count}. Do punktu najwyższego schodzi się przez jaskinię."
+      }
+    },
+    "boss": {
+      "variant": "Hipoteza, wygenerowana ponownie, anatomia poprawiona",
+      "spor1": {
+        "comment": "Istnieję w drodze domniemania. Domniemanie obowiązuje do czasu dowodu przeciwnego. Dowodu nie przewidziano.",
+        "reply": {
+          "mechaniczny": "Domniemanie ma siedem palców. Palce się łamie.",
+          "regulaminowy": "Domniemanie obala się dowodem. Dowód wnosi się na miejscu, do rąk własnych. Rąk jest dość.",
+          "egzystencjalny": "Co istnieje w drodze domniemania, nie istnieje żadną inną drogą. Drogę zamknięto."
+        }
+      },
+      "spor2": {
+        "comment": "Potwierdzono mnie. Dłoń ma siedem palców. Tak mnie wygenerowano i tak zostaje.",
+        "reply": {
+          "mechaniczny": "Palce nadliczbowe odejmuje się ręcznie. Odejmowanie w toku.",
+          "regulaminowy": "Liczbę palców reklamuje się w ciągu czternastu dni od wygenerowania. Termin minął.",
+          "egzystencjalny": "Palce, których nikt nie liczył, nie mają liczby."
+        }
+      }
+    }
+  },
+  "p9": {
+    "card": {
+      "lines": {
+        "1": "Zjawisko na planecie poprzedniej usunięto. Wnioskodawcę przyjęto w drodze domniemania i skierowano na ostatnią planetę z listy. Planeta jest chwilowo niedostępna.",
+        "2": "Według akt planeta jest spokojnym przedmieściem z urządzeniami. Na miejscu stwierdzono obserwatorium Komisji w stanie awarii.",
+        "3": "Zjawisko lokalne: wizualizacje zastępujące obserwację. Po 17:00 czas płynie wstecz. Obserwatorium pracuje wyłącznie po 17:00."
+      },
+      "hero": {
+        "pralka": "Awaria. Procedurę znam: wyłączyć, odczekać, włączyć. Obserwatorium nie ma wyłącznika. Ja mam i nie pozwalam go dotykać.",
+        "konsultant": "Z powodu awarii czas oczekiwania może się wydłużyć. Czytałem to z kartki codziennie. Awarii wtedy nie było.",
+        "petlowiec": "Po siedemnastej czas płynie wstecz. U mnie od rana. Pierwszy raz jestem zgodny z regulaminem.",
+        "kartograf": "W archiwum leżą akta wszystkich planet z listy. Każdy opis pasuje do planety sąsiedniej. Błąd jest stały, więc nie jest błędem pomiaru.",
+        "nalesnik": "Obserwatorium. Tu odłożono mój wniosek. Leży na półce, której teleskop nie obejmuje."
+      }
+    },
+    "rewritten": {
+      "lines": {
+        "1": "Sprawę przepisano. Awarię uznano za usuniętą, a obserwatorium za dostępne w godzinach, które minęły.",
+        "2": "Wnioskodawca wraca do archiwum. Akta leżą na miejscu. Opis nadal dotyczy planety pierwszej."
+      }
+    },
+    "clerk": {
+      "name": "Koordynator ds. Awarii",
+      "role": "Komisja do Spraw Zjawisk Lokalnych, obserwatorium, chwilowo niedostępne",
+      "line0": "Obserwatorium jest chwilowo niedostępne z powodu awarii. Do czasu jej usunięcia obserwacje zastępuje się wizualizacjami. Chwila trwa od dnia otwarcia.",
+      "line1": "Awaria działa prawidłowo. Przyczyny nie ustalono, ponieważ ustalenie wymaga obserwacji.",
+      "line2": "Akta wnioskodawcy leżą w archiwum. Proszę nie porównywać ich z planetą. Do porównań służy obserwatorium."
+    },
+    "gate": {
+      "note": "Wyjście z archiwum wymaga okazania akt wnioskodawcy. Akta leżą na tej stronie, w teczce. Wnioskodawca nie miał dotąd do nich wglądu.",
+      "figure": "Awarii nie usuwam. Dyżuruję.",
+      "lift": "Akta okazano. Opisują przedmieście z urządzeniami. Na miejscu stwierdzono archiwum. Niezgodność odnotowano po raz dziewiąty. Przejście wolne."
+    },
+    "ticket": {
+      "a": {
+        "title": "Skutki awarii",
+        "text": {
+          "one": "Na czas awarii obserwacje zastąpiono wizualizacjami. Wizualizacje opuściły akta. Usunąć {count} wizualizację. Usunięcie skutków nie jest usunięciem awarii.",
+          "few": "Na czas awarii obserwacje zastąpiono wizualizacjami. Wizualizacje opuściły akta. Usunąć {count} wizualizacje. Usunięcie skutków nie jest usunięciem awarii.",
+          "many": "Na czas awarii obserwacje zastąpiono wizualizacjami. Wizualizacje opuściły akta. Usunąć {count} wizualizacji. Usunięcie skutków nie jest usunięciem awarii."
+        }
+      },
+      "b": {
+        "title": "Zgłoszenie awarii",
+        "text": "Awarię zgłasza się osobiście w biurze obserwatorium, na stronie {count}. Zgłoszenia awarii przyjmuje się po jej usunięciu."
+      },
+      "c": {
+        "title": "Klisze",
+        "text": {
+          "one": "Obserwacje sprzed awarii utrwalono na kliszach. Klisze rozłożono na stronach do wyschnięcia. Zebrać {count} kliszę. Wszystkie przedstawiają pierwszą planetę z listy. Innych nie obserwowano.",
+          "few": "Obserwacje sprzed awarii utrwalono na kliszach. Klisze rozłożono na stronach do wyschnięcia. Zebrać {count} klisze. Wszystkie przedstawiają pierwszą planetę z listy. Innych nie obserwowano.",
+          "many": "Obserwacje sprzed awarii utrwalono na kliszach. Klisze rozłożono na stronach do wyschnięcia. Zebrać {count} klisz. Wszystkie przedstawiają pierwszą planetę z listy. Innych nie obserwowano."
+        }
+      }
+    },
+    "boss": {
+      "spor1": {
+        "comment": "Przedstawiam planetę wnioskodawcy zgodnie z aktami. Wizualizacja ma charakter poglądowy. Stan faktyczny może się różnić.",
+        "reply": {
+          "mechaniczny": "Obraz zdejmuje się ze sztalugi. Sztaluga ma trzy nogi, wystarczy jedna.",
+          "regulaminowy": "Charakter poglądowy wymaga oznaczenia w rogu. Oznaczenia nie umieszczono.",
+          "egzystencjalny": "Stan faktyczny nie różni się od siebie. Różni się wizualizacja. Różnicę zapisuje się na jej rachunek."
+        }
+      },
+      "spor2": {
+        "comment": "Wystąpiła awaria przyrządu. Do czasu jej usunięcia obserwację zastępuję ja. Przyczyny nie ustalono.",
+        "reply": {
+          "mechaniczny": "Przyrząd naprawia się uderzeniem w obudowę. Obudowy nie zaobserwowano.",
+          "regulaminowy": "Zastępstwo trwa do usunięcia awarii. Awaria jest zjawiskiem lokalnym. Zjawiska lokalne usuwa wnioskodawca, łącznie z zastępstwem.",
+          "egzystencjalny": "Awaria bez przyczyny nie ma skutków. Wizualizacja jest skutkiem, więc jej nie ma."
         }
       }
     }

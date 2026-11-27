@@ -221,7 +221,9 @@ Progress is recorded here, one line per slice:
 
 - S25 story plan written (voice pass pending): STORY §8.13–8.16 (planets 29–31 Ewentualna, Wygenerowana, Niedostępna; new location types jaskinia, równina, wyżyna; P8 elite gate "Użytkownik Potwierdzający", P9 teczka gate "akta wnioskodawcy"; Hipoteza variants racja 300 and the seven-fingered arm; the new planet-9 body Wizualizacja; no act event, no new clause; elite affixes niepotwierdzony, polubiony for S26; nothing new for the cards at LAST 9), DESIGN §6 notes, PRODUCTION S26/S27 briefs adjusted (a third small builder `akt3-enemies` in S26). Report reports/S25-story.md.
 
-**Next pickup:** S25 voice pass (story.json p7–p9, planets.json p7–p9, the two M5 carry-over lines, STORY §8.16 last bullet), then S26. Slice order unchanged. The /automode loop stays off until the player asks.
+- S25 done: Akt III plan (STORY §8.13–8.16: p7 Ewentualna, p8 Wygenerowana with a page-4 elite gate, p9 Niedostępna with a page-3 teczka gate; planet 9's new body Wizualizacja; affixes niepotwierdzony, polubiony; no act event, family or clause); PRODUCTION S26/S27 adjusted (S26 gains builder `akt3-enemies`); voice pass wrote story.json p7–p9, planets.json p7–p9 and the two M5 carry-overs. Reports S25-story.md, S25-voice.md. Blocking S27 only: the Wizualizacja body and the red return card once per `CAMPAIGN_LAST` (both under Needs the player). Open: the p9 card's „ostatnią planetę z listy” holds only while LAST is 9.
+
+**Next pickup:** S26 (planets 7 and 8 + `akt3-enemies`). The /automode loop stays off until the player asks.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).
