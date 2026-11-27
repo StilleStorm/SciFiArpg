@@ -32,7 +32,9 @@ export type EliteId =
   | 'nadgorliwy'
   | 'wielokrotny'
   | 'oddzwaniajacy'
-  | 'dwuetapowy';
+  | 'dwuetapowy'
+  | 'niepotwierdzony'
+  | 'polubiony';
 
 export const DEFECT_IDS: readonly DefectId[] = ['spins', 'limp', 'thinks', 'overheat', 'firmware', 'loud', 'standby'];
 export const ELITE_IDS: readonly EliteId[] = [
@@ -52,8 +54,16 @@ export const ELITE_IDS: readonly EliteId[] = [
 export const AKT2_ELITE_IDS: readonly EliteId[] = ['oddzwaniajacy', 'dwuetapowy'];
 /** First and last planet index (0-based) of Akt II. */
 export const AKT2_PLANETS = [3, 5] as const;
+/** The two affixes of Akt III (planets 7-9, STORY 8.16): the existence pin on any body, and the audience that shields. */
+export const AKT3_ELITE_IDS: readonly EliteId[] = ['niepotwierdzony', 'polubiony'];
+/** First planet index (0-based) of Akt III. */
+export const AKT3_FIRST_PLANET = 6;
 
-/** The affixes a spawner may roll on a planet (0-based index; undefined = no plan): the ten, plus the two of Akt II on planets 4-6. */
+/**
+ * The affixes a spawner may roll on a planet (0-based index; undefined = no plan): the ten; the two of Akt II from planet 4 on;
+ * the two of Akt III from planet 7 on (pools accumulate, STORY 8.12).
+ */
 export function eliteIdsFor(planet: number | undefined): readonly EliteId[] {
-  return planet !== undefined && planet >= AKT2_PLANETS[0] && planet <= AKT2_PLANETS[1] ? [...ELITE_IDS, ...AKT2_ELITE_IDS] : ELITE_IDS;
+  if (planet === undefined || planet < AKT2_PLANETS[0]) return ELITE_IDS;
+  return planet < AKT3_FIRST_PLANET ? [...ELITE_IDS, ...AKT2_ELITE_IDS] : [...ELITE_IDS, ...AKT2_ELITE_IDS, ...AKT3_ELITE_IDS];
 }

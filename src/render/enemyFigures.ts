@@ -349,6 +349,50 @@ function staplerArm(hw: number, y: number): SVGGElement {
   return g;
 }
 
+/**
+ * The one part of the planet 8 variant of Hipoteza (STORY 8.14, attackRange 60): a long arm out of the body's side with an elbow and a
+ * cuff, ending in a hand of seven fingers fanned out, each bent once at the middle joint (the family's `hand` body, partsGenerated).
+ * Ink and hatching, drawn over the figure; the body is untouched.
+ */
+function dlonArm(hw: number, y: number): SVGGElement {
+  const g = el('g', { 'data-part': 'arm' });
+  const x0 = hw * 0.85;
+  const wx = x0 + 40;
+  const wy = y + 6;
+  g.append(
+    el('path', { d: `M${n2(x0)} ${n2(y)}Q${n2(x0 + 10)} ${n2(y - 12)} ${n2(x0 + 22)} ${n2(y - 5)}Q${n2(x0 + 30)} ${n2(y)} ${n2(wx)} ${n2(wy)}`, 'stroke-width': 2 }),
+    el('circle', { cx: n2(x0 + 22), cy: n2(y - 5), r: 2.4, 'stroke-width': 1.3 }),
+  );
+  const cuff = el('path', { d: `M${n2(wx + 2)} ${n2(wy - 5)}l5 -1l2 11l-5 1Z`, 'stroke-width': 1.3, fill: 'url(#hatch)' });
+  g.append(cuff);
+  const px = wx + 14;
+  const py = wy - 1;
+  // the hand is drawn a half again as large as the arm's scale, so the seven fingers can be counted on the beast's far side
+  const hand = el('g', { transform: `translate(${n2(px)} ${n2(py)}) scale(1.6) translate(${n2(-px)} ${n2(-py)})` });
+  g.append(hand);
+  // seven fingers fanned over 150 degrees, the two outer ones shorter; a thick ink stroke with a paper stroke inside reads as an outlined finger
+  for (let i = 0; i < 7; i++) {
+    const a = ((-75 + i * 25) * Math.PI) / 180;
+    const len = i === 0 || i === 6 ? 11 : i === 3 ? 15 : 13;
+    const bend = a + (i % 2 === 0 ? 0.35 : -0.3);
+    const j1x = px + Math.cos(a) * 6;
+    const j1y = py + Math.sin(a) * 6;
+    const j2x = px + Math.cos(a) * (len * 0.55 + 4);
+    const j2y = py + Math.sin(a) * (len * 0.55 + 4);
+    const tx = j2x + Math.cos(bend) * len * 0.5;
+    const ty = j2y + Math.sin(bend) * len * 0.5;
+    const d = `M${n2(j1x)} ${n2(j1y)}L${n2(j2x)} ${n2(j2y)}L${n2(tx)} ${n2(ty)}`;
+    const outline = el('path', { d, 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' });
+    const inner = el('path', { d, 'stroke-width': 1.3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' });
+    inner.style.stroke = 'var(--paper)';
+    hand.append(outline, inner);
+  }
+  const palm = el('path', { d: `M${n2(px - 8)} ${n2(py - 6)}Q${n2(px - 4)} ${n2(py - 11)} ${n2(px + 3)} ${n2(py - 9)}Q${n2(px + 9)} ${n2(py - 4)} ${n2(px + 8)} ${n2(py + 3)}Q${n2(px + 3)} ${n2(py + 10)} ${n2(px - 4)} ${n2(py + 8)}Q${n2(px - 9)} ${n2(py + 3)} ${n2(px - 8)} ${n2(py - 6)}Z`, 'stroke-width': 1.6 });
+  palm.style.fill = 'var(--paper)';
+  hand.append(palm);
+  return g;
+}
+
 /** Height of the Planeta's name above its feet, in the figure's own units (faces/figures.ts: the shaded rim is 10..22 up). */
 const PLANET_NAME_UP = 27;
 
@@ -403,6 +447,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
       );
     }
     if (bossVariantArm(e) === 'stapler') over.append(staplerArm(hw, feet - H * 0.42));
+    if (bossVariantArm(e) === 'dlon') over.append(dlonArm(hw, feet - H * 0.42));
   } else if (e.elite) {
     over.append(
       el('path', { d: `M${n2(-hw)} ${n2(feet + 3)}Q0 ${n2(feet + 6)} ${n2(hw)} ${n2(feet + 2.5)}M${n2(-hw + 5)} ${n2(feet + 6)}Q0 ${n2(feet + 8.5)} ${n2(hw - 4)} ${n2(feet + 5.5)}`, 'stroke-width': 1.1 }),
@@ -745,6 +790,12 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
       st.dashSig = sig;
       st.fig.setAttribute('stroke-dasharray', sig);
     }
+  } else if (st.opacitySig !== '') {
+    // a body that only borrowed an existence (elite niepotwierdzony) is solid again
+    st.opacitySig = '';
+    st.dashSig = '';
+    st.fig.style.opacity = '';
+    st.fig.removeAttribute('stroke-dasharray');
   }
 
   // claim bubble

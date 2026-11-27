@@ -3160,6 +3160,186 @@ try {
     await qctx.close();
   }
 
+  // ---------- 6i. planet 7 content (S26): jaskinia x3 then rownina x3, every prop drawn, no gate, Hipoteza with racja 300 and the variant line (entered by the run hook: planets 7-9 are past CAMPAIGN_LAST until S27) ----------
+  {
+    const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await qctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const qp = await qctx.newPage();
+    qp.on('pageerror', (e) => problems.push(`S26p7 pageerror: ${e.message}`));
+    qp.on('console', (m) => {
+      if (m.text().includes('Service Worker registration blocked')) return;
+      if (m.type() === 'error' || m.type() === 'warning') problems.push(`S26p7 console.${m.type()}: ${m.text()}`);
+    });
+    const ev = (fn, arg) => qp.evaluate(fn, arg);
+    await qp.goto(BASE, { waitUntil: 'load' });
+    await qp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await qp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 });
+    await sleep(500);
+    await ev(() => window.__game.start(43, { plan: { kind: 'campaign', planet: 6, priority: 'niski', lawId: 'nie-przeszkadzac' }, pageCount: 6 }));
+    await sleep(700);
+    for (let k = 0; k < 4 && (await ev(() => window.__game.state()?.modal ?? null)); k++) {
+      await qp.locator('.pop-wrap .form-btn, .pop-wrap button').locator('visible=true').first().click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(400);
+    }
+    const turn = async (k) => {
+      await ev((n) => {
+        window.__game.state().enemies.length = 0;
+        window.__game.turnTo(n);
+      }, k);
+      await qp.waitForFunction((n) => window.__game.state()?.pageIndex === n && !window.__game.state().turning, k, { timeout: 6000 }).catch(() => undefined);
+      await sleep(500);
+    };
+    const drawn = () => ev(() => {
+      const s = window.__game.state();
+      const nodes = [...document.querySelectorAll('#page [data-obstacle="prop"]')];
+      return { loc: s.page.location, gate: s.page.gate !== undefined, props: nodes.length, drawn: nodes.filter((n) => n.childElementCount > 0).length };
+    });
+    const locs = await ev(() => window.__game.state().pages.map((p) => p.location));
+    check('S26p7 pages: jaskinia x3, rownina x3', locs.join() === 'jaskinia,jaskinia,jaskinia,rownina,rownina,rownina', JSON.stringify(locs));
+    const j1 = await drawn();
+    check('S26p7 page 1: a jaskinia with every prop drawn and no gate', j1.loc === 'jaskinia' && !j1.gate && j1.props >= 6 && j1.props === j1.drawn, JSON.stringify(j1));
+    await shotOf(qp, 'S26-jaskinia-1');
+    await turn(2);
+    const j3 = await drawn();
+    check('S26p7 page 3: a jaskinia with every prop drawn', j3.loc === 'jaskinia' && j3.props >= 6 && j3.props === j3.drawn, JSON.stringify(j3));
+    await turn(3);
+    const r4 = await drawn();
+    check('S26p7 page 4: a rownina with every prop drawn and no gate', r4.loc === 'rownina' && !r4.gate && r4.props >= 4 && r4.props === r4.drawn, JSON.stringify(r4));
+    await shotOf(qp, 'S26-rownina-4');
+    await turn(5);
+    await qp.waitForFunction(() => window.__game.state()?.enemies.some((e) => e.boss), null, { timeout: 8000 }).catch(() => undefined);
+    await sleep(600);
+    const boss = await ev(() => {
+      const b = window.__game.state().enemies.find((e) => e.boss);
+      const v = document.querySelector('[data-part=variant]');
+      return b ? { hp: b.hpMax, loc: window.__game.state().page.location, variant: v?.textContent ?? null } : null;
+    });
+    check('S26p7 boss: Hipoteza on the rownina has racja 300 and the variant line', boss !== null && boss.hp === 300 && boss.loc === 'rownina' && boss.variant === 'Hipoteza, wersja robocza, uzupełniona', JSON.stringify(boss));
+    await shotOf(qp, 'S26-boss-p7');
+    await qctx.close();
+  }
+
+  // ---------- 6i'. planet 8 content (S26): rownina/jaskinia/wyzyna, the elite gate on the last jaskinia page, wyzyna props, Hipoteza with the dlon arm (entered by the run hook: planets 7-9 are past CAMPAIGN_LAST until S27) ----------
+  {
+    const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
+    await qctx.addInitScript(() => {
+      Math.random = () => 0.4242;
+      Date.now = () => 1.75e12;
+    });
+    const qp = await qctx.newPage();
+    qp.on('pageerror', (e) => problems.push(`S26p8 pageerror: ${e.message}`));
+    qp.on('console', (m) => {
+      if (m.text().includes('Service Worker registration blocked')) return;
+      if (m.type() === 'error' || m.type() === 'warning') problems.push(`S26p8 console.${m.type()}: ${m.text()}`);
+    });
+    const ev = (fn, arg) => qp.evaluate(fn, arg);
+    await qp.goto(BASE, { waitUntil: 'load' });
+    await qp.waitForFunction(() => window.__game !== undefined);
+    await sleep(1200);
+    await qp.locator('#ui').getByText('Rozpocznij', { exact: false }).locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('button.choose').locator('visible=true').first().click({ timeout: 5000 });
+    await qp.locator('.card-layer').first().waitFor({ state: 'visible', timeout: 5000 });
+    await qp.locator('.card-layer .card-skip').click({ timeout: 3000 });
+    await sleep(500);
+    // the base of planet 8 (clerk, h:p8 board, ticket a's awizo) is out of reach until S27 raises CAMPAIGN_LAST: the case file is pulled back to planet 6, so
+    // those are covered in planets/p8.test.ts and the leg enters the run by the hook
+    await ev(() => window.__game.start(43, { plan: { kind: 'campaign', planet: 7, priority: 'niski', lawId: 'grawitacja' }, pageCount: 6 }));
+    await sleep(700);
+    for (let k = 0; k < 4 && (await ev(() => window.__game.state()?.modal ?? null)); k++) {
+      await qp.locator('.pop-wrap .form-btn, .pop-wrap button').locator('visible=true').first().click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(400);
+    }
+    const turn = async (k) => {
+      await ev((n) => {
+        window.__game.state().enemies.length = 0;
+        window.__game.turnTo(n);
+      }, k);
+      await qp.waitForFunction((n) => window.__game.state()?.pageIndex === n && !window.__game.state().turning, k, { timeout: 6000 }).catch(() => undefined);
+      await sleep(500);
+    };
+    const locs = await ev(() => window.__game.state().pages.map((q) => q.location));
+    check('S26p8 pages: rownina x2, jaskinia x2, wyzyna x2', locs.join() === 'rownina,rownina,jaskinia,jaskinia,wyzyna,wyzyna', JSON.stringify(locs));
+    await turn(3);
+    const gate0 = await ev(() => {
+      const named = window.__game.enemies.list().filter((e) => e.named);
+      return {
+        loc: window.__game.state().page.location,
+        info: window.__game.gate.info(),
+        wall: document.querySelectorAll('#page [data-obstacle=gate]').length,
+        figure: document.querySelectorAll('#page [data-gate-figure]').length,
+        named: named.map((e) => e.named),
+      };
+    });
+    check('S26p8 gate: page 4 is the last jaskinia page, the hatched band, a Rachmistrz and exactly one named elite, Użytkownik Potwierdzający', gate0.loc === 'jaskinia' && gate0.info?.kind === 'elite' && gate0.info.holds && !gate0.info.look && gate0.wall === 1 && gate0.figure === 1 && gate0.named.length === 1 && gate0.named[0] === 'Użytkownik Potwierdzający', JSON.stringify(gate0));
+    await ev(() => {
+      const h = window.__game;
+      const id = h.state().page.gate?.eliteId;
+      h.enemies.hit(id, 'mechaniczny', 99999);
+      h.advance(0.2);
+    });
+    for (let k = 0; k < 12 && !(await qp.locator('.sheet:not(.hidden) .entry').first().isVisible().catch(() => false)); k++) await sleep(250);
+    if (await qp.locator('.sheet:not(.hidden) .entry').first().isVisible().catch(() => false)) {
+      await qp.locator('.sheet:not(.hidden) .entry').first().click({ timeout: 2000 }).catch(() => undefined);
+      await qp.locator('.sheet:not(.hidden) .install').click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(300);
+      await qp.locator('.sheet.assigning:not(.hidden) .report.later').click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(300);
+    }
+    await sleep(500);
+    const lifted = await ev(() => ({ info: window.__game.gate.info(), page: window.__game.state().page.gate === undefined, notes: window.__game.notes().map((n) => n.text) }));
+    check('S26p8 gate: when the Użytkownik is slain the gate lifts with the planet own footnote', lifted.info === null && lifted.page && lifted.notes.some((x) => /Odsetek\s+potwierdzających/.test(x)), JSON.stringify({ info: lifted.info, page: lifted.page, notes: lifted.notes.slice(-2) }));
+    await ev(() => { window.__game.state().player.suspended = false; });
+    await turn(4);
+    for (let k = 0; k < 4 && (await qp.locator('.sheet:not(.hidden) .entry').first().isVisible().catch(() => false)); k++) {
+      await qp.locator('.sheet:not(.hidden) .entry').first().click({ timeout: 2000 }).catch(() => undefined);
+      await qp.locator('.sheet:not(.hidden) .install').click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(300);
+      await qp.locator('.sheet.assigning:not(.hidden) .report.later').click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(300);
+    }
+    const props = await ev(() => {
+      const s = window.__game.state();
+      const nodes = [...document.querySelectorAll('#page [data-obstacle="prop"]')];
+      return { loc: s.page.location, props: nodes.length, drawn: nodes.filter((n) => n.childElementCount > 0).length };
+    });
+    check('S26p8 page 5: a wyzyna with every prop drawn', props.loc === 'wyzyna' && props.props >= 6 && props.props === props.drawn, JSON.stringify(props));
+    await shotOf(qp, 'S26-wyzyna-5');
+    await turn(5);
+    for (let k = 0; k < 4 && !(await ev(() => window.__game.state()?.enemies.some((e) => e.boss))); k++) {
+      if (await qp.locator('.sheet:not(.hidden) .entry').first().isVisible().catch(() => false)) {
+        await qp.locator('.sheet:not(.hidden) .entry').first().click({ timeout: 2000 }).catch(() => undefined);
+        await qp.locator('.sheet:not(.hidden) .install').click({ timeout: 2000 }).catch(() => undefined);
+        await sleep(300);
+        await qp.locator('.sheet.assigning:not(.hidden) .report.later').click({ timeout: 2000 }).catch(() => undefined);
+      }
+      await sleep(900);
+    }
+    await qp.waitForFunction(() => window.__game.state()?.enemies.some((e) => e.boss), null, { timeout: 8000 }).catch(() => undefined);
+    await sleep(600);
+    const boss = await ev(() => {
+      const b = window.__game.state().enemies.find((e) => e.boss);
+      const v = document.querySelector('[data-part=variant]');
+      return b ? { hp: b.hpMax, reach: b.attackRange, loc: window.__game.state().page.location, variant: v?.textContent ?? null, arm: document.querySelectorAll('[data-part=arm]').length } : null;
+    });
+    check('S26p8 boss: Hipoteza on the wyzyna summit, racja 260, reach 60, the variant line and one arm drawn', boss !== null && boss.loc === 'wyzyna' && boss.hp === 260 && boss.reach === 60 && boss.variant === 'Hipoteza, wygenerowana ponownie, anatomia poprawiona' && boss.arm === 1, JSON.stringify(boss));
+    let first = null;
+    for (let i = 0; i < 50 && !first; i++) {
+      const info = await ev(() => window.__game.spor.info());
+      if (info?.open && info.phase === 1) first = info;
+      else await sleep(200);
+    }
+    check('S26p8 Spór: the planet 8 comment (story.p8.boss.spor1) is posted and the right reply is the regulaminowy one', first !== null && first.commentKey === 'story.p8.boss.spor1.comment' && first.replies[first.correct].textKey.endsWith('.regulaminowy'), JSON.stringify({ key: first?.commentKey, right: first ? first.replies[first.correct].textKey : null }));
+    await shotOf(qp, 'S26-boss-p8');
+    await qctx.close();
+  }
+
   // ---------- 6k'. Akt II systems (S24): the reopened card for a save with the old closed list, once; the two elite affixes ----------
   {
     const qctx = await browser.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA, colorScheme: 'light', serviceWorkers: 'block' });
@@ -3271,6 +3451,66 @@ try {
     check('S24 oddzwaniajacy: struck, it is gone for 4 s, then returns once at 30% racja with the claim "Oddzwaniam"', o0.gone && o1 === 0 && o2.n === 1 && o2.affix === 'oddzwaniajacy' && Math.abs(o2.hp / o2.max - 0.3) < 0.05 && o2.claim === 'enemies.claim.oddzwaniam' && o2.bubble.some((x) => /Oddzwaniam/.test(x)), JSON.stringify({ o0, o1, o2 }));
     check('S24 oddzwaniajacy: it is inked again over its strike (the two strokes drawn again on its spot as it returns)', o2.restrike === 1, JSON.stringify({ restrike: o2.restrike }));
     await shotOf(qp, 'S24-oddzwaniajacy');
+
+    // S26: the two Akt III affixes on planet 7 (index 6): niepotwierdzony flickers on a non-Wygenerowane body, polubiony is shielded by the crowd
+    await ev(() => window.__game.start(48, { plan: { kind: 'campaign', planet: 6, priority: 'niski', lawId: 'godziny-konsultanta' }, pageCount: 3 }));
+    await sleep(700);
+    for (let k = 0; k < 4 && (await ev(() => window.__game.state()?.modal ?? null)); k++) {
+      await qp.locator('.pop-wrap .form-btn, .pop-wrap button').locator('visible=true').first().click({ timeout: 2000 }).catch(() => undefined);
+      await sleep(400);
+    }
+    await ev(() => {
+      const g = window.__game;
+      g.state().player.suspended = true;
+      g.state().player.level = 25;
+      g.enemies.clear();
+      g.enemies.spawnFamily('urzadzenia', 1, { elite: 'niepotwierdzony' });
+    });
+    await sleep(400);
+    const opac = () => ev(() => {
+      const f = document.querySelector('#world g[data-kind="enemy"] [data-part], #world g[data-kind="enemy"]');
+      const g = [...document.querySelectorAll('#world g[data-kind="enemy"] g')].find((x) => x.style.opacity !== '');
+      return g ? Number(g.style.opacity) : (f ? 1 : -1);
+    });
+    await ev(() => window.__game.advance(3));
+    const n0 = await ev(() => window.__game.enemies.list()[0]?.existence ?? null);
+    await ev(() => window.__game.advance(2.6));
+    await sleep(300);
+    const n1 = await ev(() => window.__game.enemies.list()[0]?.existence ?? null);
+    const n1o = await opac();
+    await shotOf(qp, 'S26-niepotwierdzony');
+    await ev(() => window.__game.advance(2.5));
+    await sleep(300);
+    const n2 = await ev(() => window.__game.enemies.list()[0]?.existence ?? null);
+    const n2o = await opac();
+    check('S26 niepotwierdzony: a Urządzenia body is solid, flickers to 0.3 after 6 s (drawn lighter), and is solid again after 2 s', n0 === null && n1 === 0.3 && n2 === null && n1o < 0.7 && n2o >= 0.99, JSON.stringify({ n0, n1, n1o, n2, n2o }));
+
+    await ev(() => {
+      const g = window.__game;
+      g.enemies.clear();
+      g.enemies.spawnFamily('urzadzenia', 1, { elite: 'polubiony' });
+    });
+    await sleep(300);
+    const pol = await ev(() => {
+      const g = window.__game;
+      const e = g.state().enemies[0];
+      e.hp = e.hpMax = 99999;
+      g.enemies.hit(e.id, 'mechaniczny', 1000);
+      const alone = e.hpMax - e.hp;
+      const ids = g.enemies.spawnFamily('urzadzenia', 6);
+      g.state().enemies.filter((x) => ids.includes(x.id)).forEach((x, i) => {
+        x.x = e.x + 40 + i * 12;
+        x.y = e.y + 30;
+        x.home = { x: x.x, y: x.y };
+      });
+      const e2 = g.state().enemies.find((x) => x.elite?.affix === 'polubiony');
+      e2.hp = e2.hpMax = 99999;
+      g.enemies.hit(e2.id, 'mechaniczny', 1000);
+      return { alone, crowd: e2.hpMax - e2.hp, n: g.state().enemies.length };
+    });
+    await sleep(300);
+    await shotOf(qp, 'S26-polubiony');
+    check('S26 polubiony: with a crowd around it the elite takes 40% less', pol.alone > 0 && Math.abs(pol.crowd / pol.alone - 0.6) < 0.08, JSON.stringify(pol));
     await qctx.close();
   }
 

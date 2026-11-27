@@ -11,7 +11,7 @@ import { resolveMove } from '../world/pages';
 import { sporMul } from '../combat/spor';
 import type { RunState } from '../world/run';
 import { anomaliaHit } from './anomalia/gate';
-import { POUFNY_DMG_MUL, hasAffix, ownsAffix } from './elites';
+import { POLUBIONY_CAP, POLUBIONY_CUT, POLUBIONY_RADIUS, POUFNY_DMG_MUL, hasAffix, ownsAffix } from './elites';
 import { rtOf } from './runtime';
 import { onSetHurt } from '../items/setFx';
 
@@ -19,6 +19,16 @@ type Fighter = Player | Enemy;
 
 /** e in [0.3, 1] for Wygenerowane, 1 for everything else. */
 export const existenceOf = (e: Enemy): number => e.existence ?? 1;
+
+/** polubiony: the share of damage the audience takes off, 10% per other living non-boss enemy within 200 units, 40% at most. */
+export function polubionyCut(s: RunState, e: Enemy): number {
+  let n = 0;
+  for (const o of s.enemies) {
+    if (o === e || o.boss || o.hp <= 0) continue;
+    if (Math.hypot(o.x - e.x, o.y - e.y) <= POLUBIONY_RADIUS) n++;
+  }
+  return Math.min(POLUBIONY_CAP, n * POLUBIONY_CUT);
+}
 
 /** Damage an enemy deals: existence and the aura of a zweryfikowany elite. */
 export function enemyOutgoing(e: Enemy, amount: number): number {
@@ -63,6 +73,7 @@ export function modifyDamage(
     if (s) a *= sporMul(s, defender.id); // the window of a won argument: x2 against that boss, on top of a rebuttal crit
     a *= existenceOf(defender);
     if (hasAffix(defender, 'poufny') && !answered) a *= POUFNY_DMG_MUL; // confidential: only an answer to the claim goes through whole
+    if (s && ownsAffix(defender, 'polubiony')) a *= 1 - polubionyCut(s, defender); // liked: the audience shields it
   }
   a *= statusDamageTakenMul(defender);
   const out = Math.max(1, Math.round(a));

@@ -88,6 +88,8 @@ export interface BossVariant {
   grid?: 'koszyk';
   /** i18n key of the captcha hint instead of `enemies.boss.weryfikacja.hint` (planet 5); the solved line stays the family's. */
   hintKey?: string;
+  /** i18n key of the line printed when the grid is solved instead of `enemies.boss.weryfikacja.solved` (planet 5). */
+  solvedKey?: string;
 }
 
 const VARIANTS = new Map<number, BossVariant>();
@@ -95,6 +97,7 @@ const variantLines = new WeakMap<object, string>();
 const variantArms = new WeakMap<object, 'stapler' | 'dlon'>();
 const variantGrids = new WeakMap<object, 'koszyk'>();
 const variantHints = new WeakMap<object, string>();
+const variantSolved = new WeakMap<object, string>();
 
 /** Register the boss variant of a planet (0-based index). */
 export function registerBossVariant(planet: number, v: BossVariant): void {
@@ -115,6 +118,9 @@ export const bossVariantGrid = (e: object): 'koszyk' | undefined => variantGrids
 
 /** The key of the captcha hint of this boss: its variant's override, else the family's. */
 export const bossHintKey = (e: object): string => variantHints.get(e) ?? 'enemies.boss.weryfikacja.hint';
+
+/** The key of the line printed when the grid is solved: its variant's override, else the family's. */
+export const bossSolvedKey = (e: object): string => variantSolved.get(e) ?? 'enemies.boss.weryfikacja.solved';
 
 export { bossBodyOf };
 
@@ -170,6 +176,7 @@ export function makeBoss(id: number, x: number, y: number, seed: number, family:
   if (mine?.arm) variantArms.set(e, mine.arm);
   if (mine?.grid) variantGrids.set(e, mine.grid);
   if (mine?.hintKey) variantHints.set(e, mine.hintKey);
+  if (mine?.solvedKey) variantSolved.set(e, mine.solvedKey);
   e.speed = def.speed;
   e.attackRange = mine?.attackRange ?? def.attackRange;
   e.attackCooldown = def.attackCooldown;
@@ -344,7 +351,7 @@ export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
       if (g.time >= GRID_NEED_S) {
         g.time = 0;
         applyStatus(e, 'zablokowany', GRID_BLOCK_S, p.id);
-        bus.emit('footnote', { text: t('enemies.boss.weryfikacja.solved') });
+        bus.emit('footnote', { text: t(bossSolvedKey(e)) });
         bus.emit('boss:phase', { id: e.id, family: e.family, x: e.x, y: e.y });
         postSpor(s, bus, e, 2);
       }

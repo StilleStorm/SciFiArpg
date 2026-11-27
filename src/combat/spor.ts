@@ -93,6 +93,8 @@ export const STORY_ANSWERS: Readonly<Record<number, readonly [DamageType, Damage
   3: ['regulaminowy', 'mechaniczny'],
   4: ['egzystencjalny', 'regulaminowy'],
   5: ['regulaminowy', 'egzystencjalny'],
+  6: ['mechaniczny', 'egzystencjalny'],
+  7: ['regulaminowy', 'mechaniczny'],
 };
 
 /** The planet's own comment of a phase, or null when the planet has none (then the family's applies). */

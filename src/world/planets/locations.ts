@@ -192,6 +192,89 @@ const ARCHIWUM: LocationSpec = {
   ],
 };
 
+/**
+ * Wyzyna (STORY 8.14): the highland. Escarpments are the long horizontal runs of a `rooms` page (terraces with two ramps each, the gaps),
+ * the boss page is the open summit with one escarpment along its lower edge; the rest are small things set out between the terraces:
+ * a rock spire, a cairn, a triangulation tower (the list order is the order pages draw props in, offset by page: it is set so that both highland pages and the boss page between them show every prop), survey poles, a cable-car pylon, a weather cage, a wind-bent tree, a box for the summit
+ * book, a bench, a flight of steps that ends in the air and a door standing free; the cloud on the ground and the second horizon are
+ * flat marks on the paper.
+ */
+const WYZYNA: LocationSpec = {
+  layout: 'rooms',
+  wall: 'skarpa',
+  flat: ['chmura-lezaca', 'horyzont-drugi'],
+  props: [
+    P('skarpa', [150, 170], [[-0.375, 0, 0.1], [-0.125, 0, 0.1], [0.125, 0, 0.1], [0.375, 0, 0.1]]),
+    P('kopczyk', [40, 52], [[0, 0.05, 0.42]]),
+    P('tyczki-pomiarowe', [60, 76], [[-0.3, 0.2, 0.09], [0, 0.2, 0.09], [0.3, 0.2, 0.09]]),
+    P('horyzont-drugi', [150, 210], []),
+    P('wieza-triang', [70, 90], [[-0.22, 0.3, 0.16], [0.22, 0.3, 0.16]]),
+    P('pylon-kolejki', [60, 80], [[0, 0.38, 0.22]]),
+    P('iglica-skalna', [46, 60], [[0, 0.3, 0.34]]),
+    P('schody-urwane', [90, 115], [[-0.28, 0.1, 0.18], [0.1, -0.05, 0.18]]),
+    P('drzewo-wichura', [80, 100], [[0, 0.4, 0.13]]),
+    P('lawka-donikad', [70, 90], [[-0.26, 0.15, 0.14], [0.26, 0.15, 0.14]]),
+    P('drzwi-ramowe', [64, 84], [[-0.36, 0.3, 0.1], [0.36, 0.3, 0.1]]),
+    P('klatka-pogodowa', [50, 64], [[0, 0.1, 0.34]]),
+    P('skrzynka-ksiegi', [34, 44], [[0, 0.1, 0.42]]),
+    P('chmura-lezaca', [150, 210], []),
+  ],
+};
+
+/**
+ * Jaskinia (STORY 8.13): the cave. Rock faces are the partitions of the chambers (a long horizontal run with doorways, a tall one), stalagmite
+ * clusters stand in rows; a ledge of stalactites, a boulder, a column, a painted slab (bison, hand), a rope on pitons, a carbide lamp, a
+ * ladder against a ledge, bones assembled wrongly and a crystal cluster stand between; the puddle is a flat mark; `cisza` is the
+ * serwerownia's plate, drawn there.
+ */
+const JASKINIA: LocationSpec = {
+  layout: 'rooms',
+  wall: 'urwisko',
+  wallSide: 'urwisko-boczne',
+  row: 'stalagmity',
+  flat: ['kaluza'],
+  props: [
+    P('urwisko', [150, 170], [[-0.375, 0, 0.1], [-0.125, 0, 0.1], [0.125, 0, 0.1], [0.375, 0, 0.1]]),
+    P('urwisko-boczne', [46, 52], [[0, -1, 0.34], [0, -0.33, 0.34], [0, 0.33, 0.34], [0, 1, 0.34]]),
+    P('stalagmity', [96, 120], [[-0.28, 0.1, 0.17], [0.04, 0.1, 0.2], [0.34, 0.1, 0.13]]),
+    P('stalaktyt', [60, 80], [[0, 0, 0.4]]),
+    P('glaz-jaskiniowy', [64, 88], [[-0.06, 0.04, 0.42], [0.38, 0.34, 0.14]]),
+    P('kolumna', [56, 72], [[0, 0, 0.36]]),
+    P('malowidlo', [110, 140], [[-0.3, 0, 0.17], [0, 0, 0.17], [0.3, 0, 0.17]]),
+    P('lina', [100, 130], [[-0.42, 0.1, 0.07], [-0.14, 0.1, 0.07], [0.14, 0.1, 0.07], [0.42, 0.1, 0.07]]),
+    P('lampa', [40, 52], [[0, 0.3, 0.36]]),
+    P('drabina-skalna', [90, 115], [[-0.25, 0, 0.2], [0.25, 0, 0.2]]),
+    P('kaluza', [100, 140], []),
+    P('kosci', [80, 100], [[-0.25, 0.1, 0.22], [0.25, 0.1, 0.22]]),
+    P('krysztaly', [60, 76], [[0, 0.2, 0.4]]),
+    P('cisza', [60, 76], [[0, 0, 0.4]]),
+  ],
+};
+
+/**
+ * Rownina (STORY 8.13): the plain. Wide and sparse (the `rows` layout): a patch of grass tufts is the flat mark; a fence of posts that
+ * encloses nothing, a gate without a fence, a signpost with blank arms, a haystack, a well, a scarecrow with seven-fingered gloves,
+ * erratic boulders, a windsock, power poles, a boundary stone and a tree with its branches meeting stand along the long rows.
+ */
+const ROWNINA: LocationSpec = {
+  layout: 'rows',
+  flat: ['trawa'],
+  props: [
+    P('trawa', [150, 210], []),
+    P('slupki', [120, 150], [[-0.4, 0.2, 0.07], [-0.2, 0.2, 0.07], [0, 0.2, 0.07], [0.2, 0.2, 0.07], [0.4, 0.2, 0.07]]),
+    P('brama', [100, 125], [[-0.4, 0, 0.1], [0.4, 0, 0.1]]),
+    P('drogowskaz', [50, 64], [[0, 0.2, 0.4]]),
+    P('stog', [90, 110], [[0, 0.1, 0.42]]),
+    P('studnia', [70, 90], [[0, 0.5, 0.4]]),
+    P('strach', [44, 56], [[0, 0.3, 0.4]]),
+    P('glaz-narzutowy', [70, 95], [[-0.18, 0.1, 0.3], [0.3, 0.24, 0.18]]),
+    P('rekaw', [36, 46], [[0, 0.55, 0.4]]),
+    P('slupy', [130, 160], [[-0.4, 0.4, 0.07], [0.4, 0.4, 0.07]]),
+    P('kamien-graniczny', [34, 44], [[0, 0.3, 0.4]]),
+    P('drzewo', [90, 115], [[0, 0.6, 0.12]]),
+  ],
+};
+
 /** The types that have props. Planets 2 and 3 add theirs (serwerownia, biuro, ...) here. */
 export const LOCATIONS: Partial<Record<LocationType, LocationSpec>> = {
   przedmiescie: PRZEDMIESCIE,
@@ -201,6 +284,9 @@ export const LOCATIONS: Partial<Record<LocationType, LocationSpec>> = {
   miasto: MIASTO,
   centrum: CENTRUM,
   archiwum: ARCHIWUM,
+  jaskinia: JASKINIA,
+  rownina: ROWNINA,
+  wyzyna: WYZYNA,
 };
 
 export const locationSpec = (type: LocationType | undefined): LocationSpec | undefined => (type ? LOCATIONS[type] : undefined);

@@ -32,7 +32,8 @@ import {
   enemyName,
   tierStats,
 } from './families';
-import { ODNAWIALNY_QUIET_S, ODNAWIALNY_RATE, SHARED_AFFIXES, WIELOKROTNY_SHOTS, affixSpeedMul, affixTempoMul, hasAffix, ownAffixes, ownsAffix } from './elites';
+import { NIEPOTWIERDZONY_E, NIEPOTWIERDZONY_EVERY_S, NIEPOTWIERDZONY_HOLD_S, ODNAWIALNY_QUIET_S, ODNAWIALNY_RATE, SHARED_AFFIXES, WIELOKROTNY_SHOTS, affixSpeedMul, affixTempoMul, hasAffix, ownAffixes, ownsAffix } from './elites';
+import { pinExistence } from './hooks';
 import { applyTierStats } from './make';
 import { namedRecord } from './named';
 import { bindEliteDeaths, tickReturns, trackElite } from './spawn';
@@ -106,6 +107,28 @@ export function tickExistence(e: Enemy, rng: Rng, dt: number): void {
     rt.eTarget = rng.range(0.3, 1);
   }
   e.existence = clamp(e.existence + (rt.eTarget - e.existence) * Math.min(1, dt * 1.5), 0.3, 1);
+}
+
+/**
+ * Elite niepotwierdzony: every 6 s it stops being confirmed and for 2 s exists at 0.3 (the existence pin, so a hero's confirm
+ * overrides it). A body of another family has no existence of its own: it takes one for the flicker and gives it back after.
+ * Runs before tickExistence, which applies the pin.
+ */
+export function tickNiepotwierdzony(e: Enemy, dt: number): void {
+  if (e.boss || !ownsAffix(e, 'niepotwierdzony')) return;
+  const rt = rtOf(e);
+  if (rt.nieOn) {
+    if (rt.ePin) return;
+    rt.nieOn = false;
+    rt.nieT = NIEPOTWIERDZONY_EVERY_S;
+    if (e.family !== 'wygenerowane') e.existence = undefined;
+    return;
+  }
+  rt.nieT -= dt;
+  if (rt.nieT > 0 || rt.ePin) return;
+  rt.nieOn = true;
+  if (e.existence === undefined) e.existence = NIEPOTWIERDZONY_E;
+  pinExistence(e, NIEPOTWIERDZONY_E, NIEPOTWIERDZONY_HOLD_S);
 }
 
 /** A notification left alive climbs to the next tier every ESCALATE_S seconds. Returns true when it did. */
@@ -311,6 +334,7 @@ function tickEnemy(s: RunState, e: Enemy, grid: Grid<Enemy>, near: Enemy[], bus:
   const rt = rtOf(e);
   const ai = s.rngs.ai;
   rt.age += dt;
+  tickNiepotwierdzony(e, dt);
   if (!e.boss) tickExistence(e, ai, dt);
   tickEscalation(e, ai, bus, dt);
   tickClaimRotation(e, ai, dt);

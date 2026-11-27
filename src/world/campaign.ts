@@ -254,8 +254,30 @@ export const PLANETS: readonly PlanetDef[] = [
       },
     ],
   },
-  planet(6, 3, 'wygenerowane', mix(0.15, 0.25, 0.6), ['czas-wsteczny', 'parzystosc', 'nie-przeszkadzac'], ['ladowisko', 'wioska'], ['jaskinia', 'rownina'], null, [5, 6]),
-  planet(7, 3, 'wygenerowane', mix(0.2, 0.2, 0.6), ['czas-wsteczny', 'grawitacja', 'oplata-serwisowa'], ['wioska', 'miasteczko'], ['wyzyna', 'rownina', 'jaskinia'], 'domniemanie', [5, 6]),
+  {
+    ...planet(6, 3, 'wygenerowane', mix(0.15, 0.25, 0.6), ['czas-wsteczny', 'parzystosc', 'nie-przeszkadzac'], ['ladowisko', 'wioska'], ['jaskinia', 'rownina'], null, [5, 6]),
+    headline: 'nie-przeszkadzac',
+    // pages 1-3 jaskinia, pages 4-6 and the boss page rownina; no gate (the first planet of the act, STORY 8.13)
+    locationSplit: 3,
+  },
+  {
+    ...planet(7, 3, 'wygenerowane', mix(0.2, 0.2, 0.6), ['czas-wsteczny', 'grawitacja', 'oplata-serwisowa'], ['wioska', 'miasteczko'], ['rownina', 'jaskinia', 'wyzyna'], 'domniemanie', [5, 6]),
+    headline: 'grawitacja',
+    // pages 1-2 rownina, pages 3-4 jaskinia, pages 5-6 and the boss page wyzyna: the highest point is reached by going down (STORY 8.14)
+    locationSplit: [2, 4],
+    // page 4 (the last jaskinia page): the hatched band across the exit corner with a Rachmistrz; lifts when the page's named elite "Uzytkownik Potwierdzajacy" is slain (planets/p8.ts)
+    gates: [
+      {
+        page: 3,
+        gate: {
+          kind: 'elite',
+          key: 'story.p8.gate.note',
+          liftKey: 'story.p8.gate.lift',
+          figure: { look: 84, key: 'story.p8.gate.figure' },
+        },
+      },
+    ],
+  },
   planet(8, 3, 'wygenerowane', mix(0.15, 0.15, 0.7), ['czas-wsteczny', 'weryfikacja-dwuetapowa', 'parzystosc', 'ciasteczka'], ['miasteczko', 'ladowisko'], ['archiwum', 'biuro'], 'awaria', [6, 6]),
 ];
 

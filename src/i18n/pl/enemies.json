@@ -259,6 +259,20 @@
       "n": "dwuetapowe",
       "pl": "dwuetapowe",
       "effect": "Teza wymaga dwóch odparć. Pierwsze potwierdza jedynie odbiór."
+    },
+    "niepotwierdzony": {
+      "m": "niepotwierdzony",
+      "f": "niepotwierdzona",
+      "n": "niepotwierdzone",
+      "pl": "niepotwierdzone",
+      "effect": "Co sześć sekund przestaje być potwierdzony i przez dwie sekundy istnieje w stopniu 0,3. Trafienia liczą się wtedy w tym samym stopniu."
+    },
+    "polubiony": {
+      "m": "polubiony",
+      "f": "polubiona",
+      "n": "polubione",
+      "pl": "polubione",
+      "effect": "Za każdego przeciwnika w pobliżu przyjmuje o 10% mniej obrażeń, najwyżej o 40%. Oglądalność mu służy."
     }
   },
   "boss": {

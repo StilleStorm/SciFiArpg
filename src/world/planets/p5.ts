@@ -48,4 +48,4 @@ registerSideTickets(P5_TICKETS);
  * (`grid: 'koszyk'`, render/enemyFigures.ts) and the captcha hint read from `story.p5.boss.hint`. Its Spor comments are
  * `combat/spor.ts` (STORY_ANSWERS).
  */
-registerBossVariant(P5, { boss: 'weryfikacja', hp: BOSSES.weryfikacja.hp, lineKey: 'story.p5.boss.variant', grid: 'koszyk', hintKey: 'story.p5.boss.hint' });
+registerBossVariant(P5, { boss: 'weryfikacja', hp: BOSSES.weryfikacja.hp, lineKey: 'story.p5.boss.variant', grid: 'koszyk', hintKey: 'story.p5.boss.hint', solvedKey: 'story.p5.boss.solved' });

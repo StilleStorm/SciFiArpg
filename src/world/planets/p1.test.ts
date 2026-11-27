@@ -86,10 +86,7 @@ describe('planet 1: base layout and locations', () => {
     const variants = new Set<string>();
     for (const page of s.pages) for (const o of page.obstacles) if (o.kind === 'prop' && o.variant) variants.add(o.variant);
     expect(variants.size).toBeGreaterThanOrEqual(6);
-    // planet 7's types (jaskinia, rownina) have no drawings yet: its pages stay the generic ones
-    const other = createRun(11, { plan: plan(6) });
-    expect(other.pages.some((p) => p.obstacles.some((o) => o.kind === 'prop'))).toBe(false);
-    expect(other.pages.every((p) => p.location === undefined)).toBe(true);
+    // a run without a plan has no location types: its pages stay the generic ones (every planet has its own types since S26)
     expect(createRun(11).pages.every((p) => p.location === undefined)).toBe(true);
   });
 

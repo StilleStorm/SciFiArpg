@@ -57,6 +57,9 @@ export interface EnemyRt {
   eTarget: number;
   eTimer: number;
   ePin: { value: number; t: number } | null;
+  /** Elite niepotwierdzony: seconds until the next flicker, and whether one is in force. */
+  nieT: number;
+  nieOn: boolean;
   /** Seconds left of walking home after straying too far (leash). */
   leash: number;
   /** Speed factor from boss phases. */
@@ -116,6 +119,8 @@ export function newRt(): EnemyRt {
     eTarget: 1,
     eTimer: 0,
     ePin: null,
+    nieT: 6, // NIEPOTWIERDZONY_EVERY_S (elites.ts imports this file)
+    nieOn: false,
     leash: 0,
     speedMul: 1,
     phase: 1,

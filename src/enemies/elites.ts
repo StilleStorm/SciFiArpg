@@ -29,6 +29,14 @@ export const WIELOKROTNY_REACH = 1.5;
 /** oddzwaniajacy: seconds after the strike it returns, and the share of its racja it returns with. */
 export const ODDZWANIAJACY_DELAY_S = 4;
 export const ODDZWANIAJACY_RACJA = 0.3;
+/** niepotwierdzony: every NIEPOTWIERDZONY_EVERY_S it stops being confirmed and for NIEPOTWIERDZONY_HOLD_S exists at NIEPOTWIERDZONY_E. */
+export const NIEPOTWIERDZONY_EVERY_S = 6;
+export const NIEPOTWIERDZONY_HOLD_S = 2;
+export const NIEPOTWIERDZONY_E = 0.3;
+/** polubiony: damage taken less per other living non-boss enemy within the radius, and the ceiling of the cut. */
+export const POLUBIONY_CUT = 0.1;
+export const POLUBIONY_RADIUS = 200;
+export const POLUBIONY_CAP = 0.4;
 /** The claim of the one that came back (type: it answers to the rule that one calls back). */
 export const ODDZWANIAM_CLAIM = { textKey: 'enemies.claim.oddzwaniam', type: 'regulaminowy' } as const;
 

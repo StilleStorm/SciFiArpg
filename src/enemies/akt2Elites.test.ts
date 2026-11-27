@@ -36,8 +36,8 @@ const put = (s: RunState, opts: Parameters<typeof makeEnemy>[5] = {}, x = 700, y
 describe('the Akt II affixes in the pool', () => {
   it('join the pool on planets 4-6 and nowhere else', () => {
     expect(eliteIdsFor(undefined)).toBe(ELITE_IDS);
-    for (const planet of [0, 1, 2, 6, 7, 8]) expect(eliteIdsFor(planet), `planet ${planet + 1}`).toBe(ELITE_IDS);
-    for (const planet of [3, 4, 5]) expect(eliteIdsFor(planet)).toEqual([...ELITE_IDS, ...AKT2_ELITE_IDS]);
+    for (const planet of [0, 1, 2]) expect(eliteIdsFor(planet), `planet ${planet + 1}`).toBe(ELITE_IDS);
+    for (const planet of [3, 4, 5, 6, 7, 8]) expect(eliteIdsFor(planet)).toEqual(expect.arrayContaining([...ELITE_IDS, ...AKT2_ELITE_IDS]));
     expect(ELITE_IDS).toHaveLength(10);
   });
   it('are never rolled in Akt I, and are rolled in Akt II', () => {
