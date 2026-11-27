@@ -9,7 +9,8 @@ logs, agent transcripts or the whole brief. Do not summarise the history; there 
 
 1. `docs/STATUS.md` whole (about 1k words). It holds: where things are, the latest player
    feedback and what was done, the ordered backlog, known limits, the gates.
-2. `git status --short && git log --oneline -8 && git fetch -q origin && git status -sb | head -1`.
+2. `git status --short && git log --oneline -8 && git fetch -q origin && git status -sb | head -1 && git log --oneline origin/main..HEAD | wc -l`
+   (the last number = commits built but not yet released to `main`; see CLAUDE.md "Branches and deploy").
    The tree must be clean and level with the remote; if not, read the diff before anything else.
 3. The next slice is the first in docs/PRODUCTION.md not marked done in STATUS.md; read that slice
    entry only (its Reads line names the DESIGN/PLAN/SKILLS/ITEMS/STORY sections). Open `docs/DESIGN.md` only at

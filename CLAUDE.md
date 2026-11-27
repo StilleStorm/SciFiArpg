@@ -68,6 +68,15 @@ world group, drawn-in spawns, crossed-out deaths, ink blots for hits, stamps for
 HUD as a filled form, footnotes as tooltips. No gradients, glow, shadows, blur, neon, rounded
 glass cards, emoji, icon fonts, sans-serif, particle bursts, big shake.
 
+## Branches and deploy
+- `main` is the live game. A push to `main` deploys to https://stillestorm.github.io/SciFiArpg/
+  (`.github/workflows/deploy.yml`; pushes that only touch docs, reports or agent files do not).
+- Every update is built and committed on a work branch (the session's own branch, never `main`).
+  Pushing the work branch never deploys.
+- Release = the player says so: run `npm run check` and `npm run smoke` green, then fast-forward
+  `main` to the work branch (`git push origin HEAD:main`), wait for the deploy run of that commit,
+  and delete the work branch afterwards if the player wants. Nothing else touches `main`.
+
 ## Git
 - Commit small, descriptive, imperative. No emoji. Never mention model names in commits.
 - Do not add dependencies beyond: vite, typescript, vitest, vite-plugin-pwa, playwright-core

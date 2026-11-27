@@ -48,12 +48,12 @@ report, a doc section or a plan brief into a prompt: it passes paths and slice i
    report to reports/S<n>-look.md." REDO → one `integrator` round pointing at that file, then
    `look` again. FIX verdicts ride along with the next integrator round.
 8. **Gate, push, deploy, record.** `integrator`: "Slice S<n> gate-and-push. Gate by exit code
-   (check, smoke), tree clean, push to <branch>, wait for the deploy of HEAD, one fix round on
+   (check, smoke), tree clean, push to the work branch (never `main`; no deploy happens), one fix round on
    failure. Then mark S<n> done in STATUS.md with this line: <one line of what shipped>; note
    parked items; name S<n+1>; commit and push." The lead then checks only
    `git status --short | wc -l` (0) and `git log origin/<branch> -1 --oneline` (the STATUS commit).
 9. **Report** to the player in at most eight lines: slice shipped, what it adds for the player,
-   anything parked, what starts next. Then continue with the next slice.
+   anything parked, what starts next. Then continue with the next slice. Releasing to `main` is the player's call (CLAUDE.md).
 
 ## Milestones (listed in STATUS.md)
 At the end of a milestone's last slice, before step 8 (the same pointer style):

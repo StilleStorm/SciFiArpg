@@ -3,6 +3,12 @@ name: Deploy
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'reports/**'
+      - '.claude/**'
+      - 'CLAUDE.md'
+      - '**/*.md'
   workflow_dispatch:
 
 permissions:
