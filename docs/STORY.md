@@ -154,7 +154,11 @@ change). Keys, so that S11 writes and S12 only wires:
   Akt II affixes, `enemies.claim.oddzwaniam`, `enemies.claimStep.<family>.<id>.1|2` (the two-step
   bracket, built mechanically from the claim text);
 - to add at S25 (voice): `story.p5.boss.solved` (a variant's solved line, §8.9, M5 review §8.12) and
-  the one-word fix of `story.p6.boss.spor2.reply.egzystencjalny` (§8.12).
+  the one-word fix of `story.p6.boss.spor2.reply.egzystencjalny` (§8.12);
+- added S25: `story.p7|p8|p9.*` in the same scheme (§8.13–8.15), `story.p8.gate.elite`; no
+  `story.p9.boss.variant` (planet 9 has its own body) and no hint or solved override in Akt III;
+  outside `story`: `enemies.elite.niepotwierdzony.*` and `enemies.elite.polubiony.*` (S26),
+  `enemies.boss.wizualizacja.*` and `enemies.claim.boss.wizualizacja` (S27), §8.16.
 Planet names stay in `planets.json` (`planets.p<N>.name|loc`), replaced in place by the voice
 editor. Cards fall back to the `screens.cards.*` placeholders when a planet has no story key
 yet, so unwritten planets keep working.
@@ -205,7 +209,8 @@ Every entry maps onto a built contract, so a planet is data plus drawings:
   card describes planet 1.
 
 Entries for planets 1–3 and the finale texts follow (S11), planets 4–6 and the Akt II decisions
-(§8.8–8.11, S22; what M5 shipped and the review's rulings, §8.12). Planet numbers in the names run
+(§8.8–8.11, S22; what M5 shipped and the review's rulings, §8.12), planets 7–9 and the Akt III
+decisions (§8.13–8.16, S25). Planet numbers in the names run
 consecutively from 23 (the Komisja's list order: "the next planet" is literally the next
 number), so Akt II continues at 26 and Akt III at 29. Hero ids: pralka, konsultant, petlowiec,
 kartograf, nalesnik. All Polish below is a draft for the voice editor, who writes the final
@@ -1108,3 +1113,464 @@ What shipped against §8.8–8.11 is in DESIGN §4.2 "What M5 added". The ruling
   will carry a number.
 - **No fourth family, no act event** stays the rule for Akt III unless the player asks; at most
   one affix pair as in Akt II.
+
+### 8.13 Planet 7: Planeta Dwudziesta Dziewiąta (Ewentualna) — Akt III
+**Record** (`PLANETS[6]`): act 3; dominant Wygenerowane 0.15/0.25/0.6; law pool `czas-wsteczny`,
+`parzystosc`, `nie-przeszkadzac`; base layouts lądowisko, wioska; locations jaskinia, równina;
+hosted set none (first planet of the act, ITEMS §12.6); pages 5–6; boss Hipoteza. Record edits
+for S26 (data only): `headline: 'nie-przeszkadzac'`, `locationSplit: 3` (pages 1–3 jaskinia,
+pages 4–6 and the boss page równina). Name `planets.p7.name` "Planeta Dwudziesta Dziewiąta
+(Ewentualna)", `loc` "Planecie Dwudziestej Dziewiątej" (the list number continues at 29, §8.5; the
+placeholder epithet "Domniemana" is replaced: «Domniemanie» is planet 8's set and *domniemany* an
+elite affix, while *ewentualny* is Lem's own word, DESIGN §12, and the family's bear already
+carries it).
+
+**Feel.** The verification. The escalation ended without an answer, and the ticket was passed to
+the Komisja's wydział weryfikacji, which does not doubt the complaint; it doubts the complainant.
+From here on the letters hedge: Akt I was polite, Akt II attached, Akt III writes "wnioskodawca,
+o ile istnieje", "do czasu potwierdzenia", "w drodze domniemania". The first planet of the act is
+the one planet 6's card described: a cave in which things exist in proportion to their likes,
+drawn on the walls by something that has never seen an animal and stepping off them when enough
+users agree. Above the cave is a plain the file does not mention, where nothing has been
+confirmed: fences that enclose nothing, a signpost with blank arms. The clause is silence: what
+is not disturbed does not have to be verified. Violet wash, profile B+C (the act's).
+
+**Locations.**
+- *jaskinia* (pages 1–3; new type, reused on planet 8): stalagmites and stalactites as hatched
+  cones, boulders, a rock column, wall slabs with cave paintings in dotted line (a bison with six
+  legs, a hand with seven fingers: the family's own figures as props), a rope on pitons with
+  survey flags, a carbide lamp on a tripod, a ladder against a ledge, a puddle drawn as a coffee
+  ring, a heap of bones assembled wrongly (a ribcage with a handle), a crystal cluster, the
+  "CISZA" plate (planet 2's reused; here it is the headline clause). Page shape: chambers joined
+  by narrow passages (the `rooms` layout with irregular walls; no new layout), a załącznik page
+  may branch from a side chamber.
+- *równina* (pages 4–6, boss page; new type, reused on planet 8): grass as hatched tufts, a row
+  of fence posts that encloses nothing, a gate standing without a fence, a signpost with blank
+  arms, a haystack, a well with a windlass, a scarecrow whose gloves have seven fingers, erratic
+  boulders, a windsock, power poles with dotted wires, a boundary stone, a tree drawn with its
+  branches meeting. Page shape: wide and sparse (the `rows` layout at a low prop count), long
+  sight lines; the boss stands in the open, where its outline can be seen whole.
+
+**Law.** Headline clause *Nie przeszkadzać* (skills make noise; the cave carries it). The pool's
+`czas-wsteczny`, new to the act, rolls on later tickets here and headlines planet 9. Warunek:
+"istoty wygenerowane, niepotwierdzone".
+
+**Boss.** Hipoteza, the first time the campaign meets it as a planet boss. Variant line
+`story.p7.boss.variant`: "Hipoteza, wersja robocza, uzupełniona". One data change: racja 260 → 300
+(the supplements). The outline, the 0.3 and the confirmation stay the family's, so every family
+footnote stays true. Spór:
+- spor1 (on arrival): comment "Jestem hipotezą roboczą. Hipotezy roboczej się nie obala.
+  Hipotezę roboczą się uzupełnia." Right: **mechaniczny** "Uzupełnienie wnosi się uderzeniem.
+  Uderzenie jest faktem. Faktów hipoteza robocza nie przewidziała." Wrong regulaminowy
+  "Uzupełnienie wymaga formularza. Formularza dla hipotez nie wydano." Wrong egzystencjalny
+  "Hipoteza uzupełniona przestaje być robocza. Przestaje więc być."
+- spor2 (confirmed): comment "Potwierdzono mnie. Od tej chwili wątpliwości budzi wyłącznie
+  wnioskodawca." Right: **egzystencjalny** "Potwierdzenia dokonał wnioskodawca. Jeżeli
+  wnioskodawca budzi wątpliwości, budzi je także potwierdzenie." Wrong mechaniczny "Wątpliwość
+  usuwa się tym samym narzędziem co hipotezę." Wrong regulaminowy "Wątpliwości co do
+  wnioskodawcy zgłasza się na piśmie. Pisma nie doręczono."
+
+**Base and clerk.** lądowisko or wioska by seed. Clerk `story.p7.clerk`: name "Inspektor ds.
+Weryfikacji", role "Komisja do Spraw Zjawisk Lokalnych, wydział weryfikacji, stanowisko
+terenowe", look seed 7.
+- line0 "Zgłoszenie przekazano do weryfikacji. Weryfikacji podlega wnioskodawca. Zgłoszenie
+  wątpliwości nie budzi."
+- line1 "Do czasu potwierdzenia wnioskodawcę uznaje się za ewentualnego. Wnioskodawcy
+  ewentualnemu przysługują wszystkie obowiązki."
+- line2 "W jaskini obowiązuje cisza. Co nie zostało zakłócone, nie wymaga weryfikacji. Proszę
+  nie zakłócać."
+
+**Gate.** None (first planet of the act, §8.6).
+
+**Side tickets** (`story.p7.ticket.a|b|c`, ids `h:p7:a..c`):
+- a) kill, n 16, family wygenerowane, reward 45 stars + permission wygenerowane. Title
+  "Weryfikacja negatywna". Text "Zjawiska wygenerowane weryfikuje się przez skreślenie. Zjawisko
+  skreślone uznaje się za niepotwierdzone. Innego wyniku weryfikacji nie przewidziano.
+  Zweryfikować {count}." Twist: verification has one possible result.
+- b) reach, n 4, reward 40 stars + 1 potwierdzenie. Title "Oględziny wyjścia". Text "Komisja
+  wymaga oględzin wyjścia z jaskini, na stronie {count}. Akta wyjścia nie przewidują. Oględzin
+  dokonuje się mimo to." Twist: the applicant inspects an exit the file says is not there (page 4
+  is the first page of the plain).
+- c) fetch, n 5, reward 35 stars. Title "Polubienia". Text "Zjawiska istnieją w stopniu zależnym
+  od liczby polubień. Polubienia leżą na stronach. Zebrać {count} i złożyć w depozycie. Polubień
+  wycofanych nie zwraca się." Twist: the beasts are starved administratively.
+
+**Chapter card** (`story.p7.card`; title generated "Akt III. Planeta Dwudziesta Dziewiąta
+(Ewentualna)"; lines.1 is written to follow either planet 6 directly or the "Sprawę wznowiono"
+card, §8.16):
+- lines.1 "Zjawiska lokalne w instancji drugiej usunięto. Zgłoszenie przekazano do weryfikacji.
+  Weryfikacji podlega wnioskodawca, o ile istnieje."
+- lines.2 "Według akt planetę wygenerował model, który nie widział planety. Na miejscu
+  stwierdzono jaskinię zjawisk wygenerowanych i równinę nad nią." (describes planet 8)
+- lines.3 "Zjawisko lokalne: istoty wygenerowane, niepotwierdzone. Na planecie obowiązuje tryb
+  „nie przeszkadzać”. Weryfikację prowadzi się po cichu."
+- hero.pralka "Komisja wątpi, czy istnieję. Okazuję numer seryjny i kartę gwarancyjną.
+  Osobowość w toku, bęben na miejscu."
+- hero.konsultant "W celu weryfikacji proszę podać datę urodzenia. Pytałem o to tysiące razy.
+  Odpowiedzi nie sprawdziłem ani razu."
+- hero.petlowiec "Zweryfikowano mnie jutro, z wynikiem negatywnym. Dziś jeszcze istnieję, więc
+  zdążę."
+- hero.kartograf "Jaskinia figuruje w aktach, równina nie. Równinę zmierzę. Akta poprawi ktoś,
+  kto je widział."
+- hero.nalesnik "Komisja wątpi, czy jestem. Moja wątpi od czterech miliardów lat, czy jestem
+  planetą. Mam wprawę."
+- rewritten.1 "Sprawę przepisano. Wnioskodawcę uznano za potwierdzonego, a potwierdzenie za
+  ewentualne."
+- rewritten.2 "Wnioskodawca wraca do jaskini. Zjawiska zweryfikowano negatywnie. Polubiono
+  nowe."
+
+**Stop posts.** In *jaskinia* the post stands in a chamber and reads as a survey marker; on
+*równina* it is the plain's one post that points somewhere. No flavour needed.
+
+**Hosted set.** None (first planet of the act). Systems: campaign record (headline, split),
+locations registry (jaskinia and równina new, both owned by this planet's builder because planet 8
+reuses them), clerk, side tickets, boss variant table (racja), cards. Slice: **S26** (builder
+`planet-7`).
+
+### 8.14 Planet 8: Planeta Trzydziesta (Wygenerowana) — Akt III
+**Record** (`PLANETS[7]`): act 3; dominant Wygenerowane 0.2/0.2/0.6; law pool `czas-wsteczny`,
+`grawitacja`, `oplata-serwisowa`; base layouts wioska, miasteczko; locations wyżyna, równina,
+jaskinia; hosted set «Domniemanie»; pages 5–6; boss Hipoteza. Record edits for S26: `headline:
+'grawitacja'`, locations reordered to `['rownina', 'jaskinia', 'wyzyna']` with `locationSplit:
+[2, 4]` (pages 1–2 równina, pages 3–4 jaskinia, pages 5–6 and the boss page wyżyna), the gate
+below. Name "Planeta Trzydziesta (Wygenerowana)", loc "Planecie Trzydziestej" (the placeholder
+epithet kept).
+
+**Feel.** The planet drawn by a model that has never seen a planet (§4). The list needed a planet
+in this position, none had been observed, so one was generated from a spoken description, and the
+wydział presumes it exists because a presumption is cheaper than an observation. The topography
+shows it: the cave is entered from the plain and comes out on the highland, so the highest point
+is reached by going down; gravity (the headline clause) is a recommendation because nobody
+ordered it from the model. The applicant is treated the same way: admitted "w drodze
+domniemania". The set «Domniemanie» is the planet's subject, a doubt held as a rule: the clerk's
+line, the gate's lift and the boss's first comment name it. Violet wash, profile B+C.
+
+**Locations.**
+- *równina* (pages 1–2): planet 7's drawings reused as they stand.
+- *jaskinia* (pages 3–4): planet 7's drawings reused as they stand; the gate is on its last page.
+- *wyżyna* (pages 5–6, boss page; new type, owned by this planet's builder): escarpments as long
+  hatched bars with gaps (the ramps), rock spires, cairns, a wooden triangulation tower, striped
+  survey poles, a cable-car pylon without a cable, a weather cage on legs, a wind-bent tree, a
+  box for the summit book, a bench facing nothing, and the model's errors as props: a cloud
+  lying on the ground as a hatched ellipse, a flight of steps that ends in the air, a door
+  standing free in its frame, a second horizon ruled across the page. Page shape: terraces (the
+  `rows` layout, the rows being escarpments with gaps); the boss page is the summit, open, with
+  the escarpment round its rim.
+  No drawing on any Akt III type carries words that are false on another planet (§8.12).
+
+**Law.** Headline clause *Grawitacja doradcza*. Warunek: "istoty istniejące w drodze
+domniemania".
+
+**Boss.** Hipoteza, variant line `story.p8.boss.variant`: "Hipoteza, wygenerowana ponownie,
+anatomia poprawiona". One data change, spent on a part as planets 3 and 5 did: a long arm ending
+in a **hand with seven fingers** (`BossVariant.arm: 'dlon'`, the family's `hand` art on an arm,
+one drawing in render/enemyFigures.ts; the body stays) and attackRange 42 → 60 (planet 3's rule:
+the reach is the part). Override check (§8.12): no family footnote names the hand or the reach
+(`enemies.boss.hipoteza.meet` and `.confirmed` name the outline and the 0,3 only), so no
+`hintKey` or `solvedKey` is registered; the planet's own Spór comments replace the family's
+"dwanaście palców". Racja as the family has it (260). Spór:
+- spor1 (on arrival): comment "Istnieję w drodze domniemania. Domniemanie obowiązuje do czasu
+  dowodu przeciwnego. Dowodu nie przewidziano." Right: **regulaminowy** "Domniemanie obala się
+  dowodem. Dowód wnosi się na miejscu, do rąk własnych. Rąk jest dość." Wrong mechaniczny
+  "Domniemanie ma siedem palców. Palce się łamie." Wrong egzystencjalny "Co istnieje w drodze
+  domniemania, nie istnieje żadną inną drogą. Drogę zamknięto." (the set's hook, ITEMS §4.1
+  «Domniemanie»)
+- spor2 (confirmed): comment "Potwierdzono mnie. Dłoń ma siedem palców. Tak mnie wygenerowano
+  i tak zostaje." Right: **mechaniczny** "Palce nadliczbowe odejmuje się ręcznie. Odejmowanie
+  w toku." Wrong regulaminowy "Liczbę palców reklamuje się w ciągu czternastu dni od
+  wygenerowania. Termin minął." Wrong egzystencjalny "Palce, których nikt nie liczył, nie mają
+  liczby."
+
+**Base and clerk.** wioska or miasteczko by seed. Clerk `story.p8.clerk`: name "Rzeczoznawca ds.
+Domniemań", role "Komisja do Spraw Zjawisk Lokalnych, wydział weryfikacji, punkt domniemań
+(wygenerowany)", look seed 8.
+- line0 "Planetę wygenerowano, ponieważ lista wymagała planety na tej pozycji. Model planety
+  nie widział. Opisano mu ją ustnie."
+- line1 "Istnienie przyjmuje się tu w drodze domniemania. Domniemanie jest tańsze od obserwacji
+  i nie zależy od pogody." (the set's hook line)
+- line2 "Grawitacja ma charakter zalecenia. U modelu jej nie zamówiono. Zalecamy."
+
+**Gate** (`story.p8.gate`): **page 4** (0-based 3; jaskinia, the page whose exit comes out on the
+highland). Kind `elite`, the default hatched tape band across the exit corner, with a figure
+"Rachmistrz" at it (look seed 84). Condition: the page's forced named elite, titled "Użytkownik
+Potwierdzający" (`story.p8.gate.elite`, as planets 3 and 5), is struck. On the lift the band is
+struck through and the Rachmistrz walks off the page.
+- note "Przejście wymaga głosu użytkownika potwierdzającego. Użytkownik przebywa na tej stronie.
+  Głos oddaje się przez skreślenie."
+- figure (tap) "Nie potwierdzam. Liczę."
+- lift "Użytkownika potwierdzającego skreślono. Odsetek potwierdzających spadł do 86%. Przejście
+  wolne w drodze domniemania."
+
+**Side tickets** (`story.p8.ticket.a|b|c`; ticket a is the planet's one item ticket, §8.7,
+ITEMS §12.14):
+- a) deliver, n 1, reward 45 stars + item: one piece of «Domniemanie» (`reward.item: { set:
+  'domniemanie' }`, rolled from the character seed when the reward is sent). Title
+  "Zaświadczenie o istnieniu". Text "Komisja wymaga zaświadczenia, że wnioskodawca istnieje.
+  Zaświadczenie wystawia wnioskodawca, na druku z pierwszej strony. Wynieść druk, wrócić,
+  doręczyć Rzeczoznawcy ds. Domniemań. Zaświadczenie przyjmuje się w drodze domniemania." Twist:
+  the applicant certifies their own existence and it is accepted as a presumption; the reward
+  arrives by awizo with the paczkomat's built line.
+- b) kill, n 16, family wygenerowane, reward 45 stars + permission wygenerowane. Title "Dowód
+  przeciwny". Text "Domniemanie istnienia obala się dowodem przeciwnym. Dowód przeprowadza się
+  na miejscu, przez skreślenie. Przeprowadzić {count}." Twist: the proof is the strike.
+- c) reach, n 5, reward 40 stars + 1 potwierdzenie. Title "Punkt najwyższy". Text "Komisja
+  wymaga stwierdzenia, że planeta ma górę i dół. Stwierdzenia dokonuje się w punkcie najwyższym,
+  na stronie {count}. Do punktu najwyższego schodzi się przez jaskinię." Twist: the generated
+  topography (page 5 is the first highland page).
+
+**Chapter card** (`story.p8.card`; "Akt III. Planeta Trzydziesta (Wygenerowana)"):
+- lines.1 "Zjawisko na planecie poprzedniej zweryfikowano negatywnie. Wnioskodawcy nie
+  zweryfikowano. Zgłoszenie przekazano na planetę następną w drodze domniemania."
+- lines.2 "Według akt planeta jest obserwatorium Komisji, chwilowo niedostępnym. Na miejscu
+  stwierdzono planetę wygenerowaną. Na wyżynę schodzi się tu przez jaskinię." (describes
+  planet 9)
+- lines.3 "Zjawisko lokalne: istoty istniejące w drodze domniemania. Grawitacja ma charakter
+  zalecenia. U modelu jej nie zamówiono."
+- hero.pralka "Planetę wygenerowano bez instrukcji obsługi. Mnie wyprodukowano z instrukcją.
+  Żadna z nas jej nie czytała."
+- hero.konsultant "Model nie widział planety. Ja nie widziałem klienta. Obsługa przebiegała
+  prawidłowo."
+- hero.petlowiec "Planetę wygenerowano po moim przybyciu. Wcześniej stałem tu na niczym.
+  Pamiętam, że było równiej."
+- hero.kartograf "Planeta wygenerowana figuruje w nawigacji. Planeta z moich akt również.
+  Zmierzę obie. Na razie stoję na tej."
+- hero.nalesnik "Model nie widział planety i narysował kulę. Mnie by nie narysował. Płaskich nie
+  ma w zbiorze uczącym."
+- rewritten.1 "Sprawę przepisano. Planetę uznano za zaobserwowaną, a obserwację za domniemaną."
+- rewritten.2 "Wnioskodawca wraca na wyżynę. Wyżynę wygenerowano ponownie. Jest w tym samym
+  miejscu, o stronę dalej."
+
+**Stop posts.** On *wyżyna* the post reads as a trail marker beside a cairn; on the two reused
+types as planet 7.
+
+**Hosted set.** «Domniemanie» (drops as built: boss 35%, Sklep 10%, elites by post; ticket a
+pays one piece by awizo). Systems: campaign record (headline, location order and split, gate),
+locations registry (wyżyna new; równina and jaskinia reused from the planet-7 builder),
+clerk, side tickets (one `QuestReward.item`), boss variant table (`arm: 'dlon'` + attackRange: the
+`arm` union widened in enemies/bosses.ts, one drawing in enemyFigures.ts), gate (elite kind,
+default band), cards. Slice: **S26** (builder `planet-8`).
+
+### 8.15 Planet 9: Planeta Trzydziesta Pierwsza (Niedostępna) — Akt III
+**Record** (`PLANETS[8]`): act 3; dominant Wygenerowane 0.15/0.15/0.7; law pool `czas-wsteczny`,
+`weryfikacja-dwuetapowa`, `parzystosc`, `ciasteczka`; base layouts miasteczko, lądowisko;
+locations archiwum, biuro; hosted set «Awaria»; pages 6–6. Record edits for S27: `boss:
+'wizualizacja'` (the act's new body, below; `BOSS_OF[dominant]` would give Hipoteza), `headline:
+'czas-wsteczny'` (already `lawPool[0]`, named for clarity), `locationSplit: 3` (pages 1–3
+archiwum, pages 4–6 and the boss page biuro), the gate below. Name "Planeta Trzydziesta Pierwsza
+(Niedostępna)", loc "Planecie Trzydziestej Pierwszej" (the placeholder "Nieznana" replaced: the
+planet is the Komisja's observatory, "chwilowo niedostępne z powodu awarii", and the applicant
+is sent there all the same).
+
+**Feel.** The Observatory (§4): the organ of the Komisja that settles by observation what
+exists, and the last position on the list. It has been down since it opened. While the breakdown
+lasts, observations are replaced by visualizations, which is where the generated ones come from
+and why no file matches its planet: the pictures in the files were never taken, they were drawn.
+The archive holds the observation records of every planet on the list and, for the first time
+within reach, the applicant's own file; the office behind it is the wydział's seat, with an empty
+frame on the wall. After 17:00 time runs backwards (the headline clause), and the observatory
+works only after 17:00: a telescope shows what was. What the file here describes is planet 1.
+The pool's two Akt I clauses (ciasteczka, parzystość) are read the same way: the observatory
+applies the regulamin of the planet in its file. Hosted set «Awaria»: the clerk's line and the
+boss's second comment name it. The Naleśnik's unresolved matter is shelved in this building
+(his card line); the finale's Obserwatorium face (§3) is the Anomalia taking this shape, so the
+telescope itself is never an enemy here. Violet wash, profile B+C.
+
+**Locations.**
+- *archiwum* (pages 1–3): planet 6's drawings reused with the violet wash (the reels read as
+  observation films; the planet-9 builder may enlarge them, §8.12), plus the observatory's props
+  on the shared `ARCHIWUM` spec (they will also stand on planet 6, which is allowed): glass plates
+  in a rack, star charts rolled in tubes, a light table with a plate on it, an observation log
+  on a lectern, a crate of lenses, an instrument under a dust sheet. No word plates.
+- *biuro* (pages 4–6, boss page): planet 3's drawings reused with this wash, plus on the shared
+  `BIURO` spec: a telescope on a tripod under a drape, a wall clock without digits whose hands
+  are drawn twice, a drawing board with a half-drawn planet, a ladder to a dome hatch drawn as an
+  arc on the floor, an empty picture frame on a wall hook. Page shape as built; the boss hall is
+  the comparison room, an open room with the empty frame on its far wall.
+
+**Law.** Headline clause *Czas wsteczny*. Warunek: "wizualizacje zastępujące obserwację".
+
+**Boss: Wizualizacja** (the act's new body, player 2026-10-19; proposed here, drawn and built in
+S27 unless the player objects first; alternatives in §8.16). The picture that stands in a file in
+place of an observation: the applicant's planet as the model drew it. Polish knows the word from
+developers' brochures: "wizualizacja ma charakter poglądowy".
+- *Body (for the S27 builder, ink only, DESIGN §3).* A large framed picture on a three-legged
+  easel (the Urządzenia stilts part reused, three legs). The frame is a double ruled rectangle
+  in solid ink; inside it, in dotted line (the family's `dotted`), a planet drawn wrongly: the
+  horizon runs through the disc, a ring passes in front of it on both sides, there are three
+  moons of which one is square, and on top of the disc stands an oversized suburb house with a
+  picket fence and a dish (planet 1's props: the picture in the file is of planet 1). A caption
+  strip of hatched lines hangs under the frame on two strings. No arms, no face; it strikes by
+  tipping the frame forward. Size between Hipoteza and Prototyp. Claim bubble: "Zdjęcie
+  poglądowe" (`enemies.claim.boss.wizualizacja`). Family Wygenerowane (resists egzystencjalny,
+  weak to mechaniczny), `claimType: 'mechaniczny'`. Suggested `BOSSES.wizualizacja`: hp 320,
+  speed 34, dmg 6–9, attackRange 44, attackCooldown 1.3, pewnoscSiebie 80, upor 45; the balance
+  pass at the end of S27 tunes them.
+- *Fight (existing primitives only: Hipoteza's confirm circle detached from the body as the
+  Ankieta's row was detached from the grid, the existence pin, the summon code with a family
+  argument, zablokowany, the phase model).* Unobserved, it exists at **0,4** (pinned: hits count
+  at 0.4 both ways). 4 s after arrival, and 8 s after each answer, it marks an **observation
+  post** (stanowisko obserwacyjne) on the floor: a solid ink circle of `CONFIRM_R` with a
+  cross-hair, 135–210 units from the boss toward the player (the Ankieta's placement). Standing
+  in it 2 s is an observation: the Wizualizacja is compared with the facts, exists at 1 for 6 s
+  and is **zablokowany** for the first 3. A post left unanswered for 6 s is filled in instead: it
+  summons two Wygenerowane of tier 1 ("szczegóły", cap 6) and marks the next post. At half racja,
+  phase 2, the instrument breaks down: every 6 s **two** posts are marked round the player, one
+  solid (true) and one dotted with its cross-hair off centre (generated). 2 s in the true one
+  observes as before; 2 s in the generated one confirms the picture: it regains 10% racja and
+  both posts vanish. The second Spór comment is posted at the phase change. Footnotes
+  (`enemies.boss.wizualizacja.*`, drafts, voiced in S27): name "Wizualizacja"; meet "Napotkano
+  Wizualizację. Przedstawia planetę wnioskodawcy według akt. Ma charakter poglądowy i istnieje
+  w stopniu 0,4."; hint "Wizualizację porównuje się ze stanem faktycznym ze stanowiska
+  obserwacyjnego. Stanowisko wyznaczono na podłodze."; observed "Dokonano obserwacji. Stan
+  faktyczny różni się od wizualizacji. Wizualizację wstrzymano."; details "Obserwacji nie
+  dokonano. Wizualizację uzupełniono o szczegóły, w dwóch egzemplarzach."; half "Awaria
+  przyrządu. Wyznaczono dwa stanowiska obserwacyjne. Jedno z nich wygenerowano."; false
+  "Obserwacji dokonano ze stanowiska wygenerowanego. Wizualizację uznano za zgodną ze stanem
+  faktycznym."
+- *Variant line.* None (the body is its own, as planet 6); `story.p9.boss.variant` is not
+  written. No finale form: phase 1 of the Anomalia cycles the three family bosses (§3).
+- Spór (`story.p9.boss.spor1|spor2`):
+  - spor1 (on arrival): comment "Przedstawiam planetę wnioskodawcy zgodnie z aktami.
+    Wizualizacja ma charakter poglądowy. Stan faktyczny może się różnić." Right:
+    **egzystencjalny** "Stan faktyczny nie różni się od siebie. Różni się wizualizacja. Różnicę
+    zapisuje się na jej rachunek." Wrong mechaniczny "Obraz zdejmuje się ze sztalugi. Sztaluga
+    ma trzy nogi, wystarczy jedna." Wrong regulaminowy "Charakter poglądowy wymaga oznaczenia
+    w rogu. Oznaczenia nie umieszczono."
+  - spor2 (half racja): comment "Wystąpiła awaria przyrządu. Do czasu jej usunięcia obserwację
+    zastępuję ja. Przyczyny nie ustalono." Right: **regulaminowy** "Zastępstwo trwa do usunięcia
+    awarii. Awaria jest zjawiskiem lokalnym. Zjawiska lokalne usuwa wnioskodawca, łącznie
+    z zastępstwem." Wrong mechaniczny "Przyrząd naprawia się uderzeniem w obudowę. Obudowy nie
+    zaobserwowano." Wrong egzystencjalny "Awaria bez przyczyny nie ma skutków. Wizualizacja jest
+    skutkiem, więc jej nie ma." (the set's hook, ITEMS §4.1 «Awaria»: "Przyczyny nie ustalono")
+
+**Base and clerk.** miasteczko or lądowisko by seed. Clerk `story.p9.clerk`: name "Koordynator
+ds. Awarii", role "Komisja do Spraw Zjawisk Lokalnych, obserwatorium, chwilowo niedostępne",
+look seed 9.
+- line0 "Obserwatorium jest chwilowo niedostępne z powodu awarii. Do czasu jej usunięcia
+  obserwacje zastępuje się wizualizacjami. Chwila trwa od dnia otwarcia."
+- line1 "Awaria działa prawidłowo. Przyczyny nie ustalono, ponieważ ustalenie wymaga
+  obserwacji." (the set's hook line)
+- line2 "Akta wnioskodawcy leżą w archiwum. Proszę nie porównywać ich z planetą. Do porównań
+  służy obserwatorium."
+
+**Gate** (`story.p9.gate`): **page 3** (0-based 2; archiwum, the last page before the office).
+Kind `teczka` with the forced key folder (`keyTeczka`, as planets 2 and 6), the default hatched
+tape band with a figure "Dyżurny" at it (look seed 93). Condition: the teczka "akta
+wnioskodawcy", which the page always places, is opened: the one time in the campaign the
+applicant holds the file. The lift says what it describes and draws no conclusion; the conclusion
+is the final footnote's (§8.4).
+- note "Wyjście z archiwum wymaga okazania akt wnioskodawcy. Akta leżą na tej stronie,
+  w teczce. Wnioskodawca nie miał dotąd do nich wglądu."
+- figure (tap) "Awarii nie usuwam. Dyżuruję."
+- lift "Akta okazano. Opisują przedmieście z urządzeniami. Na miejscu stwierdzono archiwum.
+  Niezgodność odnotowano po raz dziewiąty. Przejście wolne."
+
+**Side tickets** (`story.p9.ticket.a|b|c`; no item ticket, as planet 6):
+- a) kill, n 18, family wygenerowane, reward 50 stars + permission wygenerowane. Title
+  "Skutki awarii". Text "Na czas awarii obserwacje zastąpiono wizualizacjami. Wizualizacje
+  opuściły akta. Usunąć {count}. Usunięcie skutków nie jest usunięciem awarii."
+  Twist: the applicant removes consequences; the cause stays unestablished.
+- b) reach, n 4, reward 40 stars + 1 potwierdzenie. Title "Zgłoszenie awarii". Text "Awarię
+  zgłasza się osobiście w biurze obserwatorium, na stronie {count}. Zgłoszenia awarii przyjmuje
+  się po jej usunięciu." Twist: the report is accepted once there is nothing to report.
+- c) fetch, n 6, reward 40 stars. Title "Klisze". Text "Obserwacje sprzed awarii utrwalono na
+  kliszach. Klisze rozłożono na stronach do wyschnięcia. Zebrać {count}. Wszystkie przedstawiają
+  pierwszą planetę z listy. Innych nie obserwowano." Twist: the only planet ever really observed
+  is planet 1 (the spine, planted as §8.1 ticket b planted the luggage).
+
+**Chapter card** (`story.p9.card`; "Akt III. Planeta Trzydziesta Pierwsza (Niedostępna)"):
+- lines.1 "Zjawisko na planecie poprzedniej usunięto. Wnioskodawcę przyjęto w drodze domniemania
+  i skierowano na ostatnią planetę z listy. Planeta jest chwilowo niedostępna."
+- lines.2 "Według akt planeta jest spokojnym przedmieściem z urządzeniami. Na miejscu
+  stwierdzono obserwatorium Komisji w stanie awarii." (describes planet 1, §8.0)
+- lines.3 "Zjawisko lokalne: wizualizacje zastępujące obserwację. Po 17:00 czas płynie wstecz.
+  Obserwatorium pracuje wyłącznie po 17:00."
+- hero.pralka "Awaria. Procedurę znam: wyłączyć, odczekać, włączyć. Obserwatorium nie ma
+  wyłącznika. Ja mam i nie pozwalam go dotykać."
+- hero.konsultant "Z powodu awarii czas oczekiwania może się wydłużyć. Czytałem to z kartki
+  codziennie. Awarii wtedy nie było."
+- hero.petlowiec "Po siedemnastej czas płynie wstecz. U mnie od rana. Pierwszy raz jestem zgodny
+  z regulaminem."
+- hero.kartograf "W archiwum leżą akta wszystkich planet z listy. Każdy opis pasuje do planety
+  sąsiedniej. Błąd jest stały, więc nie jest błędem pomiaru."
+- hero.nalesnik "Obserwatorium. Tu odłożono mój wniosek. Leży na półce, której teleskop nie
+  obejmuje."
+- rewritten.1 "Sprawę przepisano. Awarię uznano za usuniętą, a obserwatorium za dostępne
+  w godzinach, które minęły."
+- rewritten.2 "Wnioskodawca wraca do archiwum. Akta leżą na miejscu. Opis nadal dotyczy planety
+  pierwszej."
+
+**Stop posts.** On *archiwum* and *biuro* as planets 6 and 4.
+
+**Hosted set.** «Awaria» (as built; its hook is spoken by the clerk, the gate figure and the
+boss). Closing this planet at `CAMPAIGN_LAST` 9 issues the return ticket (§2); the return's card
+is §8.4's, unchanged. Systems: campaign record (boss id, headline, split, gate), new boss body
+(`BossId` 'wizualizacja' in enemies/ids.ts with `BOSS_FAMILY` wygenerowane, `BOSSES.wizualizacja`,
+its tick in bosses.ts on the detached confirm circle, its figure in partsBosses.ts and
+enemyFigures.ts, its Spór table from `story.p9.boss.*`, its footnotes and claim in enemies.json),
+locations registry (both types reused, props added to the shared specs), gate (teczka kind,
+default band), clerk, side tickets, cards, `CAMPAIGN_LAST` 9. Slice: **S27** (builder
+`planet-9`).
+
+### 8.16 Akt III decisions and texts outside the planet entries (S25)
+- **Planet 9's body: Wizualizacja** (recommended; §8.15). Weighed and not recommended:
+  *Wnioskodawca wzorcowy* (a generated applicant that matches the file; Diablo 3 fought a shadow
+  of the hero, but here it would spend the finale's hero-specific face, §3, one planet early, and
+  needs five drawings or a composite); *Akta* (the file itself as a body; the final footnote
+  needs the file intact and correct "o jedną pozycję dalej", so the applicant must not strike
+  it); *Społeczność* (the 87% as a crowd whose existence follows the number of living summons;
+  the reward runs backwards, since striking the adds makes the boss harder to hurt, and the bot
+  would stall); an Urządzenia *Teleskop* (the Obserwatorium is the Naleśnik's face). The player
+  may object before S27 starts; planet 9's entry is otherwise independent of the choice except
+  the two Spór comments and the body's lines.
+- **Hipoteza on two planets, the new body on the third**, as Akt II did with Weryfikacja: planet
+  7 a number (racja 300), planet 8 a part (the seven-fingered arm, reach 60), planet 9
+  Wizualizacja. `BOSS_OF[dominant]` stays the rule; planet 9's record names its boss.
+- **No act event, no fourth family** (§8.12; the player has not asked). The act's theme,
+  existence and likes (§4), is carried by the family's coefficient, the two affixes below and the
+  two bosses; it gets **no new clause**. The three headline clauses come from the pools as they
+  stand (Nie przeszkadzać, Grawitacja doradcza, Czas wsteczny); a clause about likes would be a
+  builder item and nothing in the act waits for it.
+- **One pair of elite affixes in the Wygenerowane key**, rolling from planet 7 on (pools
+  accumulate, §8.12), elite-system data plus one small hook each, never on bosses or their
+  summons, not shared with pack minions:
+  - *niepotwierdzony* (m niepotwierdzony, f niepotwierdzona, n and pl niepotwierdzone): every
+    6 s it stops being confirmed and for 2 s exists at 0.3 (the existence pin on any family's
+    body: hits count at 0.3 both ways; a hero's "potwierdzić istnienie" overrides it). Diablo 3's
+    shielding monster. Effect line `enemies.elite.niepotwierdzony.effect`: "Co sześć sekund
+    przestaje być potwierdzony i przez dwie sekundy istnieje w stopniu 0,3. Trafienia liczą się
+    wtedy w tym samym stopniu."
+  - *polubiony* (m polubiony, f polubiona, n and pl polubione): it takes 10% less damage for
+    every other living enemy within 200 units, 40% at most (the damage hook beside *poufny*):
+    strike the audience first. Diablo's pack that shields its leader. Effect line
+    `enemies.elite.polubiony.effect`: "Za każdego przeciwnika w pobliżu przyjmuje o 10% mniej
+    obrażeń, najwyżej o 40%. Oglądalność mu służy."
+- **Gates**: planet 7 none; planet 8 an elite gate at the default band (cave page 4, "Użytkownik
+  Potwierdzający", figure Rachmistrz); planet 9 a teczka gate at the default band (archive page
+  3, "akta wnioskodawcy", figure Dyżurny). No new gate kind and no new gate look.
+- **`CAMPAIGN_LAST` 9, the cards.** Nothing new is written. "Sprawę wznowiono" (`story.reopened.*`,
+  §8.11) serves a case closed at 3 or at 6 unchanged, shown once ahead of the planet 7 chapter
+  card; planet 7's lines.1 reads correctly after it and after planet 6. The return card
+  (`story.finale.card.*`) and every finale line stand (they count no planets, §8.12), and the
+  final footnote stays the 235-character text (§8.6). Recommendation on the open STATUS question:
+  the red return card is shown **once per `CAMPAIGN_LAST`**, so a case reopened from a shorter
+  campaign sees it again before its second return (a two-line change where `cards.finale` is
+  remembered, S27); the player decides.
+- **The file in the archive** (planet 9's gate) and the Kartograf's planet-9 line are the last
+  plants before the finale; neither names the shift or Asystent 0.9. The reveal stays the final
+  footnote's.
+- **Hero lines**: five per card as before. Akt III belongs to no hero's trade; instead three
+  lines point at the hero's finale face (§3): the Naleśnik's shelved application on planet 9, the
+  Kartograf's two planets in the navigation on planet 8, the Pralka's switch on planet 9.
+- **Zgłoszenia dodatkowe after Akt III** (texts in S27, STORY §5): the act gives the Komisja's
+  case against the applicant its subject without new story: the case concerns whether the
+  applicant exists, and every extra is one more observation in it. A direction for the S27 voice
+  pass, not a text.
+- **Keys added to §7**: `story.p7|p8|p9.*` in the p4–p6 scheme, `story.p8.gate.elite`;
+  no `story.p9.boss.variant`, no hint or solved override on planets 7–9; outside `story`:
+  `enemies.elite.niepotwierdzony.*`, `enemies.elite.polubiony.*` (S26), `enemies.boss.wizualizacja.*`
+  and `enemies.claim.boss.wizualizacja` (S27).
+- **For the S25 voice pass, besides planets 7–9**: write `story.p5.boss.solved` "Wszystkie
+  koszyki zaznaczono. Weryfikację wstrzymano." and change
+  `story.p6.boss.spor2.reply.egzystencjalny` to end "Nagranie wraca do wnioskodawcy wraz
+  z ankietą." (§8.9, §8.10, §8.12); replace `planets.p7–p9` in place and drop the file's `_todo`.

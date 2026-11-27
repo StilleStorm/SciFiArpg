@@ -93,7 +93,8 @@ Polish and release. Progress lines are below.
 
 ## Needs the player
 - Akt II difficulty (S24 bot, level-14 kits): no hero dies on planets 4-6 Normalny. Raise Akt II enemy numbers, or leave it to the priority levels? Recommendation (M5 story review): a bot data point at the real Akt I exit level (Normalny + Wysoki), then one player ticket; if soft, move `PLANET_DMG_GROWTH`, not hp (S27/S29).
-- Planet 9's new boss body: S25 proposes it, S27 builds it unless the player objects.
+- Planet 9's new boss body: S25 proposes **Wizualizacja** (STORY §8.15: the picture that stands in a file in place of an observation, a framed drawing on an easel; fought by standing on marked observation posts, from half racja one of two posts is generated and heals it). S27 builds it unless the player objects; alternatives weighed in STORY §8.16 (a generated applicant, the file itself, a crowd of the 87%).
+- Akt III names (S25, STORY §8.13–8.15): Planeta Dwudziesta Dziewiąta (Ewentualna), Trzydziesta (Wygenerowana), Trzydziesta Pierwsza (Niedostępna). The player may rename; nothing waits on it.
 - A case file reopened from an MVP save does not see the red return card again after planet 6 (`cards.finale` is once per character); e2e:m5 asserts this. Should the second return show it? Recommendation: yes once per `CAMPAIGN_LAST` (decide before S27 sets LAST 9).
 - Capstones as built are small flat bonuses (+20–25% on one skill, DESIGN §10.3). Keep them so, or
   turn them into mechanical rules (Diablo 4 key passives) in M4 S19–S21? Recommendation: keep;
@@ -218,7 +219,9 @@ Progress is recorded here, one line per slice:
 
 - **M5 Akt II complete** (2026-10-31): `npm run e2e:m5` green (scripts/e2e-milestone-5.mjs, M5_PORT 4195, Konsultant and Naleśnik × both orientations: the reopened card once from an MVP save, planets 4–6 through the case file with both gates and bosses incl. the Ankieta, both elite affixes never on bosses, free travel 1..6, reload; 40 enemies 16.7–17.2 ms); e2e:m2/m3 re-run green at LAST 6 (m3 needed `scripts/pathwalk.mjs`: straight walks stuck behind Akt II buildings, planet 6's code modal settled). Look (reports/M5-look.md, M5-integrator-look.md): Ankieta reply cards 11 px and stacked in portrait, bubbles kept in view, five-square row held near the player; the dwuetapowy caption reads 1/2 then 2/2; p5/p6 shot scripts close the level-up form, new frames in shots-m5/. The reopened card stays fully red like the rewritten and return cards (one rule, `.card-layer.rewritten`; player may overrule). Left for S28: enemy captions under the HUD pads (P5 gate), the planet-5 boss subtitle cut at the right edge in portrait, the Archiwista under a pad in portrait. Story review (reports/M5-story.md): STORY §8.12 decisions (p5 solved line via `BossVariant.solvedKey` in S25/S26, spor2 "do wnioskodawcy" in S25 voice, affix pools accumulate by act from planet 4 on in S26, Ankieta stars/paper feed/biuro props/archiwum reels to S28), DESIGN §4.2 "What M5 added", ITEMS §12.14, PRODUCTION S25–S29 adjusted. ARCHITECTURE folded.
 
-**Next pickup:** S25 (story plan Akt III). The /automode loop stays off until the player asks.
+- S25 story plan written (voice pass pending): STORY §8.13–8.16 (planets 29–31 Ewentualna, Wygenerowana, Niedostępna; new location types jaskinia, równina, wyżyna; P8 elite gate "Użytkownik Potwierdzający", P9 teczka gate "akta wnioskodawcy"; Hipoteza variants racja 300 and the seven-fingered arm; the new planet-9 body Wizualizacja; no act event, no new clause; elite affixes niepotwierdzony, polubiony for S26; nothing new for the cards at LAST 9), DESIGN §6 notes, PRODUCTION S26/S27 briefs adjusted (a third small builder `akt3-enemies` in S26). Report reports/S25-story.md.
+
+**Next pickup:** S25 voice pass (story.json p7–p9, planets.json p7–p9, the two M5 carry-over lines, STORY §8.16 last bullet), then S26. Slice order unchanged. The /automode loop stays off until the player asks.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).

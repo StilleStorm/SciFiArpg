@@ -515,10 +515,19 @@ from drawn parts, so no two are identical, but families are recognizable at a gl
   Resist egzystencjalny (used to being doubted). Weak to mechaniczny (a hit makes them real for
   a moment, which is lethal to them). Claims: "Istnieję według 87% użytkowników", "Zweryfikowane
   przez społeczność". Boss: **Hipoteza**, e=0.3 until the player stands in its drawn outline
-  for 3 s to "confirm" it, after which it is e=1 and furious.
+  for 3 s to "confirm" it, after which it is e=1 and furious. Planet 9 (the last of Akt III) has
+  the act's new boss body instead (proposed S25, STORY §8.15, built S27 unless the player
+  objects): **Wizualizacja**, the picture that stands in a file in place of an observation, a
+  framed drawing on an easel that exists at 0.4 until the player stands 2 s on a marked
+  observation post (then e=1 for 6 s and blocked for 3); an unanswered post summons two
+  Wygenerowane; from half racja two posts are marked, one generated (dotted), which heals it.
 
 Elites carry one affix from a small list with Polish grammar (*zweryfikowany*, *sponsorowany*,
-*nieuchronny*, *domniemany*) mapped to a mechanic (aura, speed, extra racja, teleport).
+*nieuchronny*, *domniemany*) mapped to a mechanic (aura, speed, extra racja, teleport). Pools
+grow by act and never retire (STORY §8.12): Akt II added *oddzwaniający* and *dwuetapowy* from
+planet 4 on; Akt III adds *niepotwierdzony* (every 6 s exists at 0.3 for 2 s) and *polubiony*
+(10% less damage taken per other enemy within 200 units, 40% at most) from planet 7 on (STORY
+§8.16, S26).
 
 ---
 
