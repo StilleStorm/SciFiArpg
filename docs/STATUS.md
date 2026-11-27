@@ -7,8 +7,8 @@ current: it replaces chat memory. Context note: the project's own files cost ~1k
 plugins, connectors), which the player trims in Claude settings, not in the repo.
 
 ## Where things are (2026-10-31, M5 complete)
-- Branch: `claude/scifi-arpg-concept-6vqk36`. Deploys to https://stillestorm.github.io/SciFiArpg/
-  on every push (GitHub Actions; repo public; github-pages environment allows `claude/*`).
+- Branches: work lands on `claude/scifi-arpg-concept-6vqk36` and `main` is moved to it. Only a push
+  to `main` deploys to https://stillestorm.github.io/SciFiArpg/ (GitHub Actions; repo public).
 - Playable first version is live: four heroes, three enemy families with claims/rebuttals,
   statuses, three bosses, loot with grammar and reviews, inventory, store, nine regulamin
   clauses, pages with page turns, update-style level ups (deferred to a lull), three death

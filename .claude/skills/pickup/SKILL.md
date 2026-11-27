@@ -25,6 +25,6 @@ logs, agent transcripts or the whole brief. Do not summarise the history; there 
 
 Rules of thumb that cost tokens when forgotten:
 - Gate with exit codes, never by grepping output.
-- Deploy status: `curl -sS -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/StilleStorm/SciFiArpg/actions/runs?branch=claude/scifi-arpg-concept-6vqk36&per_page=3"` and read `status`/`conclusion` of the run whose `head_sha` matches HEAD; no MCP needed.
+- Deploy status: `curl -sS -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/StilleStorm/SciFiArpg/actions/runs?branch=main&per_page=3"` and read `status`/`conclusion` of the run whose `head_sha` matches HEAD; no MCP needed.
 - Screenshot review: open at most two or three PNGs per build, the ones the builder flags.
 - Update STATUS.md in the same commit as the feature; it is the next session's memory.
