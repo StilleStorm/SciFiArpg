@@ -265,14 +265,14 @@
       "f": "niepotwierdzona",
       "n": "niepotwierdzone",
       "pl": "niepotwierdzone",
-      "effect": "Co sześć sekund przestaje być potwierdzony i przez dwie sekundy istnieje w stopniu 0,3. Trafienia liczą się wtedy w tym samym stopniu."
+      "effect": "Co sześć sekund traci potwierdzenie i przez dwie sekundy istnieje w stopniu 0,3. Trafienia, zadane i przyjęte, także."
     },
     "polubiony": {
       "m": "polubiony",
       "f": "polubiona",
       "n": "polubione",
       "pl": "polubione",
-      "effect": "Za każdego przeciwnika w pobliżu przyjmuje o 10% mniej obrażeń, najwyżej o 40%. Oglądalność mu służy."
+      "effect": "Za każdego innego przeciwnika w pobliżu przyjmuje o 10% mniej obrażeń, najwyżej o 40%. Oglądalność ma działanie ochronne."
     }
   },
   "boss": {

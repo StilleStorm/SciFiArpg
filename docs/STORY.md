@@ -1538,13 +1538,13 @@ default band), clerk, side tickets, cards, `CAMPAIGN_LAST` 9. Slice: **S27** (bu
     6 s it stops being confirmed and for 2 s exists at 0.3 (the existence pin on any family's
     body: hits count at 0.3 both ways; a hero's "potwierdzić istnienie" overrides it). Diablo 3's
     shielding monster. Effect line `enemies.elite.niepotwierdzony.effect`: "Co sześć sekund
-    przestaje być potwierdzony i przez dwie sekundy istnieje w stopniu 0,3. Trafienia liczą się
-    wtedy w tym samym stopniu."
+    traci potwierdzenie i przez dwie sekundy istnieje w stopniu 0,3. Trafienia, zadane i
+    przyjęte, także." (S26 voice: no gendered word, every family's noun reads it)
   - *polubiony* (m polubiony, f polubiona, n and pl polubione): it takes 10% less damage for
     every other living enemy within 200 units, 40% at most (the damage hook beside *poufny*):
     strike the audience first. Diablo's pack that shields its leader. Effect line
-    `enemies.elite.polubiony.effect`: "Za każdego przeciwnika w pobliżu przyjmuje o 10% mniej
-    obrażeń, najwyżej o 40%. Oglądalność mu służy."
+    `enemies.elite.polubiony.effect`: "Za każdego innego przeciwnika w pobliżu przyjmuje o 10%
+    mniej obrażeń, najwyżej o 40%. Oglądalność ma działanie ochronne." (S26 voice)
 - **Gates**: planet 7 none; planet 8 an elite gate at the default band (cave page 4, "Użytkownik
   Potwierdzający", figure Rachmistrz); planet 9 a teczka gate at the default band (archive page
   3, "akta wnioskodawcy", figure Dyżurny). No new gate kind and no new gate look.

@@ -984,6 +984,8 @@ music and SFX volume, both persisted; defaults on.
 - Enemies are *przeciwnicy* in system text; *wrogowie* only when a form or clause is quoting
   the planet's own regulamin (the regulamin is allowed to be cruder than the Asystent).
 - The death form counts every kill as *urządzenie* on purpose: the clerk generalizes.
+- An elite affix's effect line is shared by every family, so it carries no gendered word
+  (no "potwierdzony", no "mu"); gender lives only in the m/f/n/pl caption forms.
 - A form that DESIGN says lies must keep lying (e.g. *Czas wsteczny*: "reputacja ujemna").
 - One-letter words (w, z, i, a, o, u) never end a line. This is a typography rule for the
   renderer (bind them to the next word in `wrapText`/`wrapClaim` and in `t()`), not for the
