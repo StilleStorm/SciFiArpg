@@ -30,6 +30,8 @@ export interface ScreenLayout {
    * whatever the phase is now): the printed page header is set clear of it. Null when there is no row.
    */
   row: Box | null;
+  /** The HUD form when it is a box in a corner (landscape), else null; the printed page header is set clear of it. */
+  hud?: Box | null;
 }
 
 let source: (() => ScreenLayout | null) | null = null;

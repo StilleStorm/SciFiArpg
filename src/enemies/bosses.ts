@@ -62,6 +62,8 @@ export const BOSSES: Record<BossId, BossDef> = {
 
 /** Wizualizacja (STORY 8.15): the pinned existence, the post (radius of Hipoteza's outline), and its timings. */
 export const BOSS_WIZUALIZACJA_E = 0.4;
+/** The least y the Wizualizacja walks to: its frame (88 units tall) then clears the HUD and its stamp has room. */
+export const BOSS_WIZUALIZACJA_TOP = 190;
 export const POST_R = CONFIRM_R;
 export const POST_FIRST_S = 4;
 export const POST_EVERY_S = 8;
@@ -450,7 +452,10 @@ export function tickBoss(s: RunState, e: Enemy, bus: Bus, dt: number): void {
     rt.sporAt = undefined;
     postSpor(s, bus, e, 1);
   }
-  if (boss === 'wizualizacja') tickSeen(e, dt);
+  if (boss === 'wizualizacja') {
+    tickSeen(e, dt);
+    e.y = Math.max(e.y, BOSS_WIZUALIZACJA_TOP); // the frame stays below the landscape HUD, which covers the top ~75 units of the view
+  }
   if (isStunned(e)) return;
   if (boss === 'prototyp') {
     if (rt.phase === 1 && e.hp <= e.hpMax / 2) {

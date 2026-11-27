@@ -11,7 +11,16 @@ import type { Builder } from './view';
 
 const pen = createRng(0x5c11);
 
+/** Cast drawings on the page at once, at most: when every skill fires together the page is not buried (the newest are drawn, the oldest erased early). */
+export const MAX_CASTS = 6;
+/** Pure: how many of the drawings alive must go for one more to fit under `max`. */
+export function castOverflow(alive: number, max: number = MAX_CASTS): number {
+  return Math.max(0, alive + 1 - max);
+}
+const live: SVGGElement[] = [];
+
 function sketch(layer: SVGGElement, d: string, opts: { dash?: string; ms?: number; hold?: number; width?: number; red?: boolean } = {}): void {
+  for (let n = castOverflow(live.length); n > 0; n--) live.shift()?.remove();
   const g = el('g', {});
   const path = el('path', { d });
   if (opts.dash) path.setAttribute('stroke-dasharray', opts.dash);
@@ -20,7 +29,12 @@ function sketch(layer: SVGGElement, d: string, opts: { dash?: string; ms?: numbe
   g.append(path);
   layer.append(g);
   drawIn(g, opts.ms ?? 180);
-  eraseOut(g, 420, (opts.ms ?? 180) + (opts.hold ?? 260), () => g.remove());
+  live.push(g);
+  eraseOut(g, 420, (opts.ms ?? 180) + (opts.hold ?? 260), () => {
+    g.remove();
+    const at = live.indexOf(g);
+    if (at >= 0) live.splice(at, 1);
+  });
 }
 
 function spiral(x: number, y: number, r: number): string {

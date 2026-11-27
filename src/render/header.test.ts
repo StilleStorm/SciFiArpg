@@ -29,6 +29,17 @@ describe('the clause header', () => {
     expect(torn.y).toBeGreaterThan(left.y);
   });
 
+  it('in landscape it keeps right of the HUD corner box and left of the note row, or below the row', () => {
+    const hud = { x0: 0, y0: -1000, x1: 500, y1: 130 };
+    const row = { x0: 1000, y0: 80, x1: 1150, y1: 160 };
+    const b = headerBox(page, undefined, true, [hud, row], 30);
+    expect(b.x0).toBeGreaterThanOrEqual(510);
+    expect(b.x1).toBeLessThanOrEqual(page.w - 52);
+    const noRow = headerBox(page, undefined, true, [hud], 30);
+    expect(noRow.x0).toBe(510);
+    expect(noRow.y).toBe(52);
+  });
+
   it('every clause fits two lines of the portrait box, cut after a whole sentence when it is longer', () => {
     const box = headerBox(page, { x0: 400, x1: 790 });
     const ids = Object.entries(lawsJson).filter(([, v]) => typeof v === 'object' && v !== null && 'header' in v).map(([k]) => k);

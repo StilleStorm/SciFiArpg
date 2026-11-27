@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clearStand } from './spor';
+import { clearStand, coversAny } from './spor';
 
 const rect = (top: number, bottom: number, left = 100, right = 200) => ({ top, bottom, left, right });
 
@@ -19,5 +19,14 @@ describe('clearStand (the Spór reply strip in portrait)', () => {
     expect(clearStand(844, 177, 8, 294, 190, 120, [rect(500, 640, 320, 380)])).toBe(190);
     const at = clearStand(844, 177, 8, 294, 190, 120, [rect(130, 700)]);
     expect(at).toBeGreaterThanOrEqual(190);
+  });
+});
+
+describe('coversAny (fade the strip over a boss it could not clear)', () => {
+  it('is true while the strip at its stand still lies over the boss, false once it is clear', () => {
+    const boss = rect(130, 700);
+    expect(coversAny(844, 177, 8, 294, 190, [boss])).toBe(true);
+    expect(coversAny(844, 177, 8, 294, 190, [rect(100, 200)])).toBe(false);
+    expect(coversAny(844, 177, 8, 294, 190, [])).toBe(false);
   });
 });

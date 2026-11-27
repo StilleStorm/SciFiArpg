@@ -56,6 +56,16 @@ export function clearStand(viewH: number, h: number, left: number, right: number
   return best;
 }
 
+/**
+ * Whether the strip at `bottom` (css px from the view's foot) still covers one of the `figures` (the bosses), with the same air as
+ * `clearStand`. When it does, ui/spor.ts fades the strip so the boss shows through it. Pure.
+ */
+export function coversAny(viewH: number, h: number, left: number, right: number, bottom: number, figures: readonly Rect[]): boolean {
+  const top = viewH - bottom - h;
+  const bot = viewH - bottom;
+  return figures.some((f) => Math.min(right, f.right + AIR) - Math.max(left, f.left - AIR) > 0 && Math.min(bot, f.bottom + AIR) - Math.max(top, f.top - AIR) > 0);
+}
+
 /** `state` is read on every use: the live RunState is replaced by every ticket and every tunnel return. */
 export function createSpor(root: HTMLElement, bus: Bus, state: () => RunState | null): SporStrip {
   const el = h('div', 'spor');
@@ -64,7 +74,7 @@ export function createSpor(root: HTMLElement, bus: Bus, state: () => RunState | 
   root.append(el);
 
   const clear = (): void => {
-    el.classList.remove('closing', 'done');
+    el.classList.remove('closing', 'done', 'over-boss');
     el.style.removeProperty('bottom');
     el.replaceChildren();
   };
@@ -74,8 +84,10 @@ export function createSpor(root: HTMLElement, bus: Bus, state: () => RunState | 
     el.style.removeProperty('bottom');
     const box = el.getBoundingClientRect();
     if (box.height === 0) return;
+    el.classList.remove('over-boss');
     const s = state();
     const figures: Rect[] = [];
+    const bosses: Rect[] = [];
     const take = (sel: string, weight: number): void => {
       const n = document.querySelector(sel);
       if (!n) return;
@@ -85,6 +97,7 @@ export function createSpor(root: HTMLElement, bus: Bus, state: () => RunState | 
     if (s) {
       take(`[data-kind="player"]`, 6);
       for (const e of s.enemies) if (e.boss) take(`[data-kind="enemy"][data-id="${e.id}"]`, 1);
+      for (const f of figures) if (f.weight === 1) bosses.push(f);
     }
     const hud = document.querySelector('.hud')?.getBoundingClientRect();
     const ceiling = (hud ? hud.bottom : 64) + 58; // under the margin notes that hang from the HUD
@@ -94,6 +107,8 @@ export function createSpor(root: HTMLElement, bus: Bus, state: () => RunState | 
       el.style.bottom = `${at}px`;
       invalidateLayout(); // the strip moved without changing size: bubbles and stamps keep off its new stand
     }
+    // no stand clear of the boss: the strip is faded over it (ui/base.css .over-boss), so the boss stays readable through the replies
+    if (coversAny(window.innerHeight, box.height, box.left, box.right, at, bosses)) el.classList.add('over-boss');
   };
   // the 600 ms hold is a CSS animation: no timer, and it only runs while the strip is on screen
   el.addEventListener('animationend', (ev) => {

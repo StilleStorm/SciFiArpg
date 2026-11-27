@@ -13,6 +13,7 @@ import { SKILL_INDICES } from './defs';
 import { patchAt } from './grants';
 import { durationOf, enemiesWithin, nearestEnemy, patchOf, power, setExistence, skillDamage, touchStatus } from './helpers';
 import { FOAM_RADIUS } from './numbers';
+import { knockback } from '../systems/combat';
 import { effectiveSkill } from './loadout';
 import { lineHit } from './kartograf/hits';
 import { stepFlag, stepGravity, stepOrbit, stepRoll } from './nalesnik/steps';
@@ -84,6 +85,9 @@ export function heroBaseStep(s: RunState, bus: Bus, dt: number): void {
   else if (h.updateRequested && canOpenUpdate(s, false)) bus.emit('update:ready');
 }
 
+/** Odwirowanie lets go of the enemy it dragged: it is thrown this far on along the dash (units, times the law's knockback). A look, not a balance number. */
+const ODWIROWANIE_RELEASE_PUSH = 36;
+
 function stepDash(s: RunState, bus: Bus, dt: number): void {
   const d = s.hero.dash;
   if (!d) return;
@@ -110,6 +114,8 @@ function stepDash(s: RunState, bus: Bus, dt: number): void {
   if (dragged && s.enemies.includes(dragged)) {
     applyStatus(dragged, 'zablokowany', 1.5 * durationOf(s, 2), p.id);
     skillDamage(s, bus, dragged, effectiveSkill(s, 2).type, power(s, 2));
+    // let go: the held enemy is thrown on along the dash, so the spin-out reads as a push (S28b)
+    if (!dragged.boss && s.enemies.includes(dragged)) knockback(s, dragged, p.x, p.y, ODWIROWANIE_RELEASE_PUSH);
   }
 }
 

@@ -410,6 +410,10 @@
   padding-top: 2px;
   border-top: 1px dotted var(--ink);
 }
+/* portrait, no stand clear of the boss: the replies are faded so the boss reads through them (S28b) */
+.spor.over-boss .spor-reply {
+  opacity: 0.55;
+}
 /* the chosen card is marked in ink only: no browser focus ring (orange on some phones), no accent */
 .spor-reply:focus,
 .spor-reply:focus-visible {

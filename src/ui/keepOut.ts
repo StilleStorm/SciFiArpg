@@ -70,7 +70,8 @@ export function measureLayout(ui: HTMLElement): ScreenLayout {
       if (b && b.y0 < r.y1 + 12 && b.y1 > r.y0 - 90 && b.x0 < r.x1 && b.x1 > r.x0) row = union(row, b);
     });
   }
-  return { w, h, top, bottom, blocks, row };
+  const hudCorner = hudBox && top === 0 ? hudBox : null;
+  return { w, h, top, bottom, blocks, row, hud: hudCorner };
 }
 
 /** Wire the measurement to the DOM; call once at boot with the #ui layer. */

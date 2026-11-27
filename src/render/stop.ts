@@ -11,6 +11,7 @@ import { t } from '../i18n';
 import type { Page, PageStop } from '../world/pages';
 import type { RunState } from '../world/run';
 import { drawIn } from './ink';
+import { plateSize, plateWidth } from './plates';
 import { dotPath, el, n2, polyline, wobblyLine } from './svg';
 import { washGroup } from './wash';
 
@@ -56,8 +57,14 @@ function timetable(r: Rng, x0: number, y0: number, w: number, h: number, rows: n
 /** The plate: two printed lines, "PRZYSTANEK" over "NA ŻĄDANIE". */
 function plate(cx: number, cy: number): SVGGElement {
   const g = el('g', { transform: `translate(${n2(cx)} ${n2(cy)})` });
-  g.append(sheet(rect(-30, -11, 30, 11), 1.9), stroke('M-27 -8H27', 0.6));
-  g.append(el('text', { class: 't-plate', x: 0, y: -1.5, 'font-size': 7.4 }, [t('ui.stop.plate1')]), el('text', { class: 't-plate', x: 0, y: 7, 'font-size': 6.2 }, [t('ui.stop.plate2')]));
+  // the type reads 11 css px at the zoom now; the plate is cut to the longer line (S28b)
+  const s1 = plateSize(7.4);
+  const s2 = plateSize(6.2);
+  const hw = plateWidth(Math.max(t('ui.stop.plate1').length, t('ui.stop.plate2').length), Math.max(s1, s2), 3, 60) / 2;
+  const top = -(s1 + 4);
+  const bottom = s2 + 4;
+  g.append(sheet(rect(-hw, top, hw, bottom), 1.9), stroke(`M${n2(-hw + 3)} ${n2(top + s1 + 1.5)}H${n2(hw - 3)}`, 0.6));
+  g.append(el('text', { class: 't-plate', x: 0, y: n2(top + s1 - 0.5), 'font-size': n2(s1) }, [t('ui.stop.plate1')]), el('text', { class: 't-plate', x: 0, y: n2(bottom - 3), 'font-size': n2(s2) }, [t('ui.stop.plate2')]));
   return g;
 }
 

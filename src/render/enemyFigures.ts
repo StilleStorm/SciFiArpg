@@ -457,7 +457,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
     const capLines = captionKeyOf(e) && !facePartsOf(e) ? wrapClaim(capWords, 14) : [capWords];
     capLines.forEach((line, i) => {
       over.append(
-        el('text', { 'data-part': 'boss-name', 'data-y': n2(nameAt + i * readableUnits(11)), x: 0, y: n2(nameAt + i * readableUnits(11)), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [line]),
+        el('text', { 'data-part': 'boss-name', 'data-y': n2(nameAt + i * readableUnits(11)), x: 0, y: n2(nameAt + i * readableUnits(11)), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: var(--paper); stroke-width: 5; stroke-linejoin: round; paint-order: stroke` }, [line]),
       );
     });
     const variant = bossVariantLine(e);

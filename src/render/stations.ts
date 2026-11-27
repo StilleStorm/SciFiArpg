@@ -17,6 +17,7 @@ import type { RunState } from '../world/run';
 import { viewZoom } from './camera';
 import { drawIn } from './ink';
 import { drawNpc } from './npc';
+import { plateSize, plateWidth } from './plates';
 import { drawStopBoard } from './stop';
 import { drawHeader, drawPage, type PageHeader } from './obstacles';
 import { dotPath, el, n2, polyline, wobblyCircle, wobblyLine } from './svg';
@@ -110,8 +111,12 @@ function drawKiosk(r: Rng, seed: number): SVGGElement {
     g.append(p);
   }
   // the sign under the awning
-  const plate = sheet(rect(-24, -13, 24, -3), 1.3);
-  g.append(plate, el('text', { class: 't-plate', x: 0, y: -5.5, 'font-size': 8.5 }, [t('screens.base.plate.kiosk')]));
+  // the type reads 11 css px at the zoom now; the sign is cut to the word and hangs from the awning's hem (S28b)
+  const word = t('screens.base.plate.kiosk');
+  const ps = plateSize(8.5);
+  const hw = plateWidth(word.length, ps, 4, 48) / 2;
+  const plate = sheet(rect(-hw, -3 - ps - 4, hw, -3), 1.3);
+  g.append(plate, el('text', { class: 't-plate', x: 0, y: n2(-5.5), 'font-size': n2(ps) }, [word]));
   // goods on the counter: a phone, a jar, a box with a ribbon
   g.append(sheet(rect(-44, -1, -32, 9), 1.2), stroke('M-42 7h8', 0.8));
   g.append(el('path', { d: wobblyCircle(r, 4, 3.5, 5.5, 8, 0.05), 'stroke-width': 1.3 }));

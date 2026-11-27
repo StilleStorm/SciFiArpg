@@ -3,7 +3,8 @@ import type { Pickup } from '../entities';
 import { t } from '../i18n';
 import { buildDrawing, starPath } from './itemDrawings';
 import { buildAffixMarks, buildTierMark, groundMark, numberSuffix } from './itemMarks';
-import { el } from './svg';
+import { plateSize, plateWidth } from './plates';
+import { el, n2 } from './svg';
 import { TIER_HUE, washGroup } from './wash';
 
 /** Cards on the ground are drawn this much larger than the 34 x 24 sketch below. */
@@ -36,11 +37,15 @@ function permissionCard(e: Pickup): SVGGElement {
   g.append(washGroup(createRng(e.id).fork('wash'), 'indigo', 34, { opacity: 0.25 }));
   const plate = el('g', { transform: `scale(${CARD_SCALE}) rotate(-2)` });
   const family = e.permission ?? 'urzadzenia';
+  // the family word reads 11 css px at the zoom now (the card is scaled by CARD_SCALE); the plate is cut to it (S28b)
+  const word = t(`forms.update.family.${family}`);
+  const size = plateSize(6.4, CARD_SCALE);
+  const hw = plateWidth(word.length, size, 3, 54) / 2;
   plate.append(
-    el('rect', { x: -27, y: -15, width: 54, height: 30 }),
+    el('rect', { x: -hw, y: -15, width: hw * 2, height: 34 }),
     el('rect', { x: -6, y: -12, width: 12, height: 12, 'stroke-width': 1.1 }),
     el('path', { d: 'M-4.2-5.5L-1.4-2.4L5.2-10.4', 'stroke-width': 1.6 }),
-    el('text', { class: 't-plate', x: 0, y: 10, 'font-size': 6.4 }, [t(`forms.update.family.${family}`)]),
+    el('text', { class: 't-plate', x: 0, y: n2(Math.max(11.5, 4 + size)), 'font-size': n2(size) }, [word]),
   );
   g.append(plate);
   return g;
@@ -67,7 +72,11 @@ export function buildPickupCard(e: Pickup): SVGGElement {
   g.append(washGroup(createRng(item.uid).fork('wash'), hue, 25, { opacity: 0.25 }));
   const tilt = (e.number % 5) - 2;
   const plate = el('g', { transform: `scale(${CARD_SCALE}) rotate(${tilt})` });
-  plate.append(el('rect', { x: -17, y: -12, width: 34, height: 24 }));
+  // the number reads 11 css px at the zoom now; the plate grows to the right to hold it (S28b)
+  const numSize = plateSize(7, CARD_SCALE);
+  const numW = String(e.number).length * numSize * 0.6;
+  const right = Math.max(17, 7 + numW + 3);
+  plate.append(el('rect', { x: -17, y: -12, width: right + 17, height: 24 }));
   // the art, then the tier mark (never omitted) and one affix mark, in the art's own coordinates
   const kind = groundMark(item);
   const art = buildDrawing(item.drawing, kind === 'dotted');
@@ -78,7 +87,7 @@ export function buildPickupCard(e: Pickup): SVGGElement {
   if (tierMark) marked.append(tierMark);
   const affixMark = kind ? buildAffixMarks([kind], 2.6) : null;
   if (affixMark) marked.append(affixMark);
-  plate.append(marked, el('text', { class: 't-plate', x: 12, y: 9, 'font-size': 7 }, [String(e.number)]));
+  plate.append(marked, el('text', { class: 't-plate', x: n2(right - 2 - numW / 2), y: 9.5, 'font-size': n2(numSize) }, [String(e.number)]));
   if (kind === 'ok') plate.append(el('text', { class: 't-plate', x: 12, y: 3.4, style: 'font-size:4.6px' }, [t('items.mark.ok')]));
   if (kind === 'footnote') plate.append(el('text', { class: 't-plate', x: 17.2, y: 5.2, style: 'font-size:4.6px' }, [numberSuffix(['footnote'])]));
   if (kind === 'strike') plate.append(el('path', { d: 'M7.6 9.6L16.6 3.8', 'stroke-width': 0.8 }));

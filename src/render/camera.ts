@@ -178,19 +178,32 @@ export function keepOutBlocks(cam: Pick<Camera, 'viewRect'>, margin = 0): Box[] 
   });
 }
 
+/** Where the printed header's band ends, page units: the HUD box is carried down to here. */
+const HEADER_BAND = 130;
+
 /**
  * Where the margin-note row can stand over the top of the page, in page units: the row measured on screen, carried over
  * every left edge the camera can take while the page top is in view (the header is printed once for the page and the
  * camera then pans under the screen-fixed row; in portrait that leaves no room beside the row, so the header goes below it).
  */
-export function headerKeepOut(cam: Pick<Camera, 'w' | 'h' | 'viewRect' | 'bounds'>): Box | undefined {
+export function headerKeepOut(cam: Pick<Camera, 'w' | 'h' | 'viewRect' | 'bounds'>): Box[] | undefined {
   const l = screenLayout();
-  if (!l?.row) return undefined;
+  if (!l) return undefined;
   const z = viewZoom();
   const top = viewRect(0, -1e9, cam.w, cam.h, cam.bounds).y0;
   const lo = viewRect(-1e9, 0, cam.w, cam.h, cam.bounds).x0;
   const hi = viewRect(1e9, 0, cam.w, cam.h, cam.bounds).x0;
-  return { x0: lo + l.row.x0 / z, x1: hi + l.row.x1 / z, y0: top + l.row.y0 / z, y1: top + l.row.y1 / z };
+  // landscape: the camera pans only a little under the screen-fixed furniture, so it is carried at the middle of its range (carrying
+  // it over both extremes leaves no column between the HUD and the note row); portrait keeps every left edge the camera can take
+  const land = cam.h <= cam.w;
+  const mid = (lo + hi) / 2;
+  const carry = (b: Box): Box => ({ x0: (land ? mid : lo) + b.x0 / z, x1: (land ? mid : hi) + b.x1 / z, y0: top + b.y0 / z, y1: top + b.y1 / z });
+  const out: Box[] = [];
+  // in landscape the HUD is a box in the top-left corner and hides the start of the header line: the header is set to the right of it
+  // (the camera pans under the screen-fixed HUD, so over the page it covers the header's band whatever the view's top is)
+  if (cam.h <= cam.w && l.hud) out.push({ ...carry(l.hud), y0: -1000, y1: HEADER_BAND });
+  if (l.row) out.push(cam.h <= cam.w ? { ...carry(l.row), y0: -1000, y1: HEADER_BAND } : carry(l.row));
+  return out.length > 0 ? out : undefined;
 }
 
 /** The rectangle the camera shows when it is centred on (cx, cy), clamped like `apply()` does. */
@@ -209,7 +222,7 @@ function axis(center: number, size: number, extent: number): number {
 }
 
 /** How the page header is set for this camera: inside the portrait span (`portraitSpan`) and clear of the note row (`headerKeepOut`). */
-export function headerFrame(cam: Pick<Camera, 'w' | 'h' | 'viewRect' | 'bounds'>): { view?: { x0: number; x1: number }; avoid?: Box } {
+export function headerFrame(cam: Pick<Camera, 'w' | 'h' | 'viewRect' | 'bounds'>): { view?: { x0: number; x1: number }; avoid?: Box[] } {
   const view = portraitSpan(cam);
   const avoid = headerKeepOut(cam);
   return { ...(view ? { view } : {}), ...(avoid ? { avoid } : {}) };

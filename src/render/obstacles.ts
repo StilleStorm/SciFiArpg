@@ -250,7 +250,7 @@ export interface PageHeader {
    * The margin-note row over the top of the page in page units (`headerKeepOut` in render/camera.ts): the header is narrowed
    * to the side of it when that leaves a readable width, otherwise set below it. Absent: nothing to avoid.
    */
-  avoid?: { x0: number; y0: number; x1: number; y1: number };
+  avoid?: HeaderAvoid | readonly HeaderAvoid[];
 }
 
 /** Break a text into lines of at most `max` characters. */
@@ -298,6 +298,9 @@ export interface HeaderBox {
   maxLines: number;
 }
 
+/** A rectangle over the top of the page, in page units, that the header keeps clear of. */
+export type HeaderAvoid = { x0: number; y0: number; x1: number; y1: number };
+
 /** Average advance of an EB Garamond italic letter, as a share of the font size. */
 const SERIF_ADVANCE = 0.435;
 const HEADER_SIZE = 17;
@@ -324,7 +327,7 @@ export function headerBox(
   page: Pick<Page, 'w' | 'torn' | 'exit'>,
   view?: { x0: number; x1: number },
   avoidExit = true,
-  avoid?: { x0: number; y0: number; x1: number; y1: number },
+  avoid?: HeaderAvoid | readonly HeaderAvoid[],
   topChars = 0,
 ): HeaderBox {
   const topLeft = page.torn === 'tl' || (avoidExit && page.exit?.corner === 'tl');
@@ -347,17 +350,20 @@ export function headerBox(
       y = HEADER_Y + BELOW_CORNER;
     }
   }
-  const bottom = y + 22 + maxLines * Math.round(size * 1.18);
-  if (avoid && avoid.x0 < x1 && avoid.x1 > x0 && avoid.y1 > y - 12 && avoid.y0 < bottom) {
-    // the row stands over the header's line: narrow the header to the wider side of the row, or set it below the row
-    const left = { x0, x1: Math.min(x1, avoid.x0 - ROW_GAP) };
-    const right = { x0: Math.max(x0, avoid.x1 + ROW_GAP), x1 };
+  // the screen furniture over the top of the page (landscape: the HUD corner box, then the margin-note row), one after the other
+  const boxes: readonly HeaderAvoid[] = avoid === undefined ? [] : 'x0' in avoid ? [avoid] : avoid;
+  for (const a of [...boxes].sort((p, q) => p.x0 - q.x0)) {
+    const bottom = y + 22 + maxLines * Math.round(size * 1.18);
+    if (!(a.x0 < x1 && a.x1 > x0 && a.y1 > y - 12 && a.y0 < bottom)) continue;
+    // it stands over the header's line: narrow the header to the wider side of it, or set it below
+    const left = { x0, x1: Math.min(x1, a.x0 - ROW_GAP) };
+    const right = { x0: Math.max(x0, a.x1 + ROW_GAP), x1 };
     const side = left.x1 - left.x0 >= right.x1 - right.x0 ? left : right;
     const need = Math.max(MIN_HEADER_W, topChars * TOP_ADVANCE + 8);
     if (side.x1 - side.x0 >= need) {
       x0 = side.x0;
       x1 = side.x1;
-    } else y = Math.max(y, Math.ceil(avoid.y1 + ROW_GAP + 11));
+    } else y = Math.max(y, Math.ceil(a.y1 + ROW_GAP + 11));
   }
   return { x0, x1, y, size, maxChars: Math.max(12, Math.floor((x1 - x0) / (size * SERIF_ADVANCE))), maxLines };
 }
