@@ -8,6 +8,7 @@ import { installUnlock, setVolumes as setBusVolumes, unlockAudio } from './conte
 import { play } from './sfx';
 
 export { unlockAudio, setVolumes } from './context';
+export { currentHoldTrack } from './music';
 
 export interface Audio extends AudioBindings {
   /** Music and SFX volume, 0..100. */

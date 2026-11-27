@@ -3,6 +3,7 @@
  * with up to seven lines: Wznów, Ustawienia, Umiejętności, Konfiguracja, Zgłoś problem, Zakończ zgłoszenie, Wyjdź. The sheet owns no rules: it only calls back. The router
  * (main.ts) pauses the game, shows the sheet, opens the settings in place and takes the run to the base.
  */
+import { currentHoldTrack } from '../audio';
 import { createRng } from '../core/rng';
 import { t } from '../i18n';
 import { el, wobblyCircle } from '../render/svg';
@@ -109,6 +110,9 @@ export function createPauseSheet(root: HTMLElement, handlers: PauseHandlers): Pa
       if (handlers.onExit) lines.append(line(t('screens.pause.exit'), t('screens.pause.exitNote'), handlers.onExit, 'exit'));
       made.scroll.append(lines);
       made.note(t('screens.pause.hold'));
+      // the music on hold has a number (DESIGN 14.4); null while no run's music plays (the base, a pause before the first gesture)
+      const track = currentHoldTrack();
+      if (track !== null) made.note(t('screens.pause.track', { n: track }));
       sheet = made;
     },
     close() {

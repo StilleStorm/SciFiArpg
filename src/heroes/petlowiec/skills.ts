@@ -42,16 +42,42 @@ import {
 } from './numbers';
 import { petlState, type Clock } from './state';
 
+const COPY_RING = 34;
+
+/**
+ * Where a new copy stands: on a ring round the hero, at the direction farthest from the copies already there (and from the ones
+ * placed in this cast), so a second and third copy fan out and are not a heap at his spot (S28 look). Eight directions from a
+ * random start, the first at the largest distance to its nearest neighbour wins. Pure but for the roll.
+ */
+export function copySpot(p: { x: number; y: number }, others: readonly { x: number; y: number }[], start: number): { x: number; y: number } {
+  let best = { x: p.x + Math.cos(start) * COPY_RING, y: p.y + Math.sin(start) * COPY_RING };
+  let bestD = -1;
+  for (let i = 0; i < 8; i++) {
+    const a = start + (i * Math.PI) / 4;
+    const x = p.x + Math.cos(a) * COPY_RING;
+    const y = p.y + Math.sin(a) * COPY_RING;
+    let d = Infinity;
+    for (const o of others) d = Math.min(d, Math.hypot(o.x - x, o.y - y));
+    if (d > bestD + 1e-6) {
+      bestD = d;
+      best = { x, y };
+    }
+  }
+  return best;
+}
+
 /** Przybycie przed wyjazdem: a copy from another loop for 8 s (two at most). It disagrees in a footnote. */
 const przybycie = cast(0, [
   ({ c, s, bus, p }) => {
+    const placed: { x: number; y: number }[] = s.summons.filter((m) => m.variant === 'copy').map((m) => ({ x: m.x, y: m.y }));
     for (let k = 0; k <= countOf(s, 0); k++) {
-      const angle = s.rngs.combat.range(0, Math.PI * 2);
+      const spot = copySpot(p, placed, s.rngs.combat.range(0, Math.PI * 2));
+      placed.push(spot);
       summon(c, {
         variant: 'copy',
         heroId: p.heroId,
-        x: p.x + Math.cos(angle) * 34,
-        y: p.y + Math.sin(angle) * 34,
+        x: spot.x,
+        y: spot.y,
         max: MAX_COPIES + s.hero.mods.summonMax,
         settle: true,
         ttl: 8 * durationOf(s, 0),

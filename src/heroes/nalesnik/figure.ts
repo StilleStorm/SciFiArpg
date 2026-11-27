@@ -163,7 +163,7 @@ export function zoneParts(z: Zone): readonly string[] | null {
       const a = (i / 12) * Math.PI * 2 + rng.range(-0.1, 0.1);
       ticks += `M${f1(Math.cos(a) * z.r * 1.05)} ${f1(Math.sin(a) * z.r * 1.05)}L${f1(Math.cos(a) * z.r * 1.2)} ${f1(Math.sin(a) * z.r * 1.2)}`;
     }
-    return [rim(1), rim(0.85), `~${circlePath(0, 0, z.r * 0.5)}`, ticks];
+    return [rim(1), `~${rim(0.85)}`, `~${circlePath(0, 0, z.r * 0.5)}`, ticks]; // the inner rim dotted: the double rim read heavy at r 100 (S28)
   }
   if (z.variant === 'luk') {
     const a = z.angle ?? 0;

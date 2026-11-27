@@ -215,6 +215,9 @@ export interface ActiveUlt {
   /** Kartograf: the auto-attack fires this many shots and every line pierces while it runs (heroes/auto.ts). */
   shots?: number;
   pierce?: boolean;
+  /** The stamp waits for the ultimate to land (`stampOnLand`): false until the def calls `landStamp`, then emitted by the runtime once. */
+  stampWait?: boolean;
+  stampNow?: boolean;
 }
 
 /** The ultimate side of a run (S3): the active paragraph (1..3), what runs now, and the quiet that drains the meter. Absent until first used. */

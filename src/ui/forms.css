@@ -318,7 +318,7 @@
   border-bottom: 1px solid var(--ink);
 }
 .stamp-room {
-  height: 58px;
+  height: 76px; /* a stamp of 18 px lettering, tilted, is about 60 px high: it lies between the last line and the button, touching neither */
   width: 100%;
 }
 .wait {
@@ -348,6 +348,11 @@
 .verdict.hidden {
   display: block !important;
   visibility: hidden;
+}
+/* portrait: the notes (Potw., Tunel, Pauza) hang under the right end of the HUD, so the stamp lies at the left end and covers none of them */
+:root:not([data-orient='landscape']) .hud-stamp {
+  right: auto;
+  left: 6px;
 }
 .hud-stamp {
   z-index: 5;
@@ -635,4 +640,10 @@
   align-self: center;
   margin-top: 4px;
   min-height: 40px;
+}
+
+/* A long footnote (the finale's closing note, held for 12 s) grows the slip above the pad band: the pads in portrait are lifted by what it
+   grew, so its top rule and its first line never touch the pad labels. ui/footnotes.ts writes `--note-h` on the root only while it is long. */
+:root[style*='--note-h']:not([data-orient='landscape']) .pad {
+  transform: translateY(calc(-1 * max(0px, var(--note-h) - var(--band-bottom) - env(safe-area-inset-bottom) + 10px)));
 }

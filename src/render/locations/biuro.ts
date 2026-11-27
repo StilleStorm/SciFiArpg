@@ -7,6 +7,7 @@
 import { createRng, type Rng } from '../../core/rng';
 import type { Obstacle } from '../../world/pages';
 import { kit, type Kit } from './kit';
+import { sznur } from './centrum';
 import { registerDrawings } from './registry';
 
 /** A desk: the slab on a drawer pedestal and a panel leg, a monitor with a stand, a keyboard line, a paper tray with a sheet. */
@@ -314,7 +315,55 @@ function ramaPusta(o: Obstacle, r: Rng): SVGGElement {
   return k.g;
 }
 
+/** Form stacks (planet 4's second office): three piles of forms on a pallet, the top sheet of each curling, a strap on the tallest. */
+function stosFormularzy(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-46, 40], [46, 40], [46, 50], [-46, 50]], { fill: 'hatch', w: 1.6, jit: 0.4 });
+  const piles: [number, number, number][] = [[-30, 24, 18], [0, 36, 24], [30, 18, 14]];
+  for (const [cx, w, h] of piles) {
+    const n = Math.max(3, Math.round(h / 4));
+    for (let i = 0; i < n; i++) {
+      const y1 = 40 - i * (h * 2 / n);
+      k.shape([[cx - w / 2 + r.range(-1.5, 1.5), y1 - h * 2 / n], [cx + w / 2 + r.range(-1.5, 1.5), y1 - h * 2 / n], [cx + w / 2, y1], [cx - w / 2, y1]], { fill: 'paper', w: 1.2, jit: 0.3 });
+    }
+    k.path(`M${cx - w / 2 + 3} ${40 - h * 2 + 3}H${cx + w / 2 - 6}`, { w: 0.6 });
+  }
+  k.path('M-12 40V-8M12 40V-8', { w: 1 }); // the strap round the tallest pile
+  return k.g;
+}
+
+/** A lift door: two sliding leaves in a frame, a call plate beside it, the floor number over the door in digits (II), an arrow. */
+function drzwiWindy(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-36, -90], [36, -90], [36, 100], [-36, 100]], { fill: 'paper', w: 2.4, jit: 0.8 });
+  k.shape([[-30, -60], [-2, -60], [-2, 96], [-30, 96]], { fill: 'hatch', w: 1.4, jit: 0.4 });
+  k.shape([[2, -60], [30, -60], [30, 96], [2, 96]], { fill: 'hatch', w: 1.4, jit: 0.4 });
+  k.shape([[-14, -84], [14, -84], [14, -66], [-14, -66]], { fill: 'paper', w: 1.2, jit: 0.3 });
+  k.mark('II', 0, -70, 14);
+  k.shape([[40, 0], [52, 0], [52, 26], [40, 26]], { fill: 'paper', w: 1.3, jit: 0.3 });
+  k.disc(46, 7, 2.4, { w: 1 });
+  k.disc(46, 18, 2.4, { w: 1 });
+  return k.g;
+}
+
+/** A window with the blind down: a frame, a hatched slatted blind with a pull cord, one slat bent up, nothing outside. */
+function oknoZaluzje(o: Obstacle, r: Rng): SVGGElement {
+  const k = kit(o, r, 100);
+  k.shape([[-42, -64], [42, -64], [42, 70], [-42, 70]], { fill: 'paper', w: 2.4, jit: 0.8 });
+  k.shape([[-36, -58], [36, -58], [36, 40], [-36, 40]], { fill: 'wide', w: 1.2, jit: 0.4 });
+  for (let i = 0; i < 9; i++) k.path(`M-36 ${-52 + i * 11}H36`, { w: 0.8 });
+  k.path('M-14 -54L-8 -56L-2 -52', { w: 1 });
+  k.path('M30 40V62', { w: 1.2 });
+  k.disc(30, 64, 2.6, { fill: 'paper', w: 1.2 });
+  k.shape([[-46, 70], [46, 70], [50, 78], [-50, 78]], { fill: 'paper', w: 1.6, jit: 0.4 });
+  return k.g;
+}
+
 registerDrawings('biuro', {
+  'stos-formularzy': stosFormularzy,
+  'drzwi-windy': drzwiWindy,
+  'okno-zaluzje': oknoZaluzje,
+  sznur,
   biurko,
   kartoteka,
   dystrybutor,

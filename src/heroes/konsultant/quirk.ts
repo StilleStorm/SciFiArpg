@@ -8,6 +8,7 @@ import type { Claim } from '../../combat/claims';
 import { DAMAGE_TYPES } from '../../combat/damage';
 import { getStatus } from '../../combat/status';
 import type { Bus } from '../../core/events';
+import { rtOf } from '../../enemies/runtime';
 import { recomputeStats } from '../../items/stats';
 import type { RunState } from '../../world/run';
 import { enemiesWithin, skillDamage, touchStatus } from '../helpers';
@@ -118,7 +119,11 @@ function setCrit(s: RunState, bus: Bus, k: KonsState, to: number): void {
 
 /** Numerek: whoever he gives a status is numbered; a kill that takes the lowest number left adds a step of crit, a kill out of order drops the chain. */
 function stepNumerek(s: RunState, bus: Bus, k: KonsState, died: readonly number[]): void {
-  for (const e of s.enemies) if (!k.numbered.has(e.id) && carriesHis(s, k, e)) k.numbered.set(e.id, k.nextNumber++);
+  for (const e of s.enemies) {
+    if (!k.numbered.has(e.id) && carriesHis(s, k, e)) k.numbered.set(e.id, k.nextNumber++);
+    const no = k.numbered.get(e.id);
+    if (no !== undefined && rtOf(e).queueNo !== no) rtOf(e).queueNo = no; // render draws it by the figure
+  }
   for (const id of died) {
     const n = k.numbered.get(id);
     if (n === undefined) continue;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createRun } from '../world/run';
-import { bracketPath, reputacjaText } from './hud';
+import { bracketPath, LONG_RACJA, reputacjaText } from './hud';
 
 describe('reputacjaText', () => {
   it('prints level and progress, and the progress as a debt once time runs backwards', () => {
@@ -15,11 +15,19 @@ describe('reputacjaText', () => {
 describe('bracketPath (S20, Opóźnienie on the racja line)', () => {
   it('brackets the owed part left of the racja end, at least 8 px wide, inside the line', () => {
     const d = bracketPath(200, 0.5, 0.25);
-    expect(d.startsWith('M53 0L50 0L50 10')).toBe(true);
-    expect(d).toContain('L100 0L100 10');
+    expect(d.startsWith('M53 4L50 4L50 10')).toBe(true);
+    expect(d).toContain('L100 4L100 10');
     const thin = bracketPath(200, 0.5, 0);
-    expect(thin).toContain('L92 0L92 10');
-    expect(thin).toContain('L100 0L100 10');
-    expect(bracketPath(200, 0.2, 0.9).startsWith('M3 0L0 0')).toBe(true);
+    expect(thin).toContain('L92 4L92 10');
+    expect(thin).toContain('L100 4L100 10');
+    expect(bracketPath(200, 0.2, 0.9).startsWith('M3 4L0 4')).toBe(true);
+  });
+});
+
+describe('LONG_RACJA', () => {
+  it('types a racja value smaller only when it would crowd its line', () => {
+    expect('132/132'.length).toBeLessThanOrEqual(LONG_RACJA);
+    expect('12345/12345'.length).toBeLessThanOrEqual(LONG_RACJA);
+    expect('123456/123456'.length).toBeGreaterThan(LONG_RACJA);
   });
 });

@@ -94,6 +94,8 @@ export interface EnemyRt {
   volleyT: number;
   /** Weryfikacja: captcha grid. cells are indices 0..8 of the hydrant squares; time is seconds stood on them. */
   grid?: { cells: [number, number]; time: number; cx: number; cy: number };
+  /** Konsultant's Numerek (passive 8): the number he gave this enemy in his queue; render/enemyFigures.ts writes it by the figure (S28). */
+  queueNo?: number;
   /** Ankieta: the survey row of five squares (enemies/bosses.ts `Survey`); absent on other bodies. */
   survey?: Survey;
   /** Wizualizacja: its observation posts (enemies/bosses.ts); absent on other bodies. */

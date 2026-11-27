@@ -96,13 +96,19 @@ export function castUltimate(s: RunState, bus: Bus): boolean {
   run.active.push(u);
   const env = envOf(s, bus, def, u);
   def.cast(env);
-  const text = t(def.stampKey);
-  const spot = ultStampSpot(s.enemies, p.x, p.y, text.length);
-  // never on the hero: beside him on the emptier side; render/bindings keeps it inside the view and off `away`
-  bus.emit('stamp', { text, x: spot.x, y: spot.y, quiet: true, away: { x: p.x, y: p.y } }); // quiet: the ultimate recipe ends in its own thud
+  if (def.stampOnLand) u.stampWait = true;
+  else emitUltStamp(s, bus, def);
   bus.emit('margin:note', { text: t(def.noteKey, { number: 1000 + (s.seed % 9000) }), x: p.x, y: ultNoteY(s.enemies, p.x, p.y, p.r, def.noteClear) });
   bus.emit('ultimate:cast', { heroId: p.heroId, ultimateId: def.id, x: p.x, y: p.y });
   return true;
+}
+
+/** The ultimate's stamp: never on the hero, beside him on the emptier side; render/bindings keeps it inside the view and off `away`. */
+function emitUltStamp(s: RunState, bus: Bus, def: UltimateDef): void {
+  const p = s.player;
+  const text = t(def.stampKey);
+  const spot = ultStampSpot(s.enemies, p.x, p.y, text.length);
+  bus.emit('stamp', { text, x: spot.x, y: spot.y, quiet: true, away: { x: p.x, y: p.y } }); // quiet: the ultimate recipe ends in its own thud
 }
 
 /**
@@ -193,6 +199,12 @@ export function stepUltimates(s: RunState, bus: Bus, dt: number): void {
     if (u.left <= 1e-9) {
       run.active.splice(i, 1);
       def.end?.(env);
+      if (u.stampWait) u.stampNow = true; // a landing that never came still gets its stamp
+    }
+    if (u.stampNow) {
+      u.stampNow = false;
+      u.stampWait = false;
+      emitUltStamp(s, bus, def);
     }
   }
 }

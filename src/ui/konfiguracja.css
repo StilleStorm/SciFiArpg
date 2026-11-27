@@ -90,7 +90,7 @@
 .kf-dname {
   font-family: var(--mono);
   font-weight: 700;
-  font-size: 0.8em;
+  font-size: max(11px, 0.8em);
   margin-right: 0.5em;
 }
 .kf-desc {
@@ -165,6 +165,7 @@
   font-size: 11px;
   font-weight: 700;
   line-height: 1.1;
+  letter-spacing: -0.02em;
   overflow-wrap: break-word;
 }
 .kf-specs {
@@ -208,14 +209,14 @@
 }
 .kf-cap-line b {
   font-family: var(--mono);
-  font-size: 0.82em;
+  font-size: max(11px, 0.82em);
 }
 .kf-cap-line i.idle {
   color: var(--ink-wet);
 }
 .kf-cap-line i.granted {
   font-family: var(--mono);
-  font-size: 0.8em;
+  font-size: max(11px, 0.8em);
   font-weight: 700;
   font-style: normal;
 }
@@ -355,7 +356,8 @@
 }
 :root[data-orient='landscape'] .kf-top {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  /* the pad column takes the wider share: four pad boxes in it keep "Przekierowuję" whole at 11 px */
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
   column-gap: 16px;
   align-items: start;
 }

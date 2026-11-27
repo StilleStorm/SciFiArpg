@@ -7,12 +7,53 @@
  */
 import { answerSpor } from '../combat/spor';
 import type { Bus } from '../core/events';
+import { invalidateLayout } from '../render/keepOut';
 import { t } from '../i18n';
 import type { RunState } from '../world/run';
 import { h } from './dom';
 
 export interface SporStrip {
   el: HTMLElement;
+}
+
+/** The strip steps up this many px at a time while it looks for a stand clear of the hero and the boss. */
+const STEP = 12;
+/** A figure's bounding box is grown by this much: the strip keeps a little air from the hero's feet and the boss's bubbles. */
+const AIR = 6;
+
+interface Rect {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+  /** How much covering it costs against the others (the hero counts for more than a boss's whole box, which reaches over its bubbles and props). */
+  weight?: number;
+}
+
+/**
+ * Portrait: the lowest stand (`bottom` in css px) from `lowest` up to where the strip's top would meet `ceiling`, at which the strip of
+ * height `h` and the horizontal span [left, right] covers none of the `figures`; when no stand is clear, the one that covers least.
+ * Pure: the caller measures. DESIGN 5.4 (the boss, its bubbles and the hero stay readable while the replies are up).
+ */
+export function clearStand(viewH: number, h: number, left: number, right: number, lowest: number, ceiling: number, figures: readonly Rect[]): number {
+  let best = lowest;
+  let bestArea = Infinity;
+  for (let bottom = lowest; viewH - bottom - h >= ceiling; bottom += STEP) {
+    const top = viewH - bottom - h;
+    const bot = viewH - bottom;
+    let area = 0;
+    for (const f of figures) {
+      const w = Math.min(right, f.right + AIR) - Math.max(left, f.left - AIR);
+      const v = Math.min(bot, f.bottom + AIR) - Math.max(top, f.top - AIR);
+      if (w > 0 && v > 0) area += w * v * (f.weight ?? 1);
+    }
+    if (area === 0) return bottom;
+    if (area < bestArea) {
+      bestArea = area;
+      best = bottom;
+    }
+  }
+  return best;
 }
 
 /** `state` is read on every use: the live RunState is replaced by every ticket and every tunnel return. */
@@ -24,7 +65,35 @@ export function createSpor(root: HTMLElement, bus: Bus, state: () => RunState | 
 
   const clear = (): void => {
     el.classList.remove('closing', 'done');
+    el.style.removeProperty('bottom');
     el.replaceChildren();
+  };
+  /** Portrait: lift the strip off the boss and the hero (landscape has its own column and keeps it). Measured once per prompt, on the next frame. */
+  const stand = (): void => {
+    if (el.childElementCount === 0 || document.documentElement.dataset['orient'] === 'landscape') return;
+    el.style.removeProperty('bottom');
+    const box = el.getBoundingClientRect();
+    if (box.height === 0) return;
+    const s = state();
+    const figures: Rect[] = [];
+    const take = (sel: string, weight: number): void => {
+      const n = document.querySelector(sel);
+      if (!n) return;
+      const r = n.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) figures.push({ top: r.top, bottom: r.bottom, left: r.left, right: r.right, weight });
+    };
+    if (s) {
+      take(`[data-kind="player"]`, 6);
+      for (const e of s.enemies) if (e.boss) take(`[data-kind="enemy"][data-id="${e.id}"]`, 1);
+    }
+    const hud = document.querySelector('.hud')?.getBoundingClientRect();
+    const ceiling = (hud ? hud.bottom : 64) + 58; // under the margin notes that hang from the HUD
+    const lowest = window.innerHeight - box.bottom;
+    const at = clearStand(window.innerHeight, box.height, box.left, box.right, lowest, ceiling, figures);
+    if (at !== lowest) {
+      el.style.bottom = `${at}px`;
+      invalidateLayout(); // the strip moved without changing size: bubbles and stamps keep off its new stand
+    }
   };
   // the 600 ms hold is a CSS animation: no timer, and it only runs while the strip is on screen
   el.addEventListener('animationend', (ev) => {
@@ -51,6 +120,7 @@ export function createSpor(root: HTMLElement, bus: Bus, state: () => RunState | 
       });
       el.append(b);
     });
+    requestAnimationFrame(stand);
   };
   bus.on('spor:posted', (ev) => build(ev.replies));
   // a prompt held in the tunnel with its run is still up when the player comes back

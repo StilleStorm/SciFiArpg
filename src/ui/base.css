@@ -28,7 +28,7 @@
 .desk-sheet .ps-sub {
   font-family: var(--title);
   font-style: normal;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -119,7 +119,7 @@
 .board-sheet .ps-sub {
   font-family: var(--title);
   font-style: normal;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -154,7 +154,7 @@
 .ticket-sheet .ps-sub {
   font-family: var(--title);
   font-style: normal;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -270,7 +270,7 @@
 
 /* ---------- the ultimate pad and the Argument meter (DESIGN 10.2) ---------- */
 /* HUD: the Argument field stands beside Racja; its underline is ink while it fills and a heavier ink once the meter is full
-   (red is for stamps, strikes and Racja: the ready signal in red is the pad's cushion) */
+   (red is for stamps, strikes and Racja: the ready pad is told by heavier ink; red comes with the ultimate's stamp when it lands) */
 .hud .field.arg {
   flex: 0.8;
 }
@@ -303,8 +303,8 @@
 .hud .arg.full .left {
   stroke-width: 3.2;
 }
-/* the pad: a stamp pad. Disabled it is drawn dotted and in wet ink; ready, the cushion is inked red, the tin is thick and the
-   word, in black ink, gets a red underline (the only red besides the cushion) */
+/* the pad: a stamp pad. Disabled it is drawn dotted and in wet ink; ready, the cushion is inked solid in black, the tin is thick and the
+   word is bold and underlined in ink (DESIGN 3: red stays for the stamp that lands when the ultimate is cast) */
 .pad.ult .cushion path {
   stroke: var(--ink-wet);
   stroke-width: 1.4;
@@ -317,7 +317,7 @@
   stroke: var(--ink-wet);
 }
 .pad.ult.ready .cushion path {
-  stroke: var(--accent);
+  stroke: var(--ink);
   stroke-width: 2;
 }
 .pad.ult.ready .base {
@@ -327,7 +327,7 @@
   color: var(--ink);
   font-weight: 700;
   text-decoration: underline;
-  text-decoration-color: var(--accent);
+  text-decoration-color: var(--ink);
   text-decoration-thickness: 1.5px;
   text-underline-offset: 3px;
 }
@@ -357,7 +357,9 @@
   position: absolute;
   left: 8px;
   right: 8px;
-  bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom) + 156px);
+  /* the lowest stand, just over the row of pads (they top out 76 px above the band); ui/spor.ts lifts the strip in steps when it would cover the
+     hero, the boss or its bubbles, and keeps this stand when nothing is in the way */
+  bottom: calc(var(--band-bottom) + env(safe-area-inset-bottom) + 84px);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -379,7 +381,7 @@
   flex: none;
   min-width: 0;
   min-height: 44px;
-  padding: 5px 7px 5px;
+  padding: 3px 7px 3px;
   border: 1px solid var(--ink);
   border-radius: 0;
   background-color: var(--paper);
@@ -407,6 +409,15 @@
   font-style: italic;
   padding-top: 2px;
   border-top: 1px dotted var(--ink);
+}
+/* the chosen card is marked in ink only: no browser focus ring (orange on some phones), no accent */
+.spor-reply:focus,
+.spor-reply:focus-visible {
+  outline: 0;
+}
+.spor-reply:focus-visible {
+  outline: 1.5px solid var(--ink);
+  outline-offset: 2px;
 }
 .spor-reply:active {
   border-width: 2px;
@@ -466,7 +477,7 @@
   margin: 0 0 6px;
   font-family: var(--title);
   font-weight: 400;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }

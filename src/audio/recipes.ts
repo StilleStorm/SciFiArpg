@@ -835,6 +835,45 @@ export const RECIPES = {
     pluck(1480, 0.075, 0.38, { bright: 7500 }),
     pluck(2210, 0.05, 0.16, { delay: 0.012, bright: 7500 }),
   ], 0.04, 4),
+  /** An attack that found nothing: a sheet swished through the air, a dry flick, no body. */
+  enemyMiss: light([
+    noise(2200, 0.09, 0.3, { q: 0.8, attack: 0.025, pitchDrop: 0.55 }),
+    click(3100, 0.18, { delay: 0.05, decay: 0.006, role: 'tail' }),
+  ], 0.12, 1),
+  /** An off-topic remark: a margin mark scratched, then a dry low tick (a damped pluck, never a chat-app ping). */
+  offTopic: light([
+    click(3300, 0.34),
+    noise(1900, 0.07, 0.3, { q: 1.4, delay: 0.01, pitchDrop: 0.3 }),
+    pluck(520, 0.09, 0.3, { delay: 0.03, bright: 2400 }),
+    thump(150, 0.07, 0.24, { delay: 0.03, pitchDrop: 0.25, role: 'tail' }),
+  ], 0.12, 2),
+  /** Gwiazdki: a five-stroke star scribbled quickly, then one small dry tap. */
+  starsPickup: light([
+    { ...click(4600, 0.26, { q: 2, decay: 0.007 }), repeat: 5, spread: 0.12 },
+    pluck(1960, 0.06, 0.26, { delay: 0.13, bright: 6500 }),
+    thump(130, 0.05, 0.22, { delay: 0.13, pitchDrop: 0.2, role: 'tail' }),
+  ], 0.05, 2),
+  /** A named elite is entered in the register: a typewriter key, a rubber stamp, a ruler rapped once. */
+  eliteNamed: combat([
+    click(3900, 0.5),
+    noise(1250, 0.04, 0.34, { q: 2, delay: 0.002 }),
+    thump(84, 0.15, 0.85, { delay: 0.09, pitchDrop: 0.35 }),
+    noise(650, 0.05, 0.3, { delay: 0.09, q: 1 }),
+    pluck(330, 0.12, 0.3, { delay: 0.15, bright: 2800 }),
+  ], 0.3, 6),
+  /** A named elite falls: three strokes with weight, the register struck through (a long scribble tail). */
+  eliteSlain: combat([
+    click(4000, 0.55),
+    noise(3000, 0.07, 0.55, { q: 1.2, pitchDrop: 0.45 }),
+    thump(92, 0.15, 1.0, { pitchDrop: 0.4 }),
+    thump(50, 0.12, 0.55, { delay: 0.004, pitchDrop: 0.1, role: 'sub' }),
+    thump(78, 0.17, 1.0, { delay: 0.14, pitchDrop: 0.4 }),
+    noise(2600, 0.08, 0.5, { q: 1.2, delay: 0.14, pitchDrop: 0.5 }),
+    thump(62, 0.2, 1.0, { delay: 0.28, pitchDrop: 0.35 }),
+    thump(46, 0.3, 0.6, { delay: 0.284, pitchDrop: 0.1, role: 'sub' }),
+    noise(700, 0.06, 0.4, { delay: 0.28, q: 1 }),
+    { ...noise(5000, 0.016, 0.24, { q: 2.5, delay: 0.34, role: 'tail' }), repeat: 20, spread: 0.45 },
+  ], 0.2, 8),
   /** Generated beasts: dotted lines, granular ticks. */
   flavBeast: light([
     { ...click(3400, 0.34, { q: 3, decay: 0.006, role: 'tail' }), repeat: 10, spread: 0.13 },

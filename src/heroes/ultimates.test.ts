@@ -454,3 +454,22 @@ describe('the ultimate stamp', () => {
     expect(Math.abs((st?.y ?? 0) - (s.player.y - 130))).toBeGreaterThanOrEqual(60); // not on the row of enemies
   });
 });
+
+describe('Zderzenie stamps where the roll ends (S28)', () => {
+  it('no stamp at the cast; one when he lands, at the spot he stopped on, off him', () => {
+    const { s, bus, log } = scene('nalesnik', [[200, 0]]);
+    s.hero.ultimateId = 'zderzenie';
+    s.player.level = 24;
+    s.player.x = 300;
+    expect(cast(s, bus)).toBe(true);
+    expect(log.filter((l) => l.name === 'stamp')).toHaveLength(0);
+    expect(log.filter((l) => l.name === 'margin:note')).toHaveLength(1);
+    const startX = s.player.x;
+    run(s, bus, 2);
+    const stamps = log.filter((l) => l.name === 'stamp').map((l) => l.payload as GameEvents['stamp']);
+    expect(stamps).toHaveLength(1);
+    expect(s.player.x).toBeGreaterThan(startX + 100); // he rolled
+    expect(stamps[0]?.away).toEqual({ x: s.player.x, y: s.player.y });
+    expect(Math.abs((stamps[0]?.x ?? 0) - s.player.x)).toBeLessThan(1);
+  });
+});

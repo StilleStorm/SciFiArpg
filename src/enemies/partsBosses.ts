@@ -125,7 +125,7 @@ const hipoteza: BodyPart = {
  * lettering strokes, no words here: the plate text is the boss caption), five hatched star boxes down the front are its face, a pencil on a
  * string its one arm, the clip at the top a brow, a paper feed curling out of the top.
  */
-function stars(y: number): string {
+export function ankietaStar(y: number): string {
   // a five-point star outline centred on (0, y), radius 3.1
   let d = '';
   for (let i = 0; i < 10; i++) {
@@ -134,6 +134,15 @@ function stars(y: number): string {
     d += `${i === 0 ? 'M' : 'L'}${(Math.cos(a) * rad).toFixed(1)} ${(y + Math.sin(a) * rad).toFixed(1)}`;
   }
   return d + 'Z';
+}
+
+/** The five star boxes down the Ankieta's front (body units); one star fills with ink for each fifth of the racja lost (render/enemyFigures.ts). */
+export const ANKIETA_STAR_YS: readonly number[] = [-40.5, -31.5, -22.5, -13.5, -4.7];
+
+/** How many of the Ankieta's five face stars are filled: `floor(5 x (1 - racja / max))`, 0..5 (S28). Pure. */
+export function ankietaStarsLost(racja: number, max: number): number {
+  if (max <= 0) return 0;
+  return Math.max(0, Math.min(ANKIETA_STAR_YS.length, Math.floor(ANKIETA_STAR_YS.length * (1 - racja / max) + 1e-9)));
 }
 
 const ankieta: BodyPart = {
@@ -167,8 +176,8 @@ const ankieta: BodyPart = {
         box(-8, -8, 8, -1.4, 0.4) +
         // the pencil on a string: hangs from the left edge, the one arm
         'M-20-40Q-30-38 -30-26L-30-8L-27.5-3L-25-8L-25-26Q-25-34 -20-34' +
-        // the paper feed curling out of the top
-        'M-3-72Q-10-84 -2-88Q6-92 4-80Q2-74 6-72',
+        // the paper feed: a ribbon of sheet leaves a slot in the clip and lolls over to the right like a till receipt
+        'M-4-72L-4-79Q-4-84 1-84Q8-84 10-78L11-71M2-72L2-77Q2-80 5-80Q7-80 8-76',
       thin:
         pl(-14, -53, -6, -53) +
         pl(-2, -53, 8, -53) +
@@ -178,7 +187,7 @@ const ankieta: BodyPart = {
         pl(-30, -18, -25, -18) +
         pl(11, -62, 11, -58) +
         pl(-1, -76, 3, -79) +
-        [-40.5, -31.5, -22.5, -13.5, -4.7].map(stars).join(''),
+        ANKIETA_STAR_YS.map(ankietaStar).join(''),
       hatch: rectPath(-16, -57, 16, -49) + rectPath(-27.5, -29, -26.5, -6),
       ink: circ(-11, -4.5, 0.8) + circ(11, -4.5, 0.8) + circ(11, -67, 0.8),
     },

@@ -180,6 +180,49 @@ describe('audio bindings', () => {
     expect(music.musicTurn).toHaveBeenCalledWith(s, 1);
   });
 
+  it('a miss, an off-topic remark, a named elite and its fall have their sounds', () => {
+    const { bus, s } = setup();
+    s.enemies.push(createEnemy(30, 0, 0, 1));
+    bus.emit('enemy:miss', { id: 30 });
+    bus.emit('enemy:offTopic', { id: 30, x: 0, y: 0 });
+    bus.emit('elite:named', { id: 30, x: 0, y: 0, name: 'x' });
+    bus.emit('elite:slain', { id: 30, x: 0, y: 0, name: 'x', minTier: 'nietypowy' });
+    expect(names()).toEqual(['enemyMiss', 'offTopic', 'eliteNamed', 'eliteSlain']);
+    for (const n of names()) expect(RECIPES[n as keyof typeof RECIPES], n).toBeDefined();
+  });
+
+  it('gwiazdki taken from the page chime once per rise of the purse; spending does not', () => {
+    const { bus, s, audio } = setup();
+    bus.emit('run:started', { seed: 3 });
+    audio.frame();
+    expect(names()).toEqual([]);
+    s.player.gwiazdki += 2;
+    audio.frame();
+    audio.frame();
+    expect(names()).toEqual(['starsPickup']);
+    s.player.gwiazdki -= 5;
+    audio.frame();
+    expect(names()).toEqual(['starsPickup']);
+  });
+
+  it('combat sounds are panned by the source x against the camera centre (max 0.6); the centre and UI sounds are not', () => {
+    const played2 = (): { pan?: number } => (played[played.length - 1]?.opts ?? {}) as { pan?: number };
+    const bus = createBus();
+    const s: RunState = createRun(3);
+    bindAudio(bus, { getState: () => s, freeze: vi.fn(), listener: () => ({ x: 600, w: 400 }) });
+    s.enemies.push(createEnemy(40, 0, 0, 1));
+    bus.emit('enemy:hit', { id: 40, x: 700, y: 0, amount: 1, crit: false });
+    expect(played2().pan).toBeCloseTo(0.3, 6);
+    bus.emit('enemy:offTopic', { id: 40, x: 100, y: 0 });
+    expect(played2().pan).toBe(-0.6);
+    bus.emit('enemy:offTopic', { id: 40, x: 600, y: 0 });
+    expect(played2().pan).toBeUndefined();
+    bus.emit('stamp', { text: 'X', x: 900, y: 0 });
+    expect(played2().pan).toBeUndefined();
+    bus.emit('pickup:taken', { id: 1, number: 1 });
+    expect(played2().pan).toBeUndefined();
+  });
+
   it('enemy escalation and a rebuttal are heard', () => {
     const { bus } = setup();
     bus.emit('enemy:escalated', { id: 1, tier: 2, x: 0, y: 0 });

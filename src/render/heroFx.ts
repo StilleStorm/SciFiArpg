@@ -68,7 +68,7 @@ function wetStrokes(x: number, y: number, r: number, count: number, toward?: { x
 /** Wavy strokes rising from the floor of a circle (x, y, r): the steam of Program 90. */
 function steamStrokes(x: number, y: number, r: number): string {
   let d = '';
-  const count = Math.max(3, Math.round(r / 22));
+  const count = Math.max(5, Math.round(r / 11)); // denser (S28): the steam of a big drum read sparse
   for (let i = 0; i < count; i++) {
     const cx = x + pen.range(-r, r) * 0.7;
     const cy = y + pen.range(-0.1, 0.5) * r;
@@ -399,8 +399,8 @@ export function buildMoon(e: Summon): SVGGElement {
   const ring = e.orbit?.ring ?? 90;
   g.append(el('path', { class: 'moon-ring', d: `M${-ring} 0a${ring} ${ring} 0 1 0 ${2 * ring} 0a${ring} ${ring} 0 1 0 ${-2 * ring} 0`, 'stroke-dasharray': '1.4 6', 'stroke-width': 1.1 }));
   g.append(
-    el('path', { d: smoothClosed(blobPoints(rng, 0, 0, 7, 9, 0.12)), 'stroke-width': 1.8 }),
-    el('path', { d: 'M-3.5-1.5q1.5-2 3.5-.6M1.5 2.5q1.8 1 3.2-.6', 'stroke-width': 1 }),
+    el('path', { d: smoothClosed(blobPoints(rng, 0, 0, 10.5, 9, 0.12)), 'stroke-width': 2 }),
+    el('path', { d: 'M-5.2-2.2q2.2-3 5.2-.9M2.2 3.7q2.7 1.5 4.8-.9', 'stroke-width': 1.2 }), // larger (S28): a moon read as a speck against a crowd
   );
   return g;
 }

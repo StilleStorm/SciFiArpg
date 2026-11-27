@@ -198,7 +198,7 @@
         },
         "10": {
           "name": "Trzeci punkt",
-          "desc": "Trzecie z rzędu trafienie tego samego przeciwnika Pomiarem, Przekrojem lub Pomiarem kontrolnym jest odparciem, bez względu na jego tezę."
+          "desc": "Trzecie z rzędu trafienie tego samego przeciwnika Triangulacją, Pomiarem, Przekrojem lub Pomiarem kontrolnym jest odparciem, bez względu na jego tezę. Odczytu nie wlicza się."
         }
       },
       "nalesnik": {

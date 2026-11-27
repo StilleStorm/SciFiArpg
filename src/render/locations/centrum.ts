@@ -35,7 +35,7 @@ function lada(o: Obstacle, r: Rng): SVGGElement {
 }
 
 /** A rope queue: five posts with ball tops on hatched feet, the rope sagging between them, a hanging number tag. */
-function sznur(o: Obstacle, r: Rng): SVGGElement {
+export function sznur(o: Obstacle, r: Rng): SVGGElement {
   const k = kit(o, r, 100);
   const xs = [-40, -20, 0, 20, 40];
   for (let i = 0; i < xs.length; i++) {

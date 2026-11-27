@@ -14,6 +14,7 @@ import { patchAt } from './grants';
 import { durationOf, enemiesWithin, nearestEnemy, patchOf, power, setExistence, skillDamage, touchStatus } from './helpers';
 import { FOAM_RADIUS } from './numbers';
 import { effectiveSkill } from './loadout';
+import { lineHit } from './kartograf/hits';
 import { stepFlag, stepGravity, stepOrbit, stepRoll } from './nalesnik/steps';
 import { bindNumerBonus, landStart, stepLegend, stepMoon, stepNumer, stepReading, stepScale, stepTide, syncMoonUpor } from './steps2';
 import { tickRound } from './quirks';
@@ -299,7 +300,10 @@ function projectileHit(s: RunState, bus: Bus, pr: Projectile, e: Enemy): boolean
     p.attackTimer = timer;
     if (crit && pr.pierceOnCrit) pr.pierce = (pr.pierce ?? 0) + 1;
   } else {
-    skillDamage(s, bus, e, pr.damageType, pr.damage + (pr.bonusPerPass ?? 0) * passed.length);
+    const mult = pr.damage + (pr.bonusPerPass ?? 0) * passed.length;
+    // Triangulacja's line (the one projectile with a bonus per pass) counts toward Trzeci punkt like the other survey lines (S28); the auto laser is `roll` and stays out
+    if (pr.bonusPerPass !== undefined) lineHit(s, bus, e, pr.damageType, mult);
+    else skillDamage(s, bus, e, pr.damageType, mult);
   }
   passed.push(e.id);
   if ((pr.pierce ?? 0) > 0) {

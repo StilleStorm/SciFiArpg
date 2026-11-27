@@ -70,18 +70,14 @@
   border-left: 1px solid var(--ink);
 }
 
-/* the typed "aktualizacja dostepna" line leaves the HUD and hangs beside the Zalaczniki pad, top right */
+/* the typed "aktualizacja dostepna" line hangs under the HUD slip, top left (top right is where the clause header, the claim bubbles and the
+   Konsultant's face are); on the left-handed layout the slip is on the right and the line hangs under it */
 :root[data-orient='landscape'] .upd {
-  position: fixed;
-  left: auto;
-  right: calc(env(safe-area-inset-right) + 100px);
-  top: calc(env(safe-area-inset-top) + 10px);
-  border: 1px solid var(--ink);
+  left: calc(env(safe-area-inset-left) + 12px);
   min-height: 40px;
 }
 :root[data-orient='landscape'] .lefty .upd {
-  right: auto;
-  left: calc(env(safe-area-inset-left) + 100px);
+  left: 12px;
 }
 
 /* pads: skills in an arc under the right thumb, the Zalaczniki pad top right */
@@ -226,7 +222,7 @@
   margin: 8px 0 8px;
 }
 :root[data-orient='landscape'] .agency {
-  font-size: 9px;
+  font-size: 11px;
 }
 :root[data-orient='landscape'] .form-title,
 :root[data-orient='landscape'] .frame > .agency + .form-title,
@@ -629,7 +625,7 @@
   padding: 14px 22px 14px;
 }
 :root[data-orient='landscape'] .stamp-room {
-  height: 40px;
+  height: 66px;
 }
 :root[data-orient='landscape'] .sheet .body {
   margin-top: 6px;

@@ -37,6 +37,10 @@ export function createSheet(root: HTMLElement, opts: SheetOptions): Sheet {
   // a typed line of its own on clean paper between the body and the notes' rule, there only while the body runs on below its edge
   const more = h('span', 'ps-more', t('ui.sheet.more'));
   more.hidden = true;
+  // a paper veil from the first sliced line (or box) down to the cut, so no button or line shows half of itself above the cue
+  const veil = h('span', 'ps-veil');
+  veil.setAttribute('aria-hidden', 'true');
+  more.append(veil);
   frame.append(head, scroll, more, notes);
   el.append(frame);
   root.append(el);
@@ -46,6 +50,9 @@ export function createSheet(root: HTMLElement, opts: SheetOptions): Sheet {
     // while the line is printed it takes its own height from the body, so the test counts that height back
     const room = more.hidden ? 0 : CUE_ROOM;
     more.hidden = !runsOn(scroll.scrollTop, scroll.clientHeight + room, scroll.scrollHeight);
+    if (more.hidden) return;
+    const bottom = scroll.getBoundingClientRect().bottom;
+    veil.style.height = `${Math.max(0, Math.round(bottom - cutEdge(lineBoxes(scroll, bottom), bottom)))}px`;
   };
   const cue = (): void => {
     if (queued) return;
@@ -88,6 +95,16 @@ export function lineBoxes(scroll: HTMLElement, bottom: number): { top: number; b
     if (!n.textContent?.trim()) continue;
     range.selectNodeContents(n);
     for (const r of range.getClientRects()) if (r.bottom > bottom - 80 && r.top < bottom) out.push({ top: r.top, bottom: r.bottom });
+  }
+  // a heading is never left alone above the cut: its box reaches down over the first row of what it heads
+  for (const hd of scroll.querySelectorAll('h3.group')) {
+    const r = hd.getBoundingClientRect();
+    if (r.height > 0 && r.bottom + 44 > bottom - 80 && r.top < bottom) out.push({ top: r.top, bottom: r.bottom + 44 });
+  }
+  // a boxed button is cut whole or not at all (its text lines alone would let the cut pass through its border)
+  for (const b of scroll.querySelectorAll('button')) {
+    const r = b.getBoundingClientRect();
+    if (r.height > 0 && r.bottom > bottom - 80 && r.top < bottom) out.push({ top: r.top, bottom: r.bottom });
   }
   // drawings (a stamp, the slips) are cut whole or not at all
   for (const g of scroll.querySelectorAll('svg')) {

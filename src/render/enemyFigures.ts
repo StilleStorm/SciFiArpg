@@ -11,6 +11,7 @@ import { ENEMY_SCALE, assemble, assembleBoss, layoutAssembly, type Assembly, typ
 import { captionKeyOf, faceDrawing, faceHeroOf, facePartsOf, wearsOwnBody } from '../enemies/anomalia/state';
 import { CONFIRM_R, GRID_CELL, SURVEY_CELLS, SURVEY_NEED_S, surveyCellCenter, GRID_NEED_S, CONFIRM_NEED_S, bossVariantArm, bossVariantGrid, bossVariantLine, gridCellCenter, POST_NEED_S, POST_R } from '../enemies/bosses';
 import { bossBodyOf } from '../enemies/bossBody';
+import { ANKIETA_STAR_YS, ankietaStar, ankietaStarsLost } from '../enemies/partsBosses';
 import { ELITE_SCALE, eliteWord } from '../enemies/families';
 import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsBase';
 import { rtOf } from '../enemies/runtime';
@@ -72,6 +73,12 @@ interface FigState {
   /** Planeta Nieistniejaca (finale phase 2): one arc per sector of the body, solid where measured; the mask last written. */
   partArcs: SVGPathElement[];
   partsMask: number;
+  /** The Ankieta's face stars filled with ink for lost racja (one group of five paths), and how many are showing now. */
+  lostStars: SVGGElement | null;
+  starsLost: number;
+  /** Konsultant's Numerek: the small handwritten numeral by the figure (0: none) and its node. */
+  queueNo: number;
+  queueText: SVGTextElement | null;
 }
 
 const states = new WeakMap<SVGGElement, FigState>();
@@ -422,6 +429,17 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
   }
 
   const boss = e.boss ? bossBodyOf(e, e.family) : null;
+  let lostStars: SVGGElement | null = null;
+  if (boss === 'ankieta' && layout.layers[0]) {
+    // the five stars of the face fill with ink as racja is lost (syncLostStars); drawn in the body's own frame
+    lostStars = el('g', { transform: layout.layers[0].tf, 'data-part': 'lost-stars' });
+    for (const y of ANKIETA_STAR_YS) {
+      const star = el('path', { d: ankietaStar(y), style: INK_FILL });
+      star.style.display = 'none';
+      lostStars.append(star);
+    }
+    fig.append(lostStars);
+  }
   // the Planeta's measuring arcs are its tell: no stain under them, the outline and the arcs stay sharp on clean paper
   if (!facePartsOf(e)) addWash(under, e, hw, H, feet);
   if (boss === 'weryfikacja') buildGrid(under, e);
@@ -439,7 +457,7 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
     const capLines = captionKeyOf(e) && !facePartsOf(e) ? wrapClaim(capWords, 14) : [capWords];
     capLines.forEach((line, i) => {
       over.append(
-        el('text', { x: 0, y: n2(nameAt + i * readableUnits(11)), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [line]),
+        el('text', { 'data-part': 'boss-name', 'data-y': n2(nameAt + i * readableUnits(11)), x: 0, y: n2(nameAt + i * readableUnits(11)), 'text-anchor': 'middle', 'font-size': readableUnits(9), 'letter-spacing': 1.8, style: `${FONT.title}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [line]),
       );
     });
     const variant = bossVariantLine(e);
@@ -501,6 +519,10 @@ function buildFigure(e: Enemy, g: SVGGElement): FigState {
     hiddenLeg: false,
     partArcs,
     partsMask: -1,
+    lostStars,
+    starsLost: 0,
+    queueNo: 0,
+    queueText: null,
   };
   if (e.claim?.struck) strikeBubble(bubble, false);
   states.set(g, st);
@@ -595,7 +617,7 @@ function buildGrid(under: SVGGElement, e: Enemy): void {
     cg.append(el('path', { d: box(-half, -half, half, half, 1.6), 'stroke-width': 1.2 }));
     if (grid.cells.includes(i)) {
       if (koszyk) {
-        const cart = el('g', { transform: 'translate(0 -1) scale(1.45)', 'data-part': 'koszyk' });
+        const cart = el('g', { transform: 'translate(0 -2) scale(1.8)', 'data-part': 'koszyk' });
         cart.append(el('path', { d: CART, 'stroke-width': 1.1 }), el('path', { d: circ(-3.6, 8.6, 1.5) + circ(3.6, 8.6, 1.5), 'stroke-width': 0.9 }));
         cg.append(cart);
       }
@@ -635,7 +657,7 @@ function buildSurvey(): SVGGElement {
     cg.append(el('path', { d: box(-half, -half, half, half, 1.6), 'stroke-width': 1.2 }));
     if (i === 0 || i === SURVEY_CELLS - 1) {
       cg.append(el('path', { d: starPath(i === 0 ? 11 : 12), 'stroke-width': 1.3, ...(i === SURVEY_CELLS - 1 ? { style: INK_FILL } : {}) }));
-      cg.append(el('text', { x: 0, y: n2(half - 4), 'text-anchor': 'middle', 'font-size': 9, style: `${FONT.mono}; fill: var(--ink); stroke: none` }, [String(i + 1)]));
+      cg.append(el('text', { x: 0, y: n2(half - 4), 'text-anchor': 'middle', 'font-size': 11, style: `${FONT.mono}; fill: var(--ink); stroke: none` }, [String(i + 1)]));
     } else {
       cg.append(el('path', { d: hatchRect(-half + 2, -half + 2, half - 2, half - 2, 3.4 + (i % 3), i % 2 === 0), 'stroke-width': 0.8 }));
       cg.append(el('path', { d: starPath(5.5), 'stroke-width': 0.9, style: 'fill: var(--paper)' }));
@@ -645,12 +667,31 @@ function buildSurvey(): SVGGElement {
   return row;
 }
 
+/** Half the width of a boss name under the feet (ANKIETA in Michroma), units: the span tested against the survey row. */
+const BOSS_NAME_HALF_W = 42;
+
+/**
+ * How far down a boss name at `nameY` (relative to the boss) must move so it clears a survey row centred at (`dx`, `dy`):
+ * 0 when the two do not cross; else to just under the row. Pure.
+ */
+export function captionStepAside(nameY: number, dx: number, dy: number): number {
+  const rowHalfW = (SURVEY_CELLS * GRID_CELL) / 2;
+  const top = dy - GRID_CELL / 2;
+  const bottom = dy + GRID_CELL / 2;
+  // the caption's letters reach about 9 units above the baseline and 3 below
+  const crosses = Math.abs(dx) < rowHalfW + BOSS_NAME_HALF_W && nameY + 3 > top && nameY - 9 < bottom;
+  return crosses ? bottom + 12 - nameY : 0;
+}
+
 /** Place the survey row where the world has it, and trace the stand-on progress of the answerable square. */
 function syncSurvey(e: Enemy, st: FigState): void {
   const sv = rtOf(e).survey;
   let row = st.under.querySelector<SVGGElement>(':scope > [data-part="survey"]');
   if (!sv?.on) {
-    row?.remove();
+    if (row) {
+      row.remove();
+      for (const cap of st.over.querySelectorAll<SVGTextElement>(':scope > [data-part="boss-name"]')) if (cap.dataset['y']) cap.setAttribute('y', cap.dataset['y']);
+    }
     return;
   }
   if (!row) {
@@ -661,6 +702,13 @@ function syncSurvey(e: Enemy, st: FigState): void {
   // the under group is mirrored with the figure; the row is a thing on the page, so it is placed in world terms and not mirrored
   const f = st.flip < 0 ? -1 : 1;
   row.setAttribute('transform', `translate(${n2(f * (sv.cx - e.x))} ${n2(sv.cy - e.y)}) scale(${f} 1)`);
+  // the name under the feet must not lie over the squares the player reads: it steps below the row while they cross
+  for (const cap of st.over.querySelectorAll<SVGTextElement>(':scope > [data-part="boss-name"]')) {
+    const y0 = Number(cap.dataset['y'] ?? 'NaN');
+    if (!Number.isFinite(y0)) continue;
+    const y = n2(y0 + captionStepAside(y0, sv.cx - e.x, sv.cy - e.y));
+    if (cap.getAttribute('y') !== String(y)) cap.setAttribute('y', String(y));
+  }
   const p = sv.at === 0 || sv.at === SURVEY_CELLS - 1 ? Math.min(1, sv.stand / SURVEY_NEED_S) : 0;
   const sig = `${sv.at}:${Math.round(p * 30)}`;
   if (row.dataset['sig'] === sig) return;
@@ -905,8 +953,37 @@ function patchEnemy(e: Enemy, g: SVGGElement, timeMs: number): void {
   syncStatusMarkers(st.markers, e.statuses, { hw: st.hw, top: st.top, feet: st.feet });
   if (e.boss && !wearsOwnBody(e)) syncBossProgress(e, st);
   if (e.boss && rtOf(e).survey) syncSurvey(e, st);
+  if (st.lostStars) syncLostStars(e, st);
+  if ((rt.queueNo ?? 0) !== st.queueNo) syncQueueNo(rt.queueNo ?? 0, st);
   if (e.boss && rtOf(e).obs) syncPosts(e, st);
   if (st.partArcs.length > 0) syncMeasured(e, st);
+}
+
+/** Numerek: the number the Konsultant gave this enemy, written small beside the figure like a clerk's queue number (it is written once, with the pen, not typed). */
+function syncQueueNo(n: number, st: FigState): void {
+  st.queueNo = n;
+  if (n <= 0) {
+    st.queueText?.remove();
+    st.queueText = null;
+    return;
+  }
+  if (!st.queueText) {
+    const size = readableUnits(11, 12);
+    st.queueText = el('text', { x: n2(st.hw + 3), y: n2(st.top + size + 2), 'font-size': size, 'data-part': 'queue-no', style: `${FONT.serif}; fill: var(--ink); stroke: var(--paper); stroke-width: 3; stroke-linejoin: round; paint-order: stroke` }, [String(n)]);
+    st.over.append(st.queueText);
+    drawIn(st.queueText, 200);
+  } else {
+    st.queueText.textContent = String(n);
+  }
+}
+
+/** The Ankieta's face stars fill with lost racja, top first; the stars are touched only when the count changes. */
+function syncLostStars(e: Enemy, st: FigState): void {
+  const n = ankietaStarsLost(e.hp, e.hpMax);
+  if (!st.lostStars || n === st.starsLost) return;
+  st.starsLost = n;
+  st.lostStars.dataset['lost'] = String(n);
+  Array.from(st.lostStars.children).forEach((c, i) => ((c as SVGElement).style.display = i < n ? '' : 'none'));
 }
 
 // ---------- the measured sectors of Planeta Nieistniejaca (finale phase 2) ----------

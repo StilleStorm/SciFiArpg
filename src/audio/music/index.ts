@@ -50,6 +50,17 @@ let override: Partial<MusicFlags> | null = null;
 let applied: MusicFlags = CALM_FLAGS;
 let seed = 0;
 let pausedFlag = false;
+let pauseCount = 0;
+let holdTrack: number | null = null;
+
+/** How many hold-line tracks "Muzyka na czekanie, utwór nr N" can name. */
+export const HOLD_TRACKS = 12;
+
+/** The track number (1-based) of the n-th pause of a run with `seed`. Pure: the same run always plays the same programme. */
+export function holdTrackNumber(seed: number, n: number): number {
+  const h = Math.imul((seed | 0) ^ Math.imul(n + 1, 0x9e3779b1), 0x85ebca6b) >>> 0;
+  return 1 + ((h ^ (h >>> 15)) % HOLD_TRACKS);
+}
 
 export function currentProfile(): ProfileParams | null {
   return engine?.params ?? null;
@@ -92,6 +103,8 @@ export function stopMusic(fadeS = 1.5): void {
   getStateFn = null;
   applied = CALM_FLAGS;
   pausedFlag = false;
+  holdTrack = null;
+  pauseCount = 0;
 }
 
 /** Called every frame. Cheap: the engine gates itself to one run per 25 ms. */
@@ -120,7 +133,17 @@ export function setMusicState(flags: Partial<MusicFlags> | null): void {
 
 /** The pause sheet holds the run (`game:paused`): the music goes to the telephone band with the hold beep, as in bot hours. */
 export function setMusicPaused(paused: boolean): void {
+  if (paused && !pausedFlag && getStateFn) holdTrack = holdTrackNumber(getStateFn?.()?.seed ?? seed, pauseCount++);
+  if (!paused) holdTrack = null;
   pausedFlag = paused;
+}
+
+/**
+ * The number of the hold-line track playing while the run is on hold ("Muzyka na czekanie, utwór nr N"), 1-based and
+ * fixed for the whole pause; null when no pause is on or the run's music is not started (the menus have none).
+ */
+export function currentHoldTrack(): number | null {
+  return pausedFlag && getStateFn !== null ? holdTrack : null;
 }
 
 /** Whether the music is on hold because the run is paused. */

@@ -223,7 +223,7 @@ button {
   flex: 1.9;
 }
 .field > label {
-  font-size: 10px;
+  font-size: 11px;
   white-space: nowrap;
 }
 .blank {
@@ -249,6 +249,13 @@ button {
   top: 0;
   color: var(--accent);
   font-size: 14px;
+  /* never wider than its line: a long value is typed smaller (hud.ts LONG_RACJA) and, past that, cut at the label */
+  max-width: 100%;
+  overflow: hidden;
+}
+.racja .val.long {
+  font-size: 11px;
+  line-height: 14px;
 }
 .racja svg {
   position: absolute;
@@ -337,7 +344,7 @@ button {
   text-decoration-thickness: 1.5px;
 }
 .fn sup {
-  font-size: 10px;
+  font-size: 11px;
   line-height: 0;
   margin-right: 3px;
 }
@@ -412,7 +419,7 @@ button {
 }
 .agency {
   font-family: var(--title);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -566,7 +573,7 @@ button {
   fill: var(--ink);
   stroke: none;
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 11px;
   text-anchor: middle;
 }
 pattern line {
@@ -637,7 +644,7 @@ pattern line {
   min-width: 78px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: 10px;
+  font-size: 11px;
 }
 .tval {
   flex: 1;

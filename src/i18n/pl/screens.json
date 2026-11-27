@@ -216,6 +216,7 @@
     "end": "Zakończ zgłoszenie",
     "endNote": "Zgłoszenie zostanie przekazane innemu konsultantowi. Dotychczasowych ustaleń nie przekazuje się. Postać i wyposażenie zostaną zapisane. Strona zostanie wydrukowana od nowa, przeciwnicy również.",
     "hold": "Prosimy czekać. Rozmowa jest nagrywana.",
+    "track": "Muzyka na czekanie, utwór nr {n}.",
     "subBase": "Zgłoszenie nr {number}. {planet}, baza.",
     "report": "Zgłoś problem z grą",
     "reportNote": "Do schowka zostanie skopiowany krótki zapis stanu: wersja, profil, planeta, strona, ostatnie zdarzenia, ustawienia.",

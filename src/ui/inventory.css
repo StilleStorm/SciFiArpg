@@ -243,3 +243,16 @@
   font-size: 14px;
   line-height: 1.25;
 }
+
+/* The wax seal of a unikatowy item (render/itemMarks.ts) is drawn with one red dot at its heart; on a card, a plate and a slot it is
+   an ink mark like the rest of the seal (DESIGN 3: red only for Racja, stamps, strikes and corrections). */
+.inv-slot-box svg [style*='var(--accent)'],
+.inv-plate svg [style*='var(--accent)'] {
+  fill: var(--paper) !important;
+}
+
+/* landscape: the sheet is 390 px high and the buttons pinned under a card took half of what is left, hiding the card's footnote and
+   its table behind them; here they stand in the flow after the card's last line instead (the body scrolls to them) */
+:root[data-orient='landscape'] .inv-actions {
+  position: static;
+}

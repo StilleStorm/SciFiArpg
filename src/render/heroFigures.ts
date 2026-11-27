@@ -197,13 +197,22 @@ export const playerBuilder: Builder<Player> = {
   drawInMs: 0,
 };
 
+/** Hero-drawn summons that are drawn larger than their parts (no dotted radius among them). */
+const SUMMON_SCALE: Readonly<Record<string, number>> = { chair: 1.35, phone: 1.35 };
+
 export const summonBuilder: Builder<Summon> = {
   create: (e) => {
     if (e.variant === 'moon') return buildMoon(e);
     const things = heroById(e.heroId).figure.summonParts?.(e);
     if (things) {
       const thing = el('g', { class: `summon-${e.variant}` });
-      appendParts(thing, things);
+      // the chair and the phone read small beside the hero at play zoom (S28): drawn 1.35 times larger, about his own height
+      const k = SUMMON_SCALE[e.variant];
+      if (k !== undefined) {
+        const inner = el('g', { transform: `scale(${k})` });
+        appendParts(inner, things);
+        thing.append(inner);
+      } else appendParts(thing, things);
       return thing;
     }
     const opts: FigureOpts = { dotted: true, size: HERO_SCALE, wash: true, faint: true };

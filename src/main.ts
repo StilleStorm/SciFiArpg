@@ -646,7 +646,15 @@ const asystent = bindAsystent(bus, { say: printNote, getState: () => game.state,
 bus.on('footnote', (e) => printNote(e.text, e.correction === true)); // the finale's duel of footnotes prints its corrections as corrections
 bus.on('footnote:retract', () => void footnotes.retract()); // Cofnięcie zgłoszenia withdraws the slip's last line
 // Sound: the bindings are the only place where events meet sounds (src/audio/bindings.ts).
-const audio = createAudio(bus, { getState: () => game.state, freeze: (ms) => loop.freeze(ms) });
+const audio = createAudio(bus, {
+  getState: () => game.state,
+  freeze: (ms) => loop.freeze(ms),
+  // Combat sounds pan by where they sit in the view the player sees (clamped to the page, as drawn).
+  listener: () => {
+    const r = camera.viewRect();
+    return { x: (r.x0 + r.x1) / 2, w: r.x1 - r.x0 };
+  },
+});
 // The kiosk's office hours are decided by the clause (economy/hours.ts keeps the decision).
 lawHooks.officeReset = () => setOfficeOpen(null);
 

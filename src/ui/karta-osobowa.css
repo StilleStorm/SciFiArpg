@@ -209,7 +209,7 @@
 .field.tappable::after {
   content: '';
   position: absolute;
-  inset: -11px -4px;
+  inset: -22px -4px -3px;
 }
 
 /* the slips of the potwierdzenia: paper with ink lines, as on the HUD note */

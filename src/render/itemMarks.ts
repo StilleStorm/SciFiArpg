@@ -105,9 +105,10 @@ export function buildTierMark(item: MarkSubject, sw = 1.5): SVGGElement | null {
 const stripText = (x: number, y: number, size: number, text: string): SVGTextElement =>
   el('text', { class: 't-plate', x, y, style: `font-size:${size}px;fill:var(--ink);stroke:none` }, [text]);
 
+/** The ad sticker across the top-left corner; its type is 6.8 units like the NOWOŚĆ tag, so it reads at 11 px on a 76 px card figure. */
 function reklamaStrip(sw: number): SVGGElement {
-  const g = el('g', { transform: 'translate(-11 -10) rotate(-35)' });
-  g.append(el('rect', { x: -10, y: -3, width: 20, height: 6, fill: 'var(--paper)', 'stroke-width': sw * 0.7 }), stripText(0, 1.5, 4.2, t('items.mark.reklama')));
+  const g = el('g', { transform: 'translate(-7 -9) rotate(-40)' });
+  g.append(el('rect', { x: -16.5, y: -4.5, width: 33, height: 9, fill: 'var(--paper)', 'stroke-width': sw * 0.7 }), stripText(0, 2.4, 6.8, t('items.mark.reklama')));
   return g;
 }
 

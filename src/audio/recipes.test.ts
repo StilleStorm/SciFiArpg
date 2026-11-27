@@ -185,3 +185,22 @@ describe('recipes follow DESIGN 14', () => {
     }
   });
 });
+
+describe('the polish sounds (miss, off topic, gwiazdki, named elite)', () => {
+  it('exist, validate, and the elite pair are weighted combat sounds with a body', () => {
+    for (const n of ['enemyMiss', 'offTopic', 'starsPickup', 'eliteNamed', 'eliteSlain']) {
+      expect(SFX_NAMES, n).toContain(n);
+      expect(validateRecipe(n, recipes[n] as Recipe), n).toEqual([]);
+      expect(TRIMS[n], n).toBeGreaterThan(0);
+    }
+    for (const n of ['eliteNamed', 'eliteSlain']) expect(bodyLayers(recipes[n] as Recipe).length, n).toBeGreaterThan(0);
+    expect(bodyLayers(recipes['eliteSlain'] as Recipe).length).toBe(3);
+    expect(recipeLength(recipes['eliteSlain'] as Recipe)).toBeGreaterThan(recipeLength(recipes['kill'] as Recipe));
+  });
+  it('the miss is light (no body), the gwiazdki are a short scribble, none uses a raw sine', () => {
+    expect(recipes['enemyMiss']?.combat).toBeUndefined();
+    expect(recipeLength(recipes['starsPickup'] as Recipe)).toBeLessThan(0.3);
+    for (const n of ['enemyMiss', 'offTopic', 'starsPickup', 'eliteNamed', 'eliteSlain']) expect((recipes[n] as Recipe).layers.some((l) => l.kind === 'sine')).toBe(false);
+  });
+});
+

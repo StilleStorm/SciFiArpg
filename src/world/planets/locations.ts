@@ -115,6 +115,11 @@ const BIURO: LocationSpec = {
     P('tablica-rysunkowa', [90, 115], [[-0.25, 0, 0.2], [0.25, 0, 0.2]]),
     P('drabina-do-kopuly', [150, 210], []),
     P('rama-pusta', [50, 64], [[0, 0.1, 0.42]]),
+    // planet 4 (S28), the second office: form stacks, a lift door marked II, a window with the blind down, the rope queue of the centrum reused
+    P('stos-formularzy', [80, 100], [[-0.3, 0.1, 0.2], [0, 0.1, 0.24], [0.3, 0.1, 0.18]]),
+    P('drzwi-windy', [64, 76], [[0, 0, 0.3], [0, 0.6, 0.3]]),
+    P('okno-zaluzje', [70, 84], [[0, 0, 0.4]]),
+    P('sznur', [100, 120], [[-0.4, 0, 0.07], [-0.2, 0, 0.07], [0, 0, 0.07], [0.2, 0, 0.07], [0.4, 0, 0.07]]),
   ],
 };
 

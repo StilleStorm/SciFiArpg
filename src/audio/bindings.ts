@@ -7,6 +7,8 @@ import type { Enemy } from '../entities';
 import { heroById, HERO_IDS, type HeroId } from '../heroes/registry';
 import type { RunState } from '../world/run';
 import { getMix } from './context';
+import { panFor } from './pan';
+import { stampSoundDelay } from './stampGap';
 import { musicPhase, musicTurn, setMusicPaused, startMusic, stopMusic, tickMusic } from './music';
 import { FAMILY_FLAVOUR, play, startHum, type Hum, type PlayOpts, type SfxName } from './sfx';
 
@@ -14,6 +16,11 @@ export interface AudioDeps {
   getState(): RunState | null;
   /** Hit-stop from the game loop (`loop.freeze`). */
   freeze(ms: number): void;
+  /**
+   * The camera: its centre x and the world width it shows, for stereo placement (pan.ts).
+   * main.ts passes the clamped camera view; without it (tests) the player's x and a 390-unit view are used.
+   */
+  listener?(): { x: number; w: number } | null;
 }
 
 export interface AudioBindings {
@@ -77,9 +84,19 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
   let seenId = 0;
   let invOpen = false;
   let fxRadius = 0;
+  let lastStars = 0;
 
   const enemyOf = (id: number): Enemy | undefined => deps.getState()?.enemies.find((e) => e.id === id);
   const duck = (): void => getMix()?.duck();
+  /** Play options that place a combat sound at world x (none when it sits in the centre). */
+  const placed = (x: number | undefined, opts: PlayOpts = {}): PlayOpts => {
+    if (x === undefined) return opts;
+    const l = deps.listener?.() ?? null;
+    const cx = l?.x ?? deps.getState()?.player.x;
+    if (cx === undefined) return opts;
+    const pan = panFor(x, cx, l?.w);
+    return Math.abs(pan) < 0.005 ? opts : { ...opts, pan };
+  };
 
   /** The family's flavour laid over a hit, a crit or a kill. */
   const flavour = (family: Enemy['family'] | undefined, opts: PlayOpts = {}): void => {
@@ -92,6 +109,7 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
     const s = deps.getState();
     seenId = s ? s.nextId - 1 : 0;
     invOpen = false;
+    lastStars = s?.player.gwiazdki ?? 0;
     startMusic(deps.getState);
   });
   on('run:ended', () => {
@@ -135,16 +153,16 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
     if (lethal) return; // the kill sound covers it
     const beast = en?.family === 'wygenerowane';
     const body = beast ? beastBody(en?.existence) : 1;
-    const opts: PlayOpts = beast ? { scale: { body, sub: body, transient: 0.7 } } : {};
+    const opts: PlayOpts = placed(e.x, beast ? { scale: { body, sub: body, transient: 0.7 } } : {});
     play(e.crit ? 'crit' : 'hit', opts);
-    flavour(en?.family, e.crit ? { gain: 1.1 } : {});
+    flavour(en?.family, placed(e.x, e.crit ? { gain: 1.1 } : {}));
   });
   on('enemy:died', (e) => {
     deps.freeze(HIT_STOP_MS);
     duck();
     const beast = e.family === 'wygenerowane';
-    play('kill', beast ? { scale: { body: 0.5, sub: 0.5 } } : {});
-    flavour(e.family, { gain: 1.2 });
+    play('kill', placed(e.x, beast ? { scale: { body: 0.5, sub: 0.5 } } : {}));
+    flavour(e.family, placed(e.x, { gain: 1.2 }));
   });
   on('boss:died', () => {
     hum?.stop(1);
@@ -152,11 +170,16 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
     play('bossPhase', { gain: 1.1, rate: 0.85, when: 0.2 });
     duck();
   });
-  on('boss:phase', () => {
-    play('bossPhase');
+  on('boss:phase', (e) => {
+    play('bossPhase', placed(e.x));
     duck();
     musicPhase();
   });
+  // a swing that found nothing, a remark off the subject, the register entry of a named elite and its fall
+  on('enemy:miss', (e) => play('enemyMiss', placed(enemyOf(e.id)?.x)));
+  on('enemy:offTopic', (e) => play('offTopic', placed(e.x)));
+  on('elite:named', (e) => play('eliteNamed', placed(e.x)));
+  on('elite:slain', (e) => play('eliteSlain', placed(e.x, { when: 0.05 }))); // under the kill sound's first stroke
   on('enemy:escalated', () => play('escalate'));
   on('enemy:rebutted', () => play('strikeThrough', { when: 0.08 }));
   // Spor (DESIGN 5.4): the comment is typed in like a footnote; a right reply is struck through (the stamp sound comes from the
@@ -197,8 +220,13 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
   });
 
   // ---- paper, forms, the document ----
+  // the drawn stamp waits 0.4 s behind the last one (render/stampQueue.ts); its thud waits the same, so ink and sound land together
+  let stampFreeAt = 0;
   on('stamp', (e) => {
-    if (!e.quiet) play('stamp'); // an ultimate's stamp is heard in its own recipe
+    const now = performance.now();
+    const slot = stampSoundDelay(now, stampFreeAt);
+    stampFreeAt = slot.freeAtMs;
+    if (!e.quiet) play('stamp', slot.delayMs > 0 ? { when: slot.delayMs / 1000 } : {}); // an ultimate's stamp is heard in its own recipe
   });
   on('player:levelup', () => play('stamp'));
   on('player:unsuspended', () => play('stamp'));
@@ -250,6 +278,10 @@ export function bindAudio(bus: Bus, deps: AudioDeps): AudioBindings {
           if (k.item || k.permission) drawn = true;
         }
         seenId = Math.max(seenId, s.nextId - 1);
+        // gwiazdki taken from the page (no event carries them: the purse is read; spending only lowers the baseline)
+        const stars = s.player.gwiazdki;
+        if (stars > lastStars && s.status !== 'dead') play('starsPickup');
+        lastStars = stars;
         if (drawn) play('cardDrawn');
         // the tape-motor hum under the whole boss fight
         const boss = s.status !== 'dead' && s.enemies.some((e) => e.boss);

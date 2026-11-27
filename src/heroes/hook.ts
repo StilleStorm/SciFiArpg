@@ -5,7 +5,8 @@ import { applyUpgrade, gainXp, xpToNext } from '../progression';
 import type { Bus } from '../core/events';
 import { createEnemy } from '../entities/factory';
 import { applyDamage } from '../systems/combat';
-import { nextId } from '../world/run';
+import { nextId, type RunState } from '../world/run';
+import { xpMul } from '../world/campaign';
 import { mountProfile } from '../ui/profile';
 import type { Aim } from './aim';
 import { castSkill } from './skills';
@@ -13,6 +14,14 @@ import { heroDef, skillAt, skillIndicesOf, type SkillIndex } from './defs';
 import { assignPad } from './loadout';
 import type { ParagraphNo } from './paragraphs';
 import { setRunParagraph } from '../progression/paragraphs';
+
+/**
+ * The raw reputacja that gainXp turns into exactly one level: gainXp multiplies by the hero's xp mod and the plan's xp factor
+ * (Krytyczny pays less), so the hook divides by both (S28: without the plan's factor a level-18 bot run reached 31). Pure.
+ */
+export function levelUpXp(s: Pick<RunState, 'player' | 'hero' | 'plan'>): number {
+  return (xpToNext(s.player.level) - s.player.xp) / (s.hero.mods.xp * xpMul(s.plan)) + 1;
+}
 
 export interface HeroHook {
   /** Fire skill 1, 2 or 3 now (same as the pad). Returns false on cooldown or if nothing happened. */
@@ -115,7 +124,7 @@ export function createHeroHook(game: Game, bus: Bus): HeroHook {
     },
     levelUp() {
       const s = game.state;
-      if (s) gainXp(s, bus, xpToNext(s.player.level) / s.hero.mods.xp + 1);
+      if (s) gainXp(s, bus, levelUpXp(s));
     },
     openUpdate: () => game.hero.openUpdate(),
     requestUpdate: () => game.hero.requestUpdate(),

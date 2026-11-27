@@ -198,6 +198,10 @@ const BLOT_DRIED = 22;
 /** A blot stays black this long after it darkened, then dries over BLOT_DRY_MS (DESIGN 3.2: a hit leaves a blot that dries). */
 const BLOT_HOLD_MS = 500;
 const BLOT_DRY_MS = 1800;
+/** A blot this big (a crit, an edge, a kiosk's splash) does not stay as a stain: after it has dried it fades off the page (S28). */
+export const BLOT_LARGE = 8;
+const BLOT_GONE_HOLD_MS = 1500;
+const BLOT_GONE_MS = 2200;
 interface BlotSlot {
   node: SVGPathElement;
   cancel: () => void;
@@ -229,6 +233,7 @@ export function blot(x: number, y: number, size: number, crit = false): void {
     }
   }
   node.setAttribute('d', d);
+  node.style.opacity = '';
   node.setAttribute('transform', `translate(${n2(x)} ${n2(y)})`);
   const mix = (pct: number): void => {
     node.style.fill = `color-mix(in srgb, var(--ink) ${Math.round(pct)}%, var(--paper))`;
@@ -238,7 +243,12 @@ export function blot(x: number, y: number, size: number, crit = false): void {
   const s = slot;
   const cancelWet = tween(300, (p) => mix(BLOT_WET + (100 - BLOT_WET) * p), {
     done: () => {
-      s.cancel = tween(BLOT_DRY_MS, (p) => mix(100 - (100 - BLOT_DRIED) * p), { delay: BLOT_HOLD_MS });
+      s.cancel = tween(BLOT_DRY_MS, (p) => mix(100 - (100 - BLOT_DRIED) * p), {
+        delay: BLOT_HOLD_MS,
+        done: () => {
+          if (size >= BLOT_LARGE) s.cancel = tween(BLOT_GONE_MS, (q) => (node.style.opacity = String(1 - q)), { delay: BLOT_GONE_HOLD_MS });
+        },
+      });
     },
   });
   slot.cancel = cancelWet;

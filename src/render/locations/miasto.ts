@@ -187,9 +187,10 @@ function rozklad(o: Obstacle, r: Rng): SVGGElement {
   k.shape([[-34, -62], [34, -62], [34, 14], [-34, 14]], { fill: 'paper', w: 2, jit: 0.6 });
   k.shape([[-34, -62], [34, -62], [34, -48], [-34, -48]], { fill: 'hatch', w: 1.3, jit: 0.3 });
   k.mark(String(r.int(1, 24)), 0, -51, 9);
-  for (let i = 0; i < 6; i++) {
-    k.mark(`${r.int(4, 22)}.${r.int(10, 59)}`, -15, -38 + i * 8.5, 6.5);
-    k.mark(`${r.int(4, 22)}.${r.int(10, 59)}`, 14, -38 + i * 8.5, 6.5);
+  for (let i = 0; i < 5; i++) {
+    // larger digits (S28): five rows at 9 units read at play zoom, six at 6.5 did not
+    k.mark(`${r.int(4, 22)}.${r.int(10, 59)}`, -15, -37 + i * 10.5, 9);
+    k.mark(`${r.int(4, 22)}.${r.int(10, 59)}`, 14, -37 + i * 10.5, 9);
   }
   k.line(-32, -46, 32, 10, 1.6);
   k.line(32, -46, -32, 10, 1.6);
@@ -199,9 +200,10 @@ function rozklad(o: Obstacle, r: Rng): SVGGElement {
 /** A zebra crossing: a flat mark of ruled stripes across the street, edges drawn by hand, the stripes hatched. */
 function pasy(o: Obstacle, r: Rng): SVGGElement {
   const k = kit(o, r, 100);
-  for (let i = 0; i < 9; i++) {
-    const x0 = -46 + i * 10.4;
-    k.shape([[x0, -140], [x0 + 6, -140], [x0 + 6, 140], [x0, 140]], { fill: 'hatch', w: 0.9, jit: 0.9 });
+  for (let i = 0; i < 6; i++) {
+    // six wide stripes on the lighter hatch (S28): nine on the dense one read as a grey block
+    const x0 = -46 + i * 15.6;
+    k.shape([[x0, -140], [x0 + 9, -140], [x0 + 9, 140], [x0, 140]], { fill: 'wide', w: 0.9, jit: 0.9 });
   }
   k.path('M-50 -146H50M-50 146H50', { w: 0.8 }).setAttribute('stroke-dasharray', '5 3');
   return k.g;

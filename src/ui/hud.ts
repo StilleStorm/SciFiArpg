@@ -20,6 +20,8 @@ export interface Hud {
 }
 
 const LINE_Y = 6;
+/** A racja value longer than this many characters is typed smaller (and never wider than its line): `.racja .val.long` in style.css. */
+export const LONG_RACJA = 11;
 
 /** A click this soon after a pointerdown on the note is the tail of that press. */
 const CLICK_AFTER_PRESS_MS = 700;
@@ -120,7 +122,9 @@ export function bracketPath(width: number, ratio: number, owed: number): string 
   let x0 = Math.max(0, Math.min(1, ratio - Math.max(0, owed))) * width;
   if (x1 - x0 < 8) x0 = Math.max(0, x1 - 8);
   const right = Math.max(x1, x0 + 8);
-  const top = LINE_Y - 6;
+  // from just above the line to just below it: the typed value stands over the line's right end, and a bracket reaching up to the
+  // top of the box (as it did) ran through the figures when the racja is full
+  const top = LINE_Y - 2;
   const bot = LINE_Y + 4;
   return `M${n2(x0 + 3)} ${top}L${n2(x0)} ${top}L${n2(x0)} ${bot}L${n2(x0 + 3)} ${bot}M${n2(right - 3)} ${top}L${n2(right)} ${top}L${n2(right)} ${bot}L${n2(right - 3)} ${bot}`;
 }
@@ -209,6 +213,7 @@ export function createHud(
     update(s) {
       const p = s.player;
       setText(racja.value, 'racja', `${Math.max(0, Math.ceil(p.hp))}/${p.hpMax}`);
+      racja.value.classList.toggle('long', racja.value.textContent !== null && racja.value.textContent.length > LONG_RACJA);
       potw.show(heldOf(p));
       setText(reputacja.value, 'reputacja', reputacjaText(s));
       setText(gwiazdki.value, 'gwiazdki', String(p.gwiazdki));

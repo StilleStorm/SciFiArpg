@@ -708,7 +708,7 @@ try {
   const ultFull = await page.evaluate(() => ({ info: window.__game.ultimateInfo(), pad: window.__game.ultimatePad(), arg: document.querySelector('.hud .arg')?.classList.contains('full') ?? false }));
   check('rebuttals fill the Argument meter, the stamp pad is shown and ready, the HUD underline is full', ultFull.info.ready && ultFull.pad?.ready === true && ultFull.pad.hidden === false && ultFull.arg, JSON.stringify({ rebuttals, ...ultFull }));
   await shot('07e-ultimate-ready');
-  // the crowd of six speaks through two bubbles at most, every one inside the screen; the ready pad's word is ink, underlined in red
+  // the crowd of six speaks through two bubbles at most, every one inside the screen; the ready pad's word is ink, underlined in ink (S28: red only when the stamp lands)
   const crowd = await page.evaluate(() => {
     const on = [...document.querySelectorAll('#world [data-kind="enemy"] [data-part="over"] > .bubble:not(.comment):not(.bubble-off)')].filter((b) => b.childElementCount > 0);
     const out = on.filter((b) => {
@@ -721,7 +721,7 @@ try {
     return { shown: on.length, out, color: cs?.color ?? '', line: cs?.textDecorationLine ?? '', lineColor: cs?.textDecorationColor ?? '', ink };
   });
   check('a crowd of six shows at most two claim bubbles, none past the screen edge', crowd.shown <= 2 && crowd.shown >= 1 && crowd.out === 0, JSON.stringify(crowd));
-  check('the ready pad word is ink with a red underline (red stays on the cushion and the line)', crowd.line.includes('underline') && crowd.color !== crowd.lineColor, JSON.stringify(crowd));
+  check('the ready pad word is ink, underlined in ink (S28: red is for the stamp that lands)', crowd.line.includes('underline') && crowd.color === crowd.lineColor, JSON.stringify(crowd));
   await hitAreas('the meter full');
   const fxTexts = () => page.evaluate(() => [...document.querySelectorAll('#fx .stamp-frame')].length);
   const stampsBefore = await fxTexts();

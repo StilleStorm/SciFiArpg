@@ -587,6 +587,20 @@ describe('passives', () => {
     expect(e.claim?.struck).toBe(true);
   });
 
+  it('10 Trzeci punkt also counts Triangulacja: its third line hit on the same enemy is a rebuttal (S28)', () => {
+    const { s, bus, enemies } = scene([[100, 0]]);
+    s.hero.upgrades['passive10'] = 1;
+    const e = enemies[0]!;
+    e.claim = { textKey: 'enemies.urzadzenia.claim.update', type: 'egzystencjalny' };
+    for (let k = 0; k < 3; k++) {
+      s.hero.cd[IX.triangulacja] = 0;
+      expect(cast(s, bus, IX.triangulacja, 1, { kind: 'kierunek', dx: 1, dy: 0 }), `line ${k}`).toBe(true);
+      tick(s, bus, 1);
+      if (k < 2) expect(e.claim?.struck, `after line ${k}`).not.toBe(true);
+    }
+    expect(e.claim?.struck).toBe(true);
+  });
+
   it('10 without the passive: three hits are three hits', () => {
     const { s, bus, enemies } = scene([[100, 0]]);
     const e = enemies[0]!;

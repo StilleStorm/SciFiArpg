@@ -65,8 +65,18 @@ export function createFootnotes(root: HTMLElement): Footnotes {
    * note is laid out; never per frame.
    */
   let pruneQueued = false;
+  /**
+   * A long note grows the slip above the band the pads stand on: the pads (portrait) are lifted by the excess, so the slip's top rule
+   * and its first line never touch the pad labels while it is held (style.css `--note-h`, ui/landscape.css). Not needed while it is short.
+   */
+  const syncLift = (): void => {
+    const root = document.documentElement;
+    if (el.classList.contains('fn-long')) root.style.setProperty('--note-h', `${el.offsetHeight}px`);
+    else root.style.removeProperty('--note-h');
+  };
   const prune = (): void => {
     pruneQueued = false;
+    syncLift();
     const top = list.getBoundingClientRect().top;
     while (list.children.length > 1 && (list.firstElementChild?.getBoundingClientRect().top ?? top) < top - 1) list.firstElementChild?.remove();
   };
@@ -125,6 +135,7 @@ export function createFootnotes(root: HTMLElement): Footnotes {
       log.length = 0;
       list.replaceChildren();
       el.classList.remove('fn-long');
+      syncLift();
       release(false);
       sheet?.close();
     },

@@ -68,6 +68,8 @@ export interface UltimateDef {
   noteKey: string;
   /** Radius of the ring it draws round the hero, which the margin note must stand clear of (heroes/ultimate.ts `ultNoteY`). */
   noteClear?: number;
+  /** The stamp is not struck at the cast but when the def calls `landStamp` (Nalesnik's Zderzenie: where the roll ends). */
+  stampOnLand?: boolean;
   list: readonly [UltimateParagraph, UltimateParagraph, UltimateParagraph];
   /** The instant part of the cast. Runs once, after the cost is paid. */
   cast(e: UltEnv): void;
@@ -85,6 +87,7 @@ export interface UltimateSpec {
   radius: number | null;
   pageWide?: boolean;
   noteClear?: number;
+  stampOnLand?: boolean;
   two: { patch: ParagraphPatch; tune?: Record<string, number> };
   three: { patch: ParagraphPatch; tune?: Record<string, number> };
   cast: UltimateDef['cast'];
@@ -117,9 +120,15 @@ export function defineUltimate(hero: HeroId, o: UltimateSpec): UltimateDef {
     cast: o.cast,
   };
   if (o.noteClear !== undefined) def.noteClear = o.noteClear;
+  if (o.stampOnLand) def.stampOnLand = true;
   if (o.tick) def.tick = o.tick;
   if (o.end) def.end = o.end;
   return def;
+}
+
+/** The roll or flight has ended: the runtime stamps the ultimate here, at the hero's spot now (only for a def with `stampOnLand`). */
+export function landStamp(e: UltEnv): void {
+  if (e.u.stampWait) e.u.stampNow = true;
 }
 
 /** Gather `dt` into `u.acc` and call `fn` once for every whole second reached (a tick of "x per second" damage). */

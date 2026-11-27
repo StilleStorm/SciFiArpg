@@ -181,6 +181,89 @@ try {
   await nal('nalesnik-gravity', () => window.__game.hero.cast(2), 700);
   await nal('nalesnik-flag', () => window.__game.aimCast(3, { kind: 'wskazanie', x: 720, y: 800 }), 900);
 
+  // ---- skills 6-10 and the ultimates of every hero (S28) ----
+  const ultsOf = {
+    pralka: ['pelnyCykl', 'uznanieOsobowosci', 'reklamacja'],
+    konsultant: ['przekazanie', 'koniecKolejki', 'ankieta'],
+    petlowiec: ['zebranie', 'cofniecie', 'przedwczesny'],
+    kartograf: ['mapaOstateczna', 'skreslenie', 'pomiarKontrolny'],
+    nalesnik: ['decyzjaKomisji', 'zderzenie', 'pelnia'],
+  };
+  const arena = (cnt) =>
+    page.evaluate((c) => {
+      const g = window.__game;
+      const s = g.state();
+      g.enemies.clear();
+      s.zones.length = 0;
+      s.law.botTime = 0;
+      s.player.statuses.length = 0;
+      s.player.hp = s.player.hpMax = 1e9;
+      s.hero.cd.fill(0);
+      g.placePlayer(600, 800);
+      g.hero.spawn(c);
+      s.enemies.forEach((e, i) => {
+        e.x = s.player.x + 70 + (i % 3) * 30;
+        e.y = s.player.y + ((i % 5) - 2) * 36;
+        e.home = { x: e.x, y: e.y };
+        e.mode = 'wander';
+        e.wanderTimer = 99;
+        e.hp = e.hpMax = 99999;
+        e.attackTimer = 99;
+      });
+    }, cnt);
+  for (const id of heroes) {
+    await page.evaluate((h) => window.__game.start(17, { heroId: h }), id);
+    await wait(1400);
+    await page.evaluate(() => {
+      const g = window.__game;
+      g.state().hero.pendingLevels = 0;
+      g.setLevel(40);
+      const n = g.hero.info().skillIds.length;
+      for (let k = 3; k < n; k++) g.hero.installSkill(k);
+    });
+    const count = await page.evaluate(() => window.__game.hero.info().skillIds.length);
+    for (let k = 5; k < Math.min(count, 10); k++) {
+      await arena(6);
+      if (id === 'petlowiec' && k === 9) {
+        // Zamiana swaps with a copy: two copies of Przybycie first
+        await page.evaluate(() => {
+          window.__game.hero.assignPad(1, 0);
+          window.__game.hero.cast(1);
+          window.__game.state().hero.cd.fill(0);
+          window.__game.hero.cast(1);
+          window.__game.state().hero.cd.fill(0);
+        });
+        await wait(300);
+      }
+      await page.evaluate((i) => {
+        window.__game.hero.assignPad(1, i);
+        window.__game.hero.setParagraph(window.__game.hero.info().skillIds[i], 1, true);
+      }, k);
+      const ok = await page.evaluate(() => window.__game.hero.cast(1));
+      if (!ok) problems.push(`${id}: skill ${k + 1} did not fire`);
+      await wait(320);
+      await shot(`skill-${id}-${k + 1}`);
+    }
+    for (const u of ultsOf[id]) {
+      await arena(8);
+      const ok = await page.evaluate((ult) => {
+        const g = window.__game;
+        const s = g.state();
+        s.hero.ultimateId = ult;
+        s.hero.ult = { para: 1, active: [], idle: 0 };
+        g.fillMeter(1);
+        return g.castUltimate();
+      }, u);
+      if (!ok) problems.push(`${id}: ultimate ${u} did not fire`);
+      await wait(u === 'zderzenie' ? 900 : 450);
+      await shot(`ult-${id}-${u}`);
+      await page.evaluate(() => {
+        for (let k = 0; k < 10; k++) window.__game.advance(1);
+        window.__game.state().player.hp = window.__game.state().player.hpMax;
+      });
+    }
+  }
+
   // ---- update form ----
   await page.evaluate(() => window.__game.start(21, { heroId: 'konsultant' }));
   await wait(1200);

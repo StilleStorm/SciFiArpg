@@ -7,7 +7,7 @@ import type { HeroModule } from '../module';
 import { fx, heal, summon, zone } from '../primitives';
 import { KSIEZYC_HIT_R } from '../numbers';
 import { syncMoonUpor } from '../steps2';
-import { defineUltimate, perSecond, type UltEnv } from '../ultimateDefs';
+import { defineUltimate, landStamp, perSecond, type UltEnv } from '../ultimateDefs';
 import {
   PELNIA_DAMAGE,
   PELNIA_FROM,
@@ -92,6 +92,7 @@ function landCollision(e: UltEnv): void {
   const col = k.collision;
   if (!col) return;
   k.collision = null;
+  landStamp(e);
   const z = zone(c, { variant: 'krater', x: p.x, y: p.y, r: ZDERZENIE_CRATER_R, ttl: ZDERZENIE_CRATER_S, own: true, max: 2 });
   k.craters.push({ zone: z.id, x: p.x, y: p.y, r: ZDERZENIE_CRATER_R, until: s.time + ZDERZENIE_CRATER_S, type: col.type, mul: 0, mark: true, acc: 0 });
   fx(c, 'ring', p.x, p.y, ZDERZENIE_CRATER_R);
@@ -112,6 +113,7 @@ function landCollision(e: UltEnv): void {
  */
 const zderzenie = defineUltimate('nalesnik', {
   id: 'zderzenie',
+  stampOnLand: true,
   level: 24,
   type: 'mechaniczny',
   seconds: ZDERZENIE_S + 0.1,

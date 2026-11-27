@@ -46,6 +46,7 @@ export class FakeNode {
   delayTime = new FakeParam();
   playbackRate = new FakeParam();
   detune = new FakeParam();
+  pan = new FakeParam();
   Q = new FakeParam();
   threshold = new FakeParam();
   knee = new FakeParam();
@@ -102,6 +103,7 @@ export class FakeContext {
   createDelay = (): FakeNode => this.make('delay');
   createOscillator = (): FakeNode => this.make('osc');
   createBufferSource = (): FakeNode => this.make('buffer');
+  createStereoPanner = (): FakeNode => this.make('panner');
   createWaveShaper = (): FakeNode => this.make('shaper');
   createDynamicsCompressor = (): FakeNode => this.make('compressor');
   createBuffer = (channels: number, length: number, sampleRate: number): FakeBuffer => new FakeBuffer(channels, length, sampleRate);

@@ -6,6 +6,7 @@ import { bindAttackFx } from './attackFx';
 import { bindDamageNumbers } from './damageNumbers';
 import { blot, marginNote, restrike, stamp, stampSize, strike, type Box } from './ink';
 import { avoidBoxes } from './keepOut';
+import { queueStamp } from './stampQueue';
 import type { Views } from './view';
 
 const jitter = createRng(0xb107);
@@ -122,12 +123,15 @@ export function bindFx(
   });
   bus.on('stamp', (e) => {
     // a long text (REKLAMACJA PRZYJETA, S19) would run off a phone's width at 17: the type is cut down until the stamp fits the view
-    const v = view();
-    let size = 17;
-    if (v) while (size > 11 && stampSize(e.text, size).w > v.x1 - v.x0 - 2 * STAMP_MX - 16) size--;
-    const { w, h } = stampSize(e.text, size);
-    const at = placeStamp(e.x, e.y, w, h, v, e.away, blocks());
-    stamp(e.text, at.x, at.y, size < 17 ? { fontSize: size } : {});
+    // two stamps within 0.4 s would overprint: the second waits (render/stampQueue.ts); the spot is chosen when it lands
+    queueStamp(() => {
+      const v = view();
+      let size = 17;
+      if (v) while (size > 11 && stampSize(e.text, size).w > v.x1 - v.x0 - 2 * STAMP_MX - 16) size--;
+      const { w, h } = stampSize(e.text, size);
+      const at = placeStamp(e.x, e.y, w, h, v, e.away, blocks());
+      stamp(e.text, at.x, at.y, size < 17 ? { fontSize: size } : {});
+    });
   });
   bus.on('margin:note', (e) => marginNote(e.text, e.x, e.y, jitter.range(-5, 3), e.ttl));
 }

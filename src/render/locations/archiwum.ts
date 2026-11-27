@@ -11,7 +11,7 @@ import { registerDrawings } from './registry';
 
 /** A tape reel seen edge-on as a disc: a flange, a hub with three spokes, a tail of tape. */
 function reel(k: Kit, cx: number, cy: number, rad: number): void {
-  k.disc(cx, cy, rad, { fill: 'paper', w: 1.4 });
+  k.disc(cx, cy, rad, { fill: 'paper', w: 1.9 });
   k.disc(cx, cy, rad * 0.62, { w: 0.8 });
   k.disc(cx, cy, rad * 0.2, { fill: 'hatch', w: 0.9 });
   const sp: string[] = [];
@@ -33,9 +33,10 @@ function regal(o: Obstacle, r: Rng): SVGGElement {
     const y1 = -142 + (b + 1) * h;
     k.line(-42, y1, 42, y1, 1.6);
     if (b % 2 === 0) {
-      reel(k, -22, y1 - 18.5, 16.5);
-      reel(k, 12, y1 - 17.5, 15.5);
-      k.shape([[28, y1 - 30], [38, y1 - 30], [38, y1 - 2], [28, y1 - 2]], { fill: 'hatch', w: 0.9, jit: 0.3 });
+      // larger (S28): at play zoom the small reels read as dots; now as two tapes with the tape run between them
+      reel(k, -20, y1 - 23.5, 21);
+      reel(k, 22, y1 - 22.5, 20);
+      k.path(`M-8 ${y1 - 3}Q1 ${y1 - 9} 12 ${y1 - 3}`, { w: 1 });
     } else {
       for (let i = 0; i < 5; i++) {
         const x0 = -38 + i * 15.4;

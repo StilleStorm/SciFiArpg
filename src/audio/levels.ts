@@ -94,4 +94,9 @@ export const TRIMS: Record<string, number> = {
   flavDevice: 4.18,
   flavNotice: 3.48,
   flavBeast: 0.52,
+  enemyMiss: 1.4,
+  offTopic: 1,
+  starsPickup: 1,
+  eliteNamed: 0.8,
+  eliteSlain: 0.8,
 };

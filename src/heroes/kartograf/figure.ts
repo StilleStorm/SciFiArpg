@@ -95,7 +95,7 @@ export function zoneParts(z: Zone): readonly string[] | null {
 /** A benchmark (Punkt odniesienia): a small triangle on its pole over a ground rule, and the radius within which his lines pierce (dotted). */
 export function summonParts(e: Summon): readonly string[] | null {
   if (e.variant !== 'benchmark') return null;
-  return ['M0-14L11 4H-11Z', 'M0-14V-24', 'M-14 8H14', 'M0 0h.01', `~${circlePath(0, 0, 60)}`];
+  return ['M0-22L17 6H-17Z', 'M0-22V-38', 'M-22 12H22', 'M0 0h.01', `~${circlePath(0, 0, 60)}`];
 }
 
 export const figure: HeroFigure = {

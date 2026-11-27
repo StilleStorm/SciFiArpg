@@ -19,6 +19,8 @@ export interface PlayOpts {
   scale?: Partial<Record<NonNullable<Layer['role']>, number>>;
   /** Seconds from now. */
   when?: number;
+  /** Stereo position, -1..1 (see pan.ts; combat sounds only). Absent or 0: centre. */
+  pan?: number;
 }
 
 /** Where a sound goes: a context, the node to connect to, and a clock. The live mix, or an offline render. */
@@ -62,8 +64,17 @@ export function playRecipe(sink: Sink, name: string, recipe: Recipe, opts: PlayO
   const rate = opts.rate ?? 1;
   const out = ctx.createGain();
   out.gain.value = SFX_TRIM * (recipe.trim ?? 1) * (opts.gain ?? 1);
-  out.connect(sink.out);
   const nodes: AudioNode[] = [out];
+  const pan = opts.pan ?? 0;
+  if (Math.abs(pan) > 0.001 && typeof ctx.createStereoPanner === 'function') {
+    const sp = ctx.createStereoPanner();
+    sp.pan.value = Math.max(-1, Math.min(1, pan));
+    out.connect(sp);
+    sp.connect(sink.out);
+    nodes.push(sp);
+  } else {
+    out.connect(sink.out);
+  }
   let lastEnd = -1;
   let lastSrc: AudioScheduledSourceNode | null = null;
 
