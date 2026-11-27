@@ -1351,6 +1351,8 @@ clerk, side tickets (one `QuestReward.item`), boss variant table (`arm: 'dlon'` 
 default band), cards. Slice: **S26** (builder `planet-8`).
 
 ### 8.15 Planet 9: Planeta Trzydziesta Pierwsza (Niedostępna) — Akt III
+
+(S27 voice rewrote the Wizualizacja hint and post lines: the player stands *on* the post. src/i18n/pl/enemies.json is the text of record; the drafts below are kept as the plan.)
 **Record** (`PLANETS[8]`): act 3; dominant Wygenerowane 0.15/0.15/0.7; law pool `czas-wsteczny`,
 `weryfikacja-dwuetapowa`, `parzystosc`, `ciasteczka`; base layouts miasteczko, lądowisko;
 locations archiwum, biuro; hosted set «Awaria»; pages 6–6. Record edits for S27: `boss:

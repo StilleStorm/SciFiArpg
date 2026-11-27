@@ -352,12 +352,12 @@
     },
     "wizualizacja": {
       "name": "Wizualizacja",
-      "meet": "Napotkano Wizualizację. Przedstawia planetę wnioskodawcy według akt. Ma charakter poglądowy i istnieje w stopniu 0,4.",
-      "hint": "Wizualizację porównuje się ze stanem faktycznym ze stanowiska obserwacyjnego. Stanowisko wyznaczono na podłodze.",
+      "meet": "Napotkano Wizualizację. Przedstawia planetę wnioskodawcy według akt. Ma charakter poglądowy. Istnieje w stopniu 0,4.",
+      "hint": "Wizualizację porównuje się ze stanem faktycznym. Porównania dokonuje się na stanowisku obserwacyjnym, wyznaczonym na podłodze.",
       "observed": "Dokonano obserwacji. Stan faktyczny różni się od wizualizacji. Wizualizację wstrzymano.",
-      "details": "Obserwacji nie dokonano. Wizualizację uzupełniono o szczegóły, w dwóch egzemplarzach.",
+      "details": "Obserwacji nie dokonano w terminie. Wizualizację uzupełniono o szczegóły, w dwóch egzemplarzach.",
       "half": "Awaria przyrządu. Wyznaczono dwa stanowiska obserwacyjne. Jedno z nich wygenerowano.",
-      "false": "Obserwacji dokonano ze stanowiska wygenerowanego. Wizualizację uznano za zgodną ze stanem faktycznym."
+      "false": "Obserwacji dokonano na stanowisku wygenerowanym. Wizualizację uznano za zgodną ze stanem faktycznym."
     }
   },
   "summon": {
