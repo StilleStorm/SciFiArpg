@@ -54,6 +54,15 @@ export function setViewSize(size: { w: number; h: number }): void {
 }
 /** How much blank paper may show beyond the page edge. */
 const OVERSCAN = 60;
+/**
+ * Landscape only: the pad column (or the left-handed mirror of it) covers the last ~150 css px beside the page edge, so the
+ * view may slide that much further past the left and right edges and a corner exit or a gate can be brought out from under it.
+ */
+const OVERSCAN_SIDE_LANDSCAPE = 240;
+/** Whether the pad column is on the left (the left-handed mirror, `.lefty` on #ui); read once per call, no layout. */
+const padsLeft = (): boolean => typeof document !== 'undefined' && document.getElementById('ui')?.classList.contains('lefty') === true;
+/** Landscape only: the footnote band covers the bottom of the view, so the page may slide this far up past its bottom edge. */
+const OVERSCAN_BOTTOM_LANDSCAPE = 150;
 /** Camera lag: bigger = snappier. */
 const FOLLOW_RATE = 5;
 
@@ -108,8 +117,8 @@ export function createCamera(
       cam.y = ty;
     },
     apply() {
-      const left = axis(cam.x, cam.w, bounds.w);
-      const top = axis(cam.y, cam.h, bounds.h);
+      const left = axisX(cam.x, cam.w, bounds.w, cam.h);
+      const top = axis(cam.y, cam.h, bounds.h, OVERSCAN, cam.w > cam.h ? OVERSCAN_BOTTOM_LANDSCAPE : OVERSCAN);
       const view = `${left.toFixed(1)} ${top.toFixed(1)} ${cam.w.toFixed(1)} ${cam.h.toFixed(1)}`;
       if (view !== lastView) {
         lastView = view;
@@ -208,15 +217,22 @@ export function headerKeepOut(cam: Pick<Camera, 'w' | 'h' | 'viewRect' | 'bounds
 
 /** The rectangle the camera shows when it is centred on (cx, cy), clamped like `apply()` does. */
 export function viewRect(cx: number, cy: number, w: number, h: number, bounds: { w: number; h: number }): { x0: number; y0: number; x1: number; y1: number } {
-  const x0 = axis(cx, w, bounds.w);
-  const y0 = axis(cy, h, bounds.h);
+  const x0 = axisX(cx, w, bounds.w, h);
+  const y0 = axis(cy, h, bounds.h, OVERSCAN, w > h ? OVERSCAN_BOTTOM_LANDSCAPE : OVERSCAN);
   return { x0, y0, x1: x0 + w, y1: y0 + h };
 }
 
+/** The horizontal axis: in landscape the side with the pad column may slide `OVERSCAN_SIDE_LANDSCAPE` past the page edge, the other side the usual overscan. */
+function axisX(center: number, size: number, extent: number, height: number): number {
+  if (size <= height) return axis(center, size, extent, OVERSCAN);
+  const left = padsLeft();
+  return axis(center, size, extent, left ? OVERSCAN_SIDE_LANDSCAPE : OVERSCAN, left ? OVERSCAN : OVERSCAN_SIDE_LANDSCAPE);
+}
+
 /** Top-left of the view along one axis, keeping the view inside page +- overscan. */
-function axis(center: number, size: number, extent: number): number {
-  const lo = -OVERSCAN;
-  const hi = extent + OVERSCAN - size;
+function axis(center: number, size: number, extent: number, overscan: number, overscanEnd = overscan): number {
+  const lo = -overscan;
+  const hi = extent + overscanEnd - size;
   if (hi < lo) return extent / 2 - size / 2;
   return clamp(center - size / 2, lo, hi);
 }

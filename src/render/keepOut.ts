@@ -143,3 +143,17 @@ export function avoidBoxes(box: Box, free: Box, blocks: readonly Box[]): [number
   }
   return best ?? base;
 }
+
+/**
+ * `avoidBoxes` with two tiers: `hard` blocks (the HUD, pads, notes) must be cleared; `soft` ones (the hero's figure, bubbles placed
+ * earlier) are cleared too when some move does both, else only the hard ones are (a bubble may cover the hero, never a button). Pure.
+ */
+export function avoidBoxesTiered(box: Box, free: Box, hard: readonly Box[], soft: readonly Box[]): [number, number] {
+  const all = soft.length > 0 ? avoidBoxes(box, free, [...hard, ...soft]) : avoidBoxes(box, free, hard);
+  const clear = (m: readonly [number, number]): boolean => {
+    const b = { x0: box.x0 + m[0], y0: box.y0 + m[1], x1: box.x1 + m[0], y1: box.y1 + m[1] };
+    return [...hard, ...soft].every((k) => !overlaps(b, k));
+  };
+  if (soft.length === 0 || clear(all)) return all;
+  return avoidBoxes(box, free, hard);
+}

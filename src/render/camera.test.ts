@@ -54,7 +54,7 @@ describe('viewRect', () => {
     for (const cx of [0, 300, 600, 900, 1200]) {
       const r = viewRect(cx, 800, v.w, v.h, b);
       expect(r.x0).toBeGreaterThanOrEqual(-60);
-      expect(r.x1).toBeLessThanOrEqual(1260);
+      expect(r.x1).toBeLessThanOrEqual(1440); // right-handed: the page may slide 240 out from under the pad column on the right
     }
     const mid = viewRect(600, 800, v.w, v.h, b);
     expect(mid.x0).toBeGreaterThan(0); // centred on the page: page on both sides, no margin showing
@@ -62,12 +62,12 @@ describe('viewRect', () => {
   });
   it('clamps to the page plus overscan and centres a view wider than the page', () => {
     const b = { w: 1200, h: 1600 };
-    const r = viewRect(100, 100, 1515, 700, b);
-    expect(r.x1 - r.x0).toBeCloseTo(1515);
-    expect(r.x0).toBeCloseTo(600 - 1515 / 2); // wider than the page: centred
+    const r = viewRect(100, 100, 1800, 700, b);
+    expect(r.x1 - r.x0).toBeCloseTo(1800);
+    expect(r.x0).toBeCloseTo(600 - 1800 / 2); // wider than the page: centred
     expect(r.y0).toBeCloseTo(-60);
-    const bottom = viewRect(600, 1590, 1515, 700, b);
-    expect(bottom.y1).toBeCloseTo(1660);
+    const bottom = viewRect(600, 1590, 1800, 700, b);
+    expect(bottom.y1).toBeCloseTo(1750); // landscape: 150 past the bottom edge for the footnote band
   });
 });
 

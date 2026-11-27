@@ -119,6 +119,13 @@ export function bindFx(
   });
   bus.on('page:edge', (e) => {
     const m = marginSpot(e.side, e.x, e.y, page() ?? RUN_PAGE);
+    // the word is kept in the free part of the view and off the pads, the notes and the corner HUD (S28c)
+    const v = view();
+    if (v) {
+      const [dx, dy] = avoidBoxes({ x0: m.x - 36, y0: m.y - 16, x1: m.x + 36, y1: m.y + 6 }, v, blocks());
+      m.x += dx;
+      m.y += dy;
+    }
     marginNote(t('ui.ink.margin'), m.x, m.y, -4);
   });
   bus.on('stamp', (e) => {

@@ -116,7 +116,7 @@ function drawKiosk(r: Rng, seed: number): SVGGElement {
   const ps = plateSize(8.5);
   const hw = plateWidth(word.length, ps, 4, 48) / 2;
   const plate = sheet(rect(-hw, -3 - ps - 4, hw, -3), 1.3);
-  g.append(plate, el('text', { class: 't-plate', x: 0, y: n2(-5.5), 'font-size': n2(ps) }, [word]));
+  g.append(plate, el('text', { class: 't-plate', x: 0, y: n2(-5.5), style: `font-size:${n2(ps)}px` }, [word]));
   // goods on the counter: a phone, a jar, a box with a ribbon
   g.append(sheet(rect(-44, -1, -32, 9), 1.2), stroke('M-42 7h8', 0.8));
   g.append(el('path', { d: wobblyCircle(r, 4, 3.5, 5.5, 8, 0.05), 'stroke-width': 1.3 }));
@@ -451,7 +451,12 @@ export function drawBase(layer: SVGGElement, page: Page, opts: { header: PageHea
   labels.push(tunel);
   const labelLayer = el('g', { class: 'base-labels' });
   for (const l of labels) labelLayer.append(l.g);
-  ink.append(labelLayer);
+  // the labels are margin notes written over the page: they hang above the figures (the hero must not cover a clerk's label),
+  // in a group beside the world layer that drawPage clears again when the next page is drawn (S28c)
+  const host = layer.parentNode;
+  const worldLayer = host?.querySelector(':scope > #world');
+  if (host && worldLayer) host.insertBefore(labelLayer, worldLayer.nextSibling);
+  else ink.append(labelLayer);
   let lastZoom = -1;
   const place = (): void => {
     const z = viewZoom();

@@ -5,6 +5,7 @@ import { FOLD, type Obstacle, type Page, type PageExit } from '../world/pages';
 import { t } from '../i18n';
 import { blobPoints, dotPath, el, n2, polyline, smoothClosed, wobblyCircle } from './svg';
 import { drawProp } from './locations';
+import { drawFloor } from './locations/floors';
 import { drawIn, strike } from './ink';
 import { drawChair } from './locations/biuro';
 import { drawNpc } from './npc';
@@ -370,7 +371,7 @@ export function headerBox(
 
 /** The page header: one printed form with the HUD above it. Mono form line, then the clause in italic. */
 export function drawHeader(page: Page, header: PageHeader, opts: { cls?: string; avoidExit?: boolean } = {}): SVGGElement {
-  const g = el('g', opts.cls ? { class: opts.cls } : {});
+  const g = el('g', { class: opts.cls ? `page-header ${opts.cls}` : 'page-header' });
   const box = headerBox(page, header.view, opts.avoidExit ?? true, header.avoid, header.top.length);
   g.append(el('text', { class: 't-head-top', x: box.x0, y: box.y }, [header.top]));
   const lines = wrapLines(header.clause, box.maxChars, box.maxLines);
@@ -382,6 +383,12 @@ export function drawHeader(page: Page, header: PageHeader, opts: { cls?: string;
   });
   const ruleY = box.y + 22 + lines.length * step - 6;
   g.append(el('path', { d: `M${box.x0} ${ruleY}H${n2(Math.min(box.x1, box.x0 + 300))}`, 'stroke-width': 0.9 }));
+  // the header's printed extent, read by render/headerYield.ts (the clause is as wide as its longest line)
+  const textW = Math.min(box.x1 - box.x0, Math.max(...lines.map((l) => l.length), header.top.length) * Math.max(box.size * 0.55, 8));
+  g.dataset['x0'] = String(Math.round(box.x0));
+  g.dataset['x1'] = String(Math.round(box.x0 + textW));
+  g.dataset['y0'] = String(Math.round(box.y - 12));
+  g.dataset['y1'] = String(Math.round(ruleY + 4));
   return g;
 }
 
@@ -655,9 +662,21 @@ function tagObstacle(g: SVGElement, kind: string): SVGElement {
   return g;
 }
 
+/** A solid prop's footprint (its blocking circles, grown by a third of its width for the drawing) on its group, for render/propYield.ts. */
+function footprinted(g: SVGElement, o: Obstacle): SVGElement {
+  if (o.colliders.length === 0) return g;
+  const grow = o.size * 0.3;
+  g.dataset['fx0'] = String(Math.round(Math.min(...o.colliders.map((c) => c.x - c.r)) - grow));
+  g.dataset['fy0'] = String(Math.round(Math.min(...o.colliders.map((c) => c.y - c.r)) - grow));
+  g.dataset['fx1'] = String(Math.round(Math.max(...o.colliders.map((c) => c.x + c.r)) + grow));
+  g.dataset['fy1'] = String(Math.round(Math.max(...o.colliders.map((c) => c.y + c.r)) + grow));
+  return g;
+}
+
 /** Fill the #page layer: the margin, the frame, the hatched edge and every obstacle. */
 export function drawPage(layer: SVGGElement, page: Page, header?: PageHeader): SVGGElement {
   layer.replaceChildren();
+  layer.parentNode?.querySelectorAll(':scope > .base-labels').forEach((n) => n.remove()); // the base's labels live beside the world layer
   const { w, h, inset } = page;
   const pad = 600;
 
@@ -687,6 +706,8 @@ export function drawPage(layer: SVGGElement, page: Page, header?: PageHeader): S
   const ink = el('g', {});
   layer.append(beyond, grain, drawStains(page), ink);
   ink.append(strip, frame2, frame);
+  const floor = drawFloor(page);
+  if (floor) ink.append(floor);
 
   for (const o of page.obstacles) {
     const r = createRng(o.seed);
@@ -719,7 +740,7 @@ export function drawPage(layer: SVGGElement, page: Page, header?: PageHeader): S
         ink.append(...gateDrawings(o, page));
         break;
       case 'prop':
-        ink.append(tagObstacle(drawProp(o, r), o.kind));
+        ink.append(footprinted(tagObstacle(drawProp(o, r), o.kind), o));
         break;
     }
   }

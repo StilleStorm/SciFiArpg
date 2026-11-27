@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { avoidBoxes, cssToWorld, overlaps, screenLayout, setLayoutSource, setScreenLayout, invalidateLayout, type Box } from './keepOut';
+import { avoidBoxes, avoidBoxesTiered, cssToWorld, overlaps, screenLayout, setLayoutSource, setScreenLayout, invalidateLayout, type Box } from './keepOut';
 
 const shift = (b: Box, [dx, dy]: [number, number]): Box => ({ x0: b.x0 + dx, y0: b.y0 + dy, x1: b.x1 + dx, y1: b.y1 + dy });
 const inside = (b: Box, f: Box): boolean => b.x0 >= f.x0 - 1e-9 && b.y0 >= f.y0 - 1e-9 && b.x1 <= f.x1 + 1e-9 && b.y1 <= f.y1 + 1e-9;
@@ -64,5 +64,25 @@ describe('keeping a box out from under the screen furniture', () => {
     expect(screenLayout()?.top).toBe(64);
     expect(n).toBe(2);
     setScreenLayout(null);
+  });
+});
+
+describe('avoidBoxesTiered', () => {
+  const free = { x0: 0, y0: 0, x1: 400, y1: 300 };
+  const hud = { x0: 0, y0: 0, x1: 150, y1: 40 };
+  it('clears the soft blocks too when some move does both', () => {
+    const b = { x0: 100, y0: 10, x1: 200, y1: 50 };
+    const hero = { x0: 150, y0: 40, x1: 250, y1: 100 };
+    const m = avoidBoxesTiered(b, free, [hud], [hero]);
+    const at = { x0: b.x0 + m[0], y0: b.y0 + m[1], x1: b.x1 + m[0], y1: b.y1 + m[1] };
+    expect(overlaps(at, hud)).toBe(false);
+    expect(overlaps(at, hero)).toBe(false);
+  });
+  it('keeps off the hard blocks even when no place clears the soft one as well', () => {
+    const b = { x0: 100, y0: 10, x1: 200, y1: 50 };
+    const everywhere = { x0: -1000, y0: 40, x1: 1000, y1: 1000 };
+    const m = avoidBoxesTiered(b, free, [hud], [everywhere]);
+    const at = { x0: b.x0 + m[0], y0: b.y0 + m[1], x1: b.x1 + m[0], y1: b.y1 + m[1] };
+    expect(overlaps(at, hud)).toBe(false);
   });
 });

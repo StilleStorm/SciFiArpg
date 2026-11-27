@@ -64,7 +64,7 @@ function plate(cx: number, cy: number): SVGGElement {
   const top = -(s1 + 4);
   const bottom = s2 + 4;
   g.append(sheet(rect(-hw, top, hw, bottom), 1.9), stroke(`M${n2(-hw + 3)} ${n2(top + s1 + 1.5)}H${n2(hw - 3)}`, 0.6));
-  g.append(el('text', { class: 't-plate', x: 0, y: n2(top + s1 - 0.5), 'font-size': n2(s1) }, [t('ui.stop.plate1')]), el('text', { class: 't-plate', x: 0, y: n2(bottom - 3), 'font-size': n2(s2) }, [t('ui.stop.plate2')]));
+  g.append(el('text', { class: 't-plate', x: 0, y: n2(top + s1 - 0.5), style: `font-size:${n2(s1)}px` }, [t('ui.stop.plate1')]), el('text', { class: 't-plate', x: 0, y: n2(bottom - 3), style: `font-size:${n2(s2)}px` }, [t('ui.stop.plate2')]));
   return g;
 }
 

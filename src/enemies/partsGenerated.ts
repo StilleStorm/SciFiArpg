@@ -12,11 +12,9 @@ const r1 = (n: number): number => Math.round(n * 10) / 10;
 
 const DRAGON_HIPS = [-17, -9, 9, 17];
 
-export function dragonWings(v: number): Art {
-  let line = 'M3-24L-6-47M3-24L10-49M3-24L22-36' + 'M-6-47Q-1-38 10-49Q13-40 22-36' + 'M22-36Q14-32 8-26';
-  let thin = '';
-  if (v % 3 === 1) thin += 'M-4-25L-13-45M-4-25L-1-46M-13-45Q-9-39-1-46';
-  return { line, thin };
+export function dragonWings(_v: number): Art {
+  const line = 'M3-24L-6-47M3-24L10-49M3-24L22-36' + 'M-6-47Q-1-38 10-49Q13-40 22-36' + 'M22-36Q14-32 8-26';
+  return { line };
 }
 
 export function dragonTail(): Art {
@@ -24,8 +22,8 @@ export function dragonTail(): Art {
 }
 
 function dragonArt(v: number): Art {
-  const spikes = 4 + (v % 4);
-  let thin = 'M-8-14q2-2 4 0q2-2 4 0M-2-9q2-2 4 0q2-2 4 0' + hatchRect(-12, -8.5, 12, -1.2, 2.6);
+  const spikes = 3 + (v % 2);
+  let thin = 'M-8-14q2-2 4 0q2-2 4 0';
   const topY = (x: number): number => -(26 - (((x + 2) / 14) ** 2) * 7);
   let line = '';
   for (let i = 0; i < spikes; i++) {
@@ -78,7 +76,7 @@ const dragon: BodyPart = {
 
 // ---------- the thing that is mostly legs ----------
 
-const legCount = (v: number): number => 7 + (v % 5);
+const legCount = (v: number): number => 5 + (v % 3); // S28c: fewer legs, a simpler drawing
 const nogaczHips = (v: number): number[] => {
   const n = legCount(v);
   return Array.from({ length: n }, (_, i) => r1(-8 + (16 * i) / (n - 1)));
@@ -145,7 +143,7 @@ export function bearArt(v: number): Art {
     if (c) line += circ(c[0], c[1], 3.2);
   }
   let fur = '';
-  for (let x = -17; x <= 11; x += 5) {
+  for (let x = -17; x <= 11; x += 9) {
     const y = -33 + (((x + 2) / 22) ** 2) * 8;
     fur += pl(x, r1(y), x - 1.6, r1(y - 3));
   }
@@ -202,9 +200,7 @@ function handLegs(_v: number, phase: 0 | 1): string[] {
     return (
       `M${l} 0L${r1(l + s1)} ${r1(y1)}L${r1(l + s2)} ${r1(y2)}L${r1(l + 0.2 + s3)} ${len}` +
       `Q${r1(hx + s3)} ${r1(len + 2.8)} ${r1(r + s3)} ${len}` +
-      `L${r1(r + s2)} ${r1(y2)}L${r1(r + s1)} ${r1(y1)}L${r} 0` +
-      pl(r1(l + s1), r1(y1), r1(r + s1), r1(y1)) +
-      pl(r1(l + s2), r1(y2), r1(r + s2), r1(y2))
+      `L${r1(r + s2)} ${r1(y2)}L${r1(r + s1)} ${r1(y1)}L${r} 0`
     );
   });
 }
@@ -230,7 +226,7 @@ const hand: BodyPart = {
         pl(-7, -29, -8, -38) +
         pl(7, -29, 8, -38) +
         pl(-10, -38, 10, -38.4),
-      thin: 'M-8-12Q0-9 8-12M-10-20Q-2-17 4-21' + hatchRect(-20, -24, -11, -4, 2.6),
+      thin: 'M-8-12Q0-9 8-12',
     },
     hips: HAND_HIPS,
   }),

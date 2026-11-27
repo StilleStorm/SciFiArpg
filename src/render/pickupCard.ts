@@ -45,7 +45,7 @@ function permissionCard(e: Pickup): SVGGElement {
     el('rect', { x: -hw, y: -15, width: hw * 2, height: 34 }),
     el('rect', { x: -6, y: -12, width: 12, height: 12, 'stroke-width': 1.1 }),
     el('path', { d: 'M-4.2-5.5L-1.4-2.4L5.2-10.4', 'stroke-width': 1.6 }),
-    el('text', { class: 't-plate', x: 0, y: n2(Math.max(11.5, 4 + size)), 'font-size': n2(size) }, [word]),
+    el('text', { class: 't-plate', x: 0, y: n2(Math.max(11.5, 4 + size)), style: `font-size:${n2(size)}px` }, [word]),
   );
   g.append(plate);
   return g;
@@ -87,7 +87,7 @@ export function buildPickupCard(e: Pickup): SVGGElement {
   if (tierMark) marked.append(tierMark);
   const affixMark = kind ? buildAffixMarks([kind], 2.6) : null;
   if (affixMark) marked.append(affixMark);
-  plate.append(marked, el('text', { class: 't-plate', x: n2(right - 2 - numW / 2), y: 9.5, 'font-size': n2(numSize) }, [String(e.number)]));
+  plate.append(marked, el('text', { class: 't-plate', x: n2(right - 2 - numW / 2), y: 9.5, style: `font-size:${n2(numSize)}px` }, [String(e.number)]));
   if (kind === 'ok') plate.append(el('text', { class: 't-plate', x: 12, y: 3.4, style: 'font-size:4.6px' }, [t('items.mark.ok')]));
   if (kind === 'footnote') plate.append(el('text', { class: 't-plate', x: 17.2, y: 5.2, style: 'font-size:4.6px' }, [numberSuffix(['footnote'])]));
   if (kind === 'strike') plate.append(el('path', { d: 'M7.6 9.6L16.6 3.8', 'stroke-width': 0.8 }));

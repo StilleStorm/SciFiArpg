@@ -597,6 +597,22 @@ pattern line {
   font-size: 17px;
 }
 
+/* a prop under a pad or a margin note fades back (render/propYield.ts) */
+[data-obstacle='prop'] {
+  transition: opacity 0.25s;
+}
+[data-obstacle='prop'].yield {
+  opacity: 0.3;
+}
+
+/* a figure standing over the header: the print fades back (render/headerYield.ts) */
+.page-header {
+  transition: opacity 0.25s;
+}
+.page-header.yield {
+  opacity: 0.18;
+}
+
 /* ---------- Footnotes: a fresh note slides up into place ---------- */
 .fn.fresh {
   animation: fn-in 220ms ease-out;

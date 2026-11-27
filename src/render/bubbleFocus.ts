@@ -29,6 +29,7 @@ let shown = new Set<number>();
 let hushed = false;
 let rect: ViewBox | null = null;
 let blocks: readonly Box[] = [];
+let heroBlock: Box | null = null;
 /** The shown bubbles placed so far this frame: a later one keeps off them as off a pad. */
 const placed: Box[] = [];
 
@@ -108,14 +109,20 @@ export function updateBubbleFocus(
   shown = new Set(pickBubbles(enemies, p, BUBBLE_CAP, shown));
   hushed = opts.hush === true;
   rect = opts.view ?? null;
-  // the hero's own figure is kept clear like a pad: a bubble said next to him never covers him
-  blocks = [...(opts.blocks ?? []), heroBox(p)];
+  // the hero's own figure is kept clear too, but as a soft block: where no place clears it and the buttons, the buttons win
+  blocks = opts.blocks ?? [];
+  heroBlock = heroBox(p);
   placed.length = 0;
 }
 
-/** What a shown bubble keeps out from under (world units), as of this frame: the pads and margin notes, then the bubbles placed before it. */
+/** What a shown bubble must keep out from under (world units), as of this frame: the HUD, the pads and margin notes. */
 export function bubbleBlocks(): readonly Box[] {
-  return placed.length > 0 ? [...blocks, ...placed] : blocks;
+  return blocks;
+}
+
+/** What it keeps out from under when it can: the hero's figure, then the bubbles placed before it. */
+export function bubbleSoftBlocks(): readonly Box[] {
+  return heroBlock ? [heroBlock, ...placed] : placed;
 }
 
 /** A shown bubble took this place this frame (world units). */

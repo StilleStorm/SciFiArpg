@@ -17,8 +17,8 @@ import { box, circ, hatchRect, type Art, type PartText } from '../enemies/partsB
 import { rtOf } from '../enemies/runtime';
 import { t } from '../i18n';
 import { ENEMY_MELEE_MS, LEAN_DEG, LUNGE, attackAt, enemyOffset } from './attackFx';
-import { bubbleBlocks, bubblePlaced, bubbleRect, bubbleShown } from './bubbleFocus';
-import { avoidBoxes, inflate, type Box } from './keepOut';
+import { bubbleBlocks, bubblePlaced, bubbleRect, bubbleShown, bubbleSoftBlocks } from './bubbleFocus';
+import { avoidBoxesTiered, inflate, type Box } from './keepOut';
 import { currentViewSize, readableUnits, viewZoom } from './camera';
 import { drawIn, eraseOut, marginNote, stamp } from './ink';
 import { syncStatusMarkers } from './statusMarkers';
@@ -179,7 +179,7 @@ function bubbleShift(e: Enemy, st: FigState): [number, number] {
     const c = pageBox(cbox);
     at = { x0: Math.min(at.x0, c.x0), y0: Math.min(at.y0, c.y0), x1: Math.max(at.x1, c.x1), y1: Math.max(at.y1, c.y1) };
   }
-  const [dx, dy] = avoidBoxes(at, inflate(view, -M), bubbleBlocks().map((b) => inflate(b, M)));
+  const [dx, dy] = avoidBoxesTiered(at, inflate(view, -M), bubbleBlocks().map((b) => inflate(b, M)), bubbleSoftBlocks().map((b) => inflate(b, M)));
   bubblePlaced({ x0: at.x0 + dx, y0: at.y0 + dy, x1: at.x1 + dx, y1: at.y1 + dy });
   return [Math.round(dx), Math.round(dy)];
 }

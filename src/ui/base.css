@@ -10,7 +10,10 @@
 }
 .base-label .t-label {
   fill: var(--ink);
-  stroke: none;
+  /* a paper halo: the label hangs over the figures (it is drawn above the world layer), so the hero never hides it */
+  stroke: var(--paper);
+  stroke-width: 3px;
+  paint-order: stroke;
   font-family: var(--mono);
   font-weight: 400;
   text-transform: uppercase;

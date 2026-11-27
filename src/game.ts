@@ -27,6 +27,8 @@ import { heroBuilders, wrapEnemyBuilder } from './render/heroFigures';
 import { bindHeroFx, zoneBuilder } from './render/heroFx';
 import { createUltFx } from './render/ultFx';
 import { createExitReveal } from './render/exitReveal';
+import { createHeaderYield } from './render/headerYield';
+import { createPropYield } from './render/propYield';
 import { updateBubbleFocus } from './render/bubbleFocus';
 
 export interface Game {
@@ -66,6 +68,8 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
   const ultFx = createUltFx(stage.fx);
   bindEnemyFx(bus);
   const exits = createExitReveal(stage.page);
+  const headerYield = createHeaderYield(stage.page);
+  const propYield = createPropYield(stage.page);
   const sim = createSim(bus);
   installItems(stage.ui, bus, () => state);
   const ents: Entity[] = [];
@@ -147,6 +151,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       state = s;
       hero.onStart(s);
       views.clear();
+      stage.world.replaceChildren(); // a struck figure still drying from the last stage must not stay over the new page (S28c)
       stage.fx.replaceChildren();
       fitBounds(s.page);
       if (s.phase === 'base' && s.base) {
@@ -202,6 +207,8 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       else {
         baseView = null; // the exit walked through: the base drawing went with the old sheet
         exits.frame(s);
+        headerYield.frame([s.player, ...s.enemies]);
+        propYield.frame(keepOutBlocks(camera));
         updateBubbleFocus(s.enemies, s.player, { view: freeViewRect(camera), blocks: keepOutBlocks(camera), hush: stampsOnPage() > 0 });
       }
       views.sync(ents, s.phase === 'base' ? animMs : s.time * 1000);
