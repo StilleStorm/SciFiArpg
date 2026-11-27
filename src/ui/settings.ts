@@ -2,6 +2,7 @@ import { t } from '../i18n';
 import { el } from '../render/svg';
 import type { Settings } from '../save/save';
 import { h } from './dom';
+import { keysSeen } from './keys';
 import { currentOrient, effectiveSteering, orientationSetting } from './layout';
 import { cutEdge, lineBoxes, runsOn } from './sheet';
 import './textsize.css';
@@ -130,6 +131,11 @@ export function createSettings(
       option(t('screens.settings.bugOn'), current.bugButton !== false, () => set({ bugButton: true })),
       option(t('screens.settings.bugOff'), current.bugButton === false, () => set({ bugButton: false })),
     );
+    const aim = h('div', 'opts row');
+    aim.append(
+      option(t('ui.keys.auto'), current.aim !== 'mysz', () => set({ aim: undefined })),
+      option(t('ui.keys.mouse'), current.aim === 'mysz', () => set({ aim: 'mysz' })),
+    );
     const back = h('button', 'form-btn', t('screens.settings.back'));
     back.type = 'button';
     back.addEventListener('click', onBack);
@@ -144,6 +150,7 @@ export function createSettings(
       group(t('screens.settings.hand'), hand),
       group(t('screens.settings.orientation'), orient, h('p', 'eta', t('screens.settings.orientationNote'))),
       group(t('screens.settings.steering'), steer, h('p', 'eta', t('screens.settings.steeringNote'))),
+      ...(keysSeen() ? [group(t('ui.keys.aim'), aim, h('p', 'eta', t('ui.keys.note')))] : []),
       group(t('screens.settings.textSize'), size, h('p', 'eta', t('screens.settings.textNote'))),
       group(t('screens.settings.damage'), damage, h('p', 'eta', t('screens.settings.damageNote'))),
       group(t('screens.settings.bug'), bug),

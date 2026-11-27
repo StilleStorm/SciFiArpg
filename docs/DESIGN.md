@@ -111,8 +111,8 @@ Language of code, comments and docs: English. Language of the game: Polish, thro
 - **Desktop (keyboard and mouse, S29).** The phone controls stay as they are; a keyboard adds
   to them, never replaces them. *WASD* and the arrow keys steer like the joystick at full
   speed (diagonals normalised; releasing every key stops); a key held overrides a tap-mode
-  walk. *1–5* fire the pads in their slot order (only the slots shown on the pads; 4–5 are
-  ignored while three pads show). *Esc* opens or closes the pause sheet (and closes any open
+  walk. *1–3* fire the three skill pads in their slot order and *4* the ultimate
+  (when it is on the slot). *Esc* opens or closes the pause sheet (and closes any open
   sheet first), *I* the Załączniki, *T* the Tunel, *F* the Potw. note. Keys do nothing while a
   sheet, card or form has focus except Esc. Setting "Celowanie: auto / mysz" (shown in
   Ustawienia only after a key or a mouse move with a fine pointer was seen; default auto):

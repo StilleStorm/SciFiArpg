@@ -72,6 +72,8 @@ export interface Settings {
   damageNumbers?: boolean;
   /** The pause line "Zgłoś problem z grą"; on unless false. */
   bugButton?: boolean;
+  /** Desktop: pad keys aim at the mouse cursor; absent = auto (S29). */
+  aim?: 'mysz';
 }
 
 export const DEFAULT_MUSIC_VOLUME = 80;
@@ -270,6 +272,7 @@ export function migrate(raw: unknown): MetaState {
       ...(rawSettings['textSize'] === 1 || rawSettings['textSize'] === 2 ? { textSize: rawSettings['textSize'] } : {}),
       ...(rawSettings['damageNumbers'] === true ? { damageNumbers: true } : {}),
       ...(rawSettings['bugButton'] === false ? { bugButton: false } : {}),
+      ...(rawSettings['aim'] === 'mysz' ? { aim: 'mysz' as const } : {}),
     },
   };
   for (const k of MIRRORED) delete out[k];

@@ -1,0 +1,28 @@
+/* Desktop keys (S29): the key numeral in a pad's corner, shown only once a keyboard was seen (`data-keys` on <html>). Ink, no box. */
+.pad .pad-key {
+  display: none;
+  position: absolute;
+  left: calc(50% - 40px);
+  top: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+  -webkit-text-stroke: 3px var(--paper);
+  paint-order: stroke fill;
+  pointer-events: none;
+}
+:root[data-keys] .pad .pad-key {
+  display: block;
+}
+/* left-handed: the numeral goes to the right corner and the paragraph tag to the left one */
+.lefty .pad .pad-key {
+  left: calc(50% + 28px);
+}
+:root[data-keys] .lefty .pad .ptag {
+  left: calc(50% - 40px);
+}
+.pad.ult.locked .pad-key {
+  display: none;
+}

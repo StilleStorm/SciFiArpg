@@ -23,6 +23,7 @@ import { t } from '../i18n';
 import { runParagraph } from '../progression/paragraphs';
 import type { RunState } from '../world/run';
 import { hideAim, showAim } from '../render/aimFx';
+import { aimsAtMouse, cursorWorld, mouseAim, PAD_KEY_LABEL } from './keys';
 import { el, wobblyCircle, wobblyLine } from '../render/svg';
 import { h } from './dom';
 import { castUltimate, meterOf, ultimateReady, ultimateUnlocked } from './ultimate';
@@ -54,6 +55,8 @@ interface Press {
   y: number;
   t0: number;
   aiming: boolean;
+  /** Held by a key (desktop): aimed at the cursor, not by a drag. */
+  key?: boolean;
 }
 
 interface PadNode {
@@ -247,7 +250,9 @@ function createUltimatePad(wrap: HTMLElement): void {
     el('path', { d: wobblyLine(rng, -7, -17, 7, -17, 3, 0.35) }),
   );
   svg.append(tin, cushion, glyph);
-  btn.append(svg, word);
+  const key = h('span', 'pad-key', PAD_KEY_LABEL['ult'] ?? '');
+  key.setAttribute('aria-hidden', 'true');
+  btn.append(svg, word, key);
   // The pad answers the finger going down (another thumb may be on the joystick); a lone click still casts.
   btn.addEventListener('pointerdown', (ev) => {
     if (ev.pointerType === 'mouse' && ev.button !== 0) return;
@@ -287,8 +292,9 @@ function setThick(n: PadNode, on: boolean): void {
 }
 
 /** The aim a release at the pointer would fire; null = the pointer is back over the pad: cancel. */
-function aimAt(slot: number, n: PadNode, x: number, y: number): Aim | null {
+function aimAt(slot: number, n: PadNode, x: number, y: number, byKey = false): Aim | null {
   const sk = skillOf(slot);
+  if (byKey) return keyAimAt(slot, sk);
   const pad = centreOf(n);
   const pointer = { x, y };
   if (isCancel(pointer, pad)) return null;
@@ -296,6 +302,15 @@ function aimAt(slot: number, n: PadNode, x: number, y: number): Aim | null {
   if (!sk || !s || sk.aim === 'auto') return AUTO_AIM;
   const aim = sk.aim;
   return withCapstone(s, s.hero.pads[slot as PadSlot], () => dragToAim(aim, pad, pointer, s.player, reachOf(s, sk)));
+}
+
+/** The aim of a pad key held in "mysz": the cursor in world units (kierunek / wskazanie), else the auto aim. */
+function keyAimAt(slot: number, sk: SkillDef | undefined): Aim {
+  const s = trackedRun();
+  const cur = cursorWorld();
+  if (!sk || !s || !cur || sk.aim === 'auto') return AUTO_AIM;
+  const aim = sk.aim;
+  return withCapstone(s, s.hero.pads[slot as PadSlot], () => mouseAim(aim, s.player, cur, reachOf(s, sk)));
 }
 
 /** Put the preview of pad `slot` on the page, or take it away. Only the pad that was pressed last draws. */
@@ -310,7 +325,7 @@ function show(slot: number, n: PadNode, emit: boolean): void {
     return;
   }
   let aim: Aim | null = null;
-  if (pr.aiming) aim = aimAt(slot, n, pr.x, pr.y);
+  if (pr.aiming) aim = aimAt(slot, n, pr.x, pr.y, pr.key === true);
   else if (performance.now() - pr.t0 >= TAP_MS) aim = AUTO_AIM; // held still: show what a tap would do
   setThick(n, pr.aiming && aim !== null);
   const shown = aim;
@@ -384,12 +399,43 @@ function release(slot: number, x: number, y: number, commit: boolean): boolean {
   if (!commit) return false;
   let aim: Aim = AUTO_AIM;
   if (pr.aiming) {
-    const a = aimAt(slot, n, x, y);
+    const a = aimAt(slot, n, x, y, pr.key === true);
     if (!a) return false; // dragged back onto the pad: cancelled, no cooldown is spent
     aim = a;
   }
   fire(slot, aim);
   return true;
+}
+
+/**
+ * A pad key (1..5) went down (ui/keys.ts): keys 1..3 hold the skill pads, 4 casts the ultimate stamp pad, 5 has no pad. In "mysz"
+ * a skill with an aim mode is aimed at the cursor while the key is held (the same dotted preview as a drag) and fires on release;
+ * otherwise a key casts like a tap. False when the slot is not shown or the pad cannot be held.
+ */
+export function padKeyDown(key: number): boolean {
+  if (key === 4) return pressUltimate();
+  const slot = key - 1;
+  const n = nodes[slot];
+  if (!n || slot < 0 || slot > 2) return false;
+  const c = centreOf(n);
+  if (!press(slot, -2, c.x, c.y)) return false;
+  const pr = n.press;
+  if (pr) {
+    pr.key = true;
+    if (aimsAtMouse() && skillOf(slot)?.aim !== 'auto' && cursorWorld()) {
+      pr.aiming = true;
+      show(slot, n, true);
+    }
+  }
+  return true;
+}
+
+/** The pad key came up: fire (commit) or let go without casting (the window lost focus). */
+export function padKeyUp(key: number, commit: boolean): boolean {
+  const slot = key - 1;
+  const n = nodes[slot];
+  if (key === 4 || !n || !n.press?.key) return false;
+  return release(slot, n.press.x, n.press.y, commit);
 }
 
 /** Test hook: hold skill pad `slot` (1..3) with the finger dragged (dx, dy) css px from the pad's centre. (0, 0) is back on the pad. */
@@ -436,7 +482,9 @@ export function createPads(root: HTMLElement, bus: Bus): HTMLElement {
     svg.append(base, glyph, ring);
     const ptag = h('span', 'ptag');
     ptag.setAttribute('aria-hidden', 'true');
-    btn.append(svg, word, ptag);
+    const key = h('span', 'pad-key', PAD_KEY_LABEL[SLOT_CLASS[id]] ?? '');
+    key.setAttribute('aria-hidden', 'true');
+    btn.append(svg, word, ptag, key);
     if (id === 'inventory') btn.setAttribute('aria-label', t('ui.pads.inventory'));
     const slot = PADS.indexOf(id);
     if (id === 'inventory') {

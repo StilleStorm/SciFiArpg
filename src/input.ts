@@ -14,6 +14,10 @@ export interface Input {
   setLeftHanded(on: boolean): void;
   /** Test hook: steer as if the stick was held (null lets go). A real thumb on the stick wins. */
   inject(steer: Steer | null): void;
+  /** Keyboard (ui/keys.ts): WASD / arrows as a full-speed vector, null when no direction key is held. Wins over the stick and over a tap walk. */
+  setKeys(steer: Steer | null): void;
+  /** True while pointer input is on (no sheet, card or pause holds the page). */
+  enabled(): boolean;
 }
 
 /** A touch shorter than this and shorter than TAP_SLOP px is a tap, not a steering gesture. */
@@ -41,6 +45,7 @@ export function createInput(svg: SVGSVGElement, onTap: (clientX: number, clientY
   const pos: Vec = { x: 0, y: 0 };
   const touches = new Map<number, Touch>(); // joystick mode: candidates for a quick tap
   let injected: Steer | null = null;
+  let keys: Steer | null = null;
 
   const onSteeringHalf = (clientX: number): boolean => (lefty ? clientX >= window.innerWidth / 2 : clientX < window.innerWidth / 2);
   const capture = (id: number): void => {
@@ -101,11 +106,15 @@ export function createInput(svg: SVGSVGElement, onTap: (clientX: number, clientY
   svg.addEventListener('pointercancel', release);
 
   return {
-    held: () => (pointerId === null ? null : pos),
-    steer: () => (steerId === null ? (mode === 'joystick' ? injected : null) : (joystick?.steer() ?? null)),
+    held: () => (pointerId === null || (enabled && keys) ? null : pos),
+    steer: () => (enabled && keys ? keys : steerId === null ? (mode === 'joystick' ? injected : null) : (joystick?.steer() ?? null)),
     inject(steer) {
       injected = steer;
     },
+    setKeys(steer) {
+      keys = steer;
+    },
+    enabled: () => enabled,
     setEnabled(on) {
       enabled = on;
       if (!on) {

@@ -6,6 +6,7 @@ import { createLoop } from './core/loop';
 import { createGame } from './game';
 import { t } from './i18n';
 import { createInput } from './input';
+import { installKeys, setAimMode } from './ui/keys';
 import { bindAsystent } from './narration';
 import { bindFx } from './render/bindings';
 import { initDamageNumbers } from './render/damageNumbers';
@@ -36,7 +37,7 @@ import { addKartaDeskLine, kartaInputFromRun, openKarta, type KartaSheet } from 
 import { addOsobowaDeskLine, openKartaOsobowa, osobowaInputFromRun, type OsobowaSheet } from './ui/karta-osobowa';
 import { openNpcSheet, type NpcSheet } from './ui/npcSheet';
 import { addDeskLine, openKonfiguracja, type KonfiguracjaSheet } from './ui/konfiguracja';
-import { createPads } from './ui/pads';
+import { createPads, padKeyDown, padKeyUp } from './ui/pads';
 import { createSpor } from './ui/spor';
 import { createPauseSheet } from './ui/pause';
 import { mountProfile, unmountProfile } from './ui/profile';
@@ -99,6 +100,7 @@ function applySettings(s: Settings): void {
   applySteering(steering);
   input.setMode(steering);
   input.setLeftHanded(s.leftHanded);
+  setAimMode(s.aim === 'mysz' ? 'mysz' : 'auto');
   const wanted = orientationSetting(s);
   if (wanted !== lockedFor) {
     lockedFor = wanted;
@@ -171,6 +173,24 @@ const onVolumeSet = (which: 'music' | 'sfx'): void => {
 // The settings live in the pause sheet only: Wróć returns to the sheet.
 const pauseSettings = createSettings(stage.ui, onSettingsChange, () => closePauseSettings(), onVolumeSet);
 const pauseSheet = createPauseSheet(stage.ui, { onResume: () => resumeRun(), onSettings: () => openPauseSettings(), onSkills: () => openPauseSkills(), onParagraphs: () => openKonfig('pause'), onEnd: () => endTicket(), onExit: () => exitToRoster(), onReport: () => reportProblem(), showReport: () => meta.settings.bugButton !== false });
+// Desktop keys (DESIGN 2, S29): the same paths the pointer takes. Esc closes the sheet that is up (settings over the pause sheet first), else pauses.
+function escapeKey(): void {
+  if (!pauseSettings.el.classList.contains('hidden')) return closePauseSettings();
+  const sheets = stage.ui.querySelectorAll<HTMLElement>('.ps:not(.hidden)');
+  const close = sheets[sheets.length - 1]?.querySelector<HTMLButtonElement>('.ps-close');
+  if (close) close.click();
+  else if (live()) pauseRun();
+}
+installKeys({
+  input,
+  toWorld: (x, y) => camera.screenToWorld(x, y),
+  padDown: (slot) => void padKeyDown(slot),
+  padUp: (slot, commit) => void padKeyUp(slot, commit),
+  escape: escapeKey,
+  inventory: () => bus.emit('inventory'),
+  tunnel: () => void openTunnelNow(),
+  potw: () => void (game.state && useHeld(game.state, bus)),
+});
 const ticket = createTicket(stage.ui, {
   onAccept: (priority) => acceptNow(priority),
   onTravel: (planet, priority) => takePlan((c, seed) => travelPlan(c, planet, priority, seed), priority),

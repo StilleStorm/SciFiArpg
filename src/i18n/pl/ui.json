@@ -65,6 +65,12 @@
   "sheet": {
     "more": "c.d. poniżej"
   },
+  "keys": {
+    "aim": "Celowanie",
+    "auto": "Auto",
+    "mouse": "Mysz",
+    "note": "Auto: klawisz działa jak dotknięcie. Mysz: klawisz celuje w kursor, puszczenie zatwierdza."
+  },
   "stop": {
     "plate1": "PRZYSTANEK",
     "plate2": "NA ŻĄDANIE",
