@@ -272,7 +272,7 @@ async function leg(browser, orient, heroKey) {
   const opening = await skipCard();
   check('the opening card shows story text without keys and one tap skips it', opening?.kind === 'opening' && clean(opening.text), JSON.stringify(opening && { kind: opening.kind, len: opening.text.length }));
 
-  // ---- planets 1-6 (CAMPAIGN_LAST) ----
+  // ---- planets 1-9 (CAMPAIGN_LAST) ----
   const EXPECT = [
     { loc: ['przedmiescie', 'magazyn'], hp: 260, variant: /^Prototyp, seria 1/, spor: 'story.p1.boss.spor1.comment', clerk: null, gate: null },
     { loc: ['magazyn', 'serwerownia'], hp: 360, variant: /^Prototyp, seria 2/, spor: 'story.p2.boss.spor1.comment', clerk: /Zaległości/, gate: 'teczka' },
@@ -281,6 +281,10 @@ async function leg(browser, orient, heroKey) {
     { loc: ['miasto', 'centrum'], hp: null, variant: /^Weryfikacja, wersja sklepowa/, spor: 'story.p5.boss.spor1.comment', clerk: /Doręcze/, gate: 'elite' },
     // planet 6: the Ankieta is a body of its own, no variant line (STORY 8.10)
     { loc: ['archiwum', 'centrum', 'serwerownia'], hp: null, variant: null, spor: 'story.p6.boss.spor1.comment', clerk: /Infolinii/, gate: 'teczka' },
+    // planets 7-9 (Akt III, STORY 8.13-8.15); planet 9's Wizualizacja is a body of its own
+    { loc: ['jaskinia', 'rownina'], hp: null, variant: /^Hipoteza, wersja robocza/, spor: 'story.p7.boss.spor1.comment', clerk: /Weryfikacji/, gate: null },
+    { loc: ['rownina', 'jaskinia', 'wyzyna'], hp: null, variant: /^Hipoteza, wygenerowana ponownie/, spor: 'story.p8.boss.spor1.comment', clerk: /Domniema/, gate: 'elite' },
+    { loc: ['archiwum', 'biuro'], hp: null, variant: null, spor: 'story.p9.boss.spor1.comment', clerk: /Awarii/, gate: 'teczka' },
   ];
   const levels = [];
   let chapterSkips = 0;
