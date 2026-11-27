@@ -108,6 +108,19 @@ Language of code, comments and docs: English. Language of the game: Polish, thro
   Tunel opens the tunnel with one tap, no confirmation.
 - **A pad is tapped or held.** Tap = auto cast. Hold and drag = aimed cast (§5.6), release to
   fire. A skill without an aim mode casts on release like a tap.
+- **Desktop (keyboard and mouse, S29).** The phone controls stay as they are; a keyboard adds
+  to them, never replaces them. *WASD* and the arrow keys steer like the joystick at full
+  speed (diagonals normalised; releasing every key stops); a key held overrides a tap-mode
+  walk. *1–5* fire the pads in their slot order (only the slots shown on the pads; 4–5 are
+  ignored while three pads show). *Esc* opens or closes the pause sheet (and closes any open
+  sheet first), *I* the Załączniki, *T* the Tunel, *F* the Potw. note. Keys do nothing while a
+  sheet, card or form has focus except Esc. Setting "Celowanie: auto / mysz" (shown in
+  Ustawienia only after a key or a mouse move with a fine pointer was seen; default auto):
+  in *mysz* a pad key aims at the cursor (kierunek = hero to cursor, wskazanie = the cursor
+  point clamped to range, auto skills unchanged), drawn while the key is held with the same
+  dotted ink preview as a drag and fired on key release. In *auto* a key casts like a tap. When
+  a keyboard has been seen, each pad shows its key as a small Space Mono numeral in the pad's
+  corner (11 px at least, ink, no box). Mouse clicks on the page keep the tap-mode meaning.
 - No pinch. No double-tap. No long menus mid-run. Walking over loot picks it up. Tapping an
   item on the ground shows its card first (not built yet).
 - Must run at 60 fps on a mid-range phone with ~60 moving SVG elements. Entities are `<g>` with
