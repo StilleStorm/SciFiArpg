@@ -36,6 +36,7 @@ plugins, connectors), which the player trims in Claude settings, not in the repo
   In the base the pads cool down, the queued update opens from the HUD line, skills are not cast.
 - Portrait: the clause header is set inside the visible span, two lines, cut after a whole sentence.
 - Joystick mode: a thumb landing on the footnote slip steers; a quick tap opens the history.
+- Desktop controls are live (S29): WASD/arrows, 1–4 pads + ultimate, Esc/I/T/F, Celowanie Auto/Mysz.
 - Attack animations are live: attack:started event, hero poses per hero, enemy wind-up and
   lunge, projectiles turn along velocity (render/attackFx.ts, scripts/shot-attacks.mjs).
 
@@ -232,7 +233,9 @@ Progress is recorded here, one line per slice:
 
 - S28c done (builder world-polish-3, reports/S28c-builder-world-polish-3.md, shots-world-polish-3/): props fade to 0.3 under the pads and notes (`propYield`; no seed shift, world/pages.ts untouched); the landscape camera lets the page slide out from under the pad column so corner exits come clear; the p9 clause header fades while a figure stands over it (`headerYield`); plates read 11 px (a CSS `font-size` override on `.t-plate` was the cause), REKLAMA readable in a 60 px slot; the base clerk label above the hero, clear of the footnote box; bubbles keep off the HUD then the hero; margines note clear of pads/notes/HUD and struck figures not lingering into the next stage (code only, no frame); simpler Wygenerowane; floor marks on centrum and wyżyna. Not reproduced or no defect found: HIPOTEZA vs fence, Koniec kolejki line, cookie banner, wyżyna props; phase-3 Anomalia inspected, not redrawn. Still open: the Spór strip covers the boss in landscape (ui/spor); no frame of a live pickup plate on the ground. S28 closed.
 
-**Next pickup:** S29 (phone feedback + desktop controls, PRODUCTION.md); the /automode loop stays off until the player asks.
+- S29 done (reports/S29-builder-desktop.md, reports/S29-builder-feedback-bucket.md, shots-desktop/): desktop controls (DESIGN §2): WASD/arrows steer, 1–3 pads, 4 the ultimate, Esc pause/close, I Załączniki, T Tunel, F Potw., setting Celowanie Auto/Mysz (shown once a keyboard or fine pointer is seen; Mysz aims a held pad key at the cursor, fires on release), key numerals on the pads once a keyboard is seen (src/ui/keys.ts). Left-handed numerals done in CSS, no frame. The Konsultant's 15–38% bot stalls were the balance bot's, not the game's (two-angle escape probe looping at prop rows, an unreachable teczka chased forever, idling on the exitless boss page); scripts/balance-report.mjs fixed, `BAL_TRACE=2|3` added. Planet 4 Normalny level 14: Konsultant 85% → 100% wins, 15% → 0% stalls; all five 95–100%. Planet 6 still shows 3/50 prop-row stalls on other heroes (bot pathing, left). No game numbers moved.
+
+**Next pickup:** S30 (release prep) needs the player's go; nothing else in PRODUCTION.md is open. Open player questions: Akt II/III difficulty (Needs the player); whether the desktop key map suits. The /automode loop stays off until the player asks.
 
 ## Known limits
 - Smoke leg 6e zeroes skill cooldowns between casts; a 40 s test-hook advance paused the run at ~34 s game time (likely the deferred update form; not investigated).

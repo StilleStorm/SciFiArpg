@@ -77,6 +77,7 @@ async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode,
   let probeAt = 0;
   let escape = null;
   let side = 1;
+  let escapes = 0;
   let pageSince = 0;
   let pageIdx = 0;
   let equipAt = -99;
@@ -131,6 +132,7 @@ async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode,
   };
 
   const DT = 0.1;
+  const traceEvery = trace === '3' ? 5 : 100;
   const wall0 = Date.now();
   for (let step = 0; step < 30000; step++) {
     const s = g.state();
@@ -290,12 +292,14 @@ async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode,
     };
     const pick = s.pickups.filter(takeable).sort((a, b) => dist(a, p) - dist(b, p))[0];
     const enemy = s.enemies.filter((e) => !e.boss || true).sort((a, b) => dist(a, p) - dist(b, p))[0];
-    const folder = g.content.list().find((c) => c.kind === 'teczka' && c.state !== 'opened');
+    // S29: a folder behind a row of props was chased for ever (the bot has no path planner; seed 11203 on planet 4 ran 1000 s between two escape probes and never took the exit): after 25 seconds of walking at one the bot leaves it
+    const folder = g.content.list().find((c) => c.kind === 'teczka' && c.state !== 'opened' && (chase.get(`f${s.pageIndex}:${c.id}`) ?? 0) < 25);
     if (pick && dist(pick, p) < 320) {
       goal = { x: pick.x, y: pick.y };
       chase.set(pick.id, (chase.get(pick.id) ?? 0) + DT);
     }
-    else if (enemy && pageTimeNow < 70) {
+    else if (enemy && (pageTimeNow < 70 || !s.page.exit)) {
+      // S29: the last page has no exit to give up for, so the hunt goes on; before, the bot stood still after 70 s with a boss at 8-135 racja left (4 of 100 runs at planet 4)
       const stand = Math.max(30, (p.attackRange ?? 120) * 0.7);
       const d = dist(enemy, p);
       goal = d > stand ? { x: enemy.x, y: enemy.y } : null;
@@ -303,6 +307,7 @@ async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode,
     } else if (folder && dist(folder, p) < 900) {
       g.content.tap(folder.id);
       goal = { x: folder.x, y: folder.y };
+      chase.set(`f${s.pageIndex}:${folder.id}`, (chase.get(`f${s.pageIndex}:${folder.id}`) ?? 0) + DT);
     }
     const pageTime = s.time - pageSince;
     if (!goal && !enemy) {
@@ -317,8 +322,11 @@ async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode,
       if (s.time - probeAt >= 2) {
         const moved = Math.hypot(p.x - lastX, p.y - lastY);
         if (moved < 30 && !escape) {
-          side = -side;
-          const a = Math.atan2(goal.y - p.y, goal.x - p.x) + (side * Math.PI) / 2;
+          // S29: the old probe flipped between +90 and -90 degrees only, so a wall wider than the probe held the bot for ever (planet 4, seed 11203); the angle now walks through a cycle of six
+          escapes++;
+          const turn = [90, -90, 60, -60, 135, -135][escapes % 6];
+          side = turn < 0 ? -1 : 1;
+          const a = Math.atan2(goal.y - p.y, goal.x - p.x) + (turn * Math.PI) / 180;
           escape = { until: s.time + 3, goal: { x: p.x + Math.cos(a) * 380, y: p.y + Math.sin(a) * 380 } };
         }
         probeAt = s.time;
@@ -329,7 +337,7 @@ async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode,
       if (escape) goal = escape.goal;
       p.target = goal;
     }
-    if (trace && step % 100 === 0) (row.trace ??= []).push([Math.round(s.time), Math.round(p.x), Math.round(p.y), goal ? [Math.round(goal.x), Math.round(goal.y)] : null, s.enemies.length, Math.round(p.hp), escape ? 1 : 0, p.target ? 1 : 0]);
+    if (trace && step % traceEvery === 0) (row.trace ??= []).push([Math.round(s.time), Math.round(p.x), Math.round(p.y), goal ? [Math.round(goal.x), Math.round(goal.y)] : null, s.enemies.length, Math.round(p.hp), escape ? 1 : 0, p.target ? 1 : 0, ...(trace >= '2' ? [s.enemies.map((e) => [e.family, e.tier, Math.round(e.x), Math.round(e.y), Math.round(e.hp), e.rt?.asleep ? 'zzz' : '', Math.round(e.rt?.leash ?? 0), Math.round(e.speed ?? 0), (e.statuses ?? []).map((x) => x.kind ?? x.id ?? '?').join('+')])] : [])]);
     if (s.time > 1500) {
       row.stall = true;
       break;
@@ -337,7 +345,7 @@ async function playTicket({ heroId, seed, planet, priority, wallMs, trace, mode,
   }
   const s = g.state();
   if (s) {
-    row.dbg = { pos: [Math.round(s.player.x), Math.round(s.player.y)], exit: s.page.exit, gate: g.gate.info(), enemies: s.enemies.length, pageIdx: s.pageIndex, pageCount: s.pageCount, near: s.enemies.slice(0, 2).map((e) => [Math.round(e.x), Math.round(e.y), e.boss, e.hp]), status: s.status, modal: s.modal, turning: s.turning, pend: s.hero.pendingLevels, sheet: document.querySelector('.sheet:not(.hidden), .ps, .pop-wrap')?.className ?? null, html: (document.querySelector('.sheet:not(.hidden), .pop-wrap')?.textContent ?? '').slice(0, 200) };
+    row.dbg = { obst: trace ? s.page.obstacles.flatMap((o) => o.colliders.map((c) => [o.kind, Math.round(c.x), Math.round(c.y), Math.round(c.r)])) : null, pos: [Math.round(s.player.x), Math.round(s.player.y)], exit: s.page.exit, gate: g.gate.info(), enemies: s.enemies.length, pageIdx: s.pageIndex, pageCount: s.pageCount, near: s.enemies.slice(0, 2).map((e) => [Math.round(e.x), Math.round(e.y), e.boss, e.hp]), status: s.status, modal: s.modal, turning: s.turning, pend: s.hero.pendingLevels, sheet: document.querySelector('.sheet:not(.hidden), .ps, .pop-wrap')?.className ?? null, html: (document.querySelector('.sheet:not(.hidden), .pop-wrap')?.textContent ?? '').slice(0, 200) };
     row.deaths = Math.max(row.deaths, s.hero.deaths);
     row.stars = Math.max(row.stars, s.player.gwiazdki);
   }
@@ -362,7 +370,7 @@ async function playHero(heroId) {
   await page.waitForFunction(() => !!window.__game, null, { timeout: 15000 });
   for (let i = 0; i < RUNS; i++) {
     const seed = process.env.BAL_SEED ? Number(process.env.BAL_SEED) + i : 9100 + i * 131 + ['pralka', 'konsultant', 'petlowiec', 'kartograf', 'nalesnik'].indexOf(heroId) * 7;
-    const row = await page.evaluate(playTicket, { aim: AIM, loadout: LOADOUT, para: PARA, ult: ULT_NO > 0 ? ULTS[heroId]?.[ULT_NO - 1] ?? null : null, heroId, seed, planet: PLANET, priority: PRIORITY, wallMs: Number(process.env.BAL_RUN_MS ?? 100000), trace: !!process.env.BAL_TRACE, mode: process.env.BAL_MODE ?? 'ticket', finaleLevel: Number(process.env.BAL_LEVEL ?? (process.env.BAL_MODE === 'finale' ? 12 : 1)) });
+    const row = await page.evaluate(playTicket, { aim: AIM, loadout: LOADOUT, para: PARA, ult: ULT_NO > 0 ? ULTS[heroId]?.[ULT_NO - 1] ?? null : null, heroId, seed, planet: PLANET, priority: PRIORITY, wallMs: Number(process.env.BAL_RUN_MS ?? 100000), trace: process.env.BAL_TRACE ?? '', mode: process.env.BAL_MODE ?? 'ticket', finaleLevel: Number(process.env.BAL_LEVEL ?? (process.env.BAL_MODE === 'finale' ? 12 : 1)) });
     if (process.env.BAL_VERBOSE) console.log(`${heroId} #${i} won=${row.won} t=${row.tEnd}s wall=${((Date.now() - t0) / 1000).toFixed(0)}s lvl=${row.level} deaths=${row.deaths} pages=${row.pages} dbg=${JSON.stringify(row.dbg ?? null).slice(0, 700)}`);
     rows.push(row);
     await page.evaluate(() => window.__game.go('baza')).catch(() => undefined);
