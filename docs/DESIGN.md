@@ -111,10 +111,9 @@ Language of code, comments and docs: English. Language of the game: Polish, thro
 - **Desktop (keyboard and mouse, S29; mouse play 2026-11-28).** The phone controls stay as they
   are; touch and pen never take the mouse path. The mouse plays Diablo-style when "Celowanie"
   is *mysz* (unset = *mysz* once a fine-pointer mouse moved; an explicit choice is saved): a
-  left click or hold on the ground walks there (hold keeps walking toward the cursor); a left
-  click on an enemy walks to it until it is in reach and the auto-attack takes it first until it
-  dies (another click, the arrows or a stick let it go); the right button or Shift held = stand
-  still and attack (the auto-attack takes the enemy in reach nearest the cursor); Ctrl = walk to
+  click or hold on the ground, left or right button alike, walks there (hold keeps walking
+  toward the cursor); a click on an enemy walks to it until it is in reach and the auto-attack takes it first until it
+  dies (another click, the arrows or a stick let it go); Shift held = stand still and attack (the auto-attack takes the enemy in reach nearest the cursor); Ctrl = walk to
   the point even over an enemy. A click still opens a station, the kiosk, a stop or the gate.
   The browser's right-click menu is held back everywhere except in text fields. Keys: *Q W E*
   the three skill pads in slot order, *R* the ultimate, *1* uses the held potwierdzenie (like

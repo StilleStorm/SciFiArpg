@@ -21,7 +21,7 @@ export interface Input {
    * the tap walk or the stick) and `mouse()` reports the held button until it is let go. Touch and pen never take this path.
    */
   setMouseAims(aims: () => boolean): void;
-  /** The mouse button held now in "mysz": cursor (client px), stand = right button or Shift, force = Ctrl; null when none is held. */
+  /** The mouse button held now in "mysz" (left and right are the same): cursor (client px), stand = Shift, force = Ctrl; null when none is held. */
   mouse(): MouseHold | null;
   /** True while pointer input is on (no sheet, card or pause holds the page). */
   enabled(): boolean;
@@ -30,7 +30,7 @@ export interface Input {
 export interface MouseHold {
   x: number;
   y: number;
-  /** Right button or Shift: attack where it points, do not walk. */
+  /** Shift: attack where it points, do not walk. */
   stand: boolean;
   /** Ctrl: walk to the point even over an enemy. */
   force: boolean;
@@ -94,7 +94,7 @@ export function createInput(
       if (mouseId !== null || (ev.button !== 0 && ev.button !== 2)) return;
       mouseId = ev.pointerId;
       capture(ev.pointerId);
-      mouseHold = { x: ev.clientX, y: ev.clientY, stand: ev.button === 2 || ev.shiftKey, force: ev.ctrlKey };
+      mouseHold = { x: ev.clientX, y: ev.clientY, stand: ev.shiftKey, force: ev.ctrlKey };
       onMouse?.(mouseHold);
       return;
     }
@@ -118,8 +118,8 @@ export function createInput(
   });
   svg.addEventListener('pointermove', (ev) => {
     if (ev.pointerId === mouseId) {
-      // the right button (bit 2) or Shift held now: stand; the left alone walks again
-      mouseHold = { x: ev.clientX, y: ev.clientY, stand: (ev.buttons & 2) !== 0 || ev.shiftKey, force: ev.ctrlKey };
+      // Shift held now: stand; let go, it walks again
+      mouseHold = { x: ev.clientX, y: ev.clientY, stand: ev.shiftKey, force: ev.ctrlKey };
     } else if (ev.pointerId === steerId) joystick?.move(ev.clientX, ev.clientY);
     else if (ev.pointerId === pointerId) {
       pos.x = ev.clientX;

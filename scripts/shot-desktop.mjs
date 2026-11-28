@@ -115,7 +115,7 @@ try {
   if (!(cd > 0)) problems.push(`Q release did not fire (cd ${cd})`);
   if (await page.evaluate(() => document.querySelector('#aim-fx')?.style.opacity !== '0')) problems.push('preview not erased after key up');
 
-  // the mouse in mysz (Diablo-style): ground click walks, a click on an enemy takes it, right click stands, no browser menu
+  // the mouse in mysz (Diablo-style): ground click walks, a click on an enemy takes it, right click walks too, Shift stands, no browser menu
   const toScreen = (w) =>
     page.evaluate(([x, y]) => {
       const m = document.querySelector('#world').getScreenCTM();
@@ -149,7 +149,16 @@ try {
   await sleep(500);
   await page.mouse.up({ button: 'right' });
   const r1 = await ps();
-  if (Math.hypot(r1.x - r0.x, r1.y - r0.y) > 6) problems.push(`the right button walked (${JSON.stringify([r0, r1])})`);
+  if (Math.hypot(r1.x - r0.x, r1.y - r0.y) < 30) problems.push(`the right button did not walk (${JSON.stringify([r0, r1])})`);
+  const h0 = await ps();
+  await page.keyboard.down('Shift');
+  await page.mouse.move(far.x + 300, far.y);
+  await page.mouse.down();
+  await sleep(500);
+  await page.mouse.up();
+  await page.keyboard.up('Shift');
+  const h1 = await ps();
+  if (Math.hypot(h1.x - h0.x, h1.y - h0.y) > 6) problems.push(`Shift+click walked (${JSON.stringify([h0, h1])})`);
   const menu = await page.evaluate(() => { const ev = new MouseEvent('contextmenu', { bubbles: true, cancelable: true }); document.querySelector('#stage svg, svg').dispatchEvent(ev); return ev.defaultPrevented; });
   if (!menu) problems.push('the browser menu was not held back on right click');
   await page.screenshot({ path: `${SHOTS}/desktop-mouse.png` });

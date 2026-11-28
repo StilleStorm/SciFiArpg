@@ -97,8 +97,8 @@ export const keysSeen = (): boolean => keyboardSeen || mouseSeen;
 export const keyboardWasSeen = (): boolean => keyboardSeen;
 
 /**
- * The setting "Celowanie" (`Settings.aim`): 'mysz' = the mouse plays (input.ts / game.ts: click walks, click on an enemy attacks it,
- * right click or Shift stands and attacks, Ctrl walks regardless; pad keys and the auto-attack aim at the cursor). Unset, it follows
+ * The setting "Celowanie" (`Settings.aim`): 'mysz' = the mouse plays (input.ts / game.ts: click walks, click on an enemy attacks it (left
+ * and right buttons alike), Shift stands and attacks, Ctrl walks regardless; pad keys and the auto-attack aim at the cursor). Unset, it follows
  * the desk: mysz once a fine-pointer mouse moved, else auto. Touch never changes.
  */
 export function setAimMode(mode: 'auto' | 'mysz' | undefined): void {
@@ -198,7 +198,7 @@ export function installKeys(h: KeyHandlers): () => void {
     cursor = { x: ev.clientX, y: ev.clientY };
     if (!mouseSeen && typeof matchMedia === 'function' && matchMedia('(pointer: fine)').matches) mouseSeen = true;
   };
-  // Right click is a game button (stand and attack), not the browser's menu; a text field keeps its menu.
+  // Right click is a game button (the same as the left), not the browser's menu; a text field keeps its menu.
   const onContextMenu = (ev: MouseEvent): void => {
     if (!inFormControl(ev.target)) ev.preventDefault();
   };
