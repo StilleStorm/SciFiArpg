@@ -14,12 +14,26 @@ export interface Input {
   setLeftHanded(on: boolean): void;
   /** Test hook: steer as if the stick was held (null lets go). A real thumb on the stick wins. */
   inject(steer: Steer | null): void;
-  /** Keyboard (ui/keys.ts): WASD / arrows as a full-speed vector, null when no direction key is held. Wins over the stick and over a tap walk. */
+  /** Keyboard (ui/keys.ts): the arrows as a full-speed vector, null when no direction key is held. Wins over the stick and over a tap walk. */
   setKeys(steer: Steer | null): void;
-  /** Desktop "mysz" (ui/keys.ts): asked on each mouse press; true = a mouse click does not walk or steer, it is passed on as a tap that walks nowhere. */
+  /**
+   * Desktop "mysz" (ui/keys.ts), asked on each mouse press. True = the mouse plays Diablo-style: the press goes to `onMouse` (not to
+   * the tap walk or the stick) and `mouse()` reports the held button until it is let go. Touch and pen never take this path.
+   */
   setMouseAims(aims: () => boolean): void;
+  /** The mouse button held now in "mysz": cursor (client px), stand = right button or Shift, force = Ctrl; null when none is held. */
+  mouse(): MouseHold | null;
   /** True while pointer input is on (no sheet, card or pause holds the page). */
   enabled(): boolean;
+}
+
+export interface MouseHold {
+  x: number;
+  y: number;
+  /** Right button or Shift: attack where it points, do not walk. */
+  stand: boolean;
+  /** Ctrl: walk to the point even over an enemy. */
+  force: boolean;
 }
 
 /** A touch shorter than this and shorter than TAP_SLOP px is a tap, not a steering gesture. */
@@ -38,7 +52,12 @@ interface Touch {
  * and never reaches the stage) stays independent, so steering and pad taps work at the same time.
  * In joystick mode a quick tap does not walk: it is passed on as a tap that walks nowhere (the kiosk still hears it).
  */
-export function createInput(svg: SVGSVGElement, onTap: (clientX: number, clientY: number, walk: boolean) => void, joystick?: Joystick): Input {
+export function createInput(
+  svg: SVGSVGElement,
+  onTap: (clientX: number, clientY: number, walk: boolean) => void,
+  joystick?: Joystick,
+  onMouse?: (hold: MouseHold) => void,
+): Input {
   let enabled = false;
   let mode: Steering = 'tap';
   let lefty = false;
@@ -49,6 +68,8 @@ export function createInput(svg: SVGSVGElement, onTap: (clientX: number, clientY
   let injected: Steer | null = null;
   let keys: Steer | null = null;
   let mouseAims: () => boolean = () => false;
+  let mouseId: number | null = null; // "mysz": the mouse while a button is held
+  let mouseHold: MouseHold = { x: 0, y: 0, stand: false, force: false };
 
   const onSteeringHalf = (clientX: number): boolean => (lefty ? clientX >= window.innerWidth / 2 : clientX < window.innerWidth / 2);
   const capture = (id: number): void => {
@@ -61,6 +82,7 @@ export function createInput(svg: SVGSVGElement, onTap: (clientX: number, clientY
   const releaseAll = (): void => {
     pointerId = null;
     steerId = null;
+    mouseId = null;
     touches.clear();
     joystick?.end();
   };
@@ -68,9 +90,12 @@ export function createInput(svg: SVGSVGElement, onTap: (clientX: number, clientY
   svg.addEventListener('pointerdown', (ev) => {
     if (!enabled) return;
     if (ev.pointerType === 'mouse' && mouseAims()) {
-      // the keys walk and the cursor aims: a click still opens a station, the kiosk or a stop, but moves nobody
       ev.preventDefault();
-      if (ev.button === 0) onTap(ev.clientX, ev.clientY, false);
+      if (mouseId !== null || (ev.button !== 0 && ev.button !== 2)) return;
+      mouseId = ev.pointerId;
+      capture(ev.pointerId);
+      mouseHold = { x: ev.clientX, y: ev.clientY, stand: ev.button === 2 || ev.shiftKey, force: ev.ctrlKey };
+      onMouse?.(mouseHold);
       return;
     }
     if (mode === 'joystick') {
@@ -92,7 +117,10 @@ export function createInput(svg: SVGSVGElement, onTap: (clientX: number, clientY
     onTap(ev.clientX, ev.clientY, true);
   });
   svg.addEventListener('pointermove', (ev) => {
-    if (ev.pointerId === steerId) joystick?.move(ev.clientX, ev.clientY);
+    if (ev.pointerId === mouseId) {
+      // the right button (bit 2) or Shift held now: stand; the left alone walks again
+      mouseHold = { x: ev.clientX, y: ev.clientY, stand: (ev.buttons & 2) !== 0 || ev.shiftKey, force: ev.ctrlKey };
+    } else if (ev.pointerId === steerId) joystick?.move(ev.clientX, ev.clientY);
     else if (ev.pointerId === pointerId) {
       pos.x = ev.clientX;
       pos.y = ev.clientY;
@@ -100,6 +128,7 @@ export function createInput(svg: SVGSVGElement, onTap: (clientX: number, clientY
   });
   const release = (ev: PointerEvent): void => {
     if (ev.pointerId === pointerId) pointerId = null;
+    if (ev.pointerId === mouseId) mouseId = null;
     const start = touches.get(ev.pointerId);
     if (start) {
       touches.delete(ev.pointerId);
@@ -126,6 +155,7 @@ export function createInput(svg: SVGSVGElement, onTap: (clientX: number, clientY
     setMouseAims(aims) {
       mouseAims = aims;
     },
+    mouse: () => (enabled && mouseId !== null ? mouseHold : null),
     enabled: () => enabled,
     setEnabled(on) {
       enabled = on;

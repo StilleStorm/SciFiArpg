@@ -1,6 +1,7 @@
 import type { Bus } from './core/events';
 import type { Entity } from './entities';
-import type { Input } from './input';
+import type { Input, MouseHold } from './input';
+import type { Enemy } from './entities/types';
 import { aimsAtMouse, cursorWorld } from './ui/keys';
 import { t } from './i18n';
 import type { Camera } from './render/camera';
@@ -54,6 +55,8 @@ export interface Game {
   render(dtSec: number): void;
   /** A tap on the page. `walk` false (joystick mode): do not walk there, only the kiosk and the bot hear it. */
   onTap(clientX: number, clientY: number, walk?: boolean): void;
+  /** Desktop "mysz" (input.ts): a mouse button went down. Ground = walk there, an enemy = walk to it and attack it, stand = attack in place. */
+  onMouse(hold: MouseHold): void;
 }
 
 /** Ties run state to the stage: simulation step, view sync, camera. Owns no rules. */
@@ -197,6 +200,7 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       const cur = aimsAtMouse() ? cursorWorld() : null;
       if (cur) s.player.aimAt = cur;
       else delete s.player.aimAt;
+      mouseWalk(s, steer !== null);
       sim.step(s, dt);
       if (state === s && s.status !== 'running') input.setEnabled(false); // (a step that swapped the state — the tunnel, the end of a run — leaves the new one alone)
     },
@@ -218,6 +222,36 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       views.sync(ents, s.phase === 'base' ? animMs : s.time * 1000);
       camera.follow(s.player.x, s.player.y, dtSec);
       camera.apply();
+    },
+    onMouse(hold) {
+      const s = state;
+      if (!s || s.status !== 'running' || s.modal || s.turning) return;
+      const w = camera.screenToWorld(hold.x, hold.y);
+      const p = s.player;
+      delete p.focus;
+      if (s.phase === 'base') {
+        const hit = stationAt(s.page, w.x, w.y, viewZoom());
+        if (hit) {
+          bus.emit('station:opened', { station: hit.id });
+          return;
+        }
+      } else {
+        if (tapStop(s, bus, w.x, w.y, viewZoom())) return;
+        tapKiosk(s, w.x, w.y);
+        tapGateFigure(s, bus, w.x, w.y);
+        const e = hold.force ? null : enemyAt(s.enemies, w.x, w.y);
+        if (e && !hold.stand) {
+          p.focus = e.id;
+          return;
+        }
+      }
+      if (hold.stand) {
+        p.target = null;
+        return;
+      }
+      p.target = w;
+      tapMark(w.x, w.y);
+      bus.emit('player:tap', { x: w.x, y: w.y });
     },
     onTap(clientX, clientY, walk = true) {
       const s = state;
@@ -251,5 +285,40 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       bus.emit('player:tap', { x: w.x, y: w.y });
     },
   };
+  /**
+   * Each step in "mysz": a held button keeps walking toward the cursor (stand holds still); an enemy clicked on is walked to until
+   * it is in reach, then the hero stops and the auto-attack takes it (systems/combat.ts). Steering (arrows, a stick) lets it go.
+   */
+  function mouseWalk(s: RunState, steering: boolean): void {
+    const p = s.player;
+    const focus = p.focus === undefined ? undefined : s.enemies.find((e) => e.id === p.focus);
+    if (!focus || steering) delete p.focus;
+    if (steering) return;
+    const m = input.mouse();
+    if (m?.stand) {
+      p.target = null;
+      return;
+    }
+    if (focus && p.focus !== undefined) {
+      p.target = Math.hypot(focus.x - p.x, focus.y - p.y) > p.attackRange * 0.85 ? { x: focus.x, y: focus.y } : null;
+      return;
+    }
+    if (m) p.target = camera.screenToWorld(m.x, m.y);
+  }
   return game;
+}
+
+/** The enemy under a click: the nearest whose drawing (its radius plus a margin for a hand on a mouse) holds the point. */
+const PICK_MARGIN = 18;
+function enemyAt(enemies: readonly Enemy[], x: number, y: number): Enemy | null {
+  let best: Enemy | null = null;
+  let bestD = Infinity;
+  for (const e of enemies) {
+    const d = Math.hypot(e.x - x, e.y - y);
+    if (d <= e.r + PICK_MARGIN && d < bestD) {
+      best = e;
+      bestD = d;
+    }
+  }
+  return best;
 }

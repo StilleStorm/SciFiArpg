@@ -108,23 +108,24 @@ Language of code, comments and docs: English. Language of the game: Polish, thro
   Tunel opens the tunnel with one tap, no confirmation.
 - **A pad is tapped or held.** Tap = auto cast. Hold and drag = aimed cast (§5.6), release to
   fire. A skill without an aim mode casts on release like a tap.
-- **Desktop (keyboard and mouse, S29).** The phone controls stay as they are; a keyboard adds
-  to them, never replaces them. *WASD* and the arrow keys steer like the joystick at full
-  speed (diagonals normalised; releasing every key stops); a key held overrides a tap-mode
-  walk. *1–3* fire the three skill pads in their slot order and *4* the ultimate
-  (when it is on the slot). *Esc* opens or closes the pause sheet (and closes any open
-  sheet first), *I* the Załączniki, *T* the Tunel, *F* the Potw. note. Keys do nothing while a
-  sheet, card or form has focus except Esc. Setting "Celowanie: auto / mysz" (shown in
-  Ustawienia only after a key or a mouse move with a fine pointer was seen; unset, it is
-  *mysz* once both a key press and a fine-pointer mouse were seen, else auto; an explicit
-  choice is saved): in *mysz* a pad key aims at the cursor (kierunek = hero to cursor,
-  wskazanie = the cursor point clamped to range, auto skills unchanged), drawn while the key
-  is held with the same dotted ink preview as a drag and fired on key release; the auto-attack
-  takes the enemy in range nearest the cursor (not the one nearest the hero); a mouse click on
-  the page walks and steers nobody (it still opens a station, the kiosk or a stop), the keys
-  walk. Touch is unaffected. In *auto* a key casts like a tap and mouse clicks keep the
-  tap-mode meaning. When a keyboard has been seen, each pad shows its key as a small Space
-  Mono numeral in the pad's corner (11 px at least, ink, no box).
+- **Desktop (keyboard and mouse, S29; mouse play 2026-11-28).** The phone controls stay as they
+  are; touch and pen never take the mouse path. The mouse plays Diablo-style when "Celowanie"
+  is *mysz* (unset = *mysz* once a fine-pointer mouse moved; an explicit choice is saved): a
+  left click or hold on the ground walks there (hold keeps walking toward the cursor); a left
+  click on an enemy walks to it until it is in reach and the auto-attack takes it first until it
+  dies (another click, the arrows or a stick let it go); the right button or Shift held = stand
+  still and attack (the auto-attack takes the enemy in reach nearest the cursor); Ctrl = walk to
+  the point even over an enemy. A click still opens a station, the kiosk, a stop or the gate.
+  The browser's right-click menu is held back everywhere except in text fields. Keys: *Q W E*
+  the three skill pads in slot order, *R* the ultimate, *1* uses the held potwierdzenie (like
+  *F*), *2–3* kept for later usable items; the arrows steer like the joystick at full speed
+  (WASD does not steer: W is a skill). *Esc* opens or closes the pause sheet (and closes any
+  open sheet first), *I* the Załączniki, *T* the Tunel. Keys do nothing while a sheet, card or
+  form has focus except Esc. In *mysz* a pad key aims at the cursor (kierunek = hero to cursor,
+  wskazanie = the cursor point clamped to range, auto skills unchanged), drawn while the key is
+  held with the same dotted ink preview as a drag and fired on key release. In *auto* a key
+  casts like a tap and mouse clicks keep the tap-mode meaning. When a keyboard has been seen,
+  each pad shows its key letter in Space Mono in the pad's corner (11 px at least, ink, no box).
 - No pinch. No double-tap. No long menus mid-run. Walking over loot picks it up. Tapping an
   item on the ground shows its card first (not built yet).
 - Must run at 60 fps on a mid-range phone with ~60 moving SVG elements. Entities are `<g>` with

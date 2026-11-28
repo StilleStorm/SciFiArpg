@@ -6,41 +6,44 @@ describe('keyVector', () => {
     expect(keyVector([])).toBeNull();
     expect(keyVector(['KeyQ'])).toBeNull();
   });
-  it('steers at full speed in one direction', () => {
-    expect(keyVector(['KeyD'])).toEqual({ dx: 1, dy: 0, mag: 1 });
+  it('steers at full speed in one direction with the arrows only', () => {
+    expect(keyVector(['ArrowRight'])).toEqual({ dx: 1, dy: 0, mag: 1 });
     expect(keyVector(['ArrowUp'])).toEqual({ dx: 0, dy: -1, mag: 1 });
+    expect(keyVector(['KeyW'])).toBeNull(); // W is a skill now
+    expect(keyVector(['KeyD'])).toBeNull();
   });
   it('normalises diagonals', () => {
-    const v = keyVector(['KeyW', 'KeyD']);
+    const v = keyVector(['ArrowUp', 'ArrowRight']);
     expect(v?.mag).toBe(1);
     expect(Math.hypot(v?.dx ?? 0, v?.dy ?? 0)).toBeCloseTo(1);
     expect(v?.dx).toBeCloseTo(Math.SQRT1_2);
     expect(v?.dy).toBeCloseTo(-Math.SQRT1_2);
   });
   it('cancels opposite keys', () => {
-    expect(keyVector(['KeyA', 'KeyD'])).toBeNull();
-    expect(keyVector(['ArrowLeft', 'KeyD'])).toBeNull();
-    expect(keyVector(['KeyA', 'KeyD', 'KeyW'])).toEqual({ dx: 0, dy: -1, mag: 1 });
-  });
-  it('counts WASD and the arrow of the same way once', () => {
-    expect(keyVector(['KeyW', 'ArrowUp'])).toEqual({ dx: 0, dy: -1, mag: 1 });
+    expect(keyVector(['ArrowLeft', 'ArrowRight'])).toBeNull();
+    expect(keyVector(['ArrowLeft', 'ArrowRight', 'ArrowUp'])).toEqual({ dx: 0, dy: -1, mag: 1 });
   });
 });
 
 describe('keyAction', () => {
-  it('maps digits 1-5 to pad slots, numpad too', () => {
-    expect(keyAction('Digit1')).toEqual({ kind: 'pad', slot: 1 });
-    expect(keyAction('Digit5')).toEqual({ kind: 'pad', slot: 5 });
-    expect(keyAction('Numpad3')).toEqual({ kind: 'pad', slot: 3 });
-    expect(keyAction('Digit6')).toBeNull();
-    expect(keyAction('Digit0')).toBeNull();
+  it('maps Q W E to the skill pads and R to the ultimate', () => {
+    expect(keyAction('KeyQ')).toEqual({ kind: 'pad', slot: 1 });
+    expect(keyAction('KeyW')).toEqual({ kind: 'pad', slot: 2 });
+    expect(keyAction('KeyE')).toEqual({ kind: 'pad', slot: 3 });
+    expect(keyAction('KeyR')).toEqual({ kind: 'pad', slot: 4 });
+  });
+  it('1 uses the held item; 2 and 3 are kept free', () => {
+    expect(keyAction('Digit1')).toEqual({ kind: 'potw' });
+    expect(keyAction('Numpad1')).toEqual({ kind: 'potw' });
+    expect(keyAction('Digit2')).toBeNull();
+    expect(keyAction('Digit3')).toBeNull();
   });
   it('maps Esc, I, T, F', () => {
     expect(keyAction('Escape')).toEqual({ kind: 'pause' });
     expect(keyAction('KeyI')).toEqual({ kind: 'inventory' });
     expect(keyAction('KeyT')).toEqual({ kind: 'tunnel' });
     expect(keyAction('KeyF')).toEqual({ kind: 'potw' });
-    expect(keyAction('KeyW')).toBeNull();
+    expect(keyAction('KeyA')).toBeNull();
   });
 });
 

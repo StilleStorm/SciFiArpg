@@ -55,6 +55,8 @@ export interface Player extends Fighter {
   steer?: { dx: number; dy: number; mag: number };
   /** Desktop "mysz" (ui/keys.ts): the mouse cursor in world units, set every frame by game.ts; the auto-attack takes the enemy in range nearest to it. */
   aimAt?: Vec;
+  /** Desktop "mysz": the id of the enemy clicked on; game.ts walks to it, the auto-attack takes it first while it is in reach. */
+  focus?: number;
   level: number;
   gwiazdki: number;
   /** Percent more gwiazdki from pickups, from the gear (items/stats.ts sets it; economy/stars.ts earnStars reads it). */

@@ -116,4 +116,15 @@ describe('auto-attack while moving (DESIGN 2)', () => {
     const shot = s.projectiles[0];
     expect(Math.atan2(shot?.vy ?? 0, shot?.vx ?? 0)).toBeCloseTo(Math.atan2(near.y - s.player.y, near.x - s.player.x), 5);
   });
+
+  it('an enemy clicked on is taken first while in reach, whatever the cursor says', () => {
+    const s = run('konsultant');
+    const clicked = addEnemy(s, s.player.attackRange * 0.8);
+    const other = addEnemy(s, -s.player.attackRange * 0.2);
+    s.player.focus = clicked.id;
+    s.player.aimAt = { x: other.x, y: other.y };
+    attackOnce(s);
+    const shot = s.projectiles[0];
+    expect(Math.atan2(shot?.vy ?? 0, shot?.vx ?? 0)).toBeCloseTo(Math.atan2(clicked.y - s.player.y, clicked.x - s.player.x), 5);
+  });
 });

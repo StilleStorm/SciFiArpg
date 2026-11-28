@@ -78,17 +78,17 @@ try {
   const noKeys = await page.evaluate(() => document.documentElement.hasAttribute('data-keys'));
   if (noKeys) problems.push('numerals shown before any key was seen');
 
-  // WASD: D moves the hero right, release stops
+  // the arrows: right moves the hero right, release stops
   const x0 = await page.evaluate(() => window.__game.state().player.x);
-  await page.keyboard.down('KeyD');
+  await page.keyboard.down('ArrowRight');
   await sleep(500);
   const x1 = await page.evaluate(() => window.__game.state().player.x);
-  await page.keyboard.up('KeyD');
+  await page.keyboard.up('ArrowRight');
   await sleep(150);
   const x2 = await page.evaluate(() => window.__game.state().player.x);
   await sleep(250);
   const x3 = await page.evaluate(() => window.__game.state().player.x);
-  if (!(x1 > x0 + 20)) problems.push(`D did not steer right (${x0} -> ${x1})`);
+  if (!(x1 > x0 + 20)) problems.push(`the right arrow did not steer right (${x0} -> ${x1})`);
   if (Math.abs(x3 - x2) > 0.5) problems.push(`hero kept moving after the key came up (${x2} -> ${x3})`);
   const seen = await page.evaluate(() => document.documentElement.hasAttribute('data-keys'));
   if (!seen) problems.push('numerals not shown after a key press');
@@ -104,16 +104,55 @@ try {
   });
   await page.evaluate(() => window.__game.setSettings({ aim: 'mysz' }));
   await page.mouse.move(hero.x - 230, hero.y - 90);
-  await page.keyboard.down('Digit1');
+  await page.keyboard.down('KeyQ');
   await sleep(350);
   const during = await page.evaluate(() => ({ preview: document.querySelector('#aim-fx')?.style.opacity === '1' }));
-  if (!during.preview) problems.push('no preview while key 1 is held in mysz');
+  if (!during.preview) problems.push('no preview while Q is held in mysz');
   await page.screenshot({ path: `${SHOTS}/desktop-aim-key.png` });
-  await page.keyboard.up('Digit1');
+  await page.keyboard.up('KeyQ');
   await sleep(250);
   const cd = await page.evaluate(() => window.__game.hero.info().cd[0]);
-  if (!(cd > 0)) problems.push(`key 1 release did not fire (cd ${cd})`);
+  if (!(cd > 0)) problems.push(`Q release did not fire (cd ${cd})`);
   if (await page.evaluate(() => document.querySelector('#aim-fx')?.style.opacity !== '0')) problems.push('preview not erased after key up');
+
+  // the mouse in mysz (Diablo-style): ground click walks, a click on an enemy takes it, right click stands, no browser menu
+  const toScreen = (w) =>
+    page.evaluate(([x, y]) => {
+      const m = document.querySelector('#world').getScreenCTM();
+      const q = new DOMPoint(x, y).matrixTransform(m);
+      return { x: q.x, y: q.y };
+    }, w);
+  const ps = () => page.evaluate(() => { const s = window.__game.state(); return { x: s.player.x, y: s.player.y, focus: s.player.focus ?? null }; });
+  await page.evaluate(arena, [[-260, -200], [-300, 160], [300, -220], [320, 200], [0, -330]]);
+  await sleep(400);
+  const m0 = await ps();
+  const ground = await toScreen([m0.x + 160, m0.y + 40]);
+  await page.mouse.click(ground.x, ground.y);
+  await sleep(700);
+  const m1 = await ps();
+  if (Math.hypot(m1.x - m0.x, m1.y - m0.y) < 40) problems.push(`a left click on the ground did not walk (${JSON.stringify([m0, m1])})`);
+  const foe = await page.evaluate(() => { const s = window.__game.state(); const e = s.enemies[0]; return e ? { id: e.id, x: e.x, y: e.y } : null; });
+  if (foe) {
+    const at = await toScreen([foe.x, foe.y]);
+    await page.mouse.click(at.x, at.y);
+    await sleep(120);
+    const m2 = await ps();
+    if (m2.focus !== foe.id) problems.push(`a click on an enemy did not take it (${m2.focus} vs ${foe.id})`);
+    await sleep(900);
+    const m3 = await ps();
+    if (!(Math.hypot(foe.x - m3.x, foe.y - m3.y) < Math.hypot(foe.x - m2.x, foe.y - m2.y) - 10 || m3.focus === null)) problems.push('the hero did not walk to the enemy clicked on');
+  }
+  const r0 = await ps();
+  const far = await toScreen([r0.x - 200, r0.y + 100]);
+  await page.mouse.move(far.x, far.y);
+  await page.mouse.down({ button: 'right' });
+  await sleep(500);
+  await page.mouse.up({ button: 'right' });
+  const r1 = await ps();
+  if (Math.hypot(r1.x - r0.x, r1.y - r0.y) > 6) problems.push(`the right button walked (${JSON.stringify([r0, r1])})`);
+  const menu = await page.evaluate(() => { const ev = new MouseEvent('contextmenu', { bubbles: true, cancelable: true }); document.querySelector('#stage svg, svg').dispatchEvent(ev); return ev.defaultPrevented; });
+  if (!menu) problems.push('the browser menu was not held back on right click');
+  await page.screenshot({ path: `${SHOTS}/desktop-mouse.png` });
 
   // Esc pauses, Esc again resumes; settings show the Celowanie line
   await page.keyboard.press('Escape');

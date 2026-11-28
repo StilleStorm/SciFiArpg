@@ -123,6 +123,7 @@ const input = createInput(
     else game.onTap(x, y, walk);
   },
   createJoystick(stage.ui),
+  (hold) => game.onMouse(hold),
 );
 input.setMouseAims(aimsAtMouse);
 initLayout(() => applySettings(meta.settings)); // data-orient on <html> follows the window; steering follows it until the player chooses

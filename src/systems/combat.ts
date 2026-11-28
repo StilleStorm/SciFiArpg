@@ -101,7 +101,8 @@ function killPlayer(s: RunState, bus: Bus, p: Player): void {
 /**
  * Auto-attack the nearest enemy in range, standing or moving (DESIGN 2): a ranged hero shoots while steering or
  * walking to a tap, a melee hero swings at whatever is within reach. Nothing in range, nothing happens. With a mouse
- * aiming (`player.aimAt`), the one in range nearest the cursor is taken instead.
+ * aiming (`player.aimAt`), the one in range nearest the cursor is taken instead, and an enemy clicked on (`player.focus`)
+ * before any other while it is in reach.
  */
 export function playerAttacks(s: RunState, grid: Grid<Enemy>, bus: Bus, dt: number): void {
   const p = s.player;
@@ -111,6 +112,10 @@ export function playerAttacks(s: RunState, grid: Grid<Enemy>, bus: Bus, dt: numb
   let best = Infinity;
   const from = p.aimAt ?? p;
   for (const e of grid.query(p.x, p.y, p.attackRange)) {
+    if (e.id === p.focus) {
+      nearest = e;
+      break;
+    }
     const d = Math.hypot(e.x - from.x, e.y - from.y);
     if (d < best) {
       best = d;

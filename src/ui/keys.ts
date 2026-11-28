@@ -15,14 +15,11 @@ export type KeyAction =
   | { kind: 'tunnel' }
   | { kind: 'potw' };
 
+/** Only the arrows steer: Q W E R are the skills (the mouse walks, DESIGN 2). */
 const DIRECTIONS: Readonly<Record<string, readonly [number, number]>> = {
-  KeyW: [0, -1],
   ArrowUp: [0, -1],
-  KeyS: [0, 1],
   ArrowDown: [0, 1],
-  KeyA: [-1, 0],
   ArrowLeft: [-1, 0],
-  KeyD: [1, 0],
   ArrowRight: [1, 0],
 };
 
@@ -30,7 +27,7 @@ const DIRECTIONS: Readonly<Record<string, readonly [number, number]>> = {
 export function keyVector(held: Iterable<string>): Steer | null {
   let x = 0;
   let y = 0;
-  const seen = new Set<string>(); // W and ArrowUp together are one push, not two
+  const seen = new Set<string>(); // the same direction twice is one push, not two
   for (const code of held) {
     const d = DIRECTIONS[code];
     if (!d) continue;
@@ -45,11 +42,17 @@ export function keyVector(held: Iterable<string>): Steer | null {
   return { dx: x / len, dy: y / len, mag: 1 };
 }
 
-/** What a key (`KeyboardEvent.code`) asks for, or null. Digits and the numpad both count. */
+/** The pad keys: Q W E the three skill pads, R the ultimate. */
+const PAD_KEYS: Readonly<Record<string, 1 | 2 | 3 | 4>> = { KeyQ: 1, KeyW: 2, KeyE: 3, KeyR: 4 };
+
+/** What a key (`KeyboardEvent.code`) asks for, or null. 1 (and numpad 1) uses the held item like F; 2 and 3 are kept for later items. */
 export function keyAction(code: string): KeyAction | null {
-  const m = /^(?:Digit|Numpad)([1-5])$/.exec(code);
-  if (m?.[1]) return { kind: 'pad', slot: Number(m[1]) as 1 | 2 | 3 | 4 | 5 };
+  const slot = PAD_KEYS[code];
+  if (slot) return { kind: 'pad', slot };
   switch (code) {
+    case 'Digit1':
+    case 'Numpad1':
+      return { kind: 'potw' };
     case 'Escape':
       return { kind: 'pause' };
     case 'KeyI':
@@ -64,7 +67,7 @@ export function keyAction(code: string): KeyAction | null {
 }
 
 /** The key numeral drawn on a pad, by the pad's class (s1..s3, ult, inv). */
-export const PAD_KEY_LABEL: Readonly<Record<string, string>> = { s1: '1', s2: '2', s3: '3', ult: '4', inv: 'I' };
+export const PAD_KEY_LABEL: Readonly<Record<string, string>> = { s1: 'Q', s2: 'W', s3: 'E', ult: 'R', inv: 'I' };
 
 /**
  * The aim of a pad key held in "mysz": kierunek = the unit vector from the hero to the cursor; wskazanie = the cursor point
@@ -94,13 +97,14 @@ export const keysSeen = (): boolean => keyboardSeen || mouseSeen;
 export const keyboardWasSeen = (): boolean => keyboardSeen;
 
 /**
- * The setting "Celowanie" (`Settings.aim`): 'mysz' aims pad keys and the auto-attack at the cursor and a mouse click no longer
- * walks (the keys walk). Unset, it follows the desk: mysz once a key was pressed and a fine-pointer mouse moved, else auto.
+ * The setting "Celowanie" (`Settings.aim`): 'mysz' = the mouse plays (input.ts / game.ts: click walks, click on an enemy attacks it,
+ * right click or Shift stands and attacks, Ctrl walks regardless; pad keys and the auto-attack aim at the cursor). Unset, it follows
+ * the desk: mysz once a fine-pointer mouse moved, else auto. Touch never changes.
  */
 export function setAimMode(mode: 'auto' | 'mysz' | undefined): void {
   aimSetting = mode;
 }
-export const aimsAtMouse = (): boolean => (aimSetting ?? (keyboardSeen && mouseSeen ? 'mysz' : 'auto')) === 'mysz';
+export const aimsAtMouse = (): boolean => (aimSetting ?? (mouseSeen ? 'mysz' : 'auto')) === 'mysz';
 
 /** The cursor in world units now, or null before the mouse moved (or without a camera). */
 export function cursorWorld(): Point | null {
@@ -194,6 +198,10 @@ export function installKeys(h: KeyHandlers): () => void {
     cursor = { x: ev.clientX, y: ev.clientY };
     if (!mouseSeen && typeof matchMedia === 'function' && matchMedia('(pointer: fine)').matches) mouseSeen = true;
   };
+  // Right click is a game button (stand and attack), not the browser's menu; a text field keeps its menu.
+  const onContextMenu = (ev: MouseEvent): void => {
+    if (!inFormControl(ev.target)) ev.preventDefault();
+  };
   const onHidden = (): void => {
     if (document.visibilityState === 'hidden') clear();
   };
@@ -202,12 +210,14 @@ export function installKeys(h: KeyHandlers): () => void {
   window.addEventListener('keyup', onKeyUp);
   window.addEventListener('pointermove', onPointerMove);
   window.addEventListener('blur', clear);
+  window.addEventListener('contextmenu', onContextMenu);
   document.addEventListener('visibilitychange', onHidden);
   return () => {
     window.removeEventListener('keydown', onKeyDown);
     window.removeEventListener('keyup', onKeyUp);
     window.removeEventListener('pointermove', onPointerMove);
     window.removeEventListener('blur', clear);
+    window.removeEventListener('contextmenu', onContextMenu);
     document.removeEventListener('visibilitychange', onHidden);
     clear();
     h.input.setKeys(null);
