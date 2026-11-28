@@ -20,7 +20,9 @@ logs, agent transcripts or the whole brief. Do not summarise the history; there 
 4. `docs/ARCHITECTURE.md` only the sections for the code the task touches (grep its headings).
 5. `docs/WORKFLOW.md` only when about to spawn agents (builder = Sonnet, integrator = Opus,
    voice = Opus, look = Sonnet; definitions in `.claude/agents/`).
-6. Then act: write the builder brief from the template in WORKFLOW.md, or start the task.
+6. If STATUS.md has "Tell the player at session start", say those items to the player first,
+   in a few lines, before any other work.
+7. Then act: write the builder brief from the template in WORKFLOW.md, or start the task.
    The lead (this session) plans, briefs, reviews screenshots, gates by exit code
    (`npm run check; echo $?`, likewise shot and smoke), commits, pushes, and keeps STATUS.md current.
 

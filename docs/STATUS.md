@@ -6,6 +6,13 @@ current: it replaces chat memory. Context note: the project's own files cost ~1k
 (CLAUDE.md); a large first-command context comes from the harness (tool definitions, skills,
 plugins, connectors), which the player trims in Claude settings, not in the repo.
 
+## Tell the player at session start (then remove the item once it is done)
+- The old branch `claude/scifi-arpg-concept-6vqk36` still exists on GitHub (an exact copy of an
+  already-released commit; deleting it loses nothing). The permission check blocked deleting it
+  from the session. Ask the player to delete it on GitHub (Branches, bin icon) or to allow
+  `git push origin --delete` for it. Check with `git ls-remote origin`.
+- Remind them of the rule: `main` is live; work goes to the work branch; release only on their word.
+
 ## Where things are (2026-10-31, M5 complete)
 - Branches (2026-11-27): `main` is the live game and the only branch that deploys (CLAUDE.md
   "Branches and deploy"). Live now: everything through S29 (commit d8c42cc and later docs-only
