@@ -15,7 +15,9 @@ plugins, connectors), which the player trims in Claude settings, not in the repo
 
 ## Where things are (2026-10-31, M5 complete)
 - Branches (2026-11-27): `main` is the live game and the only branch that deploys (CLAUDE.md
-  "Branches and deploy"). Live now: everything through S29 (commit d8c42cc and later docs-only
+  "Branches and deploy"). Live now: everything through S29 plus Diablo-style PC mouse controls (commit 04802b4, 2026-11-28: click walks or
+  attacks the enemy clicked on, Shift stands, Ctrl forces a walk, Q W E skills, R ultimate, 1 potwierdzenie, arrows steer;
+  DESIGN 2 "Desktop") and later docs-only
   commits). Updates are built on a work branch and reach `main` only when the player says release.
 - Playable first version is live: four heroes, three enemy families with claims/rebuttals,
   statuses, three bosses, loot with grammar and reviews, inventory, store, nine regulamin
