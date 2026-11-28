@@ -1,6 +1,7 @@
 import type { Bus } from './core/events';
 import type { Entity } from './entities';
 import type { Input } from './input';
+import { aimsAtMouse, cursorWorld } from './ui/keys';
 import { t } from './i18n';
 import type { Camera } from './render/camera';
 import { bindEnemyFx, enemyBuilder } from './render/enemyFigures';
@@ -193,6 +194,9 @@ export function createGame(stage: Stage, bus: Bus, camera: Camera, input: Input,
       const steer = input.steer();
       if (steer) s.player.steer = steer;
       else delete s.player.steer;
+      const cur = aimsAtMouse() ? cursorWorld() : null;
+      if (cur) s.player.aimAt = cur;
+      else delete s.player.aimAt;
       sim.step(s, dt);
       if (state === s && s.status !== 'running') input.setEnabled(false); // (a step that swapped the state — the tunnel, the end of a run — leaves the new one alone)
     },

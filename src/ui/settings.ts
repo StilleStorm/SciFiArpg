@@ -2,7 +2,7 @@ import { t } from '../i18n';
 import { el } from '../render/svg';
 import type { Settings } from '../save/save';
 import { h } from './dom';
-import { keysSeen } from './keys';
+import { aimsAtMouse, keysSeen } from './keys';
 import { currentOrient, effectiveSteering, orientationSetting } from './layout';
 import { cutEdge, lineBoxes, runsOn } from './sheet';
 import './textsize.css';
@@ -133,8 +133,8 @@ export function createSettings(
     );
     const aim = h('div', 'opts row');
     aim.append(
-      option(t('ui.keys.auto'), current.aim !== 'mysz', () => set({ aim: undefined })),
-      option(t('ui.keys.mouse'), current.aim === 'mysz', () => set({ aim: 'mysz' })),
+      option(t('ui.keys.auto'), !aimsAtMouse(), () => set({ aim: 'auto' })),
+      option(t('ui.keys.mouse'), aimsAtMouse(), () => set({ aim: 'mysz' })),
     );
     const back = h('button', 'form-btn', t('screens.settings.back'));
     back.type = 'button';

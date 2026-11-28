@@ -87,17 +87,20 @@ let keyboardSeen = false;
 let mouseSeen = false;
 let cursor: Point | null = null;
 let toWorld: ((x: number, y: number) => Point) | null = null;
-let aimMouse = false;
+let aimSetting: 'auto' | 'mysz' | undefined;
 
 /** True once a key was pressed or a fine-pointer mouse moved this session: the "Celowanie" line appears in Ustawienia. */
 export const keysSeen = (): boolean => keyboardSeen || mouseSeen;
 export const keyboardWasSeen = (): boolean => keyboardSeen;
 
-/** The setting "Celowanie" (`Settings.aim`): 'mysz' aims pad keys at the cursor. */
-export function setAimMode(mode: 'auto' | 'mysz'): void {
-  aimMouse = mode === 'mysz';
+/**
+ * The setting "Celowanie" (`Settings.aim`): 'mysz' aims pad keys and the auto-attack at the cursor and a mouse click no longer
+ * walks (the keys walk). Unset, it follows the desk: mysz once a key was pressed and a fine-pointer mouse moved, else auto.
+ */
+export function setAimMode(mode: 'auto' | 'mysz' | undefined): void {
+  aimSetting = mode;
 }
-export const aimsAtMouse = (): boolean => aimMouse;
+export const aimsAtMouse = (): boolean => (aimSetting ?? (keyboardSeen && mouseSeen ? 'mysz' : 'auto')) === 'mysz';
 
 /** The cursor in world units now, or null before the mouse moved (or without a camera). */
 export function cursorWorld(): Point | null {

@@ -72,8 +72,8 @@ export interface Settings {
   damageNumbers?: boolean;
   /** The pause line "Zgłoś problem z grą"; on unless false. */
   bugButton?: boolean;
-  /** Desktop: pad keys aim at the mouse cursor; absent = auto (S29). */
-  aim?: 'mysz';
+  /** Desktop: pad keys and the auto-attack aim at the mouse cursor, a mouse click does not walk; absent = mysz once a keyboard and a mouse were seen, else auto. */
+  aim?: 'mysz' | 'auto';
 }
 
 export const DEFAULT_MUSIC_VOLUME = 80;
@@ -272,7 +272,7 @@ export function migrate(raw: unknown): MetaState {
       ...(rawSettings['textSize'] === 1 || rawSettings['textSize'] === 2 ? { textSize: rawSettings['textSize'] } : {}),
       ...(rawSettings['damageNumbers'] === true ? { damageNumbers: true } : {}),
       ...(rawSettings['bugButton'] === false ? { bugButton: false } : {}),
-      ...(rawSettings['aim'] === 'mysz' ? { aim: 'mysz' as const } : {}),
+      ...(rawSettings['aim'] === 'mysz' || rawSettings['aim'] === 'auto' ? { aim: rawSettings['aim'] } : {}),
     },
   };
   for (const k of MIRRORED) delete out[k];

@@ -16,6 +16,8 @@ export interface Input {
   inject(steer: Steer | null): void;
   /** Keyboard (ui/keys.ts): WASD / arrows as a full-speed vector, null when no direction key is held. Wins over the stick and over a tap walk. */
   setKeys(steer: Steer | null): void;
+  /** Desktop "mysz" (ui/keys.ts): asked on each mouse press; true = a mouse click does not walk or steer, it is passed on as a tap that walks nowhere. */
+  setMouseAims(aims: () => boolean): void;
   /** True while pointer input is on (no sheet, card or pause holds the page). */
   enabled(): boolean;
 }
@@ -46,6 +48,7 @@ export function createInput(svg: SVGSVGElement, onTap: (clientX: number, clientY
   const touches = new Map<number, Touch>(); // joystick mode: candidates for a quick tap
   let injected: Steer | null = null;
   let keys: Steer | null = null;
+  let mouseAims: () => boolean = () => false;
 
   const onSteeringHalf = (clientX: number): boolean => (lefty ? clientX >= window.innerWidth / 2 : clientX < window.innerWidth / 2);
   const capture = (id: number): void => {
@@ -64,6 +67,12 @@ export function createInput(svg: SVGSVGElement, onTap: (clientX: number, clientY
 
   svg.addEventListener('pointerdown', (ev) => {
     if (!enabled) return;
+    if (ev.pointerType === 'mouse' && mouseAims()) {
+      // the keys walk and the cursor aims: a click still opens a station, the kiosk or a stop, but moves nobody
+      ev.preventDefault();
+      if (ev.button === 0) onTap(ev.clientX, ev.clientY, false);
+      return;
+    }
     if (mode === 'joystick') {
       ev.preventDefault();
       capture(ev.pointerId);
@@ -113,6 +122,9 @@ export function createInput(svg: SVGSVGElement, onTap: (clientX: number, clientY
     },
     setKeys(steer) {
       keys = steer;
+    },
+    setMouseAims(aims) {
+      mouseAims = aims;
     },
     enabled: () => enabled,
     setEnabled(on) {

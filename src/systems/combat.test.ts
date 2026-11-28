@@ -95,4 +95,25 @@ describe('auto-attack while moving (DESIGN 2)', () => {
     attackOnce(s);
     expect(s.player.facing).toBe(-1);
   });
+
+  it('with a mouse aiming, shoots the enemy in range nearest the cursor, not the nearest one', () => {
+    const s = run('konsultant');
+    addEnemy(s, s.player.attackRange * 0.3);
+    const far = addEnemy(s, -s.player.attackRange * 0.9);
+    s.player.aimAt = { x: far.x - 40, y: far.y + 30 };
+    attackOnce(s);
+    expect(s.projectiles).toHaveLength(1);
+    const shot = s.projectiles[0];
+    expect(Math.atan2(shot?.vy ?? 0, shot?.vx ?? 0)).toBeCloseTo(Math.atan2(far.y - s.player.y, far.x - s.player.x), 5);
+  });
+
+  it('a cursor on an enemy out of range does not pull the shot past the reach', () => {
+    const s = run('konsultant');
+    const near = addEnemy(s, s.player.attackRange * 0.5);
+    const out = addEnemy(s, -(s.player.attackRange + 200));
+    s.player.aimAt = { x: out.x, y: out.y };
+    attackOnce(s);
+    const shot = s.projectiles[0];
+    expect(Math.atan2(shot?.vy ?? 0, shot?.vx ?? 0)).toBeCloseTo(Math.atan2(near.y - s.player.y, near.x - s.player.x), 5);
+  });
 });

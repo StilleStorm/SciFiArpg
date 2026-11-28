@@ -53,6 +53,8 @@ export interface Player extends Fighter {
    * is on the stick, absent otherwise; it overrides `target` (systems/movement.ts).
    */
   steer?: { dx: number; dy: number; mag: number };
+  /** Desktop "mysz" (ui/keys.ts): the mouse cursor in world units, set every frame by game.ts; the auto-attack takes the enemy in range nearest to it. */
+  aimAt?: Vec;
   level: number;
   gwiazdki: number;
   /** Percent more gwiazdki from pickups, from the gear (items/stats.ts sets it; economy/stars.ts earnStars reads it). */

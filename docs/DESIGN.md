@@ -115,12 +115,16 @@ Language of code, comments and docs: English. Language of the game: Polish, thro
   (when it is on the slot). *Esc* opens or closes the pause sheet (and closes any open
   sheet first), *I* the Załączniki, *T* the Tunel, *F* the Potw. note. Keys do nothing while a
   sheet, card or form has focus except Esc. Setting "Celowanie: auto / mysz" (shown in
-  Ustawienia only after a key or a mouse move with a fine pointer was seen; default auto):
-  in *mysz* a pad key aims at the cursor (kierunek = hero to cursor, wskazanie = the cursor
-  point clamped to range, auto skills unchanged), drawn while the key is held with the same
-  dotted ink preview as a drag and fired on key release. In *auto* a key casts like a tap. When
-  a keyboard has been seen, each pad shows its key as a small Space Mono numeral in the pad's
-  corner (11 px at least, ink, no box). Mouse clicks on the page keep the tap-mode meaning.
+  Ustawienia only after a key or a mouse move with a fine pointer was seen; unset, it is
+  *mysz* once both a key press and a fine-pointer mouse were seen, else auto; an explicit
+  choice is saved): in *mysz* a pad key aims at the cursor (kierunek = hero to cursor,
+  wskazanie = the cursor point clamped to range, auto skills unchanged), drawn while the key
+  is held with the same dotted ink preview as a drag and fired on key release; the auto-attack
+  takes the enemy in range nearest the cursor (not the one nearest the hero); a mouse click on
+  the page walks and steers nobody (it still opens a station, the kiosk or a stop), the keys
+  walk. Touch is unaffected. In *auto* a key casts like a tap and mouse clicks keep the
+  tap-mode meaning. When a keyboard has been seen, each pad shows its key as a small Space
+  Mono numeral in the pad's corner (11 px at least, ink, no box).
 - No pinch. No double-tap. No long menus mid-run. Walking over loot picks it up. Tapping an
   item on the ground shows its card first (not built yet).
 - Must run at 60 fps on a mid-range phone with ~60 moving SVG elements. Entities are `<g>` with

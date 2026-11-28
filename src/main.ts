@@ -6,7 +6,7 @@ import { createLoop } from './core/loop';
 import { createGame } from './game';
 import { t } from './i18n';
 import { createInput } from './input';
-import { installKeys, setAimMode } from './ui/keys';
+import { aimsAtMouse, installKeys, setAimMode } from './ui/keys';
 import { bindAsystent } from './narration';
 import { bindFx } from './render/bindings';
 import { initDamageNumbers } from './render/damageNumbers';
@@ -100,7 +100,7 @@ function applySettings(s: Settings): void {
   applySteering(steering);
   input.setMode(steering);
   input.setLeftHanded(s.leftHanded);
-  setAimMode(s.aim === 'mysz' ? 'mysz' : 'auto');
+  setAimMode(s.aim);
   const wanted = orientationSetting(s);
   if (wanted !== lockedFor) {
     lockedFor = wanted;
@@ -124,6 +124,7 @@ const input = createInput(
   },
   createJoystick(stage.ui),
 );
+input.setMouseAims(aimsAtMouse);
 initLayout(() => applySettings(meta.settings)); // data-orient on <html> follows the window; steering follows it until the player chooses
 applySettings(meta.settings);
 const game = createGame(stage, bus, camera, input, bounds);
